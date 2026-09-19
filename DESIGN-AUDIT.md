@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 144 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 149 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -21,7 +21,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | 9 | TXT-1 + ACC-1 | Que no se corte lo importante y que la acción principal sea sólida: título y subtítulo del `Header` (títulos de lecturas), `EntryRow` compacta y `DulcesScreen`; y `secondary` a `primary` en `EmptyState` (11 usos), `DownloadsScreen` y `ErrorDetailScreen` | `Header.tsx:30,35`, `EntryRow.tsx:110,115`, `DulcesScreen.tsx:593`, `EmptyState.tsx:25`, `DownloadsScreen.tsx:134`, `ErrorDetailScreen.tsx:90` | S | medio |
 | 10 | EST-error + RND-1 + AUD-1 | Robustez: estado de error en 19 pantallas que leen la base (y de carga en 13); `ErrorsScreen` (194 tarjetas) y `PronunciationScreen` (53) a `FlatList`; regenerar el audio vacío `aud/phrasal/5_ejemplo_en_lento.mp3` | `ErrorsScreen.tsx:76`, `PronunciationScreen.tsx:190`, tabla de la sección a) | M | medio |
 
-**Hecho en la fase B:** 1 (TIPO-2), 2 (COLOR-4), 3 (MOV-1), 5 (TIPO-1), 7 (IA-3 y ACC-1 del selector), 8 (TIPO-4) y 9 (TXT-1 y ACC-1, con dos excepciones: el subtítulo del `Header` queda en 1 línea por decisión, y `ExploreScreen.tsx:104` no estaba en la lista; `DownloadsScreen` se queda `secondary` porque son 16 botones iguales). `npm run check:color` cuida que no vuelvan los colores sueltos.
+**Hecho en la fase B:** 1 (TIPO-2), 2 (COLOR-4), 3 (MOV-1), 4 (ACC-3: de 16 a 7 opciones visibles, y ACC-2 con Hoy como única superficie destacada), 5 (TIPO-1), 7 (IA-3 y ACC-1), 8 (TIPO-4) y 9 (TXT-1 y ACC-1). Excepciones: el subtítulo del `Header` queda en 1 línea por decisión y `DownloadsScreen` se queda `secondary` porque son 16 botones iguales. `npm run check:color` cuida que no vuelvan los colores sueltos y `npm run check:practicar` prueba la lógica de Hoy.
 <!-- PLAN:end -->
 
 ## Conteo por regla
@@ -37,15 +37,15 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
 | ESP-1 | espaciado fuera de 4/8 | 35 |
 | ACC-1 | acción principal no sólida o varios sólidos a la vez | 0 |
-| ACC-3 | opciones visibles en Practicar (máximo recomendado 7) | 16 |
+| ACC-3 | opciones visibles en Practicar con los grupos plegados (máximo recomendado 7) | 7 |
 | MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 0 |
 | IA-1 | líneas con emojis | 15 |
 | IA-1b | líneas con glifos de texto como íconos | 53 |
 | IA-3 | sombras de color o fuera de tokens | 0 |
 | EST-carga | pantallas que cargan datos sin estado de carga | 13 |
 | EST-vacio | pantallas que cargan datos sin estado vacío | 6 |
-| EST-error | pantallas que cargan datos sin estado de error | 19 |
-| TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 2 |
+| EST-error | pantallas que cargan datos sin estado de error | 18 |
+| TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 1 |
 | RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 4 |
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
@@ -83,13 +83,12 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 **TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo `font.size.md` vale **16** (`tokens.ts`) y `text.body` y `text.bodyMuted` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (0):
 - (ninguno)
 
-Se quedan en 12–13 px, revisados a mano (16):
+Se quedan en 12–13 px, revisados a mano (15):
 - `src/components/base/Ads.tsx:181` — fullNota: fontSize sm = 13 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:470` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/screens/extras/LecturaScreen.tsx:301` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/extras/LecturasScreen.tsx:232` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/extras/PracticeScreen.tsx:315` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/CaidaScreen.tsx:612` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/CaidaScreen.tsx:659` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/ColmenaScreen.tsx:609` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
@@ -101,7 +100,7 @@ Se quedan en 12–13 px, revisados a mano (16):
 - `src/screens/games/ParesScreen.tsx:454` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
-Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/components/unlock/CandadoBadge.tsx` 2, `src/components/unlock/MuroDesbloqueo.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/feedback/Toast.tsx` 1, `src/components/list/EntryRow.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/PracticeScreen.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
+Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/components/unlock/CandadoBadge.tsx` 2, `src/components/unlock/MuroDesbloqueo.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/extras/PracticeScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/feedback/Toast.tsx` 1, `src/components/list/EntryRow.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
 
 **TIPO-2b · Line-height del cuerpo entre 1.4 y 1.6** (texto de 18 px o menos):
 - `src/screens/extras/GramaticaTemaScreen.tsx:344` — en: 18 px con lineHeight x1.35
@@ -167,7 +166,7 @@ Descartados tras leer el render (no son hallazgo):
 - `src/screens/utility/DownloadsScreen.tsx` — lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`
 - `src/screens/entry/OnboardingScreen.tsx` — un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes
 
-**ACC-3 · Menos opciones (Ley de Hick).** `PracticeScreen` (la pestaña de inicio) pinta **16 modos** como tarjetas de la misma jerarquía.
+**ACC-3 · Menos opciones (Ley de Hick).** `PracticeScreen` (la pestaña de inicio) muestra **7 opciones** con los grupos plegados: 1 acción de HOY + 3 destacados + 3 grupos, que guardan el resto de los 17 destinos. Máximo recomendado 7.
 
 ## MÓVIL
 
@@ -283,7 +282,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/EarModeScreen.tsx` | ✓ `:82` | ✓ `:187` | ✗ |
 | `extras/LecturaScreen.tsx` | ✗ | ✓ `:134` | ✗ |
 | `extras/LecturasScreen.tsx` | ✗ | ✓ `:137` | ✗ |
-| `extras/PracticeScreen.tsx` | ✗ | ✗ | ✗ |
+| `extras/PracticeScreen.tsx` | ✗ | ✗ | ✓ `:70` |
 | `games/CaidaScreen.tsx` | ✓ `:100` | ✓ `:360` | ✗ |
 | `games/CazalaScreen.tsx` | ✗ | ✓ `:135` | ✗ |
 | `games/ColmenaScreen.tsx` | ✓ `:106` | ✓ `:310` | ✗ |
@@ -295,15 +294,14 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `utility/ProgressScreen.tsx` | ✗ | ✓ `:73` | ✗ |
 | `utility/StuckScreen.tsx` | ✗ | ✓ `:34` | ✗ |
 
-Sin carga: 13 de 21 · sin vacío: 6 · sin error: 19.
+Sin carga: 13 de 21 · sin vacío: 6 · sin error: 18.
 
 ## b) Texto cortado
 
 `numberOfLines={1}` en texto cuyo contenido importa (frases, traducciones, títulos, nombres). Se corta con "…" y el usuario no puede leer el resto:
 - `src/components/base/Header.tsx:35` — `{subtitle}`
-- `src/screens/discover/ExploreScreen.tsx:104` — `{m.descripcion}`
 
-Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
+Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 
 ## c) Rendimiento
 
@@ -326,7 +324,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/screens/extras/GramaticaTemaScreen.tsx:289` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:291` — key por índice
 
-Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 13, `games/ParesScreen.tsx` 10.
+Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `extras/PracticeScreen.tsx` 9, `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 13, `games/ParesScreen.tsx` 10.
 
 ## d) Audio
 
@@ -355,4 +353,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":0,"ACC-3":16,"MOV-1":0,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":2,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":18,"TXT-1":1,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->

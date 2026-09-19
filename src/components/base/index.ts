@@ -16,3 +16,4 @@ export {
 } from './Ads';
 export { RoundTimer } from './RoundTimer';
 export { IconButton } from './IconButton';
+export { Chevron } from './Chevron';

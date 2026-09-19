@@ -1,323 +1,285 @@
 import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, ProgressBar, Screen } from '@/components/base';
-import { SectionTitle } from '@/components/list';
-import { getGameRecords, getHablaResumen, getRetoSemanal } from '@/db/economy';
+import { Button, Card, ProgressBar, Screen } from '@/components/base';
+import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
-import { countDue } from '@/db/queries';
+import { getRecentDays } from '@/db/progress';
+import { getStats } from '@/db/queries';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { PORTADA_JUEGO, color, font, radius, space } from '@/theme';
+import { PORTADA_JUEGO, color, font, radius, shadow, space, text } from '@/theme';
+import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
+import { FilaModo } from './practicar/FilaModo';
+import { GrupoPlegable } from './practicar/GrupoPlegable';
+import { ORDEN, elegirDestacados, elegirHoy, type ModoId, type MotivoHoy, type Uso } from './practicar/hoy';
+import { GRUPOS, MODOS, type Modo } from './practicar/modos';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+type Resumen = Awaited<ReturnType<typeof getStats>>;
+
+/** El botón de HOY dice qué va a pasar al tocarlo. */
+function etiquetaHoy(motivo: MotivoHoy, modo: ModoId, atoradas: number): string {
+  if (motivo === 'atoradas') return `Corregir ${atoradas} ${atoradas === 1 ? 'error' : 'errores'}`;
+  if (motivo === 'ultimo') return `Seguir con ${MODOS[modo].titulo}`;
+  return 'Empezar';
+}
 
 /**
- * P-23, el arcade. Antes era un menú plano de ocho modos.
+ * Practicar: una sola cosa destacada (HOY), tres modos a mano y el resto
+ * en grupos plegados. Ningún modo se quitó: solo cambió la jerarquía.
  *
- * La competencia pone aquí cuatro barras en cero, dos candados y un
- * torneo con cuenta regresiva. Es la pantalla a la que llega alguien
- * que no trae ganas de estudiar, y le contesta con un muro.
- *
- * Aquí todo está abierto desde la instalación, cada juego enseña el
- * mejor puntaje del propio usuario y no el de nadie más, y el reto de
- * la semana no tiene reloj que pueda vencerse en contra.
- *
- * Ningún modo que ya existía se quitó: solo quedaron agrupados.
+ * HOY sale de lo que la app ya guarda (ver `elegirHoy`): frases atoradas,
+ * el último modo usado o, sin historial, Frases al azar.
  */
 export function PracticeScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
-  const filter = useSettingsStore((s) => s.filter);
+  const abiertos = useSettingsStore((s) => s.practicarGruposAbiertos);
+  const guardarAjuste = useSettingsStore((s) => s.set);
 
   const [records, setRecords] = useState<Record<string, JuegoRecord>>({});
   const [reto, setReto] = useState<RetoSemanal | null>(null);
-  const [due, setDue] = useState(0);
   const [habla, setHabla] = useState({ intentos: 0, dominados: 0 });
   const [niveles, setNiveles] = useState<
     Record<string, { jugados: number; estrellas: number; siguiente: number }>
   >({});
+  const [stats, setStats] = useState<Resumen | null>(null);
+  const [uso, setUso] = useState<Uso>({});
+  const [hoyFrases, setHoyFrases] = useState(0);
+  // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
+  // el caso "usuario nuevo" un instante y luego saltaría a otro.
+  const [listo, setListo] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       if (!user) return;
       void getGameRecords(user.id).then(setRecords);
       void getRetoSemanal(user.id).then(setReto);
-      void countDue(user.id, filter()).then(setDue);
       void getHablaResumen(user.id).then(setHabla);
       void resumenTodos(user.id).then(setNiveles);
-    }, [user, filter])
+      void Promise.all([getStats(user.id), getUsoModos(user.id), getRecentDays(user.id, 1)])
+        .then(([s, u, dias]) => {
+          setStats(s);
+          setUso(u);
+          setHoyFrases(dias[0]?.dia === dayKey() ? dias[0].respuestas : 0);
+        })
+        .catch((err) => console.warn('[Practicar] no se pudo leer el progreso', err))
+        .finally(() => setListo(true));
+    }, [user])
   );
 
-  /**
-   * El renglón de la derecha. Con niveles, lo útil no es el mejor
-   * puntaje sino dónde te quedaste: es lo que decide si tocas o no.
-   */
+  const atoradas = stats?.atoradas ?? 0;
+  const racha = stats?.racha ?? 0;
+  const hoy = elegirHoy(atoradas, uso);
+  const destacados = elegirDestacados(uso, hoy.modo);
+  const modoHoy = MODOS[hoy.modo];
+
+  const datoHoy = [
+    hoyFrases > 0 ? `Llevas ${hoyFrases} ${hoyFrases === 1 ? 'frase' : 'frases'} hoy` : null,
+    racha > 0 ? `Racha: ${racha} ${racha === 1 ? 'día' : 'días'}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  /** Con niveles, lo útil es dónde te quedaste; sin ellos, el mejor puntaje. */
   const marca = (juego: string): string | null => {
     const n = niveles[juego];
-    if (n && n.jugados > 0) {
-      return `nivel ${n.siguiente} · ${n.estrellas} estrellas`;
-    }
+    if (n && n.jugados > 0) return `nivel ${n.siguiente} · ${n.estrellas} estrellas`;
     if (n) return 'nivel 1 · 200 niveles';
     const r = records[juego];
-    if (!r || r.partidas === 0) return null;
-    return `mejor: ${r.mejor}`;
+    return r && r.partidas > 0 ? `mejor: ${r.mejor}` : null;
+  };
+
+  const datoDe = (id: ModoId): string | null => {
+    switch (id) {
+      case 'colmena':
+      case 'pares':
+      case 'caida':
+      case 'dulces':
+      case 'cazala':
+        return marca(id);
+      case 'pares_minimos':
+        return habla.dominados > 0 ? `${habla.dominados} pares limpios` : 'nuevo';
+      case 'phrasal':
+        return `${loadContent().phrasal.verbos.length} frases`;
+      case 'atoran':
+        return atoradas > 0 ? `${atoradas} frases` : null;
+      case 'mazo':
+        return stats && stats.favoritas > 0 ? `${stats.favoritas} guardadas` : null;
+      default:
+        return null;
+    }
+  };
+
+  const alternar = (grupo: string) => {
+    if (!user) return;
+    const siguiente = abiertos.includes(grupo)
+      ? abiertos.filter((g) => g !== grupo)
+      : [...abiertos, grupo];
+    void guardarAjuste(user.id, 'practicarGruposAbiertos', siguiente);
   };
 
   return (
     <Screen scroll>
-      <View style={styles.head}>
-        <Text style={styles.title}>Practicar</Text>
-      </View>
-
-      {/* Lo que toca hoy, arriba de todo. Es la única fila que la
-          competencia también tiene bien puesta en esta pantalla. */}
-      <Card
-        style={styles.repaso}
-        accent={color.accent}
-        portada="azar"
-        imagen={PORTADA_JUEGO.azar}
-        altoPortada={84}
-        onPress={() => nav.navigate('Study', undefined)}
-      >
-        {/* Ya no hay cola ni pendientes: siempre hay algo que tocar. */}
-        <Text style={styles.repasoTitle}>Frases al azar</Text>
-        <Text style={styles.repasoBody}>
-          Doce frases sueltas del catálogo, en unos tres minutos
-        </Text>
-      </Card>
-
-      <SectionTitle title="Gramática" />
-      <Text style={styles.nota}>
-        Ochenta temas explicados desde el español.
-      </Text>
-      <View style={styles.list}>
-        <Modo
-          title="Gramática"
-          body="Tiempos, modales, condicionales, phrasal verbs y qué decir en cada situación"
-          tint={color.world.legal}
-          arte="gramatica"
-          go={() => nav.navigate('Gramatica')}
-        />
-      </View>
-
-      <SectionTitle title="Juegos" />
-      <Text style={styles.nota}>Todos abiertos. Ninguno con candado.</Text>
-      <View style={styles.list}>
-        <Modo
-          title="Colmena"
-          body="Arma la palabra letra por letra · 200 niveles"
-          extra={marca('colmena')}
-          tint={color.world.fonetica}
-          arte="colmena"
-          go={() => nav.navigate('Niveles', { juego: 'colmena' })}
-        />
-        <Modo
-          title="Pares"
-          body="Junta cada frase con su significado · 200 niveles"
-          extra={marca('pares')}
-          tint={color.world.dia_a_dia}
-          arte="pares"
-          go={() => nav.navigate('Niveles', { juego: 'pares' })}
-        />
-        <Modo
-          title="Caída"
-          body="Dos opciones bajando, contra reloj · 200 niveles"
-          extra={marca('caida')}
-          tint={color.riskStrong}
-          arte="caida"
-          go={() => nav.navigate('Niveles', { juego: 'caida' })}
-        />
-        <Modo
-          title="Dulces"
-          body="Tres en línea con frases al azar · 200 niveles"
-          extra={marca('dulces')}
-          tint={color.world.cultura}
-          arte="dulces"
-          go={() => nav.navigate('Niveles', { juego: 'dulces' })}
-        />
-        <Modo
-          title="Cázala"
-          body="Oye una frase rápida y di qué reducciones traía"
-          extra={marca('cazala')}
-          tint={color.world.cultura}
-          arte="cazala"
-          go={() => nav.navigate('Cazala')}
-        />
-      </View>
-
-      <SectionTitle title="Tu boca y tu oído" />
-      <View style={styles.list}>
-        <Modo
-          title="Di la palabra"
-          body="Wero te escucha y te dice cuál palabra entendió"
-          extra={
-            habla.dominados > 0 ? `${habla.dominados} pares limpios` : 'nuevo'
-          }
-          tint={color.accent}
-          arte="pares_minimos"
-          go={() => nav.navigate('MinimalPairs', undefined)}
-        />
-        <Modo
-          title="Modo oído"
-          arte="oido"
-          body="Escucha en el camión, sin tocar la pantalla"
-          tint={color.world.dia_a_dia}
-          go={() => nav.navigate('EarMode', undefined)}
-        />
-        <Modo
-          title="Laboratorio de sonidos"
-          arte="sonidos"
-          body="Los 44 sonidos del inglés y los que no existen en español"
-          tint={color.world.fonetica}
-          go={() => nav.navigate('Pronunciation', undefined)}
-        />
-        <Modo
-          title="Cómo suena de verdad"
-          arte="suena"
-          body="Gonna, wanna, wader: lo que se dice y no se escribe"
-          tint={color.world.tech}
-          go={() => nav.navigate('Contractions')}
-        />
-      </View>
-
-      <SectionTitle title="Para leer" />
-      <View style={styles.list}>
-        <Modo
-          title="Phrasal verbs"
-          body={`${loadContent().phrasal.verbos.length} frases donde la partícula lo cambia todo`}
-          tint={color.world.tech}
-          arte="phrasal"
-          go={() => nav.navigate('Phrasal')}
-        />
-        <Modo
-          title="Al azar"
-          body="Frases sueltas, sin algoritmo y sin llevar cuenta"
-          tint={color.world.gente}
-          arte="azar"
-          go={() => nav.navigate('Azar')}
-        />
-        <Modo
-          title="Lecturas"
-          body="Historias hechas con frases que ya viste. Hay para niños."
-          tint={color.world.legal}
-          arte="lecturas"
-          go={() => nav.navigate('Lecturas')}
-        />
-      </View>
-
-      <SectionTitle title="Tus frases" />
-      <View style={styles.list}>
-        <Modo
-          title="Errores que te delatan"
-          arte="errores"
-          body="Lo que llevas años diciendo mal sin que nadie te corrija"
-          tint={color.world.gente}
-          go={() => nav.navigate('Errors')}
-        />
-        <Modo
-          title="Se me atoran"
-          arte="atoran"
-          body="Las que más fallas, sin cronómetro"
-          tint={color.riskWarn}
-          go={() => nav.navigate('Stuck')}
-        />
-        <Modo
-          title="Mi mazo"
-          arte="mazo"
-          body="Las que guardaste con estrella"
-          tint={color.world.dinero}
-          go={() => nav.navigate('Deck')}
-        />
-      </View>
-
-      {reto ? (
-        <>
-          <SectionTitle title="Esta semana" />
-          <Card style={styles.reto}>
-            <View style={styles.retoTop}>
-              <Text style={styles.retoTitle}>Reto de la semana</Text>
-              <Text style={styles.retoNum}>
-                {reto.llevas} de {reto.meta}
-              </Text>
+      <View style={styles.bloques}>
+        <View style={styles.bloque}>
+          <Text style={styles.title}>Practicar</Text>
+          <View style={styles.hoy}>
+            <View
+              style={listo ? styles.hoyContenido : styles.hoyOculto}
+              accessibilityElementsHidden={!listo}
+              importantForAccessibility={listo ? 'auto' : 'no-hide-descendants'}
+            >
+              <View style={styles.hoyTexto}>
+                <Text style={styles.hoyEtiqueta}>Hoy</Text>
+                <Text style={styles.hoyTitulo}>{modoHoy.titulo}</Text>
+                <Text style={styles.hoyCuerpo}>{modoHoy.cuerpo}</Text>
+              </View>
+              <Button
+                label={etiquetaHoy(hoy.motivo, hoy.modo, atoradas)}
+                size="lg"
+                full
+                onPress={() => modoHoy.ir(nav)}
+              />
+              {datoHoy ? <Text style={styles.hoyDato}>{datoHoy}</Text> : null}
             </View>
-            <ProgressBar
-              value={Math.min(reto.llevas, reto.meta)}
-              total={reto.meta}
-            />
-            <Text style={styles.retoBody}>
-              {reto.cumplido
-                ? 'Cumplido. La semana que entra empieza otro.'
-                : 'Cuenta lo que aciertas estudiando y jugando. No hay reloj y no se pierde.'}
-            </Text>
-          </Card>
-        </>
-      ) : null}
+          </View>
+        </View>
+
+        <View style={styles.bloque}>
+          <Text style={text.h3}>Destacados</Text>
+          {destacados.map((id) => (
+            <Destacado key={id} modo={MODOS[id]} dato={datoDe(id)} onPress={() => MODOS[id].ir(nav)} />
+          ))}
+        </View>
+
+        <View style={styles.bloque}>
+          <Text style={text.h3}>Todo lo demás</Text>
+          {GRUPOS.map((g) => {
+            const ids = ORDEN.filter((id) => MODOS[id].grupo === g.id && !destacados.includes(id));
+            return (
+              <GrupoPlegable
+                key={g.id}
+                titulo={g.titulo}
+                total={ids.length}
+                abierto={abiertos.includes(g.id)}
+                onAlternar={() => alternar(g.id)}
+              >
+                {ids.map((id, i) => (
+                  <FilaModo
+                    key={id}
+                    titulo={MODOS[id].titulo}
+                    dato={datoDe(id)}
+                    primera={i === 0}
+                    onPress={() => MODOS[id].ir(nav)}
+                  />
+                ))}
+              </GrupoPlegable>
+            );
+          })}
+        </View>
+
+        {reto ? (
+          <View style={styles.bloque}>
+            <Text style={text.h3}>Esta semana</Text>
+            <Card style={styles.reto}>
+              <View style={styles.retoTop}>
+                <Text style={styles.retoTitle}>Reto de la semana</Text>
+                <Text style={styles.retoNum}>
+                  {reto.llevas} de {reto.meta}
+                </Text>
+              </View>
+              <ProgressBar value={Math.min(reto.llevas, reto.meta)} total={reto.meta} />
+              <Text style={styles.retoBody}>
+                {reto.cumplido
+                  ? 'Cumplido. La semana que entra empieza otro.'
+                  : 'Cuenta lo que aciertas estudiando y jugando. No hay reloj y no se pierde.'}
+              </Text>
+            </Card>
+          </View>
+        ) : null}
+      </View>
     </Screen>
   );
 }
 
-interface ModoProps {
-  title: string;
-  body: string;
-  tint: string;
-  extra?: string | null;
-  /** Clave de PORTADA_JUEGO. Sin ella la fila va lisa. */
-  arte?: string;
-  go: () => void;
+interface DestacadoProps {
+  modo: Modo;
+  dato: string | null;
+  onPress: () => void;
 }
 
-function Modo({ title, body, tint, extra, arte, go }: ModoProps) {
+/** Tarjeta mediana: pesa menos que HOY y más que un renglón de grupo. */
+function Destacado({ modo, dato, onPress }: DestacadoProps) {
   return (
     <Card
-      accent={tint}
-      onPress={go}
+      onPress={onPress}
       style={styles.item}
-      portada={arte ? arte : undefined}
-      imagen={arte ? PORTADA_JUEGO[arte] : undefined}
-      altoPortada={arte ? 84 : undefined}
+      portada={modo.arte}
+      imagen={PORTADA_JUEGO[modo.arte]}
+      altoPortada={56}
     >
       <View style={styles.itemTop}>
-        <Text style={styles.itemTitle}>{title}</Text>
-        {extra ? <Text style={styles.itemExtra}>{extra}</Text> : null}
+        <Text style={styles.itemTitle}>{modo.titulo}</Text>
+        {dato ? <Text style={styles.itemExtra}>{dato}</Text> : null}
       </View>
-      <Text style={styles.itemBody}>{body}</Text>
+      <Text style={styles.itemBody} numberOfLines={2}>
+        {modo.cuerpo}
+      </Text>
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  head: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: space.lg,
-  },
+  // Entre bloques 32; dentro de un bloque 16 (ESP-2).
+  bloques: { gap: space.xxl },
+  bloque: { gap: space.lg },
   title: {
     fontSize: font.size.xxl,
     letterSpacing: font.size.xxl * -0.015,
     fontFamily: font.family.display,
     color: color.text,
   },
-  repaso: { marginBottom: space.md },
-  repasoTitle: {
-    fontSize: font.size.lg,
-    fontFamily: font.family.heading,
-    color: color.text,
-    marginBottom: 4,
+  // La única superficie de color de la app (ver tokens.ts, decisión 5).
+  hoy: {
+    backgroundColor: color.contraste,
+    borderRadius: radius.lg,
+    padding: space.xl,
+    gap: space.lg,
+    ...shadow.card,
   },
-  repasoBody: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
-  nota: {
-    fontFamily: font.family.body,
+  hoyContenido: { gap: space.lg },
+  hoyOculto: { gap: space.lg, opacity: 0, pointerEvents: 'none' },
+  hoyTexto: { gap: space.sm },
+  hoyEtiqueta: {
+    fontFamily: font.family.bodyStrong,
     fontSize: font.size.xs,
-    color: color.textFaint,
-    marginBottom: space.sm,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: color.accent,
   },
-  list: { gap: space.md, marginBottom: space.lg },
-  item: { gap: 4 },
+  hoyTitulo: {
+    fontFamily: font.family.heading,
+    fontSize: font.size.xl,
+    color: color.onContraste,
+  },
+  hoyCuerpo: {
+    fontFamily: font.family.body,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
+    color: color.onContraste,
+  },
+  hoyDato: {
+    fontFamily: font.family.body,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
+    color: color.textMuted,
+  },
+  item: { gap: space.xs },
   itemTop: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -331,7 +293,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   itemExtra: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  itemBody: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
+  itemBody: {
+    fontFamily: font.family.body,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
+    color: color.textMuted,
+  },
   reto: { gap: space.sm },
   retoTop: {
     flexDirection: 'row',
@@ -348,5 +315,10 @@ const styles = StyleSheet.create({
     fontFamily: font.family.bodyStrong,
     color: color.accent,
   },
-  retoBody: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
+  retoBody: {
+    fontFamily: font.family.body,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
+    color: color.textMuted,
+  },
 });

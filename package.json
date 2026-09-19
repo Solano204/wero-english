@@ -21,6 +21,7 @@
     "check:cazala": "node scripts/valida-cazala.mjs",
     "check:phrasal": "node scripts/valida-phrasal.mjs",
     "check:color": "node scripts/check-color.mjs",
+    "check:practicar": "node scripts/check-practicar.mjs",
     "reinstala": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps"
   },
   "dependencies": {

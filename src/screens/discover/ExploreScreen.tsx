@@ -101,7 +101,7 @@ export function ExploreScreen() {
                     {c.vistas}/{c.total}
                   </Text>
                 </View>
-                <Text style={styles.worldDesc} numberOfLines={1}>
+                <Text style={styles.worldDesc} numberOfLines={2}>
                   {m.descripcion}
                 </Text>
                 <ProgressBar

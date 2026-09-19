@@ -427,6 +427,16 @@ function auditaAudio(archivos, bundledSrc) {
   return { porGrupo, faltan: [...porGrupo.values()].reduce((s, g) => s + g.faltan.length, 0), total: refs.size, botones, vacios };
 }
 
+/** ACC-3: opciones visibles en Practicar con los grupos plegados = 1 acción de HOY + destacados + grupos. */
+function opcionesPracticar(leer) {
+  const modos = leer('src/screens/extras/practicar/modos.ts');
+  const grupos = modos.slice(modos.indexOf('GRUPOS = ['), modos.indexOf('] as const')).split("id: '").length - 1;
+  const hoy = leer('src/screens/extras/practicar/hoy.ts');
+  const destacados = Number(hoy.slice(hoy.indexOf('NUM_DESTACADOS = ') + 17).split(';')[0]);
+  const destinos = modos.split("    titulo: '").length - 1;
+  return { total: 1 + destacados + grupos, destacados, grupos, destinos };
+}
+
 // ── ACC-1 ────────────────────────────────────────────────────────────────
 function auditaAcc1(H, archivos) {
   const datos = { actionLabel: archivos.reduce((s, { src }) => s + (src.match(/actionLabel=/g) || []).length, 0) };
@@ -466,7 +476,7 @@ function conteoPorRegla(ctx) {
     ['TIPO-4', 'títulos ≥ 28 px sin letterSpacing negativo', H.titulo.length],
     ['ESP-1', 'espaciado fuera de 4/8', H.espacio.length],
     ['ACC-1', 'acción principal no sólida o varios sólidos a la vez', acc1.reales.length + acc1.candidatos.length],
-    ['ACC-3', `opciones visibles en Practicar (máximo recomendado ${MAX_OPCIONES})`, modos],
+    ['ACC-3', `opciones visibles en Practicar con los grupos plegados (máximo recomendado ${MAX_OPCIONES})`, modos.total],
     ['MOV-1', 'áreas táctiles < 48 dp (estilos + tokens)', H.tactil.length + tokensBajos.length],
     ['IA-1', 'líneas con emojis', H.emoji.length],
     ['IA-1b', 'líneas con glifos de texto como íconos', H.glifo.length],
@@ -532,7 +542,7 @@ ${c.acc1.candidatos.length ? '\nArchivos nuevos con 2 o más `primary` por verif
 Descartados tras leer el render (no son hallazgo):
 ${c.acc1.descartados.map(([r, m]) => `- \`${r}\` — ${m}`).join('\n')}
 
-**ACC-3 · Menos opciones (Ley de Hick).** \`PracticeScreen\` (la pestaña de inicio) pinta **${c.modos} modos** como tarjetas de la misma jerarquía.
+**ACC-3 · Menos opciones (Ley de Hick).** \`PracticeScreen\` (la pestaña de inicio) muestra **${c.modos.total} opciones** con los grupos plegados: 1 acción de HOY + ${c.modos.destacados} destacados + ${c.modos.grupos} grupos, que guardan el resto de los ${c.modos.destinos} destinos. Máximo recomendado ${MAX_OPCIONES}.
 
 ## MÓVIL
 
@@ -629,12 +639,11 @@ function main() {
   const leer = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
   const tokens = leer('src/theme/tokens.ts');
   const H = auditaEstatica(archivos);
-  const practicar = archivos.find((a) => a.r === 'src/screens/extras/PracticeScreen.tsx');
   const coloreadas = (tokens.match(/shadowColor:\s*'#[0-9A-Fa-f]{6}'/g) || []).filter((s) => !/#000000/i.test(s)).length;
   const ctx = {
     H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos),
     A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
-    modos: leeTags(practicar.src, 'Modo').length,
+    modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),
     sinEscala: !/accent(50|100|200|300|400|500|600|700|800|900)\b/.test(tokens),
     tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.length,

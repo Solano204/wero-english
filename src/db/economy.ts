@@ -1,6 +1,6 @@
 import { getDb } from './client';
 import { dayKey } from '@/utils/date';
-import type { JuegoId, JuegoRecord, RetoSemanal } from '@/types';
+import type { JuegoId, JuegoRecord, RetoSemanal, UsoModo } from '@/types';
 
 /**
  * Registro de partidas, reto semanal y pronunciación.
@@ -145,4 +145,44 @@ export async function getHablaResumen(
     intentos: row?.intentos ?? 0,
     dominados: row?.dominados ?? 0,
   };
+}
+
+/**
+ * Uso de cada modo con registro, sin tablas nuevas: las partidas salen de
+ * `juego_log`, las sesiones de estudio de `sesion` y "Di la palabra" de
+ * `habla_log`. Los modos que no dejan registro (gramática, lecturas, oído…)
+ * no aparecen.
+ */
+export async function getUsoModos(
+  usuarioId: number
+): Promise<Record<string, UsoModo>> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{
+    modo: string;
+    dias: number;
+    ultimo: number | null;
+  }>(
+    `SELECT juego AS modo, COUNT(DISTINCT dia) AS dias, MAX(jugado_en) AS ultimo
+       FROM juego_log WHERE usuario_id = ? GROUP BY juego
+     UNION ALL
+     SELECT 'study', COUNT(DISTINCT dia), MAX(inicio)
+       FROM sesion WHERE usuario_id = ?
+     UNION ALL
+     SELECT 'pares_minimos',
+            COUNT(DISTINCT date(creado_en / 1000, 'unixepoch', 'localtime')),
+            MAX(creado_en)
+       FROM habla_log WHERE usuario_id = ?;`,
+    [usuarioId, usuarioId, usuarioId]
+  );
+
+  const out: Record<string, UsoModo> = {};
+  for (const r of rows) {
+    if (r.ultimo === null) continue;
+    const previo = out[r.modo];
+    out[r.modo] = {
+      dias: (previo?.dias ?? 0) + r.dias,
+      ultimo: Math.max(previo?.ultimo ?? 0, r.ultimo),
+    };
+  }
+  return out;
 }

@@ -141,13 +141,14 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 | `EntryRow` | Renglón de frase en dos variantes: `compacta` (una línea) y `mazo` (texto a dos líneas y barra de audios etiquetados) |
 | `FeedbackBand` | Banda de veredicto con filo verde o ámbar |
 | `EmptyState` | Emoji o símbolo, título, cuerpo y botón `primary` opcional |
+| `Chevron` | Chevron de trazo en SVG (`derecha`, `abajo`, `arriba`), para renglones y grupos plegables. Sustituye a `›` |
 | `SectionTitle` | Título `lg` semibold con contador o acción `sm` |
 | Barra de pestañas | Flotante: `left`/`right` `md`, alto 68, radio `lg`, `BlurView` con velo y filo. Tres pestañas: Vocabulario, Practicar (inicial) y Progreso. Etiqueta `xs` semibold; ícono de texto de 17 en una píldora de 54×28 que se enciende con `accentSoft` |
 | Retroalimentación | `Trozos` (cubitos al acertar), `Estrellas`, `Confetti`, `Chispas`, `Toast` |
 
 ## 1.8 Las cinco pantallas más usadas
 
-**Practicar (Home).** `Screen` con scroll. Título "Practicar" (`xxl` bold). Tarjeta de repaso con portada, luego secciones con `SectionTitle` y una lista (`gap md`) de **16 modos**, cada uno una `Card` con portada, título `md` semibold, cuerpo `sm` muted y dato extra `xs` faint. Tarjeta del reto semanal con un número `md` bold en `accent`.
+**Practicar (Home).** `Screen` con scroll y cuatro bloques separados por 32 (dentro de cada bloque, 16). Título "Practicar" (`xxl`). **Hoy**: la única superficie de color (`contraste`), con el modo que toca, un botón `primary` grande que dice qué hará ("Corregir N errores" si hay frases atoradas, "Seguir con X" con el último modo usado, "Empezar" sin historial) y, si existen, "Llevas N frases hoy" y "Racha: N días". **Destacados**: 3 tarjetas medianas con portada de 56 (los más usados por días de uso; sin datos, los primeros del orden de siempre; nunca el de Hoy). **Todo lo demás**: 3 grupos plegados por defecto ("Juegos", "Oír y hablar", "Leer y repasar", cada uno con su cuenta) que se despliegan en 200 ms (alto y opacidad, sin animación con Reduce Motion); los que el usuario deja abiertos se guardan en `practicarGruposAbiertos`. Cada renglón: nombre, dato opcional y chevron, 48 dp como mínimo. Al final, el reto de la semana. Con los grupos plegados hay 7 opciones (1 + 3 + 3) para 17 destinos; el código está en `screens/extras/practicar/`.
 
 **Estudio.** Arriba, barra de progreso y contador `xs`; debajo, aciertos (`lg` bold en `accent` + `sm` muted) y una racha `xs` semibold. `StudyCardView`: instrucción `xs` en mayúsculas, escenario con la frase en español (`xl`, ×1.35), `AudioButton` grande, opciones (`OptionButton`, alto 56, `gap md`) o un campo de texto (alto 58, radio `md`, borde 1.5), y `FeedbackBand` al responder.
 

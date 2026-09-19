@@ -36,6 +36,9 @@ export interface Settings {
   onboardingHecho: boolean;
   /** Respuesta a "dónde se te traba el inglés". Solo se guarda local. */
   dondeSeTraba: string | null;
+
+  /** Grupos de Practicar que el usuario dejó desplegados (ids de `GRUPOS`). */
+  practicarGruposAbiertos: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -62,6 +65,7 @@ export const DEFAULT_SETTINGS: Settings = {
   micHabilitado: false,
   onboardingHecho: false,
   dondeSeTraba: null,
+  practicarGruposAbiertos: [],
 };
 
 /** Tope de notificaciones diarias. Más allá el sistema las agrupa igual. */

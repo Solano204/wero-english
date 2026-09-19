@@ -21,6 +21,13 @@ export interface JuegoRecord {
   ultimaFecha: string | null;
 }
 
+/** Cuánto y cuándo se usó un modo de Practicar. `dias` = días distintos con uso. */
+export interface UsoModo {
+  dias: number;
+  /** Marca de tiempo (ms) de la última vez. */
+  ultimo: number;
+}
+
 export interface RetoSemanal {
   /** Aciertos acumulados de lunes a hoy. */
   llevas: number;
