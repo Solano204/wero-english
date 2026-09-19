@@ -1,5 +1,7 @@
 import { getDb } from './client';
+import { buildFilter, type ContentFilter, paramsUpsertTarjeta, sqlContarVencidas, sqlDiagnosticoCola, sqlNuevas, sqlVencidas, SQL_UPSERT_TARJETA } from './cola';
 import { toEntry, type EntryRow } from './rows';
+import { startOfDay } from '@/utils/date';
 import type { CardState, Entry, Nivel, Registro, Vulgaridad } from '@/types';
 
 /* ============================================================
@@ -11,41 +13,7 @@ import type { CardState, Entry, Nivel, Registro, Vulgaridad } from '@/types';
    aparece una frase de vulgaridad 2 con el modo limpio encendido.
    ============================================================ */
 
-export interface ContentFilter {
-  modoLimpio: boolean;
-  niveles: Nivel[];
-  packs?: string[];
-  mundos?: string[];
-}
-
-interface Fragment {
-  sql: string;
-  args: (string | number)[];
-}
-
-function buildFilter(f: ContentFilter): Fragment {
-  const parts: string[] = ['e.is_canonical = 1', 'e.revisar = 0'];
-  const args: (string | number)[] = [];
-
-  if (f.modoLimpio) parts.push('e.vulgaridad = 0');
-
-  if (f.niveles.length > 0 && f.niveles.length < 3) {
-    parts.push(`e.nivel IN (${f.niveles.map(() => '?').join(',')})`);
-    args.push(...f.niveles);
-  }
-
-  if (f.packs && f.packs.length > 0) {
-    parts.push(`e.pack_final IN (${f.packs.map(() => '?').join(',')})`);
-    args.push(...f.packs);
-  }
-
-  if (f.mundos && f.mundos.length > 0) {
-    parts.push(`e.mundo IN (${f.mundos.map(() => '?').join(',')})`);
-    args.push(...f.mundos);
-  }
-
-  return { sql: parts.join(' AND '), args };
-}
+export type { ContentFilter };
 
 const ENTRY_COLS = 'e.*';
 
@@ -81,8 +49,7 @@ export function rowToState(r: QueueRow): CardState {
 }
 
 /**
- * Las tarjetas vencidas, más antiguas primero.
- * LEFT JOIN porque una entrada nunca vista no tiene fila en tarjeta.
+ * Las tarjetas vencidas (definición en SQL_VENCIDA), las más atrasadas primero.
  */
 export async function getDueCards(
   usuarioId: number,
@@ -92,25 +59,13 @@ export async function getDueCards(
 ): Promise<{ entry: Entry; state: CardState }[]> {
   const db = await getDb();
   const f = buildFilter(filter);
-
-  const rows = await db.getAllAsync<QueueRow>(
-    `SELECT ${ENTRY_COLS}, t.repeticiones, t.intervalo, t.facilidad,
-            t.vence_en, t.ultimo_repaso, t.fallos, t.aciertos,
-            t.dominada, t.favorito
-       FROM entrada e
-       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
-      WHERE ${f.sql}
-        AND t.vence_en <= ?
-        AND e.tipo != 'regla_fonetica'
-      ORDER BY t.vence_en ASC
-      LIMIT ?;`,
-    [usuarioId, ...f.args, now, limit]
-  );
-
+  const rows = await db.getAllAsync<QueueRow>(sqlVencidas(f.sql), [
+    usuarioId, ...f.args, now, startOfDay(now), limit,
+  ]);
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
 }
 
-/** Entradas que el usuario nunca ha visto, en orden de nivel y luego id. */
+/** Frases sin turno: nunca vistas, o favoritas que nunca se estudiaron. Por nivel y luego id. */
 export async function getNewCards(
   usuarioId: number,
   filter: ContentFilter,
@@ -118,22 +73,7 @@ export async function getNewCards(
 ): Promise<{ entry: Entry; state: CardState }[]> {
   const db = await getDb();
   const f = buildFilter(filter);
-
-  const rows = await db.getAllAsync<QueueRow>(
-    `SELECT ${ENTRY_COLS}, NULL AS repeticiones, NULL AS intervalo,
-            NULL AS facilidad, NULL AS vence_en, NULL AS ultimo_repaso,
-            NULL AS fallos, NULL AS aciertos, NULL AS dominada,
-            NULL AS favorito
-       FROM entrada e
-       LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
-      WHERE ${f.sql}
-        AND t.entry_id IS NULL
-        AND e.tipo != 'regla_fonetica'
-      ORDER BY e.nivel ASC, e.id ASC
-      LIMIT ?;`,
-    [usuarioId, ...f.args, limit]
-  );
-
+  const rows = await db.getAllAsync<QueueRow>(sqlNuevas(f.sql), [usuarioId, ...f.args, limit]);
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
 }
 
@@ -144,14 +84,26 @@ export async function countDue(
 ): Promise<number> {
   const db = await getDb();
   const f = buildFilter(filter);
-  const row = await db.getFirstAsync<{ n: number }>(
-    `SELECT COUNT(*) AS n
-       FROM entrada e
-       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
-      WHERE ${f.sql} AND t.vence_en <= ? AND e.tipo != 'regla_fonetica';`,
-    [usuarioId, ...f.args, now]
-  );
+  const row = await db.getFirstAsync<{ n: number }>(sqlContarVencidas(f.sql), [
+    usuarioId, ...f.args, now, startOfDay(now),
+  ]);
   return row?.n ?? 0;
+}
+
+/** Vencidas, de aprendizaje y fantasma, para la pantalla de Diagnóstico. */
+export async function getDiagnosticoCola(
+  usuarioId: number,
+  filter: ContentFilter,
+  now = Date.now()
+): Promise<{ vencidas: number; aprendizaje: number; fantasma: number }> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const inicio = startOfDay(now);
+  const row = await db.getFirstAsync<{ vencidas: number; aprendizaje: number; fantasma: number }>(
+    sqlDiagnosticoCola(f.sql),
+    [now, inicio, now, inicio, usuarioId, ...f.args]
+  );
+  return { vencidas: row?.vencidas ?? 0, aprendizaje: row?.aprendizaje ?? 0, fantasma: row?.fantasma ?? 0 };
 }
 
 /* ============================================================
@@ -202,26 +154,7 @@ export async function upsertCardState(
   s: CardState
 ): Promise<void> {
   const db = await getDb();
-  await db.runAsync(
-    `INSERT INTO tarjeta
-       (usuario_id, entry_id, repeticiones, intervalo, facilidad,
-        vence_en, ultimo_repaso, fallos, aciertos, dominada, favorito)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?)
-     ON CONFLICT(usuario_id, entry_id) DO UPDATE SET
-       repeticiones = excluded.repeticiones,
-       intervalo    = excluded.intervalo,
-       facilidad    = excluded.facilidad,
-       vence_en     = excluded.vence_en,
-       ultimo_repaso= excluded.ultimo_repaso,
-       fallos       = excluded.fallos,
-       aciertos     = excluded.aciertos,
-       dominada     = excluded.dominada;`,
-    [
-      usuarioId, s.entry_id, s.repeticiones, s.intervalo, s.facilidad,
-      s.vence_en, s.ultimo_repaso, s.fallos, s.aciertos, s.dominada,
-      s.favorito,
-    ]
-  );
+  await db.runAsync(SQL_UPSERT_TARJETA, paramsUpsertTarjeta(usuarioId, s));
 }
 
 export async function toggleFavorite(

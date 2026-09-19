@@ -37,8 +37,15 @@ function parseKey(key: string): number | null {
   return new Date(y, m - 1, d, 12, 0, 0, 0).getTime();
 }
 
+/**
+ * Suma días de calendario en hora local. Sumar `days * 24 h` en ms se
+ * corre un día en las zonas con horario de verano (frontera norte de
+ * México): un día tiene 23 o 25 h dos veces al año.
+ */
 export function addDays(ts: number, days: number): number {
-  return ts + days * MS_DAY;
+  const d = new Date(ts);
+  d.setDate(d.getDate() + days);
+  return d.getTime();
 }
 
 /** "hace 3 días", "hoy", "en 2 semanas". Para P-12 y P-13. */
