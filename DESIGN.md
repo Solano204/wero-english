@@ -50,7 +50,7 @@ Todo en `src/theme/tokens.ts`.
 |---|---|
 | `accent` | `#45D9FF` |
 | `accentSoft` | `rgba(69,217,255,0.14)` |
-| `accentDeep` | `#17A8D4` |
+| `accentDeep` | `#17ABD8` |
 | `accentBorde` | `rgba(69,217,255,0.32)` |
 | `onAccent` | `#04141C` (texto sobre el cian: nunca blanco) |
 
@@ -59,11 +59,11 @@ Todo en `src/theme/tokens.ts`.
 | Token | Valor | Semántica |
 |---|---|---|
 | `correct` (+`Soft`, `Deep` `#22B87A`, `Fondo` `#10241B`) | `#4ADE9B` | Acierto |
-| `wrong` (+`Soft`, `Deep` `#C98F1F`, `Fondo` `#241C0C`) | `#F2B33D` | Fallo: ámbar, nunca rojo |
+| `wrong` (+`Soft`, `Deep` `#CF9320`, `Fondo` `#241C0C`) | `#F2B33D` | Fallo: ámbar, nunca rojo |
 | `riskWarn` | `#F2B33D` | Advertencia de contenido |
 | `riskStrong` (+`Soft`) | `#FF7A66` | Único rojo: lenguaje explícito |
 
-**Mundos** (`color.world`, categorías de contenido): `dia_a_dia #5B9BE8`, `calle #F08A4B`, `dinero #4ADE9B`, `gente #E070C0`, `cultura #9B87F5`, `tech #3E9FBC`, `legal #8C97A6`, `fonetica #E0B441`.
+**Mundos** (`color.world`, categorías de contenido): `dia_a_dia #66A2EA`, `calle #F08A4B`, `dinero #4ADE9B`, `gente #E27BC5`, `cultura #A390F6`, `tech #4FAAC5`, `legal #96A0AE`, `fonetica #E0B441`.
 
 **Velos y auxiliares:** `velo` (0.94), `veloPortada` (0.42), `veloMuro` (0.72), `veloBarra` (0.72), `trackFondo` (negro 0.38), `biselSombra` (negro 0.45), `textSobrePortada` (0.22), `shadow` `#000000`, `notifAndroid` `#E8543F` (requisito del sistema operativo).
 
@@ -74,7 +74,7 @@ Todo en `src/theme/tokens.ts`.
 - `filoLuz`: blanco 0.28 → blanco 0.04 → cian 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
 - `resplandorSol`: cian 0.16 → 0.04 → 0, el halo de `Screen`.
 
-**Contraste medido** (WCAG, calculado de los tokens): `text` ≥ 10.7:1 sobre cualquier superficie; `textMuted` ≥ 6.66; `textFaint` ≥ 4.62; `accent` ≥ 7.27; `onAccent` sobre `accent` 11.25; `text` sobre `accent` 1.47. Pasan AA todos sobre `bg`, `surface` y `surfaceAlt`. Bajo 4.5 sobre `contraste`: `accentDeep` 4.37, `wrongDeep` 4.28, `world.dia_a_dia` 4.21, `world.gente` 4.18, `world.cultura` 4.14, `world.legal` 4.09 y `world.tech` 3.97 (también 4.41 sobre `surfaceHigh`).
+**Contraste medido** (WCAG, calculado de los tokens): `text` ≥ 10.7:1 sobre cualquier superficie; `textMuted` ≥ 6.66; `textFaint` ≥ 4.62; `accent` ≥ 7.27; `onAccent` sobre `accent` 11.25; `text` sobre `accent` 1.47. Todos los pares de texto pasan AA (mínimo 4.5:1) sobre las ocho superficies, `contraste` incluida. Para lograrlo se aclararon `accentDeep`, `wrongDeep` y cinco colores de mundo (`dia_a_dia`, `gente`, `cultura`, `tech`, `legal`), lo mínimo para cruzar el umbral. `accentDeep` solo se usa como borde inferior de fichas (no como texto) y `wrongDeep` no se usa fuera de los tokens.
 
 ## 1.3 Tipografía
 

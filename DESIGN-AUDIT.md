@@ -28,7 +28,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 |---|---|---|
 | COLOR-1 | colores de marca de más (mundos + `contraste`) | 9 |
 | COLOR-3 | colores sin escala 50–900 | 1 |
-| COLOR-4 | pares texto/superficie bajo AA | 8 |
+| COLOR-4 | pares texto/superficie bajo AA | 0 |
 | TIPO-1 | familias: fuente del sistema, `CharisSIL` sin cargar, `monospace` | 0 |
 | TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 0 |
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 1 |
@@ -69,14 +69,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 **COLOR-3 · Cada color con escala 50–900.** Ninguno la tiene: `accent` solo trae `accent`, `accentSoft` y `accentDeep` (`tokens.ts:66-68`); igual `correct`, `wrong` y los ocho de `world`.
 
 **COLOR-4 · Contraste AA (4.5:1).** Pares texto/superficie que fallan (calculados de los tokens):
-- `accentDeep` sobre `contraste`: 4.37
-- `wrongDeep` sobre `contraste`: 4.28
-- `world.dia_a_dia` sobre `contraste`: 4.21
-- `world.gente` sobre `contraste`: 4.18
-- `world.cultura` sobre `contraste`: 4.14
-- `world.tech` sobre `surfaceHigh`: 4.41
-- `world.tech` sobre `contraste`: 3.97
-- `world.legal` sobre `contraste`: 4.09
+- (ninguno)
 
 `text` sobre `accent` da 1.47: usar siempre `onAccent`.
 
@@ -374,4 +367,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":8,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":5,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":3,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":5,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":3,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->

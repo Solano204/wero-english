@@ -65,7 +65,7 @@ export const color = {
   // libres el ámbar para el fallo y el verde para el acierto.
   accent: '#45D9FF',
   accentSoft: 'rgba(69, 217, 255, 0.14)',
-  accentDeep: '#17A8D4',
+  accentDeep: '#17ABD8',
 
   // Texto encima del cian: tinta, no blanco. Blanco sobre cian no pasa
   // contraste y se ve lavado.
@@ -83,7 +83,7 @@ export const color = {
   // Esta regla es anterior al rediseño y se mantiene intacta.
   wrong: '#F2B33D',
   wrongSoft: 'rgba(242, 179, 61, 0.12)',
-  wrongDeep: '#C98F1F',
+  wrongDeep: '#CF9320',
 
   riskWarn: '#F2B33D',
   riskWarnSoft: 'rgba(242, 179, 61, 0.12)',
@@ -96,14 +96,16 @@ export const color = {
   // para pasar contraste sobre tinta, pero se quedan un paso por debajo
   // del acento en saturación: el cian tiene que seguir siendo lo más
   // encendido de la pantalla.
+  // Todos (y accentDeep, wrongDeep) pasan 4.5:1 sobre las ocho superficies,
+  // `contraste` incluida: se aclararon lo mínimo para cruzar ese umbral.
   world: {
-    dia_a_dia: '#5B9BE8',
+    dia_a_dia: '#66A2EA',
     calle: '#F08A4B',
     dinero: '#4ADE9B',
-    gente: '#E070C0',
-    cultura: '#9B87F5',
-    tech: '#3E9FBC',
-    legal: '#8C97A6',
+    gente: '#E27BC5',
+    cultura: '#A390F6',
+    tech: '#4FAAC5',
+    legal: '#96A0AE',
     fonetica: '#E0B441',
   },
 
