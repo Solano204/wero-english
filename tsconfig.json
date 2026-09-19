@@ -10,7 +10,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@data/*": ["assets/data/*"]
+      "@data/*": ["assets/data/*"],
+      "phosphor-react-native/src/icons/*": ["node_modules/phosphor-react-native/lib/typescript/icons/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

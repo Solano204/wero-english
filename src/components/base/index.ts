@@ -17,3 +17,4 @@ export {
 export { RoundTimer } from './RoundTimer';
 export { IconButton } from './IconButton';
 export { Chevron } from './Chevron';
+export { Icon, ICON_NAMES, ICON_SIZE, type IconName, type IconSize } from './Icon';

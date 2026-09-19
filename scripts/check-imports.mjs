@@ -34,6 +34,9 @@ function resolve(spec, from) {
 const files = [...walk(SRC), path.join(ROOT, 'App.tsx')];
 const graph = new Map();
 const broken = [];
+// Regla: los íconos entran solo por components/base/Icon.tsx.
+const PUERTA_ICONOS = path.join(SRC, 'components', 'base', 'Icon.tsx');
+const iconosSueltos = [];
 
 for (const f of files) {
   const src = fs.readFileSync(f, 'utf8');
@@ -42,6 +45,9 @@ for (const f of files) {
   let m;
   while ((m = re.exec(src))) {
     const spec = m[1];
+    if (spec.startsWith('phosphor-react-native') && f !== PUERTA_ICONOS) {
+      iconosSueltos.push(`${path.relative(ROOT, f)} -> ${spec}`);
+    }
     const target = resolve(spec, f);
     if (target === false) broken.push(`${path.relative(ROOT, f)} -> ${spec}`);
     else if (target) deps.push(target);
@@ -52,6 +58,8 @@ for (const f of files) {
 console.log(`archivos analizados: ${files.length}`);
 console.log(`imports rotos: ${broken.length}`);
 for (const b of broken) console.log(`  ${b}`);
+console.log(`phosphor-react-native fuera de Icon.tsx: ${iconosSueltos.length}`);
+for (const i of iconosSueltos) console.log(`  ${i}`);
 
 // Detección de ciclos con DFS
 const WHITE = 0, GRAY = 1, BLACK = 2;
@@ -79,4 +87,4 @@ for (const f of files) if (state.get(f) === WHITE) dfs(f, []);
 console.log(`ciclos: ${cycles.length}`);
 for (const c of cycles.slice(0, 10)) console.log('  ' + c.join(' -> '));
 
-process.exit(broken.length === 0 && cycles.length === 0 ? 0 : 1);
+process.exit(broken.length === 0 && cycles.length === 0 && iconosSueltos.length === 0 ? 0 : 1);

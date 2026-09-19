@@ -1,0 +1,108 @@
+import React from 'react';
+import { View } from 'react-native';
+import type { Icon as PhosphorIcon } from 'phosphor-react-native';
+import { ArrowClockwiseIcon } from 'phosphor-react-native/src/icons/ArrowClockwise';
+import { ArrowLeftIcon } from 'phosphor-react-native/src/icons/ArrowLeft';
+import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
+import { BarbellIcon } from 'phosphor-react-native/src/icons/Barbell';
+import { CaretDownIcon } from 'phosphor-react-native/src/icons/CaretDown';
+import { CaretRightIcon } from 'phosphor-react-native/src/icons/CaretRight';
+import { CaretUpIcon } from 'phosphor-react-native/src/icons/CaretUp';
+import { ChartLineUpIcon } from 'phosphor-react-native/src/icons/ChartLineUp';
+import { CheckIcon } from 'phosphor-react-native/src/icons/Check';
+import { CompassIcon } from 'phosphor-react-native/src/icons/Compass';
+import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
+import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMedium';
+import { InfoIcon } from 'phosphor-react-native/src/icons/Info';
+import { LightbulbIcon } from 'phosphor-react-native/src/icons/Lightbulb';
+import { LockSimpleIcon } from 'phosphor-react-native/src/icons/LockSimple';
+import { MicrophoneSlashIcon } from 'phosphor-react-native/src/icons/MicrophoneSlash';
+import { PauseIcon } from 'phosphor-react-native/src/icons/Pause';
+import { PlayIcon } from 'phosphor-react-native/src/icons/Play';
+import { SpeakerHighIcon } from 'phosphor-react-native/src/icons/SpeakerHigh';
+import { SpeakerSlashIcon } from 'phosphor-react-native/src/icons/SpeakerSlash';
+import { StarIcon } from 'phosphor-react-native/src/icons/Star';
+import { StopIcon } from 'phosphor-react-native/src/icons/Stop';
+import { WarningIcon } from 'phosphor-react-native/src/icons/Warning';
+import { XIcon } from 'phosphor-react-native/src/icons/X';
+import { color } from '@/theme';
+
+/**
+ * ÚNICA puerta a los íconos. Nadie más importa phosphor-react-native
+ * (check:imports lo vigila). Se importa cada ícono por su archivo, no del
+ * índice: Metro no hace tree-shaking y el índice arrastra 1,500 íconos.
+ *
+ * Los nombres dicen para qué sirve el ícono, no cómo se dibuja: si mañana
+ * "slow" pasa de reloj de arena a otra cosa, nadie más se entera.
+ */
+/** Un solo grosor para toda la app: bold. */
+const PESO = 'bold';
+
+interface Definicion {
+  Componente: PhosphorIcon;
+  /** Solo "star-filled": el estado encendido necesita relleno, no otro grosor. */
+  relleno?: boolean;
+}
+
+const ICONOS = {
+  play: { Componente: PlayIcon },
+  pause: { Componente: PauseIcon },
+  stop: { Componente: StopIcon },
+  // Phosphor no trae tortuga: el reloj de arena es lo más cercano a "lento",
+  // y por sí solo no dice "lento". Regla: SIEMPRE con el texto "Lento" a la
+  // vista (o accessibilityLabel "Lento" si el botón es solo ícono y tiene
+  // contexto visual). AudioButton la cumple: en slow, la etiqueta es "Lento".
+  slow: { Componente: HourglassMediumIcon },
+  volume: { Componente: SpeakerHighIcon },
+  'volume-off': { Componente: SpeakerSlashIcon },
+  'mic-off': { Componente: MicrophoneSlashIcon },
+  star: { Componente: StarIcon },
+  'star-filled': { Componente: StarIcon, relleno: true },
+  check: { Componente: CheckIcon },
+  close: { Componente: XIcon },
+  'chevron-right': { Componente: CaretRightIcon },
+  'chevron-down': { Componente: CaretDownIcon },
+  'chevron-up': { Componente: CaretUpIcon },
+  'arrow-right': { Componente: ArrowRightIcon },
+  back: { Componente: ArrowLeftIcon },
+  repeat: { Componente: ArrowClockwiseIcon },
+  lock: { Componente: LockSimpleIcon },
+  warning: { Componente: WarningIcon },
+  info: { Componente: InfoIcon },
+  hint: { Componente: LightbulbIcon },
+  reveal: { Componente: EyeIcon },
+  explore: { Componente: CompassIcon },
+  practice: { Componente: BarbellIcon },
+  progress: { Componente: ChartLineUpIcon },
+} satisfies Record<string, Definicion>;
+
+export type IconName = keyof typeof ICONOS;
+
+export const ICON_NAMES = Object.keys(ICONOS) as IconName[];
+
+export const ICON_SIZE = { sm: 16, md: 20, lg: 24, xl: 32 } as const;
+export type IconSize = keyof typeof ICON_SIZE;
+
+interface Props {
+  name: IconName;
+  size?: IconSize;
+  color?: string;
+  /** Sin etiqueta el ícono es decorativo y el lector de pantalla lo salta. */
+  accessibilityLabel?: string;
+}
+
+export function Icon({
+  name,
+  size = 'md',
+  color: tinte = color.text,
+  accessibilityLabel,
+}: Props) {
+  const { Componente, relleno } = ICONOS[name] as Definicion;
+  const icono = <Componente size={ICON_SIZE[size]} color={tinte} weight={relleno ? 'fill' : PESO} />;
+  if (accessibilityLabel === undefined) return icono;
+  return (
+    <View accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
+      {icono}
+    </View>
+  );
+}
