@@ -168,7 +168,7 @@ export function GramaticaTemaScreen() {
         <Button
           label={reproduciendoTodos ? '■ Detener' : '▶ Escuchar todos los ejemplos'}
           onPress={reproduciendoTodos ? detenerTodos : () => void escucharTodos()}
-          variant={reproduciendoTodos ? 'secondary' : 'ghost'}
+          variant={reproduciendoTodos ? 'secondary' : 'primary'}
           style={styles.escucharTodos}
         />
         {tema.ejemplos.map((e, i) => (

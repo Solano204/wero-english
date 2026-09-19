@@ -22,7 +22,7 @@ export function EmptyState({ title, body, actionLabel, onAction, emoji }: Props)
       <Text style={styles.title}>{title}</Text>
       {body ? <Text style={styles.body}>{body}</Text> : null}
       {actionLabel && onAction ? (
-        <Button label={actionLabel} onPress={onAction} variant="secondary" />
+        <Button label={actionLabel} onPress={onAction} />
       ) : null}
     </View>
   );

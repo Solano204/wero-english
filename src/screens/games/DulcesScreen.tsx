@@ -590,7 +590,7 @@ export function DulcesScreen() {
                   style={[styles.punto, { backgroundColor: TINTES[o.color] }]}
                 />
                 <View style={styles.metaCuerpo}>
-                  <Text style={styles.metaFrase} numberOfLines={1}>
+                  <Text style={styles.metaFrase} numberOfLines={2}>
                     {o.entry.phrase}
                   </Text>
                   <ProgressBar

@@ -107,12 +107,12 @@ export const EntryRow = memo(function EntryRow({
         <>
           <View style={styles.body}>
             <View style={styles.head}>
-              <Text style={styles.phrase} numberOfLines={1}>
+              <Text style={styles.phrase} numberOfLines={2}>
                 {entry.phrase}
               </Text>
               {dominada ? <Text style={styles.check}>✓</Text> : null}
             </View>
-            <Text style={styles.spanish} numberOfLines={1}>
+            <Text style={styles.spanish} numberOfLines={2}>
               {entry.spanish_main}
             </Text>
             {entry.vulgaridad > 0 ? (

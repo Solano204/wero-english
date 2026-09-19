@@ -38,14 +38,11 @@ const ACC1_NO_CONVIVEN = {
   'src/screens/extras/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
   'src/screens/games/CazalaScreen.tsx': '`checked ? Siguiente : Revisar`',
   'src/screens/games/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
+  'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
   'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
 };
 /** ACC-1 reales: la acción principal no es sólida, o hay varios sólidos a la vez. */
 const ACC1_REALES = [
-  { archivo: 'src/components/base/EmptyState.tsx', patron: /variant="secondary"/, motivo: (d) => `la acción del estado vacío es \`secondary\` (con borde); hay ${d.actionLabel} usos de \`actionLabel\`` },
-  { archivo: 'src/screens/utility/DownloadsScreen.tsx', patron: /Ver anuncio y descargar/, motivo: () => 'la acción principal (descargar) es `secondary`, con borde' },
-  { archivo: 'src/screens/extras/ErrorDetailScreen.tsx', patron: /Ver la frase completa/, motivo: () => 'única acción de la pantalla y es `secondary`' },
-  { archivo: 'src/screens/extras/GramaticaTemaScreen.tsx', patron: /Escuchar todos/, motivo: () => '(discutible) única acción de la pantalla y es `ghost`' },
 ];
 
 /** TIPO-2: textos de 12–13 px con nombre de cuerpo que se quedan así, revisados a mano. */
@@ -532,7 +529,7 @@ ${L(c.H.espacio)}
 ${L(c.acc1.reales)}
 ${c.acc1.candidatos.length ? '\nArchivos nuevos con 2 o más `primary` por verificar:\n' + L(c.acc1.candidatos.map((b) => ({ r: b.r, linea: b.tags[0].linea, txt: b.tags.map((t) => `:${t.linea} ${t.variant}`).join('; ') }))) : ''}
 
-Descartados tras leer el render (tienen 2 o más \`primary\`, pero **nunca conviven en pantalla**):
+Descartados tras leer el render (no son hallazgo):
 ${c.acc1.descartados.map(([r, m]) => `- \`${r}\` — ${m}`).join('\n')}
 
 **ACC-3 · Menos opciones (Ley de Hick).** \`PracticeScreen\` (la pestaña de inicio) pinta **${c.modos} modos** como tarjetas de la misma jerarquía.

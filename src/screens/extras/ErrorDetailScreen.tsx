@@ -88,7 +88,6 @@ export function ErrorDetailScreen() {
       {err.entrada_relacionada ? (
         <Button
           label="Ver la frase completa"
-          variant="secondary"
           onPress={() =>
             nav.navigate('Detail', { entryId: err.entrada_relacionada! })
           }

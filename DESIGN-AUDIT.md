@@ -21,7 +21,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | 9 | TXT-1 + ACC-1 | Que no se corte lo importante y que la acción principal sea sólida: título y subtítulo del `Header` (títulos de lecturas), `EntryRow` compacta y `DulcesScreen`; y `secondary` a `primary` en `EmptyState` (11 usos), `DownloadsScreen` y `ErrorDetailScreen` | `Header.tsx:30,35`, `EntryRow.tsx:110,115`, `DulcesScreen.tsx:593`, `EmptyState.tsx:25`, `DownloadsScreen.tsx:134`, `ErrorDetailScreen.tsx:90` | S | medio |
 | 10 | EST-error + RND-1 + AUD-1 | Robustez: estado de error en 19 pantallas que leen la base (y de carga en 13); `ErrorsScreen` (194 tarjetas) y `PronunciationScreen` (53) a `FlatList`; regenerar el audio vacío `aud/phrasal/5_ejemplo_en_lento.mp3` | `ErrorsScreen.tsx:76`, `PronunciationScreen.tsx:190`, tabla de la sección a) | M | medio |
 
-**Hecho en la fase B:** 1 (TIPO-2), 2 (COLOR-4), 5 (TIPO-1), 8 (TIPO-4) y de 7 el `glow` y el selector de niveles. De 7 sigue abierto ACC-1 en `EmptyState`, `DownloadsScreen`, `ErrorDetailScreen` y `GramaticaTemaScreen` (va con el paso 9). `npm run check:color` cuida que no vuelvan los colores sueltos.
+**Hecho en la fase B:** 1 (TIPO-2), 2 (COLOR-4), 3 (MOV-1), 5 (TIPO-1), 7 (IA-3 y ACC-1 del selector), 8 (TIPO-4) y 9 (TXT-1 y ACC-1, con dos excepciones: el subtítulo del `Header` queda en 1 línea por decisión, y `ExploreScreen.tsx:104` no estaba en la lista; `DownloadsScreen` se queda `secondary` porque son 16 botones iguales). `npm run check:color` cuida que no vuelvan los colores sueltos.
 <!-- PLAN:end -->
 
 ## Conteo por regla
@@ -36,7 +36,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 1 |
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
 | ESP-1 | espaciado fuera de 4/8 | 35 |
-| ACC-1 | acción principal no sólida o varios sólidos a la vez | 4 |
+| ACC-1 | acción principal no sólida o varios sólidos a la vez | 0 |
 | ACC-3 | opciones visibles en Practicar (máximo recomendado 7) | 16 |
 | MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 0 |
 | IA-1 | líneas con emojis | 15 |
@@ -45,7 +45,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | EST-carga | pantallas que cargan datos sin estado de carga | 13 |
 | EST-vacio | pantallas que cargan datos sin estado vacío | 6 |
 | EST-error | pantallas que cargan datos sin estado de error | 19 |
-| TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 6 |
+| TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 2 |
 | RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 4 |
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
@@ -157,16 +157,14 @@ Descartados (28 px o más, pero no son títulos):
 ## JERARQUÍA Y ACCIÓN
 
 **ACC-1 · Una sola acción principal, botón sólido de alto contraste.** `Button` tiene 4 variantes: `primary` (cian sólido), `secondary` (con borde), `ghost` y `danger` (`Button.tsx:143-158`). Revisado leyendo cada render, **los hallazgos reales son:**
-- `src/components/base/EmptyState.tsx:25` — la acción del estado vacío es `secondary` (con borde); hay 11 usos de `actionLabel`
-- `src/screens/utility/DownloadsScreen.tsx:134` — la acción principal (descargar) es `secondary`, con borde
-- `src/screens/extras/ErrorDetailScreen.tsx:90` — única acción de la pantalla y es `secondary`
-- `src/screens/extras/GramaticaTemaScreen.tsx:169` — (discutible) única acción de la pantalla y es `ghost`
+- (ninguno)
 
 
-Descartados tras leer el render (tienen 2 o más `primary`, pero **nunca conviven en pantalla**):
+Descartados tras leer el render (no son hallazgo):
 - `src/screens/extras/LecturaScreen.tsx` — la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)
 - `src/screens/games/CazalaScreen.tsx` — `checked ? Siguiente : Revisar`
 - `src/screens/games/GameEndScreen.tsx` — `nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos
+- `src/screens/utility/DownloadsScreen.tsx` — lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`
 - `src/screens/entry/OnboardingScreen.tsx` — un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes
 
 **ACC-3 · Menos opciones (Ley de Hick).** `PracticeScreen` (la pestaña de inicio) pinta **16 modos** como tarjetas de la misma jerarquía.
@@ -302,12 +300,8 @@ Sin carga: 13 de 21 · sin vacío: 6 · sin error: 19.
 ## b) Texto cortado
 
 `numberOfLines={1}` en texto cuyo contenido importa (frases, traducciones, títulos, nombres). Se corta con "…" y el usuario no puede leer el resto:
-- `src/components/base/Header.tsx:30` — `{title}`
 - `src/components/base/Header.tsx:35` — `{subtitle}`
-- `src/components/list/EntryRow.tsx:110` — `{entry.phrase}`
-- `src/components/list/EntryRow.tsx:115` — `{entry.spanish_main}`
 - `src/screens/discover/ExploreScreen.tsx:104` — `{m.descripcion}`
-- `src/screens/games/DulcesScreen.tsx:593` — `{o.entry.phrase}`
 
 Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 
@@ -361,4 +355,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":4,"ACC-3":16,"MOV-1":0,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":0,"ACC-3":16,"MOV-1":0,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":2,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->

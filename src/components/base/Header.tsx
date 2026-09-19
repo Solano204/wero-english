@@ -27,7 +27,7 @@ export function Header({ title, subtitle, onBack, onClose, right }: Props) {
 
       <View style={styles.center}>
         {title ? (
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={2}>
             {title}
           </Text>
         ) : null}
@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
   sideRight: { width: undefined, minWidth: 56, alignItems: 'flex-end' },
   center: { flex: 1, alignItems: 'center' },
   title: {
+    textAlign: 'center',
     fontSize: font.size.lg,
     fontFamily: font.family.heading,
     color: color.text,
