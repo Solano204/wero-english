@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 150 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 152 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -141,7 +141,7 @@ Descartados (28 px o más, pero no son títulos):
 - `src/screens/games/DulcesScreen.tsx:702` — metas: gap: 6 = 6
 - `src/screens/games/DulcesScreen.tsx:705` — metaCuerpo: gap: 2 = 2
 - `src/screens/games/NivelesScreen.tsx:288` — estrellas: marginTop: 1 = 1
-- `src/screens/study/StudyScreen.tsx:257` — aciertosRow: gap: 6 = 6
+- `src/screens/study/StudyScreen.tsx:296` — aciertosRow: gap: 6 = 6
 - `src/screens/utility/ProgressScreen.tsx:160` — big: gap: 2 = 2
 - `src/screens/utility/ProgressScreen.tsx:176` — bars: gap: 3 = 3
 - `src/screens/utility/SettingsScreen.tsx:429` — hint: marginTop: 2 = 2
@@ -210,7 +210,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/EarModeScreen.tsx` | ✓ `:82` | ✓ `:187` | ✗ |
 | `extras/LecturaScreen.tsx` | ✗ | ✓ `:134` | ✗ |
 | `extras/LecturasScreen.tsx` | ✗ | ✓ `:137` | ✗ |
-| `extras/PracticeScreen.tsx` | ✗ | ✗ | ✓ `:70` |
+| `extras/PracticeScreen.tsx` | ✗ | ✗ | ✓ `:92` |
 | `games/CaidaScreen.tsx` | ✓ `:100` | ✓ `:360` | ✗ |
 | `games/CazalaScreen.tsx` | ✗ | ✓ `:135` | ✗ |
 | `games/ColmenaScreen.tsx` | ✓ `:107` | ✓ `:311` | ✗ |
@@ -253,7 +253,7 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:292` — key por índice
 
-Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `extras/PracticeScreen.tsx` 9, `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 13, `games/ParesScreen.tsx` 10.
+Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `extras/PracticeScreen.tsx` 10, `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 13, `games/ParesScreen.tsx` 10.
 
 ## d) Audio
 

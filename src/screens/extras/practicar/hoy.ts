@@ -30,18 +30,24 @@ export const NUM_DESTACADOS = 3;
 
 export type Uso = Partial<Record<ModoId, UsoModo>>;
 
-export type MotivoHoy = 'atoradas' | 'ultimo' | 'nuevo';
+export type MotivoHoy = 'vencidas' | 'atoradas' | 'ultimo' | 'nuevo';
 
 /**
  * Lo que toca hoy, con lo que la app ya guarda:
- *  1. hay frases atoradas → "Se me atoran";
- *  2. si no, el último modo que dejó registro;
- *  3. si no hay historial, Frases al azar (Study).
+ *  1. hay repasos vencidos → Study ("Repasar N frases");
+ *  2. si no, hay frases atoradas → "Se me atoran";
+ *  3. si no, el último modo que dejó registro;
+ *  4. si no hay historial, Study.
  *
- * No hay paso de "repasos vencidos": Study elige frases al azar y no
- * consume la cola SM-2, así que "Repasar N" prometería algo que no pasa.
+ * `vencidas` sale de countDue con la misma definición que usa Study al
+ * armar la sesión, así que lo que se ofrece es lo que se sirve.
  */
-export function elegirHoy(atoradas: number, uso: Uso): { modo: ModoId; motivo: MotivoHoy } {
+export function elegirHoy(
+  vencidas: number,
+  atoradas: number,
+  uso: Uso
+): { modo: ModoId; motivo: MotivoHoy } {
+  if (vencidas > 0) return { modo: 'study', motivo: 'vencidas' };
   if (atoradas > 0) return { modo: 'atoran', motivo: 'atoradas' };
   let ultimo: ModoId | null = null;
   for (const id of ORDEN) {

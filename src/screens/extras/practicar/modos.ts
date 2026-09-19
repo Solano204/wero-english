@@ -28,8 +28,8 @@ export interface Modo {
 /** Los 17 destinos de Practicar. El orden de aparición sale de `ORDEN` en hoy.ts. */
 export const MODOS: Record<ModoId, Modo> = {
   study: {
-    titulo: 'Frases al azar',
-    cuerpo: 'Doce frases sueltas del catálogo, en unos tres minutos',
+    titulo: 'Estudiar',
+    cuerpo: 'Tus repasos del día y frases nuevas, en unos tres minutos',
     arte: 'azar',
     grupo: 'leer',
     ir: (nav) => nav.navigate('Study', undefined),

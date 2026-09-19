@@ -6,7 +6,8 @@ import { Button, Card, ProgressBar, Screen } from '@/components/base';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
 import { getRecentDays } from '@/db/progress';
-import { getStats } from '@/db/queries';
+import { countDue, getStats } from '@/db/queries';
+import { filtroEstudio } from '@/domain/cola';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { PORTADA_JUEGO, color, font, radius, shadow, space, text } from '@/theme';
@@ -22,7 +23,19 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 type Resumen = Awaited<ReturnType<typeof getStats>>;
 
 /** El botón de HOY dice qué va a pasar al tocarlo. */
-function etiquetaHoy(motivo: MotivoHoy, modo: ModoId, atoradas: number): string {
+function etiquetaHoy(
+  motivo: MotivoHoy,
+  modo: ModoId,
+  atoradas: number,
+  vencidas: number,
+  meta: number
+): string {
+  if (motivo === 'vencidas') {
+    // El botón lleva lo que cabe en una sesión; el total pendiente va aparte.
+    const n = Math.min(vencidas, meta);
+    return `Repasar ${n} ${n === 1 ? 'frase' : 'frases'}`;
+  }
+  if (motivo === 'ultimo' && modo === 'study') return 'Seguir estudiando';
   if (motivo === 'atoradas') return `Corregir ${atoradas} ${atoradas === 1 ? 'error' : 'errores'}`;
   if (motivo === 'ultimo') return `Seguir con ${MODOS[modo].titulo}`;
   return 'Empezar';
@@ -40,6 +53,8 @@ export function PracticeScreen() {
   const user = useAuthStore((s) => s.user);
   const abiertos = useSettingsStore((s) => s.practicarGruposAbiertos);
   const guardarAjuste = useSettingsStore((s) => s.set);
+  const filter = useSettingsStore((s) => s.filter);
+  const metaDiaria = useSettingsStore((s) => s.metaDiaria);
 
   const [records, setRecords] = useState<Record<string, JuegoRecord>>({});
   const [reto, setReto] = useState<RetoSemanal | null>(null);
@@ -50,6 +65,7 @@ export function PracticeScreen() {
   const [stats, setStats] = useState<Resumen | null>(null);
   const [uso, setUso] = useState<Uso>({});
   const [hoyFrases, setHoyFrases] = useState(0);
+  const [vencidas, setVencidas] = useState(0);
   // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
   // el caso "usuario nuevo" un instante y luego saltaría a otro.
   const [listo, setListo] = useState(false);
@@ -61,24 +77,31 @@ export function PracticeScreen() {
       void getRetoSemanal(user.id).then(setReto);
       void getHablaResumen(user.id).then(setHabla);
       void resumenTodos(user.id).then(setNiveles);
-      void Promise.all([getStats(user.id), getUsoModos(user.id), getRecentDays(user.id, 1)])
-        .then(([s, u, dias]) => {
+      void Promise.all([
+        getStats(user.id),
+        getUsoModos(user.id),
+        getRecentDays(user.id, 1),
+        countDue(user.id, filtroEstudio(filter())),
+      ])
+        .then(([s, u, dias, venc]) => {
           setStats(s);
           setUso(u);
+          setVencidas(venc);
           setHoyFrases(dias[0]?.dia === dayKey() ? dias[0].respuestas : 0);
         })
         .catch((err) => console.warn('[Practicar] no se pudo leer el progreso', err))
         .finally(() => setListo(true));
-    }, [user])
+    }, [user, filter])
   );
 
   const atoradas = stats?.atoradas ?? 0;
   const racha = stats?.racha ?? 0;
-  const hoy = elegirHoy(atoradas, uso);
+  const hoy = elegirHoy(vencidas, atoradas, uso);
   const destacados = elegirDestacados(uso, hoy.modo);
   const modoHoy = MODOS[hoy.modo];
 
   const datoHoy = [
+    hoy.motivo === 'vencidas' && vencidas > metaDiaria ? `Tienes ${vencidas} pendientes` : null,
     hoyFrases > 0 ? `Llevas ${hoyFrases} ${hoyFrases === 1 ? 'frase' : 'frases'} hoy` : null,
     racha > 0 ? `Racha: ${racha} ${racha === 1 ? 'día' : 'días'}` : null,
   ]
@@ -140,7 +163,7 @@ export function PracticeScreen() {
                 <Text style={styles.hoyCuerpo}>{modoHoy.cuerpo}</Text>
               </View>
               <Button
-                label={etiquetaHoy(hoy.motivo, hoy.modo, atoradas)}
+                label={etiquetaHoy(hoy.motivo, hoy.modo, atoradas, vencidas, metaDiaria)}
                 size="lg"
                 full
                 onPress={() => modoHoy.ir(nav)}

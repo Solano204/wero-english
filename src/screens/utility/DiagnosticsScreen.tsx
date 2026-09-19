@@ -6,6 +6,9 @@ import { Card, Header, Icon, Screen } from '@/components/base';
 import { contentHealth } from '@/store/content';
 import { BUNDLED_COUNT } from '@/assets/bundled';
 import { countEntries } from '@/db/seed';
+import { getDiagnosticoCola } from '@/db/queries';
+import { filtroEstudio } from '@/domain/cola';
+import { useAuthStore, useSettingsStore } from '@/store';
 import * as downloads from '@/services/downloads';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
@@ -22,12 +25,16 @@ export function DiagnosticsScreen() {
   const nav = useNavigation<Nav>();
   const [enDb, setEnDb] = useState(0);
   const [mb, setMb] = useState(0);
+  const [cola, setCola] = useState<{ vencidas: number; aprendizaje: number; fantasma: number } | null>(null);
+  const user = useAuthStore((s) => s.user);
+  const filter = useSettingsStore((s) => s.filter);
   const health = contentHealth();
 
   useEffect(() => {
     void countEntries().then(setEnDb);
     setMb(downloads.mediaSize() / 1_048_576);
-  }, []);
+    if (user) void getDiagnosticoCola(user.id, filtroEstudio(filter())).then(setCola);
+  }, [user, filter]);
 
   return (
     <Screen scroll>
@@ -52,6 +59,10 @@ export function DiagnosticsScreen() {
         <Line label="Entradas en la base" value={String(enDb)} />
         <Line label="Medios en el binario" value={String(BUNDLED_COUNT)} />
         <Line label="Medios descargados" value={`${mb.toFixed(1)} MB`} />
+        <Line
+          label="Cola de repaso: vencidas / de aprendizaje / fantasma"
+          value={cola ? `${cola.vencidas} / ${cola.aprendizaje} / ${cola.fantasma}` : '…'}
+        />
       </Card>
     </Screen>
   );
@@ -85,7 +96,7 @@ const styles = StyleSheet.create({
   count: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   summary: { marginTop: space.lg, gap: space.sm },
   line: { flexDirection: 'row', justifyContent: 'space-between' },
-  lineLabel: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  lineLabel: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   lineValue: {
     fontSize: font.size.sm,
     color: color.text,
