@@ -18,7 +18,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const SALIDA = path.join(ROOT, 'DESIGN-AUDIT.md');
 
 // ── valores de los tokens (src/theme/tokens.ts). Si cambian, se actualizan aquí ──
-const FS = { xs: 12, sm: 13, md: 15, lg: 18, xl: 22, xxl: 28, display: 34 };
+const FS = { xs: 12, sm: 13, md: 16, lg: 18, xl: 22, xxl: 28, display: 34 };
 const SP = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 };
 const RA = { sm: 14, md: 20, lg: 28, xl: 36, pill: 999 };
 const ESCALA = new Set([0, 4, 8, 12, 16, 24, 32, 48]);
@@ -48,6 +48,26 @@ const ACC1_REALES = [
   { archivo: 'src/screens/extras/ErrorDetailScreen.tsx', patron: /Ver la frase completa/, motivo: () => 'única acción de la pantalla y es `secondary`' },
   { archivo: 'src/screens/extras/GramaticaTemaScreen.tsx', patron: /Escuchar todos/, motivo: () => '(discutible) única acción de la pantalla y es `ghost`' },
 ];
+
+/** TIPO-2: textos de 12–13 px con nombre de cuerpo que se quedan así, revisados a mano. */
+const TIPO2_SE_QUEDAN = {
+  'src/components/base/Ads.tsx:fullNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/entry/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/entry/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/screens/extras/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/games/ColmenaScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/games/CaidaScreen.tsx:finNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/games/CaidaScreen.tsx:siguienteTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/screens/games/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/games/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/games/DulcesScreen.tsx:pieNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/games/DulcesScreen.tsx:metaFrase': 'etiqueta de una línea (metadato o chip)',
+  'src/screens/games/DulcesScreen.tsx:seguirTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/screens/extras/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/screens/extras/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/screens/utility/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/screens/games/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+};
 
 /** TIPO-4: estilos de 28 px o más que no son títulos, revisados a mano. */
 const TIPO4_NO_ES_TITULO = {
@@ -187,7 +207,7 @@ function contrastes(tokens) {
 
 // ── auditoría estática ───────────────────────────────────────────────────
 function auditaEstatica(archivos) {
-  const H = { gradiente: [], fuente: [], cuerpoMd: [], cuerpoSm: [], cuerpoSmResto: new Map(), titulo: [], tipo4Descartados: [], lineHeight: [], espacio: [], tactil: [], sombra: [], propio: [], emoji: [], glifo: [], botones: [] };
+  const H = { gradiente: [], fuente: [], cuerpoMd: [], cuerpoSm: [], cuerpoDescartado: [], cuerpoSmResto: new Map(), titulo: [], tipo4Descartados: [], lineHeight: [], espacio: [], tactil: [], sombra: [], propio: [], emoji: [], glifo: [], botones: [] };
   for (const { r, src, lines } of archivos) {
     const enTema = r.startsWith('src/theme/');
     lines.forEach((l, i) => {
@@ -215,7 +235,11 @@ function evaluaEstilo(e, r, enTema, H) {
   if (fsz && tam !== null && !enTema && tam < 16) {
     const item = { r, linea: fsz.linea, txt: `${e.nombre}: fontSize ${fsz.v.replace(/font\.size\./, '')} = ${tam}` };
     if (tam === 15) H.cuerpoMd.push(item);
-    else if (CUERPO.test(e.nombre)) H.cuerpoSm.push(item);
+    else if (CUERPO.test(e.nombre)) {
+      const motivo = TIPO2_SE_QUEDAN[`${r}:${e.nombre}`];
+      if (motivo) H.cuerpoDescartado.push({ ...item, txt: `${item.txt} — ${motivo}` });
+      else H.cuerpoSm.push(item);
+    }
     else H.cuerpoSmResto.set(r, (H.cuerpoSmResto.get(r) || 0) + 1);
   }
   if (fsz && tam !== null && tam >= 28) {
@@ -441,7 +465,7 @@ function conteoPorRegla(ctx) {
     ['COLOR-3', 'colores sin escala 50–900', ctx.sinEscala ? 1 : 0],
     ['COLOR-4', 'pares texto/superficie bajo AA', C.fallos.length],
     ['TIPO-1', 'familias: fuente del sistema, `CharisSIL` sin cargar, `monospace`', ctx.tipo1],
-    ['TIPO-2', 'cuerpo < 16 px (token `md` = 15 y estilos de cuerpo en 13/12)', H.cuerpoMd.length + H.cuerpoSm.length],
+    ['TIPO-2', 'cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano)', H.cuerpoMd.length + H.cuerpoSm.length],
     ['TIPO-2b', 'line-height del cuerpo fuera de 1.4–1.6', H.lineHeight.length],
     ['TIPO-4', 'títulos ≥ 28 px sin letterSpacing negativo', H.titulo.length],
     ['ESP-1', 'espaciado fuera de 4/8', H.espacio.length],
@@ -483,11 +507,11 @@ ${c.C.fallos.map((f) => `- \`${f.t}\` sobre \`${f.s}\`: ${f.v.toFixed(2)}`).join
 **TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), cargadas en \`App.tsx\` con \`useFonts\` (\`src/theme/fuentes.ts\`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
 ${L(c.H.fuente)}
 
-**TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo \`font.size.md\` vale **15** (\`tokens.ts:305\`) y \`text.body\` y \`text.bodyMuted\` lo usan (\`typography.ts:29-40\`). Usos de \`md\` (${c.H.cuerpoMd.length}):
-${L(c.H.cuerpoMd)}
+**TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo \`font.size.md\` vale **16** (\`tokens.ts\`) y \`text.body\` y \`text.bodyMuted\` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (${c.H.cuerpoMd.length + c.H.cuerpoSm.length}):
+${L([...c.H.cuerpoMd, ...c.H.cuerpoSm])}
 
-Estilos de cuerpo o descripción en \`sm\` (13) o \`xs\` (12) (${c.H.cuerpoSm.length}):
-${L(c.H.cuerpoSm)}
+Se quedan en 12–13 px, revisados a mano (${c.H.cuerpoDescartado.length}):
+${L(c.H.cuerpoDescartado)}
 
 Otros \`fontSize\` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): ${[...c.H.cuerpoSmResto.entries()].sort((a, b) => b[1] - a[1]).map(([r, n]) => `\`${r}\` ${n}`).join(', ')}.
 

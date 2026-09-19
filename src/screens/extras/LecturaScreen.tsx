@@ -301,7 +301,8 @@ const styles = StyleSheet.create({
   leyendaTexto: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   introPreguntas: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
     color: color.textMuted,
     marginBottom: space.md,
   },
@@ -325,6 +326,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.correctSoft,
   },
   opcionMal: { borderColor: color.wrong, backgroundColor: color.wrongSoft },
-  opcionTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.text },
-  porque: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
+  porque: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
 });

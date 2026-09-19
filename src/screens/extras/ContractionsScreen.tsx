@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   tabText: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   tabTextOn: { color: color.accent, fontFamily: font.family.bodyStrong },
 
-  desc: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, marginTop: space.xs },
+  desc: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted, marginTop: space.xs },
   list: { gap: space.sm, marginTop: space.md },
   cargando: { minHeight: 200, alignItems: 'center', justifyContent: 'center' },
   item: { gap: space.sm },

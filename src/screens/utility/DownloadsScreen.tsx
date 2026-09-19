@@ -159,9 +159,9 @@ export function DownloadsScreen() {
 const styles = StyleSheet.create({
   intro: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.textMuted,
-    lineHeight: font.size.sm * 1.6,
+    lineHeight: font.size.md * 1.6,
     marginBottom: space.lg,
   },
   list: { gap: space.sm },

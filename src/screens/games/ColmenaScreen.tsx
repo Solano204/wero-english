@@ -593,7 +593,8 @@ const styles = StyleSheet.create({
   },
   fraseEs: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
     color: color.textMuted,
     textAlign: 'center',
   },

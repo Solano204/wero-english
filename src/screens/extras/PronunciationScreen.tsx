@@ -418,9 +418,9 @@ const styles = StyleSheet.create({
   },
   sectionBody: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.text,
-    lineHeight: font.size.sm * 1.6,
+    lineHeight: font.size.md * 1.6,
   },
 
   words: { gap: space.sm },

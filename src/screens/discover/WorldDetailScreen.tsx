@@ -104,6 +104,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tag: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.correct },
-  desc: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  desc: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
 });

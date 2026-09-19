@@ -370,9 +370,9 @@ const styles = StyleSheet.create({
   },
   porQue: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.textMuted,
-    lineHeight: font.size.sm * 1.55,
+    lineHeight: font.size.md * 1.55,
     marginTop: space.xs,
   },
   ojo: { backgroundColor: color.accentSoft, borderRadius: radius.lg },

@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family.bodyStrong,
     color: color.riskWarn,
   },
-  avisoTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  avisoTexto: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   acciones: { gap: space.sm, marginTop: space.lg },
   marca: {
     width: 48,

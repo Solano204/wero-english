@@ -220,9 +220,9 @@ const styles = StyleSheet.create({
   },
   nota: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.textMuted,
-    lineHeight: font.size.sm * 1.5,
+    lineHeight: font.size.md * 1.5,
   },
   actions: {
     flexDirection: 'row',

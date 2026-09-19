@@ -163,6 +163,6 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   check: { color: color.correct, fontFamily: font.family.body, fontSize: font.size.md },
-  spanish: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  spanish: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
   badges: { flexDirection: 'row', gap: space.xs, marginTop: 2 },
 });

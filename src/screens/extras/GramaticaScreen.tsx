@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   bloqueNum: { fontSize: font.size.sm, color: color.accent, fontFamily: font.family.bodyStrong },
-  bloqueResumen: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, lineHeight: font.size.sm * 1.5 },
+  bloqueResumen: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted, lineHeight: font.size.sm * 1.5 },
   /*
    * Los temas van sangrados y con su propio aire. La sangria dice que
    * cuelgan del bloque; el margen evita que se peguen entre ellos.
@@ -154,5 +154,5 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   temaNivel: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  temaGancho: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, lineHeight: font.size.sm * 1.45 },
+  temaGancho: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted, lineHeight: font.size.sm * 1.45 },
 });

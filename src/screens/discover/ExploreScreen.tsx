@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   worldCount: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  worldDesc: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  worldDesc: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   results: { gap: space.sm },
   none: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md, marginTop: space.md },
 });

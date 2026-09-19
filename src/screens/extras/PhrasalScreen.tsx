@@ -149,7 +149,8 @@ function Forma({ v }: { v: PhrasalVerb }) {
 const styles = StyleSheet.create({
   intro: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
     color: color.textMuted,
     marginBottom: space.lg,
   },
@@ -197,10 +198,11 @@ const styles = StyleSheet.create({
     color: color.text,
     fontStyle: 'italic',
   },
-  traduccion: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  traduccion: { flex: 1, fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   nota: {
     fontFamily: font.family.body,
-    fontSize: font.size.xs,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
     color: color.textFaint,
     marginTop: space.xs,
   },

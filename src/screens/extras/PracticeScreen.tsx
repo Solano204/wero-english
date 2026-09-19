@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     color: color.text,
     marginBottom: 4,
   },
-  repasoBody: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  repasoBody: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   nota: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   itemExtra: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  itemBody: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  itemBody: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   reto: { gap: space.sm },
   retoTop: {
     flexDirection: 'row',
@@ -348,5 +348,5 @@ const styles = StyleSheet.create({
     fontFamily: font.family.bodyStrong,
     color: color.accent,
   },
-  retoBody: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  retoBody: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
 });

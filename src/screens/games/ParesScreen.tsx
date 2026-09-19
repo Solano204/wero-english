@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   fichaTexto: {
     color: color.text,
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     textAlign: 'center',
   },
   pie: {

@@ -303,7 +303,7 @@ export const font = {
     // real (text.tiny, pestañas, insignias): no un tamaño decorativo.
     xs: 12,
     sm: 13,
-    md: 15,
+    md: 16,
     lg: 18,
     xl: 22,
     xxl: 28,

@@ -30,7 +30,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | COLOR-3 | colores sin escala 50–900 | 1 |
 | COLOR-4 | pares texto/superficie bajo AA | 8 |
 | TIPO-1 | familias: fuente del sistema, `CharisSIL` sin cargar, `monospace` | 0 |
-| TIPO-2 | cuerpo < 16 px (token `md` = 15 y estilos de cuerpo en 13/12) | 120 |
+| TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 0 |
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 1 |
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
 | ESP-1 | espaciado fuera de 4/8 | 35 |
@@ -85,129 +85,26 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 **TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de `font.family` (`tokens.ts`), cargadas en `App.tsx` con `useFonts` (`src/theme/fuentes.ts`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un `fontFamily` que no salga de `font.family`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de `font.family`:
 - (ninguno)
 
-**TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo `font.size.md` vale **15** (`tokens.ts:305`) y `text.body` y `text.bodyMuted` lo usan (`typography.ts:29-40`). Usos de `md` (76):
-- `src/components/base/Ads.tsx:186` — fullCerrar: fontSize md = 15
-- `src/components/base/Button.tsx:178` — label: fontSize md = 15
-- `src/components/base/EmptyState.tsx:48` — body: fontSize md = 15
-- `src/components/base/ErrorBoundary.tsx:70` — body: fontSize md = 15
-- `src/components/base/Input.tsx:97` — input: fontSize md = 15
-- `src/components/card/AudioButton.tsx:116` — icon: fontSize md = 15
-- `src/components/card/OptionButton.tsx:169` — label: fontSize md = 15
-- `src/components/card/PhraseBlock.tsx:80` — ipa: fontSize md = 15
-- `src/components/card/TileBuilder.tsx:191` — fichaTexto: fontSize md = 15
-- `src/components/card/TileBuilder.tsx:194` — fichaTextoPuesta: fontSize md = 15
-- `src/components/card/TileBuilder.tsx:218` — revisarTexto: fontSize md = 15
-- `src/components/list/EntryRow.tsx:161` — phrase: fontSize md = 15
-- `src/components/list/EntryRow.tsx:165` — check: fontSize md = 15
-- `src/components/unlock/MuroDesbloqueo.tsx:151` — detalle: fontSize md = 15
-- `src/screens/discover/DetailScreen.tsx:168` — warnBody: fontSize md = 15
-- `src/screens/discover/DetailScreen.tsx:182` — blockBody: fontSize md = 15
-- `src/screens/discover/ExploreScreen.tsx:145` — none: fontSize md = 15
-- `src/screens/discover/PackDetailScreen.tsx:93` — empty: fontSize md = 15
-- `src/screens/entry/AuthScreen.tsx:132` — tagline: fontSize md = 15
-- `src/screens/entry/BootScreen.tsx:110` — step: fontSize md = 15
-- `src/screens/entry/BootScreen.tsx:115` — error: fontSize md = 15
-- `src/screens/entry/OnboardingScreen.tsx:457` — bajada: fontSize md = 15
-- `src/screens/entry/OnboardingScreen.tsx:469` — opcionTexto: fontSize md = 15
-- `src/screens/entry/OnboardingScreen.tsx:473` — previaTexto: fontSize md = 15
-- `src/screens/entry/OnboardingScreen.tsx:496` — avisoTitulo: fontSize md = 15
-- `src/screens/extras/AzarScreen.tsx:363` — cargando: fontSize md = 15
-- `src/screens/extras/ContractionsScreen.tsx:184` — spoken: fontSize md = 15
-- `src/screens/extras/ErrorDetailScreen.tsx:132` — understoodText: fontSize md = 15
-- `src/screens/extras/ErrorDetailScreen.tsx:154` — whyBody: fontSize md = 15
-- `src/screens/extras/ErrorsScreen.tsx:129` — cross: fontSize md = 15
-- `src/screens/extras/ErrorsScreen.tsx:130` — check: fontSize md = 15
-- `src/screens/extras/ErrorsScreen.tsx:133` — bad: fontSize md = 15
-- `src/screens/extras/ErrorsScreen.tsx:140` — good: fontSize md = 15
-- `src/screens/extras/GramaticaScreen.tsx:116` — intro: fontSize md = 15
-- `src/screens/extras/GramaticaScreen.tsx:152` — temaTitulo: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:308` — gancho: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:324` — parrafo: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:346` — es: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:350` — contrasteTxt: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:356` — mal: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:357` — bien: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:361` — malTxt: fontSize md = 15
-- `src/screens/extras/GramaticaTemaScreen.tsx:367` — bienTxt: fontSize md = 15
-- `src/screens/extras/LecturaScreen.tsx:310` — preguntaTexto: fontSize md = 15
-- `src/screens/extras/MinimalPairsScreen.tsx:269` — significado: fontSize md = 15
-- `src/screens/extras/MinimalPairsScreen.tsx:285` — resultadoTitulo: fontSize md = 15
-- `src/screens/extras/PhrasalScreen.tsx:187` — significado: fontSize md = 15
-- `src/screens/extras/PhrasalScreen.tsx:196` — ejemplo: fontSize md = 15
-- `src/screens/extras/PracticeScreen.tsx:328` — itemTitle: fontSize md = 15
-- `src/screens/extras/PracticeScreen.tsx:342` — retoTitle: fontSize md = 15
-- `src/screens/extras/PracticeScreen.tsx:347` — retoNum: fontSize md = 15
-- `src/screens/extras/PronunciationScreen.tsx:403` — name: fontSize md = 15
-- `src/screens/extras/PronunciationScreen.tsx:430` — wordEn: fontSize md = 15
-- `src/screens/extras/PronunciationScreen.tsx:447` — pairWord: fontSize md = 15
-- `src/screens/games/CaidaScreen.tsx:566` — fichaTexto: fontSize md = 15
-- `src/screens/games/CaidaScreen.tsx:591` — finLabel: fontSize md = 15
-- `src/screens/games/CaidaScreen.tsx:608` — finBien: fontSize md = 15
-- `src/screens/games/CaidaScreen.tsx:621` — loading: fontSize md = 15
-- `src/screens/games/CaidaScreen.tsx:652` — overlayEs: fontSize md = 15
-- `src/screens/games/CazalaScreen.tsx:261` — spanish: fontSize md = 15
-- `src/screens/games/ColmenaScreen.tsx:535` — escucharTexto: fontSize md = 15
-- `src/screens/games/ColmenaScreen.tsx:613` — loading: fontSize md = 15
-- `src/screens/games/DulcesScreen.tsx:769` — opcionTexto: fontSize md = 15
-- `src/screens/games/DulcesScreen.tsx:778` — loading: fontSize md = 15
-- `src/screens/games/GameEndScreen.tsx:232` — sub: fontSize md = 15
-- `src/screens/games/GameEndScreen.tsx:248` — repasoTexto: fontSize md = 15
-- `src/screens/games/NivelesScreen.tsx:253` — bandaNombre: fontSize md = 15
-- `src/screens/games/NivelesScreen.tsx:282` — celdaNum: fontSize md = 15
-- `src/screens/games/ParesScreen.tsx:447` — overlayEs: fontSize md = 15
-- `src/screens/games/ParesScreen.tsx:518` — loading: fontSize md = 15
-- `src/screens/study/StudyScreen.tsx:282` — loading: fontSize md = 15
-- `src/screens/utility/DiagnosticsScreen.tsx:84` — dot: fontSize md = 15
-- `src/screens/utility/DownloadsScreen.tsx:172` — name: fontSize md = 15
-- `src/screens/utility/ProgressScreen.tsx:189` — rowLabel: fontSize md = 15
-- `src/screens/utility/ProgressScreen.tsx:191` — rowValue: fontSize md = 15
-- `src/screens/utility/SettingsScreen.tsx:428` — label: fontSize md = 15
+**TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo `font.size.md` vale **16** (`tokens.ts`) y `text.body` y `text.bodyMuted` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (0):
+- (ninguno)
 
-Estilos de cuerpo o descripción en `sm` (13) o `xs` (12) (44):
-- `src/components/base/Ads.tsx:181` — fullNota: fontSize sm = 13
-- `src/components/card/FeedbackBand.tsx:223` — nota: fontSize sm = 13
-- `src/components/list/EntryRow.tsx:166` — spanish: fontSize sm = 13
-- `src/screens/discover/ExploreScreen.tsx:143` — worldDesc: fontSize sm = 13
-- `src/screens/discover/WorldDetailScreen.tsx:107` — desc: fontSize sm = 13
-- `src/screens/entry/OnboardingScreen.tsx:470` — nota: fontSize xs = 12
-- `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13
-- `src/screens/entry/OnboardingScreen.tsx:500` — avisoTexto: fontSize sm = 13
-- `src/screens/extras/AzarScreen.tsx:340` — nota: fontSize sm = 13
-- `src/screens/extras/ContractionsScreen.tsx:172` — desc: fontSize sm = 13
-- `src/screens/extras/GramaticaScreen.tsx:138` — bloqueResumen: fontSize sm = 13
-- `src/screens/extras/GramaticaScreen.tsx:157` — temaGancho: fontSize sm = 13
-- `src/screens/extras/GramaticaTemaScreen.tsx:373` — porQue: fontSize sm = 13
-- `src/screens/extras/LecturaScreen.tsx:301` — leyendaTexto: fontSize xs = 12
-- `src/screens/extras/LecturaScreen.tsx:304` — introPreguntas: fontSize sm = 13
-- `src/screens/extras/LecturaScreen.tsx:328` — opcionTexto: fontSize sm = 13
-- `src/screens/extras/LecturaScreen.tsx:329` — porque: fontSize sm = 13
-- `src/screens/extras/LecturasScreen.tsx:209` — intro: fontSize sm = 13
-- `src/screens/extras/LecturasScreen.tsx:231` — difTexto: fontSize xs = 12
-- `src/screens/extras/MinimalPairsScreen.tsx:277` — contrasteTexto: fontSize sm = 13
-- `src/screens/extras/MinimalPairsScreen.tsx:288` — resultadoCuerpo: fontSize sm = 13
-- `src/screens/extras/PhrasalScreen.tsx:152` — intro: fontSize sm = 13
-- `src/screens/extras/PhrasalScreen.tsx:200` — traduccion: fontSize sm = 13
-- `src/screens/extras/PhrasalScreen.tsx:203` — nota: fontSize xs = 12
-- `src/screens/extras/PracticeScreen.tsx:312` — repasoBody: fontSize sm = 13
-- `src/screens/extras/PracticeScreen.tsx:315` — nota: fontSize xs = 12
-- `src/screens/extras/PracticeScreen.tsx:334` — itemBody: fontSize sm = 13
-- `src/screens/extras/PracticeScreen.tsx:351` — retoBody: fontSize sm = 13
-- `src/screens/extras/PronunciationScreen.tsx:421` — sectionBody: fontSize sm = 13
-- `src/screens/games/CaidaScreen.tsx:612` — finNota: fontSize xs = 12
-- `src/screens/games/CaidaScreen.tsx:659` — siguienteTexto: fontSize sm = 13
-- `src/screens/games/ColmenaScreen.tsx:596` — fraseEs: fontSize sm = 13
-- `src/screens/games/ColmenaScreen.tsx:608` — nota: fontSize xs = 12
-- `src/screens/games/DulcesScreen.tsx:705` — metaFrase: fontSize xs = 12
-- `src/screens/games/DulcesScreen.tsx:728` — pieNota: fontSize xs = 12
-- `src/screens/games/DulcesScreen.tsx:773` — seguirTexto: fontSize sm = 13
-- `src/screens/games/GameEndScreen.tsx:243` — estrellasNota: fontSize xs = 12
-- `src/screens/games/GameEndScreen.tsx:249` — repasoNota: fontSize xs = 12
-- `src/screens/games/ParesScreen.tsx:454` — saltarTexto: fontSize sm = 13
-- `src/screens/games/ParesScreen.tsx:502` — fichaTexto: fontSize sm = 13
-- `src/screens/utility/DiagnosticsScreen.tsx:72` — intro: fontSize sm = 13
-- `src/screens/utility/DownloadsScreen.tsx:162` — intro: fontSize sm = 13
-- `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13
-- `src/screens/utility/StuckScreen.tsx:78` — intro: fontSize sm = 13
+Se quedan en 12–13 px, revisados a mano (16):
+- `src/components/base/Ads.tsx:181` — fullNota: fontSize sm = 13 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/entry/OnboardingScreen.tsx:470` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
+- `src/screens/extras/LecturaScreen.tsx:301` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/extras/LecturasScreen.tsx:232` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/extras/PracticeScreen.tsx:315` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/CaidaScreen.tsx:612` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/CaidaScreen.tsx:659` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/ColmenaScreen.tsx:609` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:705` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/games/DulcesScreen.tsx:728` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:773` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/GameEndScreen.tsx:243` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/GameEndScreen.tsx:249` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/ParesScreen.tsx:454` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
 Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/components/unlock/CandadoBadge.tsx` 2, `src/components/unlock/MuroDesbloqueo.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/feedback/Toast.tsx` 1, `src/components/list/EntryRow.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/PracticeScreen.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
 
@@ -250,8 +147,8 @@ Descartados (28 px o más, pero no son títulos):
 - `src/screens/extras/ErrorsScreen.tsx:129` — cross: marginTop: 1 = 1
 - `src/screens/extras/ErrorsScreen.tsx:130` — check: marginTop: 1 = 1
 - `src/screens/extras/ErrorsScreen.tsx:149` — understood: marginLeft: space.lg + space.xs = 20
-- `src/screens/extras/LecturasScreen.tsx:229` — meta: marginTop: 2 = 2
-- `src/screens/extras/PhrasalScreen.tsx:172` — forma: gap: 3 = 3
+- `src/screens/extras/LecturasScreen.tsx:230` — meta: marginTop: 2 = 2
+- `src/screens/extras/PhrasalScreen.tsx:173` — forma: gap: 3 = 3
 - `src/screens/extras/PronunciationScreen.tsx:445` — pairSide: gap: 2 = 2
 - `src/screens/games/DulcesScreen.tsx:701` — metas: gap: 6 = 6
 - `src/screens/games/DulcesScreen.tsx:704` — metaCuerpo: gap: 2 = 2
@@ -260,7 +157,7 @@ Descartados (28 px o más, pero no son títulos):
 - `src/screens/utility/ProgressScreen.tsx:160` — big: gap: 2 = 2
 - `src/screens/utility/ProgressScreen.tsx:176` — bars: gap: 3 = 3
 - `src/screens/utility/SettingsScreen.tsx:429` — hint: marginTop: 2 = 2
-- `src/screens/utility/StuckScreen.tsx:83` — slot: gap: 2 = 2
+- `src/screens/utility/StuckScreen.tsx:84` — slot: gap: 2 = 2
 
 ## JERARQUÍA Y ACCIÓN
 
@@ -291,7 +188,7 @@ Descartados tras leer el render (tienen 2 o más `primary`, pero **nunca convive
 Estilos interactivos con alto menor a 48 (verificar si llevan `hitSlop`):
 - `src/components/card/TileBuilder.tsx:171` — ficha: minHeight 42 = 42 dp
 - `src/screens/entry/OnboardingScreen.tsx:483` — chip: minHeight 44 = 44 dp
-- `src/screens/extras/LecturaScreen.tsx:315` — opcion: minHeight 46 = 46 dp
+- `src/screens/extras/LecturaScreen.tsx:316` — opcion: minHeight 46 = 46 dp
 - `src/screens/utility/SettingsScreen.tsx:417` — horaChip: minHeight 40 = 40 dp
 
 ## ANTI-LOOK-IA
@@ -477,4 +374,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":8,"TIPO-1":0,"TIPO-2":120,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":5,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":3,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":8,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":5,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":3,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->

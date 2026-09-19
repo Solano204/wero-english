@@ -274,7 +274,8 @@ const styles = StyleSheet.create({
   },
   contrasteTexto: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
     color: color.textMuted,
     textAlign: 'center',
   },
@@ -285,7 +286,7 @@ const styles = StyleSheet.create({
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,
   },
-  resultadoCuerpo: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  resultadoCuerpo: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   rendicion: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
