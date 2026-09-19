@@ -1,0 +1,616 @@
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import * as media from './media';
+import * as music from './music';
+
+/**
+ * Reproductor de audio.
+ *
+ * Un solo player reutilizado en vez de uno por sonido. Crear un player
+ * por reproducción filtra memoria nativa y en una sesión de 60 tarjetas
+ * con dos toques cada una la app se pone a tirones.
+ */
+
+let player: AudioPlayer | null = null;
+let ready = false;
+let currentPath: string | null = null;
+
+/**
+ * Token de reproducción vigente. Cada play()/playSlow() de frase saca
+ * uno nuevo; si al llegar a tocar el player el suyo ya no es el vigente
+ * (llegó un salto más nuevo mientras esperaba), aborta sin tocar nada.
+ * stop() también lo avanza, para invalidar lo que esté en camino.
+ */
+let reproduccionId = 0;
+
+/**
+ * Cola de reproducción de frases. Encadenar sobre esta promesa garantiza
+ * que nunca haya dos createAudioPlayer()/play() de frase en el aire a la
+ * vez: la siguiente reproducción espera a que la anterior termine de
+ * tocar el player (aunque haya abortado) antes de empezar la suya.
+ */
+let colaFrase: Promise<void> = Promise.resolve();
+
+/* ---------- efectos cortos ----------
+   Canal separado del player de frases: uno reproduce catálogo (rutas
+   variables, se resuelven con media.resolve), el otro sonidos fijos
+   empaquetados. Mezclarlos en el mismo player forzaría un resolve()
+   innecesario cada vez que pasa algo en un juego.
+
+   Cada efecto tiene SU PROPIO player, creado una sola vez y reutilizado
+   (máximo un player por efecto): así "tap" y "match" nunca se pisan
+   entre sí, y no hay que crear un player nativo en cada toque. */
+type SfxKey =
+  | 'success'
+  | 'fail'
+  | 'tap'
+  | 'combo'
+  | 'nivelCompleto'
+  | 'caidaPieza'
+  | 'pista';
+
+const SFX_SOURCES: Record<SfxKey, number> = {
+  success: require('../../assets/sfx/success.wav'),
+  fail: require('../../assets/sfx/fail.wav'),
+  tap: require('../../assets/sfx/tap.wav'),
+  combo: require('../../assets/sfx/combo.wav'),
+  nivelCompleto: require('../../assets/sfx/nivel_completo.wav'),
+  caidaPieza: require('../../assets/sfx/caida_pieza.wav'),
+  pista: require('../../assets/sfx/pista.wav'),
+};
+
+let sfxEnabled = true;
+const sfxPlayers = new Map<SfxKey, AudioPlayer>();
+const sfxUltimaVez = new Map<SfxKey, number>();
+
+/** Toques rápidos no saturan: por debajo de esto, el toque se ignora. */
+const SFX_THROTTLE_MS = 60;
+
+/** Interruptor de "sonidos de feedback" en ajustes. */
+export function setSfxEnabled(v: boolean): void {
+  sfxEnabled = v;
+}
+
+function sfxPlayerPara(key: SfxKey): AudioPlayer {
+  let p = sfxPlayers.get(key);
+  if (!p) {
+    p = createAudioPlayer(SFX_SOURCES[key]);
+    sfxPlayers.set(key, p);
+  }
+  return p;
+}
+
+export async function initAudio(): Promise<void> {
+  if (ready) return;
+  await setAudioModeAsync({
+    playsInSilentMode: true,
+    shouldPlayInBackground: false,
+    interruptionMode: 'doNotMix',
+  });
+  ready = true;
+
+  // Precarga los SFX una sola vez: así el primer tap de una partida no
+  // paga el costo de crear el player nativo, solo los siguientes toques
+  // lo reutilizan. Un efecto que no carga no debe tumbar la precarga de
+  // los demás (ni dejar `ready` en true sin haber intentado el resto).
+  for (const key of Object.keys(SFX_SOURCES) as SfxKey[]) {
+    try {
+      sfxPlayerPara(key);
+    } catch (err) {
+      console.warn('[audio] no se pudo precargar el efecto', key, err);
+    }
+  }
+}
+
+/**
+ * Resuelve, crea o reutiliza el player y reproduce a la velocidad pedida.
+ *
+ * Dos protecciones contra toques rápidos (p. ej. "Saltar" repetido):
+ *
+ * 1. Token: si mientras esta llamada esperaba (resolve, initAudio) llegó
+ *    una más nueva, se aborta sin tocar el player. Así de un salto de
+ *    diez toques solo la última tarjeta llega a sonar (o ninguna).
+ * 2. Cola: el trabajo real (resolver, crear o reutilizar el player,
+ *    reproducir) se encadena, nunca corre en paralelo con otra llamada.
+ *    Sin esto, dos createAudioPlayer() casi simultáneos podían dejar el
+ *    anterior sonando sin nadie que lo pausara ni lo liberara: voces
+ *    encimadas y, a la larga, el crash por memoria nativa reportado.
+ *
+ * La velocidad se fija SIEMPRE, se reutilice o se cree el player: es lo
+ * que evita que "Lento" se quede pegado al volver a "Escuchar".
+ */
+function reproducir(relPath: string | null, rate: number): Promise<boolean> {
+  if (!relPath) {
+    console.warn('[audio] play() llamado con relPath null');
+    return Promise.resolve(false);
+  }
+
+  const miId = ++reproduccionId;
+  let resultado = false;
+
+  colaFrase = colaFrase.then(async () => {
+    // Todo el paso va en un solo try/catch: si algo truena (incluso
+    // media.resolve), la cola sigue viva para la próxima reproducción.
+    // Un solo throw sin atrapar aquí dejaría `colaFrase` rechazada para
+    // siempre y ningún audio de frase volvería a sonar en la sesión.
+    try {
+      if (miId !== reproduccionId) return; // ya hay un toque más nuevo
+
+      const resolved = await media.resolve(relPath);
+      if (miId !== reproduccionId) return; // se saltó mientras resolvía
+
+      if (!resolved) {
+        console.warn('[audio] media.resolve() no encontró el archivo', relPath);
+        return;
+      }
+
+      await initAudio();
+      if (miId !== reproduccionId) return; // se saltó durante initAudio
+
+      if (player && currentPath === relPath) {
+        // Se reutiliza el mismo player: se detiene y rebobina antes de
+        // tocarle la velocidad o la posición.
+        try {
+          player.pause();
+        } catch {
+          /* sin consecuencia */
+        }
+        try {
+          await player.seekTo(0);
+        } catch {
+          // Si el dispositivo no puede rebobinar, se reproduce igual.
+        }
+      } else {
+        // Se pausa antes de soltarlo: remove() sin pausar puede dejar
+        // el sonido anterior terminando de salir mientras el nuevo ya
+        // empezó, que es justo el "voz encimada" reportado.
+        try {
+          player?.pause();
+        } catch {
+          /* sin consecuencia */
+        }
+        try {
+          player?.remove();
+        } catch {
+          /* sin consecuencia */
+        }
+        // Empaquetado: se le pasa el módulo de require() tal cual, igual que
+        // en darenow/app. Resolverlo primero a un `uri` vía Asset.downloadAsync()
+        // (como hacía antes) depende de bajar el archivo desde el packager y
+        // fallaba en silencio: el player se creaba con la URL del bundler en
+        // vez de un archivo local, y no sonaba nada.
+        player = createAudioPlayer(
+          resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri }
+        );
+        currentPath = relPath;
+      }
+
+      if (miId !== reproduccionId) return; // se saltó justo antes de sonar
+
+      try {
+        // 'high': corrige el tono al bajar la velocidad, para que "Lento"
+        // no suene grave además de lento.
+        player.setPlaybackRate(rate, 'high');
+      } catch {
+        // Si el dispositivo no soporta cambiar la velocidad, suena normal.
+      }
+
+      player.play();
+      resultado = true;
+      // Ducking: la música se agacha mientras suena esta voz y se
+      // recupera sola cuando isPlaying() diga que ya no hay nada
+      // sonando en el player de frases (por fin natural o por stop()).
+      void music.duck(true);
+      void waitUntilDone().then(() => music.duck(false));
+    } catch (err) {
+      console.warn('[audio] no se pudo reproducir', relPath, err);
+    }
+  });
+
+  return colaFrase.then(() => resultado);
+}
+
+/** Reproduce siempre a velocidad normal (1.0). */
+export function play(relPath: string | null): Promise<boolean> {
+  return reproducir(relPath, 1.0);
+}
+
+async function playSfx(key: SfxKey): Promise<void> {
+  if (!sfxEnabled) return;
+
+  const ahora = Date.now();
+  if (ahora - (sfxUltimaVez.get(key) ?? 0) < SFX_THROTTLE_MS) return;
+  sfxUltimaVez.set(key, ahora);
+
+  try {
+    await initAudio();
+
+    // Nunca encimado con la frase: el efecto la corta, no suena junto a ella.
+    stop();
+
+    const p = sfxPlayerPara(key);
+    try {
+      await p.seekTo(0);
+    } catch {
+      // Si no puede rebobinar, suena desde donde iba.
+    }
+    p.play();
+  } catch (err) {
+    console.warn('[audio] no se pudo reproducir el efecto', key, err);
+  }
+}
+
+function sfxSuena(key: SfxKey): boolean {
+  try {
+    return Boolean(sfxPlayers.get(key)?.playing);
+  } catch {
+    return false;
+  }
+}
+
+/** Se resuelve cuando ese efecto termina, o de inmediato si no sonó. */
+async function esperarSfx(key: SfxKey, timeoutMs = 2000): Promise<void> {
+  const inicio = Date.now();
+  // Justo después de play() el estado "playing" puede tardar un
+  // instante en reflejarse: sin este margen, esperarSfx podría creer
+  // que ya terminó cuando en realidad apenas empezaba.
+  await new Promise((r) => setTimeout(r, 30));
+  while (sfxSuena(key) && Date.now() - inicio < timeoutMs) {
+    await new Promise((r) => setTimeout(r, 40));
+  }
+}
+
+/** Efecto corto al acertar. */
+export function playSuccess(): Promise<void> {
+  return playSfx('success');
+}
+
+/** Efecto corto y suave al fallar. Nunca debe sonar a regaño. */
+export function playFail(): Promise<void> {
+  return playSfx('fail');
+}
+
+/** Toque muy corto y discreto: fichas, letras, cartas. */
+export function playTap(): Promise<void> {
+  return playSfx('tap');
+}
+
+/** Racha/combo: algo se está acumulando. */
+export function playCombo(): Promise<void> {
+  return playSfx('combo');
+}
+
+/** La fanfarria grande, para GameEndScreen cuando el resultado es bueno. */
+export function playNivelCompleto(): Promise<void> {
+  return playSfx('nivelCompleto');
+}
+
+/** Una pieza/carta aterriza, en Caída. */
+export function playCaidaPieza(): Promise<void> {
+  return playSfx('caidaPieza');
+}
+
+/** Empujoncito al usar una pista de letra (Colmena y similares). */
+export function playPista(): Promise<void> {
+  return playSfx('pista');
+}
+
+/**
+ * Secuencia de fin de ronda en los juegos: primero el efecto de
+ * acierto/fallo y, cuando termina, la frase correcta en inglés a
+ * velocidad normal (si autoAudio está activo).
+ *
+ * Se puede cancelar en cualquier punto llamando a stop(): el id que
+ * playSfx() ya fijó (stop() corre dentro de ella) queda viejo y la voz
+ * nunca llega a sonar. Así "avanzar de ronda" cancela SFX y voz con el
+ * mismo mecanismo que ya cancela un salto en la sesión de estudio.
+ */
+export async function playRoundResult(
+  correct: boolean,
+  phrasePath: string | null,
+  autoAudio: boolean
+): Promise<void> {
+  const key: SfxKey = correct ? 'success' : 'fail';
+  await playSfx(key);
+  const miId = reproduccionId;
+  await esperarSfx(key);
+  if (!autoAudio || miId !== reproduccionId) return;
+  await play(phrasePath);
+}
+
+/**
+ * Igual que playRoundResult, pero SIEMPRE reproduce la frase completa en
+ * inglés y luego en español al terminar el efecto, sin mirar "Audio
+ * automático": para Colmena, donde oír cómo se dice correctamente
+ * importa tanto si acertaste la ronda como si no.
+ *
+ * Si algo corta la reproducción entre el SFX y el inglés, o entre el
+ * inglés y el español (avanzar de ronda, salir), no sigue: nunca deja
+ * sonando la voz de una ronda que el usuario ya dejó atrás.
+ */
+export async function playRoundResultBilingue(
+  correct: boolean,
+  phraseEn: string | null,
+  phraseEs: string | null
+): Promise<void> {
+  const key: SfxKey = correct ? 'success' : 'fail';
+  await playSfx(key);
+  const miId = reproduccionId;
+  await esperarSfx(key);
+  if (miId !== reproduccionId) return;
+
+  if (phraseEn) {
+    const antes = reproduccionId;
+    const sonó = await playAndWait(phraseEn);
+    if (!sonó || reproduccionId !== antes + 1) return;
+  }
+  if (phraseEs) {
+    await playAndWait(phraseEs);
+  }
+}
+
+/** Reproduce siempre a velocidad reducida. Para el modo lento de Cázala y P-10. */
+export function playSlow(relPath: string | null, rate = 0.7): Promise<boolean> {
+  return reproducir(relPath, rate);
+}
+
+/**
+ * ¿Está sonando algo ahorita?
+ *
+ * Lo usa la tarjeta para no dejar pasar a la siguiente a media
+ * reproducción. Sin esto, tocar "siguiente" tres veces seguidas deja
+ * tres audios encimados y el usuario oye el primero mientras ve la
+ * cuarta frase, que fue exactamente lo que pasó en pruebas.
+ */
+export function isPlaying(): boolean {
+  try {
+    return Boolean(player?.playing);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generación actual del token de reproducción de frases (sube en cada
+ * play()/playSlow()/stop()). La usa el modo "Repetir" de P-10 para
+ * darse cuenta de que otro botón tomó el player mientras esperaba y
+ * apagarse solo, en vez de competir por el audio.
+ */
+export function generacionActual(): number {
+  return reproduccionId;
+}
+
+// Cuánto tarda como mucho el player en pasar de play() a playing=true.
+// expo-audio no lo marca en el mismo tick: hay una carga de por medio.
+const ARRANQUE_TIMEOUT_MS = 1500;
+// Colchón sobre la duración real, por si el reporte del player se queda
+// corto (metadata imprecisa, primer frame que tarda, etc.).
+const FIN_MARGEN_MS = 2000;
+// Si no se conoce la duración (duration <= 0), tope duro razonable.
+const FIN_TIMEOUT_SIN_DURACION_MS = 15000;
+const POLL_MS = 60;
+
+/**
+ * ¿currentTime en 0 y sin sonar? Es la señal de "se le acaba de dar
+ * play() y el nativo todavía no lo refleja", no de "ya terminó". Un
+ * audio que YA terminó se queda con currentTime > 0 (reproducir() solo
+ * rebobina a 0 al REUSAR el player para uno nuevo), así que esta
+ * distinción es lo que evita meter una espera muerta de hasta
+ * arranqueTimeoutMs en algo como "Siguiente" cuando el audio ya se
+ * acabó hace rato.
+ */
+function pareceAPuntoDeArrancar(): boolean {
+  return !isPlaying() && (player?.currentTime ?? 0) === 0;
+}
+
+/**
+ * Espera a que el player REALMENTE arranque (si acaba de arrancar y
+ * el nativo aún no lo refleja, hasta arranqueTimeoutMs) y luego a que
+ * termine de sonar. Se corta de inmediato si el token de reproducción
+ * cambia mientras espera: alguien más (otro play(), otro stop()) tomó
+ * el player y ya no hay nada que esperar aquí.
+ */
+async function esperaReproduccion(
+  miId: number,
+  arranqueTimeoutMs: number,
+  finTimeoutMs?: number
+): Promise<void> {
+  const vigente = () => reproduccionId === miId;
+
+  if (pareceAPuntoDeArrancar()) {
+    const t0 = Date.now();
+    while (pareceAPuntoDeArrancar() && vigente() && Date.now() - t0 < arranqueTimeoutMs) {
+      await new Promise((r) => setTimeout(r, 30));
+    }
+  }
+  if (!vigente()) return;
+
+  const duracionS = player?.duration ?? 0;
+  const timeout =
+    finTimeoutMs ?? (duracionS > 0 ? duracionS * 1000 + FIN_MARGEN_MS : FIN_TIMEOUT_SIN_DURACION_MS);
+  const t1 = Date.now();
+  while (isPlaying() && vigente() && Date.now() - t1 < timeout) {
+    await new Promise((r) => setTimeout(r, POLL_MS));
+  }
+}
+
+export interface OpcionesReproduccion {
+  /** 1.0 = velocidad normal. */
+  rate?: number;
+  /** Cuánto esperar a que el audio arranque antes de darlo por perdido. */
+  arranqueTimeoutMs?: number;
+}
+
+/**
+ * Reproduce y no resuelve hasta que el audio TERMINÓ de sonar de
+ * verdad: a diferencia de play(), que solo espera a que se le dé
+ * play() al player, esta espera arranque real + fin real. Es lo que
+ * necesita una secuencia (Modo Oído) para no cortar una frase larga
+ * con la siguiente.
+ *
+ * Cancelable con el mismo token que play()/playSlow()/stop(): si
+ * alguien más reproduce algo mientras espera, resuelve de inmediato en
+ * vez de seguir bloqueando.
+ */
+export async function playAndWait(
+  relPath: string | null,
+  opciones: OpcionesReproduccion = {}
+): Promise<boolean> {
+  const sonó = await reproducir(relPath, opciones.rate ?? 1.0);
+  if (!sonó) return false;
+  await esperaReproduccion(reproduccionId, opciones.arranqueTimeoutMs ?? ARRANQUE_TIMEOUT_MS);
+  return true;
+}
+
+/**
+ * Se resuelve cuando el audio actual termina de sonar. Antes solo
+ * miraba isPlaying() una vez: si se llamaba justo después de play(),
+ * el player todavía no había arrancado y salía sin esperar nada. Ahora
+ * espera arranque real y luego fin real, igual que playAndWait().
+ */
+export async function waitUntilDone(timeoutMs?: number): Promise<void> {
+  if (!player) return;
+  await esperaReproduccion(reproduccionId, ARRANQUE_TIMEOUT_MS, timeoutMs);
+}
+
+/**
+ * Pausa la frase sin cancelarla: NO toca reproduccionId, así que
+ * resumeFrase() puede seguir donde iba. stop() es el que cancela.
+ */
+export function pauseFrase(): void {
+  try {
+    player?.pause();
+  } catch {
+    /* sin consecuencia */
+  }
+  // La música vuelve mientras la voz está en pausa.
+  void music.duck(false);
+}
+
+/**
+ * Reanuda la frase pausada donde iba. Devuelve false si ya no hay
+ * player o si no pudo arrancar (nadie sonando, nada que agachar).
+ */
+export function resumeFrase(): boolean {
+  if (!player) return false;
+  try {
+    player.play();
+  } catch {
+    return false;
+  }
+  void music.duck(true);
+  void esperarFinReanudado(reproduccionId).then(() => music.duck(false));
+  return true;
+}
+
+/**
+ * Espera a que la frase reanudada termine para subir la música. Tras
+ * play() el estado "playing" tarda un instante en reflejarse, y aquí
+ * currentTime ya no es 0, así que waitUntilDone() no esperaría el
+ * arranque y creería que ya terminó. Si stop() o una frase nueva toman
+ * el player (cambia el token) sale de inmediato: la música no se queda
+ * agachada esperando el timeout.
+ */
+async function esperarFinReanudado(miId: number): Promise<void> {
+  const t0 = Date.now();
+  while (!isPlaying() && reproduccionId === miId && Date.now() - t0 < ARRANQUE_TIMEOUT_MS) {
+    await new Promise((r) => setTimeout(r, 30));
+  }
+  if (reproduccionId === miId) await waitUntilDone();
+}
+
+/** Posición y duración de la frase actual, en segundos. */
+export function progresoFrase(): { pos: number; dur: number } {
+  try {
+    return { pos: player?.currentTime ?? 0, dur: player?.duration ?? 0 };
+  } catch {
+    return { pos: 0, dur: 0 };
+  }
+}
+
+export function stop(): void {
+  // Invalida cualquier reproducción de frase en camino (en la cola o a
+  // medio resolver): al llegar a su turno se va a encontrar con un id
+  // viejo y va a abortar sin tocar el player.
+  reproduccionId++;
+  try {
+    player?.pause();
+  } catch {
+    /* sin consecuencia */
+  }
+  // También corta los efectos: "avanzar" o salir de pantalla no debe
+  // dejar un SFX terminando de sonar de fondo.
+  for (const p of sfxPlayers.values()) {
+    try {
+      p.pause();
+    } catch {
+      /* sin consecuencia */
+    }
+  }
+}
+
+/** Libera el player nativo. Se llama al salir de la sesión de estudio. */
+export function releaseAudio(): void {
+  reproduccionId++;
+  try {
+    player?.pause();
+  } catch {
+    /* sin consecuencia */
+  }
+  try {
+    player?.remove();
+  } catch {
+    /* sin consecuencia */
+  }
+  for (const p of sfxPlayers.values()) {
+    try {
+      p.remove();
+    } catch {
+      /* sin consecuencia */
+    }
+  }
+  sfxPlayers.clear();
+  player = null;
+  currentPath = null;
+  media.invalidate();
+}
+
+/**
+ * Reproduce una secuencia con pausas. Lo usa el Modo Oído (P-09):
+ * inglés, pausa, español, pausa.
+ *
+ * Cada paso espera a que su audio TERMINE de sonar (playAndWait) antes
+ * de arrancar su pausa: la pausa empieza cuando termina el audio,
+ * nunca antes. Sin esto, una frase más larga que su pausa quedaba
+ * cortada por la siguiente.
+ *
+ * `onStep`, si viene, se llama justo antes de reproducir cada paso con
+ * su índice — lo usa P-09 para mostrar "Repetición X/3" y resaltar el
+ * idioma que suena.
+ */
+export async function playSequence(
+  steps: { path: string | null; pauseMs: number }[],
+  shouldContinue: () => boolean,
+  onStep?: (index: number) => void
+): Promise<void> {
+  for (let i = 0; i < steps.length; i++) {
+    if (!shouldContinue()) return;
+    onStep?.(i);
+    await playAndWait(steps[i]!.path);
+    if (!shouldContinue()) return;
+    await sleep(steps[i]!.pauseMs, shouldContinue);
+  }
+}
+
+function sleep(ms: number, shouldContinue: () => boolean): Promise<void> {
+  return new Promise((resolve) => {
+    const step = 100;
+    let waited = 0;
+    const tick = setInterval(() => {
+      waited += step;
+      if (waited >= ms || !shouldContinue()) {
+        clearInterval(tick);
+        resolve();
+      }
+    }, step);
+  });
+}

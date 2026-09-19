@@ -1,0 +1,58 @@
+ESTADO DE assets/data
+=====================
+
+Ya está todo pegado. Corre "npm run check:data" y debe salir 7 de 7.
+
+  catalogo.json        1,524 entradas   <- catalogo_v9.json
+  packs.json           17 packs, 8 mundos
+  situaciones.json     8 arquetipos, 60 escenarios
+  contracciones.json   5 grupos, 20 de Cázala
+  errores.json         194 tarjetas     <- errores_final.json
+  fonemas.json         44 fonemas, 124 pares mínimos  <- fonemas_final.json
+  notificaciones.json  7 plantillas, 3 de vuelta
+  lecturas.json        24 historias, 8 para niños   <- generado
+  niveles.json         800 niveles, 200 por juego   <- generado
+  phrasal_verbs.json   67 phrasal verbs, 38 verbos  <- generado
+
+Si vuelves a generar alguno, los nombres SÍ cambian respecto al disco:
+
+    catalogo_v9.json    ->  catalogo.json
+    errores_final.json  ->  errores.json
+    fonemas_final.json  ->  fonemas.json
+
+Después de reemplazar cualquiera:
+
+    npx expo start -c
+
+La bandera -c limpia el caché. Sin ella Metro sigue sirviendo el JSON
+viejo y parece que no pasó nada.
+
+GENERADOS, NO EDITAR A MANO
+---------------------------
+    lecturas.json       python3 scripts/genera_lecturas.py
+    niveles.json        python3 scripts/genera_niveles.py
+    phrasal_verbs.json  python3 scripts/genera_phrasal.py
+
+Los dos scripts validan antes de escribir. Si algo no cuadra no tocan el
+archivo y dicen exactamente qué está mal.
+
+TODAVÍA NO EXISTEN
+------------------
+    gramatica.json   las seis unidades, v1.1
+    trucos.json      las 30 tarjetas, v1.2
+
+La app no truena por eso: esas pantallas simplemente no están montadas.
+
+MEDIOS
+------
+Los mp3 y webp NO van aquí. Van así:
+
+    assets/aud/     el audio del pack empaquetado
+    assets/img/     las imágenes del pack empaquetado
+
+El catálogo apunta a 1,524 audios y 1,416 imágenes. Los que no estén
+descargados se pintan como hueco, no truenan.
+
+Después de copiar medios:
+
+    npm run build:assets

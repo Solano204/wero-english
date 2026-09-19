@@ -1,0 +1,47 @@
+const { getDefaultConfig } = require('expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
+config.resolver.assetExts.push('mp3', 'wav', 'webp', 'db');
+
+// Node en Windows falla con EMFILE pasadas ~8190 aperturas simultáneas por
+// proceso, y no se puede subir. Metro (Assets.js) lee TODOS los assets a la
+// vez con fs.promises.readFile: con ~7.9k assets en bundled.ts eso es una
+// sola ráfaga de ~7.9k lecturas (medido: pico de 7872) que se come casi todo
+// el presupuesto; cualquier otra lectura (caché, fuentes, HMR) lo rebasa.
+// Se deja pasar un puñado de lecturas/escrituras a la vez en el proceso
+// principal. Son operaciones hoja (no esperan a otras), así que no hay
+// riesgo de interbloqueo.
+const fs = require('fs');
+
+const MAX_ARCHIVOS_ABIERTOS = 64;
+let activas = 0;
+const enEspera = [];
+
+async function adquirir() {
+  if (activas < MAX_ARCHIVOS_ABIERTOS) {
+    activas++;
+    return;
+  }
+  // El que libera le pasa su lugar directo: activas no se mueve.
+  await new Promise((resolve) => enEspera.push(resolve));
+}
+
+function liberar() {
+  const siguiente = enEspera.shift();
+  if (siguiente) siguiente();
+  else activas--;
+}
+
+for (const nombre of ['readFile', 'writeFile']) {
+  const original = fs.promises[nombre];
+  fs.promises[nombre] = async function (...args) {
+    await adquirir();
+    try {
+      return await original.apply(this, args);
+    } finally {
+      liberar();
+    }
+  };
+}
+
+module.exports = config;

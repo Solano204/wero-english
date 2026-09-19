@@ -1,0 +1,247 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Button, Card, Header, ProgressBar, Screen } from '@/components/base';
+import { Confetti } from '@/components/feedback';
+import { logGame } from '@/db/economy';
+import { estrellasPara, guardarNivel } from '@/db/levels';
+import { loadContent } from '@/store/content';
+import { useAuthStore } from '@/store';
+import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import * as ads from '@/services/ads';
+import * as audio from '@/services/audio';
+import { color, font, space } from '@/theme';
+import type { RootStackParams } from '@/navigation/routes';
+
+type Nav = NativeStackNavigationProp<RootStackParams>;
+type Ruta = RouteProp<RootStackParams, 'GameEnd'>;
+
+/**
+ * P-28, el cierre de cualquier partida.
+ *
+ * Tiene la misma forma que el de la competencia y tres diferencias que
+ * importan:
+ *
+ * 1. Dice cuántas frases se movieron a repaso, que es el resultado real
+ *    de haber jugado.
+ * 2. El botón principal lleva al siguiente nivel sin pedir estrellas.
+ * 3. Hay una salida debajo. La pantalla de ellos tiene dos botones y los
+ *    dos te dejan adentro.
+ *
+ * Ya no hay monedas. Se quitaron a propósito: la moneda no compraba
+ * nada que importara y llenaba de números una pantalla cuyo único
+ * trabajo es decirte cómo te fue y llevarte al siguiente nivel.
+ */
+export function GameEndScreen() {
+  const nav = useNavigation<Nav>();
+  const { params } = useRoute<Ruta>();
+  const user = useAuthStore((s) => s.user);
+  const [ocupado, setOcupado] = useState(false);
+
+  const { juego, rondas, aciertos, nivel } = params;
+  const content = useMemo(loadContent, []);
+  useMusicaPantalla('juegos');
+
+  /**
+   * Las estrellas salen de los umbrales del nivel, que ya vienen
+   * calculados en niveles.json. No se recalculan aquí: si la fórmula
+   * viviera en dos lados, un día dirían cosas distintas.
+   */
+  const umbrales = useMemo(() => {
+    if (!nivel) return null;
+    const def = content.niveles.juegos[juego];
+    return def?.niveles[nivel - 1]?.estrellas ?? null;
+  }, [content, juego, nivel]);
+
+  const estrellas = umbrales ? estrellasPara(aciertos, umbrales) : 0;
+
+  useEffect(() => {
+    if (!user) return;
+
+    void (async () => {
+      await logGame(user.id, juego, rondas, aciertos);
+      if (nivel && umbrales) {
+        await guardarNivel(user.id, juego, nivel, estrellas, aciertos);
+      }
+    })();
+    // Solo al montar: guardar dos veces sumaría dos intentos.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const salir = () => nav.navigate('Main');
+
+  const pct = rondas > 0 ? Math.round((aciertos / rondas) * 100) : 0;
+  const merece = rondas >= 5 && pct >= 70;
+
+  useEffect(() => {
+    // Una sola vez, al mostrar el resultado: nivel_completo si fue un
+    // buen resultado, el acierto normal si fue uno regular. Nunca el
+    // efecto de fallo aquí, terminar una partida no es un fallo.
+    void (merece ? audio.playNivelCompleto() : audio.playSuccess());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Screen scroll edges={['top', 'bottom']}>
+      <Header onBack={() => nav.navigate('Main')} />
+      <Confetti active={merece} />
+
+      {/*
+       * El resultado, en grande y arriba de todo.
+       *
+       * Antes iba como un renglón chico bajo el título y la gente salía
+       * de la partida sin saber cómo le había ido. Lo primero que hay
+       * que poder leer sin buscar es el marcador.
+       */}
+      <Animated.View entering={FadeInDown.duration(320)} style={styles.head}>
+        <Text style={styles.marcador} maxFontSizeMultiplier={1.2}>
+          {aciertos}
+          <Text style={styles.marcadorTotal}> / {rondas}</Text>
+        </Text>
+
+        <Text style={styles.sub}>
+          {aciertos === rondas
+            ? 'Todas. Sin fallar una.'
+            : aciertos === 0
+              ? 'Ninguna esta vez.'
+              : `${pct}% de acierto`}
+        </Text>
+
+        <Text style={styles.donde}>
+          {NOMBRE[juego] ?? 'Partida'}
+          {nivel ? ` · nivel ${nivel}` : ''}
+        </Text>
+
+        {umbrales ? (
+          <>
+            <Text style={styles.estrellas}>
+              {'★★★'.slice(0, estrellas)}
+              <Text style={styles.estrellasOff}>
+                {'☆☆☆'.slice(0, 3 - estrellas)}
+              </Text>
+            </Text>
+            <Text style={styles.estrellasNota}>
+              {estrellas === 3
+                ? 'Las tres. No hay más que sacarle.'
+                : estrellas === 0
+                  ? `El siguiente ya está abierto. Con ${umbrales[0]} sacas tu primera estrella aquí.`
+                  : `Con ${umbrales[estrellas]} sacas ${estrellas + 1}.`}
+            </Text>
+          </>
+        ) : null}
+      </Animated.View>
+
+      {aciertos > 0 ? (
+        <Animated.View entering={FadeInDown.delay(180).duration(320)}>
+          <Card style={styles.repaso}>
+            <Text style={styles.repasoTexto}>
+              {aciertos}{' '}
+              {aciertos === 1 ? 'frase se movió' : 'frases se movieron'} en tu
+              cola de repaso
+            </Text>
+            <Text style={styles.repasoNota}>
+              Jugar cuenta igual que estudiar. Es la misma tarjeta.
+            </Text>
+          </Card>
+        </Animated.View>
+      ) : null}
+
+      <View style={styles.acciones}>
+        {/* Terminar abre el siguiente, saques las estrellas que saques.
+            Antes este botón solo salía con una estrella o más, que era
+            justo el candado que se quitó del resto del sistema. */}
+        {nivel ? (
+          <Button
+            label={`Nivel ${nivel + 1}  →`}
+            onPress={() =>
+              nav.replace(RUTA_JUEGO[juego] ?? 'Main', {
+                nivel: nivel + 1,
+              } as never)
+            }
+            full
+            size="lg"
+          />
+        ) : null}
+        {nivel && estrellas < 3 ? (
+          <Button
+            label="↻"
+            accessibilityLabel={`Repetir el nivel ${nivel}`}
+            variant="secondary"
+            onPress={() =>
+              nav.replace(RUTA_JUEGO[juego] ?? 'Main', { nivel } as never)
+            }
+            full
+          />
+        ) : null}
+        <Button
+          label="Recoger"
+          variant={nivel ? 'secondary' : 'primary'}
+          onPress={salir}
+          full
+          size={nivel ? 'md' : 'lg'}
+        />
+
+        <Button
+          label="Listo por hoy"
+          variant="ghost"
+          onPress={salir}
+          full
+        />
+      </View>
+
+    </Screen>
+  );
+}
+
+/** A qué pantalla vuelve el botón de siguiente nivel. */
+const RUTA_JUEGO: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
+  colmena: 'Colmena',
+  pares: 'Pares',
+  caida: 'Caida',
+  dulces: 'Dulces',
+};
+
+const NOMBRE: Record<string, string> = {
+  caida: 'Caída',
+  dulces: 'Dulces',
+  colmena: 'Colmena',
+  pares: 'Pares',
+  judge: '¿Lo digo o no?',
+  cazala: 'Cázala',
+  pares_minimos: 'Di la palabra',
+};
+
+const styles = StyleSheet.create({
+  head: { alignItems: 'center', gap: space.xs, marginBottom: space.lg },
+  marcador: {
+    fontSize: 68,
+    lineHeight: 74,
+    fontWeight: font.weight.bold,
+    color: color.text,
+  },
+  marcadorTotal: {
+    fontSize: font.size.xxl,
+    color: color.textFaint,
+    fontWeight: font.weight.regular,
+  },
+  donde: { fontSize: font.size.sm, color: color.textFaint },
+  sub: { fontSize: font.size.md, color: color.textMuted },
+  estrellas: {
+    fontSize: 34,
+    color: color.world.fonetica,
+    letterSpacing: 4,
+    marginTop: space.sm,
+  },
+  estrellasOff: { color: color.border },
+  estrellasNota: {
+    fontSize: font.size.xs,
+    color: color.textFaint,
+    textAlign: 'center',
+  },
+  repaso: { gap: 4, marginBottom: space.sm },
+  repasoTexto: { fontSize: font.size.md, color: color.text },
+  repasoNota: { fontSize: font.size.xs, color: color.textFaint },
+  acciones: { gap: space.sm },
+});

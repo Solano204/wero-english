@@ -1,0 +1,185 @@
+import React, { useCallback } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import {
+  color,
+  duration,
+  font,
+  layout,
+  presionar,
+  radius,
+  rebote,
+  shadow,
+  space,
+} from '@/theme';
+import * as haptics from '@/services/haptics';
+import { useMovimientoReducido } from '@/utils';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type Size = 'md' | 'lg';
+
+interface Props {
+  label: string;
+  /** Para botones cuyo texto es un símbolo, como la flecha de seguir. */
+  accessibilityLabel?: string;
+  /** Para cuando el efecto de tocar no es obvio por el label. */
+  accessibilityHint?: string;
+  onPress: () => void;
+  variant?: Variant;
+  size?: Size;
+  disabled?: boolean;
+  loading?: boolean;
+  full?: boolean;
+  icon?: React.ReactNode;
+  style?: ViewStyle;
+}
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/**
+ * Botón con respuesta táctil inmediata.
+ *
+ * La escala corre en el hilo de UI con reanimated, no con Animated de
+ * React Native, para que no se trabe cuando el hilo de JS está ocupado
+ * guardando en SQLite justo después de responder.
+ */
+export function Button({
+  label,
+  accessibilityLabel,
+  accessibilityHint,
+  onPress,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  loading = false,
+  full = false,
+  icon,
+  style,
+}: Props) {
+  const scale = useSharedValue(1);
+  const reducido = useMovimientoReducido();
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handleIn = useCallback(() => {
+    scale.value = reducido ? 0.96 : presionar(0.96);
+  }, [scale, reducido]);
+
+  const handleOut = useCallback(() => {
+    scale.value = reducido ? 1 : rebote(1);
+  }, [scale, reducido]);
+
+  const handlePress = useCallback(() => {
+    if (disabled || loading) return;
+    haptics.tapLight();
+    onPress();
+  }, [disabled, loading, onPress]);
+
+  const blocked = disabled || loading;
+
+  return (
+    <AnimatedPressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: blocked, busy: loading }}
+      onPress={handlePress}
+      onPressIn={handleIn}
+      onPressOut={handleOut}
+      disabled={blocked}
+      style={[
+        styles.base,
+        sizes[size],
+        variants[variant],
+        full && styles.full,
+        blocked && styles.blocked,
+        animStyle,
+        style,
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={textColor[variant]} size="small" />
+      ) : (
+        <View style={styles.row}>
+          {icon ? <View style={styles.icon}>{icon}</View> : null}
+          <Text
+            style={[
+              styles.label,
+              { color: textColor[variant] },
+              size === 'lg' && styles.labelLg,
+            ]}
+            numberOfLines={1}
+          >
+            {label}
+          </Text>
+        </View>
+      )}
+    </AnimatedPressable>
+  );
+}
+
+const textColor: Record<Variant, string> = {
+  primary: color.onAccent,
+  secondary: color.text,
+  ghost: color.textMuted,
+  danger: color.onAccent,
+};
+
+/**
+ * El borde inferior más oscuro es lo que hace que el botón se lea como
+ * una pieza que se puede hundir. Al presionar, la escala baja y la
+ * franja parece comprimirse: es el mismo efecto de un botón físico y
+ * cuesta dos líneas.
+ */
+const variants: Record<Variant, ViewStyle> = {
+  primary: {
+    backgroundColor: color.accent,
+    // Sin franja inferior: la pastilla va limpia. Lo que le da volumen
+    // sobre tinta es el halo del propio acento, no un borde de dos
+    // tonos. Una sombra negra bajo un botón encendido no se ve.
+    ...shadow.glow,
+  },
+  secondary: {
+    backgroundColor: color.surfaceAlt,
+    borderWidth: 1,
+    borderColor: color.borderStrong,
+    ...shadow.soft,
+  },
+  ghost: { backgroundColor: 'transparent' },
+  danger: { backgroundColor: color.riskStrong, ...shadow.soft },
+};
+
+const sizes: Record<Size, ViewStyle> = {
+  md: { minHeight: layout.tapMin, paddingHorizontal: space.lg },
+  lg: { minHeight: 58, paddingHorizontal: space.xl },
+};
+
+const styles = StyleSheet.create({
+  base: {
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  full: { alignSelf: 'stretch' },
+  blocked: { opacity: 0.45 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  icon: { marginRight: 2 },
+  label: {
+    fontSize: font.size.md,
+    fontWeight: font.weight.semibold,
+    letterSpacing: 0.2,
+  },
+  labelLg: { fontSize: font.size.lg },
+});
+
+export const BUTTON_PRESS_MS = duration.instant;

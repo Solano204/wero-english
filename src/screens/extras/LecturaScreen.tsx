@@ -1,0 +1,328 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { Button, Card, EmptyState, Header, Screen } from '@/components/base';
+import { ReproductorCapitulo } from '@/components/card';
+import { partirTexto, type Trozo } from '@/domain/lectura';
+import { getCardStates, getEntriesByIds } from '@/db/queries';
+import { useAuthStore } from '@/store';
+import { loadContent } from '@/store/content';
+import * as audio from '@/services/audio';
+import * as haptics from '@/services/haptics';
+import { color, font, radius, space } from '@/theme';
+import type { CardState, Entry } from '@/types';
+import type { RootStackParams } from '@/navigation/routes';
+
+type Nav = NativeStackNavigationProp<RootStackParams>;
+type Ruta = RouteProp<RootStackParams, 'Lectura'>;
+
+/**
+ * El lector.
+ *
+ * Las frases del catálogo van subrayadas y se pueden tocar: azul si ya
+ * las viste, ámbar si son nuevas. Tocar abre la ficha completa.
+ *
+ * Al final, tres preguntas. No se guarda calificación y no se puede
+ * reprobar: son para confirmar que se entendió, no para evaluar. Poner
+ * un puntaje aquí convertiría la lectura en tarea.
+ */
+export function LecturaScreen() {
+  const nav = useNavigation<Nav>();
+  const { params } = useRoute<Ruta>();
+  const user = useAuthStore((s) => s.user);
+  const content = useMemo(loadContent, []);
+
+  const lectura = useMemo(
+    () => content.lecturas.lecturas.find((l) => l.id === params.lecturaId),
+    [content, params.lecturaId]
+  );
+
+  const [cap, setCap] = useState(0);
+  const [entradas, setEntradas] = useState<Map<number, Entry>>(new Map());
+  const [estados, setEstados] = useState<Map<number, CardState>>(new Map());
+  const [enPreguntas, setEnPreguntas] = useState(false);
+  const [respuestas, setRespuestas] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    if (!user || !lectura) return;
+    let vivo = true;
+
+    (async () => {
+      const es = await getEntriesByIds(lectura.frases);
+      const st = await getCardStates(user.id, lectura.frases);
+      if (!vivo) return;
+      setEntradas(new Map(es.map((e) => [e.id, e])));
+      setEstados(st);
+    })();
+
+    return () => {
+      vivo = false;
+    };
+  }, [user, lectura]);
+
+  // Perder el foco (salir, cambiar de pestaña, abrir la ficha de una
+  // frase) corta la voz: el player de frases es uno solo y compartido.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        audio.stop();
+      };
+    }, [])
+  );
+
+  // Red de seguridad por si se desmonta sin haber perdido el foco antes.
+  useEffect(
+    () => () => {
+      audio.stop();
+    },
+    []
+  );
+
+  const capitulo = lectura?.capitulos[cap];
+
+  const trozos: Trozo[] = useMemo(() => {
+    if (!capitulo) return [];
+    const frases = (lectura?.frases ?? [])
+      .map((id) => {
+        const e = entradas.get(id);
+        if (!e) return null;
+        return { id, phrase: e.phrase, nueva: !estados.has(id) };
+      })
+      .filter((f): f is { id: number; phrase: string; nueva: boolean } =>
+        Boolean(f)
+      );
+    return partirTexto(capitulo.texto, frases);
+  }, [capitulo, lectura, entradas, estados]);
+
+  const siguiente = useCallback(() => {
+    if (!lectura) return;
+    audio.stop();
+    if (cap + 1 < lectura.capitulos.length) {
+      setCap((c) => c + 1);
+      return;
+    }
+    setEnPreguntas(true);
+  }, [cap, lectura]);
+
+  const responder = useCallback(
+    (i: number, opcion: number) => {
+      if (respuestas[i] !== undefined) return;
+      const correcta = lectura?.preguntas[i]?.correcta;
+      if (opcion === correcta) {
+        haptics.success();
+        void audio.playSuccess();
+      } else {
+        haptics.failure();
+        void audio.playFail();
+      }
+      setRespuestas((r) => ({ ...r, [i]: opcion }));
+    },
+    [respuestas, lectura]
+  );
+
+  if (!lectura) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Lectura" />
+        <EmptyState
+          title="Esa historia ya no está"
+          body="Puede que se haya regenerado lecturas.json con otros ids."
+          actionLabel="Volver"
+          onAction={() => nav.goBack()}
+        />
+      </Screen>
+    );
+  }
+
+  if (enPreguntas) {
+    const contestadas = Object.keys(respuestas).length;
+    return (
+      <Screen scroll>
+        <Header onBack={() => setEnPreguntas(false)} title="Tres preguntas" />
+        <Text style={styles.introPreguntas}>
+          No se guarda calificación. Es para ver si se entendió, no para
+          calificarte.
+        </Text>
+
+        {lectura.preguntas.map((p, i) => {
+          const dada = respuestas[i];
+          return (
+            <Card key={p.pregunta} style={styles.pregunta}>
+              <Text style={styles.preguntaTexto}>{p.pregunta}</Text>
+              {p.opciones.map((o, k) => {
+                const elegida = dada === k;
+                const esCorrecta = k === p.correcta;
+                const revelada = dada !== undefined;
+                return (
+                  <Pressable
+                    key={o}
+                    onPress={() => responder(i, k)}
+                    disabled={revelada}
+                    accessibilityRole="button"
+                    accessibilityLabel={o}
+                    style={[
+                      styles.opcion,
+                      revelada && esCorrecta && styles.opcionBien,
+                      revelada && elegida && !esCorrecta && styles.opcionMal,
+                    ]}
+                  >
+                    <Text style={styles.opcionTexto}>{o}</Text>
+                  </Pressable>
+                );
+              })}
+              {dada !== undefined ? (
+                <Animated.Text entering={FadeIn} style={styles.porque}>
+                  {p.porque}
+                </Animated.Text>
+              ) : null}
+            </Card>
+          );
+        })}
+
+        <Button
+          label={
+            contestadas === lectura.preguntas.length
+              ? 'Listo'
+              : 'Salir sin contestar'
+          }
+          onPress={() => nav.goBack()}
+          full
+          size="lg"
+        />
+      </Screen>
+    );
+  }
+
+  return (
+    <Screen scroll>
+      <Header
+        onBack={() => nav.goBack()}
+        title={lectura.titulo}
+        subtitle={
+          lectura.capitulos.length > 1
+            ? `Capítulo ${cap + 1} de ${lectura.capitulos.length}`
+            : undefined
+        }
+      />
+
+      {capitulo ? (
+        <>
+          <Text style={styles.capTitulo}>{capitulo.titulo}</Text>
+
+          {capitulo.audio ? (
+            <View style={styles.audioFila}>
+              <ReproductorCapitulo key={cap} path={capitulo.audio} />
+            </View>
+          ) : null}
+
+          <Text style={styles.cuerpo}>
+            {trozos.map((t, i) =>
+              t.entryId === null ? (
+                <Text key={`t-${i}`}>{t.texto}</Text>
+              ) : (
+                <Text
+                  key={`t-${i}`}
+                  style={t.nueva ? styles.fraseNueva : styles.fraseVista}
+                  onPress={() =>
+                    nav.navigate('Detail', { entryId: t.entryId as number })
+                  }
+                >
+                  {t.texto}
+                </Text>
+              )
+            )}
+          </Text>
+
+          <View style={styles.leyenda}>
+            <Text style={styles.leyendaTexto}>
+              <Text style={styles.fraseVista}>Subrayado</Text> es lo que ya
+              viste. <Text style={styles.fraseNueva}>En ámbar</Text> es nuevo.
+              Toca cualquiera para abrir su ficha.
+            </Text>
+          </View>
+
+          {/* Aquí sí va texto: no es un botón que se toque cien veces,
+              y saber si vienen preguntas o capítulo cambia la decisión. */}
+          <Button
+            label={
+              cap + 1 < lectura.capitulos.length
+                ? `Capítulo ${cap + 2}  →`
+                : 'Tres preguntas  →'
+            }
+            onPress={siguiente}
+            full
+            size="lg"
+          />
+        </>
+      ) : null}
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  capTitulo: {
+    fontSize: font.size.xl,
+    fontWeight: font.weight.bold,
+    color: color.text,
+    marginBottom: space.md,
+  },
+  audioFila: { marginBottom: space.md },
+  cuerpo: {
+    fontSize: font.size.lg,
+    // Una lectura pide más aire que una tarjeta: 1.6 de interlineado es
+    // la diferencia entre leer y descifrar.
+    lineHeight: font.size.lg * 1.6,
+    color: color.text,
+    marginBottom: space.lg,
+  },
+  fraseVista: {
+    color: color.world.dia_a_dia,
+    textDecorationLine: 'underline',
+  },
+  fraseNueva: {
+    color: color.riskWarn,
+    fontWeight: font.weight.semibold,
+    textDecorationLine: 'underline',
+  },
+  leyenda: {
+    backgroundColor: color.surfaceAlt,
+    borderRadius: radius.md,
+    padding: space.md,
+    marginBottom: space.lg,
+  },
+  leyendaTexto: { fontSize: font.size.xs, color: color.textMuted },
+  introPreguntas: {
+    fontSize: font.size.sm,
+    color: color.textMuted,
+    marginBottom: space.md,
+  },
+  pregunta: { gap: space.sm, marginBottom: space.md },
+  preguntaTexto: {
+    fontSize: font.size.md,
+    fontWeight: font.weight.semibold,
+    color: color.text,
+  },
+  opcion: {
+    minHeight: 46,
+    justifyContent: 'center',
+    paddingHorizontal: space.md,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: color.border,
+    backgroundColor: color.surfaceAlt,
+  },
+  opcionBien: {
+    borderColor: color.correct,
+    backgroundColor: color.correctSoft,
+  },
+  opcionMal: { borderColor: color.wrong, backgroundColor: color.wrongSoft },
+  opcionTexto: { fontSize: font.size.sm, color: color.text },
+  porque: { fontSize: font.size.sm, color: color.textMuted },
+});

@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+android/
+ios/
+assets/aud/*
+assets/img/*
+!assets/aud/.gitkeep
+!assets/img/.gitkeep
+
+# generado por build:assets
+src/assets/bundled.ts
+keys/

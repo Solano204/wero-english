@@ -1,0 +1,825 @@
+import { getDb } from './client';
+import { toEntry, type EntryRow } from './rows';
+import type { CardState, Entry, Nivel, Registro, Vulgaridad } from '@/types';
+
+/* ============================================================
+   Filtros globales
+
+   Todas las consultas de contenido pasan por buildFilter para que
+   el Modo Limpio y el filtro de nivel se apliquen en UN solo lugar.
+   Si se replican por pantalla, tarde o temprano una se olvida y
+   aparece una frase de vulgaridad 2 con el modo limpio encendido.
+   ============================================================ */
+
+export interface ContentFilter {
+  modoLimpio: boolean;
+  niveles: Nivel[];
+  packs?: string[];
+  mundos?: string[];
+}
+
+interface Fragment {
+  sql: string;
+  args: (string | number)[];
+}
+
+function buildFilter(f: ContentFilter): Fragment {
+  const parts: string[] = ['e.is_canonical = 1', 'e.revisar = 0'];
+  const args: (string | number)[] = [];
+
+  if (f.modoLimpio) parts.push('e.vulgaridad = 0');
+
+  if (f.niveles.length > 0 && f.niveles.length < 3) {
+    parts.push(`e.nivel IN (${f.niveles.map(() => '?').join(',')})`);
+    args.push(...f.niveles);
+  }
+
+  if (f.packs && f.packs.length > 0) {
+    parts.push(`e.pack_final IN (${f.packs.map(() => '?').join(',')})`);
+    args.push(...f.packs);
+  }
+
+  if (f.mundos && f.mundos.length > 0) {
+    parts.push(`e.mundo IN (${f.mundos.map(() => '?').join(',')})`);
+    args.push(...f.mundos);
+  }
+
+  return { sql: parts.join(' AND '), args };
+}
+
+const ENTRY_COLS = 'e.*';
+
+/* ============================================================
+   Cola de estudio
+   ============================================================ */
+
+export interface QueueRow extends EntryRow {
+  repeticiones: number | null;
+  intervalo: number | null;
+  facilidad: number | null;
+  vence_en: number | null;
+  ultimo_repaso: number | null;
+  fallos: number | null;
+  aciertos: number | null;
+  dominada: number | null;
+  favorito: number | null;
+}
+
+export function rowToState(r: QueueRow): CardState {
+  return {
+    entry_id: r.id,
+    repeticiones: r.repeticiones ?? 0,
+    intervalo: r.intervalo ?? 0,
+    facilidad: r.facilidad ?? 2.5,
+    vence_en: r.vence_en ?? 0,
+    ultimo_repaso: r.ultimo_repaso,
+    fallos: r.fallos ?? 0,
+    aciertos: r.aciertos ?? 0,
+    dominada: (r.dominada ?? 0) as 0 | 1,
+    favorito: (r.favorito ?? 0) as 0 | 1,
+  };
+}
+
+/**
+ * Las tarjetas vencidas, más antiguas primero.
+ * LEFT JOIN porque una entrada nunca vista no tiene fila en tarjeta.
+ */
+export async function getDueCards(
+  usuarioId: number,
+  filter: ContentFilter,
+  limit: number,
+  now = Date.now()
+): Promise<{ entry: Entry; state: CardState }[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+
+  const rows = await db.getAllAsync<QueueRow>(
+    `SELECT ${ENTRY_COLS}, t.repeticiones, t.intervalo, t.facilidad,
+            t.vence_en, t.ultimo_repaso, t.fallos, t.aciertos,
+            t.dominada, t.favorito
+       FROM entrada e
+       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql}
+        AND t.vence_en <= ?
+        AND e.tipo != 'regla_fonetica'
+      ORDER BY t.vence_en ASC
+      LIMIT ?;`,
+    [usuarioId, ...f.args, now, limit]
+  );
+
+  return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
+}
+
+/** Entradas que el usuario nunca ha visto, en orden de nivel y luego id. */
+export async function getNewCards(
+  usuarioId: number,
+  filter: ContentFilter,
+  limit: number
+): Promise<{ entry: Entry; state: CardState }[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+
+  const rows = await db.getAllAsync<QueueRow>(
+    `SELECT ${ENTRY_COLS}, NULL AS repeticiones, NULL AS intervalo,
+            NULL AS facilidad, NULL AS vence_en, NULL AS ultimo_repaso,
+            NULL AS fallos, NULL AS aciertos, NULL AS dominada,
+            NULL AS favorito
+       FROM entrada e
+       LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql}
+        AND t.entry_id IS NULL
+        AND e.tipo != 'regla_fonetica'
+      ORDER BY e.nivel ASC, e.id ASC
+      LIMIT ?;`,
+    [usuarioId, ...f.args, limit]
+  );
+
+  return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
+}
+
+export async function countDue(
+  usuarioId: number,
+  filter: ContentFilter,
+  now = Date.now()
+): Promise<number> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const row = await db.getFirstAsync<{ n: number }>(
+    `SELECT COUNT(*) AS n
+       FROM entrada e
+       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql} AND t.vence_en <= ? AND e.tipo != 'regla_fonetica';`,
+    [usuarioId, ...f.args, now]
+  );
+  return row?.n ?? 0;
+}
+
+/* ============================================================
+   Distractores del ejercicio Reconocer
+
+   Se calculan en tiempo real. El filtro por word_count es lo que evita
+   el problema clásico: si la correcta es larga y las tres falsas cortas,
+   el usuario acierta sin leer.
+   ============================================================ */
+
+export async function getDistractors(
+  entry: Entry,
+  count = 3
+): Promise<string[]> {
+  const db = await getDb();
+
+  const near = await db.getAllAsync<{ spanish_main: string }>(
+    `SELECT spanish_main FROM entrada
+      WHERE pack_final = ? AND id != ?
+        AND is_canonical = 1 AND revisar = 0
+        AND ABS(word_count - ?) <= 3
+      ORDER BY RANDOM() LIMIT ?;`,
+    [entry.pack_final, entry.id, entry.word_count, count]
+  );
+
+  const out = near.map((r) => r.spanish_main);
+  if (out.length >= count) return out;
+
+  // El pack no dio suficientes: se amplía al mundo antes de rendirse.
+  const wide = await db.getAllAsync<{ spanish_main: string }>(
+    `SELECT spanish_main FROM entrada
+      WHERE mundo = ? AND id != ?
+        AND is_canonical = 1 AND revisar = 0
+        AND spanish_main NOT IN (${out.map(() => '?').join(',') || "''"})
+      ORDER BY RANDOM() LIMIT ?;`,
+    [entry.mundo, entry.id, ...out, count - out.length]
+  );
+
+  return [...out, ...wide.map((r) => r.spanish_main)];
+}
+
+/* ============================================================
+   Actualización del estado SM-2
+   ============================================================ */
+
+export async function upsertCardState(
+  usuarioId: number,
+  s: CardState
+): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `INSERT INTO tarjeta
+       (usuario_id, entry_id, repeticiones, intervalo, facilidad,
+        vence_en, ultimo_repaso, fallos, aciertos, dominada, favorito)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?)
+     ON CONFLICT(usuario_id, entry_id) DO UPDATE SET
+       repeticiones = excluded.repeticiones,
+       intervalo    = excluded.intervalo,
+       facilidad    = excluded.facilidad,
+       vence_en     = excluded.vence_en,
+       ultimo_repaso= excluded.ultimo_repaso,
+       fallos       = excluded.fallos,
+       aciertos     = excluded.aciertos,
+       dominada     = excluded.dominada;`,
+    [
+      usuarioId, s.entry_id, s.repeticiones, s.intervalo, s.facilidad,
+      s.vence_en, s.ultimo_repaso, s.fallos, s.aciertos, s.dominada,
+      s.favorito,
+    ]
+  );
+}
+
+export async function toggleFavorite(
+  usuarioId: number,
+  entryId: number
+): Promise<boolean> {
+  const db = await getDb();
+  await db.runAsync(
+    `INSERT INTO tarjeta (usuario_id, entry_id, favorito)
+     VALUES (?, ?, 1)
+     ON CONFLICT(usuario_id, entry_id)
+       DO UPDATE SET favorito = 1 - favorito;`,
+    [usuarioId, entryId]
+  );
+  const row = await db.getFirstAsync<{ favorito: number }>(
+    'SELECT favorito FROM tarjeta WHERE usuario_id = ? AND entry_id = ?;',
+    [usuarioId, entryId]
+  );
+  return (row?.favorito ?? 0) === 1;
+}
+
+/* ============================================================
+   Consultas de exploración
+   ============================================================ */
+
+export async function getEntry(id: number): Promise<Entry | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<EntryRow>(
+    'SELECT * FROM entrada WHERE id = ?;',
+    [id]
+  );
+  return row ? toEntry(row) : null;
+}
+
+export async function getEntriesByIds(ids: number[]): Promise<Entry[]> {
+  if (ids.length === 0) return [];
+  const db = await getDb();
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT * FROM entrada WHERE id IN (${ids.map(() => '?').join(',')});`,
+    ids
+  );
+  const byId = new Map(rows.map((r) => [r.id, toEntry(r)]));
+  return ids.map((i) => byId.get(i)).filter((e): e is Entry => Boolean(e));
+}
+
+export async function getPackEntries(
+  packId: string,
+  filter: ContentFilter
+): Promise<Entry[]> {
+  const db = await getDb();
+  const f = buildFilter({ ...filter, packs: [packId] });
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT * FROM entrada e WHERE ${f.sql} ORDER BY e.nivel ASC, e.id ASC;`,
+    f.args
+  );
+  return rows.map(toEntry);
+}
+
+export async function searchEntries(
+  term: string,
+  filter: ContentFilter,
+  limit = 40
+): Promise<Entry[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const like = `%${term.trim()}%`;
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT * FROM entrada e
+      WHERE ${f.sql}
+        AND (e.phrase LIKE ? OR e.spanish_main LIKE ? OR e.spanish LIKE ?)
+      ORDER BY e.nivel ASC LIMIT ?;`,
+    [...f.args, like, like, like, limit]
+  );
+  return rows.map(toEntry);
+}
+
+/** Entradas para el juego: solo las ya estudiadas al menos una vez. */
+export async function getStudiedEntries(
+  usuarioId: number,
+  filter: ContentFilter,
+  limit: number
+): Promise<Entry[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT e.* FROM entrada e
+       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql} AND t.repeticiones >= 1
+        AND e.tipo != 'regla_fonetica'
+      ORDER BY RANDOM() LIMIT ?;`,
+    [usuarioId, ...f.args, limit]
+  );
+  return rows.map(toEntry);
+}
+
+export async function getFavorites(
+  usuarioId: number,
+  filter: ContentFilter
+): Promise<Entry[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT e.* FROM entrada e
+       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql} AND t.favorito = 1
+      ORDER BY t.ultimo_repaso DESC NULLS LAST, e.id ASC;`,
+    [usuarioId, ...f.args]
+  );
+  return rows.map(toEntry);
+}
+
+/** Las que más se atoran. Alimenta P-14 y la notificación not_atorada. */
+export async function getStuckEntries(
+  usuarioId: number,
+  minFallos = 3,
+  limit = 20
+): Promise<{ entry: Entry; fallos: number }[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<EntryRow & { fallos: number }>(
+    `SELECT e.*, t.fallos FROM entrada e
+       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE t.fallos >= ? AND t.dominada = 0
+      ORDER BY t.fallos DESC LIMIT ?;`,
+    [usuarioId, minFallos, limit]
+  );
+  return rows.map((r) => ({ entry: toEntry(r), fallos: r.fallos }));
+}
+
+export async function getReglas(grupo?: string): Promise<Entry[]> {
+  const db = await getDb();
+  const rows = grupo
+    ? await db.getAllAsync<EntryRow>(
+        'SELECT * FROM entrada WHERE regla_grupo = ? ORDER BY id ASC;',
+        [grupo]
+      )
+    : await db.getAllAsync<EntryRow>(
+        'SELECT * FROM entrada WHERE regla_grupo IS NOT NULL ORDER BY id ASC;'
+      );
+  return rows.map(toEntry);
+}
+
+/** Ejemplos para una unidad de gramática, priorizando nivel bajo. */
+export async function getByTiempoVerbal(
+  tiempo: string,
+  limit = 6
+): Promise<Entry[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT * FROM entrada
+      WHERE tiempo_verbal = ? AND is_canonical = 1 AND revisar = 0
+        AND vulgaridad = 0
+      ORDER BY nivel ASC, RANDOM() LIMIT ?;`,
+    [tiempo, limit]
+  );
+  return rows.map(toEntry);
+}
+
+/* ============================================================
+   Progreso
+   ============================================================ */
+
+export interface Stats {
+  vistas: number;
+  dominadas: number;
+  favoritas: number;
+  atoradas: number;
+  total: number;
+  racha: number;
+  rachaMax: number;
+  precision: number;
+}
+
+export async function getStats(usuarioId: number): Promise<Stats> {
+  const db = await getDb();
+
+  const t = await db.getFirstAsync<{
+    vistas: number;
+    dominadas: number;
+    favoritas: number;
+    atoradas: number;
+  }>(
+    `SELECT COUNT(*) AS vistas,
+            SUM(dominada) AS dominadas,
+            SUM(favorito) AS favoritas,
+            SUM(CASE WHEN fallos >= 3 AND dominada = 0 THEN 1 ELSE 0 END)
+              AS atoradas
+       FROM tarjeta WHERE usuario_id = ?;`,
+    [usuarioId]
+  );
+
+  const total = await db.getFirstAsync<{ n: number }>(
+    `SELECT COUNT(*) AS n FROM entrada
+      WHERE is_canonical = 1 AND revisar = 0 AND tipo != 'regla_fonetica';`
+  );
+
+  const p = await db.getFirstAsync<{
+    racha: number;
+    racha_max: number;
+    total_respuestas: number;
+    total_aciertos: number;
+  }>('SELECT * FROM progreso WHERE usuario_id = ?;', [usuarioId]);
+
+  const respuestas = p?.total_respuestas ?? 0;
+
+  return {
+    vistas: t?.vistas ?? 0,
+    dominadas: t?.dominadas ?? 0,
+    favoritas: t?.favoritas ?? 0,
+    atoradas: t?.atoradas ?? 0,
+    total: total?.n ?? 0,
+    racha: p?.racha ?? 0,
+    rachaMax: p?.racha_max ?? 0,
+    precision: respuestas > 0 ? (p?.total_aciertos ?? 0) / respuestas : 0,
+  };
+}
+
+/** Cuenta por mundo, para la pantalla de mundos. */
+export async function getWorldCounts(
+  usuarioId: number,
+  filter: ContentFilter
+): Promise<Record<string, { total: number; vistas: number }>> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const rows = await db.getAllAsync<{
+    mundo: string;
+    total: number;
+    vistas: number;
+  }>(
+    `SELECT e.mundo,
+            COUNT(*) AS total,
+            SUM(CASE WHEN t.entry_id IS NULL THEN 0 ELSE 1 END) AS vistas
+       FROM entrada e
+       LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql}
+      GROUP BY e.mundo;`,
+    [usuarioId, ...f.args]
+  );
+  const out: Record<string, { total: number; vistas: number }> = {};
+  for (const r of rows) out[r.mundo] = { total: r.total, vistas: r.vistas };
+  return out;
+}
+
+export async function getPackCounts(
+  usuarioId: number,
+  filter: ContentFilter
+): Promise<Record<string, { total: number; vistas: number; dominadas: number }>> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const rows = await db.getAllAsync<{
+    pack_final: string;
+    total: number;
+    vistas: number;
+    dominadas: number;
+  }>(
+    `SELECT e.pack_final,
+            COUNT(*) AS total,
+            SUM(CASE WHEN t.entry_id IS NULL THEN 0 ELSE 1 END) AS vistas,
+            COALESCE(SUM(t.dominada), 0) AS dominadas
+       FROM entrada e
+       LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE ${f.sql}
+      GROUP BY e.pack_final;`,
+    [usuarioId, ...f.args]
+  );
+  const out: Record<
+    string,
+    { total: number; vistas: number; dominadas: number }
+  > = {};
+  for (const r of rows) {
+    out[r.pack_final] = {
+      total: r.total,
+      vistas: r.vistas,
+      dominadas: r.dominadas,
+    };
+  }
+  return out;
+}
+
+/* ============================================================
+   Señuelos de palabra para el ejercicio Construir
+
+   Los distractores de Reconocer son significados en español; estos son
+   palabras sueltas en inglés. Se sacan de frases del mismo pack porque
+   un señuelo obviamente ajeno al tema convierte el ejercicio en leer la
+   fila de fichas en vez de recordar la frase.
+   ============================================================ */
+
+export async function getWordDecoys(
+  entry: Entry,
+  count = 3
+): Promise<string[]> {
+  const db = await getDb();
+
+  const rows = await db.getAllAsync<{ phrase_tts: string }>(
+    `SELECT phrase_tts FROM entrada
+      WHERE pack_final = ? AND id != ?
+        AND is_canonical = 1 AND revisar = 0
+        AND word_count BETWEEN 2 AND 12
+      ORDER BY RANDOM() LIMIT 14;`,
+    [entry.pack_final, entry.id]
+  );
+
+  const propias = new Set(splitWords(entry.phrase_tts).map((w) => w.toLowerCase()));
+  const vistos = new Set<string>();
+  const out: string[] = [];
+
+  for (const r of rows) {
+    for (const w of splitWords(r.phrase_tts)) {
+      const key = w.toLowerCase();
+      if (propias.has(key) || vistos.has(key)) continue;
+      // Un señuelo de una letra no engaña a nadie y estorba en pantalla.
+      if (w.length < 2) continue;
+      vistos.add(key);
+      out.push(w);
+      if (out.length >= count) return out;
+    }
+  }
+
+  return out;
+}
+
+/** Parte una frase en palabras conservando apóstrofos internos. */
+export function splitWords(phrase: string): string[] {
+  return phrase
+    .split(/\s+/)
+    .map((w) => w.replace(/^[^\p{L}\p{N}']+|[^\p{L}\p{N}']+$/gu, ''))
+    .filter((w) => w.length > 0);
+}
+
+/** El estado SM-2 de una entrada, o null si nunca se ha visto. */
+export async function getCardState(
+  usuarioId: number,
+  entryId: number
+): Promise<CardState | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{
+    repeticiones: number;
+    intervalo: number;
+    facilidad: number;
+    vence_en: number;
+    ultimo_repaso: number | null;
+    fallos: number;
+    aciertos: number;
+    dominada: number;
+    favorito: number;
+  }>('SELECT * FROM tarjeta WHERE usuario_id = ? AND entry_id = ?;', [
+    usuarioId,
+    entryId,
+  ]);
+
+  if (!row) return null;
+
+  return {
+    entry_id: entryId,
+    repeticiones: row.repeticiones,
+    intervalo: row.intervalo,
+    facilidad: row.facilidad,
+    vence_en: row.vence_en,
+    ultimo_repaso: row.ultimo_repaso,
+    fallos: row.fallos,
+    aciertos: row.aciertos,
+    dominada: row.dominada as 0 | 1,
+    favorito: row.favorito as 0 | 1,
+  };
+}
+
+
+
+/** Cuántas frases domina el usuario en cada mundo. Abre las lecturas. */
+export async function getDominadasPorMundo(
+  usuarioId: number
+): Promise<Record<string, number>> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ mundo: string; n: number }>(
+    `SELECT e.mundo, COUNT(*) AS n
+       FROM entrada e
+       JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE t.dominada = 1
+      GROUP BY e.mundo;`,
+    [usuarioId]
+  );
+  const out: Record<string, number> = {};
+  for (const r of rows) out[r.mundo] = r.n;
+  return out;
+}
+
+/** Los estados SM-2 de un puñado de entradas. Lo usa el lector. */
+export async function getCardStates(
+  usuarioId: number,
+  ids: number[]
+): Promise<Map<number, CardState>> {
+  const out = new Map<number, CardState>();
+  if (ids.length === 0) return out;
+
+  const db = await getDb();
+  const rows = await db.getAllAsync<{
+    entry_id: number;
+    repeticiones: number;
+    intervalo: number;
+    facilidad: number;
+    vence_en: number;
+    ultimo_repaso: number | null;
+    fallos: number;
+    aciertos: number;
+    dominada: number;
+    favorito: number;
+  }>(
+    `SELECT * FROM tarjeta
+      WHERE usuario_id = ? AND entry_id IN (${ids.map(() => '?').join(',')});`,
+    [usuarioId, ...ids]
+  );
+
+  for (const r of rows) {
+    out.set(r.entry_id, {
+      entry_id: r.entry_id,
+      repeticiones: r.repeticiones,
+      intervalo: r.intervalo,
+      facilidad: r.facilidad,
+      vence_en: r.vence_en,
+      ultimo_repaso: r.ultimo_repaso,
+      fallos: r.fallos,
+      aciertos: r.aciertos,
+      dominada: r.dominada as 0 | 1,
+      favorito: r.favorito as 0 | 1,
+    });
+  }
+  return out;
+}
+
+/* ============================================================
+   Bolsas para los juegos
+
+   Los juegos NO dependen de que el usuario ya haya estudiado. Antes sí,
+   y el resultado era que alguien recién instalado abría Pares y se
+   encontraba una pantalla vacía diciéndole que fuera a estudiar. Un
+   juego al que no puedes entrar hasta cumplir una tarea deja de ser el
+   plan B del día flojo, que es justo para lo que existe.
+
+   Se ordena al azar. Si la entrada ya tiene tarjeta, la partida igual
+   escribe su calificación SM-2, así que jugar sigue adelantando el
+   repaso; solo dejó de ser un requisito.
+   ============================================================ */
+
+export async function getRandomEntries(
+  filter: ContentFilter,
+  limit: number,
+  opciones: { maxWords?: number; maxLen?: number; conAudio?: boolean } = {}
+): Promise<Entry[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+
+  const extra: string[] = [];
+  const args: (string | number)[] = [...f.args];
+
+  if (opciones.maxWords !== undefined) {
+    extra.push('e.word_count <= ?');
+    args.push(opciones.maxWords);
+  }
+  if (opciones.maxLen !== undefined) {
+    extra.push('LENGTH(e.spanish_main) <= ?');
+    args.push(opciones.maxLen);
+  }
+  if (opciones.conAudio) {
+    extra.push("e.audio_en IS NOT NULL AND e.audio_en != ''");
+  }
+
+  const cond = extra.length > 0 ? ` AND ${extra.join(' AND ')}` : '';
+  args.push(limit);
+
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT e.* FROM entrada e
+      WHERE ${f.sql} AND e.tipo != 'regla_fonetica'${cond}
+      ORDER BY RANDOM() LIMIT ?;`,
+    args
+  );
+  return rows.map(toEntry);
+}
+
+/** Entradas con palabra para deletrear, sin exigir haberlas estudiado. */
+export async function getRandomSpellable(
+  filter: ContentFilter,
+  limit: number
+): Promise<Entry[]> {
+  const db = await getDb();
+  const f = buildFilter(filter);
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT e.* FROM entrada e
+      WHERE ${f.sql} AND e.tipo != 'regla_fonetica'
+        AND e.word_count BETWEEN 2 AND 6
+        AND LENGTH(e.phrase_tts) <= 34
+      ORDER BY RANDOM() LIMIT ?;`,
+    [...f.args, limit]
+  );
+  return rows.map(toEntry);
+}
+
+/**
+ * Tarjetas nuevas al azar, ignorando el nivel del usuario.
+ *
+ * El filtro por nivel se quitó de la práctica a propósito. Encerraba al
+ * usuario en un tercio del catálogo: con nivel 1 puesto, 1,245 de las
+ * 1,524 frases no le salían nunca, y desde afuera eso se ve como que la
+ * app tiene poco contenido y repite.
+ *
+ * Se conserva el modo limpio, porque esa sí es una decisión del usuario
+ * sobre qué quiere ver, no una suposición de la app sobre qué puede.
+ */
+export async function getRandomNewCards(
+  usuarioId: number,
+  modoLimpio: boolean,
+  limit: number
+): Promise<{ entry: Entry; state: CardState | null }[]> {
+  const db = await getDb();
+  const cond = modoLimpio ? 'AND e.vulgaridad < 2' : '';
+
+  const rows = await db.getAllAsync<EntryRow>(
+    `SELECT e.* FROM entrada e
+      WHERE e.is_canonical = 1 AND e.revisar = 0
+        AND e.tipo != 'regla_fonetica' ${cond}
+        AND NOT EXISTS (
+          SELECT 1 FROM tarjeta t
+           WHERE t.entry_id = e.id AND t.usuario_id = ?
+        )
+      ORDER BY RANDOM() LIMIT ?;`,
+    [usuarioId, limit]
+  );
+
+  return rows.map((r) => ({ entry: toEntry(r), state: null }));
+}
+
+/**
+ * Las tarjetas de una sesión, elegidas al azar de todo el catálogo.
+ *
+ * Esto sustituye a la cola de vencidas. El plan diario desapareció: ya
+ * no hay "tus 12 de hoy", hay frases al azar cada vez que se entra.
+ *
+ * Lo que NO desaparece es el registro. Si la entrada ya tiene tarjeta,
+ * se trae su estado SM-2 para que el ejercicio siga escalando —
+ * Reconocer la primera vez, Escribir a la sexta — y para que la
+ * pantalla de Progreso y la dificultad de las lecturas sigan teniendo
+ * de dónde salir. Se quitó la planeación, no la memoria.
+ */
+export async function getSessionCards(
+  usuarioId: number,
+  modoLimpio: boolean,
+  limit: number
+): Promise<{ entry: Entry; state: CardState | null }[]> {
+  const db = await getDb();
+  const cond = modoLimpio ? 'AND e.vulgaridad < 2' : '';
+
+  const rows = await db.getAllAsync<
+    EntryRow & {
+      t_repeticiones: number | null;
+      t_intervalo: number | null;
+      t_facilidad: number | null;
+      t_vence_en: number | null;
+      t_ultimo_repaso: number | null;
+      t_fallos: number | null;
+      t_aciertos: number | null;
+      t_dominada: number | null;
+      t_favorito: number | null;
+    }
+  >(
+    `SELECT e.*,
+            t.repeticiones  AS t_repeticiones,
+            t.intervalo     AS t_intervalo,
+            t.facilidad     AS t_facilidad,
+            t.vence_en      AS t_vence_en,
+            t.ultimo_repaso AS t_ultimo_repaso,
+            t.fallos        AS t_fallos,
+            t.aciertos      AS t_aciertos,
+            t.dominada      AS t_dominada,
+            t.favorito      AS t_favorito
+       FROM entrada e
+       LEFT JOIN tarjeta t
+              ON t.entry_id = e.id AND t.usuario_id = ?
+      WHERE e.is_canonical = 1 AND e.revisar = 0
+        AND e.tipo != 'regla_fonetica' ${cond}
+      ORDER BY RANDOM() LIMIT ?;`,
+    [usuarioId, limit]
+  );
+
+  return rows.map((r) => ({
+    entry: toEntry(r),
+    state:
+      r.t_repeticiones === null
+        ? null
+        : {
+            entry_id: r.id,
+            repeticiones: r.t_repeticiones,
+            intervalo: r.t_intervalo ?? 0,
+            facilidad: r.t_facilidad ?? 2.5,
+            vence_en: r.t_vence_en ?? Date.now(),
+            ultimo_repaso: r.t_ultimo_repaso,
+            fallos: r.t_fallos ?? 0,
+            aciertos: r.t_aciertos ?? 0,
+            dominada: (r.t_dominada ?? 0) as 0 | 1,
+            favorito: (r.t_favorito ?? 0) as 0 | 1,
+          },
+  }));
+}

@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Wero",
+    "slug": "wero",
+    "version": "1.2.0",
+    "orientation": "portrait",
+    "scheme": "wero",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#FBF9F4"
+    },
+    "assetBundlePatterns": [
+      "assets/data/**/*",
+      "assets/aud/**/*",
+      "assets/img/**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.wero.mobile",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "NSMicrophoneUsageDescription": "Wero usa el microfono para oir la palabra que dices y decirte cual entendio. El audio no sale de tu telefono y no se guarda.",
+        "NSSpeechRecognitionUsageDescription": "El reconocimiento pasa en tu telefono para comparar la palabra que dijiste contra la que se te pidio. No se envia ni se guarda nada."
+      }
+    },
+    "android": {
+      "package": "app.wero.mobile",
+      "versionCode": 3,
+      "adaptiveIcon": {
+        "backgroundColor": "#FBF9F4"
+      },
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM",
+        "VIBRATE",
+        "RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#E8543F"
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Wero necesita el microfono para oirte decir la palabra.",
+          "speechRecognitionPermission": "El reconocimiento corre en tu telefono, sin enviar audio.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

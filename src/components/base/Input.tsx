@@ -1,0 +1,106 @@
+import React, { forwardRef, useState } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputProps,
+} from 'react-native';
+import { color, font, layout, radius, space } from '@/theme';
+
+interface Props extends TextInputProps {
+  label?: string;
+  error?: string | null;
+  hint?: string;
+  secureToggle?: boolean;
+}
+
+export const Input = forwardRef<TextInput, Props>(function Input(
+  { label, error, hint, secureToggle, style, ...rest },
+  ref
+) {
+  const [focused, setFocused] = useState(false);
+  const [hidden, setHidden] = useState(Boolean(secureToggle));
+
+  return (
+    <View style={styles.wrap}>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+      <View
+        style={[
+          styles.field,
+          focused && styles.focused,
+          Boolean(error) && styles.errored,
+        ]}
+      >
+        <TextInput
+          ref={ref}
+          style={[styles.input, style]}
+          placeholderTextColor={color.textFaint}
+          selectionColor={color.accent}
+          secureTextEntry={secureToggle ? hidden : rest.secureTextEntry}
+          onFocus={(e) => {
+            setFocused(true);
+            rest.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            rest.onBlur?.(e);
+          }}
+          {...rest}
+        />
+        {secureToggle ? (
+          <Pressable
+            onPress={() => setHidden((v) => !v)}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={hidden ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+          >
+            <Text style={styles.toggle}>{hidden ? 'Ver' : 'Ocultar'}</Text>
+          </Pressable>
+        ) : null}
+      </View>
+      {error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : hint ? (
+        <Text style={styles.hint}>{hint}</Text>
+      ) : null}
+    </View>
+  );
+});
+
+const styles = StyleSheet.create({
+  wrap: { gap: space.xs },
+  label: {
+    fontSize: font.size.sm,
+    color: color.textMuted,
+    fontWeight: font.weight.medium,
+    marginLeft: 2,
+  },
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: layout.tapMin,
+    backgroundColor: color.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: color.border,
+    paddingHorizontal: space.md,
+    gap: space.sm,
+  },
+  focused: { borderColor: color.accent },
+  errored: { borderColor: color.riskStrong },
+  input: {
+    flex: 1,
+    color: color.text,
+    fontSize: font.size.md,
+    paddingVertical: space.md,
+  },
+  toggle: {
+    color: color.accent,
+    fontSize: font.size.sm,
+    fontWeight: font.weight.semibold,
+  },
+  error: { fontSize: font.size.sm, color: color.riskStrong, marginLeft: 2 },
+  hint: { fontSize: font.size.sm, color: color.textFaint, marginLeft: 2 },
+});

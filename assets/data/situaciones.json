@@ -1,0 +1,579 @@
+{
+  "version": 2,
+  "rondas_por_partida": 10,
+  "nota_juez": "El juez lee SIEMPRE del arquetipo, nunca del escenario: correcto_decir_si = entrada.vulgaridad <= arquetipo.max_vulgaridad && arquetipo.registros_ok.includes(entrada.registro)",
+  "nota_seleccion": "Solo entradas ya estudiadas (repeticiones >= 1). Nunca una nueva: el juego prueba criterio, no vocabulario.",
+  "nota_imagen": "Si escenario.imagen es null, la app usa la imagen del arquetipo. Así puedes lanzar con 8 imágenes y generar las 60 después.",
+  "arquetipos": [
+    {
+      "id": "bar_amigos",
+      "nombre": "Con los tuyos, sin filtro",
+      "orden": 1,
+      "max_vulgaridad": 2,
+      "registros_ok": ["formal", "neutro", "informal", "muy_informal"],
+      "razon_no": null,
+      "razon_si": "Aquí cabe todo. Es el único lugar donde no te cuidas.",
+      "escena_imagen": "Wero sitting on a barstool, relaxed, one paw around a friend's shoulder, both laughing",
+      "imagen": "img/sit/bar_amigos.webp"
+    },
+    {
+      "id": "chat_trabajo",
+      "nombre": "Trabajo, pero relajado",
+      "orden": 2,
+      "max_vulgaridad": 1,
+      "registros_ok": ["neutro", "informal"],
+      "razon_no": "Queda escrito. Alguien lo va a leer meses después.",
+      "razon_si": "Es informal pero queda registrado. Nada que no dirías en voz alta.",
+      "escena_imagen": "Wero typing on a laptop at a desk, glancing nervously over his shoulder",
+      "imagen": "img/sit/chat_trabajo.webp"
+    },
+    {
+      "id": "cena_familiar",
+      "nombre": "En familia",
+      "orden": 3,
+      "max_vulgaridad": 1,
+      "registros_ok": ["neutro", "informal", "muy_informal"],
+      "razon_no": "Depende de la familia, pero la abuela sí escucha.",
+      "razon_si": "En familia se habla suelto, solo cuida las palabras fuertes.",
+      "escena_imagen": "Wero at a long table full of food, mid-bite, surrounded by other dogs",
+      "imagen": "img/sit/cena_familiar.webp"
+    },
+    {
+      "id": "jefe",
+      "nombre": "Con alguien que decide sobre ti",
+      "orden": 4,
+      "max_vulgaridad": 0,
+      "registros_ok": ["formal", "neutro"],
+      "razon_no": "Con quien manda, cualquier cosa fuerte te cuesta algo, aunque él la diga.",
+      "razon_si": "Es limpio y no llama la atención. Pasa sin problema.",
+      "escena_imagen": "Wero standing straight in front of a large desk, ears slightly back",
+      "imagen": "img/sit/jefe.webp"
+    },
+    {
+      "id": "suegros",
+      "nombre": "Primera impresión",
+      "orden": 5,
+      "max_vulgaridad": 0,
+      "registros_ok": ["formal", "neutro"],
+      "razon_no": "Primera impresión. No hay segunda.",
+      "razon_si": "Suena normal y educado. Sin riesgo.",
+      "escena_imagen": "Wero on a sofa holding a teacup with both paws, sitting very still",
+      "imagen": "img/sit/suegros.webp"
+    },
+    {
+      "id": "doctor",
+      "nombre": "Donde te tienen que entender exacto",
+      "orden": 6,
+      "max_vulgaridad": 0,
+      "registros_ok": ["formal", "neutro"],
+      "razon_no": "Necesitas que te entienda exacto. La jerga aquí te sale cara.",
+      "razon_si": "Es claro y directo. Es justo lo que necesitas aquí.",
+      "escena_imagen": "Wero sitting on an examination table, one paw pointing at his own throat",
+      "imagen": "img/sit/doctor.webp"
+    },
+    {
+      "id": "entrevista",
+      "nombre": "Te están evaluando",
+      "orden": 7,
+      "max_vulgaridad": 0,
+      "registros_ok": ["formal"],
+      "razon_no": "Te pinta como poco serio aunque la frase no tenga groserías.",
+      "razon_si": "Suena profesional. Justo el registro que buscan.",
+      "escena_imagen": "Wero in a shirt and tie sitting upright, a single drop of sweat on his forehead",
+      "imagen": "img/sit/entrevista.webp"
+    },
+    {
+      "id": "policia",
+      "nombre": "Ante una autoridad",
+      "orden": 8,
+      "max_vulgaridad": 0,
+      "registros_ok": ["formal"],
+      "razon_no": "Aquí el registro no es estilo: es tu seguridad.",
+      "razon_si": "Formal y sin adornos. Es lo correcto.",
+      "escena_imagen": "Wero seated in a car with both paws visible on the steering wheel, window down",
+      "imagen": "img/sit/policia.webp"
+    }
+  ],
+  "escenarios": [
+    {
+      "id": "esc_01",
+      "arquetipo": "bar_amigos",
+      "titulo": "Estás en el bar con tus amigos",
+      "subtitulo": "Ya van tres rondas y nadie se quiere ir",
+      "escena_imagen": "Wero on a barstool with one paw around a friend, three empty glasses in front of them",
+      "imagen": null
+    },
+    {
+      "id": "esc_02",
+      "arquetipo": "bar_amigos",
+      "titulo": "En la carne asada del sábado",
+      "subtitulo": "Están los de siempre y ya hay música",
+      "escena_imagen": "Wero flipping meat on a backyard grill while friends sprawl on plastic chairs around him",
+      "imagen": null
+    },
+    {
+      "id": "esc_03",
+      "arquetipo": "bar_amigos",
+      "titulo": "En el antro con la banda",
+      "subtitulo": "La música está a todo volumen",
+      "escena_imagen": "Wero shouting into a friend's ear under swirling colored lights, both leaning close",
+      "imagen": null
+    },
+    {
+      "id": "esc_04",
+      "arquetipo": "bar_amigos",
+      "titulo": "Viendo el partido con tus cuates",
+      "subtitulo": "Van perdiendo y todos están alterados",
+      "escena_imagen": "Wero throwing both paws up at a glowing screen while friends around him clutch their heads",
+      "imagen": null
+    },
+    {
+      "id": "esc_05",
+      "arquetipo": "bar_amigos",
+      "titulo": "En la barra libre de una boda",
+      "subtitulo": "Ya se fueron los novios",
+      "escena_imagen": "Wero with a loosened tie leaning on a bar counter beside friends with untucked shirts",
+      "imagen": null
+    },
+    {
+      "id": "esc_06",
+      "arquetipo": "bar_amigos",
+      "titulo": "En el carro rumbo a la playa",
+      "subtitulo": "Van cuatro horas de camino y puro relajo",
+      "escena_imagen": "Wero hanging one paw out a car window while three friends inside sing along loudly",
+      "imagen": null
+    },
+    {
+      "id": "esc_07",
+      "arquetipo": "bar_amigos",
+      "titulo": "En el gym con tu compa de siempre",
+      "subtitulo": "Entre serie y serie",
+      "escena_imagen": "Wero resting on a weight bench mid conversation while a friend spots an empty bar above him",
+      "imagen": null
+    },
+    {
+      "id": "esc_08",
+      "arquetipo": "bar_amigos",
+      "titulo": "Jugando en línea con tus amigos",
+      "subtitulo": "Todos están en el micrófono",
+      "escena_imagen": "Wero wearing a headset shouting at a glowing screen while snacks pile up beside him",
+      "imagen": null
+    },
+    {
+      "id": "esc_09",
+      "arquetipo": "bar_amigos",
+      "titulo": "En el cumpleaños de tu mejor amigo",
+      "subtitulo": "Solo hay gente de tu edad",
+      "escena_imagen": "Wero pressing a paper crown onto a laughing friend's head while others crowd around a cake",
+      "imagen": null
+    },
+    {
+      "id": "esc_10",
+      "arquetipo": "bar_amigos",
+      "titulo": "En una despedida de soltero",
+      "subtitulo": "Nadie se va a acordar de nada mañana",
+      "escena_imagen": "Wero holding up a friend by the shoulders while the rest of the group cheers behind them",
+      "imagen": null
+    },
+    {
+      "id": "esc_11",
+      "arquetipo": "bar_amigos",
+      "titulo": "En la taquería a las dos de la mañana",
+      "subtitulo": "Vienen todos de la fiesta",
+      "escena_imagen": "Wero hunched over a taco stand at night with three sleepy friends waiting beside him",
+      "imagen": null
+    },
+    {
+      "id": "esc_12",
+      "arquetipo": "bar_amigos",
+      "titulo": "En el chat de tus amigos",
+      "subtitulo": "Ahí se dicen de todo",
+      "escena_imagen": "Wero grinning at his phone on a couch while notification bubbles pile up around his head",
+      "imagen": null
+    },
+    {
+      "id": "esc_13",
+      "arquetipo": "chat_trabajo",
+      "titulo": "En el chat del trabajo",
+      "subtitulo": "Están todos, incluido tu jefe",
+      "escena_imagen": "Wero typing at a desk while glancing sideways at a coworker reading over his shoulder",
+      "imagen": null
+    },
+    {
+      "id": "esc_14",
+      "arquetipo": "chat_trabajo",
+      "titulo": "En el canal del equipo",
+      "subtitulo": "Es del día a día, pero queda escrito",
+      "escena_imagen": "Wero at a laptop surrounded by floating speech bubbles from coworkers at nearby desks",
+      "imagen": null
+    },
+    {
+      "id": "esc_15",
+      "arquetipo": "chat_trabajo",
+      "titulo": "Escribiéndole a un compañero",
+      "subtitulo": "Se llevan bien, pero es correo de la empresa",
+      "escena_imagen": "Wero pausing mid typing with one paw raised, rereading what he just wrote on screen",
+      "imagen": null
+    },
+    {
+      "id": "esc_16",
+      "arquetipo": "chat_trabajo",
+      "titulo": "En videollamada con tu equipo",
+      "subtitulo": "Están las cámaras prendidas",
+      "escena_imagen": "Wero waving at a laptop camera while five other dogs appear in floating frames around him",
+      "imagen": null
+    },
+    {
+      "id": "esc_17",
+      "arquetipo": "chat_trabajo",
+      "titulo": "Comiendo con los del trabajo",
+      "subtitulo": "Salieron todos juntos",
+      "escena_imagen": "Wero eating at a restaurant table with four coworkers who still have office lanyards on",
+      "imagen": null
+    },
+    {
+      "id": "esc_18",
+      "arquetipo": "chat_trabajo",
+      "titulo": "En el grupo del proyecto",
+      "subtitulo": "Hay gente de otras áreas que no conoces",
+      "escena_imagen": "Wero typing carefully while unfamiliar dogs watch from the far side of a long table",
+      "imagen": null
+    },
+    {
+      "id": "esc_19",
+      "arquetipo": "chat_trabajo",
+      "titulo": "En el after office del viernes",
+      "subtitulo": "Ya nadie está en modo trabajo",
+      "escena_imagen": "Wero with his sleeves rolled up laughing with coworkers around a small table of drinks",
+      "imagen": null
+    },
+    {
+      "id": "esc_20",
+      "arquetipo": "chat_trabajo",
+      "titulo": "Mandándole un mensaje directo a tu jefe",
+      "subtitulo": "Es informal, pero es tu jefe",
+      "escena_imagen": "Wero holding his phone with both paws, thumb hovering, ears tilted in hesitation",
+      "imagen": null
+    },
+    {
+      "id": "esc_21",
+      "arquetipo": "cena_familiar",
+      "titulo": "En la cena familiar",
+      "subtitulo": "Están los primos y también la abuela",
+      "escena_imagen": "Wero mid bite at a long crowded table where an older dog watches him from the head seat",
+      "imagen": null
+    },
+    {
+      "id": "esc_22",
+      "arquetipo": "cena_familiar",
+      "titulo": "En la posada de tu familia",
+      "subtitulo": "Está toda la familia junta",
+      "escena_imagen": "Wero holding a warm mug in a living room packed with dogs of every age and size",
+      "imagen": null
+    },
+    {
+      "id": "esc_23",
+      "arquetipo": "cena_familiar",
+      "titulo": "En la comida del domingo en casa de tu mamá",
+      "subtitulo": "Solo la familia cercana",
+      "escena_imagen": "Wero reaching for a serving spoon while his mother watches him with a knowing expression",
+      "imagen": null
+    },
+    {
+      "id": "esc_24",
+      "arquetipo": "cena_familiar",
+      "titulo": "En el cumpleaños de tu sobrino",
+      "subtitulo": "Hay niños corriendo por todos lados",
+      "escena_imagen": "Wero holding a plate above his head while a pack of puppies races past his legs",
+      "imagen": null
+    },
+    {
+      "id": "esc_25",
+      "arquetipo": "cena_familiar",
+      "titulo": "En el patio con tus primos",
+      "subtitulo": "Los grandes están adentro",
+      "escena_imagen": "Wero leaning on a backyard fence with three cousins, all glancing toward a lit kitchen window",
+      "imagen": null
+    },
+    {
+      "id": "esc_26",
+      "arquetipo": "cena_familiar",
+      "titulo": "En el grupo de la familia",
+      "subtitulo": "Tu tía lee absolutamente todo",
+      "escena_imagen": "Wero typing on his phone while an older dog behind him leans in with wide curious eyes",
+      "imagen": null
+    },
+    {
+      "id": "esc_27",
+      "arquetipo": "cena_familiar",
+      "titulo": "En un bautizo",
+      "subtitulo": "Hay familia y también desconocidos",
+      "escena_imagen": "Wero in a light shirt holding a small gift among clusters of dressed up dogs he does not know",
+      "imagen": null
+    },
+    {
+      "id": "esc_28",
+      "arquetipo": "cena_familiar",
+      "titulo": "En la boda de tu prima",
+      "subtitulo": "Está tu familia y también la de ella",
+      "escena_imagen": "Wero at a round banquet table between two groups of dogs eyeing each other politely",
+      "imagen": null
+    },
+    {
+      "id": "esc_29",
+      "arquetipo": "jefe",
+      "titulo": "Hablando con tu jefe",
+      "subtitulo": "Te llamó a su oficina",
+      "escena_imagen": "Wero standing straight before a large desk while a seated dog studies a folder",
+      "imagen": null
+    },
+    {
+      "id": "esc_30",
+      "arquetipo": "jefe",
+      "titulo": "En una junta con todo el equipo",
+      "subtitulo": "Tu jefe está tomando notas",
+      "escena_imagen": "Wero speaking at a conference table while a dog at the far end writes without looking up",
+      "imagen": null
+    },
+    {
+      "id": "esc_31",
+      "arquetipo": "jefe",
+      "titulo": "En una junta con clientes",
+      "subtitulo": "Están esperando que hables tú",
+      "escena_imagen": "Wero standing at the head of a long table while six dogs in suits turn toward him at once",
+      "imagen": null
+    },
+    {
+      "id": "esc_32",
+      "arquetipo": "jefe",
+      "titulo": "En tu evaluación de desempeño",
+      "subtitulo": "Van a hablar de tu sueldo",
+      "escena_imagen": "Wero sitting upright across a desk while a manager slides a closed folder toward him",
+      "imagen": null
+    },
+    {
+      "id": "esc_33",
+      "arquetipo": "jefe",
+      "titulo": "En una plática con recursos humanos",
+      "subtitulo": "Todo lo que digas queda registrado",
+      "escena_imagen": "Wero seated in a small bare office while two dogs across from him both hold pens ready",
+      "imagen": null
+    },
+    {
+      "id": "esc_34",
+      "arquetipo": "jefe",
+      "titulo": "Presentando resultados a la dirección",
+      "subtitulo": "Están los jefes de tu jefe",
+      "escena_imagen": "Wero pointing at a blank board while a row of older dogs in dark suits watch in silence",
+      "imagen": null
+    },
+    {
+      "id": "esc_35",
+      "arquetipo": "jefe",
+      "titulo": "Te encontraste al dueño en el elevador",
+      "subtitulo": "Tienes treinta segundos",
+      "escena_imagen": "Wero standing very straight in a small elevator beside one impeccably dressed older dog",
+      "imagen": null
+    },
+    {
+      "id": "esc_36",
+      "arquetipo": "jefe",
+      "titulo": "En llamada con un proveedor",
+      "subtitulo": "Estás negociando el precio",
+      "escena_imagen": "Wero holding a phone to his ear at a desk while tapping a calculator with his other paw",
+      "imagen": null
+    },
+    {
+      "id": "esc_37",
+      "arquetipo": "jefe",
+      "titulo": "Dando una capacitación al equipo nuevo",
+      "subtitulo": "Todos te están viendo como el que sabe",
+      "escena_imagen": "Wero gesturing before a semicircle of young dogs who all lean forward attentively",
+      "imagen": null
+    },
+    {
+      "id": "esc_38",
+      "arquetipo": "jefe",
+      "titulo": "Diciéndole a tu jefe que te vas",
+      "subtitulo": "Quieres dejar buena impresión",
+      "escena_imagen": "Wero placing a folded sheet on a desk while the seated dog looks up slowly at him",
+      "imagen": null
+    },
+    {
+      "id": "esc_39",
+      "arquetipo": "suegros",
+      "titulo": "Con los papás de tu pareja",
+      "subtitulo": "Es la primera vez que los ves",
+      "escena_imagen": "Wero on a sofa holding a teacup with both paws while two older dogs watch him from armchairs",
+      "imagen": null
+    },
+    {
+      "id": "esc_40",
+      "arquetipo": "suegros",
+      "titulo": "Conociendo a los amigos de tu pareja",
+      "subtitulo": "Te están midiendo",
+      "escena_imagen": "Wero standing in a doorway with one paw half raised while a group inside turns to look at him",
+      "imagen": null
+    },
+    {
+      "id": "esc_41",
+      "arquetipo": "suegros",
+      "titulo": "Presentándote con el vecino nuevo",
+      "subtitulo": "Se van a ver todos los días",
+      "escena_imagen": "Wero extending a paw across a low garden fence toward a dog carrying moving boxes",
+      "imagen": null
+    },
+    {
+      "id": "esc_42",
+      "arquetipo": "suegros",
+      "titulo": "En casa de un amigo, con sus papás",
+      "subtitulo": "Te invitaron a comer",
+      "escena_imagen": "Wero seated at a family dinner table beside a friend while the parents pass him a dish",
+      "imagen": null
+    },
+    {
+      "id": "esc_43",
+      "arquetipo": "suegros",
+      "titulo": "En una primera cita",
+      "subtitulo": "Todavía no sabes cómo habla la otra persona",
+      "escena_imagen": "Wero across a small candlelit table from another dog, both sitting carefully upright",
+      "imagen": null
+    },
+    {
+      "id": "esc_44",
+      "arquetipo": "suegros",
+      "titulo": "Contestando el teléfono en casa de tu suegra",
+      "subtitulo": "No sabes quién está llamando",
+      "escena_imagen": "Wero holding a landline receiver in a tidy hallway with wide alert eyes and stiff ears",
+      "imagen": null
+    },
+    {
+      "id": "esc_45",
+      "arquetipo": "suegros",
+      "titulo": "En una reunión de padres de familia",
+      "subtitulo": "Hay maestros presentes",
+      "escena_imagen": "Wero squeezed into a small classroom chair among other adult dogs facing a teacher",
+      "imagen": null
+    },
+    {
+      "id": "esc_46",
+      "arquetipo": "doctor",
+      "titulo": "En el consultorio del doctor",
+      "subtitulo": "Te está preguntando qué sientes",
+      "escena_imagen": "Wero on an examination table pointing at his own throat while a doctor listens closely",
+      "imagen": null
+    },
+    {
+      "id": "esc_47",
+      "arquetipo": "doctor",
+      "titulo": "En el dentista",
+      "subtitulo": "Tienes la boca medio abierta",
+      "escena_imagen": "Wero reclined in a dental chair with his mouth open and both paws gripping the armrests",
+      "imagen": null
+    },
+    {
+      "id": "esc_48",
+      "arquetipo": "doctor",
+      "titulo": "En urgencias de un hospital",
+      "subtitulo": "Te están tomando datos",
+      "escena_imagen": "Wero holding his side at a hospital counter while a nurse asks him something urgently",
+      "imagen": null
+    },
+    {
+      "id": "esc_49",
+      "arquetipo": "doctor",
+      "titulo": "Pidiendo algo en la farmacia",
+      "subtitulo": "Hay fila detrás de ti",
+      "escena_imagen": "Wero at a pharmacy counter gesturing at his own stomach while three dogs wait behind him",
+      "imagen": null
+    },
+    {
+      "id": "esc_50",
+      "arquetipo": "doctor",
+      "titulo": "En tu primera sesión de terapia",
+      "subtitulo": "Tienes que explicar cómo te sientes",
+      "escena_imagen": "Wero sitting on a soft chair with both paws in his lap while a calm dog listens across from him",
+      "imagen": null
+    },
+    {
+      "id": "esc_51",
+      "arquetipo": "doctor",
+      "titulo": "En el laboratorio de análisis",
+      "subtitulo": "Te preguntan por tus síntomas",
+      "escena_imagen": "Wero rolling up one sleeve while a technician beside him prepares a small glass tube",
+      "imagen": null
+    },
+    {
+      "id": "esc_52",
+      "arquetipo": "entrevista",
+      "titulo": "Estás en una entrevista de trabajo",
+      "subtitulo": "El reclutador te acaba de preguntar algo",
+      "escena_imagen": "Wero in a shirt and tie sitting upright with one drop of sweat on his forehead",
+      "imagen": null
+    },
+    {
+      "id": "esc_53",
+      "arquetipo": "entrevista",
+      "titulo": "En la entrevista de la visa",
+      "subtitulo": "Cada palabra cuenta",
+      "escena_imagen": "Wero standing at a tall glass window speaking to an official whose face stays completely neutral",
+      "imagen": null
+    },
+    {
+      "id": "esc_54",
+      "arquetipo": "entrevista",
+      "titulo": "En la entrevista de una beca",
+      "subtitulo": "Hay tres personas evaluándote",
+      "escena_imagen": "Wero seated alone facing three dogs behind a long table, all holding folders and pens",
+      "imagen": null
+    },
+    {
+      "id": "esc_55",
+      "arquetipo": "entrevista",
+      "titulo": "Aplicando para rentar un departamento",
+      "subtitulo": "El dueño te está entrevistando",
+      "escena_imagen": "Wero standing in an empty apartment while an older dog with keys studies him carefully",
+      "imagen": null
+    },
+    {
+      "id": "esc_56",
+      "arquetipo": "entrevista",
+      "titulo": "En la entrevista de admisión de una escuela",
+      "subtitulo": "Están tus papeles sobre la mesa",
+      "escena_imagen": "Wero sitting straight before a desk stacked with folders while an examiner leans back thinking",
+      "imagen": null
+    },
+    {
+      "id": "esc_57",
+      "arquetipo": "policia",
+      "titulo": "Te paró un policía",
+      "subtitulo": "Bajaste la ventanilla",
+      "escena_imagen": "Wero seated in a car with both paws on the wheel, window down, an officer leaning in",
+      "imagen": null
+    },
+    {
+      "id": "esc_58",
+      "arquetipo": "policia",
+      "titulo": "En la aduana del aeropuerto",
+      "subtitulo": "Te están revisando la maleta",
+      "escena_imagen": "Wero standing beside an open suitcase on a metal counter while an inspector examines it",
+      "imagen": null
+    },
+    {
+      "id": "esc_59",
+      "arquetipo": "policia",
+      "titulo": "En el módulo de migración",
+      "subtitulo": "Te preguntan a qué vienes",
+      "escena_imagen": "Wero holding a small booklet at a tall booth while an officer studies him without expression",
+      "imagen": null
+    },
+    {
+      "id": "esc_60",
+      "arquetipo": "policia",
+      "titulo": "Después de un choque, con el ajustador",
+      "subtitulo": "Están anotando todo lo que dices",
+      "escena_imagen": "Wero gesturing at a dented car bumper while an adjuster beside him writes on a clipboard",
+      "imagen": null
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+# PRODUCT.md — Wero
+
+## Propósito
+
+Wero enseña el inglés que no viene en los libros: jerga de calle, hip-hop, oficina, dinero, gente. Se aprende de oído, con frases reales que se escuchan, se practican en juegos y se leen en contexto.
+
+La promesa es concreta: entender lo que dicen en una canción, una serie o una junta, y poder decirlo sin sonar a libro de texto.
+
+## Audiencia
+
+- **Quién:** adultos jóvenes en México, hispanohablantes, con inglés básico o medio. Entienden algo, pero el inglés real (rápido, con jerga, con contracciones) se les escapa.
+- **Qué quieren:** entender de verdad, hablar sin miedo y no sentirse tontos por equivocarse.
+- **Dónde lo usan:** en el teléfono (iOS y Android), en trayectos, en la fila, entre tareas. A veces con audífonos y a veces sin sonido.
+
+## Qué hay hoy
+
+| Sección | Contenido |
+|---|---|
+| Vocabulario | 1,524 frases con audio en inglés y español, agrupadas en 8 mundos: día a día, calle, dinero, gente, cultura, tech, legal y fonética |
+| Practicar | Juegos (Colmena, Pares, Caída, Dulces, Cázala), Modo Oído, pares mínimos, retos |
+| Estudio | Repaso espaciado (SM-2) de las frases que ya viste |
+| Lecturas | 24 historias con tres preguntas al final, sin calificación |
+| Gramática | 80 temas: qué es, cuándo se usa, cómo se arma, ejemplos y el error típico |
+| Phrasal verbs | 207 verbos con audio |
+| Sonidos | Laboratorio de fonemas (53) con sonido aislado, pares mínimos y cómo producirlos |
+| Errores comunes | 194 tarjetas de los errores típicos de un hispanohablante |
+| Progreso | Lo que llevas dominado, por mundo y por juego |
+
+Lo gratuito va primero: los primeros temas de cada bloque de gramática están abiertos, y lo demás se desbloquea con un anuncio.
+
+## Tono de voz
+
+**Cercano, mexicano, directo, sin infantilizar.**
+
+- Se tutea. Español de México: "dinero", "chamba", "camión" son válidos; "vosotros", "coger" o "ordenador", no.
+- Frases cortas y verbos directos. Se dice qué hacer, no se da vuelta.
+- Habla de tú a tú con un adulto. Nada de "¡Muy bien, campeón!", "¡Ups!" ni diminutivos condescendientes.
+- Equivocarse no es un fallo moral. El error se explica, no se regaña: el fallo es ámbar, nunca rojo, y nunca se dice "Incorrecto".
+- Humor discreto y de calle, sin forzarlo. La mascota Wero acompaña; no da sermones ni celebra en exceso.
+- Cada texto se gana su lugar: si se puede quitar sin perder nada, se quita.
+
+**Sí suena a Wero** (copy real de la app):
+- "En qué te vas a equivocar"
+- "No se guarda calificación. Es para ver si se entendió, no para calificarte."
+- "Toca la estrella en cualquier frase para guardarla aquí."
+- "Junta cada frase con lo que significa"
+- "Se acabaron las jugadas, pero el tablero se queda"
+
+**No suena a Wero:**
+- "¡Excelente trabajo, campeón!"
+- "¡Ups! Inténtalo de nuevo"
+- "Estimado usuario, su sesión ha finalizado"
+
+**Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
+
+## Restricciones
+
+- **Móvil primero.** Se diseña para una pantalla de teléfono; nada depende de tener un mouse ni una pantalla grande.
+- **Uso con una mano.** Las acciones frecuentes deben quedar al alcance del pulgar, y todo objetivo táctil mide al menos 48×48 dp.
+- **Sesiones cortas.** Una sesión útil dura de 1 a 5 minutos: una tarjeta, un par, una ronda. Nada exige una sesión larga ni castiga interrumpirla.
+- **Audio primero.** El contenido de estudio se oye. Debe funcionar bien con audífonos, y también con el sonido apagado cuando haga falta.
+- **Todo en el dispositivo.** El contenido y el progreso viven en el teléfono (SQLite y audio empaquetado o descargado); el estudio no debe depender de la conexión.
+- **Sin derrota.** Quedarse sin jugadas no acaba una partida y una lectura nunca se califica. El progreso alimenta el repaso, no una tabla de castigos.
+- **Accesible.** Contraste mínimo AA, movimiento reducido respetado, y acierto o fallo nunca se comunican solo con color.

@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "reglas": {
+    "max_vulgaridad": 1,
+    "solo_entradas_descargadas": true,
+    "no_repetir_en_dias": 14,
+    "max_por_dia": 1,
+    "ventana_horaria": "06:00-22:00",
+    "nota": "Nunca mandes una entrada de vulgaridad 2. Aparece en la pantalla de bloqueo delante de quien sea."
+  },
+  "plantillas": [
+    {
+      "id": "not_curiosidad",
+      "texto": "¿Sabes qué significa \"{phrase}\"?",
+      "condicion": "siempre",
+      "peso": 30,
+      "fuente": "catalogo",
+      "abre_en": "P-05"
+    },
+    {
+      "id": "not_pendiente",
+      "texto": "Tienes {n} tarjetas listas. Van 3 minutos.",
+      "condicion": "tarjetas_vencidas>=8",
+      "peso": 20,
+      "fuente": "cola",
+      "abre_en": "P-05"
+    },
+    {
+      "id": "not_atorada",
+      "texto": "Se te sigue atorando \"{phrase}\"",
+      "condicion": "existe_entrada_con_fallos>=3",
+      "peso": 15,
+      "fuente": "catalogo",
+      "abre_en": "P-12"
+    },
+    {
+      "id": "not_racha",
+      "texto": "Llevas {n} días seguidos",
+      "condicion": "racha>=3",
+      "peso": 10,
+      "fuente": "progreso",
+      "abre_en": "P-02"
+    },
+    {
+      "id": "not_error",
+      "texto": "Este te delata: \"{lo_que_dices}\"",
+      "condicion": "modulo_errores_instalado",
+      "peso": 10,
+      "fuente": "errores",
+      "abre_en": "P-22"
+    },
+    {
+      "id": "not_desbloqueo",
+      "texto": "Te faltan {n} frases para abrir \"{titulo}\"",
+      "condicion": "lectura_casi_desbloqueada",
+      "peso": 8,
+      "fuente": "lecturas",
+      "abre_en": "P-21"
+    },
+    {
+      "id": "not_juego",
+      "texto": "Nada pendiente hoy. ¿Juegas dos minutos?",
+      "condicion": "tarjetas_vencidas==0",
+      "peso": 7,
+      "fuente": "ninguna",
+      "abre_en": "P-08"
+    }
+  ],
+  "vuelta": [
+    {
+      "id": "not_vuelta_3",
+      "texto": "\"{phrase}\" te está esperando",
+      "condicion": "dias_sin_abrir==3",
+      "fuente": "catalogo",
+      "abre_en": "P-05"
+    },
+    {
+      "id": "not_vuelta_7",
+      "texto": "Llevas {n} frases dominadas. No las pierdas.",
+      "condicion": "dias_sin_abrir==7",
+      "fuente": "progreso",
+      "abre_en": "P-13"
+    },
+    {
+      "id": "not_vuelta_14",
+      "texto": "Sigues aquí. Empezamos con 8 fáciles.",
+      "condicion": "dias_sin_abrir==14",
+      "fuente": "ninguna",
+      "abre_en": "P-05"
+    }
+  ],
+  "prohibido": [
+    "Nunca uses la palabra estudiar ni la palabra deber.",
+    "Nunca menciones que se rompió la racha.",
+    "Nunca mandes dos notificaciones el mismo día.",
+    "Nunca mandes nada después de las 22:00 ni antes de las 06:00.",
+    "Después de la de 14 días, no vuelvas a mandar nada hasta que el usuario abra la app."
+  ]
+}

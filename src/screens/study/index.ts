@@ -1,0 +1,1 @@
+export { StudyScreen } from './StudyScreen';

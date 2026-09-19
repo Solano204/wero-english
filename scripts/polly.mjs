@@ -1,0 +1,253 @@
+#!/usr/bin/env node
+/**
+ * Genera los mp3 de Wero con Amazon Polly.
+ *
+ *   node scripts/polly.mjs --plan                 qué falta y cuánto cuesta
+ *   node scripts/polly.mjs --grupo "Catálogo EN"  genera un grupo
+ *   node scripts/polly.mjs --solo 18 8 1023       genera unos ids sueltos
+ *   node scripts/polly.mjs --todo                 genera todo lo que falte
+ *   node scripts/polly.mjs --revisa               valida lo ya generado
+ *
+ * Es reanudable: si el archivo ya existe y pesa lo suficiente, no lo vuelve
+ * a pedir. Puedes cortar con Ctrl+C y volver a lanzar sin pagar dos veces.
+ *
+ * Lee assets/medios.json, que es el manifiesto. No inventa texto: cada mp3
+ * sale del campo `texto` de su fila.
+ */
+
+import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
+import { mkdir, writeFile, readFile, stat } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const ejecuta = promisify(execFile);
+const RAIZ = path.resolve(import.meta.dirname, "..");
+const MANIFIESTO = path.join(RAIZ, "assets", "medios.json");
+const REGISTRO = path.join(RAIZ, ".polly-log.json");
+
+// ── voces ────────────────────────────────────────────────────────────────
+// Matthew y Andrés son la MISMA identidad de voz en dos idiomas. Es la
+// capacidad polyglot del motor generativo: el inglés suena a gringo y el
+// español suena a mexicano, pero es la misma persona. Por eso el catálogo
+// bilingüe no se oye como dos locutores pegados.
+const VOCES = {
+  en: { VoiceId: "Matthew",  LanguageCode: "en-US", Engine: "generative" },
+  es: { VoiceId: "Andres",   LanguageCode: "es-MX", Engine: "generative" },
+  narracion: { VoiceId: "Danielle", LanguageCode: "en-US", Engine: "generative" },
+  // El motor generative no soporta <phoneme>: el sonido aislado de cada
+  // fonema (fonemas.json) necesita el motor neural, que sí lo procesa.
+  fonAislado: { VoiceId: "Matthew", LanguageCode: "en-US", Engine: "neural" },
+};
+
+// El motor generativo solo da soporte PARCIAL a <prosody> y a <phoneme>.
+// Por eso el audio lento NO se pide con SSML: se genera a velocidad normal
+// y se ralentiza con ffmpeg, que conserva el tono y no depende del motor.
+const FACTOR_LENTO = 0.72;
+
+const REGION = process.env.AWS_REGION || "us-east-1";
+// Regiones con motor generativo, a septiembre de 2026.
+const REGIONES_GENERATIVE = new Set([
+  "us-east-1", "us-west-2", "eu-central-1", "eu-west-2", "ca-central-1",
+  "ap-northeast-1", "ap-northeast-2", "ap-southeast-1", "eu-central-2",
+]);
+
+const MIN_BYTES = 3000;        // menos que esto casi siempre es fallo silencioso
+const MAX_CHARS = 2900;        // el límite facturable de SynthesizeSpeech es 3000
+const PAUSA_MS = 120;          // entre llamadas, para no chocar con el throttle
+const REINTENTOS = 4;
+// Tarifa de lista por motor, USD por millón de caracteres. El costo real
+// depende de qué motor use cada fila (VOCES[idioma(fila)].Engine), no es
+// uno solo para todo el manifiesto desde que "fonAislado" usa neural.
+const PRECIO_POR_MOTOR = { generative: 30, neural: 16, standard: 4 };
+
+const cliente = new PollyClient({ region: REGION });
+
+// ── utilidades ───────────────────────────────────────────────────────────
+const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+const money = (n) => "$" + n.toFixed(2);
+
+function idioma(fila) {
+  if (fila.voz) return fila.voz;
+  if (fila.grupo === "Catálogo ES") return "es";
+  if (fila.grupo === "Lecturas") return "narracion";
+  return "en";
+}
+
+function precioPorCaracter(fila) {
+  const motor = VOCES[idioma(fila)]?.Engine ?? "generative";
+  return (PRECIO_POR_MOTOR[motor] ?? 30) / 1e6;
+}
+
+async function yaEsta(destino) {
+  if (!existsSync(destino)) return false;
+  const s = await stat(destino);
+  return s.size >= MIN_BYTES;
+}
+
+/** Parte un texto largo por oraciones sin pasar de MAX_CHARS. */
+function trocea(texto) {
+  if (texto.length <= MAX_CHARS) return [texto];
+  const trozos = [];
+  let actual = "";
+  for (const frase of texto.split(/(?<=[.!?])\s+/)) {
+    if ((actual + " " + frase).trim().length > MAX_CHARS) {
+      if (actual) trozos.push(actual.trim());
+      actual = frase;
+    } else {
+      actual = (actual + " " + frase).trim();
+    }
+  }
+  if (actual) trozos.push(actual.trim());
+  return trozos;
+}
+
+async function sintetiza(texto, voz, esSsml) {
+  let ultimo;
+  for (let intento = 1; intento <= REINTENTOS; intento++) {
+    try {
+      const r = await cliente.send(new SynthesizeSpeechCommand({
+        ...VOCES[voz],
+        Text: texto,
+        TextType: esSsml ? "ssml" : "text",
+        OutputFormat: "mp3",
+        SampleRate: "22050",
+      }));
+      const trozos = [];
+      for await (const t of r.AudioStream) trozos.push(t);
+      return Buffer.concat(trozos);
+    } catch (e) {
+      ultimo = e;
+      // ThrottlingException y errores 5xx sí se reintentan; el resto no.
+      const reintentable = /Throttl|TooManyRequests|ServiceUnavailable|InternalFailure/i
+        .test(e.name || "") || (e.$metadata?.httpStatusCode >= 500);
+      if (!reintentable) throw e;
+      await dormir(500 * 2 ** intento);
+    }
+  }
+  throw ultimo;
+}
+
+async function genera(fila) {
+  const destino = path.join(RAIZ, "assets", fila.archivo);
+  await mkdir(path.dirname(destino), { recursive: true });
+
+  // El lento se deriva del normal: no se paga dos veces.
+  if (fila.derivado_de) {
+    const origen = path.join(RAIZ, "assets", fila.derivado_de);
+    if (!(await yaEsta(origen))) {
+      throw new Error(`falta el original ${fila.derivado_de}`);
+    }
+    await ejecuta("ffmpeg", ["-y", "-i", origen,
+      "-filter:a", `atempo=${FACTOR_LENTO}`, "-b:a", "48k", "-ac", "1", destino]);
+    return { chars: 0, derivado: true };
+  }
+
+  // El SSML nunca se trocea: cortarlo a media etiqueta (<phoneme>,
+  // <prosody>) lo deja XML inválido. Sus textos son cortos, así que
+  // entran enteros bajo MAX_CHARS de todos modos.
+  const trozos = fila.ssml ? [fila.texto] : trocea(fila.texto);
+  const voz = idioma(fila);
+  const partes = [];
+  for (const t of trozos) {
+    partes.push(await sintetiza(t, voz, fila.ssml));
+    await dormir(PAUSA_MS);
+  }
+  const audio = Buffer.concat(partes);
+  if (audio.length < MIN_BYTES && fila.texto.length > 12) {
+    throw new Error(`salió de ${audio.length} bytes, sospechoso`);
+  }
+  await writeFile(destino, audio);
+  return { chars: fila.texto.length, trozos: trozos.length };
+}
+
+// ── entrada ──────────────────────────────────────────────────────────────
+const args = process.argv.slice(2);
+const bandera = (n) => args.includes(n);
+const valor = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
+
+const manifiesto = JSON.parse(await readFile(MANIFIESTO, "utf8"));
+let filas = manifiesto.filter((f) => f.tipo === "audio");
+
+const grupo = valor("--grupo");
+if (grupo) filas = filas.filter((f) => f.grupo === grupo);
+
+const iSolo = args.indexOf("--solo");
+if (iSolo >= 0) {
+  const ids = new Set(args.slice(iSolo + 1).filter((a) => !a.startsWith("--")));
+  filas = filas.filter((f) => ids.has(String(f.recurso)));
+}
+
+// Los manuales nunca se piden a Polly: un TTS no pronuncia un fonema suelto.
+const manuales = filas.filter((f) => f.manual);
+filas = filas.filter((f) => !f.manual);
+
+const pendientes = [];
+for (const f of filas) if (!(await yaEsta(path.join(RAIZ, "assets", f.archivo)))) pendientes.push(f);
+
+if (bandera("--plan") || (!bandera("--todo") && !grupo && iSolo < 0 && !bandera("--revisa"))) {
+  const porGrupo = {};
+  let chars = 0;
+  let costo = 0;
+  for (const f of pendientes) {
+    const g = (porGrupo[f.grupo] ||= { n: 0, chars: 0, costo: 0 });
+    const propioChars = f.derivado_de ? 0 : f.texto.length;
+    const propioCosto = propioChars * precioPorCaracter(f);
+    g.n++; g.chars += propioChars; g.costo += propioCosto;
+    chars += propioChars; costo += propioCosto;
+  }
+  console.log(`\nregión ${REGION}` +
+    (REGIONES_GENERATIVE.has(REGION) ? "" : "   ← SIN motor generativo, cámbiala"));
+  console.log(`faltan ${pendientes.length} de ${filas.length} audios\n`);
+  for (const [g, v] of Object.entries(porGrupo).sort((a, b) => b[1].n - a[1].n)) {
+    console.log(`  ${String(v.n).padStart(5)}  ${g.padEnd(30)} ${money(v.costo)}`);
+  }
+  console.log(`\n  ${String(chars).padStart(5)}  caracteres facturables`);
+  console.log(`  costo estimado: ${money(costo)}`);
+  if (manuales.length) console.log(`\n  ${manuales.length} audios manuales: no se piden a Polly.`);
+  process.exit(0);
+}
+
+if (bandera("--revisa")) {
+  let ok = 0, chicos = [], sin = [];
+  for (const f of filas) {
+    const d = path.join(RAIZ, "assets", f.archivo);
+    if (!existsSync(d)) { sin.push(f.archivo); continue; }
+    const s = await stat(d);
+    if (s.size < MIN_BYTES && f.texto.length > 12) chicos.push(`${f.archivo} (${s.size} B)`);
+    else ok++;
+  }
+  console.log(`ok ${ok} · faltan ${sin.length} · sospechosos ${chicos.length}`);
+  chicos.slice(0, 20).forEach((c) => console.log("  chico:", c));
+  process.exit(chicos.length ? 1 : 0);
+}
+
+if (!REGIONES_GENERATIVE.has(REGION)) {
+  console.error(`La región ${REGION} no tiene motor generativo. Usa us-east-1.`);
+  process.exit(1);
+}
+
+// Los derivados van al final: necesitan que su original exista.
+pendientes.sort((a, b) => (a.derivado_de ? 1 : 0) - (b.derivado_de ? 1 : 0));
+
+const log = existsSync(REGISTRO) ? JSON.parse(await readFile(REGISTRO, "utf8")) : { fallos: [] };
+let hechos = 0, chars = 0, costo = 0;
+const t0 = Date.now();
+
+for (const [i, f] of pendientes.entries()) {
+  try {
+    const r = await genera(f);
+    hechos++; chars += r.chars; costo += r.chars * precioPorCaracter(f);
+    const pct = ((i + 1) / pendientes.length * 100).toFixed(1);
+    process.stdout.write(`\r  ${pct}%  ${hechos}/${pendientes.length}  ${money(costo)}  ${f.archivo.padEnd(28)}`);
+  } catch (e) {
+    log.fallos.push({ archivo: f.archivo, error: String(e.message || e) });
+    console.error(`\n  FALLÓ ${f.archivo}: ${e.message || e}`);
+  }
+}
+
+await writeFile(REGISTRO, JSON.stringify(log, null, 1));
+const min = ((Date.now() - t0) / 60000).toFixed(1);
+console.log(`\n\nlistos ${hechos} · fallos ${log.fallos.length} · ${chars} caracteres · ${money(costo)} · ${min} min`);
+if (log.fallos.length) console.log(`Los fallos quedaron en ${REGISTRO}. Vuelve a lanzar el mismo comando: solo reintenta lo que falta.`);

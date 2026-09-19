@@ -1,0 +1,710 @@
+{
+  "version": 1,
+  "total_reducciones": 75,
+  "total_cazala": 20,
+  "nota_opciones": "El campo opciones ya viene ordenado por id y mezcla reducciones con distractores. La app lo baraja antes de mostrarlo.",
+  "grupos": [
+    {
+      "id": "contraccion",
+      "nombre": "Contracciones",
+      "descripcion": "Lo que se dice y no se escribe",
+      "orden": 1,
+      "total": 30,
+      "entradas": [
+        993,
+        994,
+        995,
+        996,
+        997,
+        998,
+        999,
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1058,
+        1059,
+        1060,
+        1061,
+        1062,
+        1063,
+        1064,
+        1065,
+        1066,
+        1067
+      ]
+    },
+    {
+      "id": "g_perdida",
+      "nombre": "La G que desaparece",
+      "descripcion": "workin', talkin', nothin'",
+      "orden": 2,
+      "total": 10,
+      "entradas": [
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022
+      ]
+    },
+    {
+      "id": "flap_t",
+      "nombre": "La T que suena a R",
+      "descripcion": "water suena wader",
+      "orden": 3,
+      "total": 14,
+      "entradas": [
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029,
+        1030,
+        1031,
+        1032,
+        1033,
+        1034,
+        1035,
+        1036
+      ]
+    },
+    {
+      "id": "fusion",
+      "nombre": "Fusiones",
+      "descripcion": "gotcha, whatcha, betcha",
+      "orden": 4,
+      "total": 11,
+      "entradas": [
+        1037,
+        1038,
+        1039,
+        1040,
+        1041,
+        1042,
+        1043,
+        1044,
+        1045,
+        1046,
+        1047
+      ]
+    },
+    {
+      "id": "aave",
+      "nombre": "Gramática de la calle",
+      "descripcion": "Lo que oyes en música y series",
+      "orden": 5,
+      "total": 10,
+      "entradas": [
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057
+      ]
+    }
+  ],
+  "cazala": [
+    {
+      "id": "caza_01",
+      "frase_real": "I'm just chillin', talkin' and smokin' all day",
+      "frase_formal": "I am just chilling, talking and smoking all day",
+      "reducciones": [
+        1021,
+        1014,
+        1022
+      ],
+      "distractores": [
+        1013,
+        1015,
+        1018
+      ],
+      "opciones": [
+        1013,
+        1014,
+        1015,
+        1018,
+        1021,
+        1022
+      ],
+      "dificultad": 1,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_01.mp3",
+      "audio_lento": "aud/caza/caza_01_lento.mp3",
+      "frase_es": "Nomás ando relajado, platicando y fumando todo el día",
+      "audio_es": "aud/caza/caza_01_es.mp3"
+    },
+    {
+      "id": "caza_02",
+      "frase_real": "I'm gonna take a lotta stuff outta the car",
+      "frase_formal": "I am going to take a lot of stuff out of the car",
+      "reducciones": [
+        993,
+        1004,
+        1003
+      ],
+      "distractores": [
+        994,
+        995,
+        1002
+      ],
+      "opciones": [
+        993,
+        994,
+        995,
+        1002,
+        1003,
+        1004
+      ],
+      "dificultad": 1,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_02.mp3",
+      "audio_lento": "aud/caza/caza_02_lento.mp3",
+      "frase_es": "Voy a sacar un montón de cosas del carro",
+      "audio_es": "aud/caza/caza_02_es.mp3"
+    },
+    {
+      "id": "caza_03",
+      "frase_real": "I gotta get a little water",
+      "frase_formal": "I have got to get a little water",
+      "reducciones": [
+        995,
+        1027,
+        1023
+      ],
+      "distractores": [
+        994,
+        1028,
+        1031
+      ],
+      "opciones": [
+        994,
+        995,
+        1023,
+        1027,
+        1028,
+        1031
+      ],
+      "dificultad": 1,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_03.mp3",
+      "audio_lento": "aud/caza/caza_03_lento.mp3",
+      "frase_es": "Tengo que tomar un poco de agua",
+      "audio_es": "aud/caza/caza_03_es.mp3"
+    },
+    {
+      "id": "caza_04",
+      "frase_real": "Lemme tell you, that ain't nothin' new",
+      "frase_formal": "Let me tell you, that is nothing new",
+      "reducciones": [
+        999,
+        1012,
+        1015
+      ],
+      "distractores": [
+        1000,
+        1050,
+        1013
+      ],
+      "opciones": [
+        999,
+        1000,
+        1012,
+        1013,
+        1015,
+        1050
+      ],
+      "dificultad": 1,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_04.mp3",
+      "audio_lento": "aud/caza/caza_04_lento.mp3",
+      "frase_es": "Déjame decirte, eso no es nada nuevo",
+      "audio_es": "aud/caza/caza_04_es.mp3"
+    },
+    {
+      "id": "caza_05",
+      "frase_real": "Y'all workin' 'bout ten hours today?",
+      "frase_formal": "Are you all working about ten hours today?",
+      "reducciones": [
+        1010,
+        1013,
+        998
+      ],
+      "distractores": [
+        1011,
+        1014,
+        1004
+      ],
+      "opciones": [
+        998,
+        1004,
+        1010,
+        1011,
+        1013,
+        1014
+      ],
+      "dificultad": 1,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_05.mp3",
+      "audio_lento": "aud/caza/caza_05_lento.mp3",
+      "frase_es": "¿Todos van a trabajar como diez horas hoy?",
+      "audio_es": "aud/caza/caza_05_es.mp3"
+    },
+    {
+      "id": "caza_06",
+      "frase_real": "You shoulda known better, did ya even try?",
+      "frase_formal": "You should have known better, did you even try?",
+      "reducciones": [
+        1005,
+        1044,
+        1024
+      ],
+      "distractores": [
+        1006,
+        1043,
+        1031
+      ],
+      "opciones": [
+        1005,
+        1006,
+        1024,
+        1031,
+        1043,
+        1044
+      ],
+      "dificultad": 1,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_06.mp3",
+      "audio_lento": "aud/caza/caza_06_lento.mp3",
+      "frase_es": "Deberías haberlo sabido, ¿siquiera lo intentaste?",
+      "audio_es": "aud/caza/caza_06_es.mp3"
+    },
+    {
+      "id": "caza_07",
+      "frase_real": "I'm finna go, betcha she's comin' late",
+      "frase_formal": "I am fixing to go, I bet you she is coming late",
+      "reducciones": [
+        996,
+        1039,
+        1018
+      ],
+      "distractores": [
+        997,
+        1037,
+        1021
+      ],
+      "opciones": [
+        996,
+        997,
+        1018,
+        1021,
+        1037,
+        1039
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_07.mp3",
+      "audio_lento": "aud/caza/caza_07_lento.mp3",
+      "frase_es": "Ya me voy, apuesto a que ella va a llegar tarde",
+      "audio_es": "aud/caza/caza_07_es.mp3"
+    },
+    {
+      "id": "caza_08",
+      "frase_real": "Whatcha trippin' about? I saw everythin'!",
+      "frase_formal": "What are you tripping about? I saw everything!",
+      "reducciones": [
+        1038,
+        1020,
+        1017
+      ],
+      "distractores": [
+        1037,
+        1021,
+        1014
+      ],
+      "opciones": [
+        1014,
+        1017,
+        1020,
+        1021,
+        1037,
+        1038
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_08.mp3",
+      "audio_lento": "aud/caza/caza_08_lento.mp3",
+      "frase_es": "¿Por qué te alteras tanto? ¡Yo vi todo!",
+      "audio_es": "aud/caza/caza_08_es.mp3"
+    },
+    {
+      "id": "caza_09",
+      "frase_real": "I'm outta here, I ain't got twenty minutes",
+      "frase_formal": "I am out of here, I do not have twenty minutes",
+      "reducciones": [
+        1003,
+        1012,
+        1032
+      ],
+      "distractores": [
+        993,
+        1048,
+        1033
+      ],
+      "opciones": [
+        993,
+        1003,
+        1012,
+        1032,
+        1033,
+        1048
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_09.mp3",
+      "audio_lento": "aud/caza/caza_09_lento.mp3",
+      "frase_es": "Ya me voy de aquí, no tengo veinte minutos",
+      "audio_es": "aud/caza/caza_09_es.mp3"
+    },
+    {
+      "id": "caza_10",
+      "frase_real": "Tell 'em we're comin' to the party",
+      "frase_formal": "Tell them we are coming to the party",
+      "reducciones": [
+        1045,
+        1018,
+        1030
+      ],
+      "distractores": [
+        1046,
+        1021,
+        1026
+      ],
+      "opciones": [
+        1018,
+        1021,
+        1026,
+        1030,
+        1045,
+        1046
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_10.mp3",
+      "audio_lento": "aud/caza/caza_10_lento.mp3",
+      "frase_es": "Diles que ya vamos para la fiesta",
+      "audio_es": "aud/caza/caza_10_es.mp3"
+    },
+    {
+      "id": "caza_11",
+      "frase_real": "I coulda got it if you woulda told me",
+      "frase_formal": "I could have got it if you would have told me",
+      "reducciones": [
+        1007,
+        1035,
+        1006
+      ],
+      "distractores": [
+        1005,
+        1008,
+        1036
+      ],
+      "opciones": [
+        1005,
+        1006,
+        1007,
+        1008,
+        1035,
+        1036
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_11.mp3",
+      "audio_lento": "aud/caza/caza_11_lento.mp3",
+      "frase_es": "Lo hubiera conseguido si me hubieras avisado",
+      "audio_es": "aud/caza/caza_11_es.mp3"
+    },
+    {
+      "id": "caza_12",
+      "frase_real": "Don'tcha like ridin' around the city?",
+      "frase_formal": "Don't you like riding around the city?",
+      "reducciones": [
+        1040,
+        1019,
+        1025
+      ],
+      "distractores": [
+        1043,
+        1026,
+        1018
+      ],
+      "opciones": [
+        1018,
+        1019,
+        1025,
+        1026,
+        1040,
+        1043
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_12.mp3",
+      "audio_lento": "aud/caza/caza_12_lento.mp3",
+      "frase_es": "¿No te gusta andar dando vueltas por la ciudad?",
+      "audio_es": "aud/caza/caza_12_es.mp3"
+    },
+    {
+      "id": "caza_13",
+      "frase_real": "It's sorta pretty, but somethin' feels off",
+      "frase_formal": "It is sort of pretty, but something feels off",
+      "reducciones": [
+        1002,
+        1026,
+        1016
+      ],
+      "distractores": [
+        1001,
+        1024,
+        1013
+      ],
+      "opciones": [
+        1001,
+        1002,
+        1013,
+        1016,
+        1024,
+        1026
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_13.mp3",
+      "audio_lento": "aud/caza/caza_13_lento.mp3",
+      "frase_es": "Está bonita, más o menos, pero algo se siente raro",
+      "audio_es": "aud/caza/caza_13_es.mp3"
+    },
+    {
+      "id": "caza_14",
+      "frase_real": "I'ma tell 'im to shut up already",
+      "frase_formal": "I am going to tell him to shut up already",
+      "reducciones": [
+        1009,
+        1046,
+        1034
+      ],
+      "distractores": [
+        1000,
+        1045,
+        1035
+      ],
+      "opciones": [
+        1000,
+        1009,
+        1034,
+        1035,
+        1045,
+        1046
+      ],
+      "dificultad": 2,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_14.mp3",
+      "audio_lento": "aud/caza/caza_14_lento.mp3",
+      "frase_es": "Ya le voy a decir que se calle de una vez",
+      "audio_es": "aud/caza/caza_14_es.mp3"
+    },
+    {
+      "id": "caza_15",
+      "frase_real": "He's gotta keep workin' late, he better get paid",
+      "frase_formal": "He has got to keep working late, he had better get paid",
+      "reducciones": [
+        995,
+        1013,
+        1024
+      ],
+      "distractores": [
+        993,
+        1014,
+        1031
+      ],
+      "opciones": [
+        993,
+        995,
+        1013,
+        1014,
+        1024,
+        1031
+      ],
+      "dificultad": 3,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_15.mp3",
+      "audio_lento": "aud/caza/caza_15_lento.mp3",
+      "frase_es": "Tiene que seguir trabajando hasta tarde, más le vale que le paguen bien",
+      "audio_es": "aud/caza/caza_15_es.mp3"
+    },
+    {
+      "id": "caza_16",
+      "frase_real": "Don'tcha wanna hang out? Lemme know",
+      "frase_formal": "Don't you want to hang out? Let me know",
+      "reducciones": [
+        1040,
+        994,
+        999
+      ],
+      "distractores": [
+        1037,
+        993,
+        1000
+      ],
+      "opciones": [
+        993,
+        994,
+        999,
+        1000,
+        1037,
+        1040
+      ],
+      "dificultad": 3,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_16.mp3",
+      "audio_lento": "aud/caza/caza_16_lento.mp3",
+      "frase_es": "¿No quieres salir? Avísame",
+      "audio_es": "aud/caza/caza_16_es.mp3"
+    },
+    {
+      "id": "caza_17",
+      "frase_real": "I ain't got nothin', I'm outta here",
+      "frase_formal": "I do not have anything, I am out of here",
+      "reducciones": [
+        1012,
+        1015,
+        1003
+      ],
+      "distractores": [
+        1004,
+        1006,
+        1016
+      ],
+      "opciones": [
+        1003,
+        1004,
+        1006,
+        1012,
+        1015,
+        1016
+      ],
+      "dificultad": 3,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_17.mp3",
+      "audio_lento": "aud/caza/caza_17_lento.mp3",
+      "frase_es": "No tengo nada, ya me voy de aquí",
+      "audio_es": "aud/caza/caza_17_es.mp3"
+    },
+    {
+      "id": "caza_18",
+      "frase_real": "What it is, I'll be meetcha in thirty",
+      "frase_formal": "What it is, I will be meeting you in thirty",
+      "reducciones": [
+        1036,
+        1042,
+        1033
+      ],
+      "distractores": [
+        1035,
+        1032,
+        1037
+      ],
+      "opciones": [
+        1032,
+        1033,
+        1035,
+        1036,
+        1037,
+        1042
+      ],
+      "dificultad": 3,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_18.mp3",
+      "audio_lento": "aud/caza/caza_18_lento.mp3",
+      "frase_es": "Como sea, nos vemos en treinta minutos",
+      "audio_es": "aud/caza/caza_18_es.mp3"
+    },
+    {
+      "id": "caza_19",
+      "frase_real": "I drank everythin' in that little bottle",
+      "frase_formal": "I drank everything in that little bottle",
+      "reducciones": [
+        1017,
+        1028,
+        1027
+      ],
+      "distractores": [
+        1014,
+        1023,
+        1031
+      ],
+      "opciones": [
+        1014,
+        1017,
+        1023,
+        1027,
+        1028,
+        1031
+      ],
+      "dificultad": 3,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_19.mp3",
+      "audio_lento": "aud/caza/caza_19_lento.mp3",
+      "frase_es": "Me tomé todo lo que había en esa botellita",
+      "audio_es": "aud/caza/caza_19_es.mp3"
+    },
+    {
+      "id": "caza_20",
+      "frase_real": "Don't matter, we'll throw a better party",
+      "frase_formal": "It does not matter, we will throw a better party",
+      "reducciones": [
+        1031,
+        1024,
+        1030
+      ],
+      "distractores": [
+        1023,
+        1026,
+        1032
+      ],
+      "opciones": [
+        1023,
+        1024,
+        1026,
+        1030,
+        1031,
+        1032
+      ],
+      "dificultad": 3,
+      "velocidad": "natural",
+      "audio": "aud/caza/caza_20.mp3",
+      "audio_lento": "aud/caza/caza_20_lento.mp3",
+      "frase_es": "No importa, vamos a hacer una mejor fiesta",
+      "audio_es": "aud/caza/caza_20_es.mp3"
+    }
+  ]
+}

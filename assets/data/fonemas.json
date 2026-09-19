@@ -1,0 +1,4503 @@
+{
+ "fonemas": [
+  {
+   "id": "fon_001",
+   "ipa": "/iː/",
+   "tipo": "vocal_simple",
+   "nombre": "La i larga",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La lengua sube alto y se va bien adelante, casi tocando el paladar, y los labios se estiran como en una sonrisa forzada. El sonido se sostiene y se mantiene tenso de principio a fin. Es la única vocal inglesa que ya traes de fábrica, porque tu i española es casi idéntica.",
+   "el_error_tipico": "El problema no es producirla sino que la usas de más: la metes también donde va la i corta, así que ship te sale sheep y todo tu inglés suena a que estás alargando vocales sin razón.",
+   "ejemplos": [
+    {
+     "palabra": "eat",
+     "ipa": "/iːt/",
+     "spanish": "comer",
+     "audio": "aud/fon/fon_001_ej1.mp3"
+    },
+    {
+     "palabra": "see",
+     "ipa": "/siː/",
+     "spanish": "ver",
+     "audio": "aud/fon/fon_001_ej2.mp3"
+    },
+    {
+     "palabra": "cheese",
+     "ipa": "/tʃiːz/",
+     "spanish": "queso",
+     "audio": "aud/fon/fon_001_ej3.mp3"
+    },
+    {
+     "palabra": "green",
+     "ipa": "/ɡriːn/",
+     "spanish": "verde",
+     "audio": "aud/fon/fon_001_ej4.mp3"
+    },
+    {
+     "palabra": "easy",
+     "ipa": "/ˈiːzi/",
+     "spanish": "fácil",
+     "audio": "aud/fon/fon_001_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "feel",
+     "a_ipa": "/fiːl/",
+     "a_es": "sentir",
+     "b": "fill",
+     "b_ipa": "/fɪl/",
+     "b_es": "llenar",
+     "contrasta_con": "/ɪ/",
+     "audio_a": "aud/fon/fon_001_par1a.mp3",
+     "audio_b": "aud/fon/fon_001_par1b.mp3"
+    },
+    {
+     "a": "cheap",
+     "a_ipa": "/tʃiːp/",
+     "a_es": "barato",
+     "b": "chip",
+     "b_ipa": "/tʃɪp/",
+     "b_es": "papa frita",
+     "contrasta_con": "/ɪ/",
+     "audio_a": "aud/fon/fon_001_par2a.mp3",
+     "audio_b": "aud/fon/fon_001_par2b.mp3"
+    },
+    {
+     "a": "seat",
+     "a_ipa": "/siːt/",
+     "a_es": "asiento",
+     "b": "sit",
+     "b_ipa": "/sɪt/",
+     "b_es": "sentarse",
+     "contrasta_con": "/ɪ/",
+     "audio_a": "aud/fon/fon_001_par3a.mp3",
+     "audio_b": "aud/fon/fon_001_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero patting a bathtub gently with one paw while a friend waits beside him holding a heavy bucket of water",
+   "orden": 1,
+   "audio": "aud/fon/fon_001.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_001_lento.mp3",
+   "imagen": "img/fon/fon_001.webp",
+   "palabra_ancla": "eat"
+  },
+  {
+   "id": "fon_002",
+   "ipa": "/ɪ/",
+   "tipo": "vocal_simple",
+   "nombre": "La i corta",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "La lengua se queda a media altura y relajada, sin tensión, y la boca apenas se abre. El sonido es breve y se corta rápido. Está a medio camino entre la i y la e del español, más cerca de una e apurada que de una i.",
+   "el_error_tipico": "Sale la i española, que es tensa y larga, así que ship suena sheep y bitch suena beach. Es la vocal que más te delata de todas.",
+   "ejemplos": [
+    {
+     "palabra": "ship",
+     "ipa": "/ʃɪp/",
+     "spanish": "barco",
+     "audio": "aud/fon/fon_002_ej1.mp3"
+    },
+    {
+     "palabra": "sit",
+     "ipa": "/sɪt/",
+     "spanish": "sentarse",
+     "audio": "aud/fon/fon_002_ej2.mp3"
+    },
+    {
+     "palabra": "big",
+     "ipa": "/bɪɡ/",
+     "spanish": "grande",
+     "audio": "aud/fon/fon_002_ej3.mp3"
+    },
+    {
+     "palabra": "gym",
+     "ipa": "/dʒɪm/",
+     "spanish": "gimnasio",
+     "audio": "aud/fon/fon_002_ej4.mp3"
+    },
+    {
+     "palabra": "listen",
+     "ipa": "/ˈlɪsən/",
+     "spanish": "escuchar",
+     "audio": "aud/fon/fon_002_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "sheep",
+     "a_ipa": "/ʃiːp/",
+     "a_es": "oveja",
+     "b": "ship",
+     "b_ipa": "/ʃɪp/",
+     "b_es": "barco",
+     "contrasta_con": "/iː/",
+     "audio_a": "aud/fon/fon_002_par1a.mp3",
+     "audio_b": "aud/fon/fon_002_par1b.mp3"
+    },
+    {
+     "a": "leave",
+     "a_ipa": "/liːv/",
+     "a_es": "irse",
+     "b": "live",
+     "b_ipa": "/lɪv/",
+     "b_es": "vivir",
+     "contrasta_con": "/iː/",
+     "audio_a": "aud/fon/fon_002_par2a.mp3",
+     "audio_b": "aud/fon/fon_002_par2b.mp3"
+    },
+    {
+     "a": "bit",
+     "a_ipa": "/bɪt/",
+     "a_es": "pedacito",
+     "b": "bet",
+     "b_ipa": "/bɛt/",
+     "b_es": "apuesta",
+     "contrasta_con": "/ɛ/",
+     "audio_a": "aud/fon/fon_002_par3a.mp3",
+     "audio_b": "aud/fon/fon_002_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero gesturing proudly at a green pasture where several small boats sit parked in the grass like animals",
+   "orden": 2,
+   "audio": "aud/fon/fon_002.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_002_lento.mp3",
+   "imagen": "img/fon/fon_002.webp",
+   "palabra_ancla": "ship"
+  },
+  {
+   "id": "fon_003",
+   "ipa": "/ɛ/",
+   "tipo": "vocal_simple",
+   "nombre": "La e abierta",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "La boca se abre un poco más que para la e española y la lengua baja ligeramente, pero el punto de partida es el mismo. El sonido es corto y sin tensión. Si dices mesa y sostienes esa vocal abriendo un dedo más la mandíbula, ya llegaste.",
+   "el_error_tipico": "Casi no falla porque tu e española sirve. El riesgo real es que la confundas con la a aplastada del inglés y digas bed cuando querías decir bad, o pen cuando querías pan.",
+   "ejemplos": [
+    {
+     "palabra": "egg",
+     "ipa": "/ɛɡ/",
+     "spanish": "huevo",
+     "audio": "aud/fon/fon_003_ej1.mp3"
+    },
+    {
+     "palabra": "bed",
+     "ipa": "/bɛd/",
+     "spanish": "cama",
+     "audio": "aud/fon/fon_003_ej2.mp3"
+    },
+    {
+     "palabra": "ten",
+     "ipa": "/tɛn/",
+     "spanish": "diez",
+     "audio": "aud/fon/fon_003_ej3.mp3"
+    },
+    {
+     "palabra": "friend",
+     "ipa": "/frɛnd/",
+     "spanish": "amigo",
+     "audio": "aud/fon/fon_003_ej4.mp3"
+    },
+    {
+     "palabra": "ready",
+     "ipa": "/ˈrɛdi/",
+     "spanish": "listo",
+     "audio": "aud/fon/fon_003_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "bed",
+     "a_ipa": "/bɛd/",
+     "a_es": "cama",
+     "b": "bad",
+     "b_ipa": "/bæd/",
+     "b_es": "malo",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_003_par1a.mp3",
+     "audio_b": "aud/fon/fon_003_par1b.mp3"
+    },
+    {
+     "a": "pen",
+     "a_ipa": "/pɛn/",
+     "a_es": "pluma",
+     "b": "pan",
+     "b_ipa": "/pæn/",
+     "b_es": "sartén",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_003_par2a.mp3",
+     "audio_b": "aud/fon/fon_003_par2b.mp3"
+    },
+    {
+     "a": "men",
+     "a_ipa": "/mɛn/",
+     "a_es": "hombres",
+     "b": "man",
+     "b_ipa": "/mæn/",
+     "b_es": "hombre",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_003_par3a.mp3",
+     "audio_b": "aud/fon/fon_003_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at one single dog while a whole crowd of dogs steps forward expecting to be called",
+   "orden": 3,
+   "audio": "aud/fon/fon_003.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_003_lento.mp3",
+   "imagen": "img/fon/fon_003.webp",
+   "palabra_ancla": "egg"
+  },
+  {
+   "id": "fon_004",
+   "ipa": "/æ/",
+   "tipo": "vocal_simple",
+   "nombre": "La a aplastada",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "La lengua baja y se va hacia adelante, y la boca se estira a lo ancho en vez de abrirse hacia abajo. Suena a medio camino entre la a y la e del español, con un dejo nasal. Piensa en el balido de un borrego o en la cara que pones al oler algo feo.",
+   "el_error_tipico": "Sale la a española, redonda y neutra, así que cat suena cot y bad suena bod. También pasa lo contrario: si te esfuerzas de más sale una e y bad se convierte en bed.",
+   "ejemplos": [
+    {
+     "palabra": "cat",
+     "ipa": "/kæt/",
+     "spanish": "gato",
+     "audio": "aud/fon/fon_004_ej1.mp3"
+    },
+    {
+     "palabra": "apple",
+     "ipa": "/ˈæpəl/",
+     "spanish": "manzana",
+     "audio": "aud/fon/fon_004_ej2.mp3"
+    },
+    {
+     "palabra": "bad",
+     "ipa": "/bæd/",
+     "spanish": "malo",
+     "audio": "aud/fon/fon_004_ej3.mp3"
+    },
+    {
+     "palabra": "man",
+     "ipa": "/mæn/",
+     "spanish": "hombre",
+     "audio": "aud/fon/fon_004_ej4.mp3"
+    },
+    {
+     "palabra": "happy",
+     "ipa": "/ˈhæpi/",
+     "spanish": "feliz",
+     "audio": "aud/fon/fon_004_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "hat",
+     "a_ipa": "/hæt/",
+     "a_es": "sombrero",
+     "b": "hot",
+     "b_ipa": "/hɑːt/",
+     "b_es": "caliente",
+     "contrasta_con": "/ɑː/",
+     "audio_a": "aud/fon/fon_004_par1a.mp3",
+     "audio_b": "aud/fon/fon_004_par1b.mp3"
+    },
+    {
+     "a": "cat",
+     "a_ipa": "/kæt/",
+     "a_es": "gato",
+     "b": "cut",
+     "b_ipa": "/kʌt/",
+     "b_es": "cortar",
+     "contrasta_con": "/ʌ/",
+     "audio_a": "aud/fon/fon_004_par2a.mp3",
+     "audio_b": "aud/fon/fon_004_par2b.mp3"
+    },
+    {
+     "a": "bad",
+     "a_ipa": "/bæd/",
+     "a_es": "malo",
+     "b": "bed",
+     "b_ipa": "/bɛd/",
+     "b_es": "cama",
+     "contrasta_con": "/ɛ/",
+     "audio_a": "aud/fon/fon_004_par3a.mp3",
+     "audio_b": "aud/fon/fon_004_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero placing a steaming hot pan on his own head as if it were a hat while friends wince",
+   "orden": 4,
+   "audio": "aud/fon/fon_004.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_004_lento.mp3",
+   "imagen": "img/fon/fon_004.webp",
+   "palabra_ancla": "cat"
+  },
+  {
+   "id": "fon_005",
+   "ipa": "/ɑː/",
+   "tipo": "vocal_simple",
+   "nombre": "La a de atrás, larga",
+   "existe_en_espanol": false,
+   "dificultad": 2,
+   "como_producirlo": "La boca se abre bien grande, como cuando el doctor te pide que digas ah, y la lengua se va hacia atrás y hacia abajo. Los labios quedan relajados, sin redondear. El sonido se sostiene: es de las vocales más largas del inglés.",
+   "el_error_tipico": "Sale la a española, que se produce más al centro de la boca y más corta. No suele romper la comunicación, pero hace que hot y hat se te confundan entre sí y que car suene a algo entre carro y quiero.",
+   "ejemplos": [
+    {
+     "palabra": "father",
+     "ipa": "/ˈfɑːðər/",
+     "spanish": "padre",
+     "audio": "aud/fon/fon_005_ej1.mp3"
+    },
+    {
+     "palabra": "hot",
+     "ipa": "/hɑːt/",
+     "spanish": "caliente",
+     "audio": "aud/fon/fon_005_ej2.mp3"
+    },
+    {
+     "palabra": "stop",
+     "ipa": "/stɑːp/",
+     "spanish": "detenerse",
+     "audio": "aud/fon/fon_005_ej3.mp3"
+    },
+    {
+     "palabra": "car",
+     "ipa": "/kɑːr/",
+     "spanish": "carro",
+     "audio": "aud/fon/fon_005_ej4.mp3"
+    },
+    {
+     "palabra": "watch",
+     "ipa": "/wɑːtʃ/",
+     "spanish": "ver, reloj",
+     "audio": "aud/fon/fon_005_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "hot",
+     "a_ipa": "/hɑːt/",
+     "a_es": "caliente",
+     "b": "hat",
+     "b_ipa": "/hæt/",
+     "b_es": "sombrero",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_005_par1a.mp3",
+     "audio_b": "aud/fon/fon_005_par1b.mp3"
+    },
+    {
+     "a": "lock",
+     "a_ipa": "/lɑːk/",
+     "a_es": "cerradura",
+     "b": "lack",
+     "b_ipa": "/læk/",
+     "b_es": "carencia",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_005_par2a.mp3",
+     "audio_b": "aud/fon/fon_005_par2b.mp3"
+    },
+    {
+     "a": "calm",
+     "a_ipa": "/kɑːm/",
+     "a_es": "tranquilo",
+     "b": "come",
+     "b_ipa": "/kʌm/",
+     "b_es": "venir",
+     "contrasta_con": "/ʌ/",
+     "audio_a": "aud/fon/fon_005_par3a.mp3",
+     "audio_b": "aud/fon/fon_005_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at a heavy door bolt while a friend beside him shrugs and turns both empty pockets inside out",
+   "orden": 5,
+   "audio": "aud/fon/fon_005.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_005_lento.mp3",
+   "imagen": "img/fon/fon_005.webp",
+   "palabra_ancla": "father"
+  },
+  {
+   "id": "fon_006",
+   "ipa": "/ɒ/",
+   "tipo": "vocal_simple",
+   "nombre": "La o corta británica",
+   "existe_en_espanol": false,
+   "dificultad": 2,
+   "como_producirlo": "La boca se abre como para la a de atrás pero los labios se redondean un poco y el sonido se corta rápido. La lengua queda atrás y abajo. Si intentas decir hot con la boca lista para una o española pero sin cerrar los labios, andas cerca.",
+   "el_error_tipico": "En inglés americano este sonido simplemente no existe: colapsa con la a de atrás, así que hot, stop y box se dicen todas con /ɑː/. Solo lo vas a oír en cine británico. No lo entrenes, solo apréndelo a reconocer.",
+   "ejemplos": [
+    {
+     "palabra": "hot",
+     "ipa": "/hɑːt/",
+     "spanish": "caliente",
+     "audio": "aud/fon/fon_006_ej1.mp3"
+    },
+    {
+     "palabra": "box",
+     "ipa": "/bɑːks/",
+     "spanish": "caja",
+     "audio": "aud/fon/fon_006_ej2.mp3"
+    },
+    {
+     "palabra": "job",
+     "ipa": "/dʒɑːb/",
+     "spanish": "trabajo",
+     "audio": "aud/fon/fon_006_ej3.mp3"
+    },
+    {
+     "palabra": "wash",
+     "ipa": "/wɑːʃ/",
+     "spanish": "lavar",
+     "audio": "aud/fon/fon_006_ej4.mp3"
+    },
+    {
+     "palabra": "pocket",
+     "ipa": "/ˈpɑːkɪt/",
+     "spanish": "bolsillo",
+     "audio": "aud/fon/fon_006_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [],
+   "escena_imagen": "Wero holding up two identical keys while a visitor insists they open completely different doors and Wero just shrugs",
+   "orden": 6,
+   "audio": "aud/fon/fon_006.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_006_lento.mp3",
+   "imagen": "img/fon/fon_006.webp",
+   "palabra_ancla": "hot"
+  },
+  {
+   "id": "fon_007",
+   "ipa": "/ɔː/",
+   "tipo": "vocal_simple",
+   "nombre": "La o larga y redonda",
+   "existe_en_espanol": false,
+   "dificultad": 2,
+   "como_producirlo": "Los labios se redondean y se empujan hacia adelante, y la lengua se va bien atrás. La boca queda más cerrada que para la a de atrás. El sonido se sostiene largo, como si estuvieras diciendo una o española pero con la mandíbula más caída y sin cerrarla al final.",
+   "el_error_tipico": "Sale la o española, que es más cerrada y más corta, así que caught y cot se te vuelven la misma palabra. Ojo: muchos americanos también las juntan, así que este contraste es opcional según la región.",
+   "ejemplos": [
+    {
+     "palabra": "call",
+     "ipa": "/kɔːl/",
+     "spanish": "llamar",
+     "audio": "aud/fon/fon_007_ej1.mp3"
+    },
+    {
+     "palabra": "law",
+     "ipa": "/lɔː/",
+     "spanish": "ley",
+     "audio": "aud/fon/fon_007_ej2.mp3"
+    },
+    {
+     "palabra": "thought",
+     "ipa": "/θɔːt/",
+     "spanish": "pensamiento",
+     "audio": "aud/fon/fon_007_ej3.mp3"
+    },
+    {
+     "palabra": "walk",
+     "ipa": "/wɔːk/",
+     "spanish": "caminar",
+     "audio": "aud/fon/fon_007_ej4.mp3"
+    },
+    {
+     "palabra": "morning",
+     "ipa": "/ˈmɔːrnɪŋ/",
+     "spanish": "mañana",
+     "audio": "aud/fon/fon_007_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "caught",
+     "a_ipa": "/kɔːt/",
+     "a_es": "atrapó",
+     "b": "cot",
+     "b_ipa": "/kɑːt/",
+     "b_es": "catre",
+     "contrasta_con": "/ɑː/",
+     "audio_a": "aud/fon/fon_007_par1a.mp3",
+     "audio_b": "aud/fon/fon_007_par1b.mp3"
+    },
+    {
+     "a": "walk",
+     "a_ipa": "/wɔːk/",
+     "a_es": "caminar",
+     "b": "wok",
+     "b_ipa": "/wɑːk/",
+     "b_es": "sartén china",
+     "contrasta_con": "/ɑː/",
+     "audio_a": "aud/fon/fon_007_par2a.mp3",
+     "audio_b": "aud/fon/fon_007_par2b.mp3"
+    },
+    {
+     "a": "bought",
+     "a_ipa": "/bɔːt/",
+     "a_es": "compró",
+     "b": "boat",
+     "b_ipa": "/boʊt/",
+     "b_es": "barco",
+     "contrasta_con": "/oʊ/",
+     "audio_a": "aud/fon/fon_007_par3a.mp3",
+     "audio_b": "aud/fon/fon_007_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero setting off on a morning stroll through a park while carrying an enormous round cooking pan under one arm",
+   "orden": 7,
+   "audio": "aud/fon/fon_007.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_007_lento.mp3",
+   "imagen": "img/fon/fon_007.webp",
+   "palabra_ancla": "call"
+  },
+  {
+   "id": "fon_008",
+   "ipa": "/ʊ/",
+   "tipo": "vocal_simple",
+   "nombre": "La u corta y floja",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Los labios se redondean apenas, mucho menos que para la u española, y la lengua se queda a media altura sin tensión. El sonido es breve y flojo. Si sientes que los labios se te aprietan hacia adelante, ya te pasaste: esta vocal casi no los mueve.",
+   "el_error_tipico": "Sale la u española, que es tensa y larga, así que full suena fool y pull suena pool. En inglés americano estás llamándote tonto justo cuando querías decir que ya no puedes comer más.",
+   "ejemplos": [
+    {
+     "palabra": "book",
+     "ipa": "/bʊk/",
+     "spanish": "libro",
+     "audio": "aud/fon/fon_008_ej1.mp3"
+    },
+    {
+     "palabra": "good",
+     "ipa": "/ɡʊd/",
+     "spanish": "bueno",
+     "audio": "aud/fon/fon_008_ej2.mp3"
+    },
+    {
+     "palabra": "put",
+     "ipa": "/pʊt/",
+     "spanish": "poner",
+     "audio": "aud/fon/fon_008_ej3.mp3"
+    },
+    {
+     "palabra": "foot",
+     "ipa": "/fʊt/",
+     "spanish": "pie",
+     "audio": "aud/fon/fon_008_ej4.mp3"
+    },
+    {
+     "palabra": "cookie",
+     "ipa": "/ˈkʊki/",
+     "spanish": "galleta",
+     "audio": "aud/fon/fon_008_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "full",
+     "a_ipa": "/fʊl/",
+     "a_es": "lleno",
+     "b": "fool",
+     "b_ipa": "/fuːl/",
+     "b_es": "tonto",
+     "contrasta_con": "/uː/",
+     "audio_a": "aud/fon/fon_008_par1a.mp3",
+     "audio_b": "aud/fon/fon_008_par1b.mp3"
+    },
+    {
+     "a": "pull",
+     "a_ipa": "/pʊl/",
+     "a_es": "jalar",
+     "b": "pool",
+     "b_ipa": "/puːl/",
+     "b_es": "alberca",
+     "contrasta_con": "/uː/",
+     "audio_a": "aud/fon/fon_008_par2a.mp3",
+     "audio_b": "aud/fon/fon_008_par2b.mp3"
+    },
+    {
+     "a": "look",
+     "a_ipa": "/lʊk/",
+     "a_es": "mirar",
+     "b": "Luke",
+     "b_ipa": "/luːk/",
+     "b_es": "nombre propio",
+     "contrasta_con": "/uː/",
+     "audio_a": "aud/fon/fon_008_par3a.mp3",
+     "audio_b": "aud/fon/fon_008_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero tugging hard on a rope while a friend behind him floats past relaxed in an inflatable ring",
+   "orden": 8,
+   "audio": "aud/fon/fon_008.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_008_lento.mp3",
+   "imagen": "img/fon/fon_008.webp",
+   "palabra_ancla": "book"
+  },
+  {
+   "id": "fon_009",
+   "ipa": "/uː/",
+   "tipo": "vocal_simple",
+   "nombre": "La u larga",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "Los labios se aprietan y se empujan bien hacia adelante, como para dar un beso, y la lengua sube atrás. El sonido se sostiene con tensión de principio a fin. Es prácticamente tu u española, solo que más larga y con los labios más apretados.",
+   "el_error_tipico": "Producirla no cuesta, el problema es que la usas también donde va la u corta. Como solo tienes una u, todas tus palabras salen largas y el contraste entre full y fool desaparece de tu inglés.",
+   "ejemplos": [
+    {
+     "palabra": "food",
+     "ipa": "/fuːd/",
+     "spanish": "comida",
+     "audio": "aud/fon/fon_009_ej1.mp3"
+    },
+    {
+     "palabra": "blue",
+     "ipa": "/bluː/",
+     "spanish": "azul",
+     "audio": "aud/fon/fon_009_ej2.mp3"
+    },
+    {
+     "palabra": "school",
+     "ipa": "/skuːl/",
+     "spanish": "escuela",
+     "audio": "aud/fon/fon_009_ej3.mp3"
+    },
+    {
+     "palabra": "two",
+     "ipa": "/tuː/",
+     "spanish": "dos",
+     "audio": "aud/fon/fon_009_ej4.mp3"
+    },
+    {
+     "palabra": "choose",
+     "ipa": "/tʃuːz/",
+     "spanish": "elegir",
+     "audio": "aud/fon/fon_009_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "fool",
+     "a_ipa": "/fuːl/",
+     "a_es": "tonto",
+     "b": "full",
+     "b_ipa": "/fʊl/",
+     "b_es": "lleno",
+     "contrasta_con": "/ʊ/",
+     "audio_a": "aud/fon/fon_009_par1a.mp3",
+     "audio_b": "aud/fon/fon_009_par1b.mp3"
+    },
+    {
+     "a": "pool",
+     "a_ipa": "/puːl/",
+     "a_es": "alberca",
+     "b": "pull",
+     "b_ipa": "/pʊl/",
+     "b_es": "jalar",
+     "contrasta_con": "/ʊ/",
+     "audio_a": "aud/fon/fon_009_par2a.mp3",
+     "audio_b": "aud/fon/fon_009_par2b.mp3"
+    },
+    {
+     "a": "suit",
+     "a_ipa": "/suːt/",
+     "a_es": "traje",
+     "b": "soot",
+     "b_ipa": "/sʊt/",
+     "b_es": "hollín",
+     "contrasta_con": "/ʊ/",
+     "audio_a": "aud/fon/fon_009_par3a.mp3",
+     "audio_b": "aud/fon/fon_009_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pushing away a full dinner plate while the friend across the table covers a sudden laugh with one paw",
+   "orden": 9,
+   "audio": "aud/fon/fon_009.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_009_lento.mp3",
+   "imagen": "img/fon/fon_009.webp",
+   "palabra_ancla": "food"
+  },
+  {
+   "id": "fon_010",
+   "ipa": "/ʌ/",
+   "tipo": "vocal_simple",
+   "nombre": "La a de cup",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "La boca se abre poco, la lengua se queda al centro sin subir ni bajar, y todo el aparato queda flojo. Es un sonido corto y opaco, sin color. Si dices una a española pero relajando la mandíbula a la mitad del camino y cortándola de golpe, andas cerca.",
+   "el_error_tipico": "Sale la a española abierta, así que cup suena cap y cut suena cat. También pasa que la lees como o por culpa de la escritura, y entonces love te sale lov con o española en vez de lav.",
+   "ejemplos": [
+    {
+     "palabra": "cup",
+     "ipa": "/kʌp/",
+     "spanish": "taza",
+     "audio": "aud/fon/fon_010_ej1.mp3"
+    },
+    {
+     "palabra": "love",
+     "ipa": "/lʌv/",
+     "spanish": "amor",
+     "audio": "aud/fon/fon_010_ej2.mp3"
+    },
+    {
+     "palabra": "but",
+     "ipa": "/bʌt/",
+     "spanish": "pero",
+     "audio": "aud/fon/fon_010_ej3.mp3"
+    },
+    {
+     "palabra": "money",
+     "ipa": "/ˈmʌni/",
+     "spanish": "dinero",
+     "audio": "aud/fon/fon_010_ej4.mp3"
+    },
+    {
+     "palabra": "under",
+     "ipa": "/ˈʌndər/",
+     "spanish": "debajo",
+     "audio": "aud/fon/fon_010_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "cup",
+     "a_ipa": "/kʌp/",
+     "a_es": "taza",
+     "b": "cap",
+     "b_ipa": "/kæp/",
+     "b_es": "gorra",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_010_par1a.mp3",
+     "audio_b": "aud/fon/fon_010_par1b.mp3"
+    },
+    {
+     "a": "cut",
+     "a_ipa": "/kʌt/",
+     "a_es": "cortar",
+     "b": "cat",
+     "b_ipa": "/kæt/",
+     "b_es": "gato",
+     "contrasta_con": "/æ/",
+     "audio_a": "aud/fon/fon_010_par2a.mp3",
+     "audio_b": "aud/fon/fon_010_par2b.mp3"
+    },
+    {
+     "a": "luck",
+     "a_ipa": "/lʌk/",
+     "a_es": "suerte",
+     "b": "lock",
+     "b_ipa": "/lɑːk/",
+     "b_es": "cerradura",
+     "contrasta_con": "/ɑː/",
+     "audio_a": "aud/fon/fon_010_par3a.mp3",
+     "audio_b": "aud/fon/fon_010_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pouring hot coffee into a baseball hat held carefully in both paws while a barista stares in disbelief",
+   "orden": 10,
+   "audio": "aud/fon/fon_010.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_010_lento.mp3",
+   "imagen": "img/fon/fon_010.webp",
+   "palabra_ancla": "cup"
+  },
+  {
+   "id": "fon_011",
+   "ipa": "/ɜː/",
+   "tipo": "vocal_simple",
+   "nombre": "La vocal de bird",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "La lengua se queda al centro pero se enrosca hacia atrás sin tocar nada, y el sonido sale con la erre metida adentro de la vocal, no después. Los labios quedan neutros. En americano esta vocal y la erre son una sola cosa: no digas ber, di una erre sostenida con voz.",
+   "el_error_tipico": "Partes la palabra en dos y dices be-rd con una erre española vibrante al final. Esa erre golpeada es de lo que más marca el acento mexicano, porque aparece en work, girl, first y turn, que son palabras de todos los días.",
+   "ejemplos": [
+    {
+     "palabra": "bird",
+     "ipa": "/bɜːrd/",
+     "spanish": "pájaro",
+     "audio": "aud/fon/fon_011_ej1.mp3"
+    },
+    {
+     "palabra": "work",
+     "ipa": "/wɜːrk/",
+     "spanish": "trabajo",
+     "audio": "aud/fon/fon_011_ej2.mp3"
+    },
+    {
+     "palabra": "girl",
+     "ipa": "/ɡɜːrl/",
+     "spanish": "muchacha",
+     "audio": "aud/fon/fon_011_ej3.mp3"
+    },
+    {
+     "palabra": "learn",
+     "ipa": "/lɜːrn/",
+     "spanish": "aprender",
+     "audio": "aud/fon/fon_011_ej4.mp3"
+    },
+    {
+     "palabra": "Thursday",
+     "ipa": "/ˈθɜːrzdeɪ/",
+     "spanish": "jueves",
+     "audio": "aud/fon/fon_011_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "bird",
+     "a_ipa": "/bɜːrd/",
+     "a_es": "pájaro",
+     "b": "bud",
+     "b_ipa": "/bʌd/",
+     "b_es": "brote, cuate",
+     "contrasta_con": "/ʌ/",
+     "audio_a": "aud/fon/fon_011_par1a.mp3",
+     "audio_b": "aud/fon/fon_011_par1b.mp3"
+    },
+    {
+     "a": "work",
+     "a_ipa": "/wɜːrk/",
+     "a_es": "trabajo",
+     "b": "walk",
+     "b_ipa": "/wɔːk/",
+     "b_es": "caminar",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_011_par2a.mp3",
+     "audio_b": "aud/fon/fon_011_par2b.mp3"
+    },
+    {
+     "a": "hurt",
+     "a_ipa": "/hɜːrt/",
+     "a_es": "doler",
+     "b": "heart",
+     "b_ipa": "/hɑːrt/",
+     "b_es": "corazón",
+     "contrasta_con": "/ɑː/",
+     "audio_a": "aud/fon/fon_011_par3a.mp3",
+     "audio_b": "aud/fon/fon_011_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero holding clippers up to his own chin while a small feathered creature perched there looks extremely concerned",
+   "orden": 11,
+   "audio": "aud/fon/fon_011.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_011_lento.mp3",
+   "imagen": "img/fon/fon_011.webp",
+   "palabra_ancla": "bird"
+  },
+  {
+   "id": "fon_012",
+   "ipa": "/ə/",
+   "tipo": "vocal_simple",
+   "nombre": "La vocal fantasma",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "No hagas nada con la boca. En serio: la lengua al centro, la mandíbula floja, los labios quietos, y suelta un sonido corto y sin color, como el uh de cuando dudas. Lo difícil no es producirla sino aceptar que va donde la escritura dice otra cosa: en about la a se derrumba a uh, en sofa la última a también, en teacher la e final, y en support la o. La regla es que toda sílaba sin acento colapsa aquí, sin importar qué letra esté escrita. Practica marcando primero la sílaba fuerte y dejando que todas las demás se caigan solas.",
+   "el_error_tipico": "Lees la letra en vez del sonido y dices a-BOUT en vez de uh-BOUT, so-FA en vez de SO-fuh. Como el español pronuncia todas sus vocales con el mismo peso, tu inglés sale con ritmo de metrónomo y es lo que más acento te da, más que cualquier consonante.",
+   "ejemplos": [
+    {
+     "palabra": "about",
+     "ipa": "/əˈbaʊt/",
+     "spanish": "acerca de",
+     "audio": "aud/fon/fon_012_ej1.mp3"
+    },
+    {
+     "palabra": "sofa",
+     "ipa": "/ˈsoʊfə/",
+     "spanish": "sofá",
+     "audio": "aud/fon/fon_012_ej2.mp3"
+    },
+    {
+     "palabra": "teacher",
+     "ipa": "/ˈtiːtʃər/",
+     "spanish": "maestro",
+     "audio": "aud/fon/fon_012_ej3.mp3"
+    },
+    {
+     "palabra": "support",
+     "ipa": "/səˈpɔːrt/",
+     "spanish": "apoyar",
+     "audio": "aud/fon/fon_012_ej4.mp3"
+    },
+    {
+     "palabra": "banana",
+     "ipa": "/bəˈnænə/",
+     "spanish": "plátano",
+     "audio": "aud/fon/fon_012_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [],
+   "escena_imagen": "Wero carefully pronouncing every single beat of a long name while three listeners lean in straining to follow him",
+   "orden": 12,
+   "audio": "aud/fon/fon_012.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_012_lento.mp3",
+   "imagen": "img/fon/fon_012.webp",
+   "palabra_ancla": "about"
+  },
+  {
+   "id": "fon_013",
+   "ipa": "/eɪ/",
+   "tipo": "diptongo",
+   "nombre": "El diptongo de peine",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Arranca en la e y desliza hacia la i sin cortar el sonido, en un solo movimiento continuo. La lengua sube y se va adelante durante el trayecto. Es exactamente el diptongo de peine o de rey en español, así que ya lo tienes hecho.",
+   "el_error_tipico": "Casi no falla. El único riesgo es acortarlo y dejarlo en una e sola, y entonces late suena let y taste suena test. Si dudas, alárgalo: en inglés siempre son dos vocales, nunca una.",
+   "ejemplos": [
+    {
+     "palabra": "eight",
+     "ipa": "/eɪt/",
+     "spanish": "ocho",
+     "audio": "aud/fon/fon_013_ej1.mp3"
+    },
+    {
+     "palabra": "name",
+     "ipa": "/neɪm/",
+     "spanish": "nombre",
+     "audio": "aud/fon/fon_013_ej2.mp3"
+    },
+    {
+     "palabra": "make",
+     "ipa": "/meɪk/",
+     "spanish": "hacer",
+     "audio": "aud/fon/fon_013_ej3.mp3"
+    },
+    {
+     "palabra": "train",
+     "ipa": "/treɪn/",
+     "spanish": "tren",
+     "audio": "aud/fon/fon_013_ej4.mp3"
+    },
+    {
+     "palabra": "today",
+     "ipa": "/təˈdeɪ/",
+     "spanish": "hoy",
+     "audio": "aud/fon/fon_013_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "late",
+     "a_ipa": "/leɪt/",
+     "a_es": "tarde",
+     "b": "let",
+     "b_ipa": "/lɛt/",
+     "b_es": "dejar",
+     "contrasta_con": "/ɛ/",
+     "audio_a": "aud/fon/fon_013_par1a.mp3",
+     "audio_b": "aud/fon/fon_013_par1b.mp3"
+    },
+    {
+     "a": "taste",
+     "a_ipa": "/teɪst/",
+     "a_es": "sabor",
+     "b": "test",
+     "b_ipa": "/tɛst/",
+     "b_es": "examen",
+     "contrasta_con": "/ɛ/",
+     "audio_a": "aud/fon/fon_013_par2a.mp3",
+     "audio_b": "aud/fon/fon_013_par2b.mp3"
+    },
+    {
+     "a": "pain",
+     "a_ipa": "/peɪn/",
+     "a_es": "dolor",
+     "b": "pen",
+     "b_ipa": "/pɛn/",
+     "b_es": "pluma",
+     "contrasta_con": "/ɛ/",
+     "audio_a": "aud/fon/fon_013_par3a.mp3",
+     "audio_b": "aud/fon/fon_013_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero clutching his own paw dramatically while a coworker holds out a small writing pen with a very puzzled face",
+   "orden": 13,
+   "audio": "aud/fon/fon_013.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_013_lento.mp3",
+   "imagen": "img/fon/fon_013.webp",
+   "palabra_ancla": "eight"
+  },
+  {
+   "id": "fon_014",
+   "ipa": "/aɪ/",
+   "tipo": "diptongo",
+   "nombre": "El diptongo de aire",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Arranca con la boca bien abierta en la a y cierra deslizando hacia la i, con la lengua subiendo hacia adelante. Todo en un solo golpe de voz. Es el mismo movimiento de aire, hay o caimán en español.",
+   "el_error_tipico": "Prácticamente no falla. Lo único que pasa es que a veces lo confundes con el diptongo de hoy y dices boy cuando querías buy, sobre todo hablando rápido.",
+   "ejemplos": [
+    {
+     "palabra": "ice",
+     "ipa": "/aɪs/",
+     "spanish": "hielo",
+     "audio": "aud/fon/fon_014_ej1.mp3"
+    },
+    {
+     "palabra": "time",
+     "ipa": "/taɪm/",
+     "spanish": "tiempo",
+     "audio": "aud/fon/fon_014_ej2.mp3"
+    },
+    {
+     "palabra": "five",
+     "ipa": "/faɪv/",
+     "spanish": "cinco",
+     "audio": "aud/fon/fon_014_ej3.mp3"
+    },
+    {
+     "palabra": "night",
+     "ipa": "/naɪt/",
+     "spanish": "noche",
+     "audio": "aud/fon/fon_014_ej4.mp3"
+    },
+    {
+     "palabra": "buy",
+     "ipa": "/baɪ/",
+     "spanish": "comprar",
+     "audio": "aud/fon/fon_014_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "buy",
+     "a_ipa": "/baɪ/",
+     "a_es": "comprar",
+     "b": "boy",
+     "b_ipa": "/bɔɪ/",
+     "b_es": "niño",
+     "contrasta_con": "/ɔɪ/",
+     "audio_a": "aud/fon/fon_014_par1a.mp3",
+     "audio_b": "aud/fon/fon_014_par1b.mp3"
+    },
+    {
+     "a": "like",
+     "a_ipa": "/laɪk/",
+     "a_es": "gustar",
+     "b": "lake",
+     "b_ipa": "/leɪk/",
+     "b_es": "lago",
+     "contrasta_con": "/eɪ/",
+     "audio_a": "aud/fon/fon_014_par2a.mp3",
+     "audio_b": "aud/fon/fon_014_par2b.mp3"
+    },
+    {
+     "a": "file",
+     "a_ipa": "/faɪl/",
+     "a_es": "archivo",
+     "b": "fail",
+     "b_ipa": "/feɪl/",
+     "b_es": "fallar",
+     "contrasta_con": "/eɪ/",
+     "audio_a": "aud/fon/fon_014_par3a.mp3",
+     "audio_b": "aud/fon/fon_014_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero handing coins to a shopkeeper who gestures apologetically toward a small puppy standing beside the counter",
+   "orden": 14,
+   "audio": "aud/fon/fon_014.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_014_lento.mp3",
+   "imagen": "img/fon/fon_014.webp",
+   "palabra_ancla": "ice"
+  },
+  {
+   "id": "fon_015",
+   "ipa": "/ɔɪ/",
+   "tipo": "diptongo",
+   "nombre": "El diptongo de hoy",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Arranca con los labios redondeados en la o y desliza hacia la i estirándolos. La lengua viaja de atrás hacia adelante. Es idéntico al de hoy, soy o estoy en español, sin ningún ajuste.",
+   "el_error_tipico": "Es el diptongo más fácil de los ocho y casi nunca se equivoca. Lo único que ocurre es que se te acorta al final de palabra y boy queda a medio camino entre boy y buy.",
+   "ejemplos": [
+    {
+     "palabra": "oil",
+     "ipa": "/ɔɪl/",
+     "spanish": "aceite",
+     "audio": "aud/fon/fon_015_ej1.mp3"
+    },
+    {
+     "palabra": "boy",
+     "ipa": "/bɔɪ/",
+     "spanish": "niño",
+     "audio": "aud/fon/fon_015_ej2.mp3"
+    },
+    {
+     "palabra": "coin",
+     "ipa": "/kɔɪn/",
+     "spanish": "moneda",
+     "audio": "aud/fon/fon_015_ej3.mp3"
+    },
+    {
+     "palabra": "noise",
+     "ipa": "/nɔɪz/",
+     "spanish": "ruido",
+     "audio": "aud/fon/fon_015_ej4.mp3"
+    },
+    {
+     "palabra": "enjoy",
+     "ipa": "/ɪnˈdʒɔɪ/",
+     "spanish": "disfrutar",
+     "audio": "aud/fon/fon_015_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "boy",
+     "a_ipa": "/bɔɪ/",
+     "a_es": "niño",
+     "b": "buy",
+     "b_ipa": "/baɪ/",
+     "b_es": "comprar",
+     "contrasta_con": "/aɪ/",
+     "audio_a": "aud/fon/fon_015_par1a.mp3",
+     "audio_b": "aud/fon/fon_015_par1b.mp3"
+    },
+    {
+     "a": "voice",
+     "a_ipa": "/vɔɪs/",
+     "a_es": "voz",
+     "b": "vice",
+     "b_ipa": "/vaɪs/",
+     "b_es": "vicio, prensa",
+     "contrasta_con": "/aɪ/",
+     "audio_a": "aud/fon/fon_015_par2a.mp3",
+     "audio_b": "aud/fon/fon_015_par2b.mp3"
+    },
+    {
+     "a": "noise",
+     "a_ipa": "/nɔɪz/",
+     "a_es": "ruido",
+     "b": "nice",
+     "b_ipa": "/naɪs/",
+     "b_es": "agradable",
+     "contrasta_con": "/aɪ/",
+     "audio_a": "aud/fon/fon_015_par3a.mp3",
+     "audio_b": "aud/fon/fon_015_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero singing warmly into a microphone while a friend hands him a heavy metal clamp taken from a workbench",
+   "orden": 15,
+   "audio": "aud/fon/fon_015.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_015_lento.mp3",
+   "imagen": "img/fon/fon_015.webp",
+   "palabra_ancla": "oil"
+  },
+  {
+   "id": "fon_016",
+   "ipa": "/oʊ/",
+   "tipo": "diptongo",
+   "nombre": "La o que se cierra",
+   "existe_en_espanol": false,
+   "dificultad": 2,
+   "como_producirlo": "Arranca en una o pero no la dejes quieta: los labios se van cerrando y empujando hacia adelante hasta terminar casi en u. Es un movimiento, no un punto fijo. Si tu o se queda parada en el mismo lugar del principio al final, todavía es española.",
+   "el_error_tipico": "Sale la o española pura, que no se mueve, y entonces todas las palabras con o suenan cortadas y planas. No cambia el significado casi nunca, pero es de los rasgos que más rápido identifican tu acento en la primera frase.",
+   "ejemplos": [
+    {
+     "palabra": "open",
+     "ipa": "/ˈoʊpən/",
+     "spanish": "abrir",
+     "audio": "aud/fon/fon_016_ej1.mp3"
+    },
+    {
+     "palabra": "home",
+     "ipa": "/hoʊm/",
+     "spanish": "hogar",
+     "audio": "aud/fon/fon_016_ej2.mp3"
+    },
+    {
+     "palabra": "know",
+     "ipa": "/noʊ/",
+     "spanish": "saber",
+     "audio": "aud/fon/fon_016_ej3.mp3"
+    },
+    {
+     "palabra": "coat",
+     "ipa": "/koʊt/",
+     "spanish": "abrigo",
+     "audio": "aud/fon/fon_016_ej4.mp3"
+    },
+    {
+     "palabra": "phone",
+     "ipa": "/foʊn/",
+     "spanish": "teléfono",
+     "audio": "aud/fon/fon_016_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "coat",
+     "a_ipa": "/koʊt/",
+     "a_es": "abrigo",
+     "b": "caught",
+     "b_ipa": "/kɔːt/",
+     "b_es": "atrapó",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_016_par1a.mp3",
+     "audio_b": "aud/fon/fon_016_par1b.mp3"
+    },
+    {
+     "a": "boat",
+     "a_ipa": "/boʊt/",
+     "a_es": "barco",
+     "b": "bought",
+     "b_ipa": "/bɔːt/",
+     "b_es": "compró",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_016_par2a.mp3",
+     "audio_b": "aud/fon/fon_016_par2b.mp3"
+    },
+    {
+     "a": "low",
+     "a_ipa": "/loʊ/",
+     "a_es": "bajo",
+     "b": "law",
+     "b_ipa": "/lɔː/",
+     "b_es": "ley",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_016_par3a.mp3",
+     "audio_b": "aud/fon/fon_016_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero holding up a warm winter jacket while a friend beside him mimes catching something invisible in mid air",
+   "orden": 16,
+   "audio": "aud/fon/fon_016.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_016_lento.mp3",
+   "imagen": "img/fon/fon_016.webp",
+   "palabra_ancla": "open"
+  },
+  {
+   "id": "fon_017",
+   "ipa": "/aʊ/",
+   "tipo": "diptongo",
+   "nombre": "El diptongo de auto",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Arranca con la boca bien abierta en la a y cierra deslizando hacia la u, redondeando los labios al final. Un solo golpe de voz. Es el mismo movimiento de auto, causa o jaula en español.",
+   "el_error_tipico": "No falla casi nunca. El único descuido es acortar el final y dejarlo en a sola, con lo que house pierde el cierre de labios y se acerca a hose.",
+   "ejemplos": [
+    {
+     "palabra": "out",
+     "ipa": "/aʊt/",
+     "spanish": "afuera",
+     "audio": "aud/fon/fon_017_ej1.mp3"
+    },
+    {
+     "palabra": "house",
+     "ipa": "/haʊs/",
+     "spanish": "casa",
+     "audio": "aud/fon/fon_017_ej2.mp3"
+    },
+    {
+     "palabra": "down",
+     "ipa": "/daʊn/",
+     "spanish": "abajo",
+     "audio": "aud/fon/fon_017_ej3.mp3"
+    },
+    {
+     "palabra": "mouth",
+     "ipa": "/maʊθ/",
+     "spanish": "boca",
+     "audio": "aud/fon/fon_017_ej4.mp3"
+    },
+    {
+     "palabra": "now",
+     "ipa": "/naʊ/",
+     "spanish": "ahora",
+     "audio": "aud/fon/fon_017_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "house",
+     "a_ipa": "/haʊs/",
+     "a_es": "casa",
+     "b": "hose",
+     "b_ipa": "/hoʊz/",
+     "b_es": "manguera",
+     "contrasta_con": "/oʊ/",
+     "audio_a": "aud/fon/fon_017_par1a.mp3",
+     "audio_b": "aud/fon/fon_017_par1b.mp3"
+    },
+    {
+     "a": "now",
+     "a_ipa": "/naʊ/",
+     "a_es": "ahora",
+     "b": "no",
+     "b_ipa": "/noʊ/",
+     "b_es": "no",
+     "contrasta_con": "/oʊ/",
+     "audio_a": "aud/fon/fon_017_par2a.mp3",
+     "audio_b": "aud/fon/fon_017_par2b.mp3"
+    },
+    {
+     "a": "loud",
+     "a_ipa": "/laʊd/",
+     "a_es": "ruidoso",
+     "b": "load",
+     "b_ipa": "/loʊd/",
+     "b_es": "carga",
+     "contrasta_con": "/oʊ/",
+     "audio_a": "aud/fon/fon_017_par3a.mp3",
+     "audio_b": "aud/fon/fon_017_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing proudly at his new home while a friend beside him unrolls a long garden watering tube",
+   "orden": 17,
+   "audio": "aud/fon/fon_017.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_017_lento.mp3",
+   "imagen": "img/fon/fon_017.webp",
+   "palabra_ancla": "out"
+  },
+  {
+   "id": "fon_018",
+   "ipa": "/ɪə/",
+   "tipo": "diptongo",
+   "nombre": "El sonido de ear",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Arranca en la i corta y relajada y desliza hacia la erre americana, esa que se hace enroscando la lengua sin tocar nada. En americano no son dos vocales sino una vocal que se convierte en erre. La lengua nunca golpea el paladar: si vibra, ya te fuiste al español.",
+   "el_error_tipico": "En americano este diptongo ya no existe como tal: se dice /ɪr/, con la erre pegada. El error mexicano es meter una erre vibrante y decir i-ar, así que beer suena a dos sílabas y se confunde con bear, que lleva otra vocal.",
+   "ejemplos": [
+    {
+     "palabra": "ear",
+     "ipa": "/ɪr/",
+     "spanish": "oreja",
+     "audio": "aud/fon/fon_018_ej1.mp3"
+    },
+    {
+     "palabra": "here",
+     "ipa": "/hɪr/",
+     "spanish": "aquí",
+     "audio": "aud/fon/fon_018_ej2.mp3"
+    },
+    {
+     "palabra": "beer",
+     "ipa": "/bɪr/",
+     "spanish": "cerveza",
+     "audio": "aud/fon/fon_018_ej3.mp3"
+    },
+    {
+     "palabra": "year",
+     "ipa": "/jɪr/",
+     "spanish": "año",
+     "audio": "aud/fon/fon_018_ej4.mp3"
+    },
+    {
+     "palabra": "serious",
+     "ipa": "/ˈsɪriəs/",
+     "spanish": "serio",
+     "audio": "aud/fon/fon_018_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "beer",
+     "a_ipa": "/bɪr/",
+     "a_es": "cerveza",
+     "b": "bear",
+     "b_ipa": "/bɛr/",
+     "b_es": "oso",
+     "contrasta_con": "/ɛə/",
+     "audio_a": "aud/fon/fon_018_par1a.mp3",
+     "audio_b": "aud/fon/fon_018_par1b.mp3"
+    },
+    {
+     "a": "ear",
+     "a_ipa": "/ɪr/",
+     "a_es": "oreja",
+     "b": "air",
+     "b_ipa": "/ɛr/",
+     "b_es": "aire",
+     "contrasta_con": "/ɛə/",
+     "audio_a": "aud/fon/fon_018_par2a.mp3",
+     "audio_b": "aud/fon/fon_018_par2b.mp3"
+    },
+    {
+     "a": "cheer",
+     "a_ipa": "/tʃɪr/",
+     "a_es": "animar",
+     "b": "chair",
+     "b_ipa": "/tʃɛr/",
+     "b_es": "silla",
+     "contrasta_con": "/ɛə/",
+     "audio_a": "aud/fon/fon_018_par3a.mp3",
+     "audio_b": "aud/fon/fon_018_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero ordering a drink at a bar while the bartender nervously points at a large furry animal right behind him",
+   "orden": 18,
+   "audio": "aud/fon/fon_018.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_018_lento.mp3",
+   "imagen": "img/fon/fon_018.webp",
+   "palabra_ancla": "ear"
+  },
+  {
+   "id": "fon_019",
+   "ipa": "/ɛə/",
+   "tipo": "diptongo",
+   "nombre": "El sonido de air",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Arranca en la e abierta y desliza hacia la erre americana enroscando la lengua hacia atrás. La boca queda más abierta que para el sonido de ear. Es un solo movimiento continuo, no una vocal seguida de una consonante.",
+   "el_error_tipico": "En americano tampoco existe como diptongo verdadero: se realiza como /ɛr/. El error es meter la erre vibrante española y partir la palabra, así que chair te sale che-ar y el que escucha duda entre chair y cheer.",
+   "ejemplos": [
+    {
+     "palabra": "air",
+     "ipa": "/ɛr/",
+     "spanish": "aire",
+     "audio": "aud/fon/fon_019_ej1.mp3"
+    },
+    {
+     "palabra": "hair",
+     "ipa": "/hɛr/",
+     "spanish": "cabello",
+     "audio": "aud/fon/fon_019_ej2.mp3"
+    },
+    {
+     "palabra": "chair",
+     "ipa": "/tʃɛr/",
+     "spanish": "silla",
+     "audio": "aud/fon/fon_019_ej3.mp3"
+    },
+    {
+     "palabra": "where",
+     "ipa": "/wɛr/",
+     "spanish": "dónde",
+     "audio": "aud/fon/fon_019_ej4.mp3"
+    },
+    {
+     "palabra": "careful",
+     "ipa": "/ˈkɛrfəl/",
+     "spanish": "cuidadoso",
+     "audio": "aud/fon/fon_019_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "chair",
+     "a_ipa": "/tʃɛr/",
+     "a_es": "silla",
+     "b": "cheer",
+     "b_ipa": "/tʃɪr/",
+     "b_es": "animar",
+     "contrasta_con": "/ɪə/",
+     "audio_a": "aud/fon/fon_019_par1a.mp3",
+     "audio_b": "aud/fon/fon_019_par1b.mp3"
+    },
+    {
+     "a": "hair",
+     "a_ipa": "/hɛr/",
+     "a_es": "cabello",
+     "b": "here",
+     "b_ipa": "/hɪr/",
+     "b_es": "aquí",
+     "contrasta_con": "/ɪə/",
+     "audio_a": "aud/fon/fon_019_par2a.mp3",
+     "audio_b": "aud/fon/fon_019_par2b.mp3"
+    },
+    {
+     "a": "bear",
+     "a_ipa": "/bɛr/",
+     "a_es": "oso",
+     "b": "beer",
+     "b_ipa": "/bɪr/",
+     "b_es": "cerveza",
+     "contrasta_con": "/ɪə/",
+     "audio_a": "aud/fon/fon_019_par3a.mp3",
+     "audio_b": "aud/fon/fon_019_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero dragging a wooden seat onto a stadium field while the whole crowd around him raises both paws celebrating",
+   "orden": 19,
+   "audio": "aud/fon/fon_019.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_019_lento.mp3",
+   "imagen": "img/fon/fon_019.webp",
+   "palabra_ancla": "air"
+  },
+  {
+   "id": "fon_020",
+   "ipa": "/ʊə/",
+   "tipo": "diptongo",
+   "nombre": "El sonido de tour",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Arranca en la u corta y floja, con los labios apenas redondeados, y desliza hacia la erre americana. Es el más raro de los ocho y el que menos vas a necesitar producir, aunque sí conviene reconocerlo cuando lo oigas.",
+   "el_error_tipico": "En americano este diptongo está casi extinto: la mayoría dice /ʊr/ o directamente lo cambia por /ɔːr/, así que sure suena shore y poor suena pour. No lo entrenes aparte, entrena la erre americana y este sale solo.",
+   "ejemplos": [
+    {
+     "palabra": "tour",
+     "ipa": "/tʊr/",
+     "spanish": "recorrido",
+     "audio": "aud/fon/fon_020_ej1.mp3"
+    },
+    {
+     "palabra": "sure",
+     "ipa": "/ʃʊr/",
+     "spanish": "seguro",
+     "audio": "aud/fon/fon_020_ej2.mp3"
+    },
+    {
+     "palabra": "poor",
+     "ipa": "/pʊr/",
+     "spanish": "pobre",
+     "audio": "aud/fon/fon_020_ej3.mp3"
+    },
+    {
+     "palabra": "cure",
+     "ipa": "/kjʊr/",
+     "spanish": "cura",
+     "audio": "aud/fon/fon_020_ej4.mp3"
+    },
+    {
+     "palabra": "during",
+     "ipa": "/ˈdʊrɪŋ/",
+     "spanish": "durante",
+     "audio": "aud/fon/fon_020_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "poor",
+     "a_ipa": "/pʊr/",
+     "a_es": "pobre",
+     "b": "pour",
+     "b_ipa": "/pɔːr/",
+     "b_es": "servir, verter",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_020_par1a.mp3",
+     "audio_b": "aud/fon/fon_020_par1b.mp3"
+    },
+    {
+     "a": "sure",
+     "a_ipa": "/ʃʊr/",
+     "a_es": "seguro",
+     "b": "shore",
+     "b_ipa": "/ʃɔːr/",
+     "b_es": "orilla",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_020_par2a.mp3",
+     "audio_b": "aud/fon/fon_020_par2b.mp3"
+    },
+    {
+     "a": "tour",
+     "a_ipa": "/tʊr/",
+     "a_es": "recorrido",
+     "b": "tore",
+     "b_ipa": "/tɔːr/",
+     "b_es": "rasgó",
+     "contrasta_con": "/ɔː/",
+     "audio_a": "aud/fon/fon_020_par3a.mp3",
+     "audio_b": "aud/fon/fon_020_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero holding an empty coin purse while a waiter beside him tips a pitcher over his cup instead",
+   "orden": 20,
+   "audio": "aud/fon/fon_020.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_020_lento.mp3",
+   "imagen": "img/fon/fon_020.webp",
+   "palabra_ancla": "tour"
+  },
+  {
+   "id": "fon_021",
+   "ipa": "/p/",
+   "tipo": "oclusiva",
+   "nombre": "La p con soplido",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "Los labios se cierran, se acumula aire y se sueltan de golpe. Hasta ahí es igual que en español. La diferencia está en que al principio de palabra el inglés suelta además un soplido de aire, como si estuvieras apagando una vela: pen sale con una pequeña ráfaga que el español nunca hace.",
+   "el_error_tipico": "Sale la p española, limpia y sin aire, y como el inglés distingue p de b justo por ese soplido, pin se te oye como bin y pat como bat. Pon la palma frente a la boca: si no sientes la ráfaga de aire, falta soplido.",
+   "ejemplos": [
+    {
+     "palabra": "pen",
+     "ipa": "/pɛn/",
+     "spanish": "pluma",
+     "audio": "aud/fon/fon_021_ej1.mp3"
+    },
+    {
+     "palabra": "paper",
+     "ipa": "/ˈpeɪpər/",
+     "spanish": "papel",
+     "audio": "aud/fon/fon_021_ej2.mp3"
+    },
+    {
+     "palabra": "apple",
+     "ipa": "/ˈæpəl/",
+     "spanish": "manzana",
+     "audio": "aud/fon/fon_021_ej3.mp3"
+    },
+    {
+     "palabra": "stop",
+     "ipa": "/stɑːp/",
+     "spanish": "detenerse",
+     "audio": "aud/fon/fon_021_ej4.mp3"
+    },
+    {
+     "palabra": "cheap",
+     "ipa": "/tʃiːp/",
+     "spanish": "barato",
+     "audio": "aud/fon/fon_021_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "pin",
+     "a_ipa": "/pɪn/",
+     "a_es": "alfiler",
+     "b": "bin",
+     "b_ipa": "/bɪn/",
+     "b_es": "bote de basura",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_021_par1a.mp3",
+     "audio_b": "aud/fon/fon_021_par1b.mp3"
+    },
+    {
+     "a": "pat",
+     "a_ipa": "/pæt/",
+     "a_es": "palmadita",
+     "b": "bat",
+     "b_ipa": "/bæt/",
+     "b_es": "bate, murciélago",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_021_par2a.mp3",
+     "audio_b": "aud/fon/fon_021_par2b.mp3"
+    },
+    {
+     "a": "cap",
+     "a_ipa": "/kæp/",
+     "a_es": "gorra",
+     "b": "cab",
+     "b_ipa": "/kæb/",
+     "b_es": "taxi",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_021_par3a.mp3",
+     "audio_b": "aud/fon/fon_021_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero holding out a tiny needle while a friend rolls a large trash container toward him instead",
+   "orden": 21,
+   "audio": "aud/fon/fon_021.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_021_lento.mp3",
+   "imagen": "img/fon/fon_021.webp",
+   "palabra_ancla": "pen"
+  },
+  {
+   "id": "fon_022",
+   "ipa": "/b/",
+   "tipo": "oclusiva",
+   "nombre": "La b de los dos labios",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "Los labios se cierran del todo, la garganta vibra desde antes de abrirlos, y se sueltan sin soplido. La clave está en que el cierre debe ser completo, incluso entre vocales: en baby los labios se juntan de verdad las dos veces.",
+   "el_error_tipico": "El español relaja la b entre vocales y la convierte en un roce, así que baby te sale bavi y about suena avaut. Además usas la misma b para la v inglesa, que es otro sonido entero.",
+   "ejemplos": [
+    {
+     "palabra": "book",
+     "ipa": "/bʊk/",
+     "spanish": "libro",
+     "audio": "aud/fon/fon_022_ej1.mp3"
+    },
+    {
+     "palabra": "big",
+     "ipa": "/bɪɡ/",
+     "spanish": "grande",
+     "audio": "aud/fon/fon_022_ej2.mp3"
+    },
+    {
+     "palabra": "table",
+     "ipa": "/ˈteɪbəl/",
+     "spanish": "mesa",
+     "audio": "aud/fon/fon_022_ej3.mp3"
+    },
+    {
+     "palabra": "about",
+     "ipa": "/əˈbaʊt/",
+     "spanish": "acerca de",
+     "audio": "aud/fon/fon_022_ej4.mp3"
+    },
+    {
+     "palabra": "job",
+     "ipa": "/dʒɑːb/",
+     "spanish": "trabajo",
+     "audio": "aud/fon/fon_022_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "bin",
+     "a_ipa": "/bɪn/",
+     "a_es": "bote de basura",
+     "b": "pin",
+     "b_ipa": "/pɪn/",
+     "b_es": "alfiler",
+     "contrasta_con": "/p/",
+     "audio_a": "aud/fon/fon_022_par1a.mp3",
+     "audio_b": "aud/fon/fon_022_par1b.mp3"
+    },
+    {
+     "a": "cab",
+     "a_ipa": "/kæb/",
+     "a_es": "taxi",
+     "b": "cap",
+     "b_ipa": "/kæp/",
+     "b_es": "gorra",
+     "contrasta_con": "/p/",
+     "audio_a": "aud/fon/fon_022_par2a.mp3",
+     "audio_b": "aud/fon/fon_022_par2b.mp3"
+    },
+    {
+     "a": "ban",
+     "a_ipa": "/bæn/",
+     "a_es": "prohibir",
+     "b": "van",
+     "b_ipa": "/væn/",
+     "b_es": "camioneta",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_022_par3a.mp3",
+     "audio_b": "aud/fon/fon_022_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero hailing a taxi at the curb while a friend places a baseball hat carefully on his head instead",
+   "orden": 22,
+   "audio": "aud/fon/fon_022.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_022_lento.mp3",
+   "imagen": "img/fon/fon_022.webp",
+   "palabra_ancla": "book"
+  },
+  {
+   "id": "fon_023",
+   "ipa": "/t/",
+   "tipo": "oclusiva",
+   "nombre": "La t con soplido",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La punta de la lengua toca la encía de arriba, no los dientes como en español, y se suelta con un soplido de aire al principio de palabra. Entre vocales pasa lo contrario: se relaja tanto que se vuelve un golpecito parecido a la erre suave, y por eso water suena wader.",
+   "el_error_tipico": "Pones la lengua en los dientes y no sueltas aire, así que ten se oye den y town suena down. Y en medio de palabra haces la t completa cuando el americano ya la convirtió en golpecito, lo que hace que suenes deletreando.",
+   "ejemplos": [
+    {
+     "palabra": "time",
+     "ipa": "/taɪm/",
+     "spanish": "tiempo",
+     "audio": "aud/fon/fon_023_ej1.mp3"
+    },
+    {
+     "palabra": "take",
+     "ipa": "/teɪk/",
+     "spanish": "tomar",
+     "audio": "aud/fon/fon_023_ej2.mp3"
+    },
+    {
+     "palabra": "water",
+     "ipa": "/ˈwɑːɾər/",
+     "spanish": "agua",
+     "audio": "aud/fon/fon_023_ej3.mp3"
+    },
+    {
+     "palabra": "night",
+     "ipa": "/naɪt/",
+     "spanish": "noche",
+     "audio": "aud/fon/fon_023_ej4.mp3"
+    },
+    {
+     "palabra": "tomorrow",
+     "ipa": "/təˈmɑːroʊ/",
+     "spanish": "mañana",
+     "audio": "aud/fon/fon_023_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "ten",
+     "a_ipa": "/tɛn/",
+     "a_es": "diez",
+     "b": "den",
+     "b_ipa": "/dɛn/",
+     "b_es": "guarida",
+     "contrasta_con": "/d/",
+     "audio_a": "aud/fon/fon_023_par1a.mp3",
+     "audio_b": "aud/fon/fon_023_par1b.mp3"
+    },
+    {
+     "a": "town",
+     "a_ipa": "/taʊn/",
+     "a_es": "pueblo",
+     "b": "down",
+     "b_ipa": "/daʊn/",
+     "b_es": "abajo",
+     "contrasta_con": "/d/",
+     "audio_a": "aud/fon/fon_023_par2a.mp3",
+     "audio_b": "aud/fon/fon_023_par2b.mp3"
+    },
+    {
+     "a": "bet",
+     "a_ipa": "/bɛt/",
+     "a_es": "apuesta",
+     "b": "bed",
+     "b_ipa": "/bɛd/",
+     "b_es": "cama",
+     "contrasta_con": "/d/",
+     "audio_a": "aud/fon/fon_023_par3a.mp3",
+     "audio_b": "aud/fon/fon_023_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero holding up ten fingers proudly while a friend points at a cozy animal burrow dug under a tree",
+   "orden": 23,
+   "audio": "aud/fon/fon_023.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_023_lento.mp3",
+   "imagen": "img/fon/fon_023.webp",
+   "palabra_ancla": "time"
+  },
+  {
+   "id": "fon_024",
+   "ipa": "/d/",
+   "tipo": "oclusiva",
+   "nombre": "La d dura",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La punta de la lengua toca la encía de arriba con firmeza, la garganta vibra, y se suelta sin soplido. El contacto tiene que ser completo siempre, también entre vocales. Es la única d del inglés: no existe la versión suave del español.",
+   "el_error_tipico": "El español ablanda la d entre vocales y la convierte en algo parecido a la th de this, como en nada o cada. Al hacerlo en inglés, ladder suena a lather y made se acerca a maze. Toca la encía y detén el aire de verdad.",
+   "ejemplos": [
+    {
+     "palabra": "day",
+     "ipa": "/deɪ/",
+     "spanish": "día",
+     "audio": "aud/fon/fon_024_ej1.mp3"
+    },
+    {
+     "palabra": "door",
+     "ipa": "/dɔːr/",
+     "spanish": "puerta",
+     "audio": "aud/fon/fon_024_ej2.mp3"
+    },
+    {
+     "palabra": "ladder",
+     "ipa": "/ˈlæɾər/",
+     "spanish": "escalera",
+     "audio": "aud/fon/fon_024_ej3.mp3"
+    },
+    {
+     "palabra": "red",
+     "ipa": "/rɛd/",
+     "spanish": "rojo",
+     "audio": "aud/fon/fon_024_ej4.mp3"
+    },
+    {
+     "palabra": "idea",
+     "ipa": "/aɪˈdiːə/",
+     "spanish": "idea",
+     "audio": "aud/fon/fon_024_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "den",
+     "a_ipa": "/dɛn/",
+     "a_es": "guarida",
+     "b": "ten",
+     "b_ipa": "/tɛn/",
+     "b_es": "diez",
+     "contrasta_con": "/t/",
+     "audio_a": "aud/fon/fon_024_par1a.mp3",
+     "audio_b": "aud/fon/fon_024_par1b.mp3"
+    },
+    {
+     "a": "bed",
+     "a_ipa": "/bɛd/",
+     "a_es": "cama",
+     "b": "bet",
+     "b_ipa": "/bɛt/",
+     "b_es": "apuesta",
+     "contrasta_con": "/t/",
+     "audio_a": "aud/fon/fon_024_par2a.mp3",
+     "audio_b": "aud/fon/fon_024_par2b.mp3"
+    },
+    {
+     "a": "day",
+     "a_ipa": "/deɪ/",
+     "a_es": "día",
+     "b": "they",
+     "b_ipa": "/ðeɪ/",
+     "b_es": "ellos",
+     "contrasta_con": "/ð/",
+     "audio_a": "aud/fon/fon_024_par3a.mp3",
+     "audio_b": "aud/fon/fon_024_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at a mattress while a friend slides a stack of gambling chips across a card table",
+   "orden": 24,
+   "audio": "aud/fon/fon_024.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_024_lento.mp3",
+   "imagen": "img/fon/fon_024.webp",
+   "palabra_ancla": "day"
+  },
+  {
+   "id": "fon_025",
+   "ipa": "/k/",
+   "tipo": "oclusiva",
+   "nombre": "La k con soplido",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La parte de atrás de la lengua sube y bloquea el aire contra el paladar blando, y se suelta con una ráfaga al principio de palabra. Es la misma posición que la c de casa, solo que el inglés añade el soplido que el español no tiene.",
+   "el_error_tipico": "Sale la k española sin aire y entonces coat se oye goat y cold suena gold. Es el mismo problema de la p y la t: en inglés la diferencia entre las tres sordas y sus pares sonoras vive en ese soplido, no en la posición de la boca.",
+   "ejemplos": [
+    {
+     "palabra": "cat",
+     "ipa": "/kæt/",
+     "spanish": "gato",
+     "audio": "aud/fon/fon_025_ej1.mp3"
+    },
+    {
+     "palabra": "coffee",
+     "ipa": "/ˈkɔːfi/",
+     "spanish": "café",
+     "audio": "aud/fon/fon_025_ej2.mp3"
+    },
+    {
+     "palabra": "school",
+     "ipa": "/skuːl/",
+     "spanish": "escuela",
+     "audio": "aud/fon/fon_025_ej3.mp3"
+    },
+    {
+     "palabra": "take",
+     "ipa": "/teɪk/",
+     "spanish": "tomar",
+     "audio": "aud/fon/fon_025_ej4.mp3"
+    },
+    {
+     "palabra": "week",
+     "ipa": "/wiːk/",
+     "spanish": "semana",
+     "audio": "aud/fon/fon_025_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "coat",
+     "a_ipa": "/koʊt/",
+     "a_es": "abrigo",
+     "b": "goat",
+     "b_ipa": "/ɡoʊt/",
+     "b_es": "cabra",
+     "contrasta_con": "/ɡ/",
+     "audio_a": "aud/fon/fon_025_par1a.mp3",
+     "audio_b": "aud/fon/fon_025_par1b.mp3"
+    },
+    {
+     "a": "cold",
+     "a_ipa": "/koʊld/",
+     "a_es": "frío",
+     "b": "gold",
+     "b_ipa": "/ɡoʊld/",
+     "b_es": "oro",
+     "contrasta_con": "/ɡ/",
+     "audio_a": "aud/fon/fon_025_par2a.mp3",
+     "audio_b": "aud/fon/fon_025_par2b.mp3"
+    },
+    {
+     "a": "back",
+     "a_ipa": "/bæk/",
+     "a_es": "espalda",
+     "b": "bag",
+     "b_ipa": "/bæɡ/",
+     "b_es": "bolsa",
+     "contrasta_con": "/ɡ/",
+     "audio_a": "aud/fon/fon_025_par3a.mp3",
+     "audio_b": "aud/fon/fon_025_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero holding up a warm jacket while a friend leads a bleating horned animal in through the front door",
+   "orden": 25,
+   "audio": "aud/fon/fon_025.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_025_lento.mp3",
+   "imagen": "img/fon/fon_025.webp",
+   "palabra_ancla": "cat"
+  },
+  {
+   "id": "fon_026",
+   "ipa": "/ɡ/",
+   "tipo": "oclusiva",
+   "nombre": "La g dura de gato",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La parte de atrás de la lengua bloquea el aire contra el paladar blando y la garganta vibra antes de soltarlo. El bloqueo debe ser total, también en medio de palabra: en bigger la lengua toca de verdad, no roza.",
+   "el_error_tipico": "El español relaja la g entre vocales, como en agua o lago, y ese roce hace que bigger suene a biar y again pierda la consonante entera. Al principio de palabra el riesgo es el contrario: sin voz suficiente, goat se oye coat.",
+   "ejemplos": [
+    {
+     "palabra": "go",
+     "ipa": "/ɡoʊ/",
+     "spanish": "ir",
+     "audio": "aud/fon/fon_026_ej1.mp3"
+    },
+    {
+     "palabra": "game",
+     "ipa": "/ɡeɪm/",
+     "spanish": "juego",
+     "audio": "aud/fon/fon_026_ej2.mp3"
+    },
+    {
+     "palabra": "bigger",
+     "ipa": "/ˈbɪɡər/",
+     "spanish": "más grande",
+     "audio": "aud/fon/fon_026_ej3.mp3"
+    },
+    {
+     "palabra": "dog",
+     "ipa": "/dɔːɡ/",
+     "spanish": "perro",
+     "audio": "aud/fon/fon_026_ej4.mp3"
+    },
+    {
+     "palabra": "again",
+     "ipa": "/əˈɡɛn/",
+     "spanish": "otra vez",
+     "audio": "aud/fon/fon_026_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "goat",
+     "a_ipa": "/ɡoʊt/",
+     "a_es": "cabra",
+     "b": "coat",
+     "b_ipa": "/koʊt/",
+     "b_es": "abrigo",
+     "contrasta_con": "/k/",
+     "audio_a": "aud/fon/fon_026_par1a.mp3",
+     "audio_b": "aud/fon/fon_026_par1b.mp3"
+    },
+    {
+     "a": "bag",
+     "a_ipa": "/bæɡ/",
+     "a_es": "bolsa",
+     "b": "back",
+     "b_ipa": "/bæk/",
+     "b_es": "espalda",
+     "contrasta_con": "/k/",
+     "audio_a": "aud/fon/fon_026_par2a.mp3",
+     "audio_b": "aud/fon/fon_026_par2b.mp3"
+    },
+    {
+     "a": "gap",
+     "a_ipa": "/ɡæp/",
+     "a_es": "hueco",
+     "b": "cap",
+     "b_ipa": "/kæp/",
+     "b_es": "gorra",
+     "contrasta_con": "/k/",
+     "audio_a": "aud/fon/fon_026_par3a.mp3",
+     "audio_b": "aud/fon/fon_026_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at a shopping tote while a friend turns around and proudly shows him his own shoulders",
+   "orden": 26,
+   "audio": "aud/fon/fon_026.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_026_lento.mp3",
+   "imagen": "img/fon/fon_026.webp",
+   "palabra_ancla": "go"
+  },
+  {
+   "id": "fon_027",
+   "ipa": "/f/",
+   "tipo": "fricativa",
+   "nombre": "La f de foco",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Los dientes de arriba se apoyan en el labio de abajo y el aire pasa rozando, sin que la garganta vibre. Es exactamente la f del español, sin ningún ajuste. Guarda bien esta posición porque es la misma que vas a necesitar para la v inglesa.",
+   "el_error_tipico": "Casi no falla. El único cuidado es al final de palabra, donde el español no tiene f y tiendes a soltarla o a agregarle una vocal: laugh se te vuelve lafe y off queda ofe.",
+   "ejemplos": [
+    {
+     "palabra": "fish",
+     "ipa": "/fɪʃ/",
+     "spanish": "pez",
+     "audio": "aud/fon/fon_027_ej1.mp3"
+    },
+    {
+     "palabra": "family",
+     "ipa": "/ˈfæməli/",
+     "spanish": "familia",
+     "audio": "aud/fon/fon_027_ej2.mp3"
+    },
+    {
+     "palabra": "coffee",
+     "ipa": "/ˈkɔːfi/",
+     "spanish": "café",
+     "audio": "aud/fon/fon_027_ej3.mp3"
+    },
+    {
+     "palabra": "off",
+     "ipa": "/ɔːf/",
+     "spanish": "apagado",
+     "audio": "aud/fon/fon_027_ej4.mp3"
+    },
+    {
+     "palabra": "laugh",
+     "ipa": "/læf/",
+     "spanish": "reír",
+     "audio": "aud/fon/fon_027_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "fan",
+     "a_ipa": "/fæn/",
+     "a_es": "ventilador",
+     "b": "van",
+     "b_ipa": "/væn/",
+     "b_es": "camioneta",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_027_par1a.mp3",
+     "audio_b": "aud/fon/fon_027_par1b.mp3"
+    },
+    {
+     "a": "leaf",
+     "a_ipa": "/liːf/",
+     "a_es": "hoja",
+     "b": "leave",
+     "b_ipa": "/liːv/",
+     "b_es": "irse",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_027_par2a.mp3",
+     "audio_b": "aud/fon/fon_027_par2b.mp3"
+    },
+    {
+     "a": "safe",
+     "a_ipa": "/seɪf/",
+     "a_es": "seguro",
+     "b": "save",
+     "b_ipa": "/seɪv/",
+     "b_es": "guardar",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_027_par3a.mp3",
+     "audio_b": "aud/fon/fon_027_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at a spinning cooling blade while a friend drives an enormous delivery vehicle up the driveway",
+   "orden": 27,
+   "audio": "aud/fon/fon_027.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_027_lento.mp3",
+   "imagen": "img/fon/fon_027.webp",
+   "palabra_ancla": "fish"
+  },
+  {
+   "id": "fon_028",
+   "ipa": "/v/",
+   "tipo": "fricativa",
+   "nombre": "La v de dientes y labio",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Apoya los dientes de arriba sobre el labio de abajo, igual que para la f, y ahora deja que la garganta vibre mientras el aire pasa. Los dos labios nunca se tocan entre sí. Si sientes cosquilleo en el labio de abajo, vas bien: es una f con motor.",
+   "el_error_tipico": "En español la v se escribe distinto pero suena idéntica a la b, así que juntas los labios y vote sale boat, vest sale best y very sale berry. Es de los sonidos donde más significado se pierde, porque cambia palabras enteras de uso diario.",
+   "ejemplos": [
+    {
+     "palabra": "very",
+     "ipa": "/ˈvɛri/",
+     "spanish": "muy",
+     "audio": "aud/fon/fon_028_ej1.mp3"
+    },
+    {
+     "palabra": "video",
+     "ipa": "/ˈvɪdioʊ/",
+     "spanish": "video",
+     "audio": "aud/fon/fon_028_ej2.mp3"
+    },
+    {
+     "palabra": "over",
+     "ipa": "/ˈoʊvər/",
+     "spanish": "sobre",
+     "audio": "aud/fon/fon_028_ej3.mp3"
+    },
+    {
+     "palabra": "five",
+     "ipa": "/faɪv/",
+     "spanish": "cinco",
+     "audio": "aud/fon/fon_028_ej4.mp3"
+    },
+    {
+     "palabra": "love",
+     "ipa": "/lʌv/",
+     "spanish": "amor",
+     "audio": "aud/fon/fon_028_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "van",
+     "a_ipa": "/væn/",
+     "a_es": "camioneta",
+     "b": "ban",
+     "b_ipa": "/bæn/",
+     "b_es": "prohibir",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_028_par1a.mp3",
+     "audio_b": "aud/fon/fon_028_par1b.mp3"
+    },
+    {
+     "a": "vote",
+     "a_ipa": "/voʊt/",
+     "a_es": "votar",
+     "b": "boat",
+     "b_ipa": "/boʊt/",
+     "b_es": "barco",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_028_par2a.mp3",
+     "audio_b": "aud/fon/fon_028_par2b.mp3"
+    },
+    {
+     "a": "vest",
+     "a_ipa": "/vɛst/",
+     "a_es": "chaleco",
+     "b": "best",
+     "b_ipa": "/bɛst/",
+     "b_es": "el mejor",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_028_par3a.mp3",
+     "audio_b": "aud/fon/fon_028_par3b.mp3"
+    },
+    {
+     "a": "very",
+     "a_ipa": "/ˈvɛri/",
+     "a_es": "muy",
+     "b": "berry",
+     "b_ipa": "/ˈbɛri/",
+     "b_es": "baya",
+     "contrasta_con": "/b/",
+     "audio_a": "aud/fon/fon_028_par4a.mp3",
+     "audio_b": "aud/fon/fon_028_par4b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero emphasizing something with both paws while a friend hands him a small red fruit with a puzzled expression",
+   "orden": 28,
+   "audio": "aud/fon/fon_028.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_028_lento.mp3",
+   "imagen": "img/fon/fon_028.webp",
+   "palabra_ancla": "very"
+  },
+  {
+   "id": "fon_029",
+   "ipa": "/θ/",
+   "tipo": "fricativa",
+   "nombre": "La th sorda entre dientes",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Saca la punta de la lengua hasta que asome apenas entre los dientes de arriba y de abajo, y sopla sin usar la garganta. La lengua debe estar plana y relajada. Es incómodo al principio y esa incomodidad es la señal de que lo estás haciendo bien.",
+   "el_error_tipico": "Sale una s o una t, así que think suena sink o tink y three suena tree. Es el rasgo que más se asocia con acento extranjero en inglés, y aparece en palabras tan frecuentes como thing, three y birthday.",
+   "ejemplos": [
+    {
+     "palabra": "think",
+     "ipa": "/θɪŋk/",
+     "spanish": "pensar",
+     "audio": "aud/fon/fon_029_ej1.mp3"
+    },
+    {
+     "palabra": "three",
+     "ipa": "/θriː/",
+     "spanish": "tres",
+     "audio": "aud/fon/fon_029_ej2.mp3"
+    },
+    {
+     "palabra": "mouth",
+     "ipa": "/maʊθ/",
+     "spanish": "boca",
+     "audio": "aud/fon/fon_029_ej3.mp3"
+    },
+    {
+     "palabra": "nothing",
+     "ipa": "/ˈnʌθɪŋ/",
+     "spanish": "nada",
+     "audio": "aud/fon/fon_029_ej4.mp3"
+    },
+    {
+     "palabra": "birthday",
+     "ipa": "/ˈbɜːrθdeɪ/",
+     "spanish": "cumpleaños",
+     "audio": "aud/fon/fon_029_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "think",
+     "a_ipa": "/θɪŋk/",
+     "a_es": "pensar",
+     "b": "sink",
+     "b_ipa": "/sɪŋk/",
+     "b_es": "fregadero",
+     "contrasta_con": "/s/",
+     "audio_a": "aud/fon/fon_029_par1a.mp3",
+     "audio_b": "aud/fon/fon_029_par1b.mp3"
+    },
+    {
+     "a": "thin",
+     "a_ipa": "/θɪn/",
+     "a_es": "delgado",
+     "b": "sin",
+     "b_ipa": "/sɪn/",
+     "b_es": "pecado",
+     "contrasta_con": "/s/",
+     "audio_a": "aud/fon/fon_029_par2a.mp3",
+     "audio_b": "aud/fon/fon_029_par2b.mp3"
+    },
+    {
+     "a": "three",
+     "a_ipa": "/θriː/",
+     "a_es": "tres",
+     "b": "tree",
+     "b_ipa": "/triː/",
+     "b_es": "árbol",
+     "contrasta_con": "/t/",
+     "audio_a": "aud/fon/fon_029_par3a.mp3",
+     "audio_b": "aud/fon/fon_029_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero tapping his own forehead thoughtfully while a friend points him firmly toward the kitchen basin",
+   "orden": 29,
+   "audio": "aud/fon/fon_029.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_029_lento.mp3",
+   "imagen": "img/fon/fon_029.webp",
+   "palabra_ancla": "think"
+  },
+  {
+   "id": "fon_030",
+   "ipa": "/ð/",
+   "tipo": "fricativa",
+   "nombre": "La th con voz",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "Misma posición que la th sorda, la lengua asomando entre los dientes, pero ahora la garganta vibra. Buena noticia: ya lo haces todos los días sin saberlo, es la d de nada, cada y todo en español mexicano. Solo tienes que sacar un poco más la lengua y usarlo al principio de palabra.",
+   "el_error_tipico": "Sale una d dura, así que they suena day y the suena de. El problema no es producir el sonido sino ponerlo donde el español nunca lo pone: al inicio. Practica diciendo nada y luego arrancando una palabra desde esa misma posición.",
+   "ejemplos": [
+    {
+     "palabra": "this",
+     "ipa": "/ðɪs/",
+     "spanish": "esto",
+     "audio": "aud/fon/fon_030_ej1.mp3"
+    },
+    {
+     "palabra": "they",
+     "ipa": "/ðeɪ/",
+     "spanish": "ellos",
+     "audio": "aud/fon/fon_030_ej2.mp3"
+    },
+    {
+     "palabra": "mother",
+     "ipa": "/ˈmʌðər/",
+     "spanish": "madre",
+     "audio": "aud/fon/fon_030_ej3.mp3"
+    },
+    {
+     "palabra": "weather",
+     "ipa": "/ˈwɛðər/",
+     "spanish": "clima",
+     "audio": "aud/fon/fon_030_ej4.mp3"
+    },
+    {
+     "palabra": "breathe",
+     "ipa": "/briːð/",
+     "spanish": "respirar",
+     "audio": "aud/fon/fon_030_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "they",
+     "a_ipa": "/ðeɪ/",
+     "a_es": "ellos",
+     "b": "day",
+     "b_ipa": "/deɪ/",
+     "b_es": "día",
+     "contrasta_con": "/d/",
+     "audio_a": "aud/fon/fon_030_par1a.mp3",
+     "audio_b": "aud/fon/fon_030_par1b.mp3"
+    },
+    {
+     "a": "then",
+     "a_ipa": "/ðɛn/",
+     "a_es": "entonces",
+     "b": "den",
+     "b_ipa": "/dɛn/",
+     "b_es": "guarida",
+     "contrasta_con": "/d/",
+     "audio_a": "aud/fon/fon_030_par2a.mp3",
+     "audio_b": "aud/fon/fon_030_par2b.mp3"
+    },
+    {
+     "a": "breathe",
+     "a_ipa": "/briːð/",
+     "a_es": "respirar",
+     "b": "breeze",
+     "b_ipa": "/briːz/",
+     "b_es": "brisa",
+     "contrasta_con": "/z/",
+     "audio_a": "aud/fon/fon_030_par3a.mp3",
+     "audio_b": "aud/fon/fon_030_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at a whole group of dogs while a friend gestures upward at the bright morning sun",
+   "orden": 30,
+   "audio": "aud/fon/fon_030.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_030_lento.mp3",
+   "imagen": "img/fon/fon_030.webp",
+   "palabra_ancla": "this"
+  },
+  {
+   "id": "fon_031",
+   "ipa": "/s/",
+   "tipo": "fricativa",
+   "nombre": "La s de siempre",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La punta de la lengua se acerca a la encía de arriba sin tocarla y el aire pasa silbando, sin vibración en la garganta. Es tu s de siempre. Lo único que cambia es que en inglés puede arrancar una palabra seguida de otra consonante, cosa que el español jamás hace.",
+   "el_error_tipico": "El sonido sale bien pero le pegas una e adelante cuando va seguido de consonante: school se vuelve escool, Spanish se vuelve Espanish y student se vuelve estudent. Empieza silbando como serpiente antes de abrir la boca y la e desaparece.",
+   "ejemplos": [
+    {
+     "palabra": "sun",
+     "ipa": "/sʌn/",
+     "spanish": "sol",
+     "audio": "aud/fon/fon_031_ej1.mp3"
+    },
+    {
+     "palabra": "school",
+     "ipa": "/skuːl/",
+     "spanish": "escuela",
+     "audio": "aud/fon/fon_031_ej2.mp3"
+    },
+    {
+     "palabra": "city",
+     "ipa": "/ˈsɪɾi/",
+     "spanish": "ciudad",
+     "audio": "aud/fon/fon_031_ej3.mp3"
+    },
+    {
+     "palabra": "listen",
+     "ipa": "/ˈlɪsən/",
+     "spanish": "escuchar",
+     "audio": "aud/fon/fon_031_ej4.mp3"
+    },
+    {
+     "palabra": "class",
+     "ipa": "/klæs/",
+     "spanish": "clase",
+     "audio": "aud/fon/fon_031_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "ice",
+     "a_ipa": "/aɪs/",
+     "a_es": "hielo",
+     "b": "eyes",
+     "b_ipa": "/aɪz/",
+     "b_es": "ojos",
+     "contrasta_con": "/z/",
+     "audio_a": "aud/fon/fon_031_par1a.mp3",
+     "audio_b": "aud/fon/fon_031_par1b.mp3"
+    },
+    {
+     "a": "bus",
+     "a_ipa": "/bʌs/",
+     "a_es": "autobús",
+     "b": "buzz",
+     "b_ipa": "/bʌz/",
+     "b_es": "zumbido",
+     "contrasta_con": "/z/",
+     "audio_a": "aud/fon/fon_031_par2a.mp3",
+     "audio_b": "aud/fon/fon_031_par2b.mp3"
+    },
+    {
+     "a": "sip",
+     "a_ipa": "/sɪp/",
+     "a_es": "sorbo",
+     "b": "zip",
+     "b_ipa": "/zɪp/",
+     "b_es": "cierre",
+     "contrasta_con": "/z/",
+     "audio_a": "aud/fon/fon_031_par3a.mp3",
+     "audio_b": "aud/fon/fon_031_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero waiting patiently at a bus stop while a friend beside him swats at a loud insect circling his ears",
+   "orden": 31,
+   "audio": "aud/fon/fon_031.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_031_lento.mp3",
+   "imagen": "img/fon/fon_031.webp",
+   "palabra_ancla": "sun"
+  },
+  {
+   "id": "fon_032",
+   "ipa": "/z/",
+   "tipo": "fricativa",
+   "nombre": "La s que vibra",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Misma posición exacta que la s, pero ahora la garganta vibra mientras el aire pasa. Ponte la mano en el cuello: con la s no sientes nada, con la z tiembla. El truco es que ya la produces sin darte cuenta en desde y en mismo, donde la s se contagia de la consonante que sigue.",
+   "el_error_tipico": "Sale la s sorda en todas las posiciones, así que eyes suena ice y peas suena peace. El problema es grave al final de palabra, porque ahí la z es la que marca los plurales y los verbos en tercera persona.",
+   "ejemplos": [
+    {
+     "palabra": "zoo",
+     "ipa": "/zuː/",
+     "spanish": "zoológico",
+     "audio": "aud/fon/fon_032_ej1.mp3"
+    },
+    {
+     "palabra": "easy",
+     "ipa": "/ˈiːzi/",
+     "spanish": "fácil",
+     "audio": "aud/fon/fon_032_ej2.mp3"
+    },
+    {
+     "palabra": "music",
+     "ipa": "/ˈmjuːzɪk/",
+     "spanish": "música",
+     "audio": "aud/fon/fon_032_ej3.mp3"
+    },
+    {
+     "palabra": "please",
+     "ipa": "/pliːz/",
+     "spanish": "por favor",
+     "audio": "aud/fon/fon_032_ej4.mp3"
+    },
+    {
+     "palabra": "is",
+     "ipa": "/ɪz/",
+     "spanish": "es",
+     "audio": "aud/fon/fon_032_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "eyes",
+     "a_ipa": "/aɪz/",
+     "a_es": "ojos",
+     "b": "ice",
+     "b_ipa": "/aɪs/",
+     "b_es": "hielo",
+     "contrasta_con": "/s/",
+     "audio_a": "aud/fon/fon_032_par1a.mp3",
+     "audio_b": "aud/fon/fon_032_par1b.mp3"
+    },
+    {
+     "a": "peas",
+     "a_ipa": "/piːz/",
+     "a_es": "chícharos",
+     "b": "peace",
+     "b_ipa": "/piːs/",
+     "b_es": "paz",
+     "contrasta_con": "/s/",
+     "audio_a": "aud/fon/fon_032_par2a.mp3",
+     "audio_b": "aud/fon/fon_032_par2b.mp3"
+    },
+    {
+     "a": "rise",
+     "a_ipa": "/raɪz/",
+     "a_es": "subir",
+     "b": "rice",
+     "b_ipa": "/raɪs/",
+     "b_es": "arroz",
+     "contrasta_con": "/s/",
+     "audio_a": "aud/fon/fon_032_par3a.mp3",
+     "audio_b": "aud/fon/fon_032_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero asking for something cold at a counter while the server nervously shields both of his own eyes",
+   "orden": 32,
+   "audio": "aud/fon/fon_032.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_032_lento.mp3",
+   "imagen": "img/fon/fon_032.webp",
+   "palabra_ancla": "zoo"
+  },
+  {
+   "id": "fon_033",
+   "ipa": "/ʃ/",
+   "tipo": "fricativa",
+   "nombre": "La sh de silencio",
+   "existe_en_espanol": false,
+   "dificultad": 2,
+   "como_producirlo": "La lengua se aplana y se retira un poco hacia atrás respecto a la s, los labios se redondean ligeramente hacia adelante y el aire sale como un shhh de pedir silencio. La garganta no vibra. En México ya lo produces en palabras de origen náhuatl como Xola o mixiote.",
+   "el_error_tipico": "Sale la ch española, que arranca con la lengua tocando el paladar, así que she suena chi y ship suena chip. La diferencia es que la ch tiene un golpe seco al inicio y la sh es aire continuo, sin golpe.",
+   "ejemplos": [
+    {
+     "palabra": "she",
+     "ipa": "/ʃiː/",
+     "spanish": "ella",
+     "audio": "aud/fon/fon_033_ej1.mp3"
+    },
+    {
+     "palabra": "shoes",
+     "ipa": "/ʃuːz/",
+     "spanish": "zapatos",
+     "audio": "aud/fon/fon_033_ej2.mp3"
+    },
+    {
+     "palabra": "wash",
+     "ipa": "/wɑːʃ/",
+     "spanish": "lavar",
+     "audio": "aud/fon/fon_033_ej3.mp3"
+    },
+    {
+     "palabra": "machine",
+     "ipa": "/məˈʃiːn/",
+     "spanish": "máquina",
+     "audio": "aud/fon/fon_033_ej4.mp3"
+    },
+    {
+     "palabra": "ocean",
+     "ipa": "/ˈoʊʃən/",
+     "spanish": "océano",
+     "audio": "aud/fon/fon_033_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "ship",
+     "a_ipa": "/ʃɪp/",
+     "a_es": "barco",
+     "b": "chip",
+     "b_ipa": "/tʃɪp/",
+     "b_es": "papa frita",
+     "contrasta_con": "/tʃ/",
+     "audio_a": "aud/fon/fon_033_par1a.mp3",
+     "audio_b": "aud/fon/fon_033_par1b.mp3"
+    },
+    {
+     "a": "wash",
+     "a_ipa": "/wɑːʃ/",
+     "a_es": "lavar",
+     "b": "watch",
+     "b_ipa": "/wɑːtʃ/",
+     "b_es": "ver, reloj",
+     "contrasta_con": "/tʃ/",
+     "audio_a": "aud/fon/fon_033_par2a.mp3",
+     "audio_b": "aud/fon/fon_033_par2b.mp3"
+    },
+    {
+     "a": "she",
+     "a_ipa": "/ʃiː/",
+     "a_es": "ella",
+     "b": "see",
+     "b_ipa": "/siː/",
+     "b_es": "ver",
+     "contrasta_con": "/s/",
+     "audio_a": "aud/fon/fon_033_par3a.mp3",
+     "audio_b": "aud/fon/fon_033_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing at a boat far out on the water while a friend offers him a single salty fried snack",
+   "orden": 33,
+   "audio": "aud/fon/fon_033.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_033_lento.mp3",
+   "imagen": "img/fon/fon_033.webp",
+   "palabra_ancla": "she"
+  },
+  {
+   "id": "fon_034",
+   "ipa": "/ʒ/",
+   "tipo": "fricativa",
+   "nombre": "El sonido de vision",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Misma posición que la sh, lengua aplanada y retirada, labios ligeramente redondeados, pero ahora la garganta vibra. Es una sh con motor, igual que la z es una s con motor. Casi siempre aparece a mitad de palabra y nunca al principio.",
+   "el_error_tipico": "Sale la sh sorda o directamente una y española, así que vision suena vishion o viyion y usually queda uyually. No cambia el significado casi nunca porque hay muy pocas palabras con este sonido, pero marca el acento de inmediato.",
+   "ejemplos": [
+    {
+     "palabra": "vision",
+     "ipa": "/ˈvɪʒən/",
+     "spanish": "visión",
+     "audio": "aud/fon/fon_034_ej1.mp3"
+    },
+    {
+     "palabra": "measure",
+     "ipa": "/ˈmɛʒər/",
+     "spanish": "medir",
+     "audio": "aud/fon/fon_034_ej2.mp3"
+    },
+    {
+     "palabra": "usually",
+     "ipa": "/ˈjuːʒuəli/",
+     "spanish": "usualmente",
+     "audio": "aud/fon/fon_034_ej3.mp3"
+    },
+    {
+     "palabra": "television",
+     "ipa": "/ˈtɛləvɪʒən/",
+     "spanish": "televisión",
+     "audio": "aud/fon/fon_034_ej4.mp3"
+    },
+    {
+     "palabra": "garage",
+     "ipa": "/ɡəˈrɑːʒ/",
+     "spanish": "cochera",
+     "audio": "aud/fon/fon_034_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [],
+   "escena_imagen": "Wero pointing excitedly at a television while a friend mimes shushing him with one paw over his own mouth",
+   "orden": 34,
+   "audio": "aud/fon/fon_034.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_034_lento.mp3",
+   "imagen": "img/fon/fon_034.webp",
+   "palabra_ancla": "vision"
+  },
+  {
+   "id": "fon_035",
+   "ipa": "/h/",
+   "tipo": "fricativa",
+   "nombre": "La h suave, sin jota",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "Solo deja salir aire desde la garganta, sin que la lengua toque nada y sin raspar. Es un suspiro con forma de consonante. Si sientes fricción en el fondo del paladar, estás haciendo la jota española y hay que aflojar.",
+   "el_error_tipico": "Sale la jota de caja, que es mucho más áspera, y house suena a jaus con raspado. El otro extremo es comerte la h por completo porque en español es muda, y entonces here se convierte en ear y hold en old.",
+   "ejemplos": [
+    {
+     "palabra": "house",
+     "ipa": "/haʊs/",
+     "spanish": "casa",
+     "audio": "aud/fon/fon_035_ej1.mp3"
+    },
+    {
+     "palabra": "here",
+     "ipa": "/hɪr/",
+     "spanish": "aquí",
+     "audio": "aud/fon/fon_035_ej2.mp3"
+    },
+    {
+     "palabra": "happy",
+     "ipa": "/ˈhæpi/",
+     "spanish": "feliz",
+     "audio": "aud/fon/fon_035_ej3.mp3"
+    },
+    {
+     "palabra": "behind",
+     "ipa": "/bɪˈhaɪnd/",
+     "spanish": "detrás",
+     "audio": "aud/fon/fon_035_ej4.mp3"
+    },
+    {
+     "palabra": "perhaps",
+     "ipa": "/pərˈhæps/",
+     "spanish": "quizás",
+     "audio": "aud/fon/fon_035_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "high",
+     "a_ipa": "/haɪ/",
+     "a_es": "alto",
+     "b": "eye",
+     "b_ipa": "/aɪ/",
+     "b_es": "ojo",
+     "contrasta_con": null,
+     "audio_a": "aud/fon/fon_035_par1a.mp3",
+     "audio_b": "aud/fon/fon_035_par1b.mp3"
+    },
+    {
+     "a": "hear",
+     "a_ipa": "/hɪr/",
+     "a_es": "oír",
+     "b": "ear",
+     "b_ipa": "/ɪr/",
+     "b_es": "oreja",
+     "contrasta_con": null,
+     "audio_a": "aud/fon/fon_035_par2a.mp3",
+     "audio_b": "aud/fon/fon_035_par2b.mp3"
+    },
+    {
+     "a": "hold",
+     "a_ipa": "/hoʊld/",
+     "a_es": "sostener",
+     "b": "old",
+     "b_ipa": "/oʊld/",
+     "b_es": "viejo",
+     "contrasta_con": null,
+     "audio_a": "aud/fon/fon_035_par3a.mp3",
+     "audio_b": "aud/fon/fon_035_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pointing way up at the ceiling while a friend beside him covers one of his own eyes, confused",
+   "orden": 35,
+   "audio": "aud/fon/fon_035.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_035_lento.mp3",
+   "imagen": "img/fon/fon_035.webp",
+   "palabra_ancla": "house"
+  },
+  {
+   "id": "fon_036",
+   "ipa": "/tʃ/",
+   "tipo": "africada",
+   "nombre": "La ch de chile",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "La lengua toca el paladar bloqueando el aire y lo suelta de golpe convirtiéndolo en un roce, todo en un solo movimiento. Es exactamente la ch de chile o muchacho, sin ningún ajuste. La clave es que tiene golpe al inicio, y eso es lo que la separa de la sh.",
+   "el_error_tipico": "Producirla no cuesta nada. El riesgo es el contrario: como es tu sonido cómodo, la usas también donde va la sh y dices chip cuando querías ship, o watch cuando querías wash.",
+   "ejemplos": [
+    {
+     "palabra": "chair",
+     "ipa": "/tʃɛr/",
+     "spanish": "silla",
+     "audio": "aud/fon/fon_036_ej1.mp3"
+    },
+    {
+     "palabra": "cheese",
+     "ipa": "/tʃiːz/",
+     "spanish": "queso",
+     "audio": "aud/fon/fon_036_ej2.mp3"
+    },
+    {
+     "palabra": "watch",
+     "ipa": "/wɑːtʃ/",
+     "spanish": "ver, reloj",
+     "audio": "aud/fon/fon_036_ej3.mp3"
+    },
+    {
+     "palabra": "kitchen",
+     "ipa": "/ˈkɪtʃən/",
+     "spanish": "cocina",
+     "audio": "aud/fon/fon_036_ej4.mp3"
+    },
+    {
+     "palabra": "teacher",
+     "ipa": "/ˈtiːtʃər/",
+     "spanish": "maestro",
+     "audio": "aud/fon/fon_036_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "chip",
+     "a_ipa": "/tʃɪp/",
+     "a_es": "papa frita",
+     "b": "ship",
+     "b_ipa": "/ʃɪp/",
+     "b_es": "barco",
+     "contrasta_con": "/ʃ/",
+     "audio_a": "aud/fon/fon_036_par1a.mp3",
+     "audio_b": "aud/fon/fon_036_par1b.mp3"
+    },
+    {
+     "a": "cheap",
+     "a_ipa": "/tʃiːp/",
+     "a_es": "barato",
+     "b": "sheep",
+     "b_ipa": "/ʃiːp/",
+     "b_es": "oveja",
+     "contrasta_con": "/ʃ/",
+     "audio_a": "aud/fon/fon_036_par2a.mp3",
+     "audio_b": "aud/fon/fon_036_par2b.mp3"
+    },
+    {
+     "a": "chin",
+     "a_ipa": "/tʃɪn/",
+     "a_es": "barbilla",
+     "b": "gin",
+     "b_ipa": "/dʒɪn/",
+     "b_es": "ginebra",
+     "contrasta_con": "/dʒ/",
+     "audio_a": "aud/fon/fon_036_par3a.mp3",
+     "audio_b": "aud/fon/fon_036_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero staring intently at a friend who is instead scrubbing a dirty plate under running water in the sink",
+   "orden": 36,
+   "audio": "aud/fon/fon_036.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_036_lento.mp3",
+   "imagen": "img/fon/fon_036.webp",
+   "palabra_ancla": "chair"
+  },
+  {
+   "id": "fon_037",
+   "ipa": "/dʒ/",
+   "tipo": "africada",
+   "nombre": "La j de jam, no de jota",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Es la ch con la garganta vibrando: la lengua bloquea contra el paladar y suelta el aire como roce, pero con voz desde el arranque. Empieza diciendo yes exagerando el inicio hasta que la lengua toque, y ahí lo tienes.",
+   "el_error_tipico": "Sale la jota española y jam suena ham, job suena hob y John suena Juan. La otra salida falsa es la y española suave, que convierte just en yust. Las dos versiones te cuestan palabras completas.",
+   "ejemplos": [
+    {
+     "palabra": "job",
+     "ipa": "/dʒɑːb/",
+     "spanish": "trabajo",
+     "audio": "aud/fon/fon_037_ej1.mp3"
+    },
+    {
+     "palabra": "jump",
+     "ipa": "/dʒʌmp/",
+     "spanish": "saltar",
+     "audio": "aud/fon/fon_037_ej2.mp3"
+    },
+    {
+     "palabra": "orange",
+     "ipa": "/ˈɔːrɪndʒ/",
+     "spanish": "naranja",
+     "audio": "aud/fon/fon_037_ej3.mp3"
+    },
+    {
+     "palabra": "bridge",
+     "ipa": "/brɪdʒ/",
+     "spanish": "puente",
+     "audio": "aud/fon/fon_037_ej4.mp3"
+    },
+    {
+     "palabra": "manager",
+     "ipa": "/ˈmænɪdʒər/",
+     "spanish": "gerente",
+     "audio": "aud/fon/fon_037_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "jam",
+     "a_ipa": "/dʒæm/",
+     "a_es": "mermelada",
+     "b": "ham",
+     "b_ipa": "/hæm/",
+     "b_es": "jamón",
+     "contrasta_con": "/h/",
+     "audio_a": "aud/fon/fon_037_par1a.mp3",
+     "audio_b": "aud/fon/fon_037_par1b.mp3"
+    },
+    {
+     "a": "joke",
+     "a_ipa": "/dʒoʊk/",
+     "a_es": "chiste",
+     "b": "yolk",
+     "b_ipa": "/joʊk/",
+     "b_es": "yema",
+     "contrasta_con": "/j/",
+     "audio_a": "aud/fon/fon_037_par2a.mp3",
+     "audio_b": "aud/fon/fon_037_par2b.mp3"
+    },
+    {
+     "a": "gin",
+     "a_ipa": "/dʒɪn/",
+     "a_es": "ginebra",
+     "b": "chin",
+     "b_ipa": "/tʃɪn/",
+     "b_es": "barbilla",
+     "contrasta_con": "/tʃ/",
+     "audio_a": "aud/fon/fon_037_par3a.mp3",
+     "audio_b": "aud/fon/fon_037_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero telling a story with a wide grin while a friend cracks an egg into a bowl right beside him",
+   "orden": 37,
+   "audio": "aud/fon/fon_037.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_037_lento.mp3",
+   "imagen": "img/fon/fon_037.webp",
+   "palabra_ancla": "job"
+  },
+  {
+   "id": "fon_038",
+   "ipa": "/m/",
+   "tipo": "nasal",
+   "nombre": "La m de mamá",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Los labios se cierran, la garganta vibra y todo el aire sale por la nariz. Es idéntica a la m del español. Lo único que cambia es que en inglés aparece al final de palabra mucho más seguido, y ahí hay que sostenerla sin agregarle vocal.",
+   "el_error_tipico": "Casi no falla. El descuido está en el final de palabra: le pegas una e y film te sale filme, time queda taime. Cierra los labios y déjalos cerrados, sin abrir para soltar una vocal extra.",
+   "ejemplos": [
+    {
+     "palabra": "mom",
+     "ipa": "/mɑːm/",
+     "spanish": "mamá",
+     "audio": "aud/fon/fon_038_ej1.mp3"
+    },
+    {
+     "palabra": "morning",
+     "ipa": "/ˈmɔːrnɪŋ/",
+     "spanish": "mañana",
+     "audio": "aud/fon/fon_038_ej2.mp3"
+    },
+    {
+     "palabra": "summer",
+     "ipa": "/ˈsʌmər/",
+     "spanish": "verano",
+     "audio": "aud/fon/fon_038_ej3.mp3"
+    },
+    {
+     "palabra": "time",
+     "ipa": "/taɪm/",
+     "spanish": "tiempo",
+     "audio": "aud/fon/fon_038_ej4.mp3"
+    },
+    {
+     "palabra": "film",
+     "ipa": "/fɪlm/",
+     "spanish": "película",
+     "audio": "aud/fon/fon_038_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "mine",
+     "a_ipa": "/maɪn/",
+     "a_es": "mío",
+     "b": "nine",
+     "b_ipa": "/naɪn/",
+     "b_es": "nueve",
+     "contrasta_con": "/n/",
+     "audio_a": "aud/fon/fon_038_par1a.mp3",
+     "audio_b": "aud/fon/fon_038_par1b.mp3"
+    },
+    {
+     "a": "map",
+     "a_ipa": "/mæp/",
+     "a_es": "mapa",
+     "b": "nap",
+     "b_ipa": "/næp/",
+     "b_es": "siesta",
+     "contrasta_con": "/n/",
+     "audio_a": "aud/fon/fon_038_par2a.mp3",
+     "audio_b": "aud/fon/fon_038_par2b.mp3"
+    },
+    {
+     "a": "some",
+     "a_ipa": "/sʌm/",
+     "a_es": "algunos",
+     "b": "sun",
+     "b_ipa": "/sʌn/",
+     "b_es": "sol",
+     "contrasta_con": "/n/",
+     "audio_a": "aud/fon/fon_038_par3a.mp3",
+     "audio_b": "aud/fon/fon_038_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero clutching a toy to his chest possessively while a friend beside him holds up nine fingers instead",
+   "orden": 38,
+   "audio": "aud/fon/fon_038.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_038_lento.mp3",
+   "imagen": "img/fon/fon_038.webp",
+   "palabra_ancla": "mom"
+  },
+  {
+   "id": "fon_039",
+   "ipa": "/n/",
+   "tipo": "nasal",
+   "nombre": "La n de nada",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "La punta de la lengua toca la encía de arriba, la garganta vibra y el aire sale por la nariz. Es la n del español tal cual. Al final de palabra hay que sostener el contacto de la lengua sin soltarlo, para que no se convierta en otra cosa.",
+   "el_error_tipico": "Casi no falla, pero al final de palabra el español tiende a convertirla en la n de banco cuando viene una k o una g, y así sun se acerca a sung. La otra es agregarle vocal y dejar run como rone.",
+   "ejemplos": [
+    {
+     "palabra": "no",
+     "ipa": "/noʊ/",
+     "spanish": "no",
+     "audio": "aud/fon/fon_039_ej1.mp3"
+    },
+    {
+     "palabra": "name",
+     "ipa": "/neɪm/",
+     "spanish": "nombre",
+     "audio": "aud/fon/fon_039_ej2.mp3"
+    },
+    {
+     "palabra": "dinner",
+     "ipa": "/ˈdɪnər/",
+     "spanish": "cena",
+     "audio": "aud/fon/fon_039_ej3.mp3"
+    },
+    {
+     "palabra": "run",
+     "ipa": "/rʌn/",
+     "spanish": "correr",
+     "audio": "aud/fon/fon_039_ej4.mp3"
+    },
+    {
+     "palabra": "phone",
+     "ipa": "/foʊn/",
+     "spanish": "teléfono",
+     "audio": "aud/fon/fon_039_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "nap",
+     "a_ipa": "/næp/",
+     "a_es": "siesta",
+     "b": "map",
+     "b_ipa": "/mæp/",
+     "b_es": "mapa",
+     "contrasta_con": "/m/",
+     "audio_a": "aud/fon/fon_039_par1a.mp3",
+     "audio_b": "aud/fon/fon_039_par1b.mp3"
+    },
+    {
+     "a": "sun",
+     "a_ipa": "/sʌn/",
+     "a_es": "sol",
+     "b": "sung",
+     "b_ipa": "/sʌŋ/",
+     "b_es": "cantado",
+     "contrasta_con": "/ŋ/",
+     "audio_a": "aud/fon/fon_039_par2a.mp3",
+     "audio_b": "aud/fon/fon_039_par2b.mp3"
+    },
+    {
+     "a": "thin",
+     "a_ipa": "/θɪn/",
+     "a_es": "delgado",
+     "b": "thing",
+     "b_ipa": "/θɪŋ/",
+     "b_es": "cosa",
+     "contrasta_con": "/ŋ/",
+     "audio_a": "aud/fon/fon_039_par3a.mp3",
+     "audio_b": "aud/fon/fon_039_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero curling up for a short sleep while a friend unfolds an enormous travel chart over him like a blanket",
+   "orden": 39,
+   "audio": "aud/fon/fon_039.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_039_lento.mp3",
+   "imagen": "img/fon/fon_039.webp",
+   "palabra_ancla": "no"
+  },
+  {
+   "id": "fon_040",
+   "ipa": "/ŋ/",
+   "tipo": "nasal",
+   "nombre": "La n de banco, al final",
+   "existe_en_espanol": true,
+   "dificultad": 3,
+   "como_producirlo": "La parte de atrás de la lengua sube y toca el paladar blando, como para una g, pero el aire sale por la nariz en vez de soltarse por la boca. Ya lo haces en banco, tengo y cinco. Lo difícil es sostenerlo al final de palabra y no soltar nunca la g que viene después.",
+   "el_error_tipico": "Sueltas la g final y sing sale singg, o cambias a n normal y sing suena sin. En español este sonido solo existe pegado a una k o una g, así que dejarlo solo al final se siente incompleto y la boca quiere cerrar el sonido.",
+   "ejemplos": [
+    {
+     "palabra": "sing",
+     "ipa": "/sɪŋ/",
+     "spanish": "cantar",
+     "audio": "aud/fon/fon_040_ej1.mp3"
+    },
+    {
+     "palabra": "thing",
+     "ipa": "/θɪŋ/",
+     "spanish": "cosa",
+     "audio": "aud/fon/fon_040_ej2.mp3"
+    },
+    {
+     "palabra": "long",
+     "ipa": "/lɔːŋ/",
+     "spanish": "largo",
+     "audio": "aud/fon/fon_040_ej3.mp3"
+    },
+    {
+     "palabra": "running",
+     "ipa": "/ˈrʌnɪŋ/",
+     "spanish": "corriendo",
+     "audio": "aud/fon/fon_040_ej4.mp3"
+    },
+    {
+     "palabra": "English",
+     "ipa": "/ˈɪŋɡlɪʃ/",
+     "spanish": "inglés",
+     "audio": "aud/fon/fon_040_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "sing",
+     "a_ipa": "/sɪŋ/",
+     "a_es": "cantar",
+     "b": "sin",
+     "b_ipa": "/sɪn/",
+     "b_es": "pecado",
+     "contrasta_con": "/n/",
+     "audio_a": "aud/fon/fon_040_par1a.mp3",
+     "audio_b": "aud/fon/fon_040_par1b.mp3"
+    },
+    {
+     "a": "thing",
+     "a_ipa": "/θɪŋ/",
+     "a_es": "cosa",
+     "b": "thin",
+     "b_ipa": "/θɪn/",
+     "b_es": "delgado",
+     "contrasta_con": "/n/",
+     "audio_a": "aud/fon/fon_040_par2a.mp3",
+     "audio_b": "aud/fon/fon_040_par2b.mp3"
+    },
+    {
+     "a": "sung",
+     "a_ipa": "/sʌŋ/",
+     "a_es": "cantado",
+     "b": "sun",
+     "b_ipa": "/sʌn/",
+     "b_es": "sol",
+     "contrasta_con": "/n/",
+     "audio_a": "aud/fon/fon_040_par3a.mp3",
+     "audio_b": "aud/fon/fon_040_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero belting out a song on a small stage while a nearby dog clutches his chest looking utterly scandalized",
+   "orden": 40,
+   "audio": "aud/fon/fon_040.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_040_lento.mp3",
+   "imagen": "img/fon/fon_040.webp",
+   "palabra_ancla": "sing"
+  },
+  {
+   "id": "fon_041",
+   "ipa": "/l/",
+   "tipo": "aproximante",
+   "nombre": "La ele, clara y oscura",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "La punta de la lengua toca la encía de arriba y el aire sale por los lados. Hasta ahí es tu ele de siempre, y así suena al principio de palabra: like, love, listen. Pero al final de sílaba el inglés americano usa la ele oscura, donde la punta apenas toca y el fondo de la lengua se levanta hacia atrás, dando un sonido a medio camino entre ele y u. Es la de ball, milk y feel: si dices esas tres con tu ele clara de siempre, todo sigue entendiéndose, pero suena a español de inmediato.",
+   "el_error_tipico": "Usas la ele clara en todas las posiciones, así que ball suena bal y milk suena milk con la ele española bien marcada. No cambia el significado nunca, pero es de los rasgos que más rápido te identifican, porque estas eles finales aparecen en decenas de palabras diarias.",
+   "ejemplos": [
+    {
+     "palabra": "like",
+     "ipa": "/laɪk/",
+     "spanish": "gustar",
+     "audio": "aud/fon/fon_041_ej1.mp3"
+    },
+    {
+     "palabra": "hello",
+     "ipa": "/həˈloʊ/",
+     "spanish": "hola",
+     "audio": "aud/fon/fon_041_ej2.mp3"
+    },
+    {
+     "palabra": "ball",
+     "ipa": "/bɔːl/",
+     "spanish": "pelota",
+     "audio": "aud/fon/fon_041_ej3.mp3"
+    },
+    {
+     "palabra": "milk",
+     "ipa": "/mɪlk/",
+     "spanish": "leche",
+     "audio": "aud/fon/fon_041_ej4.mp3"
+    },
+    {
+     "palabra": "feel",
+     "ipa": "/fiːl/",
+     "spanish": "sentir",
+     "audio": "aud/fon/fon_041_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "light",
+     "a_ipa": "/laɪt/",
+     "a_es": "luz",
+     "b": "right",
+     "b_ipa": "/raɪt/",
+     "b_es": "derecha, correcto",
+     "contrasta_con": "/r/",
+     "audio_a": "aud/fon/fon_041_par1a.mp3",
+     "audio_b": "aud/fon/fon_041_par1b.mp3"
+    },
+    {
+     "a": "glass",
+     "a_ipa": "/ɡlæs/",
+     "a_es": "vaso",
+     "b": "grass",
+     "b_ipa": "/ɡræs/",
+     "b_es": "pasto",
+     "contrasta_con": "/r/",
+     "audio_a": "aud/fon/fon_041_par2a.mp3",
+     "audio_b": "aud/fon/fon_041_par2b.mp3"
+    },
+    {
+     "a": "lace",
+     "a_ipa": "/leɪs/",
+     "a_es": "encaje",
+     "b": "race",
+     "b_ipa": "/reɪs/",
+     "b_es": "carrera",
+     "contrasta_con": "/r/",
+     "audio_a": "aud/fon/fon_041_par3a.mp3",
+     "audio_b": "aud/fon/fon_041_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero flipping a lamp switch while a friend beside him points insistently down the hallway to one side",
+   "orden": 41,
+   "audio": "aud/fon/fon_041.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_041_lento.mp3",
+   "imagen": "img/fon/fon_041.webp",
+   "palabra_ancla": "like"
+  },
+  {
+   "id": "fon_042",
+   "ipa": "/r/",
+   "tipo": "aproximante",
+   "nombre": "La erre que no vibra",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "La lengua se enrosca hacia atrás y se queda flotando en medio de la boca sin tocar nada, y los labios se redondean un poco. No hay golpe ni vibración: si algo tiembla o toca el paladar, ya te fuiste al español. Piensa en un gruñido bajo con los labios adelantados.",
+   "el_error_tipico": "Sale la erre española, que golpea o vibra, así que red y right suenan a algo entre erre y ele para el oído americano. Es el sonido que más trabajo cuesta de todo el inglés, y aparece en car, work, first y sorry, que dices cien veces al día.",
+   "ejemplos": [
+    {
+     "palabra": "red",
+     "ipa": "/rɛd/",
+     "spanish": "rojo",
+     "audio": "aud/fon/fon_042_ej1.mp3"
+    },
+    {
+     "palabra": "right",
+     "ipa": "/raɪt/",
+     "spanish": "derecha, correcto",
+     "audio": "aud/fon/fon_042_ej2.mp3"
+    },
+    {
+     "palabra": "very",
+     "ipa": "/ˈvɛri/",
+     "spanish": "muy",
+     "audio": "aud/fon/fon_042_ej3.mp3"
+    },
+    {
+     "palabra": "sorry",
+     "ipa": "/ˈsɑːri/",
+     "spanish": "perdón",
+     "audio": "aud/fon/fon_042_ej4.mp3"
+    },
+    {
+     "palabra": "car",
+     "ipa": "/kɑːr/",
+     "spanish": "carro",
+     "audio": "aud/fon/fon_042_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "right",
+     "a_ipa": "/raɪt/",
+     "a_es": "derecha, correcto",
+     "b": "light",
+     "b_ipa": "/laɪt/",
+     "b_es": "luz",
+     "contrasta_con": "/l/",
+     "audio_a": "aud/fon/fon_042_par1a.mp3",
+     "audio_b": "aud/fon/fon_042_par1b.mp3"
+    },
+    {
+     "a": "rice",
+     "a_ipa": "/raɪs/",
+     "a_es": "arroz",
+     "b": "lice",
+     "b_ipa": "/laɪs/",
+     "b_es": "piojos",
+     "contrasta_con": "/l/",
+     "audio_a": "aud/fon/fon_042_par2a.mp3",
+     "audio_b": "aud/fon/fon_042_par2b.mp3"
+    },
+    {
+     "a": "grass",
+     "a_ipa": "/ɡræs/",
+     "a_es": "pasto",
+     "b": "glass",
+     "b_ipa": "/ɡlæs/",
+     "b_es": "vaso",
+     "contrasta_con": "/l/",
+     "audio_a": "aud/fon/fon_042_par3a.mp3",
+     "audio_b": "aud/fon/fon_042_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero offering a friend a warm bowl of grain while the friend recoils and starts scratching his own head",
+   "orden": 42,
+   "audio": "aud/fon/fon_042.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_042_lento.mp3",
+   "imagen": "img/fon/fon_042.webp",
+   "palabra_ancla": "red"
+  },
+  {
+   "id": "fon_043",
+   "ipa": "/w/",
+   "tipo": "aproximante",
+   "nombre": "La w de hueso",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "Los labios se redondean y se cierran casi del todo, como para una u, y se abren deslizando hacia la vocal que sigue. La lengua se va atrás. Es el sonido de hueso, huevo o cuando en español, así que ya lo traes.",
+   "el_error_tipico": "Producirlo no cuesta. El problema es el contrario: como suena parecido a la v inglesa, terminas usando uno por el otro y wine sale vine o west sale vest. La diferencia es que la w no usa los dientes para nada.",
+   "ejemplos": [
+    {
+     "palabra": "water",
+     "ipa": "/ˈwɑːɾər/",
+     "spanish": "agua",
+     "audio": "aud/fon/fon_043_ej1.mp3"
+    },
+    {
+     "palabra": "we",
+     "ipa": "/wiː/",
+     "spanish": "nosotros",
+     "audio": "aud/fon/fon_043_ej2.mp3"
+    },
+    {
+     "palabra": "away",
+     "ipa": "/əˈweɪ/",
+     "spanish": "lejos",
+     "audio": "aud/fon/fon_043_ej3.mp3"
+    },
+    {
+     "palabra": "one",
+     "ipa": "/wʌn/",
+     "spanish": "uno",
+     "audio": "aud/fon/fon_043_ej4.mp3"
+    },
+    {
+     "palabra": "question",
+     "ipa": "/ˈkwɛstʃən/",
+     "spanish": "pregunta",
+     "audio": "aud/fon/fon_043_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "wine",
+     "a_ipa": "/waɪn/",
+     "a_es": "vino",
+     "b": "vine",
+     "b_ipa": "/vaɪn/",
+     "b_es": "enredadera",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_043_par1a.mp3",
+     "audio_b": "aud/fon/fon_043_par1b.mp3"
+    },
+    {
+     "a": "west",
+     "a_ipa": "/wɛst/",
+     "a_es": "oeste",
+     "b": "vest",
+     "b_ipa": "/vɛst/",
+     "b_es": "chaleco",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_043_par2a.mp3",
+     "audio_b": "aud/fon/fon_043_par2b.mp3"
+    },
+    {
+     "a": "wet",
+     "a_ipa": "/wɛt/",
+     "a_es": "mojado",
+     "b": "vet",
+     "b_ipa": "/vɛt/",
+     "b_es": "veterinario",
+     "contrasta_con": "/v/",
+     "audio_a": "aud/fon/fon_043_par3a.mp3",
+     "audio_b": "aud/fon/fon_043_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero pouring a drink for a friend who instead points at a climbing plant covering the whole garden wall",
+   "orden": 43,
+   "audio": "aud/fon/fon_043.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_043_lento.mp3",
+   "imagen": "img/fon/fon_043.webp",
+   "palabra_ancla": "water"
+  },
+  {
+   "id": "fon_044",
+   "ipa": "/j/",
+   "tipo": "aproximante",
+   "nombre": "La y de yema",
+   "existe_en_espanol": true,
+   "dificultad": 1,
+   "como_producirlo": "La lengua sube hacia el paladar sin llegar a tocarlo y desliza hacia la vocal que sigue. Es un sonido continuo, sin golpe. Es la y de yema o la i de bien en español, así que sale solo.",
+   "el_error_tipico": "Casi no falla, pero en México la y a veces se endurece y se acerca a la ch o a la j inglesa. Si eso pasa, yes suena a jess y yolk se confunde con joke. Deja la lengua suelta y no la dejes tocar el paladar.",
+   "ejemplos": [
+    {
+     "palabra": "yes",
+     "ipa": "/jɛs/",
+     "spanish": "sí",
+     "audio": "aud/fon/fon_044_ej1.mp3"
+    },
+    {
+     "palabra": "year",
+     "ipa": "/jɪr/",
+     "spanish": "año",
+     "audio": "aud/fon/fon_044_ej2.mp3"
+    },
+    {
+     "palabra": "you",
+     "ipa": "/juː/",
+     "spanish": "tú",
+     "audio": "aud/fon/fon_044_ej3.mp3"
+    },
+    {
+     "palabra": "beyond",
+     "ipa": "/bɪˈjɑːnd/",
+     "spanish": "más allá",
+     "audio": "aud/fon/fon_044_ej4.mp3"
+    },
+    {
+     "palabra": "music",
+     "ipa": "/ˈmjuːzɪk/",
+     "spanish": "música",
+     "audio": "aud/fon/fon_044_ej5.mp3"
+    }
+   ],
+   "pares_minimos": [
+    {
+     "a": "yet",
+     "a_ipa": "/jɛt/",
+     "a_es": "todavía",
+     "b": "jet",
+     "b_ipa": "/dʒɛt/",
+     "b_es": "avión",
+     "contrasta_con": "/dʒ/",
+     "audio_a": "aud/fon/fon_044_par1a.mp3",
+     "audio_b": "aud/fon/fon_044_par1b.mp3"
+    },
+    {
+     "a": "yolk",
+     "a_ipa": "/joʊk/",
+     "a_es": "yema",
+     "b": "joke",
+     "b_ipa": "/dʒoʊk/",
+     "b_es": "chiste",
+     "contrasta_con": "/dʒ/",
+     "audio_a": "aud/fon/fon_044_par2a.mp3",
+     "audio_b": "aud/fon/fon_044_par2b.mp3"
+    },
+    {
+     "a": "year",
+     "a_ipa": "/jɪr/",
+     "a_es": "año",
+     "b": "jeer",
+     "b_ipa": "/dʒɪr/",
+     "b_es": "abuchear",
+     "contrasta_con": "/dʒ/",
+     "audio_a": "aud/fon/fon_044_par3a.mp3",
+     "audio_b": "aud/fon/fon_044_par3b.mp3"
+    }
+   ],
+   "escena_imagen": "Wero shaking his head to say not so far while a friend points up at an airplane roaring overhead",
+   "orden": 44,
+   "audio": "aud/fon/fon_044.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_044_lento.mp3",
+   "imagen": "img/fon/fon_044.webp",
+   "palabra_ancla": "yes"
+  },
+  {
+   "id": "fon_045",
+   "ipa": "/aɪr/",
+   "tipo": "diptongo",
+   "nombre": "La ai con r",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Es el diptongo de five seguido de la r: empieza con la a abierta, sube hacia la i y remata recogiendo la lengua para la r. Aparece en fire, tire, hire y wire. Muchos hablantes lo dicen casi en una sola sílaba.",
+   "el_error_tipico": "Lo separas en tres golpes, fa-i-er, o cierras con una r vibrante. Junta el diptongo y la r en un solo movimiento fluido y deja la r sin vibración.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 45,
+   "audio": "aud/fon/fon_045.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_045_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "fire",
+   "borrador": true
+  },
+  {
+   "id": "fon_046",
+   "ipa": "/ɑr/",
+   "tipo": "vocal_simple",
+   "nombre": "La a con r",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Empieza con la a abierta de father, la boca bien abierta y la lengua baja, y a mitad del sonido la lengua se recoge hacia atrás para formar la r. Es un solo movimiento suave, sin cortar entre la a y la r.",
+   "el_error_tipico": "Pones una a española corta y luego una r vibrante, así que car suena kar con erre fuerte. La r inglesa no vibra: la lengua se recoge y no toca nada.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 46,
+   "audio": "aud/fon/fon_046.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_046_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "car",
+   "borrador": true
+  },
+  {
+   "id": "fon_047",
+   "ipa": "/ɛr/",
+   "tipo": "vocal_simple",
+   "nombre": "La e con r",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Empieza con la e abierta de bed, la boca a media altura, y la lengua se va recogiendo hacia atrás para la r. Es el sonido de air, care, where y there. Se dice todo de corrido, con la r ya metida en la vocal.",
+   "el_error_tipico": "Haces una e española y una r vibrante, así que where suena wére con la r golpeada. Aquí la r no vibra: solo colorea la vocal.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 47,
+   "audio": "aud/fon/fon_047.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_047_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "air",
+   "borrador": true
+  },
+  {
+   "id": "fon_048",
+   "ipa": "/ɚ/",
+   "tipo": "vocal_simple",
+   "nombre": "La e con r sin acento",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Es la vocal débil del final de teacher o water: una schwa que ya viene con la r pegada. La lengua se recoge hacia atrás o hacia arriba sin tocar el paladar, los labios se redondean apenas y todo sale en un solo sonido corto, sin separar la vocal de la r.",
+   "el_error_tipico": "Separas las dos cosas: dices una e y luego una r española, así que teacher suena tichér con la r vibrando al final. En inglés no hay golpe de r: es un solo sonido corto y relajado.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 48,
+   "audio": "aud/fon/fon_048.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_048_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "teacher",
+   "borrador": true
+  },
+  {
+   "id": "fon_049",
+   "ipa": "/ɝ/",
+   "tipo": "vocal_simple",
+   "nombre": "La e con r acentuada",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Es la vocal de bird, word o nurse, la misma de la e con r sin acento pero fuerte y larga. La lengua se recoge hacia atrás sin tocar nada, los labios se redondean un poco y la r está desde el principio: no hay una vocal primero y una r después.",
+   "el_error_tipico": "Dices bérd con una e clara y una r española al final. Empieza ya con la lengua recogida: si la punta toca arriba, estás haciendo el sonido del español y no el del inglés.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 49,
+   "audio": "aud/fon/fon_049.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_049_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "bird",
+   "borrador": true
+  },
+  {
+   "id": "fon_050",
+   "ipa": "/ɪr/",
+   "tipo": "vocal_simple",
+   "nombre": "La i con r",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Empieza con la i corta y relajada de sit y la lengua se recoge hacia atrás para la r, sin llegar a tocar el paladar. Es el sonido de ear, here, near y beer. La vocal es más floja que la i española y se mezcla con la r.",
+   "el_error_tipico": "Dices una i española tensa y una r vibrante, así que here suena jír con erre. La i es corta y relajada, y la r no se marca: se desliza desde la vocal.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 50,
+   "audio": "aud/fon/fon_050.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_050_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "ear",
+   "borrador": true
+  },
+  {
+   "id": "fon_051",
+   "ipa": "/ɔr/",
+   "tipo": "vocal_simple",
+   "nombre": "La o con r",
+   "existe_en_espanol": false,
+   "dificultad": 3,
+   "como_producirlo": "Empieza con la o redondeada y abierta de thought, los labios en círculo, y termina recogiendo la lengua hacia atrás para la r. Aparece en door, more, four y horse. La o dura un poco más que en español antes de volverse r.",
+   "el_error_tipico": "Dices una o española cerrada y una r vibrante, así que four suena fór con erre marcada. Abre más la boca en la o y deja que la r llegue sola, sin golpe de lengua.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 51,
+   "audio": "aud/fon/fon_051.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_051_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "door",
+   "borrador": true
+  },
+  {
+   "id": "fon_052",
+   "ipa": "/t̬/",
+   "tipo": "oclusiva",
+   "nombre": "La t suave",
+   "existe_en_espanol": true,
+   "dificultad": 2,
+   "como_producirlo": "Es la t de water, city o better en inglés americano: entre vocales la lengua da un toque rápido y ligero contra la encía, sin soplido, casi como la r suave de pero. Suena más a una d rápida que a una t.",
+   "el_error_tipico": "Pronuncias una t dura con soplido, así que water suena wáter con la t marcada. Entre vocales, relaja la lengua y tócala una sola vez, rápido, como la r de pero.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 52,
+   "audio": "aud/fon/fon_052.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_052_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "water",
+   "borrador": true
+  },
+  {
+   "id": "fon_053",
+   "ipa": "/ʔ/",
+   "tipo": "oclusiva",
+   "nombre": "La pausa de garganta",
+   "existe_en_espanol": false,
+   "dificultad": 2,
+   "como_producirlo": "Es un cierre breve de la garganta que corta el aire, como la pausa entre las dos partes de uh-oh. Las cuerdas vocales se cierran un instante y se sueltan. Los hablantes americanos lo usan en palabras como button o en el no de uh-uh.",
+   "el_error_tipico": "No lo notas y sigues de corrido, o metes una consonante en su lugar, así que uh-oh suena uoh. Practica cortando el aire un instante entre las dos sílabas, como si te atoraras un segundo.",
+   "ejemplos": [],
+   "pares_minimos": [],
+   "escena_imagen": null,
+   "orden": 53,
+   "audio": "aud/fon/fon_053.mp3",
+   "audio_manual": false,
+   "audio_lento": "aud/fon/fon_053_lento.mp3",
+   "imagen": null,
+   "palabra_ancla": "uh-oh",
+   "borrador": true
+  }
+ ],
+ "reglas": [
+  {
+   "id": "reg_001",
+   "tipo": "regla",
+   "titulo": "La ed que no se dice ed",
+   "subtitulo": "Sin esta regla todos tus verbos en pasado suenan a robot deletreando.",
+   "explicacion": "La terminación ed casi nunca es una sílaba aparte: es un solo sonido pegado al verbo. Cuál de los tres sonidos sale no lo decides tú, lo decide la última consonante del verbo, y la boca lo resuelve sola por comodidad. El español pronuncia todas las letras que ve, así que lees la e y agregas una sílaba que no existe. La regla vale la pena porque el pasado aparece en cada frase que cuentes sobre ayer.",
+   "casos": [
+    {
+     "cuando": "después de sonido sordo, sin vibración en la garganta: p, k, f, s, sh, ch",
+     "suena": "/t/",
+     "truco": "si el verbo termina en puro aire, la ed también sale de aire",
+     "ejemplos": [
+      {
+       "palabra": "worked",
+       "ipa": "/wɜːrkt/",
+       "spanish": "trabajé",
+       "audio": "aud/reg/reg_001_c1_1.mp3"
+      },
+      {
+       "palabra": "stopped",
+       "ipa": "/stɑːpt/",
+       "spanish": "paré",
+       "audio": "aud/reg/reg_001_c1_2.mp3"
+      },
+      {
+       "palabra": "watched",
+       "ipa": "/wɑːtʃt/",
+       "spanish": "vi",
+       "audio": "aud/reg/reg_001_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "después de sonido sonoro, con vibración: vocales y b, g, v, m, n, l, r",
+     "suena": "/d/",
+     "truco": "si la garganta ya venía vibrando, no la apagues para la ed",
+     "ejemplos": [
+      {
+       "palabra": "played",
+       "ipa": "/pleɪd/",
+       "spanish": "jugué",
+       "audio": "aud/reg/reg_001_c2_1.mp3"
+      },
+      {
+       "palabra": "called",
+       "ipa": "/kɔːld/",
+       "spanish": "llamé",
+       "audio": "aud/reg/reg_001_c2_2.mp3"
+      },
+      {
+       "palabra": "loved",
+       "ipa": "/lʌvd/",
+       "spanish": "amé",
+       "audio": "aud/reg/reg_001_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "después de t o d, cuando el verbo ya termina en ese mismo sonido",
+     "suena": "/ɪd/",
+     "truco": "solo aquí sí es sílaba aparte, porque sin ella no se oiría el cambio",
+     "ejemplos": [
+      {
+       "palabra": "wanted",
+       "ipa": "/ˈwɑːntɪd/",
+       "spanish": "quise",
+       "audio": "aud/reg/reg_001_c3_1.mp3"
+      },
+      {
+       "palabra": "needed",
+       "ipa": "/ˈniːdɪd/",
+       "spanish": "necesité",
+       "audio": "aud/reg/reg_001_c3_2.mp3"
+      },
+      {
+       "palabra": "decided",
+       "ipa": "/dɪˈsaɪdɪd/",
+       "spanish": "decidí",
+       "audio": "aud/reg/reg_001_c3_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero hammering three separate nails into a board while a friend beside him holds up a single raised finger",
+   "orden": 1,
+   "imagen": "img/reg/reg_001.webp"
+  },
+  {
+   "id": "reg_002",
+   "tipo": "regla",
+   "titulo": "La s que a veces suena z",
+   "subtitulo": "Es la misma regla del pasado pero para plurales y para la tercera persona.",
+   "explicacion": "La s final del inglés tiene tres sonidos y funciona igual que la ed: la última consonante de la palabra decide cuál sale. No es una elección de estilo, es la boca ahorrando trabajo. El español solo tiene una s y nunca la hace vibrar al final, así que por defecto pronuncias las tres como s sorda. El costo es alto porque esta terminación marca todos tus plurales y todos tus verbos en presente.",
+   "casos": [
+    {
+     "cuando": "después de sonido sordo: p, t, k, f",
+     "suena": "/s/",
+     "truco": "la palabra termina seca y la s sigue seca",
+     "ejemplos": [
+      {
+       "palabra": "cats",
+       "ipa": "/kæts/",
+       "spanish": "gatos",
+       "audio": "aud/reg/reg_002_c1_1.mp3"
+      },
+      {
+       "palabra": "books",
+       "ipa": "/bʊks/",
+       "spanish": "libros",
+       "audio": "aud/reg/reg_002_c1_2.mp3"
+      },
+      {
+       "palabra": "stops",
+       "ipa": "/stɑːps/",
+       "spanish": "para",
+       "audio": "aud/reg/reg_002_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "después de sonido sonoro: vocales y b, d, g, v, m, n, l, r",
+     "suena": "/z/",
+     "truco": "si la garganta vibraba, la s también vibra: es el caso más frecuente",
+     "ejemplos": [
+      {
+       "palabra": "dogs",
+       "ipa": "/dɔːɡz/",
+       "spanish": "perros",
+       "audio": "aud/reg/reg_002_c2_1.mp3"
+      },
+      {
+       "palabra": "plays",
+       "ipa": "/pleɪz/",
+       "spanish": "juega",
+       "audio": "aud/reg/reg_002_c2_2.mp3"
+      },
+      {
+       "palabra": "runs",
+       "ipa": "/rʌnz/",
+       "spanish": "corre",
+       "audio": "aud/reg/reg_002_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "después de un sonido silbante: s, z, sh, ch, j",
+     "suena": "/ɪz/",
+     "truco": "dos silbidos seguidos no se oyen, así que el inglés mete una vocal en medio",
+     "ejemplos": [
+      {
+       "palabra": "buses",
+       "ipa": "/ˈbʌsɪz/",
+       "spanish": "autobuses",
+       "audio": "aud/reg/reg_002_c3_1.mp3"
+      },
+      {
+       "palabra": "watches",
+       "ipa": "/ˈwɑːtʃɪz/",
+       "spanish": "relojes",
+       "audio": "aud/reg/reg_002_c3_2.mp3"
+      },
+      {
+       "palabra": "boxes",
+       "ipa": "/ˈbɑːksɪz/",
+       "spanish": "cajas",
+       "audio": "aud/reg/reg_002_c3_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero sorting identical looking coins into three separate jars while a friend watches unable to tell them apart",
+   "orden": 2,
+   "imagen": "img/reg/reg_002.webp"
+  },
+  {
+   "id": "reg_003",
+   "tipo": "regla",
+   "titulo": "Letras que no se dicen",
+   "subtitulo": "Si pronuncias todo lo que ves, la mitad de tus palabras salen mal.",
+   "explicacion": "El inglés se escribió hace siglos y la pronunciación siguió cambiando sin que la escritura la alcanzara, así que quedaron letras fósiles que ya nadie dice. No hay lógica que las prediga: son grupos que se aprenden de memoria. El español se escribe casi como suena, así que tu instinto es leer cada letra y ese instinto aquí te traiciona. La buena noticia es que son pocos grupos y muy repetidos.",
+   "casos": [
+    {
+     "cuando": "K antes de N al principio de palabra",
+     "suena": "la K desaparece por completo",
+     "truco": "empieza directo con la n, como si la k no estuviera escrita",
+     "ejemplos": [
+      {
+       "palabra": "know",
+       "ipa": "/noʊ/",
+       "spanish": "saber",
+       "audio": "aud/reg/reg_003_c1_1.mp3"
+      },
+      {
+       "palabra": "knife",
+       "ipa": "/naɪf/",
+       "spanish": "cuchillo",
+       "audio": "aud/reg/reg_003_c1_2.mp3"
+      },
+      {
+       "palabra": "knee",
+       "ipa": "/niː/",
+       "spanish": "rodilla",
+       "audio": "aud/reg/reg_003_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "W antes de R, y también en algunas palabras a mitad",
+     "suena": "la W desaparece",
+     "truco": "si ves wr al inicio, arranca con la erre americana",
+     "ejemplos": [
+      {
+       "palabra": "write",
+       "ipa": "/raɪt/",
+       "spanish": "escribir",
+       "audio": "aud/reg/reg_003_c2_1.mp3"
+      },
+      {
+       "palabra": "wrong",
+       "ipa": "/rɔːŋ/",
+       "spanish": "equivocado",
+       "audio": "aud/reg/reg_003_c2_2.mp3"
+      },
+      {
+       "palabra": "answer",
+       "ipa": "/ˈænsər/",
+       "spanish": "respuesta",
+       "audio": "aud/reg/reg_003_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "H al principio en un puñado de palabras heredadas del francés",
+     "suena": "la H desaparece y la palabra empieza en vocal",
+     "truco": "son pocas: apréndetelas como lista cerrada",
+     "ejemplos": [
+      {
+       "palabra": "hour",
+       "ipa": "/ˈaʊər/",
+       "spanish": "hora",
+       "audio": "aud/reg/reg_003_c3_1.mp3"
+      },
+      {
+       "palabra": "honest",
+       "ipa": "/ˈɑːnəst/",
+       "spanish": "honesto",
+       "audio": "aud/reg/reg_003_c3_2.mp3"
+      },
+      {
+       "palabra": "honor",
+       "ipa": "/ˈɑːnər/",
+       "spanish": "honor",
+       "audio": "aud/reg/reg_003_c3_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "consonante enterrada a mitad de palabra",
+     "suena": "la consonante del medio se cae",
+     "truco": "si al decirla en voz alta te estorba, probablemente es muda",
+     "ejemplos": [
+      {
+       "palabra": "island",
+       "ipa": "/ˈaɪlənd/",
+       "spanish": "isla",
+       "audio": "aud/reg/reg_003_c4_1.mp3"
+      },
+      {
+       "palabra": "salmon",
+       "ipa": "/ˈsæmən/",
+       "spanish": "salmón",
+       "audio": "aud/reg/reg_003_c4_2.mp3"
+      },
+      {
+       "palabra": "listen",
+       "ipa": "/ˈlɪsən/",
+       "spanish": "escuchar",
+       "audio": "aud/reg/reg_003_c4_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero pointing at an empty chair at a dinner table where a guest was clearly supposed to be sitting",
+   "orden": 3,
+   "imagen": "img/reg/reg_003.webp"
+  },
+  {
+   "id": "reg_004",
+   "tipo": "regla",
+   "titulo": "El sufijo manda el acento",
+   "subtitulo": "Con el acento en el lugar equivocado, la palabra deja de reconocerse aunque los sonidos estén bien.",
+   "explicacion": "En inglés el acento de una palabra larga no es libre: ciertos finales lo jalan siempre al mismo lugar. Si reconoces el sufijo, ya sabes dónde cargar la voz sin haber oído nunca la palabra. El español acentúa por reglas de ortografía y además tiene tilde para avisarte, así que aquí te quedas sin señal y acabas acentuando la sílaba que te suena bonita. Esta es la regla que más palabras te desbloquea de un jalón.",
+   "casos": [
+    {
+     "cuando": "la palabra termina en -tion o -sion",
+     "suena": "acento en la sílaba justo antes del sufijo",
+     "truco": "cuenta una sílaba hacia atrás desde el final y ahí cargas",
+     "ejemplos": [
+      {
+       "palabra": "information",
+       "ipa": "/ˌɪnfərˈmeɪʃən/",
+       "spanish": "información",
+       "audio": "aud/reg/reg_004_c1_1.mp3"
+      },
+      {
+       "palabra": "education",
+       "ipa": "/ˌɛdʒəˈkeɪʃən/",
+       "spanish": "educación",
+       "audio": "aud/reg/reg_004_c1_2.mp3"
+      },
+      {
+       "palabra": "decision",
+       "ipa": "/dɪˈsɪʒən/",
+       "spanish": "decisión",
+       "audio": "aud/reg/reg_004_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "la palabra termina en -ic",
+     "suena": "acento en la sílaba justo antes del sufijo",
+     "truco": "el ic nunca lleva el acento, siempre lo cede a la anterior",
+     "ejemplos": [
+      {
+       "palabra": "fantastic",
+       "ipa": "/fænˈtæstɪk/",
+       "spanish": "fantástico",
+       "audio": "aud/reg/reg_004_c2_1.mp3"
+      },
+      {
+       "palabra": "electric",
+       "ipa": "/ɪˈlɛktrɪk/",
+       "spanish": "eléctrico",
+       "audio": "aud/reg/reg_004_c2_2.mp3"
+      },
+      {
+       "palabra": "specific",
+       "ipa": "/spəˈsɪfɪk/",
+       "spanish": "específico",
+       "audio": "aud/reg/reg_004_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "la palabra termina en -ity",
+     "suena": "acento en la sílaba justo antes del sufijo",
+     "truco": "todo el bloque ity queda flojo y sin peso",
+     "ejemplos": [
+      {
+       "palabra": "ability",
+       "ipa": "/əˈbɪləɾi/",
+       "spanish": "habilidad",
+       "audio": "aud/reg/reg_004_c3_1.mp3"
+      },
+      {
+       "palabra": "activity",
+       "ipa": "/ækˈtɪvəɾi/",
+       "spanish": "actividad",
+       "audio": "aud/reg/reg_004_c3_2.mp3"
+      },
+      {
+       "palabra": "security",
+       "ipa": "/sɪˈkjʊrəɾi/",
+       "spanish": "seguridad",
+       "audio": "aud/reg/reg_004_c3_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "la palabra termina en -logy o -graphy",
+     "suena": "acento en la sílaba justo antes del sufijo",
+     "truco": "cuenta hacia atrás: bioLOgy, techNOlogy",
+     "ejemplos": [
+      {
+       "palabra": "biology",
+       "ipa": "/baɪˈɑːlədʒi/",
+       "spanish": "biología",
+       "audio": "aud/reg/reg_004_c4_1.mp3"
+      },
+      {
+       "palabra": "technology",
+       "ipa": "/tɛkˈnɑːlədʒi/",
+       "spanish": "tecnología",
+       "audio": "aud/reg/reg_004_c4_2.mp3"
+      },
+      {
+       "palabra": "photography",
+       "ipa": "/fəˈtɑːɡrəfi/",
+       "spanish": "fotografía",
+       "audio": "aud/reg/reg_004_c4_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "la palabra termina en -ee",
+     "suena": "acento sobre el sufijo mismo",
+     "truco": "es la excepción: aquí el final sí se lleva la carga",
+     "ejemplos": [
+      {
+       "palabra": "employee",
+       "ipa": "/ɪmplɔɪˈiː/",
+       "spanish": "empleado",
+       "audio": "aud/reg/reg_004_c5_1.mp3"
+      },
+      {
+       "palabra": "refugee",
+       "ipa": "/ˌrɛfjuˈdʒiː/",
+       "spanish": "refugiado",
+       "audio": "aud/reg/reg_004_c5_2.mp3"
+      },
+      {
+       "palabra": "guarantee",
+       "ipa": "/ˌɡɛrənˈtiː/",
+       "spanish": "garantía",
+       "audio": "aud/reg/reg_004_c5_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero balancing on a seesaw that tips to a different side each time a new weight lands on one end",
+   "orden": 4,
+   "imagen": "img/reg/reg_004.webp"
+  },
+  {
+   "id": "reg_005",
+   "tipo": "regla",
+   "titulo": "El acento cambia la función",
+   "subtitulo": "La misma palabra escrita igual es sustantivo o verbo según dónde cargues la voz.",
+   "explicacion": "Hay unas cien palabras en inglés que se escriben idéntico pero cambian de categoría según la sílaba fuerte: adelante son sustantivo, atrás son verbo. No es un detalle de estilo, cambia la gramática de tu frase entera. El español no hace nada parecido con el acento hablado, así que ni se te ocurre buscar la diferencia. Y como las dos versiones existen, nadie te corrige: simplemente te entienden otra cosa.",
+   "casos": [
+    {
+     "cuando": "la palabra funciona como sustantivo, la cosa",
+     "suena": "acento en la primera sílaba",
+     "truco": "sustantivo suena a que la voz arranca fuerte y baja",
+     "ejemplos": [
+      {
+       "palabra": "record",
+       "ipa": "/ˈrɛkərd/",
+       "spanish": "un registro, un disco",
+       "audio": "aud/reg/reg_005_c1_1.mp3"
+      },
+      {
+       "palabra": "present",
+       "ipa": "/ˈprɛzənt/",
+       "spanish": "un regalo",
+       "audio": "aud/reg/reg_005_c1_2.mp3"
+      },
+      {
+       "palabra": "object",
+       "ipa": "/ˈɑːbdʒɛkt/",
+       "spanish": "un objeto",
+       "audio": "aud/reg/reg_005_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "la palabra funciona como verbo, la acción",
+     "suena": "acento en la segunda sílaba",
+     "truco": "verbo suena a que la voz sube y remata al final",
+     "ejemplos": [
+      {
+       "palabra": "record",
+       "ipa": "/rɪˈkɔːrd/",
+       "spanish": "grabar",
+       "audio": "aud/reg/reg_005_c2_1.mp3"
+      },
+      {
+       "palabra": "present",
+       "ipa": "/prɪˈzɛnt/",
+       "spanish": "presentar",
+       "audio": "aud/reg/reg_005_c2_2.mp3"
+      },
+      {
+       "palabra": "object",
+       "ipa": "/əbˈdʒɛkt/",
+       "spanish": "objetar",
+       "audio": "aud/reg/reg_005_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "palabras de dos sílabas que no cambian nunca",
+     "suena": "acento fijo en la primera, seas sustantivo o verbo",
+     "truco": "no todas se mueven: estas son trampa al revés",
+     "ejemplos": [
+      {
+       "palabra": "visit",
+       "ipa": "/ˈvɪzɪt/",
+       "spanish": "visita, visitar",
+       "audio": "aud/reg/reg_005_c3_1.mp3"
+      },
+      {
+       "palabra": "promise",
+       "ipa": "/ˈprɑːmɪs/",
+       "spanish": "promesa, prometer",
+       "audio": "aud/reg/reg_005_c3_2.mp3"
+      },
+      {
+       "palabra": "answer",
+       "ipa": "/ˈænsər/",
+       "spanish": "respuesta, responder",
+       "audio": "aud/reg/reg_005_c3_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero pointing at a small object on a shelf while a friend beside him mimes pressing a button to capture sound",
+   "orden": 5,
+   "imagen": "img/reg/reg_005.webp"
+  },
+  {
+   "id": "reg_006",
+   "tipo": "regla",
+   "titulo": "Las palabras se pegan",
+   "subtitulo": "Por esto entiendes cada palabra por separado y no entiendes nada cuando hablan rápido.",
+   "explicacion": "En inglés hablado las palabras no tienen frontera: la última consonante de una se muda a la vocal de la siguiente y las dos se vuelven un solo bloque. No es descuido ni acento regional, es la manera normal de hablar, incluso en la televisión. El español también encadena pero mucho menos, y sobre todo tú aprendiste cada palabra aislada, así que tu oído sigue buscando huecos que no existen. Entrenar esto sirve más para entender que para hablar.",
+   "casos": [
+    {
+     "cuando": "una palabra termina en consonante y la siguiente empieza en vocal",
+     "suena": "la consonante salta y se pega a la vocal de adelante",
+     "truco": "reparte las sílabas de nuevo ignorando dónde termina cada palabra",
+     "ejemplos": [
+      {
+       "palabra": "pick it up",
+       "ipa": "/ˌpɪkɪˈɾʌp/",
+       "spanish": "recógelo",
+       "audio": "aud/reg/reg_006_c1_1.mp3"
+      },
+      {
+       "palabra": "an apple",
+       "ipa": "/əˈnæpəl/",
+       "spanish": "una manzana",
+       "audio": "aud/reg/reg_006_c1_2.mp3"
+      },
+      {
+       "palabra": "turn it on",
+       "ipa": "/ˌtɜːrnɪˈɾɑːn/",
+       "spanish": "préndelo",
+       "audio": "aud/reg/reg_006_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "una palabra termina en vocal y la siguiente también empieza en vocal",
+     "suena": "aparece una y o una w de enlace que nadie escribe",
+     "truco": "si la primera vocal cierra en i sale una y, si cierra en u sale una w",
+     "ejemplos": [
+      {
+       "palabra": "go on",
+       "ipa": "/ˈɡoʊwɑːn/",
+       "spanish": "continúa",
+       "audio": "aud/reg/reg_006_c2_1.mp3"
+      },
+      {
+       "palabra": "I am",
+       "ipa": "/aɪˈjæm/",
+       "spanish": "yo soy",
+       "audio": "aud/reg/reg_006_c2_2.mp3"
+      },
+      {
+       "palabra": "see it",
+       "ipa": "/ˈsiːjɪt/",
+       "spanish": "míralo",
+       "audio": "aud/reg/reg_006_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "una palabra termina con el mismo sonido con el que empieza la siguiente",
+     "suena": "se dice una sola vez, más larga",
+     "truco": "no repitas la consonante, solo sostenla un poco más",
+     "ejemplos": [
+      {
+       "palabra": "next time",
+       "ipa": "/nɛksˈtaɪm/",
+       "spanish": "la próxima vez",
+       "audio": "aud/reg/reg_006_c3_1.mp3"
+      },
+      {
+       "palabra": "bus stop",
+       "ipa": "/ˈbʌstɑːp/",
+       "spanish": "parada de autobús",
+       "audio": "aud/reg/reg_006_c3_2.mp3"
+      },
+      {
+       "palabra": "big game",
+       "ipa": "/bɪˈɡeɪm/",
+       "spanish": "partido importante",
+       "audio": "aud/reg/reg_006_c3_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero watching two friends walk so closely together that from a distance they look like one single figure",
+   "orden": 6,
+   "imagen": "img/reg/reg_006.webp"
+  },
+  {
+   "id": "reg_007",
+   "tipo": "regla",
+   "titulo": "Las palabras que se encogen",
+   "subtitulo": "Son las palabras más comunes del inglés y casi nunca suenan como las aprendiste.",
+   "explicacion": "El inglés reparte la energía de forma desigual: las palabras que cargan el significado suenan fuertes y las de relleno se encogen hasta quedar en una schwa. To deja de ser tu y se vuelve un tə casi inaudible, and pierde la d. No es hablar mal, es el ritmo obligatorio del idioma. El español le da el mismo peso a todas sus sílabas, así que tú pronuncias cada palabra completa y suenas a metrónomo, además de que no reconoces estas formas cuando las oyes.",
+   "casos": [
+    {
+     "cuando": "preposiciones sin acento en medio de la frase",
+     "suena": "la vocal se derrumba a schwa",
+     "truco": "nunca digas tu, di tə y sigue de frente sin detenerte",
+     "ejemplos": [
+      {
+       "palabra": "to",
+       "ipa": "/tə/",
+       "spanish": "a, para",
+       "audio": "aud/reg/reg_007_c1_1.mp3"
+      },
+      {
+       "palabra": "of",
+       "ipa": "/əv/",
+       "spanish": "de",
+       "audio": "aud/reg/reg_007_c1_2.mp3"
+      },
+      {
+       "palabra": "for",
+       "ipa": "/fər/",
+       "spanish": "para, por",
+       "audio": "aud/reg/reg_007_c1_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "conjunciones que unen dos ideas",
+     "suena": "pierden vocal y a veces consonante",
+     "truco": "and casi siempre suena ən, y a veces solo queda una n",
+     "ejemplos": [
+      {
+       "palabra": "and",
+       "ipa": "/ən/",
+       "spanish": "y",
+       "audio": "aud/reg/reg_007_c2_1.mp3"
+      },
+      {
+       "palabra": "but",
+       "ipa": "/bət/",
+       "spanish": "pero",
+       "audio": "aud/reg/reg_007_c2_2.mp3"
+      },
+      {
+       "palabra": "than",
+       "ipa": "/ðən/",
+       "spanish": "que, comparativo",
+       "audio": "aud/reg/reg_007_c2_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "pronombres que no llevan el foco de la frase",
+     "suena": "se reducen y a veces se pegan a la palabra anterior",
+     "truco": "la h de him y her desaparece cuando no van al principio",
+     "ejemplos": [
+      {
+       "palabra": "you",
+       "ipa": "/jə/",
+       "spanish": "tú",
+       "audio": "aud/reg/reg_007_c3_1.mp3"
+      },
+      {
+       "palabra": "your",
+       "ipa": "/jər/",
+       "spanish": "tu",
+       "audio": "aud/reg/reg_007_c3_2.mp3"
+      },
+      {
+       "palabra": "him",
+       "ipa": "/ɪm/",
+       "spanish": "él, a él",
+       "audio": "aud/reg/reg_007_c3_3.mp3"
+      }
+     ]
+    },
+    {
+     "cuando": "auxiliares y el verbo be sin énfasis",
+     "suena": "vocal neutra, casi sin cuerpo",
+     "truco": "si suena fuerte es porque estás enfatizando algo a propósito",
+     "ejemplos": [
+      {
+       "palabra": "can",
+       "ipa": "/kən/",
+       "spanish": "poder",
+       "audio": "aud/reg/reg_007_c4_1.mp3"
+      },
+      {
+       "palabra": "was",
+       "ipa": "/wəz/",
+       "spanish": "era, fue",
+       "audio": "aud/reg/reg_007_c4_2.mp3"
+      },
+      {
+       "palabra": "are",
+       "ipa": "/ər/",
+       "spanish": "son, están",
+       "audio": "aud/reg/reg_007_c4_3.mp3"
+      }
+     ]
+    }
+   ],
+   "escena_imagen": "Wero carrying five identical heavy boxes while four of them turn out to be light and nearly empty",
+   "orden": 7,
+   "imagen": "img/reg/reg_007.webp"
+  }
+ ],
+ "version": 1,
+ "total_fonemas": 53,
+ "total_reglas": 7
+}

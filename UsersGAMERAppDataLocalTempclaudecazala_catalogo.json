@@ -1,0 +1,527 @@
+[
+ {
+  "id": 993,
+  "phrase": "gonna  ←  going to",
+  "phrase_tts": "gonna",
+  "phrase_alt": "going to",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 994,
+  "phrase": "wanna  ←  want to",
+  "phrase_tts": "wanna",
+  "phrase_alt": "want to",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 995,
+  "phrase": "gotta  ←  got to / have got to",
+  "phrase_tts": "gotta",
+  "phrase_alt": "got to / have got to",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 996,
+  "phrase": "finna  ←  fixing to",
+  "phrase_tts": "finna",
+  "phrase_alt": "fixing to",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 997,
+  "phrase": "tryna  ←  trying to",
+  "phrase_tts": "tryna",
+  "phrase_alt": "trying to",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 998,
+  "phrase": "'bout  ←  about",
+  "phrase_tts": "'bout",
+  "phrase_alt": "about",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 999,
+  "phrase": "lemme  ←  let me",
+  "phrase_tts": "lemme",
+  "phrase_alt": "let me",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1000,
+  "phrase": "gimme  ←  give me",
+  "phrase_tts": "gimme",
+  "phrase_alt": "give me",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1001,
+  "phrase": "kinda  ←  kind of",
+  "phrase_tts": "kinda",
+  "phrase_alt": "kind of",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1002,
+  "phrase": "sorta  ←  sort of",
+  "phrase_tts": "sorta",
+  "phrase_alt": "sort of",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1003,
+  "phrase": "outta  ←  out of",
+  "phrase_tts": "outta",
+  "phrase_alt": "out of",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1004,
+  "phrase": "lotta  ←  lot of",
+  "phrase_tts": "lotta",
+  "phrase_alt": "lot of",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1005,
+  "phrase": "shoulda  ←  should have",
+  "phrase_tts": "shoulda",
+  "phrase_alt": "should have",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1006,
+  "phrase": "woulda  ←  would have",
+  "phrase_tts": "woulda",
+  "phrase_alt": "would have",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1007,
+  "phrase": "coulda  ←  could have",
+  "phrase_tts": "coulda",
+  "phrase_alt": "could have",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1008,
+  "phrase": "musta  ←  must have",
+  "phrase_tts": "musta",
+  "phrase_alt": "must have",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1009,
+  "phrase": "I'ma / Imma  ←  I am going to",
+  "phrase_tts": "I'ma",
+  "phrase_alt": "I am going to",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1010,
+  "phrase": "y'all  ←  you all",
+  "phrase_tts": "y'all",
+  "phrase_alt": "you all",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1011,
+  "phrase": "y'all's  ←  you all's",
+  "phrase_tts": "y'all's",
+  "phrase_alt": "you all's",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1012,
+  "phrase": "ain't  ←  am not / is not / are not / have not",
+  "phrase_tts": "ain't",
+  "phrase_alt": "am not / is not / are not / have not",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1013,
+  "phrase": "workin'  ←  working",
+  "phrase_tts": "workin'",
+  "phrase_alt": "working",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1014,
+  "phrase": "talkin'  ←  talking",
+  "phrase_tts": "talkin'",
+  "phrase_alt": "talking",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1015,
+  "phrase": "nothin'  ←  nothing",
+  "phrase_tts": "nothin'",
+  "phrase_alt": "nothing",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1016,
+  "phrase": "somethin'  ←  something",
+  "phrase_tts": "somethin'",
+  "phrase_alt": "something",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1017,
+  "phrase": "everythin'  ←  everything",
+  "phrase_tts": "everythin'",
+  "phrase_alt": "everything",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1018,
+  "phrase": "comin'  ←  coming",
+  "phrase_tts": "comin'",
+  "phrase_alt": "coming",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1019,
+  "phrase": "ridin'  ←  riding",
+  "phrase_tts": "ridin'",
+  "phrase_alt": "riding",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1020,
+  "phrase": "trippin'  ←  tripping",
+  "phrase_tts": "trippin'",
+  "phrase_alt": "tripping",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1021,
+  "phrase": "chillin'  ←  chilling",
+  "phrase_tts": "chillin'",
+  "phrase_alt": "chilling",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1022,
+  "phrase": "smokin'  ←  smoking",
+  "phrase_tts": "smokin'",
+  "phrase_alt": "smoking",
+  "regla_grupo": "g_perdida"
+ },
+ {
+  "id": 1023,
+  "phrase": "water  →  suena 'wader'",
+  "phrase_tts": "water",
+  "phrase_alt": "wader",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1024,
+  "phrase": "better  →  suena 'beder'",
+  "phrase_tts": "better",
+  "phrase_alt": "beder",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1025,
+  "phrase": "city  →  suena 'siri'",
+  "phrase_tts": "city",
+  "phrase_alt": "siri",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1026,
+  "phrase": "pretty  →  suena 'priri'",
+  "phrase_tts": "pretty",
+  "phrase_alt": "priri",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1027,
+  "phrase": "little  →  suena 'lirol'",
+  "phrase_tts": "little",
+  "phrase_alt": "lirol",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1028,
+  "phrase": "bottle  →  suena 'barol'",
+  "phrase_tts": "bottle",
+  "phrase_alt": "barol",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1029,
+  "phrase": "getting  →  suena 'gueRin'",
+  "phrase_tts": "getting",
+  "phrase_alt": "gueRin",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1030,
+  "phrase": "party  →  suena 'pardi'",
+  "phrase_tts": "party",
+  "phrase_alt": "pardi",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1031,
+  "phrase": "matter  →  suena 'mader'",
+  "phrase_tts": "matter",
+  "phrase_alt": "mader",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1032,
+  "phrase": "twenty  →  suena 'tueni'",
+  "phrase_tts": "twenty",
+  "phrase_alt": "tueni",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1033,
+  "phrase": "thirty  →  suena 'therdi'",
+  "phrase_tts": "thirty",
+  "phrase_alt": "therdi",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1034,
+  "phrase": "shut up  →  suena 'sharap'",
+  "phrase_tts": "shut up",
+  "phrase_alt": "sharap",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1035,
+  "phrase": "got it  →  suena 'garit'",
+  "phrase_tts": "got it",
+  "phrase_alt": "garit",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1036,
+  "phrase": "what it is  →  suena 'warirís'",
+  "phrase_tts": "what it is",
+  "phrase_alt": "warirís",
+  "regla_grupo": "flap_t"
+ },
+ {
+  "id": 1037,
+  "phrase": "gotcha  ←  got you",
+  "phrase_tts": "gotcha",
+  "phrase_alt": "got you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1038,
+  "phrase": "whatcha  ←  what are you",
+  "phrase_tts": "whatcha",
+  "phrase_alt": "what are you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1039,
+  "phrase": "betcha  ←  bet you",
+  "phrase_tts": "betcha",
+  "phrase_alt": "bet you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1040,
+  "phrase": "don'tcha  ←  don't you",
+  "phrase_tts": "don'tcha",
+  "phrase_alt": "don't you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1041,
+  "phrase": "fight cha  ←  fight you",
+  "phrase_tts": "fight cha",
+  "phrase_alt": "fight you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1042,
+  "phrase": "meetcha  ←  meet you",
+  "phrase_tts": "meetcha",
+  "phrase_alt": "meet you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1043,
+  "phrase": "would ya  ←  would you",
+  "phrase_tts": "would ya",
+  "phrase_alt": "would you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1044,
+  "phrase": "did ya  ←  did you",
+  "phrase_tts": "did ya",
+  "phrase_alt": "did you",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1045,
+  "phrase": "'em  ←  them",
+  "phrase_tts": "'em",
+  "phrase_alt": "them",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1046,
+  "phrase": "'im  ←  him",
+  "phrase_tts": "'im",
+  "phrase_alt": "him",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1047,
+  "phrase": "'er  ←  her",
+  "phrase_tts": "'er",
+  "phrase_alt": "her",
+  "regla_grupo": "fusion"
+ },
+ {
+  "id": 1048,
+  "phrase": "Doble negación: 'I ain't got no money'",
+  "phrase_tts": "I ain't got no money",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1049,
+  "phrase": "Triple negación: 'I ain't never did nothin'",
+  "phrase_tts": "I ain't never did nothin",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1050,
+  "phrase": "'Done' de aspecto completivo: 'I done told you'",
+  "phrase_tts": "I done told you",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1051,
+  "phrase": "'Been' con acento: 'I BEEN knew that'",
+  "phrase_tts": "I been knew that",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1052,
+  "phrase": "'Be' habitual: 'He be workin' late'",
+  "phrase_tts": "He be workin late",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1053,
+  "phrase": "Cópula cero: 'She my sister'",
+  "phrase_tts": "She my sister",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1054,
+  "phrase": "'They' posesivo: 'they car'",
+  "phrase_tts": "they car",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1055,
+  "phrase": "'Them' demostrativo: 'them shoes'",
+  "phrase_tts": "them shoes",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1056,
+  "phrase": "'Was' generalizado: 'we was there'",
+  "phrase_tts": "we was there",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1057,
+  "phrase": "'Ain't' como 'didn't': 'I ain't do it'",
+  "phrase_tts": "I ain't do it",
+  "phrase_alt": null,
+  "regla_grupo": "aave"
+ },
+ {
+  "id": 1058,
+  "phrase": "'cause / cuz  ←  because",
+  "phrase_tts": "'cause",
+  "phrase_alt": "because",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1059,
+  "phrase": "'til  ←  until",
+  "phrase_tts": "'til",
+  "phrase_alt": "until",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1060,
+  "phrase": "'round  ←  around",
+  "phrase_tts": "'round",
+  "phrase_alt": "around",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1061,
+  "phrase": "'fore  ←  before",
+  "phrase_tts": "'fore",
+  "phrase_alt": "before",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1062,
+  "phrase": "prolly  ←  probably",
+  "phrase_tts": "prolly",
+  "phrase_alt": "probably",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1063,
+  "phrase": "'nother  ←  another",
+  "phrase_tts": "'nother",
+  "phrase_alt": "another",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1064,
+  "phrase": "hunnid  ←  hundred",
+  "phrase_tts": "hunnid",
+  "phrase_alt": "hundred",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1065,
+  "phrase": "'nun  ←  nothing / none",
+  "phrase_tts": "'nun",
+  "phrase_alt": "nothing / none",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1066,
+  "phrase": "yo  ←  your",
+  "phrase_tts": "yo",
+  "phrase_alt": "your",
+  "regla_grupo": "contraccion"
+ },
+ {
+  "id": 1067,
+  "phrase": "'sup  ←  what's up",
+  "phrase_tts": "'sup",
+  "phrase_alt": "what's up",
+  "regla_grupo": "contraccion"
+ }
+]

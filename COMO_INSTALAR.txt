@@ -1,0 +1,112 @@
+COMO INSTALAR ESTE PROYECTO
+===========================
+
+Este proyecto usa Expo SDK 57. Sigue estos pasos exactamente.
+
+
+1. BORRA LO VIEJO
+
+   Si ya intentaste instalar antes, borra estas dos cosas primero.
+   No sirve de nada instalar encima de un arbol roto.
+
+       rm -rf node_modules package-lock.json
+
+
+2. INSTALA
+
+       npm install
+
+   Tarda de dos a cinco minutos. Puede sacar avisos amarillos de
+   "deprecated" y de "vulnerabilities". Los dos son normales y no
+   rompen nada.
+
+
+3. ARRANCA
+
+       npx expo start -c
+
+
+NO CORRAS ESTO NUNCA
+--------------------
+
+       npx expo install --fix
+
+Ese comando alinea todo con la version de expo que este INSTALADA en
+node_modules. Si por lo que sea quedo instalado un expo viejo, --fix
+no lo sube: baja todo lo demas para que le empate. Asi es como un
+proyecto de SDK 57 termina convertido en uno de SDK 54 sin que digas
+nada.
+
+Si de verdad necesitas correrlo, primero comprueba con que version
+esta hablando:
+
+       npx expo --version
+
+Si eso NO dice 57.x, no corras --fix. Borra node_modules y vuelve al
+paso 1.
+
+
+NO PONGAS sdkVersion EN app.json
+--------------------------------
+
+Este proyecto NO lleva la llave "sdkVersion" en app.json, y es a
+proposito. Expo deduce el SDK de la version del paquete expo que este
+instalada.
+
+Si alguien la escribe ahi, esa linea manda sobre package.json. Con
+"sdkVersion": "54.0.0" puesto, Expo Go dice "el proyecto usa SDK 54"
+aunque tengas expo 57 instalado, y expo install --check compara contra
+las versiones de SDK 54 y te pide bajar veintiun paquetes.
+
+Si alguna vez ves ese sintoma otra vez, revisa app.json antes que
+cualquier otra cosa.
+
+
+NO PONGAS sdkVersion EN app.json
+--------------------------------
+
+Expo CLI lee la version del SDK de app.json, no de package.json. Si
+app.json trae "sdkVersion": "54.0.0" escrito a mano, el proyecto se
+anuncia como SDK 54 aunque tengas instalado el 57. De ahi salen las
+dos cosas juntas:
+
+  - Expo Go dice "el proyecto usa SDK 54"
+  - expo install --check reporta 20 y tantos paquetes "por actualizar"
+
+Sin esa linea, Expo la deduce sola del paquete expo instalado. Dejala
+fuera.
+
+
+COMO SABER QUE QUEDO BIEN
+-------------------------
+
+       npx expo --version
+
+Debe decir 57.0.20 o mayor.
+
+       node -e "console.log(require('./node_modules/expo/package.json').version)"
+
+Lo mismo: 57.x
+
+       npm run check:data      -> 9 de 9
+       npm run verify          -> 111 pasaron, 0 fallaron
+       npm run check:imports   -> 0 rotos, 0 ciclos
+
+
+TU EXPO GO
+----------
+
+Tu telefono ya tiene Expo Go para SDK 57, que es justo lo que este
+proyecto necesita. No lo cambies, no lo bajes de version.
+
+
+EN EXPO GO NO CORREN DOS COSAS
+------------------------------
+
+  - Las notificaciones. Expo las quito de Expo Go en el SDK 53.
+  - El microfono de pares minimos. Trae codigo nativo.
+
+Las dos te lo dicen en pantalla en vez de tronar, y las dos se
+prenden solas cuando compiles con:
+
+       npx expo run:android

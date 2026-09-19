@@ -1,0 +1,515 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
+import {
+  Button,
+  EmptyState,
+  Header,
+  RoundTimer,
+  Screen,
+} from '@/components/base';
+import { Trozos, useReaccion } from '@/components/feedback';
+import { buildTablero, sonPareja } from '@/domain/pares';
+import { useNivel } from './useNivel';
+import { applyGameGrade } from '@/db/games';
+import { getRandomEntries } from '@/db/queries';
+import { useAuthStore, useSettingsStore } from '@/store';
+import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import * as audio from '@/services/audio';
+import * as haptics from '@/services/haptics';
+import { color, font, radius, space } from '@/theme';
+import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
+import type { RootStackParams } from '@/navigation/routes';
+
+type Nav = NativeStackNavigationProp<RootStackParams>;
+type Ruta = RouteProp<RootStackParams, 'Pares'>;
+
+/**
+ * Tope duro: si el audio no carga o se atora, esto suelta la pausa igual.
+ * Tiene que alcanzar para efecto + inglés + español.
+ */
+const PAUSA_MAXIMA_MS = 10000;
+/** Bloqueo de "Saltar" contra doble toque. */
+const SALTAR_DEBOUNCE_MS = 400;
+
+/**
+ * P-25, Pares.
+ *
+ * La mecánica que la competencia usa con una lista fija de palabras
+ * sueltas. Aquí el tablero se arma con las tarjetas que le tocan hoy al
+ * usuario, así que juntar dos fichas mueve su cola de repaso de verdad.
+ *
+ * Se califica como reconocimiento y nunca da grado 4: resolver un
+ * tablero de ocho fichas por descarte no es recordar la frase en frío.
+ *
+ * Quedarse sin jugadas no acaba la partida. El tablero se queda como
+ * está, se muestra lo que faltaba y se pasa al resumen. No hay derrota.
+ */
+export function ParesScreen() {
+  const nav = useNavigation<Nav>();
+  const { params } = useRoute<Ruta>();
+  const user = useAuthStore((s) => s.user);
+  const { nivel, config, filtrar } = useNivel('pares', params?.nivel);
+  const nv = config as NivelPares | null;
+  const filter = useSettingsStore((s) => s.filter);
+  // Se necesita oír bien las dos frases al acertar un par: la música,
+  // aunque fuera baja, competiría justo en ese momento.
+  useMusicaPantalla('silencio');
+
+  const [tablero, setTablero] = useState<ParesTablero | null>(null);
+  // Cara y cubitos. El numero se relanza en cada respuesta;
+  // no hace falta apagarlo con un temporizador.
+  const reaccion = useReaccion();
+  const [elegida, setElegida] = useState<ParFicha | null>(null);
+  const [resueltas, setResueltas] = useState<number[]>([]);
+  const [fallando, setFallando] = useState<string[]>([]);
+  const [jugadas, setJugadas] = useState(0);
+  const [loading, setLoading] = useState(true);
+  // Pausa al acertar un par: congela reloj y tablero mientras se oyen
+  // las dos frases. `parPausado` trae lo que muestra el overlay.
+  const [enPausa, setEnPausa] = useState(false);
+  const [parPausado, setParPausado] = useState<{ en: string; es: string } | null>(
+    null
+  );
+  const [saltando, setSaltando] = useState(false);
+
+  const empezoEn = useRef(Date.now());
+  // Las fichas solo traen entryId, no el Entry completo: hace falta este
+  // mapa para llegar a audio_en/audio_es al emparejar.
+  const entradas = useRef(new Map<number, Entry>());
+  // Se incrementa cada vez que arranca o se corta una pausa: una
+  // secuencia vieja que sigue esperando un await la revisa y aborta.
+  const pausaToken = useRef(0);
+  const limiteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saltarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Evita setState después de desmontar mientras una pausa sigue en
+  // camino (los await de audio no se cancelan solos).
+  const montado = useRef(true);
+
+  /** Corta la voz en camino y quita la pausa. Saltar, salir o background. */
+  const abortarPausa = useCallback(() => {
+    pausaToken.current++;
+    audio.stop();
+    if (limiteTimer.current) clearTimeout(limiteTimer.current);
+    if (montado.current) {
+      setEnPausa(false);
+      setParPausado(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    montado.current = true;
+    const sub = AppState.addEventListener('change', (estado) => {
+      if (estado !== 'active') abortarPausa();
+    });
+    return () => {
+      montado.current = false;
+      sub.remove();
+      abortarPausa();
+      if (saltarTimer.current) clearTimeout(saltarTimer.current);
+    };
+  }, [abortarPausa]);
+
+  useEffect(() => {
+    if (!user || !nv) return;
+    let vivo = true;
+
+    (async () => {
+      const pool = await getRandomEntries(filter(), 120, {
+        maxWords: 4,
+        maxLen: 30,
+      });
+      if (!vivo) return;
+      const dentro = filtrar(pool, nv.pares);
+      entradas.current = new Map(dentro.map((e) => [e.id, e]));
+      const t = buildTablero(dentro, nv.pares);
+      // El colchón de jugadas lo pone el nivel, no el dominio.
+      setTablero({ ...t, jugadas: nv.jugadas });
+      setLoading(false);
+      empezoEn.current = Date.now();
+    })();
+
+    return () => {
+      vivo = false;
+    };
+  }, [user, filter, nv, filtrar]);
+
+  /**
+   * Al acertar: suena el efecto de acierto, luego la frase en inglés y
+   * luego la española, con el tablero y el reloj congelados. Se puede
+   * cortar en cualquier punto (saltarPausa, salir, background); un tope
+   * de PAUSA_MAXIMA_MS evita quedarse pegado si el audio no carga.
+   */
+  const pausarConVoz = useCallback(
+    async (entry: Entry) => {
+      const miToken = ++pausaToken.current;
+      setParPausado({ en: entry.phrase, es: entry.spanish_main });
+      setEnPausa(true);
+
+      // Se guarda también en local: el finally solo debe apagar SU tope,
+      // no el de una pausa nueva que arrancó mientras esta se desenredaba.
+      const limite = setTimeout(() => {
+        if (pausaToken.current === miToken) abortarPausa();
+      }, PAUSA_MAXIMA_MS);
+      limiteTimer.current = limite;
+
+      try {
+        await audio.playRoundResultBilingue(true, entry.audio_en, entry.audio_es);
+      } finally {
+        clearTimeout(limite);
+        // Si nadie más tomó el token (ni saltarPausa ni un abort externo
+        // ya lo hicieron), esta es la que cierra la pausa.
+        if (pausaToken.current === miToken && montado.current) {
+          setEnPausa(false);
+          setParPausado(null);
+        }
+      }
+    },
+    [abortarPausa]
+  );
+
+  const saltarPausa = useCallback(() => {
+    if (saltando) return;
+    setSaltando(true);
+    if (saltarTimer.current) clearTimeout(saltarTimer.current);
+    saltarTimer.current = setTimeout(() => setSaltando(false), SALTAR_DEBOUNCE_MS);
+    abortarPausa();
+  }, [saltando, abortarPausa]);
+
+  const tocar = useCallback(
+    (f: ParFicha) => {
+      if (!tablero || fallando.length > 0 || enPausa) return;
+      if (resueltas.includes(f.entryId)) return;
+
+      if (!elegida) {
+        haptics.tapLight();
+        void audio.playTap();
+        setElegida(f);
+        return;
+      }
+
+      if (elegida.id === f.id) {
+        setElegida(null);
+        return;
+      }
+
+      setJugadas((j) => j + 1);
+
+      if (sonPareja(elegida, f)) {
+        haptics.success();
+      reaccion.celebra();
+        setResueltas((prev) => [...prev, f.entryId]);
+        setElegida(null);
+        const entry = entradas.current.get(f.entryId);
+        // Siempre se oyen las dos frases al acertar un par, sin mirar
+        // "Audio automático": es la recompensa del acierto, no un
+        // extra opcional. El efecto de acierto lo pone la propia pausa:
+        // sonarlo aparte cancelaría la frase en inglés (playSfx hace
+        // stop()). Solo si no hay voz que oír suena suelto.
+        if (entry && (entry.audio_en || entry.audio_es)) {
+          void pausarConVoz(entry);
+        } else {
+          void audio.playSuccess();
+        }
+        if (user) {
+          void applyGameGrade(
+            user.id,
+            f.entryId,
+            true,
+            Date.now() - empezoEn.current,
+            'reconocer'
+          );
+        }
+        return;
+      }
+
+      // Falló: las dos parpadean en ámbar y se sueltan. Ámbar y no
+      // rojo, por la misma razón que en la tarjeta de estudio. Sin
+      // pausa ni voz: solo el SFX suave, igual que siempre.
+      haptics.failure();
+      reaccion.falla();
+      void audio.playFail();
+      setFallando([elegida.id, f.id]);
+      if (user) {
+        void applyGameGrade(
+          user.id,
+          elegida.entryId,
+          false,
+          Date.now() - empezoEn.current,
+          'reconocer'
+        );
+      }
+      setTimeout(() => {
+        setFallando([]);
+        setElegida(null);
+      }, 520);
+    },
+    [tablero, elegida, resueltas, fallando, enPausa, user, pausarConVoz]
+  );
+
+  const terminar = useCallback(() => {
+    audio.stop();
+    nav.replace('GameEnd', {
+      juego: 'pares',
+      rondas: tablero?.totalPares ?? 0,
+      aciertos: resueltas.length,
+      nivel: nivel ?? undefined,
+    });
+  }, [nav, tablero, resueltas.length, nivel]);
+
+  useEffect(() => {
+    if (!tablero || enPausa) return;
+    // Si el último par disparó pausarConVoz, esto no corre hasta que
+    // enPausa vuelva a false: primero se oye la frase, después se
+    // termina la partida.
+    if (resueltas.length > 0 && resueltas.length === tablero.totalPares) {
+      const t = setTimeout(terminar, 620);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [resueltas.length, tablero, terminar, enPausa]);
+
+  if (loading) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Pares" />
+        <View style={styles.center}>
+          <Text style={styles.loading}>Repartiendo fichas…</Text>
+        </View>
+      </Screen>
+    );
+  }
+
+  if (!tablero || tablero.totalPares < 3) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Pares" />
+        <EmptyState
+          emoji="◈"
+          title="No se pudo armar el tablero"
+          body="No hay frases cortas suficientes con los filtros que traes puestos."
+          actionLabel="Volver"
+          onAction={() => nav.goBack()}
+        />
+      </Screen>
+    );
+  }
+
+  const restantes = Math.max(0, tablero.jugadas - jugadas);
+
+  return (
+    <Screen padded={false}>
+      <Trozos disparo={reaccion.trozos} tinte={color.world.dia_a_dia} x="50%" y="50%" />
+      <View style={styles.top}>
+        <Header
+          onBack={() => nav.goBack()}
+          title={nivel ? `Nivel ${nivel}` : undefined}
+          right={
+            <Text style={styles.contador}>
+              {resueltas.length}/{tablero.totalPares}
+            </Text>
+          }
+        />
+        {nv ? (
+          <View style={styles.reloj}>
+            <RoundTimer
+              segundos={nv.segundosTablero}
+              llave={nivel ?? 0}
+              // Al resolver el tablero el reloj se congela: seguir
+              // contando mientras corre la animación de salida haría
+              // perder partidas ya ganadas. También se congela mientras
+              // se oye la voz de un par recién acertado.
+              pausado={enPausa || resueltas.length >= (tablero?.totalPares ?? 0)}
+              onFin={terminar}
+            />
+          </View>
+        ) : null}
+
+        <Text style={styles.instruccion}>
+          Junta cada frase con lo que significa
+        </Text>
+      </View>
+
+      <View style={styles.tablero} pointerEvents={enPausa ? 'none' : 'auto'}>
+        {tablero.fichas.map((f) => {
+          const fuera = resueltas.includes(f.entryId);
+          if (fuera) {
+            return (
+              <Animated.View
+                key={f.id}
+                exiting={FadeOut.duration(220)}
+                style={[styles.ficha, styles.fichaFuera]}
+              />
+            );
+          }
+          const activa = elegida?.id === f.id;
+          const falla = fallando.includes(f.id);
+          return (
+            <Pressable
+              key={f.id}
+              onPress={() => tocar(f)}
+              accessibilityRole="button"
+              accessibilityLabel={f.texto}
+              style={({ pressed }) => [
+                styles.ficha,
+                f.lado === 'en' ? styles.fichaEn : styles.fichaEs,
+                activa && styles.fichaActiva,
+                falla && styles.fichaFalla,
+                pressed && styles.fichaPress,
+              ]}
+            >
+              <Text style={styles.fichaTexto} numberOfLines={3}>
+                {f.texto}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {enPausa && parPausado ? (
+        <Animated.View
+          entering={FadeIn.duration(180)}
+          style={styles.overlay}
+          pointerEvents="box-none"
+        >
+          <Animated.View entering={ZoomIn.duration(220)} style={styles.overlayCard}>
+            <Text style={styles.overlayEn}>{parPausado.en}</Text>
+            <Text style={styles.overlayEs}>{parPausado.es}</Text>
+            <Pressable
+              onPress={saltarPausa}
+              disabled={saltando}
+              accessibilityRole="button"
+              accessibilityLabel="Saltar"
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.saltar,
+                pressed && !saltando && styles.saltarPress,
+              ]}
+            >
+              <Text style={styles.saltarTexto}>Saltar ›</Text>
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
+      ) : null}
+
+      <View style={styles.pie}>
+        <Text style={styles.jugadas}>
+          {restantes > 0
+            ? `Te quedan ${restantes} ${restantes === 1 ? 'jugada' : 'jugadas'}`
+            : 'Se acabaron las jugadas, pero el tablero se queda'}
+        </Text>
+        <Button
+          label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo te fue'}
+          variant={restantes > 0 ? 'ghost' : 'primary'}
+          onPress={terminar}
+          full
+        />
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  top: { paddingHorizontal: space.lg, paddingTop: space.sm },
+  contador: { fontSize: font.size.xs, color: color.textFaint },
+  reloj: { marginTop: space.sm, marginBottom: space.md },
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: space.xl,
+    backgroundColor: color.velo,
+  },
+  overlayCard: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.xl,
+    borderRadius: radius.lg,
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderColor: color.border,
+  },
+  overlayEn: {
+    fontSize: font.size.xl,
+    fontWeight: font.weight.bold,
+    color: color.text,
+    textAlign: 'center',
+  },
+  overlayEs: {
+    fontSize: font.size.md,
+    color: color.textMuted,
+    textAlign: 'center',
+  },
+  saltar: { marginTop: space.sm, padding: space.sm },
+  saltarPress: { opacity: 0.6 },
+  saltarTexto: {
+    fontSize: font.size.sm,
+    color: color.textFaint,
+    fontWeight: font.weight.semibold,
+  },
+  instruccion: {
+    fontSize: font.size.sm,
+    color: color.textMuted,
+    marginBottom: space.md,
+  },
+  tablero: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: space.sm,
+    paddingHorizontal: space.lg,
+    alignContent: 'flex-start',
+  },
+  ficha: {
+    width: '47.5%',
+    minHeight: 62,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: space.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fichaEn: {
+    backgroundColor: color.surfaceAlt,
+    borderColor: color.border,
+  },
+  fichaEs: {
+    backgroundColor: color.surface,
+    borderColor: color.border,
+  },
+  fichaActiva: {
+    borderColor: color.accent,
+    backgroundColor: color.accentSoft,
+  },
+  fichaFalla: {
+    borderColor: color.wrong,
+    backgroundColor: color.wrongSoft,
+  },
+  fichaFuera: { backgroundColor: 'transparent', borderColor: 'transparent' },
+  fichaPress: { opacity: 0.75 },
+  fichaTexto: {
+    color: color.text,
+    fontSize: font.size.sm,
+    textAlign: 'center',
+  },
+  pie: {
+    paddingHorizontal: space.lg,
+    paddingBottom: space.lg,
+    paddingTop: space.md,
+    gap: space.sm,
+  },
+  jugadas: {
+    fontSize: font.size.xs,
+    color: color.textFaint,
+    textAlign: 'center',
+  },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loading: { color: color.textMuted, fontSize: font.size.md },
+});

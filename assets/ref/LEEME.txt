@@ -1,0 +1,6 @@
+Pon aqui la imagen del perro de traje, con el nombre exacto:
+
+  wero.png
+
+Es la referencia que se manda en las 1,803 llamadas. Sin ella el script
+se planta antes de gastar.

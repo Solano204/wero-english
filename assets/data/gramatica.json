@@ -1,0 +1,3323 @@
+{
+ "version": 2,
+ "bloques": {
+  "presente": {
+   "nombre": "Presente",
+   "resumen": "Lo que haces, lo que está pasando y lo que sigue vivo."
+  },
+  "pasado": {
+   "nombre": "Pasado",
+   "resumen": "Lo que pasó, lo que estaba pasando y lo que ya había pasado."
+  },
+  "futuro": {
+   "nombre": "Futuro",
+   "resumen": "Will, going to y el futuro que se escribe en presente."
+  },
+  "modales": {
+   "nombre": "Modales",
+   "resumen": "Poder, deber, quizá. Y cómo pedir sin sonar mandón."
+  },
+  "condicionales": {
+   "nombre": "Condicionales",
+   "resumen": "Si pasa esto, pasa aquello. Los cuatro tipos."
+  },
+  "phrasal": {
+   "nombre": "Phrasal verbs",
+   "resumen": "La diferencia más grande entre el inglés de libro y el de la calle."
+  },
+  "confusiones": {
+   "nombre": "Se confunden",
+   "resumen": "Make o do, say o tell, for o since. Las trampas del español."
+  },
+  "estructura": {
+   "nombre": "Estructura",
+   "resumen": "Orden de la frase, preguntas, artículos y adjetivos."
+  },
+  "situaciones": {
+   "nombre": "Situaciones",
+   "resumen": "Qué decir en el aeropuerto, en una junta, al teléfono y cuando no estás de acuerdo."
+  }
+ },
+ "temas": [
+  {
+   "id": "g_01",
+   "bloque": "presente",
+   "titulo": "Presente simple",
+   "gancho": "Lo que haces siempre, no lo que haces ahora",
+   "nivel": 1,
+   "idea": "El presente simple no es 'ahora'. Es lo que es verdad en general: rutinas, hechos y gustos.",
+   "cuando": "Rutinas, horarios, hechos permanentes y opiniones.",
+   "formula": "I / you / we / they + verbo · he / she / it + verbo **-s**",
+   "ejemplos": [
+    {
+     "en": "I work from home on Fridays.",
+     "es": "Trabajo desde casa los viernes.",
+     "audio": "aud/gram/g_01_ej1.mp3",
+     "audio_lento": "aud/gram/g_01_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_01_ej1_es.mp3"
+    },
+    {
+     "en": "She drinks her coffee black.",
+     "es": "Ella toma el café negro.",
+     "audio": "aud/gram/g_01_ej2.mp3",
+     "audio_lento": "aud/gram/g_01_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_01_ej2_es.mp3"
+    },
+    {
+     "en": "Water boils at 100 degrees.",
+     "es": "El agua hierve a 100 grados.",
+     "audio": "aud/gram/g_01_ej3.mp3",
+     "audio_lento": "aud/gram/g_01_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_01_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "He work in a bank.",
+    "bien": "He works in a bank.",
+    "por_que": "La -s de tercera persona es lo primero que un nativo nota. Es una letra y cuesta cero.",
+    "audio_bien": "aud/gram/g_01_bien.mp3"
+   },
+   "ojo": "En español dices 'trabajo' y ya. En inglés el sujeto NUNCA se cae: es 'I work', jamás 'work' solo.",
+   "contraste": null
+  },
+  {
+   "id": "g_02",
+   "bloque": "presente",
+   "titulo": "Presente continuo",
+   "gancho": "Lo que está pasando en este momento",
+   "nivel": 1,
+   "idea": "Es la acción en curso. También sirve para algo temporal aunque no ocurra justo ahora.",
+   "cuando": "Ahora mismo, o una etapa temporal de tu vida.",
+   "formula": "am / is / are + verbo **-ing**",
+   "ejemplos": [
+    {
+     "en": "I'm eating, call me later.",
+     "es": "Estoy comiendo, márcame al rato.",
+     "audio": "aud/gram/g_02_ej1.mp3",
+     "audio_lento": "aud/gram/g_02_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_02_ej1_es.mp3"
+    },
+    {
+     "en": "She's living with her parents this year.",
+     "es": "Está viviendo con sus papás este año.",
+     "audio": "aud/gram/g_02_ej2.mp3",
+     "audio_lento": "aud/gram/g_02_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_02_ej2_es.mp3"
+    },
+    {
+     "en": "They're not answering.",
+     "es": "No están contestando.",
+     "audio": "aud/gram/g_02_ej3.mp3",
+     "audio_lento": "aud/gram/g_02_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_02_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I am work right now.",
+    "bien": "I am working right now.",
+    "por_que": "Continuo pide -ing siempre. Sin -ing es una frase a medias.",
+    "audio_bien": "aud/gram/g_02_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "**I work here** = es mi trabajo. **I'm working here** = hoy estoy trabajando aquí, quizá de paso."
+  },
+  {
+   "id": "g_03",
+   "bloque": "presente",
+   "titulo": "Verbos que no van en -ing",
+   "gancho": "Por qué 'I'm loving it' suena raro (y por qué McDonald's lo usa)",
+   "nivel": 2,
+   "idea": "Los verbos de estado —querer, saber, creer, pertenecer— describen algo que no está 'ocurriendo'. No llevan -ing.",
+   "cuando": "Con know, want, need, believe, love, hate, own, seem, understand.",
+   "formula": "Verbo de estado + presente simple, aunque hables de ahora",
+   "ejemplos": [
+    {
+     "en": "I know what you mean.",
+     "es": "Sé a qué te refieres.",
+     "audio": "aud/gram/g_03_ej1.mp3",
+     "audio_lento": "aud/gram/g_03_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_03_ej1_es.mp3"
+    },
+    {
+     "en": "She wants to leave now.",
+     "es": "Se quiere ir ya.",
+     "audio": "aud/gram/g_03_ej2.mp3",
+     "audio_lento": "aud/gram/g_03_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_03_ej2_es.mp3"
+    },
+    {
+     "en": "This belongs to me.",
+     "es": "Esto es mío.",
+     "audio": "aud/gram/g_03_ej3.mp3",
+     "audio_lento": "aud/gram/g_03_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_03_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I am knowing the answer.",
+    "bien": "I know the answer.",
+    "por_que": "'Know' no es una actividad que puedas estar haciendo. O sabes o no sabes.",
+    "audio_bien": "aud/gram/g_03_bien.mp3"
+   },
+   "ojo": "El eslogan 'I'm lovin' it' rompe la regla a propósito: por eso suena a publicidad y no a inglés normal.",
+   "contraste": null
+  },
+  {
+   "id": "g_04",
+   "bloque": "presente",
+   "titulo": "Present perfect",
+   "gancho": "La conexión con ahora que en español no existe igual",
+   "nivel": 3,
+   "idea": "Algo pasó antes, pero lo que importa es su efecto en el presente. Por eso no lleva cuándo.",
+   "cuando": "Experiencias de vida, cambios recientes y cosas sin fecha.",
+   "formula": "have / has + participio",
+   "ejemplos": [
+    {
+     "en": "I've been to Chicago twice.",
+     "es": "He ido a Chicago dos veces.",
+     "audio": "aud/gram/g_04_ej1.mp3",
+     "audio_lento": "aud/gram/g_04_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_04_ej1_es.mp3"
+    },
+    {
+     "en": "She's lost her keys.",
+     "es": "Perdió las llaves (y sigue sin ellas).",
+     "audio": "aud/gram/g_04_ej2.mp3",
+     "audio_lento": "aud/gram/g_04_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_04_ej2_es.mp3"
+    },
+    {
+     "en": "We haven't decided yet.",
+     "es": "Todavía no decidimos.",
+     "audio": "aud/gram/g_04_ej3.mp3",
+     "audio_lento": "aud/gram/g_04_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_04_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I have seen her yesterday.",
+    "bien": "I saw her yesterday.",
+    "por_que": "Con una fecha concreta va past simple. El present perfect y el 'cuándo' se pelean.",
+    "audio_bien": "aud/gram/g_04_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "**I lost my keys** = pasó y ya. **I've lost my keys** = las sigo sin encontrar, ese es el problema de ahora."
+  },
+  {
+   "id": "g_05",
+   "bloque": "presente",
+   "titulo": "Present perfect continuous",
+   "gancho": "Cuánto llevas haciendo algo",
+   "nivel": 4,
+   "idea": "La acción empezó antes y sigue. El foco está en la duración, no en el resultado.",
+   "cuando": "Con 'for' (cuánto tiempo) y 'since' (desde cuándo).",
+   "formula": "have / has + been + verbo **-ing**",
+   "ejemplos": [
+    {
+     "en": "I've been waiting for an hour.",
+     "es": "Llevo una hora esperando.",
+     "audio": "aud/gram/g_05_ej1.mp3",
+     "audio_lento": "aud/gram/g_05_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_05_ej1_es.mp3"
+    },
+    {
+     "en": "She's been working here since 2019.",
+     "es": "Trabaja aquí desde 2019.",
+     "audio": "aud/gram/g_05_ej2.mp3",
+     "audio_lento": "aud/gram/g_05_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_05_ej2_es.mp3"
+    },
+    {
+     "en": "It's been raining all day.",
+     "es": "Ha estado lloviendo todo el día.",
+     "audio": "aud/gram/g_05_ej3.mp3",
+     "audio_lento": "aud/gram/g_05_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_05_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I am waiting since one hour.",
+    "bien": "I've been waiting for an hour.",
+    "por_que": "El presente continuo no puede cargar el tiempo transcurrido. Y es 'for' con duración, 'since' con punto de inicio.",
+    "audio_bien": "aud/gram/g_05_bien.mp3"
+   },
+   "ojo": "'Llevo tres años aquí' → **I've been here for three years**. Nunca 'I am here for three years'.",
+   "contraste": null
+  },
+  {
+   "id": "g_06",
+   "bloque": "presente",
+   "titulo": "Presente para el futuro",
+   "gancho": "Cuando el presente ya es futuro",
+   "nivel": 3,
+   "idea": "Un plan acordado con otra persona se dice en presente continuo. Un horario fijo, en presente simple.",
+   "cuando": "Citas, vuelos, planes con hora.",
+   "formula": "am / is / are + -ing (plan) · presente simple (horario)",
+   "ejemplos": [
+    {
+     "en": "I'm meeting Ana at seven.",
+     "es": "Voy a ver a Ana a las siete.",
+     "audio": "aud/gram/g_06_ej1.mp3",
+     "audio_lento": "aud/gram/g_06_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_06_ej1_es.mp3"
+    },
+    {
+     "en": "The flight leaves at 6 a.m.",
+     "es": "El vuelo sale a las 6.",
+     "audio": "aud/gram/g_06_ej2.mp3",
+     "audio_lento": "aud/gram/g_06_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_06_ej2_es.mp3"
+    },
+    {
+     "en": "What are you doing this weekend?",
+     "es": "¿Qué vas a hacer el fin?",
+     "audio": "aud/gram/g_06_ej3.mp3",
+     "audio_lento": "aud/gram/g_06_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_06_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I will meet Ana at seven.",
+    "bien": "I'm meeting Ana at seven.",
+    "por_que": "'Will' suena a que lo decides en este segundo. Si ya quedaron, va continuo.",
+    "audio_bien": "aud/gram/g_06_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_59",
+   "bloque": "presente",
+   "titulo": "There is / there are",
+   "gancho": "Hay, en singular y en plural",
+   "nivel": 1,
+   "idea": "El 'hay' del español se parte en dos según lo que sigue.",
+   "cuando": "Describir lo que existe en un lugar.",
+   "formula": "there is + singular · there are + plural",
+   "ejemplos": [
+    {
+     "en": "There's a problem.",
+     "es": "Hay un problema.",
+     "audio": "aud/gram/g_59_ej1.mp3",
+     "audio_lento": "aud/gram/g_59_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_59_ej1_es.mp3"
+    },
+    {
+     "en": "There are three options.",
+     "es": "Hay tres opciones.",
+     "audio": "aud/gram/g_59_ej2.mp3",
+     "audio_lento": "aud/gram/g_59_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_59_ej2_es.mp3"
+    },
+    {
+     "en": "Is there any milk?",
+     "es": "¿Hay leche?",
+     "audio": "aud/gram/g_59_ej3.mp3",
+     "audio_lento": "aud/gram/g_59_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_59_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "There is three options.",
+    "bien": "There are three options.",
+    "por_que": "El verbo concuerda con lo que viene después, no con 'there'.",
+    "audio_bien": "aud/gram/g_59_bien.mp3"
+   },
+   "ojo": "En pasado: **there was** / **there were**. Mismo reparto.",
+   "contraste": null
+  },
+  {
+   "id": "g_60",
+   "bloque": "presente",
+   "titulo": "Question tags",
+   "gancho": "El '¿no?' del final",
+   "nivel": 3,
+   "idea": "Se pega al final para pedir confirmación. Va al revés de la frase principal.",
+   "cuando": "Conversación, confirmar algo que ya crees.",
+   "formula": "afirmativa + tag negativo · negativa + tag afirmativo",
+   "ejemplos": [
+    {
+     "en": "You're coming, aren't you?",
+     "es": "Vienes, ¿no?",
+     "audio": "aud/gram/g_60_ej1.mp3",
+     "audio_lento": "aud/gram/g_60_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_60_ej1_es.mp3"
+    },
+    {
+     "en": "She doesn't smoke, does she?",
+     "es": "No fuma, ¿verdad?",
+     "audio": "aud/gram/g_60_ej2.mp3",
+     "audio_lento": "aud/gram/g_60_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_60_ej2_es.mp3"
+    },
+    {
+     "en": "It's cold, isn't it?",
+     "es": "Hace frío, ¿no?",
+     "audio": "aud/gram/g_60_ej3.mp3",
+     "audio_lento": "aud/gram/g_60_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_60_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "You're coming, no?",
+    "bien": "You're coming, aren't you?",
+    "por_que": "El '¿no?' del español no se traduce como 'no'. Se arma con el auxiliar al revés.",
+    "audio_bien": "aud/gram/g_60_bien.mp3"
+   },
+   "ojo": "En inglés muy informal sí existe 'right?': *You're coming, right?*. Es la salida fácil y funciona siempre.",
+   "contraste": null
+  },
+  {
+   "id": "g_61",
+   "bloque": "presente",
+   "titulo": "So / neither",
+   "gancho": "Yo también, yo tampoco",
+   "nivel": 3,
+   "idea": "Para sumarte a lo que alguien dijo. Hay que invertir el orden y usar el mismo auxiliar.",
+   "cuando": "Conversación, todo el tiempo.",
+   "formula": "So + auxiliar + sujeto · Neither + auxiliar + sujeto",
+   "ejemplos": [
+    {
+     "en": "I'm tired. — So am I.",
+     "es": "Estoy cansado. — Yo también.",
+     "audio": "aud/gram/g_61_ej1.mp3",
+     "audio_lento": "aud/gram/g_61_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_61_ej1_es.mp3"
+    },
+    {
+     "en": "I don't like it. — Neither do I.",
+     "es": "No me gusta. — A mí tampoco.",
+     "audio": "aud/gram/g_61_ej2.mp3",
+     "audio_lento": "aud/gram/g_61_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_61_ej2_es.mp3"
+    },
+    {
+     "en": "She left early. — So did he.",
+     "es": "Se fue temprano. — Él también.",
+     "audio": "aud/gram/g_61_ej3.mp3",
+     "audio_lento": "aud/gram/g_61_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_61_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I am tired. — Me too, I am.",
+    "bien": "So am I.",
+    "por_que": "'Me too' está bien solo. Si usas 'so', hay que invertir: verbo antes del sujeto.",
+    "audio_bien": "aud/gram/g_61_bien.mp3"
+   },
+   "ojo": "'Me too' y 'me neither' funcionan siempre y son lo más común al hablar. 'So am I' suena un punto más pulido.",
+   "contraste": null
+  },
+  {
+   "id": "g_07",
+   "bloque": "pasado",
+   "titulo": "Past simple",
+   "gancho": "Pasó, terminó, punto",
+   "nivel": 1,
+   "idea": "Acción acabada en un momento cerrado del pasado. Casi siempre trae un cuándo.",
+   "cuando": "Ayer, la semana pasada, en 2019, cuando era niño.",
+   "formula": "verbo **-ed** (regular) · forma propia (irregular)",
+   "ejemplos": [
+    {
+     "en": "I called you twice last night.",
+     "es": "Te marqué dos veces anoche.",
+     "audio": "aud/gram/g_07_ej1.mp3",
+     "audio_lento": "aud/gram/g_07_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_07_ej1_es.mp3"
+    },
+    {
+     "en": "We went to the beach in July.",
+     "es": "Fuimos a la playa en julio.",
+     "audio": "aud/gram/g_07_ej2.mp3",
+     "audio_lento": "aud/gram/g_07_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_07_ej2_es.mp3"
+    },
+    {
+     "en": "She didn't say anything.",
+     "es": "No dijo nada.",
+     "audio": "aud/gram/g_07_ej3.mp3",
+     "audio_lento": "aud/gram/g_07_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_07_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I didn't went.",
+    "bien": "I didn't go.",
+    "por_que": "Con 'did' el verbo vuelve a su forma base. El pasado ya lo carga 'did'; ponerlo dos veces es doble marca.",
+    "audio_bien": "aud/gram/g_07_bien.mp3"
+   },
+   "ojo": "Los irregulares no se deducen, se memorizan. Son unos 100 los que de verdad se usan.",
+   "contraste": null
+  },
+  {
+   "id": "g_08",
+   "bloque": "pasado",
+   "titulo": "Past continuous",
+   "gancho": "El fondo de la escena",
+   "nivel": 2,
+   "idea": "Algo estaba en curso cuando otra cosa lo interrumpió. Es el decorado, no la acción principal.",
+   "cuando": "Para poner contexto antes de contar lo que pasó.",
+   "formula": "was / were + verbo **-ing**",
+   "ejemplos": [
+    {
+     "en": "I was cooking when she called.",
+     "es": "Estaba cocinando cuando llamó.",
+     "audio": "aud/gram/g_08_ej1.mp3",
+     "audio_lento": "aud/gram/g_08_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_08_ej1_es.mp3"
+    },
+    {
+     "en": "They were arguing all night.",
+     "es": "Estuvieron discutiendo toda la noche.",
+     "audio": "aud/gram/g_08_ej2.mp3",
+     "audio_lento": "aud/gram/g_08_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_08_ej2_es.mp3"
+    },
+    {
+     "en": "What were you doing at nine?",
+     "es": "¿Qué hacías a las nueve?",
+     "audio": "aud/gram/g_08_ej3.mp3",
+     "audio_lento": "aud/gram/g_08_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_08_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I cooked when she called.",
+    "bien": "I was cooking when she called.",
+    "por_que": "Con past simple parece que cocinaste DESPUÉS de que llamó. El continuo dice que ya estabas en eso.",
+    "audio_bien": "aud/gram/g_08_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "Lo largo va en continuo, lo corto que lo corta va en simple: *I **was walking** home when it **started** to rain.*"
+  },
+  {
+   "id": "g_09",
+   "bloque": "pasado",
+   "titulo": "Past perfect",
+   "gancho": "El pasado del pasado",
+   "nivel": 4,
+   "idea": "Cuando cuentas algo en pasado y necesitas decir que otra cosa fue ANTES.",
+   "cuando": "Solo si el orden importa y no se entiende solo.",
+   "formula": "had + participio",
+   "ejemplos": [
+    {
+     "en": "The train had already left when we arrived.",
+     "es": "El tren ya se había ido cuando llegamos.",
+     "audio": "aud/gram/g_09_ej1.mp3",
+     "audio_lento": "aud/gram/g_09_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_09_ej1_es.mp3"
+    },
+    {
+     "en": "I'd never seen anything like it.",
+     "es": "Nunca había visto algo así.",
+     "audio": "aud/gram/g_09_ej2.mp3",
+     "audio_lento": "aud/gram/g_09_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_09_ej2_es.mp3"
+    },
+    {
+     "en": "She told me she had quit.",
+     "es": "Me dijo que había renunciado.",
+     "audio": "aud/gram/g_09_ej3.mp3",
+     "audio_lento": "aud/gram/g_09_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_09_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "When I arrived, the movie already started.",
+    "bien": "When I arrived, the movie had already started.",
+    "por_que": "Sin 'had' parece que la película empezó justo al llegar tú.",
+    "audio_bien": "aud/gram/g_09_bien.mp3"
+   },
+   "ojo": "No lo uses de más. Si los hechos van en orden, con past simple basta y suena más natural.",
+   "contraste": null
+  },
+  {
+   "id": "g_10",
+   "bloque": "pasado",
+   "titulo": "used to",
+   "gancho": "Lo que hacías antes y ya no",
+   "nivel": 2,
+   "idea": "Costumbre del pasado que ya se acabó. Lleva implícito que hoy es distinto.",
+   "cuando": "Hábitos viejos, estados que cambiaron.",
+   "formula": "used to + verbo base",
+   "ejemplos": [
+    {
+     "en": "I used to smoke.",
+     "es": "Antes fumaba.",
+     "audio": "aud/gram/g_10_ej1.mp3",
+     "audio_lento": "aud/gram/g_10_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_10_ej1_es.mp3"
+    },
+    {
+     "en": "We used to live downtown.",
+     "es": "Vivíamos en el centro.",
+     "audio": "aud/gram/g_10_ej2.mp3",
+     "audio_lento": "aud/gram/g_10_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_10_ej2_es.mp3"
+    },
+    {
+     "en": "Did you use to play soccer?",
+     "es": "¿Jugabas fútbol antes?",
+     "audio": "aud/gram/g_10_ej3.mp3",
+     "audio_lento": "aud/gram/g_10_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_10_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I used to go there yesterday.",
+    "bien": "I went there yesterday.",
+    "por_que": "'Used to' es para costumbres, no para una vez. Un día suelto va en past simple.",
+    "audio_bien": "aud/gram/g_10_bien.mp3"
+   },
+   "ojo": "En pregunta y negación pierde la -d: *did you **use** to*, *didn't **use** to*.",
+   "contraste": null
+  },
+  {
+   "id": "g_11",
+   "bloque": "pasado",
+   "titulo": "would para costumbres",
+   "gancho": "El otro 'antes hacía'",
+   "nivel": 4,
+   "idea": "Igual que 'used to', pero solo para acciones repetidas. Con estados no funciona.",
+   "cuando": "Recuerdos y anécdotas, muy común al narrar.",
+   "formula": "would + verbo base",
+   "ejemplos": [
+    {
+     "en": "Every summer we would drive to the coast.",
+     "es": "Cada verano manejábamos a la costa.",
+     "audio": "aud/gram/g_11_ej1.mp3",
+     "audio_lento": "aud/gram/g_11_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_11_ej1_es.mp3"
+    },
+    {
+     "en": "My dad would read to us at night.",
+     "es": "Mi papá nos leía en la noche.",
+     "audio": "aud/gram/g_11_ej2.mp3",
+     "audio_lento": "aud/gram/g_11_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_11_ej2_es.mp3"
+    },
+    {
+     "en": "She would always show up late.",
+     "es": "Siempre llegaba tarde.",
+     "audio": "aud/gram/g_11_ej3.mp3",
+     "audio_lento": "aud/gram/g_11_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_11_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I would live in Mexico.",
+    "bien": "I used to live in Mexico.",
+    "por_que": "'Live' es un estado. Con estados solo sirve 'used to'.",
+    "audio_bien": "aud/gram/g_11_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "**used to** = acciones y estados. **would** = solo acciones repetidas."
+  },
+  {
+   "id": "g_12",
+   "bloque": "pasado",
+   "titulo": "Pasado en voz pasiva",
+   "gancho": "Cuando no importa quién lo hizo",
+   "nivel": 4,
+   "idea": "El foco pasa a lo que ocurrió, no a quién lo hizo. Muy común en noticias y trabajo.",
+   "cuando": "Cuando el responsable no se sabe, no importa o no conviene decirlo.",
+   "formula": "was / were + participio",
+   "ejemplos": [
+    {
+     "en": "The window was broken last night.",
+     "es": "Rompieron la ventana anoche.",
+     "audio": "aud/gram/g_12_ej1.mp3",
+     "audio_lento": "aud/gram/g_12_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_12_ej1_es.mp3"
+    },
+    {
+     "en": "My car was stolen.",
+     "es": "Me robaron el carro.",
+     "audio": "aud/gram/g_12_ej2.mp3",
+     "audio_lento": "aud/gram/g_12_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_12_ej2_es.mp3"
+    },
+    {
+     "en": "The decision was made without us.",
+     "es": "La decisión se tomó sin nosotros.",
+     "audio": "aud/gram/g_12_ej3.mp3",
+     "audio_lento": "aud/gram/g_12_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_12_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "They robbed my car.",
+    "bien": "My car was stolen.",
+    "por_que": "'Rob' es a personas o lugares; a las cosas se les hace 'steal'. Y la pasiva es lo natural aquí.",
+    "audio_bien": "aud/gram/g_12_bien.mp3"
+   },
+   "ojo": "En español usas 'se' o el plural impersonal ('me robaron'). En inglés eso se resuelve con pasiva.",
+   "contraste": null
+  },
+  {
+   "id": "g_62",
+   "bloque": "pasado",
+   "titulo": "Verbos irregulares que importan",
+   "gancho": "Los cuarenta que de verdad usas",
+   "nivel": 2,
+   "idea": "Hay unos 200 irregulares, pero cuarenta cubren casi toda la conversación.",
+   "cuando": "Cualquier frase en pasado.",
+   "formula": "go→went→gone · take→took→taken · get→got→gotten",
+   "ejemplos": [
+    {
+     "en": "I went, I've gone",
+     "es": "fui, he ido",
+     "audio": "aud/gram/g_62_ej1.mp3",
+     "audio_lento": "aud/gram/g_62_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_62_ej1_es.mp3"
+    },
+    {
+     "en": "She took it, she's taken it",
+     "es": "lo tomó, lo ha tomado",
+     "audio": "aud/gram/g_62_ej2.mp3",
+     "audio_lento": "aud/gram/g_62_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_62_ej2_es.mp3"
+    },
+    {
+     "en": "They got it, they've gotten it",
+     "es": "lo consiguieron, lo han conseguido",
+     "audio": "aud/gram/g_62_ej3.mp3",
+     "audio_lento": "aud/gram/g_62_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_62_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I have went there.",
+    "bien": "I have gone there.",
+    "por_que": "El pasado y el participio no son la misma palabra. 'Went' nunca va con 'have'.",
+    "audio_bien": "aud/gram/g_62_bien.mp3"
+   },
+   "ojo": "En Reino Unido el participio de 'get' es **got**, no 'gotten'. Las dos son correctas, cada una en su sitio.",
+   "contraste": null
+  },
+  {
+   "id": "g_63",
+   "bloque": "pasado",
+   "titulo": "Contar una anécdota",
+   "gancho": "Cómo se estructura una historia",
+   "nivel": 4,
+   "idea": "Una anécdota en inglés tiene un patrón fijo: contexto, giro, remate.",
+   "cuando": "Contar algo que te pasó.",
+   "formula": "So I was… + when + past simple + and then…",
+   "ejemplos": [
+    {
+     "en": "So I was waiting in line when this guy…",
+     "es": "Estaba formado cuando este tipo…",
+     "audio": "aud/gram/g_63_ej1.mp3",
+     "audio_lento": "aud/gram/g_63_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_63_ej1_es.mp3"
+    },
+    {
+     "en": "And then he just walked off.",
+     "es": "Y luego nada más se fue.",
+     "audio": "aud/gram/g_63_ej2.mp3",
+     "audio_lento": "aud/gram/g_63_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_63_ej2_es.mp3"
+    },
+    {
+     "en": "I couldn't believe it.",
+     "es": "No lo podía creer.",
+     "audio": "aud/gram/g_63_ej3.mp3",
+     "audio_lento": "aud/gram/g_63_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_63_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Yesterday I go to the store and I see…",
+    "bien": "So yesterday I went to the store and I saw…",
+    "por_que": "El presente narrativo existe en español pero en inglés informal se usa mucho menos.",
+    "audio_bien": "aud/gram/g_63_bien.mp3"
+   },
+   "ojo": "'So' al principio no significa 'entonces'. Es la señal de que empieza una historia y le pide atención al otro.",
+   "contraste": null
+  },
+  {
+   "id": "g_13",
+   "bloque": "futuro",
+   "titulo": "will",
+   "gancho": "La decisión que tomas en este segundo",
+   "nivel": 1,
+   "idea": "Se decide al hablar: ofrecimientos, promesas y predicciones sin pruebas.",
+   "cuando": "Cuando no lo tenías pensado antes de abrir la boca.",
+   "formula": "will + verbo base",
+   "ejemplos": [
+    {
+     "en": "I'll get it!",
+     "es": "¡Yo abro!",
+     "audio": "aud/gram/g_13_ej1.mp3",
+     "audio_lento": "aud/gram/g_13_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_13_ej1_es.mp3"
+    },
+    {
+     "en": "I think they'll win.",
+     "es": "Creo que van a ganar.",
+     "audio": "aud/gram/g_13_ej2.mp3",
+     "audio_lento": "aud/gram/g_13_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_13_ej2_es.mp3"
+    },
+    {
+     "en": "I'll call you back.",
+     "es": "Te marco al rato.",
+     "audio": "aud/gram/g_13_ej3.mp3",
+     "audio_lento": "aud/gram/g_13_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_13_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I will meet my sister tomorrow, we planned it.",
+    "bien": "I'm meeting my sister tomorrow.",
+    "por_que": "Si ya estaba planeado no es 'will'. 'Will' es la decisión recién nacida.",
+    "audio_bien": "aud/gram/g_13_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_14",
+   "bloque": "futuro",
+   "titulo": "be going to",
+   "gancho": "Lo que ya tenías pensado",
+   "nivel": 1,
+   "idea": "Intención previa, o predicción con evidencia delante de los ojos.",
+   "cuando": "Planes que ya traías, y lo que se ve venir.",
+   "formula": "am / is / are + going to + verbo base",
+   "ejemplos": [
+    {
+     "en": "I'm going to look for a new job.",
+     "es": "Voy a buscar trabajo nuevo.",
+     "audio": "aud/gram/g_14_ej1.mp3",
+     "audio_lento": "aud/gram/g_14_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_14_ej1_es.mp3"
+    },
+    {
+     "en": "Look at those clouds — it's going to rain.",
+     "es": "Mira esas nubes, va a llover.",
+     "audio": "aud/gram/g_14_ej2.mp3",
+     "audio_lento": "aud/gram/g_14_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_14_ej2_es.mp3"
+    },
+    {
+     "en": "We're going to need more chairs.",
+     "es": "Vamos a necesitar más sillas.",
+     "audio": "aud/gram/g_14_ej3.mp3",
+     "audio_lento": "aud/gram/g_14_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_14_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I will look for a job, I decided last week.",
+    "bien": "I'm going to look for a job.",
+    "por_que": "Lo decidiste la semana pasada: eso es 'going to'.",
+    "audio_bien": "aud/gram/g_14_bien.mp3"
+   },
+   "ojo": "En la calle casi siempre suena **gonna**. *I'm gonna call her.* Se dice, no se escribe en formal.",
+   "contraste": "**I'll help you** = me acabo de ofrecer. **I'm going to help you** = ya lo tenía pensado."
+  },
+  {
+   "id": "g_15",
+   "bloque": "futuro",
+   "titulo": "Future continuous",
+   "gancho": "Lo que estarás haciendo",
+   "nivel": 4,
+   "idea": "Una acción en curso en un momento futuro. También sirve para preguntar sin presionar.",
+   "cuando": "Para ubicar algo en medio del futuro, o para pedir algo con suavidad.",
+   "formula": "will be + verbo **-ing**",
+   "ejemplos": [
+    {
+     "en": "This time tomorrow I'll be flying to Madrid.",
+     "es": "Mañana a esta hora estaré volando a Madrid.",
+     "audio": "aud/gram/g_15_ej1.mp3",
+     "audio_lento": "aud/gram/g_15_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_15_ej1_es.mp3"
+    },
+    {
+     "en": "Will you be using the car tonight?",
+     "es": "¿Vas a ocupar el carro hoy?",
+     "audio": "aud/gram/g_15_ej2.mp3",
+     "audio_lento": "aud/gram/g_15_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_15_ej2_es.mp3"
+    },
+    {
+     "en": "I'll be waiting outside.",
+     "es": "Te espero afuera.",
+     "audio": "aud/gram/g_15_ej3.mp3",
+     "audio_lento": "aud/gram/g_15_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_15_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Tomorrow at eight I will fly.",
+    "bien": "Tomorrow at eight I'll be flying.",
+    "por_que": "Con 'will' simple suena a que despegas justo a las ocho. El continuo dice que ya estarás en el aire.",
+    "audio_bien": "aud/gram/g_15_bien.mp3"
+   },
+   "ojo": "*Will you be using…?* es mucho menos invasivo que *Are you going to use…?*. Suena a que preguntas, no a que reclamas.",
+   "contraste": null
+  },
+  {
+   "id": "g_16",
+   "bloque": "futuro",
+   "titulo": "Future perfect",
+   "gancho": "Lo que ya habrá pasado para entonces",
+   "nivel": 5,
+   "idea": "Miras desde un punto del futuro hacia atrás: para esa fecha, esto ya estará hecho.",
+   "cuando": "Plazos y metas con fecha límite.",
+   "formula": "will have + participio",
+   "ejemplos": [
+    {
+     "en": "By June I'll have finished the course.",
+     "es": "Para junio ya habré terminado el curso.",
+     "audio": "aud/gram/g_16_ej1.mp3",
+     "audio_lento": "aud/gram/g_16_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_16_ej1_es.mp3"
+    },
+    {
+     "en": "They'll have left by the time we get there.",
+     "es": "Ya se habrán ido para cuando lleguemos.",
+     "audio": "aud/gram/g_16_ej2.mp3",
+     "audio_lento": "aud/gram/g_16_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_16_ej2_es.mp3"
+    },
+    {
+     "en": "We'll have saved enough by then.",
+     "es": "Para entonces ya habremos ahorrado.",
+     "audio": "aud/gram/g_16_ej3.mp3",
+     "audio_lento": "aud/gram/g_16_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_16_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "By June I will finish the course.",
+    "bien": "By June I'll have finished the course.",
+    "por_que": "'By' pide que la acción esté completa antes de esa fecha, y eso es future perfect.",
+    "audio_bien": "aud/gram/g_16_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_17",
+   "bloque": "futuro",
+   "titulo": "El futuro con when e if",
+   "gancho": "Por qué nunca va 'will' después de 'when'",
+   "nivel": 3,
+   "idea": "En la parte que empieza con when, if, before, after, until o as soon as, el futuro se escribe en presente.",
+   "cuando": "Siempre que ates una acción futura a otra.",
+   "formula": "when / if / until + **presente** , + will + verbo base",
+   "ejemplos": [
+    {
+     "en": "I'll call you when I get there.",
+     "es": "Te marco cuando llegue.",
+     "audio": "aud/gram/g_17_ej1.mp3",
+     "audio_lento": "aud/gram/g_17_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_17_ej1_es.mp3"
+    },
+    {
+     "en": "If it rains, we'll stay home.",
+     "es": "Si llueve, nos quedamos.",
+     "audio": "aud/gram/g_17_ej2.mp3",
+     "audio_lento": "aud/gram/g_17_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_17_ej2_es.mp3"
+    },
+    {
+     "en": "Wait until she finishes.",
+     "es": "Espera a que termine.",
+     "audio": "aud/gram/g_17_ej3.mp3",
+     "audio_lento": "aud/gram/g_17_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_17_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I'll call you when I will arrive.",
+    "bien": "I'll call you when I arrive.",
+    "por_que": "El 'will' va una sola vez, en la parte principal. En la del 'when' se queda en presente.",
+    "audio_bien": "aud/gram/g_17_bien.mp3"
+   },
+   "ojo": "En español dices 'cuando llegue' (subjuntivo). En inglés no hay subjuntivo aquí: es presente normal.",
+   "contraste": null
+  },
+  {
+   "id": "g_76",
+   "bloque": "futuro",
+   "titulo": "be about to",
+   "gancho": "Está a punto de pasar",
+   "nivel": 3,
+   "idea": "Futuro inmediato, en segundos o minutos. Más cerca que 'going to'.",
+   "cuando": "Lo que va a pasar ya.",
+   "formula": "am / is / are about to + verbo base",
+   "ejemplos": [
+    {
+     "en": "The movie's about to start.",
+     "es": "La película está por empezar.",
+     "audio": "aud/gram/g_76_ej1.mp3",
+     "audio_lento": "aud/gram/g_76_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_76_ej1_es.mp3"
+    },
+    {
+     "en": "I was about to call you.",
+     "es": "Justo te iba a marcar.",
+     "audio": "aud/gram/g_76_ej2.mp3",
+     "audio_lento": "aud/gram/g_76_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_76_ej2_es.mp3"
+    },
+    {
+     "en": "She's about to leave.",
+     "es": "Está por irse.",
+     "audio": "aud/gram/g_76_ej3.mp3",
+     "audio_lento": "aud/gram/g_76_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_76_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "The movie will start now.",
+    "bien": "The movie's about to start.",
+    "por_que": "'Will' no transmite inminencia. 'About to' sí.",
+    "audio_bien": "aud/gram/g_76_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_77",
+   "bloque": "futuro",
+   "titulo": "Futuro en pasado",
+   "gancho": "Lo que iba a pasar",
+   "nivel": 5,
+   "idea": "Contar desde el pasado algo que en ese momento era futuro.",
+   "cuando": "Narrar planes que se hicieron o no.",
+   "formula": "was / were going to · would + base",
+   "ejemplos": [
+    {
+     "en": "I was going to call, but I fell asleep.",
+     "es": "Iba a llamar, pero me dormí.",
+     "audio": "aud/gram/g_77_ej1.mp3",
+     "audio_lento": "aud/gram/g_77_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_77_ej1_es.mp3"
+    },
+    {
+     "en": "She said she would come.",
+     "es": "Dijo que vendría.",
+     "audio": "aud/gram/g_77_ej2.mp3",
+     "audio_lento": "aud/gram/g_77_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_77_ej2_es.mp3"
+    },
+    {
+     "en": "We were about to leave when he arrived.",
+     "es": "Estábamos por irnos cuando llegó.",
+     "audio": "aud/gram/g_77_ej3.mp3",
+     "audio_lento": "aud/gram/g_77_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_77_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I will call, but I fell asleep.",
+    "bien": "I was going to call, but I fell asleep.",
+    "por_que": "Si ya pasó, el futuro también va en pasado.",
+    "audio_bien": "aud/gram/g_77_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_18",
+   "bloque": "modales",
+   "titulo": "can / could",
+   "gancho": "Poder, saber hacer y pedir",
+   "nivel": 1,
+   "idea": "Capacidad y permiso. 'Could' es el pasado, pero también la versión educada.",
+   "cuando": "Habilidades, permisos y peticiones.",
+   "formula": "can / could + verbo base (sin 'to')",
+   "ejemplos": [
+    {
+     "en": "I can swim.",
+     "es": "Sé nadar.",
+     "audio": "aud/gram/g_18_ej1.mp3",
+     "audio_lento": "aud/gram/g_18_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_18_ej1_es.mp3"
+    },
+    {
+     "en": "Could you help me with this?",
+     "es": "¿Me ayudas con esto?",
+     "audio": "aud/gram/g_18_ej2.mp3",
+     "audio_lento": "aud/gram/g_18_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_18_ej2_es.mp3"
+    },
+    {
+     "en": "I couldn't sleep last night.",
+     "es": "No pude dormir anoche.",
+     "audio": "aud/gram/g_18_ej3.mp3",
+     "audio_lento": "aud/gram/g_18_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_18_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I can to drive.",
+    "bien": "I can drive.",
+    "por_que": "Después de un modal nunca va 'to'. Nunca.",
+    "audio_bien": "aud/gram/g_18_bien.mp3"
+   },
+   "ojo": "'Can you…?' es directo y está bien entre amigos. 'Could you…?' es lo que usas con un desconocido.",
+   "contraste": null
+  },
+  {
+   "id": "g_19",
+   "bloque": "modales",
+   "titulo": "must / have to",
+   "gancho": "Obligación de dentro y de fuera",
+   "nivel": 2,
+   "idea": "'Must' es una obligación que tú sientes. 'Have to' viene de una regla o de otra persona.",
+   "cuando": "Reglas, normas y decisiones propias.",
+   "formula": "must + base · have / has to + base",
+   "ejemplos": [
+    {
+     "en": "I must stop eating so late.",
+     "es": "Tengo que dejar de cenar tan tarde.",
+     "audio": "aud/gram/g_19_ej1.mp3",
+     "audio_lento": "aud/gram/g_19_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_19_ej1_es.mp3"
+    },
+    {
+     "en": "You have to wear a helmet here.",
+     "es": "Aquí hay que traer casco.",
+     "audio": "aud/gram/g_19_ej2.mp3",
+     "audio_lento": "aud/gram/g_19_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_19_ej2_es.mp3"
+    },
+    {
+     "en": "She has to work on Saturday.",
+     "es": "Tiene que trabajar el sábado.",
+     "audio": "aud/gram/g_19_ej3.mp3",
+     "audio_lento": "aud/gram/g_19_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_19_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I must to go.",
+    "bien": "I must go.",
+    "por_que": "'Must' es modal: sin 'to'. 'Have to' sí lo lleva, porque no es modal.",
+    "audio_bien": "aud/gram/g_19_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "**mustn't** = está prohibido. **don't have to** = no es necesario. Son opuestos y se confunden todo el tiempo."
+  },
+  {
+   "id": "g_20",
+   "bloque": "modales",
+   "titulo": "should",
+   "gancho": "El consejo",
+   "nivel": 1,
+   "idea": "Lo que conviene hacer. Es una recomendación, no una orden.",
+   "cuando": "Consejos, opiniones y sugerencias.",
+   "formula": "should + verbo base",
+   "ejemplos": [
+    {
+     "en": "You should get that checked.",
+     "es": "Deberías revisarte eso.",
+     "audio": "aud/gram/g_20_ej1.mp3",
+     "audio_lento": "aud/gram/g_20_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_20_ej1_es.mp3"
+    },
+    {
+     "en": "We shouldn't have said that.",
+     "es": "No debimos decir eso.",
+     "audio": "aud/gram/g_20_ej2.mp3",
+     "audio_lento": "aud/gram/g_20_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_20_ej2_es.mp3"
+    },
+    {
+     "en": "Should I bring anything?",
+     "es": "¿Llevo algo?",
+     "audio": "aud/gram/g_20_ej3.mp3",
+     "audio_lento": "aud/gram/g_20_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_20_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "You should to rest.",
+    "bien": "You should rest.",
+    "por_que": "Modal, sin 'to'.",
+    "audio_bien": "aud/gram/g_20_bien.mp3"
+   },
+   "ojo": "'You should…' repetido suena a regaño. Los nativos suavizan con *maybe you should* o *you might want to*.",
+   "contraste": null
+  },
+  {
+   "id": "g_21",
+   "bloque": "modales",
+   "titulo": "may / might",
+   "gancho": "Probabilidad, no permiso",
+   "nivel": 3,
+   "idea": "Las dos dicen 'quizá'. 'Might' es un poco menos seguro. 'May' además sirve para permiso formal.",
+   "cuando": "Cuando no estás seguro y no quieres comprometerte.",
+   "formula": "may / might + verbo base",
+   "ejemplos": [
+    {
+     "en": "She might not come.",
+     "es": "Puede que no venga.",
+     "audio": "aud/gram/g_21_ej1.mp3",
+     "audio_lento": "aud/gram/g_21_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_21_ej1_es.mp3"
+    },
+    {
+     "en": "It may rain later.",
+     "es": "Puede que llueva al rato.",
+     "audio": "aud/gram/g_21_ej2.mp3",
+     "audio_lento": "aud/gram/g_21_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_21_ej2_es.mp3"
+    },
+    {
+     "en": "May I come in?",
+     "es": "¿Puedo pasar?",
+     "audio": "aud/gram/g_21_ej3.mp3",
+     "audio_lento": "aud/gram/g_21_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_21_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Maybe she can come.",
+    "bien": "She might come.",
+    "por_que": "'Can' es capacidad, no probabilidad. Para 'quizá' va 'might'.",
+    "audio_bien": "aud/gram/g_21_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "**maybe** va al principio de la frase. **might** va pegado al verbo. *Maybe she'll come* = *She might come*."
+  },
+  {
+   "id": "g_22",
+   "bloque": "modales",
+   "titulo": "Modales de deducción",
+   "gancho": "Cómo se dice 'debe de estar'",
+   "nivel": 4,
+   "idea": "Sirven para adivinar con lógica. 'Must be' cuando estás casi seguro, 'can't be' cuando lo descartas.",
+   "cuando": "Al sacar conclusiones de lo que ves.",
+   "formula": "must / might / can't + be",
+   "ejemplos": [
+    {
+     "en": "She must be exhausted.",
+     "es": "Debe de estar agotada.",
+     "audio": "aud/gram/g_22_ej1.mp3",
+     "audio_lento": "aud/gram/g_22_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_22_ej1_es.mp3"
+    },
+    {
+     "en": "That can't be right.",
+     "es": "Eso no puede ser.",
+     "audio": "aud/gram/g_22_ej2.mp3",
+     "audio_lento": "aud/gram/g_22_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_22_ej2_es.mp3"
+    },
+    {
+     "en": "He might be stuck in traffic.",
+     "es": "A lo mejor está en el tráfico.",
+     "audio": "aud/gram/g_22_ej3.mp3",
+     "audio_lento": "aud/gram/g_22_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_22_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "She must to be tired.",
+    "bien": "She must be tired.",
+    "por_que": "Otra vez: modal, sin 'to'.",
+    "audio_bien": "aud/gram/g_22_bien.mp3"
+   },
+   "ojo": "Ojo con el falso amigo: *she must be tired* NO es 'debe estar cansada' como orden, es 'seguro está cansada'.",
+   "contraste": null
+  },
+  {
+   "id": "g_23",
+   "bloque": "modales",
+   "titulo": "Modales en pasado",
+   "gancho": "Lo que pudiste, debiste y no hiciste",
+   "nivel": 5,
+   "idea": "Para hablar de decisiones pasadas. Es de lo que más carga emocional tiene en inglés.",
+   "cuando": "Arrepentimiento, reproche y deducción sobre el pasado.",
+   "formula": "modal + have + participio",
+   "ejemplos": [
+    {
+     "en": "I should have called you.",
+     "es": "Debí haberte llamado.",
+     "audio": "aud/gram/g_23_ej1.mp3",
+     "audio_lento": "aud/gram/g_23_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_23_ej1_es.mp3"
+    },
+    {
+     "en": "You could have told me!",
+     "es": "¡Me hubieras dicho!",
+     "audio": "aud/gram/g_23_ej2.mp3",
+     "audio_lento": "aud/gram/g_23_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_23_ej2_es.mp3"
+    },
+    {
+     "en": "They must have left already.",
+     "es": "Ya se han de haber ido.",
+     "audio": "aud/gram/g_23_ej3.mp3",
+     "audio_lento": "aud/gram/g_23_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_23_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I should called you.",
+    "bien": "I should have called you.",
+    "por_que": "Sin 'have' no hay pasado. Y en la calle suena *should've*, casi 'shoulda'.",
+    "audio_bien": "aud/gram/g_23_bien.mp3"
+   },
+   "ojo": "Escrito es *should have*. Hablado es *should've*, que suena igual que 'shoulda'. Por eso mucha gente lo escribe mal como 'should of'.",
+   "contraste": null
+  },
+  {
+   "id": "g_24",
+   "bloque": "modales",
+   "titulo": "Peticiones educadas",
+   "gancho": "La escalera de la cortesía",
+   "nivel": 3,
+   "idea": "El inglés marca cortesía con la forma del verbo, no con el tono. Entre más largo, más suave.",
+   "cuando": "En el trabajo, con desconocidos, en un correo.",
+   "formula": "Can → Could → Would you mind + -ing",
+   "ejemplos": [
+    {
+     "en": "Can you send it?",
+     "es": "¿Me lo mandas?",
+     "audio": "aud/gram/g_24_ej1.mp3",
+     "audio_lento": "aud/gram/g_24_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_24_ej1_es.mp3"
+    },
+    {
+     "en": "Could you send it when you get a chance?",
+     "es": "¿Me lo podrías mandar cuando puedas?",
+     "audio": "aud/gram/g_24_ej2.mp3",
+     "audio_lento": "aud/gram/g_24_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_24_ej2_es.mp3"
+    },
+    {
+     "en": "Would you mind sending it?",
+     "es": "¿Te importaría mandármelo?",
+     "audio": "aud/gram/g_24_ej3.mp3",
+     "audio_lento": "aud/gram/g_24_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_24_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Send me the file.",
+    "bien": "Could you send me the file?",
+    "por_que": "El imperativo directo, que en español es normal con 'por favor', en inglés suena a orden.",
+    "audio_bien": "aud/gram/g_24_bien.mp3"
+   },
+   "ojo": "En un correo de trabajo, 'Can you' ya se lee un poco seco. 'Could you' es el estándar seguro.",
+   "contraste": null
+  },
+  {
+   "id": "g_64",
+   "bloque": "modales",
+   "titulo": "would like",
+   "gancho": "La forma educada de querer",
+   "nivel": 1,
+   "idea": "Es 'want' con corbata. En cualquier contexto formal, sustituye a 'want'.",
+   "cuando": "Pedir, ofrecer, proponer.",
+   "formula": "would like + sustantivo / to + verbo",
+   "ejemplos": [
+    {
+     "en": "I'd like a table for two.",
+     "es": "Quisiera mesa para dos.",
+     "audio": "aud/gram/g_64_ej1.mp3",
+     "audio_lento": "aud/gram/g_64_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_64_ej1_es.mp3"
+    },
+    {
+     "en": "Would you like some coffee?",
+     "es": "¿Gustas café?",
+     "audio": "aud/gram/g_64_ej2.mp3",
+     "audio_lento": "aud/gram/g_64_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_64_ej2_es.mp3"
+    },
+    {
+     "en": "I'd like to speak with the manager.",
+     "es": "Quisiera hablar con el gerente.",
+     "audio": "aud/gram/g_64_ej3.mp3",
+     "audio_lento": "aud/gram/g_64_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_64_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I would like that you come.",
+    "bien": "I'd like you to come.",
+    "por_que": "'Would like' no lleva 'that'. Lleva objeto + to + verbo.",
+    "audio_bien": "aud/gram/g_64_bien.mp3"
+   },
+   "ojo": "Se contrae casi siempre: **I'd like**. Decir 'I would like' entero suena solemne.",
+   "contraste": null
+  },
+  {
+   "id": "g_65",
+   "bloque": "modales",
+   "titulo": "had better",
+   "gancho": "La advertencia disfrazada de consejo",
+   "nivel": 5,
+   "idea": "Suena a consejo pero lleva amenaza implícita: si no lo haces, va a pasar algo malo.",
+   "cuando": "Advertencias, urgencia.",
+   "formula": "had better ('d better) + verbo base",
+   "ejemplos": [
+    {
+     "en": "You'd better leave now.",
+     "es": "Más vale que te vayas ya.",
+     "audio": "aud/gram/g_65_ej1.mp3",
+     "audio_lento": "aud/gram/g_65_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_65_ej1_es.mp3"
+    },
+    {
+     "en": "We'd better not be late.",
+     "es": "Más nos vale no llegar tarde.",
+     "audio": "aud/gram/g_65_ej2.mp3",
+     "audio_lento": "aud/gram/g_65_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_65_ej2_es.mp3"
+    },
+    {
+     "en": "You'd better call her.",
+     "es": "Más vale que le hables.",
+     "audio": "aud/gram/g_65_ej3.mp3",
+     "audio_lento": "aud/gram/g_65_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_65_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "You had better to leave.",
+    "bien": "You'd better leave.",
+    "por_que": "Sin 'to'. Y aunque diga 'had', habla del futuro inmediato, no del pasado.",
+    "audio_bien": "aud/gram/g_65_bien.mp3"
+   },
+   "ojo": "No es lo mismo que 'should'. 'Should' es consejo; 'had better' avisa de una consecuencia.",
+   "contraste": null
+  },
+  {
+   "id": "g_25",
+   "bloque": "condicionales",
+   "titulo": "Condicional cero",
+   "gancho": "Lo que siempre pasa",
+   "nivel": 2,
+   "idea": "Causa y efecto que se cumple siempre. No es una hipótesis, es un hecho.",
+   "cuando": "Reglas, instrucciones, verdades.",
+   "formula": "If + presente , presente",
+   "ejemplos": [
+    {
+     "en": "If you heat ice, it melts.",
+     "es": "Si calientas hielo, se derrite.",
+     "audio": "aud/gram/g_25_ej1.mp3",
+     "audio_lento": "aud/gram/g_25_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_25_ej1_es.mp3"
+    },
+    {
+     "en": "If I skip breakfast, I get a headache.",
+     "es": "Si no desayuno, me da dolor de cabeza.",
+     "audio": "aud/gram/g_25_ej2.mp3",
+     "audio_lento": "aud/gram/g_25_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_25_ej2_es.mp3"
+    },
+    {
+     "en": "If it's free, people take it.",
+     "es": "Si es gratis, la gente lo agarra.",
+     "audio": "aud/gram/g_25_ej3.mp3",
+     "audio_lento": "aud/gram/g_25_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_25_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "If you will heat ice, it melts.",
+    "bien": "If you heat ice, it melts.",
+    "por_que": "Después de 'if' no va 'will'.",
+    "audio_bien": "aud/gram/g_25_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_26",
+   "bloque": "condicionales",
+   "titulo": "Primer condicional",
+   "gancho": "Lo que puede pasar de verdad",
+   "nivel": 2,
+   "idea": "Una posibilidad real en el futuro y su consecuencia.",
+   "cuando": "Planes, advertencias, promesas.",
+   "formula": "If + presente , will + base",
+   "ejemplos": [
+    {
+     "en": "If you study, you'll pass.",
+     "es": "Si estudias, pasas.",
+     "audio": "aud/gram/g_26_ej1.mp3",
+     "audio_lento": "aud/gram/g_26_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_26_ej1_es.mp3"
+    },
+    {
+     "en": "If she calls, I'll let you know.",
+     "es": "Si llama, te aviso.",
+     "audio": "aud/gram/g_26_ej2.mp3",
+     "audio_lento": "aud/gram/g_26_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_26_ej2_es.mp3"
+    },
+    {
+     "en": "We'll leave if it gets late.",
+     "es": "Nos vamos si se hace tarde.",
+     "audio": "aud/gram/g_26_ej3.mp3",
+     "audio_lento": "aud/gram/g_26_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_26_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "If you will study, you will pass.",
+    "bien": "If you study, you'll pass.",
+    "por_que": "El 'will' va una sola vez, del lado del resultado.",
+    "audio_bien": "aud/gram/g_26_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_27",
+   "bloque": "condicionales",
+   "titulo": "Segundo condicional",
+   "gancho": "Lo que harías si…",
+   "nivel": 3,
+   "idea": "Situación imaginaria o poco probable en el presente.",
+   "cuando": "Sueños, hipótesis, consejos indirectos.",
+   "formula": "If + past simple , would + base",
+   "ejemplos": [
+    {
+     "en": "If I had more time, I'd learn piano.",
+     "es": "Si tuviera más tiempo, aprendería piano.",
+     "audio": "aud/gram/g_27_ej1.mp3",
+     "audio_lento": "aud/gram/g_27_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_27_ej1_es.mp3"
+    },
+    {
+     "en": "What would you do if he said no?",
+     "es": "¿Qué harías si dijera que no?",
+     "audio": "aud/gram/g_27_ej2.mp3",
+     "audio_lento": "aud/gram/g_27_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_27_ej2_es.mp3"
+    },
+    {
+     "en": "If I were you, I'd wait.",
+     "es": "Yo que tú, esperaría.",
+     "audio": "aud/gram/g_27_ej3.mp3",
+     "audio_lento": "aud/gram/g_27_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_27_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "If I would have more time, I would learn piano.",
+    "bien": "If I had more time, I'd learn piano.",
+    "por_que": "'Would' nunca va del lado del 'if'. Ese lado va en pasado.",
+    "audio_bien": "aud/gram/g_27_bien.mp3"
+   },
+   "ojo": "*If I **were** you* — con 'were', no 'was', aunque el sujeto sea 'I'. Es la única forma que sobrevive del subjuntivo inglés.",
+   "contraste": null
+  },
+  {
+   "id": "g_28",
+   "bloque": "condicionales",
+   "titulo": "Tercer condicional",
+   "gancho": "Lo que hubiera pasado",
+   "nivel": 5,
+   "idea": "Pasado imaginario. Ya no se puede cambiar: es puro arrepentimiento o alivio.",
+   "cuando": "Hablar de lo que no fue.",
+   "formula": "If + had + participio , would have + participio",
+   "ejemplos": [
+    {
+     "en": "If I had known, I would have come.",
+     "es": "Si hubiera sabido, habría ido.",
+     "audio": "aud/gram/g_28_ej1.mp3",
+     "audio_lento": "aud/gram/g_28_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_28_ej1_es.mp3"
+    },
+    {
+     "en": "She would have passed if she'd studied.",
+     "es": "Habría pasado si hubiera estudiado.",
+     "audio": "aud/gram/g_28_ej2.mp3",
+     "audio_lento": "aud/gram/g_28_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_28_ej2_es.mp3"
+    },
+    {
+     "en": "If we hadn't left early, we'd have missed it.",
+     "es": "Si no nos hubiéramos ido temprano, nos lo perdemos.",
+     "audio": "aud/gram/g_28_ej3.mp3",
+     "audio_lento": "aud/gram/g_28_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_28_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "If I would have known…",
+    "bien": "If I had known…",
+    "por_que": "Es el error más común, y también entre nativos. Del lado del 'if' va 'had', nunca 'would have'.",
+    "audio_bien": "aud/gram/g_28_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_29",
+   "bloque": "condicionales",
+   "titulo": "Condicional mixto",
+   "gancho": "Pasado que todavía te afecta",
+   "nivel": 5,
+   "idea": "El 'if' habla del pasado y el resultado del presente. O al revés.",
+   "cuando": "Cuando una decisión vieja explica tu situación de hoy.",
+   "formula": "If + had + participio , would + base",
+   "ejemplos": [
+    {
+     "en": "If I had studied medicine, I'd be a doctor now.",
+     "es": "Si hubiera estudiado medicina, hoy sería doctor.",
+     "audio": "aud/gram/g_29_ej1.mp3",
+     "audio_lento": "aud/gram/g_29_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_29_ej1_es.mp3"
+    },
+    {
+     "en": "If she hadn't moved, we'd still be neighbors.",
+     "es": "Si no se hubiera mudado, seguiríamos siendo vecinos.",
+     "audio": "aud/gram/g_29_ej2.mp3",
+     "audio_lento": "aud/gram/g_29_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_29_ej2_es.mp3"
+    },
+    {
+     "en": "I'd be rich if I had sold it then.",
+     "es": "Sería rico si lo hubiera vendido entonces.",
+     "audio": "aud/gram/g_29_ej3.mp3",
+     "audio_lento": "aud/gram/g_29_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_29_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "If I had studied medicine, I would have been a doctor now.",
+    "bien": "…I'd be a doctor now.",
+    "por_que": "'Now' obliga a que el resultado sea presente: 'would be', no 'would have been'.",
+    "audio_bien": "aud/gram/g_29_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_30",
+   "bloque": "phrasal",
+   "titulo": "Qué es un phrasal verb",
+   "gancho": "Por qué 'get' significa cuarenta cosas",
+   "nivel": 2,
+   "idea": "Verbo corto + preposición. Juntos significan algo que no se deduce de las partes.",
+   "cuando": "En conversación son la forma normal de decir casi todo.",
+   "formula": "verbo + partícula (up, out, on, off, over, through…)",
+   "ejemplos": [
+    {
+     "en": "Give up = rendirse",
+     "es": "No 'dar arriba'.",
+     "audio": "aud/gram/g_30_ej1.mp3",
+     "audio_lento": "aud/gram/g_30_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_30_ej1_es.mp3"
+    },
+    {
+     "en": "Run into someone = topárselo",
+     "es": "No 'correr dentro de'.",
+     "audio": "aud/gram/g_30_ej2.mp3",
+     "audio_lento": "aud/gram/g_30_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_30_ej2_es.mp3"
+    },
+    {
+     "en": "Put up with = aguantar",
+     "es": "Tres palabras, un solo verbo.",
+     "audio": "aud/gram/g_30_ej3.mp3",
+     "audio_lento": "aud/gram/g_30_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_30_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I will investigate this matter.",
+    "bien": "I'll look into this.",
+    "por_que": "No está mal, pero suena a informe. En el habla normal se usa el phrasal.",
+    "audio_bien": "aud/gram/g_30_bien.mp3"
+   },
+   "ojo": "Es la diferencia más grande entre el inglés de libro y el de la calle. Los nativos usan el phrasal casi siempre.",
+   "contraste": null
+  },
+  {
+   "id": "g_31",
+   "bloque": "phrasal",
+   "titulo": "Separables e inseparables",
+   "gancho": "Dónde meter el 'it'",
+   "nivel": 4,
+   "idea": "Algunos dejan meter el objeto en medio; otros no. Con un pronombre, los separables OBLIGAN a partirlos.",
+   "cuando": "Cada vez que sustituyas el objeto por it, them, him.",
+   "formula": "turn **it** off ✓ · turn off **it** ✗",
+   "ejemplos": [
+    {
+     "en": "Turn off the light. / Turn the light off.",
+     "es": "Las dos están bien.",
+     "audio": "aud/gram/g_31_ej1.mp3",
+     "audio_lento": "aud/gram/g_31_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_31_ej1_es.mp3"
+    },
+    {
+     "en": "Turn it off.",
+     "es": "Obligatorio partirlo.",
+     "audio": "aud/gram/g_31_ej2.mp3",
+     "audio_lento": "aud/gram/g_31_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_31_ej2_es.mp3"
+    },
+    {
+     "en": "I ran into her.",
+     "es": "Inseparable: nunca 'ran her into'.",
+     "audio": "aud/gram/g_31_ej3.mp3",
+     "audio_lento": "aud/gram/g_31_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_31_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Turn off it.",
+    "bien": "Turn it off.",
+    "por_que": "Con pronombre, el separable se parte siempre. Es la regla que más delata.",
+    "audio_bien": "aud/gram/g_31_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_32",
+   "bloque": "phrasal",
+   "titulo": "Los de 'get'",
+   "gancho": "El verbo más usado y el más ignorado",
+   "nivel": 3,
+   "idea": "'Get' cambia por completo según la partícula. Vale más que memorizar cien palabras sueltas.",
+   "cuando": "Todo el tiempo, en cualquier registro.",
+   "formula": "get + up / over / along / rid of / by / into",
+   "ejemplos": [
+    {
+     "en": "I get up at six.",
+     "es": "Me levanto a las seis.",
+     "audio": "aud/gram/g_32_ej1.mp3",
+     "audio_lento": "aud/gram/g_32_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_32_ej1_es.mp3"
+    },
+    {
+     "en": "She still hasn't gotten over it.",
+     "es": "Todavía no lo supera.",
+     "audio": "aud/gram/g_32_ej2.mp3",
+     "audio_lento": "aud/gram/g_32_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_32_ej2_es.mp3"
+    },
+    {
+     "en": "We get along fine.",
+     "es": "Nos llevamos bien.",
+     "audio": "aud/gram/g_32_ej3.mp3",
+     "audio_lento": "aud/gram/g_32_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_32_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I wake up at six and then I get up… no, I rise.",
+    "bien": "I get up at six.",
+    "por_que": "'Rise' existe pero suena a poema. Nadie dice 'I rise at six'.",
+    "audio_bien": "aud/gram/g_32_bien.mp3"
+   },
+   "ojo": "**wake up** = abres los ojos. **get up** = te sales de la cama. No son lo mismo.",
+   "contraste": null
+  },
+  {
+   "id": "g_33",
+   "bloque": "phrasal",
+   "titulo": "Los de trabajo",
+   "gancho": "Los que oyes en cualquier oficina",
+   "nivel": 3,
+   "idea": "Un puñado de phrasal verbs cubre casi toda la conversación laboral en inglés.",
+   "cuando": "Juntas, correos y chats de trabajo.",
+   "formula": "follow up · figure out · reach out · run by · take on",
+   "ejemplos": [
+    {
+     "en": "I'll follow up tomorrow.",
+     "es": "Le doy seguimiento mañana.",
+     "audio": "aud/gram/g_33_ej1.mp3",
+     "audio_lento": "aud/gram/g_33_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_33_ej1_es.mp3"
+    },
+    {
+     "en": "Let me run this by my boss.",
+     "es": "Déjame consultarlo con mi jefe.",
+     "audio": "aud/gram/g_33_ej2.mp3",
+     "audio_lento": "aud/gram/g_33_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_33_ej2_es.mp3"
+    },
+    {
+     "en": "Can you reach out to them?",
+     "es": "¿Los puedes contactar?",
+     "audio": "aud/gram/g_33_ej3.mp3",
+     "audio_lento": "aud/gram/g_33_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_33_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I will make a follow-up.",
+    "bien": "I'll follow up.",
+    "por_que": "Como verbo va separado y sin guion. 'A follow-up' con guion es el sustantivo.",
+    "audio_bien": "aud/gram/g_33_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_34",
+   "bloque": "phrasal",
+   "titulo": "Los de relaciones",
+   "gancho": "Salir, cortar, aguantar",
+   "nivel": 3,
+   "idea": "El vocabulario emocional en inglés informal es casi todo phrasal verbs.",
+   "cuando": "Contar tu vida, series, conversación con amigos.",
+   "formula": "go out with · break up · make up · put up with · hit on",
+   "ejemplos": [
+    {
+     "en": "They broke up last month.",
+     "es": "Cortaron el mes pasado.",
+     "audio": "aud/gram/g_34_ej1.mp3",
+     "audio_lento": "aud/gram/g_34_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_34_ej1_es.mp3"
+    },
+    {
+     "en": "I can't put up with this.",
+     "es": "No aguanto esto.",
+     "audio": "aud/gram/g_34_ej2.mp3",
+     "audio_lento": "aud/gram/g_34_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_34_ej2_es.mp3"
+    },
+    {
+     "en": "Are you two making up?",
+     "es": "¿Se están reconciliando?",
+     "audio": "aud/gram/g_34_ej3.mp3",
+     "audio_lento": "aud/gram/g_34_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_34_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "They finished their relationship.",
+    "bien": "They broke up.",
+    "por_que": "'Finish' con una relación suena a trámite. Nadie lo dice así.",
+    "audio_bien": "aud/gram/g_34_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_35",
+   "bloque": "phrasal",
+   "titulo": "Los que cambian de sentido",
+   "gancho": "Cuidado con estos",
+   "nivel": 4,
+   "idea": "Mismo verbo, misma partícula, significados que no tienen nada que ver. El contexto decide.",
+   "cuando": "Cuando algo no cuadra aunque conozcas las palabras.",
+   "formula": "pick up · take off · make out · go off",
+   "ejemplos": [
+    {
+     "en": "I'll pick you up at eight.",
+     "es": "Paso por ti a las ocho.",
+     "audio": "aud/gram/g_35_ej1.mp3",
+     "audio_lento": "aud/gram/g_35_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_35_ej1_es.mp3"
+    },
+    {
+     "en": "She picked up Spanish fast.",
+     "es": "Aprendió español rápido.",
+     "audio": "aud/gram/g_35_ej2.mp3",
+     "audio_lento": "aud/gram/g_35_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_35_ej2_es.mp3"
+    },
+    {
+     "en": "The plane took off. / Business took off.",
+     "es": "Despegó / se disparó.",
+     "audio": "aud/gram/g_35_ej3.mp3",
+     "audio_lento": "aud/gram/g_35_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_35_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "The alarm went off, so it stopped.",
+    "bien": "The alarm went off, so it started ringing.",
+    "por_que": "'Go off' con una alarma es que SONÓ, no que se apagó. Es trampa pura.",
+    "audio_bien": "aud/gram/g_35_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_78",
+   "bloque": "phrasal",
+   "titulo": "Los de dinero",
+   "gancho": "Pagar, ahorrar, deber",
+   "nivel": 3,
+   "idea": "El vocabulario de dinero informal es casi todo phrasal verbs.",
+   "cuando": "Cuentas, sueldos, deudas.",
+   "formula": "pay off · put aside · chip in · rip off · save up",
+   "ejemplos": [
+    {
+     "en": "I finally paid off my card.",
+     "es": "Por fin liquidé mi tarjeta.",
+     "audio": "aud/gram/g_78_ej1.mp3",
+     "audio_lento": "aud/gram/g_78_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_78_ej1_es.mp3"
+    },
+    {
+     "en": "We all chipped in.",
+     "es": "Todos cooperamos.",
+     "audio": "aud/gram/g_78_ej2.mp3",
+     "audio_lento": "aud/gram/g_78_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_78_ej2_es.mp3"
+    },
+    {
+     "en": "They ripped me off.",
+     "es": "Me vieron la cara.",
+     "audio": "aud/gram/g_78_ej3.mp3",
+     "audio_lento": "aud/gram/g_78_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_78_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "They cheated me with the price.",
+    "bien": "They ripped me off.",
+    "por_que": "'Cheat' es hacer trampa. Cobrarte de más es 'rip off'.",
+    "audio_bien": "aud/gram/g_78_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_79",
+   "bloque": "phrasal",
+   "titulo": "Los de aprender",
+   "gancho": "Los que vas a usar en esta app",
+   "nivel": 2,
+   "idea": "Estudiar en inglés informal también se dice con phrasal verbs.",
+   "cuando": "Hablar de tu propio aprendizaje.",
+   "formula": "brush up on · catch on · look up · go over · keep up with",
+   "ejemplos": [
+    {
+     "en": "I need to brush up on my English.",
+     "es": "Necesito repasar mi inglés.",
+     "audio": "aud/gram/g_79_ej1.mp3",
+     "audio_lento": "aud/gram/g_79_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_79_ej1_es.mp3"
+    },
+    {
+     "en": "She caught on fast.",
+     "es": "Agarró la onda rápido.",
+     "audio": "aud/gram/g_79_ej2.mp3",
+     "audio_lento": "aud/gram/g_79_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_79_ej2_es.mp3"
+    },
+    {
+     "en": "Look it up.",
+     "es": "Búscalo.",
+     "audio": "aud/gram/g_79_ej3.mp3",
+     "audio_lento": "aud/gram/g_79_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_79_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I need to review my English.",
+    "bien": "I need to brush up on my English.",
+    "por_que": "'Review' es correcto pero suena a escuela. En conversación es 'brush up on'.",
+    "audio_bien": "aud/gram/g_79_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_80",
+   "bloque": "phrasal",
+   "titulo": "Los de aguantar y rendirse",
+   "gancho": "Cuando la cosa se pone difícil",
+   "nivel": 3,
+   "idea": "Un grupo pequeño que aparece en cada conversación sobre problemas.",
+   "cuando": "Hablar de esfuerzo, límites y decisiones.",
+   "formula": "give up · hold on · put up with · get through · back down",
+   "ejemplos": [
+    {
+     "en": "Don't give up.",
+     "es": "No te rindas.",
+     "audio": "aud/gram/g_80_ej1.mp3",
+     "audio_lento": "aud/gram/g_80_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_80_ej1_es.mp3"
+    },
+    {
+     "en": "Hold on a second.",
+     "es": "Espérame tantito.",
+     "audio": "aud/gram/g_80_ej2.mp3",
+     "audio_lento": "aud/gram/g_80_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_80_ej2_es.mp3"
+    },
+    {
+     "en": "We got through it.",
+     "es": "La libramos.",
+     "audio": "aud/gram/g_80_ej3.mp3",
+     "audio_lento": "aud/gram/g_80_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_80_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I can't support this person.",
+    "bien": "I can't put up with this person.",
+    "por_que": "'Support' es apoyar. Aguantar a alguien es 'put up with'.",
+    "audio_bien": "aud/gram/g_80_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_36",
+   "bloque": "confusiones",
+   "titulo": "make o do",
+   "gancho": "La que falla el 100% de los hispanohablantes",
+   "nivel": 2,
+   "idea": "En español todo es 'hacer'. En inglés se parte en dos: crear algo nuevo es 'make', ejecutar una tarea es 'do'.",
+   "cuando": "Cada vez que quieras decir 'hacer'.",
+   "formula": "make = crear · do = ejecutar",
+   "ejemplos": [
+    {
+     "en": "make a decision / a mistake / dinner",
+     "es": "tomar una decisión / cometer un error / hacer la cena",
+     "audio": "aud/gram/g_36_ej1.mp3",
+     "audio_lento": "aud/gram/g_36_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_36_ej1_es.mp3"
+    },
+    {
+     "en": "do the dishes / homework / a favor",
+     "es": "lavar los trastes / la tarea / un favor",
+     "audio": "aud/gram/g_36_ej2.mp3",
+     "audio_lento": "aud/gram/g_36_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_36_ej2_es.mp3"
+    },
+    {
+     "en": "make money, do business",
+     "es": "ganar dinero, hacer negocios",
+     "audio": "aud/gram/g_36_ej3.mp3",
+     "audio_lento": "aud/gram/g_36_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_36_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I need to do a decision.",
+    "bien": "I need to make a decision.",
+    "por_que": "La decisión no existía y la creas: 'make'.",
+    "audio_bien": "aud/gram/g_36_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "Truco: si el resultado es algo que antes no existía, es **make**. Si es una tarea de una lista, es **do**."
+  },
+  {
+   "id": "g_37",
+   "bloque": "confusiones",
+   "titulo": "say o tell",
+   "gancho": "A quién se lo dices",
+   "nivel": 2,
+   "idea": "'Tell' pide una persona detrás. 'Say' no.",
+   "cuando": "Al reportar lo que alguien dijo.",
+   "formula": "tell + **alguien** · say (+ to alguien)",
+   "ejemplos": [
+    {
+     "en": "She told me the truth.",
+     "es": "Me dijo la verdad.",
+     "audio": "aud/gram/g_37_ej1.mp3",
+     "audio_lento": "aud/gram/g_37_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_37_ej1_es.mp3"
+    },
+    {
+     "en": "She said the truth was hard.",
+     "es": "Dijo que la verdad era dura.",
+     "audio": "aud/gram/g_37_ej2.mp3",
+     "audio_lento": "aud/gram/g_37_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_37_ej2_es.mp3"
+    },
+    {
+     "en": "Tell me what happened.",
+     "es": "Dime qué pasó.",
+     "audio": "aud/gram/g_37_ej3.mp3",
+     "audio_lento": "aud/gram/g_37_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_37_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "She said me she was late.",
+    "bien": "She told me she was late.",
+    "por_que": "Con persona directa después, va 'tell'.",
+    "audio_bien": "aud/gram/g_37_bien.mp3"
+   },
+   "ojo": "Fijos: *tell a story, tell the truth, tell a lie, tell time*. Y *say hello, say sorry*.",
+   "contraste": null
+  },
+  {
+   "id": "g_38",
+   "bloque": "confusiones",
+   "titulo": "for o since",
+   "gancho": "Cuánto y desde cuándo",
+   "nivel": 2,
+   "idea": "'For' lleva duración. 'Since' lleva punto de partida.",
+   "cuando": "Con present perfect casi siempre.",
+   "formula": "for + periodo · since + momento",
+   "ejemplos": [
+    {
+     "en": "I've lived here for five years.",
+     "es": "Llevo cinco años aquí.",
+     "audio": "aud/gram/g_38_ej1.mp3",
+     "audio_lento": "aud/gram/g_38_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_38_ej1_es.mp3"
+    },
+    {
+     "en": "I've lived here since 2020.",
+     "es": "Vivo aquí desde 2020.",
+     "audio": "aud/gram/g_38_ej2.mp3",
+     "audio_lento": "aud/gram/g_38_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_38_ej2_es.mp3"
+    },
+    {
+     "en": "She's been up since dawn.",
+     "es": "Está despierta desde el amanecer.",
+     "audio": "aud/gram/g_38_ej3.mp3",
+     "audio_lento": "aud/gram/g_38_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_38_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I've been here since five years.",
+    "bien": "I've been here for five years.",
+    "por_que": "Cinco años es una duración, no un momento.",
+    "audio_bien": "aud/gram/g_38_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_39",
+   "bloque": "confusiones",
+   "titulo": "other, others, another",
+   "gancho": "Otro, otros, el otro",
+   "nivel": 3,
+   "idea": "'Another' es uno más, indefinido. 'Other' acompaña a un sustantivo. 'Others' va solo.",
+   "cuando": "Cada vez que digas 'otro'.",
+   "formula": "another + singular · other + plural · others (pronombre)",
+   "ejemplos": [
+    {
+     "en": "Can I have another coffee?",
+     "es": "¿Me das otro café?",
+     "audio": "aud/gram/g_39_ej1.mp3",
+     "audio_lento": "aud/gram/g_39_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_39_ej1_es.mp3"
+    },
+    {
+     "en": "The other students left.",
+     "es": "Los otros alumnos se fueron.",
+     "audio": "aud/gram/g_39_ej2.mp3",
+     "audio_lento": "aud/gram/g_39_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_39_ej2_es.mp3"
+    },
+    {
+     "en": "Some stayed, others went home.",
+     "es": "Unos se quedaron, otros se fueron.",
+     "audio": "aud/gram/g_39_ej3.mp3",
+     "audio_lento": "aud/gram/g_39_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_39_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I want other coffee.",
+    "bien": "I want another coffee.",
+    "por_que": "Uno más y singular: 'another', que es literalmente 'an + other'.",
+    "audio_bien": "aud/gram/g_39_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_40",
+   "bloque": "confusiones",
+   "titulo": "much, many, a lot of",
+   "gancho": "Mucho contable y no contable",
+   "nivel": 1,
+   "idea": "'Many' con lo que se cuenta, 'much' con lo que no. 'A lot of' sirve para los dos y es lo normal al hablar.",
+   "cuando": "Cantidades.",
+   "formula": "many + contables · much + incontables · a lot of + ambos",
+   "ejemplos": [
+    {
+     "en": "How many people came?",
+     "es": "¿Cuánta gente vino?",
+     "audio": "aud/gram/g_40_ej1.mp3",
+     "audio_lento": "aud/gram/g_40_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_40_ej1_es.mp3"
+    },
+    {
+     "en": "I don't have much time.",
+     "es": "No tengo mucho tiempo.",
+     "audio": "aud/gram/g_40_ej2.mp3",
+     "audio_lento": "aud/gram/g_40_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_40_ej2_es.mp3"
+    },
+    {
+     "en": "There's a lot of traffic.",
+     "es": "Hay mucho tráfico.",
+     "audio": "aud/gram/g_40_ej3.mp3",
+     "audio_lento": "aud/gram/g_40_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_40_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I have much friends.",
+    "bien": "I have a lot of friends.",
+    "por_que": "'Friends' se cuenta. Y en afirmativo 'much' suena raro: se usa 'a lot of'.",
+    "audio_bien": "aud/gram/g_40_bien.mp3"
+   },
+   "ojo": "'Much' y 'many' viven sobre todo en preguntas y negaciones. En afirmativo, di 'a lot of'.",
+   "contraste": null
+  },
+  {
+   "id": "g_41",
+   "bloque": "confusiones",
+   "titulo": "in, on, at (lugar)",
+   "gancho": "Las tres preposiciones que se te atoran",
+   "nivel": 1,
+   "idea": "Van de lo grande a lo preciso: 'in' es dentro, 'on' es sobre una superficie, 'at' es un punto.",
+   "cuando": "Ubicaciones.",
+   "formula": "in (espacio) · on (superficie) · at (punto)",
+   "ejemplos": [
+    {
+     "en": "in the room, in Mexico",
+     "es": "en el cuarto, en México",
+     "audio": "aud/gram/g_41_ej1.mp3",
+     "audio_lento": "aud/gram/g_41_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_41_ej1_es.mp3"
+    },
+    {
+     "en": "on the table, on the wall",
+     "es": "en la mesa, en la pared",
+     "audio": "aud/gram/g_41_ej2.mp3",
+     "audio_lento": "aud/gram/g_41_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_41_ej2_es.mp3"
+    },
+    {
+     "en": "at the door, at work",
+     "es": "en la puerta, en el trabajo",
+     "audio": "aud/gram/g_41_ej3.mp3",
+     "audio_lento": "aud/gram/g_41_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_41_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I'm in the bus stop.",
+    "bien": "I'm at the bus stop.",
+    "por_que": "La parada es un punto de encuentro, no un espacio cerrado.",
+    "audio_bien": "aud/gram/g_41_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": "Transporte: **in** a car, pero **on** a bus, a plane, a train. Si te puedes parar y caminar, es 'on'."
+  },
+  {
+   "id": "g_42",
+   "bloque": "confusiones",
+   "titulo": "in, on, at (tiempo)",
+   "gancho": "Las mismas tres, ahora con el reloj",
+   "nivel": 1,
+   "idea": "Misma lógica: de lo amplio a lo exacto.",
+   "cuando": "Fechas y horas.",
+   "formula": "in (mes, año, estación) · on (día, fecha) · at (hora)",
+   "ejemplos": [
+    {
+     "en": "in July, in 2026, in the morning",
+     "es": "en julio, en 2026, en la mañana",
+     "audio": "aud/gram/g_42_ej1.mp3",
+     "audio_lento": "aud/gram/g_42_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_42_ej1_es.mp3"
+    },
+    {
+     "en": "on Monday, on July 4th",
+     "es": "el lunes, el 4 de julio",
+     "audio": "aud/gram/g_42_ej2.mp3",
+     "audio_lento": "aud/gram/g_42_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_42_ej2_es.mp3"
+    },
+    {
+     "en": "at 6 p.m., at night",
+     "es": "a las 6, en la noche",
+     "audio": "aud/gram/g_42_ej3.mp3",
+     "audio_lento": "aud/gram/g_42_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_42_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I'll see you in Monday.",
+    "bien": "I'll see you on Monday.",
+    "por_que": "Los días llevan 'on', siempre.",
+    "audio_bien": "aud/gram/g_42_bien.mp3"
+   },
+   "ojo": "La excepción que hay que memorizar: **at** night, pero **in** the morning / afternoon / evening.",
+   "contraste": null
+  },
+  {
+   "id": "g_43",
+   "bloque": "confusiones",
+   "titulo": "Falsos amigos",
+   "gancho": "Las que te hacen quedar mal",
+   "nivel": 3,
+   "idea": "Se parecen al español y significan otra cosa. Algunas son incómodas.",
+   "cuando": "Siempre. Son trampas silenciosas.",
+   "formula": "actually ≠ actualmente · embarrassed ≠ embarazada",
+   "ejemplos": [
+    {
+     "en": "actually = en realidad",
+     "es": "'actualmente' es currently.",
+     "audio": "aud/gram/g_43_ej1.mp3",
+     "audio_lento": "aud/gram/g_43_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_43_ej1_es.mp3"
+    },
+    {
+     "en": "embarrassed = avergonzado",
+     "es": "'embarazada' es pregnant.",
+     "audio": "aud/gram/g_43_ej2.mp3",
+     "audio_lento": "aud/gram/g_43_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_43_ej2_es.mp3"
+    },
+    {
+     "en": "assist = ayudar",
+     "es": "'asistir a' es attend.",
+     "audio": "aud/gram/g_43_ej3.mp3",
+     "audio_lento": "aud/gram/g_43_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_43_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I'm embarrassed, I'm having a baby.",
+    "bien": "I'm pregnant.",
+    "por_que": "'Embarrassed' es apenado. Este cambio de significado ha causado más de una escena.",
+    "audio_bien": "aud/gram/g_43_bien.mp3"
+   },
+   "ojo": "Otros: *sensible* = sensato (no sensible), *realize* = darse cuenta, *support* = soportar peso, no aguantar a alguien.",
+   "contraste": null
+  },
+  {
+   "id": "g_66",
+   "bloque": "confusiones",
+   "titulo": "do o make (segunda parte)",
+   "gancho": "Las colocaciones que hay que memorizar",
+   "nivel": 3,
+   "idea": "La regla general no cubre todo. Estas van de memoria porque el idioma las fijó así.",
+   "cuando": "Cuando la regla no basta.",
+   "formula": "make: sense, sure, friends, noise · do: harm, research, business",
+   "ejemplos": [
+    {
+     "en": "That makes sense.",
+     "es": "Eso tiene sentido.",
+     "audio": "aud/gram/g_66_ej1.mp3",
+     "audio_lento": "aud/gram/g_66_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_66_ej1_es.mp3"
+    },
+    {
+     "en": "Make sure you lock it.",
+     "es": "Asegúrate de cerrar.",
+     "audio": "aud/gram/g_66_ej2.mp3",
+     "audio_lento": "aud/gram/g_66_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_66_ej2_es.mp3"
+    },
+    {
+     "en": "It did more harm than good.",
+     "es": "Hizo más mal que bien.",
+     "audio": "aud/gram/g_66_ej3.mp3",
+     "audio_lento": "aud/gram/g_66_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_66_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "It has sense.",
+    "bien": "It makes sense.",
+    "por_que": "'Tener sentido' se dice con 'make'. Es la que más se calca del español.",
+    "audio_bien": "aud/gram/g_66_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_67",
+   "bloque": "confusiones",
+   "titulo": "look, see, watch",
+   "gancho": "Tres formas de mirar",
+   "nivel": 2,
+   "idea": "'See' te pasa, 'look' lo decides, 'watch' lo sostienes en el tiempo.",
+   "cuando": "Todo el tiempo.",
+   "formula": "see (percibir) · look at (dirigir la vista) · watch (seguir algo que se mueve)",
+   "ejemplos": [
+    {
+     "en": "I saw her at the store.",
+     "es": "La vi en la tienda.",
+     "audio": "aud/gram/g_67_ej1.mp3",
+     "audio_lento": "aud/gram/g_67_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_67_ej1_es.mp3"
+    },
+    {
+     "en": "Look at this photo.",
+     "es": "Mira esta foto.",
+     "audio": "aud/gram/g_67_ej2.mp3",
+     "audio_lento": "aud/gram/g_67_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_67_ej2_es.mp3"
+    },
+    {
+     "en": "We watched the game.",
+     "es": "Vimos el partido.",
+     "audio": "aud/gram/g_67_ej3.mp3",
+     "audio_lento": "aud/gram/g_67_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_67_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I'm seeing a movie.",
+    "bien": "I'm watching a movie.",
+    "por_que": "Una película dura y se sigue: es 'watch'.",
+    "audio_bien": "aud/gram/g_67_bien.mp3"
+   },
+   "ojo": "'I see' sola en conversación significa 'ya entiendo', no 'veo'.",
+   "contraste": null
+  },
+  {
+   "id": "g_68",
+   "bloque": "confusiones",
+   "titulo": "listen o hear",
+   "gancho": "Oír sin querer y escuchar a propósito",
+   "nivel": 2,
+   "idea": "'Hear' te llega solo; 'listen' es una decisión. Y 'listen' pide 'to'.",
+   "cuando": "Audio, música, conversación.",
+   "formula": "hear + objeto · listen **to** + objeto",
+   "ejemplos": [
+    {
+     "en": "I hear something.",
+     "es": "Oigo algo.",
+     "audio": "aud/gram/g_68_ej1.mp3",
+     "audio_lento": "aud/gram/g_68_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_68_ej1_es.mp3"
+    },
+    {
+     "en": "Listen to this song.",
+     "es": "Escucha esta canción.",
+     "audio": "aud/gram/g_68_ej2.mp3",
+     "audio_lento": "aud/gram/g_68_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_68_ej2_es.mp3"
+    },
+    {
+     "en": "Did you hear what she said?",
+     "es": "¿Oíste lo que dijo?",
+     "audio": "aud/gram/g_68_ej3.mp3",
+     "audio_lento": "aud/gram/g_68_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_68_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Listen this.",
+    "bien": "Listen to this.",
+    "por_que": "'Listen' siempre lleva 'to' antes del objeto. Sin él, la frase queda coja.",
+    "audio_bien": "aud/gram/g_68_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_69",
+   "bloque": "confusiones",
+   "titulo": "borrow o lend",
+   "gancho": "Quién le da qué a quién",
+   "nivel": 3,
+   "idea": "'Borrow' es pedir prestado; 'lend' es prestar. El español usa 'prestar' para las dos.",
+   "cuando": "Dinero, cosas, favores.",
+   "formula": "borrow **from** · lend **to**",
+   "ejemplos": [
+    {
+     "en": "Can I borrow your charger?",
+     "es": "¿Me prestas tu cargador?",
+     "audio": "aud/gram/g_69_ej1.mp3",
+     "audio_lento": "aud/gram/g_69_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_69_ej1_es.mp3"
+    },
+    {
+     "en": "I lent him my car.",
+     "es": "Le presté mi carro.",
+     "audio": "aud/gram/g_69_ej2.mp3",
+     "audio_lento": "aud/gram/g_69_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_69_ej2_es.mp3"
+    },
+    {
+     "en": "She borrowed it from Ana.",
+     "es": "Se lo pidió prestado a Ana.",
+     "audio": "aud/gram/g_69_ej3.mp3",
+     "audio_lento": "aud/gram/g_69_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_69_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Can you borrow me ten dollars?",
+    "bien": "Can you lend me ten dollars?",
+    "por_que": "Si TÚ das, es 'lend'. Si TÚ recibes, es 'borrow'.",
+    "audio_bien": "aud/gram/g_69_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_70",
+   "bloque": "confusiones",
+   "titulo": "remember o remind",
+   "gancho": "Acordarse y recordarle a alguien",
+   "nivel": 3,
+   "idea": "'Remember' lo haces tú solo. 'Remind' es alguien haciendo que te acuerdes.",
+   "cuando": "Recordatorios, memoria.",
+   "formula": "remember + algo · remind **someone** to / of",
+   "ejemplos": [
+    {
+     "en": "I don't remember his name.",
+     "es": "No me acuerdo de su nombre.",
+     "audio": "aud/gram/g_70_ej1.mp3",
+     "audio_lento": "aud/gram/g_70_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_70_ej1_es.mp3"
+    },
+    {
+     "en": "Remind me to call her.",
+     "es": "Recuérdame llamarle.",
+     "audio": "aud/gram/g_70_ej2.mp3",
+     "audio_lento": "aud/gram/g_70_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_70_ej2_es.mp3"
+    },
+    {
+     "en": "You remind me of my brother.",
+     "es": "Me recuerdas a mi hermano.",
+     "audio": "aud/gram/g_70_ej3.mp3",
+     "audio_lento": "aud/gram/g_70_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_70_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Remember me to call her.",
+    "bien": "Remind me to call her.",
+    "por_que": "Si hay otra persona haciendo el trabajo de la memoria, es 'remind'.",
+    "audio_bien": "aud/gram/g_70_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_44",
+   "bloque": "estructura",
+   "titulo": "Orden de la frase",
+   "gancho": "La regla que el inglés no perdona",
+   "nivel": 1,
+   "idea": "Sujeto, verbo, objeto. Casi no se mueve. El español acomoda libre; el inglés no.",
+   "cuando": "Siempre.",
+   "formula": "Sujeto + Verbo + Objeto + (cómo) + (dónde) + (cuándo)",
+   "ejemplos": [
+    {
+     "en": "I saw her yesterday.",
+     "es": "La vi ayer.",
+     "audio": "aud/gram/g_44_ej1.mp3",
+     "audio_lento": "aud/gram/g_44_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_44_ej1_es.mp3"
+    },
+    {
+     "en": "She speaks English very well.",
+     "es": "Habla muy bien inglés.",
+     "audio": "aud/gram/g_44_ej2.mp3",
+     "audio_lento": "aud/gram/g_44_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_44_ej2_es.mp3"
+    },
+    {
+     "en": "We ate quietly at home last night.",
+     "es": "Cenamos tranquilos en casa anoche.",
+     "audio": "aud/gram/g_44_ej3.mp3",
+     "audio_lento": "aud/gram/g_44_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_44_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "Yesterday saw I her.",
+    "bien": "I saw her yesterday.",
+    "por_que": "Invertir sujeto y verbo solo pasa en preguntas.",
+    "audio_bien": "aud/gram/g_44_bien.mp3"
+   },
+   "ojo": "El adverbio NO se mete entre verbo y objeto: *She speaks **very well** English* ✗ → *speaks English very well* ✓.",
+   "contraste": null
+  },
+  {
+   "id": "g_45",
+   "bloque": "estructura",
+   "titulo": "Preguntas",
+   "gancho": "Por qué necesitas 'do'",
+   "nivel": 1,
+   "idea": "Sin verbo auxiliar, el inglés mete 'do' para poder preguntar. En español no existe nada así.",
+   "cuando": "Toda pregunta que no tenga be, can, will o have.",
+   "formula": "Do / Does / Did + sujeto + verbo base",
+   "ejemplos": [
+    {
+     "en": "Do you like it?",
+     "es": "¿Te gusta?",
+     "audio": "aud/gram/g_45_ej1.mp3",
+     "audio_lento": "aud/gram/g_45_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_45_ej1_es.mp3"
+    },
+    {
+     "en": "Does she know?",
+     "es": "¿Ella sabe?",
+     "audio": "aud/gram/g_45_ej2.mp3",
+     "audio_lento": "aud/gram/g_45_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_45_ej2_es.mp3"
+    },
+    {
+     "en": "Did they call?",
+     "es": "¿Llamaron?",
+     "audio": "aud/gram/g_45_ej3.mp3",
+     "audio_lento": "aud/gram/g_45_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_45_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "You like it?",
+    "bien": "Do you like it?",
+    "por_que": "Se oye en la calle con entonación, pero en cuanto escribes o hablas con alguien formal, se nota.",
+    "audio_bien": "aud/gram/g_45_bien.mp3"
+   },
+   "ojo": "Con 'be' no hace falta: *Are you ready?*, no 'Do you be ready?'.",
+   "contraste": null
+  },
+  {
+   "id": "g_46",
+   "bloque": "estructura",
+   "titulo": "Doble negación",
+   "gancho": "Por qué 'I don't know nothing' está mal (y se dice)",
+   "nivel": 2,
+   "idea": "En inglés estándar dos negaciones se cancelan. Una sola por frase.",
+   "cuando": "Al negar.",
+   "formula": "don't + **anything** / **anybody** / **ever**",
+   "ejemplos": [
+    {
+     "en": "I don't know anything.",
+     "es": "No sé nada.",
+     "audio": "aud/gram/g_46_ej1.mp3",
+     "audio_lento": "aud/gram/g_46_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_46_ej1_es.mp3"
+    },
+    {
+     "en": "She didn't tell anybody.",
+     "es": "No le dijo a nadie.",
+     "audio": "aud/gram/g_46_ej2.mp3",
+     "audio_lento": "aud/gram/g_46_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_46_ej2_es.mp3"
+    },
+    {
+     "en": "I've never been there.",
+     "es": "Nunca he ido.",
+     "audio": "aud/gram/g_46_ej3.mp3",
+     "audio_lento": "aud/gram/g_46_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_46_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I don't know nothing.",
+    "bien": "I don't know anything.",
+    "por_que": "En español la doble negación es obligatoria. En inglés estándar es error.",
+    "audio_bien": "aud/gram/g_46_bien.mp3"
+   },
+   "ojo": "Ojo: en AAVE y en muchas letras de hip-hop la doble negación es gramatical y correcta dentro de esa variedad. No es un error, es otro sistema. Fuera de ahí, en trabajo o examen, usa 'anything'.",
+   "contraste": null
+  },
+  {
+   "id": "g_47",
+   "bloque": "estructura",
+   "titulo": "Artículos",
+   "gancho": "El, la, un… y cuando no va ninguno",
+   "nivel": 2,
+   "idea": "'The' es para algo identificado. 'A/an' para uno cualquiera. Y con generalidades en plural, no va artículo.",
+   "cuando": "Todo el tiempo.",
+   "formula": "the (concreto) · a/an (uno cualquiera) · ∅ (general en plural)",
+   "ejemplos": [
+    {
+     "en": "I need a pen.",
+     "es": "Necesito una pluma (cualquiera).",
+     "audio": "aud/gram/g_47_ej1.mp3",
+     "audio_lento": "aud/gram/g_47_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_47_ej1_es.mp3"
+    },
+    {
+     "en": "Give me the pen.",
+     "es": "Dame la pluma (esa).",
+     "audio": "aud/gram/g_47_ej2.mp3",
+     "audio_lento": "aud/gram/g_47_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_47_ej2_es.mp3"
+    },
+    {
+     "en": "Dogs are loyal.",
+     "es": "Los perros son leales.",
+     "audio": "aud/gram/g_47_ej3.mp3",
+     "audio_lento": "aud/gram/g_47_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_47_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "The dogs are loyal.",
+    "bien": "Dogs are loyal.",
+    "por_que": "En español el general lleva 'los'. En inglés el general va pelón.",
+    "audio_bien": "aud/gram/g_47_bien.mp3"
+   },
+   "ojo": "'a' antes de sonido consonante, 'an' antes de sonido vocal. Es el SONIDO: *an hour*, *a university*.",
+   "contraste": null
+  },
+  {
+   "id": "g_48",
+   "bloque": "estructura",
+   "titulo": "Adjetivos: orden",
+   "gancho": "Por qué 'a red big car' suena mal",
+   "nivel": 4,
+   "idea": "Los adjetivos en inglés van en un orden fijo que ningún nativo aprendió y todos siguen.",
+   "cuando": "Cuando pones dos o más adjetivos.",
+   "formula": "opinión → tamaño → edad → forma → color → origen → material",
+   "ejemplos": [
+    {
+     "en": "a beautiful little old house",
+     "es": "una casita vieja preciosa",
+     "audio": "aud/gram/g_48_ej1.mp3",
+     "audio_lento": "aud/gram/g_48_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_48_ej1_es.mp3"
+    },
+    {
+     "en": "a big black leather bag",
+     "es": "una bolsa grande negra de piel",
+     "audio": "aud/gram/g_48_ej2.mp3",
+     "audio_lento": "aud/gram/g_48_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_48_ej2_es.mp3"
+    },
+    {
+     "en": "an ugly new plastic chair",
+     "es": "una silla nueva de plástico horrible",
+     "audio": "aud/gram/g_48_ej3.mp3",
+     "audio_lento": "aud/gram/g_48_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_48_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "a red big car",
+    "bien": "a big red car",
+    "por_que": "Tamaño antes que color. Nadie te lo explicó nunca, pero al oírlo al revés suena mal.",
+    "audio_bien": "aud/gram/g_48_bien.mp3"
+   },
+   "ojo": "El adjetivo va ANTES del sustantivo y no cambia en plural: *red cars*, nunca 'reds cars'.",
+   "contraste": null
+  },
+  {
+   "id": "g_49",
+   "bloque": "estructura",
+   "titulo": "Estilo indirecto",
+   "gancho": "Cómo contar lo que alguien dijo",
+   "nivel": 4,
+   "idea": "Al reportar, los tiempos retroceden un paso y cambian los pronombres.",
+   "cuando": "Contar conversaciones.",
+   "formula": "presente → pasado · will → would · can → could",
+   "ejemplos": [
+    {
+     "en": "\"I'm tired\" → He said he was tired.",
+     "es": "Dijo que estaba cansado.",
+     "audio": "aud/gram/g_49_ej1.mp3",
+     "audio_lento": "aud/gram/g_49_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_49_ej1_es.mp3"
+    },
+    {
+     "en": "\"I'll call\" → She said she would call.",
+     "es": "Dijo que llamaría.",
+     "audio": "aud/gram/g_49_ej2.mp3",
+     "audio_lento": "aud/gram/g_49_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_49_ej2_es.mp3"
+    },
+    {
+     "en": "\"Can you help?\" → He asked if I could help.",
+     "es": "Preguntó si podía ayudar.",
+     "audio": "aud/gram/g_49_ej3.mp3",
+     "audio_lento": "aud/gram/g_49_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_49_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "He said he is tired.",
+    "bien": "He said he was tired.",
+    "por_que": "Con 'said' en pasado, lo que sigue retrocede también.",
+    "audio_bien": "aud/gram/g_49_bien.mp3"
+   },
+   "ojo": "En preguntas indirectas el orden vuelve a normal: *He asked **where I was**​*, no 'where was I'.",
+   "contraste": null
+  },
+  {
+   "id": "g_50",
+   "bloque": "estructura",
+   "titulo": "Mezcla de tiempos",
+   "gancho": "Cómo suena una historia de verdad",
+   "nivel": 5,
+   "idea": "Nadie cuenta nada en un solo tiempo. Una anécdota normal mezcla tres o cuatro.",
+   "cuando": "Al narrar cualquier cosa.",
+   "formula": "past continuous (fondo) + past simple (acción) + past perfect (lo previo)",
+   "ejemplos": [
+    {
+     "en": "I was walking home when I ran into Ana.",
+     "es": "Iba caminando a casa cuando me topé a Ana.",
+     "audio": "aud/gram/g_50_ej1.mp3",
+     "audio_lento": "aud/gram/g_50_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_50_ej1_es.mp3"
+    },
+    {
+     "en": "I hadn't seen her since college, so we grabbed a coffee.",
+     "es": "No la veía desde la uni, así que fuimos por un café.",
+     "audio": "aud/gram/g_50_ej2.mp3",
+     "audio_lento": "aud/gram/g_50_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_50_ej2_es.mp3"
+    },
+    {
+     "en": "She's been living in Austin, and she says she'll visit soon.",
+     "es": "Ha estado viviendo en Austin y dice que va a venir pronto.",
+     "audio": "aud/gram/g_50_ej3.mp3",
+     "audio_lento": "aud/gram/g_50_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_50_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I walked home and I saw Ana and I didn't see her since college.",
+    "bien": "I was walking home when I ran into Ana. I hadn't seen her since college.",
+    "por_que": "Todo en past simple suena a lista de hechos, no a historia.",
+    "audio_bien": "aud/gram/g_50_bien.mp3"
+   },
+   "ojo": "Este es el tema donde de verdad se nota si alguien habla inglés o solo lo estudia. Practícalo contando tu día en voz alta.",
+   "contraste": null
+  },
+  {
+   "id": "g_71",
+   "bloque": "estructura",
+   "titulo": "Comparativos",
+   "gancho": "Más que, menos que, tan como",
+   "nivel": 2,
+   "idea": "Corto lleva -er; largo lleva 'more'. La frontera está en las dos sílabas.",
+   "cuando": "Comparar cualquier cosa.",
+   "formula": "corto + **-er than** · largo: **more** + adj + **than**",
+   "ejemplos": [
+    {
+     "en": "This is cheaper than that.",
+     "es": "Esto es más barato que eso.",
+     "audio": "aud/gram/g_71_ej1.mp3",
+     "audio_lento": "aud/gram/g_71_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_71_ej1_es.mp3"
+    },
+    {
+     "en": "She's more careful than me.",
+     "es": "Ella es más cuidadosa que yo.",
+     "audio": "aud/gram/g_71_ej2.mp3",
+     "audio_lento": "aud/gram/g_71_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_71_ej2_es.mp3"
+    },
+    {
+     "en": "It's as good as the original.",
+     "es": "Es tan bueno como el original.",
+     "audio": "aud/gram/g_71_ej3.mp3",
+     "audio_lento": "aud/gram/g_71_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_71_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "This is more cheap than that.",
+    "bien": "This is cheaper than that.",
+    "por_que": "'Cheap' es de una sílaba: lleva -er, no 'more'.",
+    "audio_bien": "aud/gram/g_71_bien.mp3"
+   },
+   "ojo": "Irregulares que hay que saber: good→better, bad→worse, far→further.",
+   "contraste": null
+  },
+  {
+   "id": "g_72",
+   "bloque": "estructura",
+   "titulo": "Superlativos",
+   "gancho": "El más de todos",
+   "nivel": 2,
+   "idea": "Misma frontera que los comparativos, pero con 'the' delante.",
+   "cuando": "Rankings y extremos.",
+   "formula": "**the** + adj**-est** · **the most** + adj",
+   "ejemplos": [
+    {
+     "en": "It's the cheapest option.",
+     "es": "Es la opción más barata.",
+     "audio": "aud/gram/g_72_ej1.mp3",
+     "audio_lento": "aud/gram/g_72_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_72_ej1_es.mp3"
+    },
+    {
+     "en": "She's the most talented one here.",
+     "es": "Es la más talentosa de aquí.",
+     "audio": "aud/gram/g_72_ej2.mp3",
+     "audio_lento": "aud/gram/g_72_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_72_ej2_es.mp3"
+    },
+    {
+     "en": "That was the best day.",
+     "es": "Ese fue el mejor día.",
+     "audio": "aud/gram/g_72_ej3.mp3",
+     "audio_lento": "aud/gram/g_72_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_72_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "It's cheapest option.",
+    "bien": "It's the cheapest option.",
+    "por_que": "El superlativo SIEMPRE lleva 'the'. No es opcional.",
+    "audio_bien": "aud/gram/g_72_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_73",
+   "bloque": "estructura",
+   "titulo": "Gerundio o infinitivo",
+   "gancho": "Cuándo -ing y cuándo to",
+   "nivel": 4,
+   "idea": "Después de un verbo, el segundo verbo cambia de forma según cuál sea el primero. Van de memoria.",
+   "cuando": "Cada vez que encadenes dos verbos.",
+   "formula": "enjoy / avoid / finish + **-ing** · want / need / decide + **to**",
+   "ejemplos": [
+    {
+     "en": "I enjoy cooking.",
+     "es": "Disfruto cocinar.",
+     "audio": "aud/gram/g_73_ej1.mp3",
+     "audio_lento": "aud/gram/g_73_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_73_ej1_es.mp3"
+    },
+    {
+     "en": "I want to leave.",
+     "es": "Quiero irme.",
+     "audio": "aud/gram/g_73_ej2.mp3",
+     "audio_lento": "aud/gram/g_73_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_73_ej2_es.mp3"
+    },
+    {
+     "en": "She avoided answering.",
+     "es": "Evitó contestar.",
+     "audio": "aud/gram/g_73_ej3.mp3",
+     "audio_lento": "aud/gram/g_73_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_73_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I enjoy to cook.",
+    "bien": "I enjoy cooking.",
+    "por_que": "'Enjoy' pide -ing siempre. No hay lógica que lo explique: se memoriza.",
+    "audio_bien": "aud/gram/g_73_bien.mp3"
+   },
+   "ojo": "Algunos aceptan los dos y cambian de significado: *stop **smoking*** (dejar de fumar) vs *stop **to smoke*** (parar para fumar).",
+   "contraste": null
+  },
+  {
+   "id": "g_74",
+   "bloque": "estructura",
+   "titulo": "Pronombres relativos",
+   "gancho": "Who, which, that",
+   "nivel": 4,
+   "idea": "Unen dos frases. 'Who' para personas, 'which' para cosas, 'that' para las dos.",
+   "cuando": "Frases largas, descripciones.",
+   "formula": "who (personas) · which (cosas) · that (ambas, informal)",
+   "ejemplos": [
+    {
+     "en": "The guy who called me…",
+     "es": "El tipo que me llamó…",
+     "audio": "aud/gram/g_74_ej1.mp3",
+     "audio_lento": "aud/gram/g_74_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_74_ej1_es.mp3"
+    },
+    {
+     "en": "The book that I read…",
+     "es": "El libro que leí…",
+     "audio": "aud/gram/g_74_ej2.mp3",
+     "audio_lento": "aud/gram/g_74_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_74_ej2_es.mp3"
+    },
+    {
+     "en": "My car, which is old, still runs.",
+     "es": "Mi carro, que es viejo, todavía anda.",
+     "audio": "aud/gram/g_74_ej3.mp3",
+     "audio_lento": "aud/gram/g_74_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_74_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "The guy which called me.",
+    "bien": "The guy who called me.",
+    "por_que": "'Which' no se usa con personas.",
+    "audio_bien": "aud/gram/g_74_bien.mp3"
+   },
+   "ojo": "En inglés informal el relativo se cae si es objeto: *The book I read* está perfecto.",
+   "contraste": null
+  },
+  {
+   "id": "g_75",
+   "bloque": "estructura",
+   "titulo": "Posesivos y el genitivo",
+   "gancho": "La forma de decir 'de'",
+   "nivel": 1,
+   "idea": "El inglés le pone 's al dueño, al revés que el español.",
+   "cuando": "Pertenencia.",
+   "formula": "dueño + **'s** + cosa · plural: dueños**s'**",
+   "ejemplos": [
+    {
+     "en": "Ana's brother",
+     "es": "el hermano de Ana",
+     "audio": "aud/gram/g_75_ej1.mp3",
+     "audio_lento": "aud/gram/g_75_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_75_ej1_es.mp3"
+    },
+    {
+     "en": "my parents' house",
+     "es": "la casa de mis papás",
+     "audio": "aud/gram/g_75_ej2.mp3",
+     "audio_lento": "aud/gram/g_75_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_75_ej2_es.mp3"
+    },
+    {
+     "en": "the company's decision",
+     "es": "la decisión de la empresa",
+     "audio": "aud/gram/g_75_ej3.mp3",
+     "audio_lento": "aud/gram/g_75_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_75_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "The brother of Ana.",
+    "bien": "Ana's brother.",
+    "por_que": "Con personas se usa 's, no 'of'. El 'of' se reserva para cosas abstractas.",
+    "audio_bien": "aud/gram/g_75_bien.mp3"
+   },
+   "ojo": "Con objetos suele ir al revés: *the door **of the car***, o mejor aún, *the **car door***.",
+   "contraste": null
+  },
+  {
+   "id": "g_51",
+   "bloque": "situaciones",
+   "titulo": "Presentarte",
+   "gancho": "Los primeros treinta segundos",
+   "nivel": 1,
+   "idea": "En inglés te presentas con menos palabras de las que crees. Nombre, qué haces y de dónde eres, y ya.",
+   "cuando": "Trabajo, viaje, conocer gente.",
+   "formula": "I'm + nombre · I work in / as + trabajo · I'm from + lugar",
+   "ejemplos": [
+    {
+     "en": "Hi, I'm Javier. I work in tech.",
+     "es": "Hola, soy Javier. Trabajo en tecnología.",
+     "audio": "aud/gram/g_51_ej1.mp3",
+     "audio_lento": "aud/gram/g_51_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_51_ej1_es.mp3"
+    },
+    {
+     "en": "Nice to meet you.",
+     "es": "Mucho gusto.",
+     "audio": "aud/gram/g_51_ej2.mp3",
+     "audio_lento": "aud/gram/g_51_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_51_ej2_es.mp3"
+    },
+    {
+     "en": "I'm originally from Mexico.",
+     "es": "Soy de México.",
+     "audio": "aud/gram/g_51_ej3.mp3",
+     "audio_lento": "aud/gram/g_51_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_51_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "How are you? — I'm fine, thank you, and you?",
+    "bien": "How's it going? — Pretty good, you?",
+    "por_que": "La respuesta de libro suena a examen de primaria. Nadie contesta así.",
+    "audio_bien": "aud/gram/g_51_bien.mp3"
+   },
+   "ojo": "'Nice to meet you' solo la primera vez. La segunda es 'Good to see you', y confundirlas delata que no te acordabas.",
+   "contraste": null
+  },
+  {
+   "id": "g_52",
+   "bloque": "situaciones",
+   "titulo": "Pedir en un restaurante",
+   "gancho": "Sin sonar mandón ni sonar raro",
+   "nivel": 1,
+   "idea": "En inglés se pide con 'I'll have' o 'Can I get'. El 'I want' de traducción directa suena a niño exigiendo.",
+   "cuando": "Restaurantes, cafés, bares.",
+   "formula": "I'll have… · Can I get… · Could I see…",
+   "ejemplos": [
+    {
+     "en": "I'll have the chicken, please.",
+     "es": "Me da el pollo, por favor.",
+     "audio": "aud/gram/g_52_ej1.mp3",
+     "audio_lento": "aud/gram/g_52_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_52_ej1_es.mp3"
+    },
+    {
+     "en": "Can I get a large coffee?",
+     "es": "¿Me das un café grande?",
+     "audio": "aud/gram/g_52_ej2.mp3",
+     "audio_lento": "aud/gram/g_52_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_52_ej2_es.mp3"
+    },
+    {
+     "en": "Could we get the check?",
+     "es": "¿Nos trae la cuenta?",
+     "audio": "aud/gram/g_52_ej3.mp3",
+     "audio_lento": "aud/gram/g_52_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_52_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I want a coffee.",
+    "bien": "Can I get a coffee?",
+    "por_que": "'I want' es gramaticalmente correcto y socialmente frío. La forma normal es una pregunta.",
+    "audio_bien": "aud/gram/g_52_bien.mp3"
+   },
+   "ojo": "En EE. UU. es 'check'; en Reino Unido, 'bill'. Y la propina en EE. UU. no es opcional: 18–20%.",
+   "contraste": null
+  },
+  {
+   "id": "g_53",
+   "bloque": "situaciones",
+   "titulo": "En el aeropuerto",
+   "gancho": "Las cuatro frases que te van a preguntar",
+   "nivel": 2,
+   "idea": "Migración pregunta siempre lo mismo. Si reconoces las cuatro preguntas, el trámite se acaba.",
+   "cuando": "Migración, aduana, abordar.",
+   "formula": "What's the purpose of your visit? · How long are you staying?",
+   "ejemplos": [
+    {
+     "en": "Business or pleasure? — Pleasure.",
+     "es": "¿Negocios o placer? — Placer.",
+     "audio": "aud/gram/g_53_ej1.mp3",
+     "audio_lento": "aud/gram/g_53_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_53_ej1_es.mp3"
+    },
+    {
+     "en": "Two weeks, then I fly back.",
+     "es": "Dos semanas, luego regreso.",
+     "audio": "aud/gram/g_53_ej2.mp3",
+     "audio_lento": "aud/gram/g_53_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_53_ej2_es.mp3"
+    },
+    {
+     "en": "I'm staying with family.",
+     "es": "Me quedo con familia.",
+     "audio": "aud/gram/g_53_ej3.mp3",
+     "audio_lento": "aud/gram/g_53_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_53_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I come for tourism.",
+    "bien": "I'm here on vacation.",
+    "por_que": "'Tourism' es la palabra del formulario, no de la conversación.",
+    "audio_bien": "aud/gram/g_53_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_54",
+   "bloque": "situaciones",
+   "titulo": "Al teléfono",
+   "gancho": "Donde el inglés cambia de forma",
+   "nivel": 3,
+   "idea": "Por teléfono se usan frases fijas que casi no aparecen en otro contexto.",
+   "cuando": "Llamadas de trabajo o de servicio.",
+   "formula": "This is… · Speaking · Hold on · I'll put you through",
+   "ejemplos": [
+    {
+     "en": "Hi, this is Javier calling about the invoice.",
+     "es": "Hola, habla Javier por lo de la factura.",
+     "audio": "aud/gram/g_54_ej1.mp3",
+     "audio_lento": "aud/gram/g_54_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_54_ej1_es.mp3"
+    },
+    {
+     "en": "Is Ana there? — Speaking.",
+     "es": "¿Está Ana? — Ella habla.",
+     "audio": "aud/gram/g_54_ej2.mp3",
+     "audio_lento": "aud/gram/g_54_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_54_ej2_es.mp3"
+    },
+    {
+     "en": "Can you hear me?",
+     "es": "¿Me escuchas?",
+     "audio": "aud/gram/g_54_ej3.mp3",
+     "audio_lento": "aud/gram/g_54_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_54_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I am Javier.",
+    "bien": "This is Javier.",
+    "por_que": "Al teléfono nunca es 'I am'. Es 'this is', porque no te ven.",
+    "audio_bien": "aud/gram/g_54_bien.mp3"
+   },
+   "ojo": "'Speaking' sola significa 'soy yo'. Es una palabra y resuelve la llamada.",
+   "contraste": null
+  },
+  {
+   "id": "g_55",
+   "bloque": "situaciones",
+   "titulo": "En una junta",
+   "gancho": "Interrumpir sin quedar mal",
+   "nivel": 4,
+   "idea": "El inglés de trabajo tiene fórmulas para entrar a hablar sin pisar a nadie.",
+   "cuando": "Reuniones, llamadas de equipo.",
+   "formula": "Sorry to jump in · Just to build on that · Can I add something?",
+   "ejemplos": [
+    {
+     "en": "Sorry to jump in — quick question.",
+     "es": "Perdón que interrumpa, pregunta rápida.",
+     "audio": "aud/gram/g_55_ej1.mp3",
+     "audio_lento": "aud/gram/g_55_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_55_ej1_es.mp3"
+    },
+    {
+     "en": "Just to build on what Ana said…",
+     "es": "Retomando lo que dijo Ana…",
+     "audio": "aud/gram/g_55_ej2.mp3",
+     "audio_lento": "aud/gram/g_55_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_55_ej2_es.mp3"
+    },
+    {
+     "en": "Can we circle back to that?",
+     "es": "¿Podemos volver a eso luego?",
+     "audio": "aud/gram/g_55_ej3.mp3",
+     "audio_lento": "aud/gram/g_55_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_55_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I want to say something.",
+    "bien": "Can I add something?",
+    "por_que": "Anunciar que vas a hablar suena rígido. Se pide permiso y se habla.",
+    "audio_bien": "aud/gram/g_55_bien.mp3"
+   },
+   "ojo": null,
+   "contraste": null
+  },
+  {
+   "id": "g_56",
+   "bloque": "situaciones",
+   "titulo": "Quedar con alguien",
+   "gancho": "Proponer, mover y cancelar",
+   "nivel": 2,
+   "idea": "Tres momentos, tres fórmulas. Cancelar es el que más se equivoca.",
+   "cuando": "Planes con amigos o compañeros.",
+   "formula": "Are you free… · Does X work for you? · Can we push it to…",
+   "ejemplos": [
+    {
+     "en": "Are you free Thursday?",
+     "es": "¿Tienes libre el jueves?",
+     "audio": "aud/gram/g_56_ej1.mp3",
+     "audio_lento": "aud/gram/g_56_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_56_ej1_es.mp3"
+    },
+    {
+     "en": "Does seven work for you?",
+     "es": "¿Te late a las siete?",
+     "audio": "aud/gram/g_56_ej2.mp3",
+     "audio_lento": "aud/gram/g_56_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_56_ej2_es.mp3"
+    },
+    {
+     "en": "Something came up, can we push it?",
+     "es": "Me surgió algo, ¿lo movemos?",
+     "audio": "aud/gram/g_56_ej3.mp3",
+     "audio_lento": "aud/gram/g_56_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_56_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "I can't go, sorry.",
+    "bien": "Something came up — can we reschedule?",
+    "por_que": "Cancelar sin ofrecer otra fecha se lee como que no te interesa.",
+    "audio_bien": "aud/gram/g_56_bien.mp3"
+   },
+   "ojo": "'Something came up' es la excusa universal y nadie pregunta cuál. Úsala.",
+   "contraste": null
+  },
+  {
+   "id": "g_57",
+   "bloque": "situaciones",
+   "titulo": "Estar en desacuerdo",
+   "gancho": "Decir que no sin pelear",
+   "nivel": 4,
+   "idea": "El inglés suaviza el desacuerdo antes de decirlo. Ir directo se lee como agresión.",
+   "cuando": "Trabajo, discusiones, negociar.",
+   "formula": "I see what you mean, but… · I'm not sure I agree · Fair point, though…",
+   "ejemplos": [
+    {
+     "en": "I see your point, but I'd do it differently.",
+     "es": "Entiendo, pero yo lo haría distinto.",
+     "audio": "aud/gram/g_57_ej1.mp3",
+     "audio_lento": "aud/gram/g_57_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_57_ej1_es.mp3"
+    },
+    {
+     "en": "I'm not sure that's the whole picture.",
+     "es": "No sé si eso sea todo el panorama.",
+     "audio": "aud/gram/g_57_ej2.mp3",
+     "audio_lento": "aud/gram/g_57_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_57_ej2_es.mp3"
+    },
+    {
+     "en": "That's fair, though I'd add one thing.",
+     "es": "Es justo, aunque yo añadiría algo.",
+     "audio": "aud/gram/g_57_ej3.mp3",
+     "audio_lento": "aud/gram/g_57_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_57_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "No, you're wrong.",
+    "bien": "I'm not sure I agree with that.",
+    "por_que": "'You're wrong' cierra la conversación. En inglés el desacuerdo se abre, no se cierra.",
+    "audio_bien": "aud/gram/g_57_bien.mp3"
+   },
+   "ojo": "Ojo: entre amigos cercanos sí se dice directo. La suavidad es para contextos formales o con desconocidos.",
+   "contraste": null
+  },
+  {
+   "id": "g_58",
+   "bloque": "situaciones",
+   "titulo": "Small talk",
+   "gancho": "La conversación que no va de nada",
+   "nivel": 2,
+   "idea": "Es un ritual, no un intercambio de información. Se responde corto y se devuelve la pregunta.",
+   "cuando": "Elevadores, salas de espera, antes de una junta.",
+   "formula": "How's it going? · Crazy weather, huh? · Any plans this weekend?",
+   "ejemplos": [
+    {
+     "en": "How's it going? — Not bad, you?",
+     "es": "¿Cómo vas? — Bien, ¿y tú?",
+     "audio": "aud/gram/g_58_ej1.mp3",
+     "audio_lento": "aud/gram/g_58_ej1_lento.mp3",
+     "audio_es": "aud/gram/g_58_ej1_es.mp3"
+    },
+    {
+     "en": "Long week, huh?",
+     "es": "Semana larga, ¿no?",
+     "audio": "aud/gram/g_58_ej2.mp3",
+     "audio_lento": "aud/gram/g_58_ej2_lento.mp3",
+     "audio_es": "aud/gram/g_58_ej2_es.mp3"
+    },
+    {
+     "en": "Any plans for the weekend?",
+     "es": "¿Planes para el fin?",
+     "audio": "aud/gram/g_58_ej3.mp3",
+     "audio_lento": "aud/gram/g_58_ej3_lento.mp3",
+     "audio_es": "aud/gram/g_58_ej3_es.mp3"
+    }
+   ],
+   "error_tipico": {
+    "mal": "How are you? — I am very tired because yesterday…",
+    "bien": "Pretty good, thanks. You?",
+    "por_que": "Contestar de verdad rompe el ritual. Se responde corto y se devuelve.",
+    "audio_bien": "aud/gram/g_58_bien.mp3"
+   },
+   "ojo": "'How are you?' de un desconocido no es una pregunta. Es un saludo, y la respuesta es otro saludo.",
+   "contraste": null
+  }
+ ]
+}

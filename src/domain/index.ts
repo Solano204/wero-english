@@ -1,0 +1,10 @@
+export * from './sm2';
+export * from './exercise';
+export * from './session';
+export * as colmena from './colmena';
+export * as pares from './pares';
+export * as minimalPairs from './minimalPairs';
+export * as caida from './caida';
+export * as match3 from './match3';
+export * as lectura from './lectura';
+export * as cazala from './cazala';
