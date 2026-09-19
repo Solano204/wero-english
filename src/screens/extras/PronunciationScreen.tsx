@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Badge, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Badge, Card, EmptyState, Header, Icon, Screen, type IconName } from '@/components/base';
 import { AudioButton, SceneImage } from '@/components/card';
 import { isBundled } from '@/assets/bundled';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -140,7 +140,7 @@ export function PronunciationScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Sonidos" />
         <EmptyState
-          emoji="🔤"
+          icon="warning"
           title="Falta el contenido"
           body="Pega fonemas.json en assets/data y recarga la app."
         />
@@ -179,7 +179,7 @@ export function PronunciationScreen() {
 
       {fonemas.length === 0 ? (
         <EmptyState
-          emoji="🇪🇸"
+          icon="info"
           title="Estos sonidos ya existen en español"
           body="Por eso no salen en 'Los difíciles'. Puedes verlos igual."
           actionLabel="Ver todos"
@@ -254,12 +254,13 @@ function FonemaCard({
               vuelva a tocar. Antes hacía falta este Y el chip de
               "Repetir" aparte para oírlo más de una vez. */}
           <Chip
-            label={repitiendo ? '⏹ Repitiendo…' : '🔊 Solo el sonido'}
+            icon={repitiendo ? 'stop' : 'volume'}
+            label={repitiendo ? 'Repitiendo…' : 'Solo el sonido'}
             active={repitiendo}
             onPress={onToggleRepetir}
           />
           {hayLento ? (
-            <AudioButton path={fonema.audio_lento} size="md" slow label="🐢 Lento" />
+            <AudioButton path={fonema.audio_lento} size="md" slow />
           ) : null}
         </View>
       ) : (
@@ -343,10 +344,12 @@ function Section({ title, body }: { title: string; body: string }) {
 
 function Chip({
   label,
+  icon,
   active,
   onPress,
 }: {
   label: string;
+  icon?: IconName;
   active: boolean;
   onPress: () => void;
 }) {
@@ -356,6 +359,7 @@ function Chip({
       style={[styles.chip, active && styles.chipOn]}
       accessibilityRole="button"
     >
+      {icon ? <Icon name={icon} size="sm" color={active ? color.accent : color.textMuted} /> : null}
       <Text style={[styles.chipText, active && styles.chipTextOn]}>{label}</Text>
     </Pressable>
   );
@@ -370,6 +374,9 @@ function difTint(d: 1 | 2 | 3): string {
 const styles = StyleSheet.create({
   chips: { gap: space.xs, paddingVertical: space.sm, paddingRight: space.lg },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
     paddingHorizontal: space.md,
     paddingVertical: space.sm,
     borderRadius: radius.pill,

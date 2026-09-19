@@ -189,7 +189,7 @@ export function EarModeScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Modo oído" />
         <EmptyState
-          emoji="🎧"
+          icon="volume-off"
           title="Sin audio todavía"
           body="Este modo usa frases que ya estudiaste y que tengan audio descargado."
           actionLabel="Ir a estudiar"

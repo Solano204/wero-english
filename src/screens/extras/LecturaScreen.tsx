@@ -253,9 +253,11 @@ export function LecturaScreen() {
           <Button
             label={
               cap + 1 < lectura.capitulos.length
-                ? `Capítulo ${cap + 2}  →`
-                : 'Tres preguntas  →'
+                ? `Capítulo ${cap + 2}`
+                : 'Tres preguntas'
             }
+            icon="arrow-right"
+            iconAlFinal
             onPress={siguiente}
             full
             size="lg"

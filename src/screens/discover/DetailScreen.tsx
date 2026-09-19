@@ -67,7 +67,8 @@ export function DetailScreen() {
         onBack={() => nav.goBack()}
         right={
           <Button
-            label={fav ? '★' : '☆'}
+            icon={fav ? 'star-filled' : 'star'}
+            accessibilityLabel={fav ? 'Quitar de mi mazo' : 'Guardar en mi mazo'}
             variant="ghost"
             onPress={alternar}
           />

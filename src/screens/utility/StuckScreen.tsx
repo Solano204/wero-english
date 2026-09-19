@@ -36,7 +36,7 @@ export function StuckScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Se me atoran" />
         <EmptyState
-          emoji="👌"
+          icon="check"
           title="Ninguna por ahora"
           body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma."
         />

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Card, Header, Screen } from '@/components/base';
+import { Card, Header, Icon, Screen } from '@/components/base';
 import { CandadoBadge } from '@/components/unlock';
 import { SectionTitle } from '@/components/list';
 import { loadContent } from '@/store/content';
@@ -71,9 +71,10 @@ export function GramaticaScreen() {
             >
               <View style={styles.bloqueTop}>
                 <Text style={styles.bloqueNombre}>{bloque.nombre}</Text>
-                <Text style={styles.bloqueNum}>
-                  {temas.length} {desplegado ? '▾' : '▸'}
-                </Text>
+                <View style={styles.bloqueNumFila}>
+                  <Text style={styles.bloqueNum}>{temas.length}</Text>
+                  <Icon name={desplegado ? 'chevron-down' : 'chevron-right'} size="sm" color={color.accent} />
+                </View>
               </View>
               <Text style={styles.bloqueResumen}>{bloque.resumen}</Text>
             </Card>
@@ -134,6 +135,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family.heading,
     color: color.text,
   },
+  bloqueNumFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   bloqueNum: { fontSize: font.size.sm, color: color.accent, fontFamily: font.family.bodyStrong },
   bloqueResumen: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted, lineHeight: font.size.sm * 1.5 },
   /*

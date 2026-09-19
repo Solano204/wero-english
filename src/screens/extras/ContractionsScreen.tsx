@@ -66,7 +66,7 @@ export function ContractionsScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Cómo suena" />
         <EmptyState
-          emoji="🗣"
+          icon="warning"
           title="Falta el contenido"
           body="Pega contracciones.json en assets/data y recarga la app."
         />

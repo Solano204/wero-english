@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { color, font, layout, motionSpring, radius, space } from '@/theme';
+import { Icon } from '@/components/base/Icon';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import * as media from '@/services/media';
@@ -44,6 +45,8 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
   // tiene que reactivar el botón en el siguiente render.
   const sinAudio = !hayAudio(path);
   const apagado = missing || sinAudio;
+  // El reloj de arena solo no dice "lento": en slow el texto siempre se ve.
+  const etiqueta = slow ? (label ?? 'Lento') : label;
   const pulse = useSharedValue(1);
   const reducido = useMovimientoReducido();
 
@@ -87,10 +90,8 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
           style,
         ]}
       >
-        <Text style={[styles.icon, apagado && styles.iconMissing]}>
-          {slow ? '𝄽' : '►'}
-        </Text>
-        {label ? <Text style={styles.label}>{label}</Text> : null}
+        <Icon name={slow ? 'slow' : 'play'} size={size} color={apagado ? color.textFaint : color.accent} />
+        {etiqueta ? <Text style={styles.label}>{etiqueta}</Text> : null}
       </Animated.View>
     </Pressable>
   );
@@ -121,8 +122,6 @@ const styles = StyleSheet.create({
   },
   missing: { backgroundColor: color.surfaceHigh },
   sinAudio: { opacity: 0.4 },
-  icon: { color: color.accent, fontFamily: font.family.body, fontSize: font.size.md, marginTop: -1 },
-  iconMissing: { color: color.textFaint },
   label: {
     color: color.accent,
     fontSize: font.size.sm,

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -8,7 +8,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { color, font } from '@/theme';
+import { Icon } from '@/components/base';
+import { color } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const N = 9;
@@ -69,7 +70,7 @@ function Chispa({ i }: { i: number }) {
 
   return (
     <Animated.View style={[styles.chispa, anim]}>
-      <Text style={[styles.glifo, { color: TINTS[i % TINTS.length] }]}>★</Text>
+      <Icon name="star-filled" size="md" color={TINTS[i % TINTS.length] ?? color.accent} />
     </Animated.View>
   );
 }
@@ -82,5 +83,4 @@ const styles = StyleSheet.create({
     marginLeft: -10,
     marginTop: -10,
   },
-  glifo: { fontSize: 20, fontFamily: font.family.display },
 });

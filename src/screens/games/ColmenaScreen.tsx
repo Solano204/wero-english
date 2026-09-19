@@ -14,6 +14,7 @@ import {
   Button,
   EmptyState,
   Header,
+  Icon,
   ProgressBar,
   RoundTimer,
   Screen,
@@ -312,7 +313,7 @@ export function ColmenaScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Colmena" />
         <EmptyState
-          emoji="◆"
+          icon="warning"
           title="No se pudo armar el tablero"
           body="No hay frases que quepan en la cuadrícula con los filtros que traes puestos. Prueba quitando el modo limpio o subiendo el nivel en Ajustes."
           actionLabel="Volver"
@@ -341,7 +342,7 @@ export function ColmenaScreen() {
         <View style={styles.pie}>
           {resuelta ? (
             <Button
-              label={idx + 1 >= rounds.length ? '✓' : '→'}
+              icon={idx + 1 >= rounds.length ? 'check' : 'arrow-right'}
               accessibilityLabel={
                 idx + 1 >= rounds.length ? 'Terminar' : 'Siguiente'
               }
@@ -353,14 +354,16 @@ export function ColmenaScreen() {
           ) : (
             <View style={styles.pieRow}>
               <Button
-                label={`💡 Pista ${pistas}`}
+                icon="hint"
+                label={`Pista ${pistas}`}
                 variant="secondary"
                 onPress={usarPista}
                 disabled={!puedePista}
                 style={styles.grow}
               />
               <Button
-                label="🤔 No me sale"
+                icon="reveal"
+                label="No me sale"
                 variant="ghost"
                 onPress={rendirse}
                 style={styles.grow}
@@ -428,14 +431,21 @@ export function ColmenaScreen() {
               pressed && escuchas > 0 && !sonandoEscuchar && styles.escucharPress,
             ]}
           >
-            <Text
-              style={[
-                styles.escucharTexto,
-                (escuchas <= 0 || sonandoEscuchar) && styles.escucharTextoApagado,
-              ]}
-            >
-              🔊 {escuchas}
-            </Text>
+            <View style={styles.escucharFila}>
+              <Icon
+                name="volume"
+                size="md"
+                color={escuchas <= 0 || sonandoEscuchar ? color.textFaint : color.accent}
+              />
+              <Text
+                style={[
+                  styles.escucharTexto,
+                  (escuchas <= 0 || sonandoEscuchar) && styles.escucharTextoApagado,
+                ]}
+              >
+                {escuchas}
+              </Text>
+            </View>
           </Pressable>
         ) : null}
 
@@ -531,6 +541,7 @@ const styles = StyleSheet.create({
   },
   escucharApagado: { backgroundColor: color.surfaceHigh },
   escucharPress: { opacity: 0.75 },
+  escucharFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   escucharTexto: {
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,

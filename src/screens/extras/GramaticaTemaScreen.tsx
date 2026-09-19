@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Button, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { MuroDesbloqueo } from '@/components/unlock';
 import { loadContent } from '@/store/content';
@@ -166,7 +166,8 @@ export function GramaticaTemaScreen() {
 
       <Bloque titulo="Así se dice" retraso={180}>
         <Button
-          label={reproduciendoTodos ? '■ Detener' : '▶ Escuchar todos los ejemplos'}
+          icon={reproduciendoTodos ? 'stop' : 'play'}
+          label={reproduciendoTodos ? 'Detener' : 'Escuchar todos los ejemplos'}
           onPress={reproduciendoTodos ? detenerTodos : () => void escucharTodos()}
           variant={reproduciendoTodos ? 'secondary' : 'primary'}
           style={styles.escucharTodos}
@@ -211,11 +212,11 @@ export function GramaticaTemaScreen() {
       <Bloque titulo="En qué te vas a equivocar" retraso={260}>
         <Card style={styles.error}>
           <View style={styles.linea}>
-            <Text style={styles.mal}>✕</Text>
+            <Icon name="close" size="md" color={color.wrong} />
             <Text style={styles.malTxt}>{tema.error_tipico.mal}</Text>
           </View>
           <View style={styles.linea}>
-            <Text style={styles.bien}>✓</Text>
+            <Icon name="check" size="md" color={color.correct} />
             <Text style={styles.bienTxt}>{tema.error_tipico.bien}</Text>
           </View>
           <View style={styles.audioRow}>
@@ -353,8 +354,6 @@ const styles = StyleSheet.create({
   },
   error: { gap: space.sm },
   linea: { flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' },
-  mal: { color: color.wrong, fontSize: font.size.md, fontFamily: font.family.bodyStrong },
-  bien: { color: color.correct, fontSize: font.size.md, fontFamily: font.family.bodyStrong },
   malTxt: {
     flex: 1,
     fontFamily: font.family.body,

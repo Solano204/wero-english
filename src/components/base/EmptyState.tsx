@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button } from './Button';
+import { Icon, type IconName } from './Icon';
 import { color, font, space } from '@/theme';
 
 interface Props {
@@ -8,17 +9,17 @@ interface Props {
   body?: string;
   actionLabel?: string;
   onAction?: () => void;
-  emoji?: string;
+  icon?: IconName;
 }
 
 /**
  * Estado vacío. Nunca se deja una pantalla en blanco: si no hay nada,
  * hay que decir por qué y qué hacer en su lugar.
  */
-export function EmptyState({ title, body, actionLabel, onAction, emoji }: Props) {
+export function EmptyState({ title, body, actionLabel, onAction, icon }: Props) {
   return (
     <View style={styles.wrap}>
-      {emoji ? <Text style={styles.emoji}>{emoji}</Text> : null}
+      {icon ? <Icon name={icon} size="xl" color={color.textMuted} /> : null}
       <Text style={styles.title}>{title}</Text>
       {body ? <Text style={styles.body}>{body}</Text> : null}
       {actionLabel && onAction ? (
@@ -36,7 +37,6 @@ const styles = StyleSheet.create({
     padding: space.xl,
     gap: space.md,
   },
-  emoji: { fontFamily: font.family.body, fontSize: 44 },
   title: {
     fontSize: font.size.lg,
     fontFamily: font.family.heading,

@@ -7,7 +7,7 @@ import Animated, {
   LinearTransition,
   ZoomIn,
 } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, ProgressBar, Screen } from '@/components/base';
+import { Button, Card, EmptyState, Header, Icon, ProgressBar, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { Estrellas, Trozos, useReaccion } from '@/components/feedback';
 import {
@@ -558,7 +558,8 @@ export function DulcesScreen() {
                   pressed && !avanzando && styles.seguirPress,
                 ]}
               >
-                <Text style={styles.seguirTexto}>Seguir ›</Text>
+                <Text style={styles.seguirTexto}>Seguir</Text>
+                <Icon name="chevron-right" size="sm" color={color.textFaint} />
               </Pressable>
             ) : (
               <AudioButton
@@ -767,7 +768,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.wrongSoft,
   },
   opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
-  seguir: { alignSelf: 'center', marginTop: space.sm, padding: space.sm },
+  seguir: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'center', marginTop: space.sm, padding: space.sm },
   seguirPress: { opacity: 0.6 },
   seguirTexto: {
     fontSize: font.size.sm,

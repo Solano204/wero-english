@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { Chevron } from '@/components/base';
+import { Icon } from '@/components/base';
 import { color, font, layout, space } from '@/theme';
 
 interface Props {
@@ -26,7 +26,7 @@ export function FilaModo({ titulo, dato, primera, onPress }: Props) {
           {dato}
         </Text>
       ) : null}
-      <Chevron direccion="derecha" color={color.textFaint} />
+      <Icon name="chevron-right" size="md" color={color.textFaint} />
     </Pressable>
   );
 }

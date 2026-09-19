@@ -2,7 +2,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Header, Screen, pedirRecompensa } from '@/components/base';
+import { Card, Header, Icon, Screen, pedirRecompensa } from '@/components/base';
+import { FilaEstrellas } from '@/components/card';
 import {
   abrirConAnuncio,
   getNiveles,
@@ -192,13 +193,18 @@ export function NivelesScreen() {
                       >
                         {nv.n}
                       </Text>
-                      <Text style={styles.estrellas}>
-                        {abierto
-                          ? estrellitas(est?.estrellas ?? 0)
-                          : saltable
-                            ? '▶ anuncio'
-                            : '·'}
-                      </Text>
+                      <View style={styles.estrellas}>
+                        {abierto ? (
+                          <FilaEstrellas llenas={est?.estrellas ?? 0} color={color.world.fonetica} />
+                        ) : saltable ? (
+                          <>
+                            <Icon name="play" size="sm" color={color.world.fonetica} />
+                            <Text style={styles.anuncio}>anuncio</Text>
+                          </>
+                        ) : (
+                          <Text style={styles.anuncio}>·</Text>
+                        )}
+                      </View>
                     </Pressable>
                   );
                 })}
@@ -230,11 +236,6 @@ export function NivelesScreen() {
       {contenido}
     </MuroDesbloqueo>
   );
-}
-
-/** Tres posiciones fijas para que la cuadrícula no baile. */
-function estrellitas(n: number): string {
-  return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n);
 }
 
 const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
@@ -284,7 +285,8 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   celdaNumOff: { color: color.textFaint },
-  estrellas: { fontFamily: font.family.body, fontSize: 9, color: color.world.fonetica, marginTop: 1 },
+  estrellas: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: 1 },
+  anuncio: { fontFamily: font.family.body, fontSize: 9, color: color.world.fonetica },
   pie: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

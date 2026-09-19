@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { color, font, radius, space } from '@/theme';
+import { Icon } from '@/components/base';
+import { color, font, radius } from '@/theme';
 
 /**
  * Marca de "esto está cerrado" para las listas.
@@ -11,7 +12,7 @@ import { color, font, radius, space } from '@/theme';
 export function CandadoBadge({ texto = 'Con anuncio' }: { texto?: string }) {
   return (
     <View style={styles.wrap}>
-      <Text style={styles.glifo}>◈</Text>
+      <Icon name="lock" size="sm" color={color.accent} />
       <Text style={styles.txt}>{texto}</Text>
     </View>
   );
@@ -21,13 +22,12 @@ const styles = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 8,
     alignSelf: 'flex-start',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: radius.pill,
     backgroundColor: color.accentSoft,
   },
-  glifo: { color: color.accent, fontFamily: font.family.body, fontSize: font.size.xs },
   txt: { color: color.accent, fontSize: font.size.xs, fontFamily: font.family.bodyStrong },
 });

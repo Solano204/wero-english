@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { color, font, layout, radius, space } from '@/theme';
 import * as ads from '@/services/ads';
+import { Icon } from './Icon';
 
 /**
  * Los tres huecos de publicidad, en un solo archivo.
@@ -75,14 +76,17 @@ export function AdFullScreen({ visible, onClose, segundos = 3 }: FullProps) {
         </Text>
       </View>
 
-      <Text
-        style={[styles.fullCerrar, restan > 0 && styles.fullCerrarOff]}
+      <Pressable
+        style={styles.fullCerrar}
         onPress={restan > 0 ? undefined : onClose}
         accessibilityRole="button"
         accessibilityLabel={restan > 0 ? `Espera ${restan}` : 'Cerrar anuncio'}
       >
-        {restan > 0 ? `Cerrar en ${restan}` : 'Cerrar  ✕'}
-      </Text>
+        <Text style={[styles.fullCerrarTexto, restan > 0 && styles.fullCerrarOff]}>
+          {restan > 0 ? `Cerrar en ${restan}` : 'Cerrar'}
+        </Text>
+        {restan > 0 ? null : <Icon name="close" size="md" color={color.text} />}
+      </Pressable>
     </View>
   );
 }
@@ -183,11 +187,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   fullCerrar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingVertical: space.md,
+    paddingHorizontal: space.xl,
+  },
+  fullCerrarTexto: {
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,
     color: color.text,
-    paddingVertical: space.md,
-    paddingHorizontal: space.xl,
   },
   fullCerrarOff: { color: color.textFaint },
 });

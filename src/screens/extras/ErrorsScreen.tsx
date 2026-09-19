@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Badge, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Badge, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
 import { loadContent } from '@/store/content';
 import { color, font, radius, space } from '@/theme';
 import type { ErrorCategoria } from '@/types';
@@ -37,7 +37,7 @@ export function ErrorsScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Errores" />
         <EmptyState
-          emoji="⚠️"
+          icon="warning"
           title="Falta el contenido"
           body="Pega errores.json en assets/data y recarga la app."
         />
@@ -81,14 +81,14 @@ export function ErrorsScreen() {
             onPress={() => nav.navigate('ErrorDetail', { errorId: e.id })}
           >
             <View style={styles.row}>
-              <Text style={styles.cross}>✕</Text>
+              <Icon name="close" size="md" color={color.riskStrong} />
               <Text style={styles.bad} numberOfLines={2}>
                 {e.lo_que_dices}
               </Text>
             </View>
             <Text style={styles.understood}>{e.lo_que_entienden}</Text>
             <View style={styles.row}>
-              <Text style={styles.check}>✓</Text>
+              <Icon name="check" size="md" color={color.correct} />
               <Text style={styles.good} numberOfLines={2}>
                 {e.lo_correcto}
               </Text>
@@ -126,8 +126,6 @@ const styles = StyleSheet.create({
   list: { gap: space.sm, marginTop: space.sm },
   item: { gap: space.xs },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
-  cross: { color: color.riskStrong, fontFamily: font.family.body, fontSize: font.size.md, marginTop: 1 },
-  check: { color: color.correct, fontFamily: font.family.body, fontSize: font.size.md, marginTop: 1 },
   bad: {
     flex: 1,
     fontSize: font.size.md,

@@ -20,15 +20,13 @@ import {
   space,
 } from '@/theme';
 import * as haptics from '@/services/haptics';
+import { Icon, type IconName } from './Icon';
 import { useMovimientoReducido } from '@/utils';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'md' | 'lg';
 
-interface Props {
-  label: string;
-  /** Para botones cuyo texto es un símbolo, como la flecha de seguir. */
-  accessibilityLabel?: string;
+interface BaseProps {
   /** Para cuando el efecto de tocar no es obvio por el label. */
   accessibilityHint?: string;
   onPress: () => void;
@@ -37,9 +35,19 @@ interface Props {
   disabled?: boolean;
   loading?: boolean;
   full?: boolean;
-  icon?: React.ReactNode;
+  /** Va antes del texto, con gap 8 y centrado. 20 px en `md`, 24 en `lg`. */
+  icon?: IconName;
+  /** Pone el ícono después del texto (las flechas de "seguir"). */
+  iconAlFinal?: boolean;
   style?: ViewStyle;
 }
+
+/** Un botón solo con ícono no tiene texto que leer: su etiqueta es obligatoria. */
+type Props = BaseProps &
+  (
+    | { label: string; accessibilityLabel?: string }
+    | { label?: undefined; icon: IconName; accessibilityLabel: string }
+  );
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -61,6 +69,7 @@ export function Button({
   loading = false,
   full = false,
   icon,
+  iconAlFinal = false,
   style,
 }: Props) {
   const scale = useSharedValue(1);
@@ -110,17 +119,24 @@ export function Button({
         <ActivityIndicator color={textColor[variant]} size="small" />
       ) : (
         <View style={styles.row}>
-          {icon ? <View style={styles.icon}>{icon}</View> : null}
-          <Text
-            style={[
-              styles.label,
-              { color: textColor[variant] },
-              size === 'lg' && styles.labelLg,
-            ]}
-            numberOfLines={1}
-          >
-            {label}
-          </Text>
+          {icon && !iconAlFinal ? (
+            <Icon name={icon} size={size === 'lg' ? 'lg' : 'md'} color={textColor[variant]} />
+          ) : null}
+          {label ? (
+            <Text
+              style={[
+                styles.label,
+                { color: textColor[variant] },
+                size === 'lg' && styles.labelLg,
+              ]}
+              numberOfLines={1}
+            >
+              {label}
+            </Text>
+          ) : null}
+          {icon && iconAlFinal ? (
+            <Icon name={icon} size={size === 'lg' ? 'lg' : 'md'} color={textColor[variant]} />
+          ) : null}
         </View>
       )}
     </AnimatedPressable>
@@ -173,7 +189,6 @@ const styles = StyleSheet.create({
   full: { alignSelf: 'stretch' },
   blocked: { opacity: 0.45 },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  icon: { marginRight: 2 },
   label: {
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,

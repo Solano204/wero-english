@@ -137,7 +137,7 @@ export function CazalaScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Cázala" />
         <EmptyState
-          emoji="👂"
+          icon="warning"
           title="Falta el contenido"
           body="Pega contracciones.json en assets/data y recarga la app."
         />
@@ -200,7 +200,7 @@ export function CazalaScreen() {
             <AudioButton path={item.audio_es} size="sm" />
           </View>
           <Button
-            label="→"
+            icon="arrow-right"
             accessibilityLabel="Siguiente"
             onPress={siguiente}
             full

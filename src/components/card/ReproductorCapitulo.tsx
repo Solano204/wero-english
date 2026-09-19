@@ -120,15 +120,17 @@ export function ReproductorCapitulo({ path }: Props) {
         {activo ? (
           <>
             <Button
-              label={estado === 'sonando' ? '❚❚ Pausar' : '▶ Reanudar'}
+              icon={estado === 'sonando' ? 'pause' : 'play'}
+              label={estado === 'sonando' ? 'Pausar' : 'Reanudar'}
               onPress={estado === 'sonando' ? pausar : reanudar}
               variant="secondary"
             />
-            <Button label="■ Detener" onPress={detener} variant="ghost" />
+            <Button icon="stop" label="Detener" onPress={detener} variant="ghost" />
           </>
         ) : (
           <Button
-            label={estado === 'cargando' ? 'Cargando…' : '▶ Escuchar el capítulo'}
+            icon={estado === 'cargando' ? undefined : 'play'}
+            label={estado === 'cargando' ? 'Cargando…' : 'Escuchar el capítulo'}
             onPress={() => void escuchar()}
             variant="secondary"
             disabled={apagado || estado === 'cargando'}

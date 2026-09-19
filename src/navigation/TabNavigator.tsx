@@ -13,7 +13,7 @@ import { ExploreScreen } from '@/screens/discover';
 import { PracticeScreen } from '@/screens/extras';
 import { ProgressScreen } from '@/screens/utility';
 import { color, duration, filoLuz, font, radius, shadow, sol, space } from '@/theme';
-import { AdBar } from '@/components/base';
+import { AdBar, Icon, type IconName } from '@/components/base';
 import { useMovimientoReducido } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { MainTabParams } from './routes';
@@ -27,14 +27,13 @@ const Tab = createBottomTabNavigator<MainTabParams>();
  * no le quedaba trabajo propio: su tarjeta de sesión vive ahora en
  * Practicar, arriba de todo, que es donde la gente la busca.
  *
- * Los iconos son glifos de texto en vez de una librería de iconos:
- * lucide o vector-icons agregan unos 400 KB al bundle por cuatro
- * símbolos. Si más adelante se necesita un set completo, se cambia.
+ * Los íconos salen de `Icon`, el mismo set de toda la app. La pestaña
+ * activa cambia de color (acento), no de ícono.
  */
-const GLYPH: Record<keyof MainTabParams, string> = {
-  Explore: '◎',
-  Practice: '◈',
-  Progress: '▲',
+const ICONO: Record<keyof MainTabParams, IconName> = {
+  Explore: 'explore',
+  Practice: 'practice',
+  Progress: 'progress',
 };
 
 /**
@@ -47,7 +46,7 @@ const GLYPH: Record<keyof MainTabParams, string> = {
  * La animación corre en el hilo de UI con reanimated, igual que la del
  * botón, para que no se trabe mientras la pantalla nueva está montando.
  */
-function Icono({ glifo, activo, tint }: { glifo: string; activo: boolean; tint: string }) {
+function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; tint: string }) {
   const v = useSharedValue(activo ? 1 : 0);
   const reducido = useMovimientoReducido();
 
@@ -70,9 +69,9 @@ function Icono({ glifo, activo, tint }: { glifo: string; activo: boolean; tint: 
   return (
     <View style={styles.icon}>
       <Animated.View style={[styles.pastilla, pastilla]} />
-      <Animated.Text style={[styles.glyph, { color: tint }, simbolo]}>
-        {glifo}
-      </Animated.Text>
+      <Animated.View style={simbolo}>
+        <Icon name={nombre} size="lg" color={tint} />
+      </Animated.View>
     </View>
   );
 }
@@ -127,7 +126,7 @@ export function TabNavigator() {
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: styles.item,
         tabBarIcon: ({ color: tint, focused }) => (
-          <Icono glifo={GLYPH[route.name]} activo={focused} tint={tint} />
+          <Icono nombre={ICONO[route.name]} activo={focused} tint={tint} />
         ),
       })}
     >
@@ -198,5 +197,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.accentBorde,
   },
-  glyph: { fontFamily: font.family.body, fontSize: 17 },
 });

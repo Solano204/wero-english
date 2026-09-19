@@ -12,7 +12,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, EmptyState, Header, Screen } from '@/components/base';
+import { Button, EmptyState, Header, Icon, Screen } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
@@ -380,7 +380,7 @@ export function CaidaScreen() {
           // pantalla en un equipo chico.
           <View style={styles.finBotones}>
             <Button
-              label="↻"
+              icon="repeat"
               accessibilityLabel="Otra partida"
               onPress={() => {
                 setIdx(0);
@@ -491,7 +491,8 @@ export function CaidaScreen() {
                 pressed && !avanzando && styles.siguientePress,
               ]}
             >
-              <Text style={styles.siguienteTexto}>Siguiente ›</Text>
+              <Text style={styles.siguienteTexto}>Siguiente</Text>
+              <Icon name="chevron-right" size="sm" color={color.textFaint} />
             </Pressable>
           </Animated.View>
         </View>
@@ -653,7 +654,7 @@ const styles = StyleSheet.create({
     color: color.textMuted,
     textAlign: 'center',
   },
-  siguiente: { marginTop: space.sm, padding: space.sm },
+  siguiente: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm, padding: space.sm },
   siguientePress: { opacity: 0.6 },
   siguienteTexto: {
     fontSize: font.size.sm,

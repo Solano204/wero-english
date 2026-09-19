@@ -17,7 +17,7 @@ export function Header({ title, subtitle, onBack, onClose, right }: Props) {
       <View style={styles.side}>
         {onBack ? (
           <IconButton
-            simbolo="←"
+            icono="back"
             etiqueta="Atrás"
             tamano="sm"
             onPress={onBack}
@@ -42,7 +42,7 @@ export function Header({ title, subtitle, onBack, onClose, right }: Props) {
         {right ??
           (onClose ? (
             <IconButton
-              simbolo="✕"
+              icono="close"
               etiqueta="Salir"
               tamano="sm"
               onPress={onClose}

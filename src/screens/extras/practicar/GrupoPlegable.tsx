@@ -1,7 +1,7 @@
 import React, { useEffect, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Chevron } from '@/components/base';
+import { Icon } from '@/components/base';
 import { color, font, layout, motionEasing, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
@@ -47,7 +47,7 @@ export function GrupoPlegable({ titulo, total, abierto, onAlternar, children }: 
         style={styles.cabecera}
       >
         <Text style={styles.titulo}>{`${titulo} · ${total}`}</Text>
-        <Chevron direccion={abierto ? 'arriba' : 'abajo'} color={color.textMuted} />
+        <Icon name={abierto ? 'chevron-up' : 'chevron-down'} size="md" color={color.textMuted} />
       </Pressable>
 
       <Animated.View

@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AudioButton } from '@/components/card';
-import { RiskBadge } from '@/components/base';
+import { Icon, RiskBadge } from '@/components/base';
 import { color, font, motionDuration, radius, space } from '@/theme';
 import type { Entry } from '@/types';
 
@@ -44,7 +44,7 @@ function ContenidoMazo({
           <Text style={styles.phrase} numberOfLines={2}>
             {entry.phrase}
           </Text>
-          {dominada ? <Text style={styles.check}>✓</Text> : null}
+          {dominada ? <Icon name="check" size="md" color={color.correct} /> : null}
         </View>
         <Text style={styles.spanish} numberOfLines={2}>
           {entry.spanish_main}
@@ -65,7 +65,10 @@ function ContenidoMazo({
         {entry.audio_es ? (
           <AudioButton path={entry.audio_es} size="sm" label="Español" />
         ) : null}
-        <Text style={styles.ver}>Ver ›</Text>
+        <View style={styles.ver}>
+          <Text style={styles.verTexto}>Ver</Text>
+          <Icon name="chevron-right" size="sm" color={color.textMuted} />
+        </View>
       </View>
     </>
   );
@@ -110,7 +113,7 @@ export const EntryRow = memo(function EntryRow({
               <Text style={styles.phrase} numberOfLines={2}>
                 {entry.phrase}
               </Text>
-              {dominada ? <Text style={styles.check}>✓</Text> : null}
+              {dominada ? <Icon name="check" size="md" color={color.correct} /> : null}
             </View>
             <Text style={styles.spanish} numberOfLines={2}>
               {entry.spanish_main}
@@ -154,7 +157,8 @@ const styles = StyleSheet.create({
   bodyMazo: { gap: 3 },
   separador: { height: StyleSheet.hairlineWidth, backgroundColor: color.border },
   acciones: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  ver: { flex: 1, textAlign: 'right', fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  ver: { flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: space.sm },
+  verTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   phrase: {
     flex: 1,
@@ -162,7 +166,6 @@ const styles = StyleSheet.create({
     fontFamily: font.family.bodyStrong,
     color: color.text,
   },
-  check: { color: color.correct, fontFamily: font.family.body, fontSize: font.size.md },
   spanish: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
   badges: { flexDirection: 'row', gap: space.xs, marginTop: 2 },
 });

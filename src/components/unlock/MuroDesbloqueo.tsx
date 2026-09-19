@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Button } from '@/components/base';
+import { Button, Icon } from '@/components/base';
 import { useAuthStore, useUnlockStore } from '@/store';
 import type { TipoDesbloqueo } from '@/db/unlock';
 import { color, filoLuz, font, radius, shadow, sol, space } from '@/theme';
@@ -81,7 +81,7 @@ export function MuroDesbloqueo({
         >
           <View style={styles.caja}>
             <View style={styles.candado}>
-              <Text style={styles.candadoTxt}>◈</Text>
+              <Icon name="lock" size="lg" color={color.accent} />
             </View>
 
             <Text style={styles.titulo}>{nombre}</Text>
@@ -113,7 +113,7 @@ export function MuroDesbloqueo({
 function Punto({ texto }: { texto: string }) {
   return (
     <View style={styles.punto}>
-      <Text style={styles.check}>✓</Text>
+      <Icon name="check" size="sm" color={color.accent} />
       <Text style={styles.puntoTxt}>{texto}</Text>
     </View>
   );
@@ -139,7 +139,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: color.accentSoft,
   },
-  candadoTxt: { fontFamily: font.family.body, fontSize: 24, color: color.accent },
   titulo: {
     fontSize: font.size.xl,
     fontFamily: font.family.display,
@@ -155,6 +154,5 @@ const styles = StyleSheet.create({
   },
   trato: { gap: space.sm, paddingVertical: space.sm },
   punto: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
-  check: { color: color.accent, fontSize: font.size.sm, fontFamily: font.family.bodyStrong },
   puntoTxt: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.text, lineHeight: font.size.sm * 1.5 },
 });

@@ -79,7 +79,7 @@ Todo en `src/theme/tokens.ts`.
 ## 1.3 Tipografía
 
 - **Familias** (`font.family`, `tokens.ts`): **Bricolage Grotesque** para títulos y cifras grandes (`display` 700, `heading` 600), **Instrument Sans** para todo lo demás (`body` 400, `bodyStrong` 600) y **Charis SIL** Regular solo para IPA. `App.tsx` las carga con `useFonts` (`src/theme/fuentes.ts`) y el splash espera. El peso va en la familia: no se usa `fontWeight`.
-- **Tamaños** (`font.size`): `xs 12`, `sm 13`, `md 16`, `lg 18`, `xl 22`, `xxl 28`, `display 34`. Valores sueltos en uso: 44 (inicial y emoji grande), 46 (logo), 64 (marcador final de Caída).
+- **Tamaños** (`font.size`): `xs 12`, `sm 13`, `md 16`, `lg 18`, `xl 22`, `xxl 28`, `display 34`. Valores sueltos en uso: 44 (inicial de portada), 46 (logo), 64 (marcador final de Caída).
 - **Estilos compartidos** (`text.*`):
 
 | Estilo | Tamaño | Familia | Line-height |
@@ -93,7 +93,7 @@ Todo en `src/theme/tokens.ts`.
 | `tiny` | 12 | Instrument 600 | — |
 | `ipa` | 16 | Charis SIL 400 | — (`letterSpacing 0.3`) |
 
-- **`letterSpacing`** en uso: todo texto de 28 px o más lleva −1.5 % de su tamaño (`tamaño * -0.015`); etiquetas en mayúsculas 0.6 a 0.9; etiqueta de `Button` 0.2. Excepciones que no son títulos: emoji, inicial de portada pendiente y fila de ★ (espaciado positivo).
+- **`letterSpacing`** en uso: todo texto de 28 px o más lleva −1.5 % de su tamaño (`tamaño * -0.015`); etiquetas en mayúsculas 0.6 a 0.9; etiqueta de `Button` 0.2. Excepción que no es título: la inicial de portada pendiente.
 
 ## 1.4 Espaciado y medidas
 
@@ -130,20 +130,20 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 |---|---|
 | `Screen` | Fondo `bg` con el degradado `FONDO` y el resplandor del sol. Props `scroll`, `padded`, `footer` (fijo abajo, con borde superior fino y fondo `bgFin`). Ninguna pantalla redefine fondo ni safe area |
 | `Header` | Fila de mínimo 48 dp. Flecha atrás a la izquierda (ancho fijo 56), título `lg` semibold centrado de hasta 2 líneas, subtítulo `sm` muted de 1 línea, lado derecho que crece con su contenido |
-| `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`riskStrong`). Bloqueado: opacidad 0.45. Vibración ligera al tocar |
-| `IconButton` | Círculo `iconoVisual` (36, 44 o 52) dentro de un área táctil `iconoRedondo` (48, 48 o 52), con símbolos de texto. Sin `hitSlop` |
+| `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`riskStrong`). Bloqueado: opacidad 0.45. Vibración ligera al tocar Ícono opcional (`icon`, 20 px en `md` y 24 en `lg`, gap 8, antes del texto o con `iconAlFinal`); un botón solo con ícono exige `accessibilityLabel` |
+| `IconButton` | Círculo `iconoVisual` (36, 44 o 52) dentro de un área táctil `iconoRedondo` (48, 48 o 52), con un `Icon` de 24 px (`icono`). Sin `hitSlop` |
 | `Card` | Filo de luz de 1 px sobre `surface`, radio `lg`, padding `lg`, `gap md`. Props: `accent` (tiñe el borde), `elevated`, `portada` (degradado o imagen con alto reservado), `onLongPress` |
 | `Badge` | Píldora, texto `sm` semibold (`xs` en `small`) |
 | `ProgressBar` | Carril `trackFondo`, relleno `accent` animado con `scaleX`; alto 6 por defecto |
 | `RoundTimer` | Reloj de ronda de los juegos |
 | `OptionButton` | Alto mínimo 56, radio `md`, sin borde, texto `md`. Estados: idle, elegida, correcta, incorrecta, atenuada |
-| `AudioButton` | Píldora `accentSoft` con `►` (o `𝄽` en lento) y etiqueta opcional. Píldora de `sm 34`, `md 44` o `lg 56` de alto dentro de un área táctil de 48 dp como mínimo (`toque`), sin `hitSlop`. Se apaga (opacidad 0.4, deshabilitado) si no hay audio |
+| `AudioButton` | Píldora `accentSoft` con el ícono `play` (o `slow`, que siempre lleva el texto "Lento" a la vista) y etiqueta opcional. Píldora de `sm 34`, `md 44` o `lg 56` de alto dentro de un área táctil de 48 dp como mínimo (`toque`), sin `hitSlop`. Se apaga (opacidad 0.4, deshabilitado) si no hay audio |
 | `EntryRow` | Renglón de frase en dos variantes: `compacta` (una línea) y `mazo` (texto a dos líneas y barra de audios etiquetados) |
 | `FeedbackBand` | Banda de veredicto con filo verde o ámbar |
-| `EmptyState` | Emoji o símbolo, título, cuerpo y botón `primary` opcional |
-| `Chevron` | Chevron de trazo en SVG (`derecha`, `abajo`, `arriba`), para renglones y grupos plegables. Sustituye a `›` |
+| `EmptyState` | Ícono `xl` (32), título, cuerpo y botón `primary` opcional |
+| `Icon` | Única puerta a los íconos: Phosphor en `bold` (`star-filled` con relleno). 25 nombres por función (`play`, `slow`, `volume`, `star`, `check`, `close`, `chevron-right`, `arrow-right`, `back`, `lock`, `warning`, `explore`, `practice`, `progress`…), tamaños `sm 16`, `md 20`, `lg 24`, `xl 32`. Decorativo salvo que lleve `accessibilityLabel`. `slow` nunca va sin el texto "Lento". `check:imports` prohíbe importar Phosphor fuera de `Icon.tsx` |
 | `SectionTitle` | Título `lg` semibold con contador o acción `sm` |
-| Barra de pestañas | Flotante: `left`/`right` `md`, alto 68, radio `lg`, `BlurView` con velo y filo. Tres pestañas: Vocabulario, Practicar (inicial) y Progreso. Etiqueta `xs` semibold; ícono de texto de 17 en una píldora de 54×28 que se enciende con `accentSoft` |
+| Barra de pestañas | Flotante: `left`/`right` `md`, alto 68, radio `lg`, `BlurView` con velo y filo. Tres pestañas: Vocabulario, Practicar (inicial) y Progreso. Etiqueta `xs` semibold; ícono `Icon` de 24 (`explore`, `practice`, `progress`; el activo cambia de color, no de ícono) en una píldora de 54×28 que se enciende con `accentSoft` |
 | Retroalimentación | `Trozos` (cubitos al acertar), `Estrellas`, `Confetti`, `Chispas`, `Toast` |
 
 ## 1.8 Las cinco pantallas más usadas
@@ -152,7 +152,7 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 
 **Estudio.** Arriba, barra de progreso y contador `xs`; debajo, aciertos (`lg` bold en `accent` + `sm` muted) y una racha `xs` semibold. `StudyCardView`: instrucción `xs` en mayúsculas, escenario con la frase en español (`xl`, ×1.35), `AudioButton` grande, opciones (`OptionButton`, alto 56, `gap md`) o un campo de texto (alto 58, radio `md`, borde 1.5), y `FeedbackBand` al responder.
 
-**Pares.** `Header` con "Nivel N" y contador `xs`; reloj; instrucción `sm`. Tablero de dos columnas con fichas de 47.5 % de ancho, alto mínimo 62 y radio `md` (inglés en `surfaceAlt`, español en `surface`; activa con borde `accent`; fallo en ámbar). Al acertar, un velo con tarjeta (inglés `xl` bold, español `md`, "Saltar ›"). Pie con la cuenta de jugadas (`xs`) y un botón (`ghost` mientras hay jugadas, `primary` al terminar).
+**Pares.** `Header` con "Nivel N" y contador `xs`; reloj; instrucción `sm`. Tablero de dos columnas con fichas de 47.5 % de ancho, alto mínimo 62 y radio `md` (inglés en `surfaceAlt`, español en `surface`; activa con borde `accent`; fallo en ámbar). Al acertar, un velo con tarjeta (inglés `xl` bold, español `md`, "Saltar con chevron"). Pie con la cuenta de jugadas (`xs`) y un botón (`ghost` mientras hay jugadas, `primary` al terminar).
 
 **Caída.** Marcador `xl` bold en `accent`, la frase que cae (`xxl` bold centrada), fichas de respuesta de alto mínimo 96, radio `lg`, con borde inferior `depth.sm` y sombra `card`. Una línea de piso de 4 px en `riskStrong`. Pantalla final con el resultado a 64 px en `accent`, una tarjeta de resumen (`correct` y `wrong`) y una nota `xs`.
 

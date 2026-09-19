@@ -132,7 +132,7 @@ export function MinimalPairsScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Di la palabra" />
         <EmptyState
-          emoji="●"
+          icon="mic-off"
           title="Aquí todavía no hay micrófono"
           body={`${estado.razon} Mientras tanto, el laboratorio de sonidos funciona igual: escuchas el modelo y repites en voz alta.`}
           actionLabel="Ir al laboratorio de sonidos"
@@ -147,7 +147,7 @@ export function MinimalPairsScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Di la palabra" />
         <EmptyState
-          emoji="●"
+          icon="warning"
           title="Faltan los pares mínimos"
           body="El archivo fonemas.json no trae pares cargados todavía."
         />
@@ -226,7 +226,7 @@ export function MinimalPairsScreen() {
         />
         {veredicto ? (
           <Button
-            label={idx + 1 >= rounds.length ? '✓' : '→'}
+            icon={idx + 1 >= rounds.length ? 'check' : 'arrow-right'}
             accessibilityLabel={
               idx + 1 >= rounds.length ? 'Terminar' : 'Siguiente'
             }

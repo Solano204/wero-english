@@ -1,14 +1,14 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import { color, font, iconoRedondo, iconoVisual, shadow } from '@/theme';
+import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { color, iconoRedondo, iconoVisual, shadow } from '@/theme';
 import * as haptics from '@/services/haptics';
+import { Icon, type IconName } from './Icon';
 
 type Tamano = keyof typeof iconoRedondo;
 type Tono = 'claro' | 'acento' | 'contraste';
 
 interface Props {
-  /** Un símbolo corto: ←, →, ✕, ▶, ★. No una palabra. */
-  simbolo: string;
+  icono: IconName;
   /** Lo que lee el lector de pantalla. Aquí sí va una frase. */
   etiqueta: string;
   onPress: () => void;
@@ -31,7 +31,7 @@ interface Props {
  * ese es el precio real de esta decisión estética.
  */
 export function IconButton({
-  simbolo,
+  icono,
   etiqueta,
   onPress,
   tamano = 'md',
@@ -70,9 +70,7 @@ export function IconButton({
           tonos[tono],
         ]}
       >
-        <Text style={[styles.simbolo, textos[tono], { fontSize: lado * 0.42 }]}>
-          {simbolo}
-        </Text>
+        <Icon name={icono} size="lg" color={colores[tono]} />
       </View>
     </Pressable>
   );
@@ -84,15 +82,14 @@ const tonos: Record<Tono, ViewStyle> = {
   contraste: { backgroundColor: color.contraste, ...shadow.soft },
 };
 
-const textos = StyleSheet.create({
-  claro: { color: color.text },
-  acento: { color: color.onAccent },
-  contraste: { color: color.onContraste },
-});
+const colores: Record<Tono, string> = {
+  claro: color.text,
+  acento: color.onAccent,
+  contraste: color.onContraste,
+};
 
 const styles = StyleSheet.create({
   centrado: { alignItems: 'center', justifyContent: 'center' },
-  simbolo: { fontFamily: font.family.bodyStrong, lineHeight: undefined },
   apagado: { opacity: 0.4 },
   press: { opacity: 0.7, transform: [{ scale: 0.94 }] },
 });

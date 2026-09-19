@@ -148,8 +148,9 @@ export function FeedbackBand({
             tocar tres veces seguido deja tres audios encimados y el
             usuario oye el primero mientras ve la cuarta frase. */}
         <Button
-          label={esperando ? '…' : '→'}
+          icon="arrow-right"
           accessibilityLabel="Siguiente"
+          loading={esperando}
           disabled={esperando || avanzando}
           onPress={async () => {
             if (esperando || avanzando) return;

@@ -148,7 +148,7 @@ export function StudyScreen() {
       <Screen>
         <Header onClose={() => nav.goBack()} />
         <EmptyState
-          emoji="✓"
+          icon="check"
           title="No se pudo armar la sesión"
           body="Ya repasaste todo lo que tocaba. Vuelve más tarde o prueba una partida de ¿Lo digo o no?"
           actionLabel="Ir al juego"

@@ -246,8 +246,8 @@ export function AzarScreen() {
             {entry.ipa ? <Text style={styles.ipa}>{entry.ipa}</Text> : null}
 
             <View style={styles.filaAudio}>
-              <Button label="🔊 Escuchar" variant="ghost" onPress={tocarEn} />
-              <Button label="🐢 Lento" variant="ghost" onPress={tocarLento} />
+              <Button icon="volume" label="Escuchar" variant="ghost" onPress={tocarEn} />
+              <Button icon="slow" label="Lento" variant="ghost" onPress={tocarLento} />
             </View>
 
             <Text style={[styles.significado, sonando === 'es' && styles.sonando]}>
@@ -256,9 +256,9 @@ export function AzarScreen() {
 
             <View style={styles.filaAudio}>
               {entry.audio_es ? (
-                <Button label="🔊 Escuchar" variant="ghost" onPress={tocarEs} />
+                <Button icon="volume" label="Escuchar" variant="ghost" onPress={tocarEs} />
               ) : null}
-              <Button label="▶ Ambos" variant="ghost" onPress={tocarAmbos} />
+              <Button icon="play" label="Ambos" variant="ghost" onPress={tocarAmbos} />
             </View>
 
             {entry.vulgaridad === 2 ? (
@@ -274,7 +274,7 @@ export function AzarScreen() {
 
       <View style={styles.pie}>
         <Button
-          label="→"
+          icon="arrow-right"
           accessibilityLabel="Otra frase"
           onPress={siguiente}
           disabled={bloqueado}
@@ -282,7 +282,8 @@ export function AzarScreen() {
           full
         />
         <Button
-          label={guardada ? '★ guardada' : '☆ guardar'}
+          icon={guardada ? 'star-filled' : 'star'}
+          label={guardada ? 'guardada' : 'guardar'}
           accessibilityLabel="Guardar en mi mazo"
           variant="ghost"
           onPress={guardar}

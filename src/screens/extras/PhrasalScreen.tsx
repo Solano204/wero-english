@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
-import { Badge, Card, Header, Screen } from '@/components/base';
+import { Badge, Card, Header, Icon, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { loadContent } from '@/store/content';
 import { useSettingsStore } from '@/store';
@@ -67,10 +67,13 @@ export function PhrasalScreen() {
               >
                 <View style={styles.grupoCabeza}>
                   <Text style={styles.verbo}>{g.verbo}</Text>
-                  <Text style={styles.cuantos}>
-                    {g.ids.length}{' '}
-                    {g.ids.length === 1 ? 'forma' : 'formas'} {esta ? '▾' : '▸'}
-                  </Text>
+                  <View style={styles.cuantosFila}>
+                    <Text style={styles.cuantos}>
+                      {g.ids.length}{' '}
+                      {g.ids.length === 1 ? 'forma' : 'formas'}
+                    </Text>
+                    <Icon name={esta ? 'chevron-down' : 'chevron-right'} size="sm" color={color.textFaint} />
+                  </View>
                 </View>
 
                 {esta ? (
@@ -166,6 +169,7 @@ const styles = StyleSheet.create({
     fontFamily: font.family.display,
     color: color.text,
   },
+  cuantosFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   cuantos: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   previa: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   formas: { gap: space.md, marginTop: space.sm },

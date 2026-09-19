@@ -36,7 +36,7 @@ export function DeckScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Mi mazo" />
         <EmptyState
-          emoji="☆"
+          icon="star"
           title="Tu mazo está vacío"
           body="Toca la estrella en cualquier frase para guardarla aquí."
         />

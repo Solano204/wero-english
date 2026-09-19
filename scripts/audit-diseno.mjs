@@ -63,14 +63,13 @@ const TIPO2_SE_QUEDAN = {
   'src/screens/extras/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/utility/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/games/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/components/list/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
 };
 
 /** TIPO-4: estilos de 28 px o más que no son títulos, revisados a mano. */
 const TIPO4_NO_ES_TITULO = {
-  'src/components/base/EmptyState.tsx:emoji': 'es un emoji, no texto',
   'src/components/base/Card.tsx:portadaVacia': 'inicial suelta de una portada pendiente (`textSobrePortada`), no un título',
   'src/components/card/SceneImage.tsx:inicial': 'inicial suelta de una imagen pendiente (`textSobrePortada`), no un título',
-  'src/screens/games/GameEndScreen.tsx:estrellas': 'fila de glifos ★: el espaciado positivo los separa, con negativo se pisarían',
 };
 
 /** Colecciones grandes pintadas con `.map` dentro de un ScrollView, sin virtualizar. Revisado a mano. */
@@ -625,6 +624,7 @@ Archivos que pintan \`<AudioButton>\`: ${c.A.botones.map((b) => `\`${b.r.replace
 
 ## Notas
 
+- Los íconos salen de \`Icon\` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en \`catalogo.json\`, \`gramatica.json\` y \`medios.json\`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
 - \`padding: 1\` (Card, FeedbackBand, MuroDesbloqueo, TabNavigator) es la técnica del filo de luz y no se cuenta en ESP-1.
 - \`impeccable detect src\` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens \`space\` y \`font.size\`, no valores calculados en ejecución.

@@ -7,6 +7,7 @@ import {
   Button,
   EmptyState,
   Header,
+  Icon,
   RoundTimer,
   Screen,
 } from '@/components/base';
@@ -287,7 +288,7 @@ export function ParesScreen() {
       <Screen>
         <Header onBack={() => nav.goBack()} title="Pares" />
         <EmptyState
-          emoji="◈"
+          icon="warning"
           title="No se pudo armar el tablero"
           body="No hay frases cortas suficientes con los filtros que traes puestos."
           actionLabel="Volver"
@@ -388,7 +389,8 @@ export function ParesScreen() {
                 pressed && !saltando && styles.saltarPress,
               ]}
             >
-              <Text style={styles.saltarTexto}>Saltar ›</Text>
+              <Text style={styles.saltarTexto}>Saltar</Text>
+              <Icon name="chevron-right" size="sm" color={color.textFaint} />
             </Pressable>
           </Animated.View>
         </Animated.View>
@@ -448,7 +450,7 @@ const styles = StyleSheet.create({
     color: color.textMuted,
     textAlign: 'center',
   },
-  saltar: { marginTop: space.sm, padding: space.sm },
+  saltar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm, padding: space.sm },
   saltarPress: { opacity: 0.6 },
   saltarTexto: {
     fontSize: font.size.sm,

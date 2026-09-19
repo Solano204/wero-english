@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Header, Screen } from '@/components/base';
+import { Card, Header, Icon, Screen } from '@/components/base';
 import { contentHealth } from '@/store/content';
 import { BUNDLED_COUNT } from '@/assets/bundled';
 import { countEntries } from '@/db/seed';
@@ -41,7 +41,7 @@ export function DiagnosticsScreen() {
       <View style={styles.list}>
         {health.map((h) => (
           <Card key={h.name} style={styles.row}>
-            <Text style={[styles.dot, h.ok ? styles.ok : styles.bad]}>●</Text>
+            <Icon name={h.ok ? 'check' : 'warning'} size="md" color={h.ok ? color.correct : color.riskStrong} />
             <Text style={styles.name}>{h.name}</Text>
             <Text style={styles.count}>{h.count}</Text>
           </Card>
@@ -81,9 +81,6 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingVertical: space.md,
   },
-  dot: { fontFamily: font.family.body, fontSize: font.size.md },
-  ok: { color: color.correct },
-  bad: { color: color.riskStrong },
   name: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.text },
   count: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   summary: { marginTop: space.lg, gap: space.sm },

@@ -4,6 +4,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Card, Header, ProgressBar, Screen } from '@/components/base';
+import { FilaEstrellas } from '@/components/card';
 import { Confetti } from '@/components/feedback';
 import { logGame } from '@/db/economy';
 import { estrellasPara, guardarNivel } from '@/db/levels';
@@ -116,12 +117,15 @@ export function GameEndScreen() {
 
         {umbrales ? (
           <>
-            <Text style={styles.estrellas}>
-              {'★★★'.slice(0, estrellas)}
-              <Text style={styles.estrellasOff}>
-                {'☆☆☆'.slice(0, 3 - estrellas)}
-              </Text>
-            </Text>
+            <View style={styles.estrellas}>
+              <FilaEstrellas
+                llenas={estrellas}
+                size="xl"
+                color={color.world.fonetica}
+                colorVacia={color.border}
+                gap={space.sm}
+              />
+            </View>
             <Text style={styles.estrellasNota}>
               {estrellas === 3
                 ? 'Las tres. No hay más que sacarle.'
@@ -154,7 +158,9 @@ export function GameEndScreen() {
             justo el candado que se quitó del resto del sistema. */}
         {nivel ? (
           <Button
-            label={`Nivel ${nivel + 1}  →`}
+            label={`Nivel ${nivel + 1}`}
+            icon="arrow-right"
+            iconAlFinal
             onPress={() =>
               nav.replace(RUTA_JUEGO[juego] ?? 'Main', {
                 nivel: nivel + 1,
@@ -166,7 +172,7 @@ export function GameEndScreen() {
         ) : null}
         {nivel && estrellas < 3 ? (
           <Button
-            label="↻"
+            icon="repeat"
             accessibilityLabel={`Repetir el nivel ${nivel}`}
             variant="secondary"
             onPress={() =>
@@ -230,14 +236,7 @@ const styles = StyleSheet.create({
   },
   donde: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint },
   sub: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
-  estrellas: {
-    fontFamily: font.family.body,
-    fontSize: 34,
-    color: color.world.fonetica,
-    letterSpacing: 4,
-    marginTop: space.sm,
-  },
-  estrellasOff: { color: color.border },
+  estrellas: { alignSelf: 'center', marginTop: space.sm },
   estrellasNota: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
