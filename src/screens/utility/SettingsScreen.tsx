@@ -112,12 +112,12 @@ export function SettingsScreen() {
           onChange={(v) => void cambiar('metaDiaria', v as never)}
         />
         <Stepper
-          label="Nuevas por sesión"
-          value={s.nuevasPorSesion}
+          label="Nuevas por día"
+          value={s.nuevasPorDia}
           min={0}
-          max={20}
+          max={30}
           step={1}
-          onChange={(v) => void cambiar('nuevasPorSesion', v as never)}
+          onChange={(v) => void cambiar('nuevasPorDia', v as never)}
         />
         <Toggle
           label="Audio automático"

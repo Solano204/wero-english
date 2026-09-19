@@ -1,3 +1,4 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { Entry, JuegoId } from '@/types';
 
 /** Todas las rutas en un solo lugar, tipadas. */
@@ -6,7 +7,7 @@ export type RootStackParams = {
   Boot: undefined;
   Auth: undefined;
   Onboarding: undefined;
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParams> | undefined;
 
   Study: { packId?: string } | undefined;
 

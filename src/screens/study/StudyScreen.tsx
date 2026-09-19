@@ -48,9 +48,12 @@ export function StudyScreen() {
     finish,
     reset,
     aciertos,
+    pendientes,
   } = useSessionStore();
 
   const [chosen, setChosen] = useState<string | null>(null);
+  // Al terminar una sesión completa con vencidas pendientes se ofrece seguir.
+  const [cierre, setCierre] = useState(false);
 
   // Cara y cubitos al responder.
   const reaccion = useReaccion();
@@ -60,7 +63,7 @@ export function StudyScreen() {
 
   useEffect(() => {
     if (!user) return;
-    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorSesion);
+    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia);
     return () => reset();
     // Se arranca una sola vez al montar: las dependencias completas
     // reiniciarían la sesión cada vez que cambie un ajuste.
@@ -99,8 +102,19 @@ export function StudyScreen() {
       });
     }
 
+    if (useSessionStore.getState().pendientes > 0) {
+      setCierre(true);
+      return;
+    }
+
     nav.goBack();
   }, [phase, nav, user, settings]);
+
+  const seguirRepasando = useCallback(() => {
+    if (!user) return;
+    setCierre(false);
+    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia);
+  }, [user, start, settings]);
 
   // El botón físico de atrás cierra la sesión igual que la X.
   useEffect(() => {
@@ -149,11 +163,28 @@ export function StudyScreen() {
         <Header onClose={() => nav.goBack()} />
         <EmptyState
           icon="check"
-          title="No se pudo armar la sesión"
-          body="Ya repasaste todo lo que tocaba. Vuelve más tarde o prueba una partida de ¿Lo digo o no?"
-          actionLabel="Ir al juego"
-          onAction={() => nav.replace('Niveles', { juego: 'colmena' })}
+          title="Ya repasaste todo por hoy"
+          body="Vuelve mañana."
+          actionLabel="Ir a Practicar"
+          onAction={() => nav.popTo('Main', { screen: 'Practice' })}
         />
+      </Screen>
+    );
+  }
+
+  if (phase === 'finished' && cierre) {
+    return (
+      <Screen>
+        <View style={styles.cierre}>
+          <Text style={styles.cierreTitulo}>Sesión terminada</Text>
+          <Button label="Terminar" full onPress={() => nav.goBack()} />
+          <Button
+            label={`Seguir repasando (${pendientes} restantes)`}
+            variant="secondary"
+            full
+            onPress={seguirRepasando}
+          />
+        </View>
       </Screen>
     );
   }
@@ -237,6 +268,14 @@ export function StudyScreen() {
 }
 
 const styles = StyleSheet.create({
+  cierre: { flex: 1, justifyContent: 'center', padding: space.xl, gap: space.md },
+  cierreTitulo: {
+    fontFamily: font.family.heading,
+    fontSize: font.size.xl,
+    color: color.text,
+    textAlign: 'center',
+    marginBottom: space.md,
+  },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   barRow: {
     flexDirection: 'row',

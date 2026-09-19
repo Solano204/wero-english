@@ -2,15 +2,21 @@ import { create } from 'zustand';
 import {
   countDue,
   getDistractors,
+  getDueCards,
   getNewCards,
-  getSessionCards,
   getWordDecoys,
   upsertCardState,
   type ContentFilter,
 } from '@/db/queries';
-import { endSession, startSession, touchStreak } from '@/db/progress';
+import { endSession, getNuevasHoy, startSession, touchStreak } from '@/db/progress';
+import {
+  MAX_REINSERCIONES,
+  cupoNuevas,
+  cupoVencidas,
+  filtroEstudio,
+  nuevasRestantesHoy,
+} from '@/domain/cola';
 import { StudySession, gradeFrom } from '@/domain/session';
-import { newCardState } from '@/domain/sm2';
 import type { SessionSummary, StudyCard } from '@/types';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
@@ -34,6 +40,8 @@ interface SessionState {
   goal: number;
   remaining: number;
   dueCount: number;
+  /** Vencidas que quedaron al terminar la sesión completa. 0 si se salió antes. */
+  pendientes: number;
   /** Aciertos seguidos dentro de la sesión. Muere al terminarla. */
   seguidas: number;
   /**
@@ -52,7 +60,7 @@ interface SessionState {
     usuarioId: number,
     filter: ContentFilter,
     meta: number,
-    nuevas: number
+    nuevasPorDia: number
   ) => Promise<void>;
   answer: (
     usuarioId: number,
@@ -71,6 +79,8 @@ interface SessionState {
    toda la cola. Con 60 tarjetas eso se nota en dispositivos lentos. */
 let engine: StudySession | null = null;
 let sesionId: number | null = null;
+/** El filtro con el que arrancó la sesión, para contar lo que queda al terminarla. */
+let filtroSesion: ContentFilter | null = null;
 /** Candado de finish(): ver el comentario dentro de la acción. */
 let terminandoSesion = false;
 
@@ -113,6 +123,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
   goal: 0,
   remaining: 0,
   dueCount: 0,
+  pendientes: 0,
   seguidas: 0,
   aciertos: 0,
   avanzando: false,
@@ -125,42 +136,27 @@ export const useSessionStore = create<SessionState>((set, get) => {
   // `nuevas` se conserva en la firma para no tocar a los cuatro
   // llamadores, pero ya no se usa: sin plan diario no hay reparto entre
   // repaso y contenido nuevo.
-  start: async (usuarioId, filter, meta, _nuevas) => {
-    set({ phase: 'loading', feedback: null, summary: null });
+  start: async (usuarioId, filter, meta, nuevasPorDia) => {
+    set({ phase: 'loading', feedback: null, summary: null, pendientes: 0 });
 
-    // El modo limpio sí se respeta; el nivel ya no. Uno es una decisión
-    // del usuario sobre qué quiere ver, el otro era una suposición de la
-    // app sobre qué puede.
-    const { modoLimpio } = filter;
+    // El modo limpio sí se respeta; el nivel no (ver filtroEstudio): uno es
+    // una decisión del usuario sobre qué quiere ver, el otro era una
+    // suposición de la app sobre qué puede.
+    const filtro = filtroEstudio(filter);
+    filtroSesion = filtro;
 
     /*
-     * Se acabó el plan diario.
-     *
-     * Antes esto pedía primero las vencidas y rellenaba con nuevas: eso
-     * era "tus 12 de hoy". Ahora son frases al azar de las 1,524, cada
-     * vez que se entra, sin cola y sin deuda.
-     *
-     * Lo que se conserva es el estado SM-2 de las que ya se vieron. No
-     * es contradicción: sirve para que el ejercicio siga escalando
-     * (Reconocer la primera vez, Escribir a la sexta) y para que
-     * Progreso y la dificultad de las lecturas tengan de dónde salir.
-     * Se quitó la planeación, no la memoria.
+     * La sesión (ver domain/cola.ts): tamaño = meta. Primero las vencidas,
+     * las más atrasadas primero, y luego nuevas hasta el límite de hoy.
+     * Hasta 3 lugares se reservan para nuevas aunque la cola sea larga, y
+     * si quedan lugares de sobra se llenan con más nuevas.
      */
-    const crudas = await getSessionCards(usuarioId, modoLimpio, meta);
+    const quedan = nuevasRestantesHoy(nuevasPorDia, await getNuevasHoy(usuarioId));
+    const candidatas = quedan > 0 ? await getNewCards(usuarioId, filtro, quedan) : [];
+    const due = await getDueCards(usuarioId, filtro, cupoVencidas(meta, candidatas.length));
+    const fresh = candidatas.slice(0, cupoNuevas(meta, due.length, candidatas.length));
 
-    const yaEsta = new Set<number>();
-    const due = crudas
-      .filter((c) => !yaEsta.has(c.entry.id) && yaEsta.add(c.entry.id))
-      // Una entrada sin fila en `tarjeta` llega con state null. Aqui se
-      // le da su estado SM-2 inicial: de este punto hacia dentro, `state`
-      // siempre existe y nadie mas tiene que comprobarlo.
-      .map((c) => ({
-        entry: c.entry,
-        state: c.state ?? newCardState(c.entry.id),
-      }));
-    const fresh: typeof due = [];
-
-    if (due.length === 0) {
+    if (due.length + fresh.length === 0) {
       set({ phase: 'empty', card: null, remaining: 0 });
       return;
     }
@@ -186,6 +182,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
       due,
       fresh,
       meta,
+      maxReinserciones: MAX_REINSERCIONES,
       distractorsFor: (e) => distractorMap.get(e.id) ?? [],
       wordDecoysFor: (e) => wordMap.get(e.id) ?? [],
     });
@@ -292,6 +289,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
 
       const { racha } = await touchStreak(usuarioId);
       const summary = engine.summary(racha);
+      const completa = engine.terminada;
 
       if (sesionId !== null) {
         await endSession(sesionId, usuarioId, {
@@ -301,7 +299,11 @@ export const useSessionStore = create<SessionState>((set, get) => {
         });
       }
 
-      set({ phase: 'finished', summary, card: null, feedback: null });
+      // Solo si la sesión se terminó de verdad: al salir a medias no se ofrece seguir.
+      const pendientes =
+        completa && filtroSesion ? await countDue(usuarioId, filtroSesion) : 0;
+
+      set({ phase: 'finished', summary, card: null, feedback: null, pendientes });
       engine = null;
       sesionId = null;
     } finally {
@@ -322,6 +324,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
       done: 0,
       goal: 0,
       remaining: 0,
+      pendientes: 0,
       seguidas: 0,
       aciertos: 0,
       avanzando: false,

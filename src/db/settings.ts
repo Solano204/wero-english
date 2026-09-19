@@ -5,8 +5,10 @@ import type { Nivel } from '@/types';
 export interface Settings {
   modoLimpio: boolean;
   niveles: Nivel[];
+  /** Frases por sesión de estudio: vencidas primero, luego nuevas. */
   metaDiaria: number;
-  nuevasPorSesion: number;
+  /** Cuántas frases nuevas entran al día en Study. */
+  nuevasPorDia: number;
   autoAudio: boolean;
   haptics: boolean;
   /** Ping de acierto / tono suave de fallo al responder una tarjeta. */
@@ -45,7 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
   modoLimpio: false,
   niveles: [1, 2, 3],
   metaDiaria: 20,
-  nuevasPorSesion: 5,
+  nuevasPorDia: 10,
   autoAudio: true,
   haptics: true,
   sonidosFeedback: true,
@@ -79,7 +81,15 @@ export async function loadSettings(usuarioId: number): Promise<Settings> {
   );
 
   const out: Settings = { ...DEFAULT_SETTINGS };
+  // `nuevasPorSesion` (por sesión, sin efecto) se volvió `nuevasPorDia`: si el
+  // usuario había guardado un valor, arranca como el valor de `nuevasPorDia`.
+  let anterior: number | null = null;
   for (const r of rows) {
+    if (r.clave === 'nuevasPorSesion') {
+      const v: unknown = JSON.parse(r.valor);
+      if (typeof v === 'number') anterior = v;
+      continue;
+    }
     try {
       (out as unknown as Record<string, unknown>)[r.clave] = JSON.parse(
         r.valor
@@ -87,6 +97,9 @@ export async function loadSettings(usuarioId: number): Promise<Settings> {
     } catch {
       // Un ajuste corrupto no debe tumbar el arranque: se usa el default.
     }
+  }
+  if (anterior !== null && !rows.some((r) => r.clave === 'nuevasPorDia')) {
+    out.nuevasPorDia = anterior;
   }
   return out;
 }

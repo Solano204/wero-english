@@ -1,4 +1,5 @@
 import { buildCard } from './exercise';
+import { REINSERCION_MAX, REINSERCION_MIN } from './cola';
 import { review, gradeFrom, newCardState } from './sm2';
 import type {
   AnswerResult,
@@ -28,6 +29,13 @@ export interface SessionInput {
    */
   wordDecoysFor?: (entry: Entry) => string[];
   meta: number;
+  /**
+   * Cuántas veces puede volver a salir, en esta sesión, una tarjeta que
+   * SM-2 deja en aprendizaje (pasos de 1 y 10 min). 0 = nunca vuelve.
+   */
+  maxReinserciones?: number;
+  /** Azar para elegir a cuántas tarjetas vuelve (3 a 5). Se inyecta en las pruebas. */
+  azar?: () => number;
 }
 
 export interface PendingCard {
@@ -44,25 +52,33 @@ export class StudySession {
   private newSeen = new Set<number>();
   private missed = new Map<number, Entry>();
   private readonly meta: number;
-  /** Cuántas tarjetas trae la sesión. Se fija al construirla y no cambia. */
+  /** Cuántas tarjetas trae la sesión. Arranca fijo y solo sube con cada reinserción. */
   private total = 0;
   private readonly distractorsFor: (e: Entry) => string[];
   private readonly wordDecoysFor: (e: Entry) => string[];
   /** Aciertos seguidos dentro de esta sesión. No se guarda en la base. */
   private combo = 0;
   private mejorCombo = 0;
+  private readonly maxReinserciones: number;
+  private readonly azar: () => number;
+  /** Cuántas veces se reinsertó cada tarjeta en esta sesión. */
+  private reinsertadas = new Map<number, number>();
+  private reinserciones = 0;
+  /** Las que entraron como nuevas; solo cuentan como vistas si se responden. */
+  private freshIds = new Set<number>();
 
   constructor(input: SessionInput, now: number = Date.now()) {
     this.startedAt = now;
     this.meta = input.meta;
+    this.maxReinserciones = input.maxReinserciones ?? 0;
+    this.azar = input.azar ?? Math.random;
     this.distractorsFor = input.distractorsFor;
     this.wordDecoysFor = input.wordDecoysFor ?? (() => []);
 
-    // Una frase no se repite NUNCA dentro de una sesión. Ni porque
-    // venga en las dos listas, ni porque se falle. Ver la misma tarjeta
-    // dos veces en tres minutos es lo que hacía sentir la práctica
-    // interminable, y es peor que no volver a verla: la vuelve a sacar
-    // el algoritmo mañana, que es donde de verdad sirve.
+    // Una frase no viene dos veces en la lista inicial, aunque esté en las
+    // dos. Dentro de la sesión solo se repite una tarjeta en aprendizaje, y
+    // solo hasta `maxReinserciones` veces: ver la misma tarjeta dos veces en
+    // tres minutos es lo que hacía sentir la práctica interminable.
     const vistas = new Set<number>();
 
     const dueCards = input.due
@@ -72,7 +88,7 @@ export class StudySession {
     const freshCards = input.fresh
       .filter((d) => !vistas.has(d.entry.id) && vistas.add(d.entry.id))
       .map((d) => {
-        this.newSeen.add(d.entry.id);
+        this.freshIds.add(d.entry.id);
         return this.make(
           d.entry,
           d.state ?? newCardState(d.entry.id),
@@ -81,9 +97,10 @@ export class StudySession {
         );
       });
 
-    // La cola se recorta a la meta y ya no crece. El total queda fijo
-    // desde el segundo cero: por eso la barra llega al final siempre.
-    this.queue = interleave(dueCards, freshCards, 4).slice(0, input.meta);
+    // Primero las vencidas (ya vienen de la más atrasada a la menos), luego
+    // las nuevas. La cola se recorta a la meta; el total arranca fijo y solo
+    // crece con cada reinserción, para que la barra siempre llegue al final.
+    this.queue = [...dueCards, ...freshCards].slice(0, input.meta);
     this.total = this.queue.length;
   }
 
@@ -157,6 +174,7 @@ export class StudySession {
     );
 
     this.answered++;
+    if (this.freshIds.has(pending.card.entry.id)) this.newSeen.add(pending.card.entry.id);
     if (result.correct) {
       this.correct++;
       this.combo++;
@@ -169,10 +187,21 @@ export class StudySession {
       this.missed.set(pending.card.entry.id, pending.card.entry);
     }
 
-    // La tarjeta sale y no vuelve. `requeue` se sigue devolviendo porque
-    // SM-2 lo usa para programar el repaso de mañana, pero ya no se
-    // reinserta en esta sesión.
     this.queue.splice(pos, 1);
+
+    // SM-2 pide `requeue` para los pasos de aprendizaje. Aquí se respeta
+    // con un tope: la tarjeta vuelve entre 3 y 5 tarjetas después y no más
+    // de `maxReinserciones` veces por sesión. Lo que sobre lo programa
+    // SM-2 para otro día.
+    const id = pending.card.entry.id;
+    const veces = this.reinsertadas.get(id) ?? 0;
+    if (requeue && veces < this.maxReinserciones) {
+      this.reinsertadas.set(id, veces + 1);
+      this.reinserciones++;
+      this.total++;
+      const salto = REINSERCION_MIN + Math.floor(this.azar() * (REINSERCION_MAX - REINSERCION_MIN + 1));
+      this.queue.splice(Math.min(this.queue.length, salto), 0, this.make(pending.card.entry, state, true, now));
+    }
 
     return { state, grade, requeue };
   }
@@ -186,6 +215,11 @@ export class StudySession {
     const pos = idx >= 0 ? idx : 0;
     if (!this.queue[pos]) return;
     this.queue.splice(pos, 1);
+  }
+
+  /** Cuántas tarjetas se reinsertaron en esta sesión. Solo lectura. */
+  get totalReinserciones(): number {
+    return this.reinserciones;
   }
 
   /** Aciertos acumulados en la sesion. Solo lectura. */
@@ -207,23 +241,3 @@ export class StudySession {
 }
 
 export { gradeFrom };
-
-/**
- * Intercala b dentro de a insertando uno de b cada `every` de a.
- * Con every=4: A A A A B A A A A B ...
- */
-function interleave<T>(a: T[], b: T[], every: number): T[] {
-  if (b.length === 0) return [...a];
-  if (a.length === 0) return [...b];
-
-  const out: T[] = [];
-  let bi = 0;
-  for (let i = 0; i < a.length; i++) {
-    out.push(a[i] as T);
-    if ((i + 1) % every === 0 && bi < b.length) {
-      out.push(b[bi++] as T);
-    }
-  }
-  while (bi < b.length) out.push(b[bi++] as T);
-  return out;
-}

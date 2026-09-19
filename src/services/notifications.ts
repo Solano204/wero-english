@@ -4,6 +4,7 @@ import { color } from '@/theme';
 import { getDb } from '@/db/client';
 import { getLastActive } from '@/db/progress';
 import { countDue, getStuckEntries } from '@/db/queries';
+import { filtroEstudio } from '@/domain/cola';
 import { weightedPick } from '@/utils/array';
 import { dayKey, daysBetween } from '@/utils/date';
 import type {
@@ -307,7 +308,9 @@ async function composeBody(
   }
 
   const elegibles: NotifPlantilla[] = [];
-  const due = await countDue(ctx.usuarioId, ctx.filter);
+  // Misma definición y mismo filtro que la sesión de Study: lo que dice la
+  // notificación es lo que la sesión va a servir.
+  const due = await countDue(ctx.usuarioId, filtroEstudio(ctx.filter));
   const stuck = await getStuckEntries(ctx.usuarioId, 3, 1);
   const recientes = await plantillasRecientes(
     ctx.usuarioId,

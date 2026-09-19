@@ -131,3 +131,10 @@ export function paramsUpsertTarjeta(usuarioId: number, s: CardState): (number | 
     s.vence_en, s.ultimo_repaso, s.fallos, s.aciertos, s.dominada, s.favorito,
   ];
 }
+
+/**
+ * Nuevas que ya entraron hoy: `sesion.nuevas` de las sesiones del día local.
+ * No cuenta las que entran por juegos. Params: usuario, dayKey (YYYY-MM-DD).
+ */
+export const SQL_NUEVAS_HOY =
+  'SELECT COALESCE(SUM(nuevas), 0) AS n FROM sesion WHERE usuario_id = ? AND dia = ?;';
