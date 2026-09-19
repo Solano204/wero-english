@@ -14,3 +14,12 @@ assets/img/*
 # generado por build:assets
 src/assets/bundled.ts
 keys/
+
+# logs y credenciales locales
+.polly-log.json
+.env*
+
+# audio: copias de respaldo y carpetas de prueba (ya cubiertas por assets/aud/*)
+assets/aud/**/_respaldo_*/
+assets/aud/fon/_viejo_vocales/
+assets/aud/fon/_prueba/
