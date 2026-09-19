@@ -20,6 +20,8 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | 8 | TIPO-4 | `letterSpacing` de −1% a −2% en los 26 títulos de 28 px o más: `text.display` y `text.h1` primero; la lista completa está en TIPO-4 | `typography.ts:6-17`, `PhraseBlock.tsx:70`, `ExploreScreen.tsx:124`, `Card.tsx:219` | S | medio |
 | 9 | TXT-1 + ACC-1 | Que no se corte lo importante y que la acción principal sea sólida: título y subtítulo del `Header` (títulos de lecturas), `EntryRow` compacta y `DulcesScreen`; y `secondary` a `primary` en `EmptyState` (11 usos), `DownloadsScreen` y `ErrorDetailScreen` | `Header.tsx:30,35`, `EntryRow.tsx:110,115`, `DulcesScreen.tsx:593`, `EmptyState.tsx:25`, `DownloadsScreen.tsx:134`, `ErrorDetailScreen.tsx:90` | S | medio |
 | 10 | EST-error + RND-1 + AUD-1 | Robustez: estado de error en 19 pantallas que leen la base (y de carga en 13); `ErrorsScreen` (194 tarjetas) y `PronunciationScreen` (53) a `FlatList`; regenerar el audio vacío `aud/phrasal/5_ejemplo_en_lento.mp3` | `ErrorsScreen.tsx:76`, `PronunciationScreen.tsx:190`, tabla de la sección a) | M | medio |
+
+**Hecho en la fase B:** 1 (TIPO-2), 2 (COLOR-4), 5 (TIPO-1), 8 (TIPO-4) y de 7 el `glow` y el selector de niveles. De 7 sigue abierto ACC-1 en `EmptyState`, `DownloadsScreen`, `ErrorDetailScreen` y `GramaticaTemaScreen` (va con el paso 9). `npm run check:color` cuida que no vuelvan los colores sueltos.
 <!-- PLAN:end -->
 
 ## Conteo por regla
