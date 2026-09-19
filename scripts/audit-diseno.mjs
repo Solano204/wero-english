@@ -99,7 +99,7 @@ function walk(d, o = []) {
 function num(expr) {
   const t = expr.replace(/space\.(\w+)/g, (_, k) => SP[k] ?? 'NaN').replace(/font\.size\.(\w+)/g, (_, k) => FS[k] ?? 'NaN')
     .replace(/radius\.(\w+)/g, (_, k) => RA[k] ?? 'NaN').replace(/layout\.screenPad/g, '16').replace(/layout\.tapMin/g, '48')
-    .replace(/iconoRedondo\.sm/g, '36').replace(/iconoRedondo\.md/g, '44').replace(/iconoRedondo\.lg/g, '52');
+    .replace(/iconoRedondo\.sm/g, '48').replace(/iconoRedondo\.md/g, '48').replace(/iconoRedondo\.lg/g, '52');
   if (!/^[\d\s.+\-*/()]+$/.test(t)) return null;
   try { const v = Function(`return (${t})`)(); return Number.isFinite(v) ? v : null; } catch { return null; }
 }
@@ -282,8 +282,8 @@ function tokensTactiles(tokens, audioBtn) {
   const out = [];
   const icono = tokens.match(/export const iconoRedondo = \{([^}]*)\}/);
   if (icono) for (const m of icono[1].matchAll(/(\w+):\s*(\d+)/g)) if (Number(m[2]) < 48) out.push(`\`iconoRedondo.${m[1]}\` ${m[2]} dp (\`tokens.ts\`)`);
-  const sizes = audioBtn.match(/const sizes = \{([\s\S]*?)\} as const/);
-  if (sizes) for (const m of sizes[1].matchAll(/(\w+):\s*\{\s*minHeight:\s*(\d+)/g)) if (Number(m[2]) < 48) out.push(`\`AudioButton\` \`${m[1]}\` ${m[2]} dp (llega a ${Number(m[2]) + 20} con \`hitSlop: 10\`, pero los botones vecinos se solapan)`);
+  // AudioButton: lo que se toca es `toque` (48 dp); la píldora visible (`sizes`) puede ser más chica.
+  if (!/toque:\s*\{[^}]*minHeight:\s*layout\.tapMin/.test(audioBtn)) out.push(`\`AudioButton\` sin área táctil de 48 dp (\`toque\`)`);
   return out;
 }
 

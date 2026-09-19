@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
   significado: { flex: 1, fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   audioFila: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: space.sm,
   },

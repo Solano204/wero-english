@@ -38,7 +38,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | ESP-1 | espaciado fuera de 4/8 | 35 |
 | ACC-1 | acción principal no sólida o varios sólidos a la vez | 4 |
 | ACC-3 | opciones visibles en Practicar (máximo recomendado 7) | 16 |
-| MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 8 |
+| MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 0 |
 | IA-1 | líneas con emojis | 15 |
 | IA-1b | líneas con glifos de texto como íconos | 53 |
 | IA-3 | sombras de color o fuera de tokens | 0 |
@@ -124,7 +124,7 @@ Descartados (28 px o más, pero no son títulos):
 - `src/components/base/Input.tsx:78` — label: marginLeft: 2 = 2
 - `src/components/base/Input.tsx:105` — error: marginLeft: 2 = 2
 - `src/components/base/Input.tsx:106` — hint: marginLeft: 2 = 2
-- `src/components/card/AudioButton.tsx:116` — icon: marginTop: -1 = -1
+- `src/components/card/AudioButton.tsx:124` — icon: marginTop: -1 = -1
 - `src/components/feedback/Chispas.tsx:98` — chispa: marginLeft: -1.5 = -1.5
 - `src/components/feedback/Estrellas.tsx:82` — chispa: marginLeft: -10 = -10
 - `src/components/feedback/Estrellas.tsx:83` — chispa: marginTop: -10 = -10
@@ -174,16 +174,10 @@ Descartados tras leer el render (tienen 2 o más `primary`, pero **nunca convive
 ## MÓVIL
 
 **MOV-1 · Área táctil mínima 48×48 dp.** Por debajo, en tokens y componentes:
-- `iconoRedondo.sm` 36 dp (`tokens.ts`)
-- `iconoRedondo.md` 44 dp (`tokens.ts`)
-- `AudioButton` `sm` 34 dp (llega a 54 con `hitSlop: 10`, pero los botones vecinos se solapan)
-- `AudioButton` `md` 44 dp (llega a 64 con `hitSlop: 10`, pero los botones vecinos se solapan)
+- (ninguno)
 
 Estilos interactivos con alto menor a 48 (verificar si llevan `hitSlop`):
-- `src/components/card/TileBuilder.tsx:171` — ficha: minHeight 42 = 42 dp
-- `src/screens/entry/OnboardingScreen.tsx:483` — chip: minHeight 44 = 44 dp
-- `src/screens/extras/LecturaScreen.tsx:316` — opcion: minHeight 46 = 46 dp
-- `src/screens/utility/SettingsScreen.tsx:417` — horaChip: minHeight 40 = 40 dp
+- (ninguno)
 
 ## ANTI-LOOK-IA
 
@@ -367,4 +361,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":4,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":4,"ACC-3":16,"MOV-1":0,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->

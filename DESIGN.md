@@ -99,7 +99,7 @@ Todo en `src/theme/tokens.ts`.
 
 - **`space`:** `xs 4`, `sm 8`, `md 12`, `lg 16`, `xl 24`, `xxl 32`, `xxxl 48`.
 - **`layout`:** `screenPad 16`, `tapMin 48`, `cardMaxWidth 520`, `adBar 56`.
-- **`iconoRedondo`** (botón circular): `sm 36`, `md 44`, `lg 52`.
+- **`iconoRedondo`** (área táctil del botón circular): `sm 48`, `md 48`, `lg 52`. **`iconoVisual`** (el círculo que se ve, centrado dentro): `sm 36`, `md 44`, `lg 52`.
 - **`depth`** (borde inferior de piezas de juego): `sm 2`, `md 3`, `lg 4`.
 - Valores sueltos que aparecen en estilos, fuera de esa escala: 1, 2, 3, 5, 6, 10 y 20 px, y márgenes negativos de −1 a −10 (detalle con archivo y línea en `DESIGN-AUDIT.md`).
 
@@ -131,13 +131,13 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 | `Screen` | Fondo `bg` con el degradado `FONDO` y el resplandor del sol. Props `scroll`, `padded`, `footer` (fijo abajo, con borde superior fino y fondo `bgFin`). Ninguna pantalla redefine fondo ni safe area |
 | `Header` | Fila de mínimo 48 dp. Flecha atrás a la izquierda (ancho fijo 56), título `lg` semibold centrado, subtítulo `sm` muted, lado derecho que crece con su contenido |
 | `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`riskStrong`). Bloqueado: opacidad 0.45. Vibración ligera al tocar |
-| `IconButton` | Círculo `iconoRedondo` 36, 44 o 52, con símbolos de texto |
+| `IconButton` | Círculo `iconoVisual` (36, 44 o 52) dentro de un área táctil `iconoRedondo` (48, 48 o 52), con símbolos de texto. Sin `hitSlop` |
 | `Card` | Filo de luz de 1 px sobre `surface`, radio `lg`, padding `lg`, `gap md`. Props: `accent` (tiñe el borde), `elevated`, `portada` (degradado o imagen con alto reservado), `onLongPress` |
 | `Badge` | Píldora, texto `sm` semibold (`xs` en `small`) |
 | `ProgressBar` | Carril `trackFondo`, relleno `accent` animado con `scaleX`; alto 6 por defecto |
 | `RoundTimer` | Reloj de ronda de los juegos |
 | `OptionButton` | Alto mínimo 56, radio `md`, sin borde, texto `md`. Estados: idle, elegida, correcta, incorrecta, atenuada |
-| `AudioButton` | Píldora `accentSoft` con `►` (o `𝄽` en lento) y etiqueta opcional. Tamaños `sm 34`, `md 44`, `lg 56` de alto, con `hitSlop 10`. Se apaga (opacidad 0.4, deshabilitado) si no hay audio |
+| `AudioButton` | Píldora `accentSoft` con `►` (o `𝄽` en lento) y etiqueta opcional. Píldora de `sm 34`, `md 44` o `lg 56` de alto dentro de un área táctil de 48 dp como mínimo (`toque`), sin `hitSlop`. Se apaga (opacidad 0.4, deshabilitado) si no hay audio |
 | `EntryRow` | Renglón de frase en dos variantes: `compacta` (una línea) y `mazo` (texto a dos líneas y barra de audios etiquetados) |
 | `FeedbackBand` | Banda de veredicto con filo verde o ámbar |
 | `EmptyState` | Emoji o símbolo, título, cuerpo y botón `secondary` opcional |

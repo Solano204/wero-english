@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, type ViewStyle } from 'react-native';
-import { color, font, iconoRedondo, shadow } from '@/theme';
+import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { color, font, iconoRedondo, iconoVisual, shadow } from '@/theme';
 import * as haptics from '@/services/haptics';
 
 type Tamano = keyof typeof iconoRedondo;
@@ -39,7 +39,8 @@ export function IconButton({
   disabled = false,
   style,
 }: Props) {
-  const lado = iconoRedondo[tamano];
+  const toque = iconoRedondo[tamano];
+  const lado = iconoVisual[tamano];
 
   return (
     <Pressable
@@ -51,21 +52,28 @@ export function IconButton({
       accessibilityRole="button"
       accessibilityLabel={etiqueta}
       accessibilityState={{ disabled }}
-      // El área táctil real es de 48 aunque el círculo mida 36: un
-      // objetivo más chico que eso se falla y la culpa se la lleva la app.
-      hitSlop={Math.max(0, Math.round((48 - lado) / 2))}
+      // El Pressable mide lo que se toca (48 o más) y el círculo lo que se
+      // ve: un objetivo más chico que 48 se falla y la culpa se la lleva la
+      // app. Sin hitSlop, que se solapa con los vecinos.
       style={({ pressed }) => [
-        styles.base,
-        { width: lado, height: lado, borderRadius: lado / 2 },
-        tonos[tono],
+        styles.centrado,
+        { width: toque, height: toque },
         disabled && styles.apagado,
         pressed && styles.press,
         style,
       ]}
     >
-      <Text style={[styles.simbolo, textos[tono], { fontSize: lado * 0.42 }]}>
-        {simbolo}
-      </Text>
+      <View
+        style={[
+          styles.centrado,
+          { width: lado, height: lado, borderRadius: lado / 2 },
+          tonos[tono],
+        ]}
+      >
+        <Text style={[styles.simbolo, textos[tono], { fontSize: lado * 0.42 }]}>
+          {simbolo}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -83,7 +91,7 @@ const textos = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  base: { alignItems: 'center', justifyContent: 'center' },
+  centrado: { alignItems: 'center', justifyContent: 'center' },
   simbolo: { fontFamily: font.family.bodyStrong, lineHeight: undefined },
   apagado: { opacity: 0.4 },
   press: { opacity: 0.7, transform: [{ scale: 0.94 }] },

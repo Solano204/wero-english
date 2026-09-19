@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   escucharTodos: { alignSelf: 'flex-start', marginBottom: space.sm },
   ejemplo: { gap: 4 },
   ejemploActivo: { borderWidth: 1, borderColor: color.accent, backgroundColor: color.accentSoft },
-  audioRow: { flexDirection: 'row', gap: space.sm, marginTop: space.xs },
+  audioRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
   en: {
     fontSize: font.size.lg,
     fontFamily: font.family.heading,

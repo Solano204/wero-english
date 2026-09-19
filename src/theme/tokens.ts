@@ -231,8 +231,15 @@ export const radius = {
   pill: 999,
 } as const;
 
-/** Botón circular de icono. */
+/** Área táctil de un botón circular de icono: nunca menos de 48 dp (MOV-1). */
 export const iconoRedondo = {
+  sm: 48,
+  md: 48,
+  lg: 52,
+} as const;
+
+/** El círculo que se ve, centrado dentro del área táctil. */
+export const iconoVisual = {
   sm: 36,
   md: 44,
   lg: 52,

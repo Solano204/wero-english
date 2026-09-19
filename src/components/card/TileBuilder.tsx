@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
-import { color, depth, font, motionSpring, radius, shadow, space } from '@/theme';
+import { color, depth, font, layout, motionSpring, radius, shadow, space } from '@/theme';
 import * as haptics from '@/services/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   placeholder: { color: color.textFaint, fontFamily: font.family.body, fontSize: font.size.sm },
   banco: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   ficha: {
-    minHeight: 42,
+    minHeight: layout.tapMin,
     justifyContent: 'center',
     paddingHorizontal: space.md,
     borderRadius: radius.sm,

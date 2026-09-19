@@ -6,7 +6,7 @@ import Animated, {
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
-import { color, font, motionSpring, radius, space } from '@/theme';
+import { color, font, layout, motionSpring, radius, space } from '@/theme';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import * as media from '@/services/media';
@@ -21,8 +21,6 @@ interface Props {
   /** Corre justo antes de pedir el audio, sin detener nada por su cuenta. */
   onBeforePlay?: () => void;
 }
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /** Empaquetado o ya descargado a disco: lo mismo que acepta media.resolve(). */
 export function hayAudio(path: string | null): boolean {
@@ -67,10 +65,9 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
   }, [path, pulse, slow, reducido, onBeforePlay]);
 
   return (
-    <AnimatedPressable
+    <Pressable
       onPress={onPress}
       disabled={sinAudio}
-      hitSlop={10}
       accessibilityRole="button"
       accessibilityLabel={label ?? (slow ? 'Escuchar lento' : 'Escuchar')}
       accessibilityState={sinAudio ? { disabled: true } : undefined}
@@ -79,22 +76,27 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
           ? 'El audio de esta frase todavía no está disponible'
           : 'Reproduce el audio de la frase'
       }
-      style={[
-        styles.btn,
-        sizes[size],
-        apagado && styles.missing,
-        sinAudio && styles.sinAudio,
-        style,
-      ]}
+      style={styles.toque}
     >
-      <Text style={[styles.icon, apagado && styles.iconMissing]}>
-        {slow ? '𝄽' : '►'}
-      </Text>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-    </AnimatedPressable>
+      <Animated.View
+        style={[
+          styles.btn,
+          sizes[size],
+          apagado && styles.missing,
+          sinAudio && styles.sinAudio,
+          style,
+        ]}
+      >
+        <Text style={[styles.icon, apagado && styles.iconMissing]}>
+          {slow ? '𝄽' : '►'}
+        </Text>
+        {label ? <Text style={styles.label}>{label}</Text> : null}
+      </Animated.View>
+    </Pressable>
   );
 }
 
+/** Tamaño de la píldora que se ve. Lo que se toca es `styles.toque`: 48 dp o más. */
 const sizes = {
   sm: { minHeight: 34, paddingHorizontal: space.sm },
   md: { minHeight: 44, paddingHorizontal: space.md },
@@ -102,6 +104,13 @@ const sizes = {
 } as const;
 
 const styles = StyleSheet.create({
+  toque: {
+    minWidth: layout.tapMin,
+    minHeight: layout.tapMin,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -109,7 +118,6 @@ const styles = StyleSheet.create({
     gap: space.sm,
     backgroundColor: color.accentSoft,
     borderRadius: radius.pill,
-    alignSelf: 'flex-start',
   },
   missing: { backgroundColor: color.surfaceHigh },
   sinAudio: { opacity: 0.4 },

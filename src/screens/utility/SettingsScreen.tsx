@@ -9,7 +9,7 @@ import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import * as authService from '@/services/auth';
 import * as notifications from '@/services/notifications';
 import * as speech from '@/services/speech';
-import { color, font, radius, space } from '@/theme';
+import { color, font, layout, radius, space } from '@/theme';
 import type { Nivel } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   hora: { gap: space.sm },
   horaChips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   horaChip: {
-    minHeight: 40,
+    minHeight: layout.tapMin,
     justifyContent: 'center',
     paddingHorizontal: space.md,
     borderRadius: radius.pill,

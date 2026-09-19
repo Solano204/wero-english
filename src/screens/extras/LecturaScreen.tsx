@@ -16,7 +16,7 @@ import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, radius, space } from '@/theme';
+import { color, font, layout, radius, space } from '@/theme';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   opcion: {
-    minHeight: 46,
+    minHeight: layout.tapMin,
     justifyContent: 'center',
     paddingHorizontal: space.md,
     borderRadius: radius.sm,

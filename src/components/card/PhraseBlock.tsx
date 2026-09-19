@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
   },
   audioRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: space.sm,
     marginTop: space.xs,
   },

@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     color: color.textMuted,
     textAlign: 'center',
   },
-  audioRow: { flexDirection: 'row', gap: space.sm },
+  audioRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   options: { gap: space.md, marginTop: space.lg },
   footer: { marginTop: space.lg, gap: space.sm, alignItems: 'center' },
   picked: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },

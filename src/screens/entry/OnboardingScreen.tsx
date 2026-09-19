@@ -6,7 +6,7 @@ import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as notifications from '@/services/notifications';
-import { color, font, radius, space } from '@/theme';
+import { color, font, layout, radius, space } from '@/theme';
 import type { Nivel } from '@/types';
 
 /**
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
-    minHeight: 44,
+    minHeight: layout.tapMin,
     justifyContent: 'center',
     paddingHorizontal: space.lg,
     borderRadius: radius.pill,

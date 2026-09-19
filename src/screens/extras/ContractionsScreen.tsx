@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     color: color.textMuted,
     lineHeight: font.size.sm * 1.5,
   },
-  practice: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
+  practice: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',

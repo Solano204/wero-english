@@ -8,6 +8,7 @@ export {
   color,
   gradiente,
   iconoRedondo,
+  iconoVisual,
   space,
   radius,
   font,
