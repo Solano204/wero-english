@@ -113,11 +113,11 @@ const styles = StyleSheet.create({
   },
   missing: { backgroundColor: color.surfaceHigh },
   sinAudio: { opacity: 0.4 },
-  icon: { color: color.accent, fontSize: font.size.md, marginTop: -1 },
+  icon: { color: color.accent, fontFamily: font.family.body, fontSize: font.size.md, marginTop: -1 },
   iconMissing: { color: color.textFaint },
   label: {
     color: color.accent,
     fontSize: font.size.sm,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
 });

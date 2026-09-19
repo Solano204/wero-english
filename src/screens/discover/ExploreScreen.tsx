@@ -122,7 +122,8 @@ export function ExploreScreen() {
 const styles = StyleSheet.create({
   title: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     marginBottom: space.lg,
   },
@@ -135,11 +136,11 @@ const styles = StyleSheet.create({
   },
   worldName: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
   },
-  worldCount: { fontSize: font.size.xs, color: color.textFaint },
-  worldDesc: { fontSize: font.size.sm, color: color.textMuted },
+  worldCount: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  worldDesc: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   results: { gap: space.sm },
-  none: { color: color.textMuted, fontSize: font.size.md, marginTop: space.md },
+  none: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md, marginTop: space.md },
 });

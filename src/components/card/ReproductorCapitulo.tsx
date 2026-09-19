@@ -144,5 +144,5 @@ export function ReproductorCapitulo({ path }: Props) {
 const styles = StyleSheet.create({
   raiz: { gap: space.sm },
   fila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  tiempo: { fontSize: font.size.xs, color: color.textFaint },
+  tiempo: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
 });

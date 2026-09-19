@@ -251,10 +251,10 @@ const styles = StyleSheet.create({
   bandaCabeza: { marginBottom: space.md },
   bandaNombre: {
     fontSize: font.size.md,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
-  bandaRango: { fontSize: font.size.xs, color: color.textFaint },
+  bandaRango: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   rejilla: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   /*
    * Sin sombra por celda, a propósito.
@@ -280,16 +280,17 @@ const styles = StyleSheet.create({
   celdaPress: { opacity: 0.75 },
   celdaNum: {
     fontSize: font.size.md,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
   celdaNumOff: { color: color.textFaint },
-  estrellas: { fontSize: 9, color: color.world.fonetica, marginTop: 1 },
+  estrellas: { fontFamily: font.family.body, fontSize: 9, color: color.world.fonetica, marginTop: 1 },
   pie: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
     marginTop: space.md,
   },
-  vacio: { fontSize: font.size.sm, color: color.textMuted },
+  vacio: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });

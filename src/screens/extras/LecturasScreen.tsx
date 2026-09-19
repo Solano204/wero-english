@@ -205,6 +205,7 @@ const NOMBRE_MUNDO: Record<string, string> = {
 
 const styles = StyleSheet.create({
   intro: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     marginBottom: space.lg,
@@ -220,18 +221,19 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
     flexShrink: 1,
   },
-  itemSub: { fontSize: font.size.sm, color: color.textMuted },
-  meta: { fontSize: font.size.xs, color: color.textFaint, marginTop: 2 },
+  itemSub: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint, marginTop: 2 },
   dif: { gap: 4, marginTop: space.sm },
-  difTexto: { fontSize: font.size.xs, color: color.textFaint },
+  difTexto: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   bloqueo: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.riskWarn,
     marginTop: space.sm,
   },
-  vacio: { fontSize: font.size.sm, color: color.textMuted },
+  vacio: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });

@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: font.size.sm,
     color: color.textMuted,
-    fontWeight: font.weight.medium,
+    fontFamily: font.family.body,
     marginLeft: 2,
   },
   field: {
@@ -93,14 +93,15 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: color.text,
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     paddingVertical: space.md,
   },
   toggle: {
     color: color.accent,
     fontSize: font.size.sm,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
-  error: { fontSize: font.size.sm, color: color.riskStrong, marginLeft: 2 },
-  hint: { fontSize: font.size.sm, color: color.textFaint, marginLeft: 2 },
+  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.riskStrong, marginLeft: 2 },
+  hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint, marginLeft: 2 },
 });

@@ -148,6 +148,7 @@ function Forma({ v }: { v: PhrasalVerb }) {
 
 const styles = StyleSheet.create({
   intro: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     marginBottom: space.lg,
@@ -161,11 +162,11 @@ const styles = StyleSheet.create({
   },
   verbo: {
     fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.text,
   },
-  cuantos: { fontSize: font.size.xs, color: color.textFaint },
-  previa: { fontSize: font.size.sm, color: color.textMuted },
+  cuantos: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  previa: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   formas: { gap: space.md, marginTop: space.sm },
   forma: {
     gap: 3,
@@ -180,10 +181,10 @@ const styles = StyleSheet.create({
   },
   frase: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.accent,
   },
-  significado: { flex: 1, fontSize: font.size.md, color: color.text },
+  significado: { flex: 1, fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   audioFila: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -191,15 +192,17 @@ const styles = StyleSheet.create({
   },
   ejemploFila: { marginTop: space.xs },
   ejemplo: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.text,
     fontStyle: 'italic',
   },
-  traduccion: { flex: 1, fontSize: font.size.sm, color: color.textMuted },
+  traduccion: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   nota: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     marginTop: space.xs,
   },
-  separable: { fontSize: font.size.xs, color: color.world.tech },
+  separable: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.world.tech },
 });

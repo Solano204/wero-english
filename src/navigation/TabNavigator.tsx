@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   veloBarra: { backgroundColor: color.veloBarra },
   label: {
     fontSize: font.size.xs,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     marginTop: 2,
   },
   item: { paddingTop: 2 },
@@ -201,5 +201,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.accentBorde,
   },
-  glyph: { fontSize: 17 },
+  glyph: { fontFamily: font.family.body, fontSize: 17 },
 });

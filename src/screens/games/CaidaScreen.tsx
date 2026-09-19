@@ -523,16 +523,18 @@ const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   marcador: {
     fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.accent,
   },
   frase: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
   },
   instruccion: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
@@ -560,6 +562,7 @@ const styles = StyleSheet.create({
   },
   fichaPress: { opacity: 0.8 },
   fichaTexto: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.text,
     textAlign: 'center',
@@ -581,10 +584,11 @@ const styles = StyleSheet.create({
   },
   finNum: {
     fontSize: 64,
-    fontWeight: font.weight.bold,
+    letterSpacing: 64 * -0.015,
+    fontFamily: font.family.display,
     color: color.accent,
   },
-  finLabel: { fontSize: font.size.md, color: color.textMuted },
+  finLabel: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
   finCard: {
     alignSelf: 'stretch',
     backgroundColor: color.surface,
@@ -598,12 +602,13 @@ const styles = StyleSheet.create({
   },
   finFrase: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
   },
-  finBien: { fontSize: font.size.md, color: color.correct },
-  finMal: { fontSize: font.size.sm, color: color.wrong },
+  finBien: { fontFamily: font.family.body, fontSize: font.size.md, color: color.correct },
+  finMal: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.wrong },
   finNota: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
@@ -613,7 +618,7 @@ const styles = StyleSheet.create({
   // arriba: aquí solo el espacio entre los dos botones.
   finBotones: { gap: space.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontSize: font.size.md },
+  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
   overlay: {
     position: 'absolute',
     left: 0,
@@ -638,11 +643,12 @@ const styles = StyleSheet.create({
   },
   overlayEn: {
     fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
   },
   overlayEs: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.textMuted,
     textAlign: 'center',
@@ -652,6 +658,6 @@ const styles = StyleSheet.create({
   siguienteTexto: {
     fontSize: font.size.sm,
     color: color.textFaint,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
 });

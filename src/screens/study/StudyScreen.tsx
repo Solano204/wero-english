@@ -259,11 +259,12 @@ const styles = StyleSheet.create({
   },
   aciertosNum: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.accent,
   },
-  aciertosTxt: { fontSize: font.size.sm, color: color.textMuted },
+  aciertosTxt: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   counter: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     minWidth: 44,
@@ -272,11 +273,11 @@ const styles = StyleSheet.create({
   seguidas: {
     fontSize: font.size.xs,
     color: color.world.fonetica,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     letterSpacing: 0.6,
     marginBottom: 4,
   },
   body: { flex: 1, paddingHorizontal: space.lg, paddingBottom: space.lg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontSize: font.size.md },
+  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });

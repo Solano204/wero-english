@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   small: { paddingHorizontal: space.sm, paddingVertical: 3 },
   text: {
     fontSize: font.size.sm,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
-  textSmall: { fontSize: font.size.xs },
+  textSmall: { fontFamily: font.family.body, fontSize: font.size.xs },
 });

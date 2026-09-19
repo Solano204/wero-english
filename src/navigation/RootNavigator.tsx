@@ -43,13 +43,6 @@ import { color } from '@/theme';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 
-// Temporal (elegir la fuente de la interfaz): solo existe en desarrollo. En
-// producción Metro descarta el require junto con las TTF de prueba.
-const FuentesPrueba = __DEV__
-  ? (require('../screens/_FuentesPrueba') as typeof import('../screens/_FuentesPrueba'))
-      .FuentesPruebaScreen
-  : null;
-
 export function RootNavigator() {
   const status = useAuthStore((s) => s.status);
   const settingsLoaded = useSettingsStore((s) => s.loaded);
@@ -139,7 +132,6 @@ export function RootNavigator() {
       <Stack.Screen name="Lecturas" component={LecturasScreen} />
       <Stack.Screen name="Lectura" component={LecturaScreen} />
       <Stack.Screen name="Diagnostics" component={DiagnosticsScreen} />
-      {FuentesPrueba ? <Stack.Screen name="FuentesPrueba" component={FuentesPrueba} /> : null}
     </Stack.Navigator>
   );
 }

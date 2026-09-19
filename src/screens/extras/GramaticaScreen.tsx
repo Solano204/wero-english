@@ -112,6 +112,7 @@ export function GramaticaScreen() {
 
 const styles = StyleSheet.create({
   intro: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.textMuted,
     lineHeight: font.size.md * 1.5,
@@ -130,11 +131,11 @@ const styles = StyleSheet.create({
   },
   bloqueNombre: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
   },
-  bloqueNum: { fontSize: font.size.sm, color: color.accent, fontWeight: font.weight.semibold },
-  bloqueResumen: { fontSize: font.size.sm, color: color.textMuted, lineHeight: font.size.sm * 1.5 },
+  bloqueNum: { fontSize: font.size.sm, color: color.accent, fontFamily: font.family.bodyStrong },
+  bloqueResumen: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, lineHeight: font.size.sm * 1.5 },
   /*
    * Los temas van sangrados y con su propio aire. La sangria dice que
    * cuelgan del bloque; el margen evita que se peguen entre ellos.
@@ -149,9 +150,9 @@ const styles = StyleSheet.create({
   temaTitulo: {
     flex: 1,
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
-  temaNivel: { fontSize: font.size.xs, color: color.textFaint },
-  temaGancho: { fontSize: font.size.sm, color: color.textMuted, lineHeight: font.size.sm * 1.45 },
+  temaNivel: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  temaGancho: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, lineHeight: font.size.sm * 1.45 },
 });

@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   marcador: { alignItems: 'center', justifyContent: 'center' },
   inicial: {
     fontSize: 44,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     letterSpacing: 2,
     color: color.textSobrePortada,
   },

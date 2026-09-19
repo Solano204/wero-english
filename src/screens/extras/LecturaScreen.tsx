@@ -269,12 +269,13 @@ export function LecturaScreen() {
 const styles = StyleSheet.create({
   capTitulo: {
     fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.text,
     marginBottom: space.md,
   },
   audioFila: { marginBottom: space.md },
   cuerpo: {
+    fontFamily: font.family.body,
     fontSize: font.size.lg,
     // Una lectura pide más aire que una tarjeta: 1.6 de interlineado es
     // la diferencia entre leer y descifrar.
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
   },
   fraseNueva: {
     color: color.riskWarn,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     textDecorationLine: 'underline',
   },
   leyenda: {
@@ -297,8 +298,9 @@ const styles = StyleSheet.create({
     padding: space.md,
     marginBottom: space.lg,
   },
-  leyendaTexto: { fontSize: font.size.xs, color: color.textMuted },
+  leyendaTexto: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   introPreguntas: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     marginBottom: space.md,
@@ -306,7 +308,7 @@ const styles = StyleSheet.create({
   pregunta: { gap: space.sm, marginBottom: space.md },
   preguntaTexto: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
   opcion: {
@@ -323,6 +325,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.correctSoft,
   },
   opcionMal: { borderColor: color.wrong, backgroundColor: color.wrongSoft },
-  opcionTexto: { fontSize: font.size.sm, color: color.text },
-  porque: { fontSize: font.size.sm, color: color.textMuted },
+  opcionTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.text },
+  porque: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });

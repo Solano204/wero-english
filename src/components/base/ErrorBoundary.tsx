@@ -61,10 +61,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
   },
   body: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.textMuted,
     lineHeight: font.size.md * 1.5,
@@ -78,6 +80,6 @@ const styles = StyleSheet.create({
   mono: {
     fontSize: font.size.sm,
     color: color.riskWarn,
-    fontFamily: 'monospace',
+    fontFamily: font.family.body,
   },
 });

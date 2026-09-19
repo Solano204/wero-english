@@ -53,8 +53,6 @@ export type RootStackParams = {
   Stuck: undefined;
   Deck: undefined;
   Diagnostics: undefined;
-  /** Temporal (solo __DEV__): elegir la fuente de la interfaz. */
-  FuentesPrueba: undefined;
 };
 
 export type MainTabParams = {

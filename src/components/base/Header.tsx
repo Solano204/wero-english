@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center' },
   title: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
   },
-  subtitle: { fontSize: font.size.sm, color: color.textMuted },
+  subtitle: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });

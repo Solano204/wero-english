@@ -147,8 +147,8 @@ const stateStyles: Record<OptionState, object> = {
 const textStyles: Record<OptionState, object> = {
   idle: { color: color.text },
   chosen: { color: color.text },
-  correct: { color: color.correct, fontWeight: font.weight.semibold },
-  wrong: { color: color.wrong, fontWeight: font.weight.semibold },
+  correct: { color: color.correct, fontFamily: font.family.bodyStrong },
+  wrong: { color: color.wrong, fontFamily: font.family.bodyStrong },
   dimmed: { color: color.textMuted },
 };
 
@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     lineHeight: font.size.md * 1.4,
   },

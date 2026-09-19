@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     borderTopColor: color.border,
   },
   barLabel: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     letterSpacing: 1.4,
     color: color.textFaint,
@@ -170,18 +171,20 @@ const styles = StyleSheet.create({
     marginBottom: space.lg,
   },
   fullLabel: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     letterSpacing: 1.6,
     color: color.textFaint,
   },
   fullNota: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     textAlign: 'center',
   },
   fullCerrar: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
     paddingVertical: space.md,
     paddingHorizontal: space.xl,

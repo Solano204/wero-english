@@ -82,5 +82,5 @@ const styles = StyleSheet.create({
     marginLeft: -10,
     marginTop: -10,
   },
-  glifo: { fontSize: 20, fontWeight: font.weight.bold },
+  glifo: { fontSize: 20, fontFamily: font.family.display },
 });

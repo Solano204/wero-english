@@ -159,11 +159,12 @@ const styles = StyleSheet.create({
   warnHead: {
     fontSize: font.size.xs,
     color: color.riskWarn,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.bodyStrong,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   warnBody: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.text,
     lineHeight: font.size.md * 1.5,
@@ -174,9 +175,10 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   blockBody: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.text,
     lineHeight: font.size.md * 1.5,

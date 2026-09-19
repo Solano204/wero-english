@@ -139,14 +139,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: color.accentSoft,
   },
-  candadoTxt: { fontSize: 24, color: color.accent },
+  candadoTxt: { fontFamily: font.family.body, fontSize: 24, color: color.accent },
   titulo: {
     fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
   },
   detalle: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.textMuted,
     textAlign: 'center',
@@ -154,6 +155,6 @@ const styles = StyleSheet.create({
   },
   trato: { gap: space.sm, paddingVertical: space.sm },
   punto: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
-  check: { color: color.accent, fontSize: font.size.sm, fontWeight: font.weight.bold },
-  puntoTxt: { flex: 1, fontSize: font.size.sm, color: color.text, lineHeight: font.size.sm * 1.5 },
+  check: { color: color.accent, fontSize: font.size.sm, fontFamily: font.family.bodyStrong },
+  puntoTxt: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.text, lineHeight: font.size.sm * 1.5 },
 });

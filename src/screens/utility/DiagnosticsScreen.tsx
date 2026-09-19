@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Header, Screen } from '@/components/base';
+import { Card, Header, Screen } from '@/components/base';
 import { contentHealth } from '@/store/content';
 import { BUNDLED_COUNT } from '@/assets/bundled';
 import { countEntries } from '@/db/seed';
@@ -53,15 +53,6 @@ export function DiagnosticsScreen() {
         <Line label="Medios en el binario" value={String(BUNDLED_COUNT)} />
         <Line label="Medios descargados" value={`${mb.toFixed(1)} MB`} />
       </Card>
-
-      {__DEV__ ? (
-        <Button
-          label="Probar fuentes (temporal)"
-          variant="secondary"
-          onPress={() => nav.navigate('FuentesPrueba')}
-          full
-        />
-      ) : null}
     </Screen>
   );
 }
@@ -77,6 +68,7 @@ function Line({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   intro: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     lineHeight: font.size.sm * 1.6,
@@ -89,17 +81,17 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingVertical: space.md,
   },
-  dot: { fontSize: font.size.md },
+  dot: { fontFamily: font.family.body, fontSize: font.size.md },
   ok: { color: color.correct },
   bad: { color: color.riskStrong },
-  name: { flex: 1, fontSize: font.size.sm, color: color.text },
-  count: { fontSize: font.size.sm, color: color.textMuted },
+  name: { flex: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.text },
+  count: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   summary: { marginTop: space.lg, gap: space.sm },
   line: { flexDirection: 'row', justifyContent: 'space-between' },
-  lineLabel: { fontSize: font.size.sm, color: color.textMuted },
+  lineLabel: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   lineValue: {
     fontSize: font.size.sm,
     color: color.text,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
 });

@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     letterSpacing: 0.9,
     textTransform: 'uppercase',
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   stage: {
     flex: 1,
@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
   },
   listen: { alignItems: 'center', gap: space.md },
   hintLine: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
     color: color.text,
     textAlign: 'center',
     lineHeight: font.size.xl * 1.35,
-    fontWeight: font.weight.medium,
+    fontFamily: font.family.body,
   },
   reveal: { alignItems: 'center', gap: space.lg },
   options: { gap: space.md },
@@ -325,6 +326,7 @@ const styles = StyleSheet.create({
     borderColor: color.border,
     paddingHorizontal: space.lg,
     color: color.text,
+    fontFamily: font.family.body,
     fontSize: font.size.lg,
   },
   inputOk: { borderColor: color.correct },

@@ -176,10 +176,10 @@ const styles = StyleSheet.create({
   icon: { marginRight: 2 },
   label: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     letterSpacing: 0.2,
   },
-  labelLg: { fontSize: font.size.lg },
+  labelLg: { fontFamily: font.family.body, fontSize: font.size.lg },
 });
 
 export const BUTTON_PRESS_MS = duration.instant;

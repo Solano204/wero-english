@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.xl,
   },
   instruction: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     textAlign: 'center',
@@ -236,11 +237,11 @@ const styles = StyleSheet.create({
   audioRow: { flexDirection: 'row', gap: space.sm },
   options: { gap: space.md, marginTop: space.lg },
   footer: { marginTop: space.lg, gap: space.sm, alignItems: 'center' },
-  picked: { fontSize: font.size.xs, color: color.textFaint },
+  picked: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   result: { marginTop: space.lg, gap: space.sm },
   resultHead: {
     fontSize: font.size.sm,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.bodyStrong,
     color: color.correct,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -248,14 +249,14 @@ const styles = StyleSheet.create({
   real: {
     fontSize: font.size.lg,
     color: color.text,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
   },
-  formal: { fontSize: font.size.sm, color: color.textMuted },
+  formal: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   spanishRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
     marginTop: space.xs,
   },
-  spanish: { flex: 1, fontSize: font.size.md, color: color.textMuted },
+  spanish: { flex: 1, fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
 });

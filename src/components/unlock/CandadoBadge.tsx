@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: color.accentSoft,
   },
-  glifo: { color: color.accent, fontSize: font.size.xs },
-  txt: { color: color.accent, fontSize: font.size.xs, fontWeight: font.weight.semibold },
+  glifo: { color: color.accent, fontFamily: font.family.body, fontSize: font.size.xs },
+  txt: { color: color.accent, fontSize: font.size.xs, fontFamily: font.family.bodyStrong },
 });

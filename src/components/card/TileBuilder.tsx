@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lineaVacia: { justifyContent: 'center' },
-  placeholder: { color: color.textFaint, fontSize: font.size.sm },
+  placeholder: { color: color.textFaint, fontFamily: font.family.body, fontSize: font.size.sm },
   banco: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   ficha: {
     minHeight: 42,
@@ -188,11 +188,11 @@ const styles = StyleSheet.create({
     borderColor: color.surface,
   },
   fichaPress: { opacity: 0.7 },
-  fichaTexto: { color: color.text, fontSize: font.size.md },
+  fichaTexto: { color: color.text, fontFamily: font.family.body, fontSize: font.size.md },
   fichaTextoPuesta: {
     color: color.accent,
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   textoGastado: { color: 'transparent' },
   acciones: {
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: space.md,
   },
-  borrar: { color: color.textMuted, fontSize: font.size.sm },
+  borrar: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
   borrarApagado: { color: color.textFaint, opacity: 0.5 },
   revisar: {
     minHeight: 48,
@@ -216,6 +216,6 @@ const styles = StyleSheet.create({
   revisarTexto: {
     color: color.onAccent,
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
 });

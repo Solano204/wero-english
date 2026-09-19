@@ -68,13 +68,15 @@ const styles = StyleSheet.create({
   wrap: { gap: space.sm, alignItems: 'center' },
   phrase: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
     lineHeight: font.size.xxl * 1.25,
   },
-  phraseMd: { fontSize: font.size.xl, lineHeight: font.size.xl * 1.3 },
+  phraseMd: { fontFamily: font.family.body, fontSize: font.size.xl, lineHeight: font.size.xl * 1.3 },
   ipa: {
+    fontFamily: font.family.ipa,
     fontSize: font.size.md,
     color: color.textMuted,
     textAlign: 'center',
@@ -92,6 +94,7 @@ const styles = StyleSheet.create({
     marginTop: space.sm,
   },
   spanish: {
+    fontFamily: font.family.body,
     fontSize: font.size.lg,
     color: color.textMuted,
     textAlign: 'center',

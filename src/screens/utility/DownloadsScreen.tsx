@@ -158,6 +158,7 @@ export function DownloadsScreen() {
 
 const styles = StyleSheet.create({
   intro: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     lineHeight: font.size.sm * 1.6,
@@ -169,12 +170,12 @@ const styles = StyleSheet.create({
   headText: { flex: 1 },
   name: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
-  meta: { fontSize: font.size.xs, color: color.textFaint },
-  included: { fontSize: font.size.sm, color: color.correct },
+  meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  included: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.correct },
   progress: { gap: space.xs },
-  progressText: { fontSize: font.size.xs, color: color.textFaint },
-  error: { fontSize: font.size.sm, color: color.riskStrong },
+  progressText: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.riskStrong },
 });

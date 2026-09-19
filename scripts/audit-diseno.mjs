@@ -49,6 +49,14 @@ const ACC1_REALES = [
   { archivo: 'src/screens/extras/GramaticaTemaScreen.tsx', patron: /Escuchar todos/, motivo: () => '(discutible) única acción de la pantalla y es `ghost`' },
 ];
 
+/** TIPO-4: estilos de 28 px o más que no son títulos, revisados a mano. */
+const TIPO4_NO_ES_TITULO = {
+  'src/components/base/EmptyState.tsx:emoji': 'es un emoji, no texto',
+  'src/components/base/Card.tsx:portadaVacia': 'inicial suelta de una portada pendiente (`textSobrePortada`), no un título',
+  'src/components/card/SceneImage.tsx:inicial': 'inicial suelta de una imagen pendiente (`textSobrePortada`), no un título',
+  'src/screens/games/GameEndScreen.tsx:estrellas': 'fila de glifos ★: el espaciado positivo los separa, con negativo se pisarían',
+};
+
 /** Colecciones grandes pintadas con `.map` dentro de un ScrollView, sin virtualizar. Revisado a mano. */
 const LISTAS_SIN_VIRTUALIZAR = [
   { archivo: 'src/screens/extras/ErrorsScreen.tsx', patron: /lista\.map\(/, motivo: 'hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render' },
@@ -179,7 +187,7 @@ function contrastes(tokens) {
 
 // ── auditoría estática ───────────────────────────────────────────────────
 function auditaEstatica(archivos) {
-  const H = { gradiente: [], fuente: [], cuerpoMd: [], cuerpoSm: [], cuerpoSmResto: new Map(), titulo: [], lineHeight: [], espacio: [], tactil: [], sombra: [], propio: [], emoji: [], glifo: [], botones: [] };
+  const H = { gradiente: [], fuente: [], cuerpoMd: [], cuerpoSm: [], cuerpoSmResto: new Map(), titulo: [], tipo4Descartados: [], lineHeight: [], espacio: [], tactil: [], sombra: [], propio: [], emoji: [], glifo: [], botones: [] };
   for (const { r, src, lines } of archivos) {
     const enTema = r.startsWith('src/theme/');
     lines.forEach((l, i) => {
@@ -189,7 +197,7 @@ function auditaEstatica(archivos) {
       if (emojis.length) H.emoji.push({ r, linea: i + 1, txt: [...new Set(emojis)].join(' ') });
       const glifos = [...codigo.matchAll(/[←-⇿■-◿☀-➿⬀-⯿⌀-⏿\u{1D100}-\u{1D1FF}›‹]/gu)].map((m) => m[0]).filter((g) => !emojis.includes(g));
       if (glifos.length) H.glifo.push({ r, linea: i + 1, txt: [...new Set(glifos)].join(' ') });
-      if (/fontFamily/.test(l)) H.fuente.push({ r, linea: i + 1, txt: l.trim() });
+      if (/fontFamily/.test(l) && !/font\.family\./.test(l)) H.fuente.push({ r, linea: i + 1, txt: l.trim() });
       if (/<LinearGradient/.test(l)) H.gradiente.push({ r, linea: i + 1 });
     });
     if (!enTema && !r.startsWith('src/components/base/Button')) {
@@ -213,7 +221,9 @@ function evaluaEstilo(e, r, enTema, H) {
   if (fsz && tam !== null && tam >= 28) {
     const ls = get('letterSpacing'); const v = ls ? num(ls.v) : null;
     if (!(v !== null && v <= -0.0099 * tam && v >= -0.0201 * tam)) {
-      H.titulo.push({ r, linea: fsz.linea, txt: `${e.nombre}: ${tam} px, letterSpacing ${ls ? ls.v : 'sin definir'} (debe estar entre ${(-0.02 * tam).toFixed(2)} y ${(-0.01 * tam).toFixed(2)})` });
+      const descarte = TIPO4_NO_ES_TITULO[`${r}:${e.nombre}`];
+      if (descarte) H.tipo4Descartados.push({ r, linea: fsz.linea, txt: `${e.nombre}: ${descarte}` });
+      else H.titulo.push({ r, linea: fsz.linea, txt: `${e.nombre}: ${tam} px, letterSpacing ${ls ? ls.v : 'sin definir'} (debe estar entre ${(-0.02 * tam).toFixed(2)} y ${(-0.01 * tam).toFixed(2)})` });
     }
   }
   const lh = get('lineHeight');
@@ -470,7 +480,7 @@ ${c.C.fallos.map((f) => `- \`${f.t}\` sobre \`${f.s}\`: ${f.v.toFixed(2)}`).join
 
 ## TIPOGRAFÍA
 
-**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** \`src/theme/typography.ts\` no define \`fontFamily\`: el texto usa la fuente del sistema, que en Android es **Roboto**. \`font.ipa = 'CharisSIL'\` (\`tokens.ts:318\`) no se carga en ningún lado. Ocurrencias de \`fontFamily\`:
+**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), cargadas en \`App.tsx\` con \`useFonts\` (\`src/theme/fuentes.ts\`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
 ${L(c.H.fuente)}
 
 **TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo \`font.size.md\` vale **15** (\`tokens.ts:305\`) y \`text.body\` y \`text.bodyMuted\` lo usan (\`typography.ts:29-40\`). Usos de \`md\` (${c.H.cuerpoMd.length}):
@@ -486,6 +496,7 @@ ${L(c.H.lineHeight)}
 
 **TIPO-4 · Títulos ≥ 28 px con letterSpacing de −1% a −2%:**
 ${L(c.H.titulo)}
+${c.H.tipo4Descartados.length ? '\nDescartados (28 px o más, pero no son títulos):\n' + L(c.H.tipo4Descartados) : ''}
 
 ## ESPACIADO
 
@@ -606,7 +617,7 @@ function main() {
     modos: leeTags(practicar.src, 'Modo').length,
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),
     sinEscala: !/accent(50|100|200|300|400|500|600|700|800|900)\b/.test(tokens),
-    tipo1: 1 + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.filter((h) => !/font\.ipa/.test(h.txt)).length,
+    tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.length,
     sombras: coloreadas + H.sombra.length + H.propio.length,
   };
   const previo = leePrevio();

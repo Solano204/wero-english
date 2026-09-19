@@ -378,16 +378,18 @@ const styles = StyleSheet.create({
     borderColor: color.border,
   },
   chipOn: { backgroundColor: color.accentSoft, borderColor: color.accent },
-  chipText: { fontSize: font.size.sm, color: color.textMuted },
-  chipTextOn: { color: color.accent, fontWeight: font.weight.semibold },
+  chipText: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  chipTextOn: { color: color.accent, fontFamily: font.family.bodyStrong },
 
   list: { gap: space.sm, marginTop: space.sm },
   card: { gap: space.md },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  // Charis SIL solo trae Regular: se compensa con tamaño, no con peso.
   symbol: {
-    fontSize: font.size.xxl,
+    fontFamily: font.family.ipa,
+    fontSize: 36,
+    letterSpacing: 36 * -0.015,
     color: color.accent,
-    fontWeight: font.weight.bold,
     minWidth: 58,
   },
   cardText: { flex: 1 },
@@ -399,12 +401,12 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
-  anchor: { fontSize: font.size.sm, color: color.textMuted },
+  anchor: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 
-  enPreparacion: { fontSize: font.size.sm, color: color.textFaint },
+  enPreparacion: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint },
   detail: { gap: space.md, marginTop: space.sm },
   section: { gap: space.xs },
   subhead: {
@@ -412,9 +414,10 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   sectionBody: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.text,
     lineHeight: font.size.sm * 1.6,
@@ -426,10 +429,10 @@ const styles = StyleSheet.create({
   wordEn: {
     fontSize: font.size.md,
     color: color.text,
-    fontWeight: font.weight.medium,
+    fontFamily: font.family.body,
   },
-  wordIpa: { fontSize: font.size.xs, color: color.textMuted },
-  wordEs: { fontSize: font.size.sm, color: color.textFaint },
+  wordIpa: { fontFamily: font.family.ipa, fontSize: font.size.xs, color: color.textMuted },
+  wordEs: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint },
 
   pair: {
     flexDirection: 'row',
@@ -443,9 +446,9 @@ const styles = StyleSheet.create({
   pairWord: {
     fontSize: font.size.md,
     color: color.text,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
-  pairIpa: { fontSize: font.size.xs, color: color.textMuted },
-  pairEs: { fontSize: font.size.xs, color: color.textFaint },
-  vs: { color: color.textFaint, fontSize: font.size.lg },
+  pairIpa: { fontFamily: font.family.ipa, fontSize: font.size.xs, color: color.textMuted },
+  pairEs: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  vs: { color: color.textFaint, fontFamily: font.family.body, fontSize: font.size.lg },
 });

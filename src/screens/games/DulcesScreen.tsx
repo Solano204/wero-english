@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   jugadas: {
     fontSize: font.size.sm,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.accent,
   },
   medio: { flex: 1 },
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
   meta: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   punto: { width: 12, height: 12, borderRadius: 6 },
   metaCuerpo: { flex: 1, gap: 2 },
-  metaFrase: { fontSize: font.size.xs, color: color.textMuted },
+  metaFrase: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   tablero: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -724,6 +724,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
   },
   pieNota: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
@@ -736,14 +737,15 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 0.9,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   preguntaFrase: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
   },
-  preguntaAyuda: { fontSize: font.size.sm, color: color.textMuted },
+  preguntaAyuda: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   opcion: {
     minHeight: 52,
     justifyContent: 'center',
@@ -764,14 +766,14 @@ const styles = StyleSheet.create({
     borderColor: color.wrong,
     backgroundColor: color.wrongSoft,
   },
-  opcionTexto: { fontSize: font.size.md, color: color.text },
+  opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   seguir: { alignSelf: 'center', marginTop: space.sm, padding: space.sm },
   seguirPress: { opacity: 0.6 },
   seguirTexto: {
     fontSize: font.size.sm,
     color: color.textFaint,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontSize: font.size.md },
+  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });

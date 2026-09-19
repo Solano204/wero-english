@@ -37,13 +37,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
   },
-  count: { fontSize: font.size.sm, color: color.textFaint },
+  count: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint },
   action: {
     fontSize: font.size.sm,
     color: color.accent,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
 });

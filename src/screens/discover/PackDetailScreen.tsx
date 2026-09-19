@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
   sep: { height: space.sm },
   empty: {
     color: color.textMuted,
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     textAlign: 'center',
     marginTop: space.xxl,

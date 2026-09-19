@@ -493,7 +493,7 @@ export function ColmenaScreen() {
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  contador: { fontSize: font.size.xs, color: color.textFaint },
+  contador: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   reloj: { marginTop: space.sm },
   body: { flex: 1 },
   bodyContenido: {
@@ -511,11 +511,12 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     letterSpacing: 0.9,
     textTransform: 'uppercase',
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   pista: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
   },
@@ -532,7 +533,7 @@ const styles = StyleSheet.create({
   escucharPress: { opacity: 0.75 },
   escucharTexto: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.accent,
   },
   escucharTextoApagado: { color: color.textFaint },
@@ -558,7 +559,7 @@ const styles = StyleSheet.create({
   huecoTexto: {
     fontSize: font.size.xl,
     color: color.text,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
   },
   letras: {
     flexDirection: 'row',
@@ -580,17 +581,18 @@ const styles = StyleSheet.create({
   letraTexto: {
     fontSize: font.size.xl,
     color: color.text,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
   },
   letraTextoOff: { color: 'transparent' },
   revelado: { alignItems: 'center', gap: space.xs },
   frase: {
     fontSize: font.size.lg,
     color: color.correct,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     textAlign: 'center',
   },
   fraseEs: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     textAlign: 'center',
@@ -602,10 +604,11 @@ const styles = StyleSheet.create({
   pieRow: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
   grow: { flex: 1 },
   nota: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontSize: font.size.md },
+  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });

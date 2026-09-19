@@ -309,13 +309,21 @@ export const font = {
     xxl: 28,
     display: 34,
   },
-  weight: {
-    regular: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
+  /**
+   * Un nombre por peso: con fuentes propias, `fontWeight` no elige la cara
+   * (en Android inventa un negrita sintético), así que el peso va en la
+   * familia. Los nombres son las llaves de `fuentes.ts`.
+   *
+   * Bricolage Grotesque para títulos y cifras grandes; Instrument Sans para
+   * todo lo demás; Charis SIL solo para IPA.
+   */
+  family: {
+    display: 'BricolageGrotesque-Bold',
+    heading: 'BricolageGrotesque-SemiBold',
+    body: 'InstrumentSans-Regular',
+    bodyStrong: 'InstrumentSans-SemiBold',
+    ipa: 'CharisSIL',
   },
-  ipa: 'CharisSIL',
 } as const;
 
 export const duration = {

@@ -150,17 +150,19 @@ function Row({
 const styles = StyleSheet.create({
   title: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     marginBottom: space.lg,
   },
   hero: { gap: space.lg },
   heroRow: { flexDirection: 'row', justifyContent: 'space-around' },
   big: { alignItems: 'center', gap: 2 },
-  bigValue: { fontSize: 40, fontWeight: font.weight.bold },
-  bigLabel: { fontSize: font.size.xs, color: color.textMuted },
+  bigValue: { fontSize: 40, letterSpacing: 40 * -0.015, fontFamily: font.family.display },
+  bigLabel: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   overall: { gap: space.sm },
   overallText: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
   },
   barSlot: { flex: 1, justifyContent: 'flex-end' },
   bar: { width: '100%', borderRadius: 3 },
-  noData: { color: color.textMuted, fontSize: font.size.sm },
+  noData: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
 
   rows: { gap: space.sm },
   row: {
@@ -184,10 +186,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: space.md,
   },
-  rowLabel: { fontSize: font.size.md, color: color.text },
+  rowLabel: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   rowValue: {
     fontSize: font.size.md,
     color: color.textMuted,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
 });

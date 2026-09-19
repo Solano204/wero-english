@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   portada: { alignItems: 'center', justifyContent: 'center', padding: space.md },
   portadaVacia: {
     fontSize: 34,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     letterSpacing: 2,
     color: color.textSobrePortada,
   },

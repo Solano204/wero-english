@@ -245,7 +245,7 @@ export function MinimalPairsScreen() {
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  contador: { fontSize: font.size.xs, color: color.textFaint },
+  contador: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   body: {
     flex: 1,
     paddingHorizontal: space.lg,
@@ -258,33 +258,36 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     letterSpacing: 0.9,
     textTransform: 'uppercase',
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   palabra: {
     fontSize: font.size.display,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.display * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
   },
-  significado: { fontSize: font.size.md, color: color.textMuted },
+  significado: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
   contraste: {
     alignSelf: 'stretch',
     backgroundColor: color.surfaceAlt,
     borderRadius: radius.md,
   },
   contrasteTexto: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     textAlign: 'center',
   },
-  confusa: { color: color.riskWarn, fontWeight: font.weight.semibold },
+  confusa: { color: color.riskWarn, fontFamily: font.family.bodyStrong },
   resultado: { alignSelf: 'stretch', gap: space.sm },
   resultadoCard: { gap: 4 },
   resultadoTitulo: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
-  resultadoCuerpo: { fontSize: font.size.sm, color: color.textMuted },
+  resultadoCuerpo: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   rendicion: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
@@ -295,6 +298,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   privacidad: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',

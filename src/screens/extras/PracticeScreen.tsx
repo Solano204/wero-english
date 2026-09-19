@@ -298,18 +298,20 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
   },
   repaso: { marginBottom: space.md },
   repasoTitle: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
     marginBottom: 4,
   },
-  repasoBody: { fontSize: font.size.sm, color: color.textMuted },
+  repasoBody: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   nota: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     marginBottom: space.sm,
@@ -324,12 +326,12 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
     flexShrink: 1,
   },
-  itemExtra: { fontSize: font.size.xs, color: color.textFaint },
-  itemBody: { fontSize: font.size.sm, color: color.textMuted },
+  itemExtra: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  itemBody: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   reto: { gap: space.sm },
   retoTop: {
     flexDirection: 'row',
@@ -338,13 +340,13 @@ const styles = StyleSheet.create({
   },
   retoTitle: {
     fontSize: font.size.md,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
     color: color.text,
   },
   retoNum: {
     fontSize: font.size.md,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.bodyStrong,
     color: color.accent,
   },
-  retoBody: { fontSize: font.size.sm, color: color.textMuted },
+  retoBody: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });

@@ -50,5 +50,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     zIndex: 100,
   },
-  text: { color: color.text, fontSize: font.size.sm, textAlign: 'center' },
+  text: { color: color.text, fontFamily: font.family.body, fontSize: font.size.sm, textAlign: 'center' },
 });

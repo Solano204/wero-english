@@ -74,6 +74,7 @@ export function StuckScreen() {
 
 const styles = StyleSheet.create({
   intro: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     marginBottom: space.lg,
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
   list: { gap: space.sm },
   slot: { gap: 2 },
   count: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.riskWarn,
     marginLeft: space.md,

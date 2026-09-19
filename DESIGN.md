@@ -78,23 +78,22 @@ Todo en `src/theme/tokens.ts`.
 
 ## 1.3 Tipografía
 
-- **Familias:** `typography.ts` no define `fontFamily`, así que todo usa la fuente del sistema (San Francisco en iOS, Roboto en Android). `font.ipa = 'CharisSIL'` está declarada pero no se carga (se referencia en `AzarScreen.tsx:321`). `ErrorBoundary` usa `monospace`.
+- **Familias** (`font.family`, `tokens.ts`): **Bricolage Grotesque** para títulos y cifras grandes (`display` 700, `heading` 600), **Instrument Sans** para todo lo demás (`body` 400, `bodyStrong` 600) y **Charis SIL** Regular solo para IPA. `App.tsx` las carga con `useFonts` (`src/theme/fuentes.ts`) y el splash espera. El peso va en la familia: no se usa `fontWeight`.
 - **Tamaños** (`font.size`): `xs 12`, `sm 13`, `md 15`, `lg 18`, `xl 22`, `xxl 28`, `display 34`. Valores sueltos en uso: 44 (inicial y emoji grande), 46 (logo), 64 (marcador final de Caída).
-- **Pesos** (`font.weight`): `regular 400`, `medium 500`, `semibold 600`, `bold 700`.
 - **Estilos compartidos** (`text.*`):
 
-| Estilo | Tamaño | Peso | Line-height |
+| Estilo | Tamaño | Familia | Line-height |
 |---|---|---|---|
-| `display` | 34 | bold | ×1.15 |
-| `h1` | 28 | bold | ×1.2 |
-| `h2` | 22 | semibold | ×1.25 |
-| `h3` | 18 | semibold | — |
-| `body` / `bodyMuted` | 15 | regular | ×1.5 |
-| `small` | 13 | — | ×1.45 |
-| `tiny` | 12 | semibold | — |
-| `ipa` | 15 | — | — (`letterSpacing 0.3`) |
+| `display` | 34 | Bricolage 700 | ×1.15 |
+| `h1` | 28 | Bricolage 700 | ×1.2 |
+| `h2` | 22 | Bricolage 600 | ×1.25 |
+| `h3` | 18 | Bricolage 600 | — |
+| `body` / `bodyMuted` | 15 | Instrument 400 | ×1.5 |
+| `small` | 13 | Instrument 400 | ×1.45 |
+| `tiny` | 12 | Instrument 600 | — |
+| `ipa` | 15 | Charis SIL 400 | — (`letterSpacing 0.3`) |
 
-- **`letterSpacing`** en uso: etiquetas en mayúsculas 0.6 a 0.9; etiqueta de `Button` 0.2; logo −1.2. Los títulos (`display`, `h1`) no lo definen.
+- **`letterSpacing`** en uso: todo texto de 28 px o más lleva −1.5 % de su tamaño (`tamaño * -0.015`); etiquetas en mayúsculas 0.6 a 0.9; etiqueta de `Button` 0.2. Excepciones que no son títulos: emoji, inicial de portada pendiente y fila de ★ (espaciado positivo).
 
 ## 1.4 Espaciado y medidas
 

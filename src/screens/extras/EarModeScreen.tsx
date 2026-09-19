@@ -252,16 +252,18 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   phrase: {
     fontSize: font.size.display,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.display * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
     lineHeight: font.size.display * 1.2,
   },
   spanish: {
+    fontFamily: font.family.body,
     fontSize: font.size.lg,
     color: color.textMuted,
     textAlign: 'center',
@@ -269,6 +271,7 @@ const styles = StyleSheet.create({
   // El idioma que está sonando ahorita, resaltado sobre el otro.
   sonando: { color: color.accent },
   hint: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textFaint,
     textAlign: 'center',

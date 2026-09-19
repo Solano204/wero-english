@@ -413,7 +413,7 @@ export function ParesScreen() {
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  contador: { fontSize: font.size.xs, color: color.textFaint },
+  contador: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   reloj: { marginTop: space.sm, marginBottom: space.md },
   overlay: {
     position: 'absolute',
@@ -438,11 +438,12 @@ const styles = StyleSheet.create({
   },
   overlayEn: {
     fontSize: font.size.xl,
-    fontWeight: font.weight.bold,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
   },
   overlayEs: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.textMuted,
     textAlign: 'center',
@@ -452,9 +453,10 @@ const styles = StyleSheet.create({
   saltarTexto: {
     fontSize: font.size.sm,
     color: color.textFaint,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.bodyStrong,
   },
   instruccion: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     marginBottom: space.md,
@@ -496,6 +498,7 @@ const styles = StyleSheet.create({
   fichaPress: { opacity: 0.75 },
   fichaTexto: {
     color: color.text,
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     textAlign: 'center',
   },
@@ -506,10 +509,11 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   jugadas: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontSize: font.size.md },
+  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });

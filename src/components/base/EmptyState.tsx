@@ -36,14 +36,15 @@ const styles = StyleSheet.create({
     padding: space.xl,
     gap: space.md,
   },
-  emoji: { fontSize: 44 },
+  emoji: { fontFamily: font.family.body, fontSize: 44 },
   title: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
     textAlign: 'center',
   },
   body: {
+    fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.textMuted,
     textAlign: 'center',

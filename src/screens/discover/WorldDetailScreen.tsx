@@ -99,11 +99,11 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: font.size.lg,
-    fontWeight: font.weight.semibold,
+    fontFamily: font.family.heading,
     color: color.text,
     flex: 1,
   },
-  tag: { fontSize: font.size.xs, color: color.correct },
-  desc: { fontSize: font.size.sm, color: color.textMuted },
-  meta: { fontSize: font.size.xs, color: color.textFaint },
+  tag: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.correct },
+  desc: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
 });

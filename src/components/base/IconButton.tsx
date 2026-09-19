@@ -84,7 +84,7 @@ const textos = StyleSheet.create({
 
 const styles = StyleSheet.create({
   base: { alignItems: 'center', justifyContent: 'center' },
-  simbolo: { fontWeight: font.weight.semibold, lineHeight: undefined },
+  simbolo: { fontFamily: font.family.bodyStrong, lineHeight: undefined },
   apagado: { opacity: 0.4 },
   press: { opacity: 0.7, transform: [{ scale: 0.94 }] },
 });

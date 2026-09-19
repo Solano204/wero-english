@@ -299,7 +299,7 @@ export function AzarScreen() {
 }
 
 const styles = StyleSheet.create({
-  contador: { fontSize: font.size.sm, color: color.textFaint },
+  contador: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint },
   cuerpo: { flex: 1, justifyContent: 'center' },
   tarjetaWrap: { width: '100%' },
   tarjeta: { gap: space.md, alignItems: 'center' },
@@ -311,16 +311,18 @@ const styles = StyleSheet.create({
   hueco: { width: '100%', alignItems: 'center' },
   frase: {
     fontSize: font.size.xxl,
-    fontWeight: font.weight.bold,
+    letterSpacing: font.size.xxl * -0.015,
+    fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
   },
   ipa: {
     fontSize: font.size.sm,
     color: color.textFaint,
-    fontFamily: font.ipa,
+    fontFamily: font.family.ipa,
   },
   significado: {
+    fontFamily: font.family.body,
     fontSize: font.size.lg,
     color: color.textMuted,
     textAlign: 'center',
@@ -334,6 +336,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   nota: {
+    fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
     textAlign: 'center',
@@ -350,11 +353,12 @@ const styles = StyleSheet.create({
     marginTop: space.lg,
   },
   aviso: {
+    fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
     marginTop: space.sm,
   },
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  cargando: { color: color.textMuted, fontSize: font.size.md },
+  cargando: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });
