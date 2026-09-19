@@ -93,9 +93,9 @@ export function SettingsScreen() {
             <Button
               key={n}
               label={['Fácil', 'Media', 'Difícil'][n - 1] ?? ''}
-              variant={s.niveles.includes(n) ? 'primary' : 'secondary'}
+              variant="secondary"
               onPress={() => alternarNivel(n)}
-              style={styles.level}
+              style={s.niveles.includes(n) ? styles.levelOn : styles.level}
             />
           ))}
         </View>
@@ -436,6 +436,7 @@ const styles = StyleSheet.create({
   toggleText: { flex: 1 },
   levels: { flexDirection: 'row', gap: space.sm },
   level: { flex: 1 },
+  levelOn: { flex: 1, backgroundColor: color.accentSoft, borderColor: color.accent },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',

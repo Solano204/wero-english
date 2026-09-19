@@ -275,14 +275,6 @@ export const shadow = {
     shadowOffset: { width: 0, height: 18 },
     elevation: 14,
   },
-  /** Halo del acento. Solo para la acción principal. */
-  glow: {
-    shadowColor: '#45D9FF',
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
 } as const;
 
 /** Intensidad del desenfoque. 0 a 100 en expo-blur. */

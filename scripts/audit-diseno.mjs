@@ -42,7 +42,6 @@ const ACC1_NO_CONVIVEN = {
 };
 /** ACC-1 reales: la acción principal no es sólida, o hay varios sólidos a la vez. */
 const ACC1_REALES = [
-  { archivo: 'src/screens/utility/SettingsScreen.tsx', patron: /s\.niveles\.includes\(n\) \? 'primary'/, motivo: () => 'el selector de niveles pinta hasta 3 botones `primary` a la vez, cada uno con `glow`' },
   { archivo: 'src/components/base/EmptyState.tsx', patron: /variant="secondary"/, motivo: (d) => `la acción del estado vacío es \`secondary\` (con borde); hay ${d.actionLabel} usos de \`actionLabel\`` },
   { archivo: 'src/screens/utility/DownloadsScreen.tsx', patron: /Ver anuncio y descargar/, motivo: () => 'la acción principal (descargar) es `secondary`, con borde' },
   { archivo: 'src/screens/extras/ErrorDetailScreen.tsx', patron: /Ver la frase completa/, motivo: () => 'única acción de la pantalla y es `secondary`' },
@@ -554,7 +553,7 @@ ${L(c.H.emoji)}
 **IA-1b · Íconos de un solo set y un solo grosor.** Glifos de texto (▶ ► ■ ✓ ✕ › → ☆…) usados como íconos, mezclados con emojis y con \`IconButton\`:
 ${L(c.H.glifo)}
 
-**IA-3 · Sombras discretas y consistentes; ninguna de color.** \`shadow.glow\` usa \`shadowColor '#45D9FF'\` (\`tokens.ts:277-283\`) y **todo botón \`primary\` la lleva** (\`Button.tsx:144-147\`). \`shadow.card\` (opacidad 0.55, radio 20) y \`shadow.raised\` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
+**IA-3 · Sombras discretas y consistentes; ninguna de color.** El halo cian (\`glow\`) se eliminó: \`primary\` usa \`shadow.soft\` (negra) y la barra de pestañas usa \`shadow.card\`. \`shadow.card\` (opacidad 0.55, radio 20) y \`shadow.raised\` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
 ${L(c.H.propio)}
 ${c.H.sombra.length ? '\nshadowColor que no es negro:\n' + L(c.H.sombra) : ''}
 
@@ -562,7 +561,7 @@ ${c.H.sombra.length ? '\nshadowColor que no es negro:\n' + L(c.H.sombra) : ''}
 
 - **TIPO-3** jerarquía con tamaño y peso, no solo color; **TIPO-5** no mezclar alineaciones en un bloque.
 - **ESP-2** proximidad (lo que va junto, cerca; entre secciones, el doble).
-- **ACC-2** una sola cosa destacada por pantalla: hoy conviven el \`glow\` del botón principal, la superficie \`contraste\`, el filo de luz de cada tarjeta y el acento cian.
+- **ACC-2** una sola cosa destacada por pantalla: hoy conviven el botón principal cian, la superficie \`contraste\`, el filo de luz de cada tarjeta y el acento cian.
 - **MOV-2** acciones frecuentes en la mitad inferior: en los juegos "Saltar" vive en el \`right\` del \`Header\` (arriba a la derecha).
 - **MOV-3** barra inferior: flota (\`TabNavigator.tsx\`, estilo \`bar\`) sobre un \`BlurView\` con filo; tiene fondo propio, así que cumple, pero no va pegada al borde.
 - **MOV-4** padding que empuja el contenido: revisar en dispositivo.

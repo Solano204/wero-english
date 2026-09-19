@@ -34,12 +34,12 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 1 |
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
 | ESP-1 | espaciado fuera de 4/8 | 35 |
-| ACC-1 | acción principal no sólida o varios sólidos a la vez | 5 |
+| ACC-1 | acción principal no sólida o varios sólidos a la vez | 4 |
 | ACC-3 | opciones visibles en Practicar (máximo recomendado 7) | 16 |
 | MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 8 |
 | IA-1 | líneas con emojis | 15 |
 | IA-1b | líneas con glifos de texto como íconos | 53 |
-| IA-3 | sombras de color o fuera de tokens | 3 |
+| IA-3 | sombras de color o fuera de tokens | 0 |
 | EST-carga | pantallas que cargan datos sin estado de carga | 13 |
 | EST-vacio | pantallas que cargan datos sin estado vacío | 6 |
 | EST-error | pantallas que cargan datos sin estado de error | 19 |
@@ -131,10 +131,10 @@ Descartados (28 px o más, pero no son títulos):
 - `src/components/list/EntryRow.tsx:167` — badges: marginTop: 2 = 2
 - `src/components/unlock/CandadoBadge.tsx:24` — wrap: gap: 5 = 5
 - `src/components/unlock/CandadoBadge.tsx:27` — wrap: paddingHorizontal: 10 = 10
-- `src/navigation/TabNavigator.tsx:169` — bar: paddingBottom: 10 = 10
-- `src/navigation/TabNavigator.tsx:170` — bar: paddingTop: 10 = 10
-- `src/navigation/TabNavigator.tsx:186` — label: marginTop: 2 = 2
-- `src/navigation/TabNavigator.tsx:188` — item: paddingTop: 2 = 2
+- `src/navigation/TabNavigator.tsx:170` — bar: paddingBottom: 10 = 10
+- `src/navigation/TabNavigator.tsx:171` — bar: paddingTop: 10 = 10
+- `src/navigation/TabNavigator.tsx:183` — label: marginTop: 2 = 2
+- `src/navigation/TabNavigator.tsx:185` — item: paddingTop: 2 = 2
 - `src/screens/entry/OnboardingScreen.tsx:471` — previa: gap: 2 = 2
 - `src/screens/extras/ContractionsScreen.tsx:177` — itemText: gap: 2 = 2
 - `src/screens/extras/ErrorsScreen.tsx:129` — cross: marginTop: 1 = 1
@@ -155,7 +155,6 @@ Descartados (28 px o más, pero no son títulos):
 ## JERARQUÍA Y ACCIÓN
 
 **ACC-1 · Una sola acción principal, botón sólido de alto contraste.** `Button` tiene 4 variantes: `primary` (cian sólido), `secondary` (con borde), `ghost` y `danger` (`Button.tsx:143-158`). Revisado leyendo cada render, **los hallazgos reales son:**
-- `src/screens/utility/SettingsScreen.tsx:96` — el selector de niveles pinta hasta 3 botones `primary` a la vez, cada uno con `glow`
 - `src/components/base/EmptyState.tsx:25` — la acción del estado vacío es `secondary` (con borde); hay 11 usos de `actionLabel`
 - `src/screens/utility/DownloadsScreen.tsx:134` — la acción principal (descargar) es `secondary`, con borde
 - `src/screens/extras/ErrorDetailScreen.tsx:90` — única acción de la pantalla y es `secondary`
@@ -258,16 +257,15 @@ Estilos interactivos con alto menor a 48 (verificar si llevan `hitSlop`):
 - `src/screens/utility/DeckScreen.tsx:39` — ☆
 - `src/screens/utility/DiagnosticsScreen.tsx:44` — ●
 
-**IA-3 · Sombras discretas y consistentes; ninguna de color.** `shadow.glow` usa `shadowColor '#45D9FF'` (`tokens.ts:277-283`) y **todo botón `primary` la lleva** (`Button.tsx:144-147`). `shadow.card` (opacidad 0.55, radio 20) y `shadow.raised` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
-- `src/navigation/TabNavigator.tsx:172` — bar: shadowOpacity 0.6 (sombra propia fuera de tokens)
-- `src/navigation/TabNavigator.tsx:173` — bar: shadowRadius 24 (sombra propia fuera de tokens)
+**IA-3 · Sombras discretas y consistentes; ninguna de color.** El halo cian (`glow`) se eliminó: `primary` usa `shadow.soft` (negra) y la barra de pestañas usa `shadow.card`. `shadow.card` (opacidad 0.55, radio 20) y `shadow.raised` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
+- (ninguno)
 
 
 ## Revisión manual (no se puede medir estáticamente)
 
 - **TIPO-3** jerarquía con tamaño y peso, no solo color; **TIPO-5** no mezclar alineaciones en un bloque.
 - **ESP-2** proximidad (lo que va junto, cerca; entre secciones, el doble).
-- **ACC-2** una sola cosa destacada por pantalla: hoy conviven el `glow` del botón principal, la superficie `contraste`, el filo de luz de cada tarjeta y el acento cian.
+- **ACC-2** una sola cosa destacada por pantalla: hoy conviven el botón principal cian, la superficie `contraste`, el filo de luz de cada tarjeta y el acento cian.
 - **MOV-2** acciones frecuentes en la mitad inferior: en los juegos "Saltar" vive en el `right` del `Header` (arriba a la derecha).
 - **MOV-3** barra inferior: flota (`TabNavigator.tsx`, estilo `bar`) sobre un `BlurView` con filo; tiene fondo propio, así que cumple, pero no va pegada al borde.
 - **MOV-4** padding que empuja el contenido: revisar en dispositivo.
@@ -367,4 +365,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":5,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":3,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":35,"ACC-1":4,"ACC-3":16,"MOV-1":8,"IA-1":15,"IA-1b":53,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":19,"TXT-1":6,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->

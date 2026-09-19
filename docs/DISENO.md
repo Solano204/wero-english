@@ -132,7 +132,7 @@ altura.** Por eso pasaron de tintadas y suaves a negras y densas.
 - `soft` — controles
 - `card` — tarjetas
 - `raised` — la que manda
-- `glow` — halo cian, **solo la acción principal**
+- ~~`glow`~~ — halo cian; se eliminó (IA-3: sin sombras de color). La acción principal usa `soft`
 
 Regla: una sombra negra bajo un botón encendido no se ve. Lo que le da
 volumen es el halo de su propio color.

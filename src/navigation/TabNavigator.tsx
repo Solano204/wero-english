@@ -12,7 +12,7 @@ import Animated, {
 import { ExploreScreen } from '@/screens/discover';
 import { PracticeScreen } from '@/screens/extras';
 import { ProgressScreen } from '@/screens/utility';
-import { color, duration, filoLuz, font, radius, sol, space } from '@/theme';
+import { color, duration, filoLuz, font, radius, shadow, sol, space } from '@/theme';
 import { AdBar } from '@/components/base';
 import { useMovimientoReducido } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -165,13 +165,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderRadius: radius.lg,
     backgroundColor: 'transparent',
+    ...shadow.card,
     elevation: 0,
     paddingBottom: 10,
     paddingTop: 10,
-    shadowColor: color.shadow,
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 14 },
   },
   filo: { flex: 1, borderRadius: radius.lg, padding: 1 },
   filoInterior: {

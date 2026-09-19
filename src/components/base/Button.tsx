@@ -143,10 +143,10 @@ const textColor: Record<Variant, string> = {
 const variants: Record<Variant, ViewStyle> = {
   primary: {
     backgroundColor: color.accent,
-    // Sin franja inferior: la pastilla va limpia. Lo que le da volumen
-    // sobre tinta es el halo del propio acento, no un borde de dos
-    // tonos. Una sombra negra bajo un botón encendido no se ve.
-    ...shadow.glow,
+    // Sin franja inferior ni halo de color: el cian sólido ya es lo más
+    // encendido de la pantalla y una sombra tintada compite con él (IA-3).
+    // La sombra negra `soft` solo lo despega del fondo.
+    ...shadow.soft,
   },
   secondary: {
     backgroundColor: color.surfaceAlt,

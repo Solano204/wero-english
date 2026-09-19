@@ -117,9 +117,8 @@ Todo en `src/theme/tokens.ts`.
 | `soft` | `#000` | 0.40 | 10 | 4 | 3 |
 | `card` | `#000` | 0.55 | 20 | 10 | 7 |
 | `raised` | `#000` | 0.70 | 32 | 18 | 14 |
-| `glow` | `#45D9FF` | 0.45 | 20 | 8 | 8 |
 
-`glow` es el halo del acento y lo lleva todo botón `primary`. La barra de pestañas define su propia sombra (0.6, radio 24, offset 14).
+No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas usa `card` (con `elevation 0`).
 
 **Desenfoque** (`blur`, expo-blur): `suave 18`, `medio 32`, `fuerte 55`. Se usa en la barra de pestañas y en el muro de desbloqueo.
 
@@ -131,7 +130,7 @@ Todo en `src/theme/tokens.ts`.
 |---|---|
 | `Screen` | Fondo `bg` con el degradado `FONDO` y el resplandor del sol. Props `scroll`, `padded`, `footer` (fijo abajo, con borde superior fino y fondo `bgFin`). Ninguna pantalla redefine fondo ni safe area |
 | `Header` | Fila de mínimo 48 dp. Flecha atrás a la izquierda (ancho fijo 56), título `lg` semibold centrado, subtítulo `sm` muted, lado derecho que crece con su contenido |
-| `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + `glow`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`riskStrong`). Bloqueado: opacidad 0.45. Vibración ligera al tocar |
+| `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`riskStrong`). Bloqueado: opacidad 0.45. Vibración ligera al tocar |
 | `IconButton` | Círculo `iconoRedondo` 36, 44 o 52, con símbolos de texto |
 | `Card` | Filo de luz de 1 px sobre `surface`, radio `lg`, padding `lg`, `gap md`. Props: `accent` (tiñe el borde), `elevated`, `portada` (degradado o imagen con alto reservado), `onLongPress` |
 | `Badge` | Píldora, texto `sm` semibold (`xs` en `small`) |
