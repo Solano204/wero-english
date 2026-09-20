@@ -26,6 +26,8 @@ export {
   motionEfecto,
   motionCiclo,
   motionPresion,
+  motionPulso,
+  motionSacudida,
   escalon,
   aparecer,
   aparecerSubiendo,

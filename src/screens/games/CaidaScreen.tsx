@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion } from '@/components/feedback';
+import { Trozos, useReaccion, estiloResultado, type Resultado } from '@/components/feedback';
 import { buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -100,6 +100,8 @@ export function CaidaScreen() {
   const [aciertos, setAciertos] = useState(0);
   const [perdio, setPerdio] = useState(false);
   const [fallada, setFallada] = useState<string | null>(null);
+  // Ronda y texto de la ficha acertada: la ronda evita que un texto repetido marque la siguiente.
+  const [acertada, setAcertada] = useState<string | null>(null);
   // Pausa al acertar: congela la caída y bloquea las fichas mientras se
   // oye la frase en inglés y su traducción.
   const [enPausa, setEnPausa] = useState(false);
@@ -230,6 +232,7 @@ export function CaidaScreen() {
   const seCayo = useCallback(() => {
     if (enPausa || !round) return;
     setFallada(null);
+    setAcertada(null);
     haptics.failure();
       reaccion.falla();
     void pausarConVoz(round.entry, false, () => setPerdio(true));
@@ -311,6 +314,7 @@ export function CaidaScreen() {
         return;
       }
 
+      setAcertada(`${idx}|${texto}`);
       haptics.success();
       reaccion.celebra();
       const totalAciertos = aciertosRef.current + 1;
@@ -389,6 +393,7 @@ export function CaidaScreen() {
                 setIdx(0);
                 setAciertos(0);
                 setFallada(null);
+                setAcertada(null);
                 setPerdio(false);
               }}
               full
@@ -472,8 +477,16 @@ export function CaidaScreen() {
         }}
       >
         <Animated.View style={[styles.fila, anim]}>
-          <Ficha texto={izquierda} onPress={() => void responder(izquierda)} />
-          <Ficha texto={derecha} onPress={() => void responder(derecha)} />
+          <Ficha
+            texto={izquierda}
+            resultado={resultadoFicha(izquierda, fallada, acertada, idx)}
+            onPress={() => void responder(izquierda)}
+          />
+          <Ficha
+            texto={derecha}
+            resultado={resultadoFicha(derecha, fallada, acertada, idx)}
+            onPress={() => void responder(derecha)}
+          />
         </Animated.View>
         <View style={styles.piso} />
       </View>
@@ -501,13 +514,32 @@ export function CaidaScreen() {
   );
 }
 
-function Ficha({ texto, onPress }: { texto: string; onPress: () => void }) {
+function resultadoFicha(
+  texto: string,
+  fallada: string | null,
+  acertada: string | null,
+  ronda: number
+): Resultado | null {
+  if (fallada === texto) return 'fallo';
+  return acertada === `${ronda}|${texto}` ? 'acierto' : null;
+}
+
+function Ficha({
+  texto,
+  onPress,
+  resultado,
+}: {
+  texto: string;
+  onPress: () => void;
+  resultado: Resultado | null;
+}) {
   return (
     <Presionable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={texto}
-      style={styles.ficha}
+      resultado={resultado}
+      style={[styles.ficha, resultado && estiloResultado[resultado]]}
     >
       <Text style={styles.fichaTexto} numberOfLines={4}>
         {texto}

@@ -62,7 +62,6 @@ export function FeedbackBand({
   const titular = useMemo(() => (correct ? elegirFrase(ACIERTO) : 'Era esta'), [visible, correct, answer]);
   const y = useSharedValue(240);
   const fade = useSharedValue(0);
-  const verdictScale = useSharedValue(0.9);
 
   useEffect(() => {
     if (visible) {
@@ -72,14 +71,6 @@ export function FeedbackBand({
         duration: reducido ? 0 : motionDuration.rapido,
         easing: motionEasing.entrar,
       });
-      // Solo "Exacto" hace el pop: el fallo no necesita más énfasis del
-      // que ya tiene, es ámbar y ya, nunca un signo de exclamación extra.
-      if (correct && !reducido) {
-        verdictScale.value = 0.9;
-        verdictScale.value = withSpring(1, motionSpring.rebote);
-      } else {
-        verdictScale.value = 1;
-      }
     } else {
       y.value = withTiming(240, {
         duration: reducido ? 0 : motionDuration.rapido,
@@ -90,16 +81,13 @@ export function FeedbackBand({
         easing: motionEasing.salir,
       });
     }
-  }, [visible, correct, reducido, y, fade, verdictScale]);
+  }, [visible, reducido, y, fade]);
 
   const anim = useAnimatedStyle(() => ({
     transform: [{ translateY: y.value }],
     opacity: fade.value,
   }));
 
-  const verdictAnim = useAnimatedStyle(() => ({
-    transform: [{ scale: verdictScale.value }],
-  }));
 
   if (!visible) return null;
 
@@ -124,11 +112,11 @@ export function FeedbackBand({
           accessibilityLabel={`${titular}. ${answer}`}
         >
       <View style={styles.head}>
-        <Animated.Text
-          style={[styles.verdict, correct ? styles.okText : styles.missText, verdictAnim]}
+        <Text
+          style={[styles.verdict, correct ? styles.okText : styles.missText]}
         >
           {titular}
-        </Animated.Text>
+        </Text>
         {nextLabel ? <Text style={styles.next}>{nextLabel}</Text> : null}
       </View>
 

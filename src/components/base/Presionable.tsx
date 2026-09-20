@@ -1,8 +1,9 @@
-import React, { useCallback, useState, type ComponentProps } from 'react';
+import React, { useCallback, useEffect, useState, type ComponentProps } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { motionDuration, motionEasing, motionPresion } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
+import { useValoresResultado, type Resultado } from '@/components/feedback/useEfectoResultado';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -11,13 +12,23 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  *
  * Escala 0.97 en `rapido`. Con "reducir movimiento" no hay escala: solo baja
  * la opacidad mientras el dedo está encima.
+ *
+ * Si la pieza recibe un `resultado`, además hace el pulso de acierto o la
+ * sacudida de fallo (`useEfectoResultado`): todo en una sola transformación.
  */
-export function usePresion() {
+export function usePresion(resultado?: Resultado | null) {
   const reducido = useMovimientoReducido();
   const escala = useSharedValue(1);
   const [abajo, setAbajo] = useState(false);
+  const { dx, pulso, disparar } = useValoresResultado();
 
-  const animado = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+  useEffect(() => {
+    disparar(resultado);
+  }, [resultado, disparar]);
+
+  const animado = useAnimatedStyle(() => ({
+    transform: [{ translateX: dx.value }, { scale: escala.value * pulso.value }],
+  }));
 
   const alPresionar = useCallback(() => {
     if (reducido) {
@@ -45,11 +56,13 @@ export function usePresion() {
 type Props = Omit<PressableProps, 'style'> &
   Pick<ComponentProps<typeof Animated.View>, 'entering' | 'exiting' | 'layout'> & {
     style?: StyleProp<ViewStyle>;
+    /** Acierto: pulso. Fallo: sacudida. El color lo pone quien la usa. */
+    resultado?: Resultado | null;
   };
 
 /** `Pressable` con el feedback unificado. Acepta también `entering`, `exiting` y `layout`. */
-export function Presionable({ style, onPressIn, onPressOut, ...resto }: Props) {
-  const { estilo, alPresionar, alSoltar } = usePresion();
+export function Presionable({ style, resultado, onPressIn, onPressOut, ...resto }: Props) {
+  const { estilo, alPresionar, alSoltar } = usePresion(resultado);
   return (
     <AnimatedPressable
       {...resto}

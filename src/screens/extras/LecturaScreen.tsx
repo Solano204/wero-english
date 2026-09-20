@@ -173,6 +173,7 @@ export function LecturaScreen() {
                     disabled={revelada}
                     accessibilityRole="button"
                     accessibilityLabel={o}
+                    resultado={revelada && elegida ? (esCorrecta ? 'acierto' : 'fallo') : null}
                     style={[
                       styles.opcion,
                       revelada && esCorrecta && styles.opcionBien,

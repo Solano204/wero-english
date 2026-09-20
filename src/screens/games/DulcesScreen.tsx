@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
-import { Estrellas, Trozos, useReaccion } from '@/components/feedback';
+import { Trozos, useReaccion } from '@/components/feedback';
 import {
   clone,
   createBoard,
@@ -99,9 +99,7 @@ export function DulcesScreen() {
   const [pool, setPool] = useState<Entry[]>([]);
   const [objetivos, setObjetivos] = useState<DulceObjetivo[]>([]);
   const [elegida, setElegida] = useState<number | null>(null);
-  /** Sube uno en cada acierto: dispara las estrellas. */
-  const [chispa, setChispa] = useState(0);
-  // Cara y cubitos, ademas de las estrellas.
+  // Cubitos al acertar.
   const reaccion = useReaccion();
   const [jugadas, setJugadas] = useState(JUGADAS_DEF);
   const [resueltas, setResueltas] = useState(0);
@@ -267,9 +265,6 @@ export function DulcesScreen() {
 
       haptics.success();
       void audio.playSuccess();
-      // Relanza el estallido de estrellas. Cambiar el número es lo que
-      // lo dispara; así no hace falta un temporizador para apagarlo.
-      setChispa((c) => c + 1);
       reaccion.celebra();
       setBoard(nuevo);
 
@@ -505,7 +500,6 @@ export function DulcesScreen() {
         ) : undefined
       }
     >
-      <Estrellas disparo={chispa} />
       <Trozos disparo={reaccion.trozos} tinte={color.world.cultura} />
       <View style={styles.top}>
         <Header
@@ -537,6 +531,7 @@ export function DulcesScreen() {
                   disabled={respondiendo}
                   accessibilityRole="button"
                   accessibilityLabel={o}
+                  resultado={respondiendo && o === elegidaOpcion ? (esCorrecta ? 'acierto' : 'fallo') : null}
                   style={[styles.opcion, marcar && esCorrecta && styles.opcionCorrecta, marcar && !esCorrecta && styles.opcionFallada]}
                 >
                   <Text style={styles.opcionTexto}>{o}</Text>

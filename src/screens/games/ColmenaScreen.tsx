@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, ProgressBar, RoundTimer, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion } from '@/components/feedback';
+import { Trozos, useReaccion, useEfectoResultado } from '@/components/feedback';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -21,7 +21,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, layout, radius, space, aparecer } from '@/theme';
+import { color, font, layout, radius, space, aparecer, motionDuration } from '@/theme';
 import type { ColmenaRound, NivelColmena } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -108,10 +108,14 @@ export function ColmenaScreen() {
   const avanzandoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const empezoEn = useRef(Date.now());
-  const shake = useSharedValue(0);
-  const anim = useAnimatedStyle(() => ({
-    transform: [{ translateX: shake.value }],
-  }));
+  const { estilo: estiloHuecos, fallo: sacudirHuecos, acierto: pulsarHuecos } = useEfectoResultado();
+  // El color de error dura lo que el efecto (`base`) y se apaga solo.
+  const [falloLetra, setFalloLetra] = useState(false);
+  useEffect(() => {
+    if (!falloLetra) return undefined;
+    const t = setTimeout(() => setFalloLetra(false), motionDuration.base);
+    return () => clearTimeout(t);
+  }, [falloLetra]);
 
   const carga = useCarga(
     async () => {
@@ -152,11 +156,8 @@ export function ColmenaScreen() {
         haptics.failure();
       reaccion.falla();
         void audio.playFail();
-        shake.value = withSequence(
-          withTiming(-8, { duration: 55 }),
-          withTiming(8, { duration: 55 }),
-          withSpring(0)
-        );
+        sacudirHuecos();
+        setFalloLetra(true);
         return;
       }
 
@@ -171,7 +172,8 @@ export function ColmenaScreen() {
         setResuelta(true);
         setAciertos((a) => a + 1);
         haptics.success();
-      reaccion.celebra();
+        reaccion.celebra();
+        pulsarHuecos();
         void audio.playRoundResultBilingue(true, round.entry.audio_en, round.entry.audio_es);
         if (user) {
           void applyGameGrade(
@@ -184,7 +186,7 @@ export function ColmenaScreen() {
         }
       }
     },
-    [round, resuelta, usadas, armado, shake, user]
+    [round, resuelta, usadas, armado, sacudirHuecos, pulsarHuecos, user]
   );
 
   const usarPista = useCallback(() => {
@@ -440,11 +442,16 @@ export function ColmenaScreen() {
           </Presionable>
         ) : null}
 
-        <Animated.View style={[styles.huecos, anim]}>
+        <Animated.View style={[styles.huecos, estiloHuecos]}>
           {round.objetivo.split('').map((c, i) => (
             <View
               key={`hueco-${i}`}
-              style={[styles.hueco, i < armado.length && styles.huecoLleno]}
+              style={[
+                styles.hueco,
+                i < armado.length && styles.huecoLleno,
+                resuelta && styles.huecoOk,
+                falloLetra && styles.huecoMal,
+              ]}
             >
               <Text style={styles.huecoTexto}>
                 {i < armado.length ? armado[i] : ' '}
@@ -551,6 +558,14 @@ const styles = StyleSheet.create({
   huecoLleno: {
     backgroundColor: color.accentSoft,
     borderBottomColor: color.accent,
+  },
+  huecoOk: {
+    backgroundColor: color.correctSoft,
+    borderBottomColor: color.correct,
+  },
+  huecoMal: {
+    backgroundColor: color.wrongSoft,
+    borderBottomColor: color.wrong,
   },
   huecoTexto: {
     fontSize: font.size.xl,

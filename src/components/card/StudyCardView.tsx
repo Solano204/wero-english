@@ -13,6 +13,7 @@ import { color, font, motionDuration, radius, space, aparecerSubiendo, desaparec
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import type { StudyCard } from '@/types';
+import { useEfectoResultado } from '@/components/feedback';
 
 /**
  * Entrada de la tarjeta: cae con un resorte suave, sin sobrepaso (no es
@@ -59,6 +60,16 @@ export function StudyCardView({
   const prompt = useMemo(() => promptFor(card), [card]);
   const modo = answerMode(card.kind);
   const isTyping = modo === 'type';
+
+  // Con opciones cada `OptionButton` hace su efecto; al armar o escribir la
+  // respuesta, la pieza es todo el bloque.
+  const { estilo: estiloBloque, disparar } = useEfectoResultado();
+  useEffect(() => {
+    if (!locked || modo === 'choice') return;
+    disparar(chosen === card.answer ? 'acierto' : 'fallo');
+    // Solo al bloquearse la tarjeta.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locked]);
 
   // Id estable de la tarjeta. `card` es un objeto nuevo en cada
   // respuesta (el store lo reconstruye), así que depender de él directo
@@ -206,14 +217,16 @@ export function StudyCardView({
       </View>
 
       {modo === 'tiles' ? (
-        <TileBuilder
-          key={`tiles-${card.entry.id}-${card.state.repeticiones}`}
-          tiles={card.options}
-          locked={locked}
-          onSubmit={handleTiles}
-        />
+        <Animated.View style={estiloBloque}>
+          <TileBuilder
+            key={`tiles-${card.entry.id}-${card.state.repeticiones}`}
+            tiles={card.options}
+            locked={locked}
+            onSubmit={handleTiles}
+          />
+        </Animated.View>
       ) : isTyping ? (
-        <View style={styles.typeArea}>
+        <Animated.View style={[styles.typeArea, estiloBloque]}>
           <TextInput
             style={[
               styles.input,
@@ -252,7 +265,7 @@ export function StudyCardView({
               />
             </View>
           ) : null}
-        </View>
+        </Animated.View>
       ) : (
         <View style={styles.options}>
           {card.options.map((opt, i) => (

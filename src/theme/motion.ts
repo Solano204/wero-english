@@ -74,6 +74,12 @@ export const motionPresion = {
   opacidad: 0.7,
 } as const;
 
+/** Acierto: pulso de la pieza (1 → escala → 1 en `base`). */
+export const motionPulso = { escala: 1.04 } as const;
+
+/** Fallo: sacudida horizontal de la pieza, entera dentro de `rapido`. */
+export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
+
 /** Bucles largos. */
 export const motionCiclo = {
   esqueleto: 700,

@@ -14,7 +14,7 @@ import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as ads from '@/services/ads';
 import * as audio from '@/services/audio';
 import { PARTIDA_PERFECTA, TRES_ESTRELLAS, elegirFrase } from '@/utils/frases';
-import { color, font, space, aparecerSubiendo, motionDuration } from '@/theme';
+import { color, font, space, aparecer, aparecerSubiendo, motionDuration } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -75,7 +75,9 @@ export function GameEndScreen() {
   const salir = () => nav.navigate('Main');
 
   const pct = rondas > 0 ? Math.round((aciertos / rondas) * 100) : 0;
-  const merece = rondas >= 5 && pct >= 70;
+  // Buen resultado: dos estrellas o más donde el juego las da (Niveles); en el
+  // resto, cinco rondas o más con el 70 % de aciertos. Solo entonces hay fiesta.
+  const merece = umbrales ? estrellas >= 2 : rondas >= 5 && pct >= 70;
   // Las felicitaciones se eligen una vez por pantalla, no en cada render.
   const perfecta = useMemo(
     () => elegirFrase(PARTIDA_PERFECTA).split('{n}').join(String(rondas)),
@@ -84,10 +86,9 @@ export function GameEndScreen() {
   const tresEstrellas = useMemo(() => elegirFrase(TRES_ESTRELLAS), []);
 
   useEffect(() => {
-    // Una sola vez, al mostrar el resultado: nivel_completo si fue un
-    // buen resultado, el acierto normal si fue uno regular. Nunca el
-    // efecto de fallo aquí, terminar una partida no es un fallo.
-    void (merece ? audio.playNivelCompleto() : audio.playSuccess());
+    // Una sola vez, al mostrar el resultado. Sin buen resultado no suena nada:
+    // ni el acierto ni el fallo, terminar una partida no es ninguno de los dos.
+    if (merece) void audio.playNivelCompleto();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,7 +104,8 @@ export function GameEndScreen() {
        * de la partida sin saber cómo le había ido. Lo primero que hay
        * que poder leer sin buscar es el marcador.
        */}
-      <Animated.View entering={aparecerSubiendo()} style={styles.head}>
+      {/* Con buen resultado el resumen sube; sin él, entra sobrio. */}
+      <Animated.View entering={merece ? aparecerSubiendo() : aparecer()} style={styles.head}>
         <Text style={styles.marcador} maxFontSizeMultiplier={1.2}>
           {aciertos}
           <Text style={styles.marcadorTotal}> / {rondas}</Text>
@@ -145,7 +147,7 @@ export function GameEndScreen() {
       </Animated.View>
 
       {aciertos > 0 ? (
-        <Animated.View entering={aparecerSubiendo(motionDuration.rapido)}>
+        <Animated.View entering={merece ? aparecerSubiendo(motionDuration.rapido) : aparecer(motionDuration.rapido)}>
           <Card style={styles.repaso}>
             <Text style={styles.repasoTexto}>
               {aciertos}{' '}

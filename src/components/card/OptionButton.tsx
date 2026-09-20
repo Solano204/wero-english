@@ -4,8 +4,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import {
@@ -14,7 +12,6 @@ import {
   layout,
   motionDuration,
   motionEasing,
-  motionSpring,
   radius,
   space,
 } from '@/theme';
@@ -42,8 +39,6 @@ interface Props {
  */
 export function OptionButton({ label, state, onPress, disabled, index }: Props) {
   const enter = useSharedValue(0);
-  const shake = useSharedValue(0);
-  const pulse = useSharedValue(1);
   const reducido = useMovimientoReducido();
 
   useEffect(() => {
@@ -58,36 +53,9 @@ export function OptionButton({ label, state, onPress, disabled, index }: Props) 
         );
   }, [enter, reducido, index]);
 
-  useEffect(() => {
-    if (state === 'wrong' && !reducido) {
-      // Corto y horizontal: comunica el fallo sin sentirse un regaño.
-      shake.value = withSequence(
-        withTiming(-7, { duration: 55 }),
-        withTiming(7, { duration: 55 }),
-        withTiming(-4, { duration: 55 }),
-        withTiming(0, { duration: 55 })
-      );
-    }
-    if (state === 'correct') {
-      pulse.value = reducido
-        ? 1
-        : withSequence(
-            withTiming(1.08, {
-              duration: motionDuration.rapido,
-              easing: motionEasing.entrar,
-            }),
-            withSpring(1, motionSpring.suave)
-          );
-    }
-  }, [state, shake, pulse, reducido]);
-
   const anim = useAnimatedStyle(() => ({
     opacity: enter.value,
-    transform: [
-      { translateY: (1 - enter.value) * 12 },
-      { translateX: shake.value },
-      { scale: pulse.value },
-    ],
+    transform: [{ translateY: (1 - enter.value) * 12 }],
   }));
 
   return (
@@ -97,6 +65,7 @@ export function OptionButton({ label, state, onPress, disabled, index }: Props) 
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
+      resultado={state === 'correct' ? 'acierto' : state === 'wrong' ? 'fallo' : null}
       style={{ zIndex: 10 - index }}
     >
       <Animated.View style={[styles.base, stateStyles[state], anim]}>

@@ -22,6 +22,7 @@ import * as haptics from '@/services/haptics';
 import { color, font, radius, space, aparecer } from '@/theme';
 import type { HablaVeredicto, ParMinimoRound } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
+import { useEfectoResultado } from '@/components/feedback';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -52,6 +53,13 @@ export function MinimalPairsScreen() {
   const [idx, setIdx] = useState(0);
   const [escuchando, setEscuchando] = useState(false);
   const [veredicto, setVeredicto] = useState<HablaVeredicto | null>(null);
+  const efecto = useEfectoResultado();
+  const { disparar } = efecto;
+
+  useEffect(() => {
+    if (!veredicto) return;
+    disparar(veredicto.tipo === 'acierto' ? 'acierto' : veredicto.tipo === 'confusa' ? 'fallo' : null);
+  }, [veredicto, disparar]);
   const [aciertos, setAciertos] = useState(0);
   const [fallidos, setFallidos] = useState(0);
 
@@ -191,20 +199,22 @@ export function MinimalPairsScreen() {
 
         {exp ? (
           <Animated.View entering={aparecer()} style={styles.resultado}>
-            <Card
-              accent={acerto ? color.correct : color.wrong}
-              style={styles.resultadoCard}
-            >
-              <Text
-                style={[
-                  styles.resultadoTitulo,
-                  { color: acerto ? color.correct : color.wrong },
-                ]}
+            <Animated.View style={efecto.estilo}>
+              <Card
+                accent={acerto ? color.correct : color.wrong}
+                style={styles.resultadoCard}
               >
-                {exp.titulo}
-              </Text>
-              <Text style={styles.resultadoCuerpo}>{exp.cuerpo}</Text>
-            </Card>
+                <Text
+                  style={[
+                    styles.resultadoTitulo,
+                    { color: acerto ? color.correct : color.wrong },
+                  ]}
+                >
+                  {exp.titulo}
+                </Text>
+                <Text style={styles.resultadoCuerpo}>{exp.cuerpo}</Text>
+              </Card>
+            </Animated.View>
 
             {fallidos >= 3 ? (
               <Text style={styles.rendicion}>

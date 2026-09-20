@@ -4,7 +4,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, RoundTimer, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion } from '@/components/feedback';
+import { Trozos, useReaccion, estiloResultado, useEfectoResultado } from '@/components/feedback';
 import { buildTablero, sonPareja } from '@/domain/pares';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -14,9 +14,10 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, radius, space, aparecer, aparecerZoom, desaparecer } from '@/theme';
+import { color, font, radius, space, aparecer, aparecerZoom, desaparecer, motionDuration, motionEasing } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
+import { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Pares'>;
@@ -333,13 +334,7 @@ export function ParesScreen() {
         {tablero.fichas.map((f) => {
           const fuera = resueltas.includes(f.entryId);
           if (fuera) {
-            return (
-              <Animated.View
-                key={f.id}
-                exiting={desaparecer()}
-                style={[styles.ficha, styles.fichaFuera]}
-              />
-            );
+            return <FichaResuelta key={f.id} texto={f.texto} />;
           }
           const activa = elegida?.id === f.id;
           const falla = fallando.includes(f.id);
@@ -349,6 +344,7 @@ export function ParesScreen() {
               onPress={() => tocar(f)}
               accessibilityRole="button"
               accessibilityLabel={f.texto}
+              resultado={falla ? 'fallo' : null}
               style={[styles.ficha, f.lado === 'en' ? styles.fichaEn : styles.fichaEs, activa && styles.fichaActiva, falla && styles.fichaFalla]}
             >
               <Text style={styles.fichaTexto} numberOfLines={3}>
@@ -397,6 +393,33 @@ export function ParesScreen() {
         />
       </View>
     </Screen>
+  );
+}
+
+/**
+ * Ficha de un par resuelto: pulso con el color de acierto y, pasado `base`,
+ * se apaga. Se queda como hueco invisible para que el tablero no se mueva.
+ */
+function FichaResuelta({ texto }: { texto: string }) {
+  const { estilo, acierto } = useEfectoResultado();
+  const opacidad = useSharedValue(1);
+
+  useEffect(() => {
+    acierto();
+    opacidad.value = withDelay(
+      motionDuration.base,
+      withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
+    );
+  }, [acierto, opacidad]);
+
+  const apagado = useAnimatedStyle(() => ({ opacity: opacidad.value }));
+
+  return (
+    <Animated.View style={[styles.ficha, estiloResultado.acierto, apagado, estilo]}>
+      <Text style={styles.fichaTexto} numberOfLines={3}>
+        {texto}
+      </Text>
+    </Animated.View>
   );
 }
 
@@ -482,7 +505,6 @@ const styles = StyleSheet.create({
     borderColor: color.wrong,
     backgroundColor: color.wrongSoft,
   },
-  fichaFuera: { backgroundColor: 'transparent', borderColor: 'transparent' },
   fichaTexto: {
     color: color.text,
     fontFamily: font.family.body,
