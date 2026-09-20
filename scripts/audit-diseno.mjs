@@ -220,7 +220,7 @@ function contrastes(tokens) {
 
 // ── auditoría estática ───────────────────────────────────────────────────
 function auditaEstatica(archivos) {
-  const H = { gradiente: [], fuente: [], cuerpoMd: [], cuerpoSm: [], cuerpoDescartado: [], cuerpoSmResto: new Map(), titulo: [], tipo4Descartados: [], lineHeight: [], espacio: [], tactil: [], sombra: [], propio: [], emoji: [], glifo: [], botones: [] };
+  const H = { espacioExento: [], gradiente: [], fuente: [], cuerpoMd: [], cuerpoSm: [], cuerpoDescartado: [], cuerpoSmResto: new Map(), titulo: [], tipo4Descartados: [], lineHeight: [], espacio: [], tactil: [], sombra: [], propio: [], emoji: [], glifo: [], botones: [] };
   for (const { r, src, lines } of archivos) {
     const enTema = r.startsWith('src/theme/');
     lines.forEach((l, i) => {
@@ -275,7 +275,9 @@ function evaluaEstilo(e, r, enTema, H) {
       // `padding: 1` es el filo de luz: una envoltura de 1 px con degradado que
       // hace de borde (Card, FeedbackBand, MuroDesbloqueo, barra de pestañas).
       // Es una técnica de dibujo, no un espaciado suelto, así que no cuenta.
-      if (x.k === 'padding' && v === 1) continue;
+      if (x.k === 'padding' && v === 1) { H.espacioExento.push({ r, linea: x.linea, txt: `${e.nombre}: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)` }); continue; }
+      // Un margen negativo de hasta 2 px compensa el grosor de un borde: tampoco es espaciado.
+      if (/^margin/.test(x.k) && v !== null && v < 0 && Math.abs(v) <= 2) { H.espacioExento.push({ r, linea: x.linea, txt: `${e.nombre}: ${x.k} ${v}, compensa un borde de 1 a 2 px` }); continue; }
       if (v !== null && !ESCALA.has(Math.abs(v))) H.espacio.push({ r, linea: x.linea, txt: `${e.nombre}: ${x.k}: ${x.v} = ${v}` });
     }
     if (x.k === 'shadowColor' && !/color\.shadow|'#000'|'#000000'|transparent/.test(x.v)) H.sombra.push({ r, linea: x.linea, txt: `${e.nombre}: shadowColor ${x.v}` });
@@ -615,8 +617,11 @@ ${c.H.tipo4Descartados.length ? '\nDescartados (28 px o más, pero no son títul
 
 ## ESPACIADO
 
-**ESP-1 · Escala 4/8 (4, 8, 12, 16, 24, 32, 48).** Los tokens \`space\` (\`tokens.ts:214-222\`) coinciden con la escala. Las violaciones son valores sueltos o sumas. No se cuenta \`padding: 1\`: es el filo de luz, una técnica de borde.
+**ESP-1 · Escala 4/8 (4, 8, 12, 16, 24, 32, 48).** Los tokens \`space\` (\`tokens.ts:214-222\`) coinciden con la escala. Las violaciones son valores sueltos o sumas. Excepciones válidas, que no cuentan: \`padding: 1\` (el filo de luz), los bordes de 1 a 2 px (\`borderWidth\`, que no son espaciado y el audit no mira) y los márgenes negativos de hasta 2 px que compensan un borde.
 ${L(c.H.espacio)}
+
+**Excepciones revisadas (no cuentan):**
+${L(c.H.espacioExento)}
 
 ## JERARQUÍA Y ACCIÓN
 

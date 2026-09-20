@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     marginBottom: space.lg,
   },
   list: { gap: space.sm },
-  slot: { gap: 2 },
+  slot: { gap: space.xs },
   count: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

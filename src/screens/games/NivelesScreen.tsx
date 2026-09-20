@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   celdaNumOff: { color: color.textFaint },
-  estrellas: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: 1 },
+  estrellas: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xs },
   anuncio: { fontFamily: font.family.body, fontSize: 9, color: color.star },
   pie: {
     fontFamily: font.family.body,

@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     ...shadow.card,
     elevation: 0,
-    paddingBottom: 10,
-    paddingTop: 10,
+    paddingBottom: space.sm,
+    paddingTop: space.sm,
   },
   filo: { flex: 1, borderRadius: radius.lg, padding: 1 },
   filoInterior: {
@@ -183,9 +183,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: font.size.xs,
     fontFamily: font.family.bodyStrong,
-    marginTop: 2,
+    marginTop: space.xs,
   },
-  item: { paddingTop: 2 },
+  item: { paddingTop: space.xs },
   icon: {
     alignItems: 'center',
     justifyContent: 'center',

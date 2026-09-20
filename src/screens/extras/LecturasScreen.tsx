@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   itemSub: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint, marginTop: 2 },
+  meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint, marginTop: space.xs },
   dif: { gap: 4, marginTop: space.sm },
   difTexto: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   bloqueo: {

@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     fontSize: font.size.sm,
     color: color.riskWarn,
     fontStyle: 'italic',
-    marginLeft: space.lg + space.xs,
+    marginLeft: space.xl,
     marginBottom: space.xs,
   },
 });

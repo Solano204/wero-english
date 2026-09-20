@@ -680,10 +680,10 @@ const styles = StyleSheet.create({
   },
   medio: { flex: 1 },
   medioContenido: { paddingBottom: space.sm },
-  metas: { paddingHorizontal: space.lg, gap: 6, marginBottom: space.md },
+  metas: { paddingHorizontal: space.lg, gap: space.sm, marginBottom: space.md },
   meta: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   punto: { width: 12, height: 12, borderRadius: 6 },
-  metaCuerpo: { flex: 1, gap: 2 },
+  metaCuerpo: { flex: 1, gap: space.xs },
   metaFrase: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   tablero: {
     flexDirection: 'row',

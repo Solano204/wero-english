@@ -35,7 +35,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 0 |
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 1 |
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
-| ESP-1 | espaciado fuera de 4/8 | 27 |
+| ESP-1 | espaciado fuera de 4/8 | 0 |
 | ACC-1 | acción principal no sólida o varios sólidos a la vez | 0 |
 | ACC-3 | opciones visibles en Practicar con los grupos plegados (máximo recomendado 7) | 7 |
 | MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 0 |
@@ -125,34 +125,14 @@ Descartados (28 px o más, pero no son títulos):
 
 ## ESPACIADO
 
-**ESP-1 · Escala 4/8 (4, 8, 12, 16, 24, 32, 48).** Los tokens `space` (`tokens.ts:214-222`) coinciden con la escala. Las violaciones son valores sueltos o sumas. No se cuenta `padding: 1`: es el filo de luz, una técnica de borde.
-- `src/components/base/Badge.tsx:84` — wrap: paddingHorizontal: space.sm + 2 = 10
-- `src/components/base/Badge.tsx:89` — small: paddingVertical: 3 = 3
-- `src/components/base/Input.tsx:72` — label: marginLeft: 2 = 2
-- `src/components/base/Input.tsx:99` — error: marginLeft: 2 = 2
-- `src/components/base/Input.tsx:100` — hint: marginLeft: 2 = 2
-- `src/components/list/EntryRow.tsx:140` — body: gap: 3 = 3
-- `src/components/list/EntryRow.tsx:141` — bodyMazo: gap: 3 = 3
-- `src/components/list/EntryRow.tsx:154` — badges: marginTop: 2 = 2
-- `src/components/unlock/CandadoBadge.tsx:28` — wrap: paddingHorizontal: 10 = 10
-- `src/navigation/TabNavigator.tsx:173` — bar: paddingBottom: 10 = 10
-- `src/navigation/TabNavigator.tsx:174` — bar: paddingTop: 10 = 10
-- `src/navigation/TabNavigator.tsx:186` — label: marginTop: 2 = 2
-- `src/navigation/TabNavigator.tsx:188` — item: paddingTop: 2 = 2
-- `src/screens/entry/OnboardingScreen.tsx:470` — previa: gap: 2 = 2
-- `src/screens/extras/ContractionsScreen.tsx:160` — itemText: gap: 2 = 2
-- `src/screens/extras/ErrorsScreen.tsx:177` — understood: marginLeft: space.lg + space.xs = 20
-- `src/screens/extras/LecturasScreen.tsx:234` — meta: marginTop: 2 = 2
-- `src/screens/extras/PhrasalScreen.tsx:177` — forma: gap: 3 = 3
-- `src/screens/extras/PronunciationScreen.tsx:482` — pairSide: gap: 2 = 2
-- `src/screens/games/DulcesScreen.tsx:683` — metas: gap: 6 = 6
-- `src/screens/games/DulcesScreen.tsx:686` — metaCuerpo: gap: 2 = 2
-- `src/screens/games/NivelesScreen.tsx:287` — estrellas: marginTop: 1 = 1
-- `src/screens/study/StudyScreen.tsx:295` — aciertosRow: gap: 6 = 6
-- `src/screens/utility/ProgressScreen.tsx:173` — big: gap: 2 = 2
-- `src/screens/utility/ProgressScreen.tsx:189` — bars: gap: 3 = 3
-- `src/screens/utility/SettingsScreen.tsx:429` — hint: marginTop: 2 = 2
-- `src/screens/utility/StuckScreen.tsx:89` — slot: gap: 2 = 2
+**ESP-1 · Escala 4/8 (4, 8, 12, 16, 24, 32, 48).** Los tokens `space` (`tokens.ts:214-222`) coinciden con la escala. Las violaciones son valores sueltos o sumas. Excepciones válidas, que no cuentan: `padding: 1` (el filo de luz), los bordes de 1 a 2 px (`borderWidth`, que no son espaciado y el audit no mira) y los márgenes negativos de hasta 2 px que compensan un borde.
+- (ninguno)
+
+**Excepciones revisadas (no cuentan):**
+- `src/components/base/Card.tsx:190` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/components/card/FeedbackBand.tsx:184` — filoCapa: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/components/unlock/MuroDesbloqueo.tsx:126` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/navigation/TabNavigator.tsx:176` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 
 ## JERARQUÍA Y ACCIÓN
 
@@ -300,4 +280,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":27,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0} -->

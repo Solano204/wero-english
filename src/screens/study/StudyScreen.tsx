@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   aciertosRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 6,
+    gap: space.xs,
     marginTop: space.sm,
   },
   aciertosNum: {

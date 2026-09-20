@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   },
   opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   nota: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  previa: { gap: 2, backgroundColor: color.surfaceAlt },
+  previa: { gap: space.xs, backgroundColor: color.surfaceAlt },
   previaApp: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   previaTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   etiqueta: {

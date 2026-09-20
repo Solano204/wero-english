@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from '@/components/base';
-import { color, font, radius } from '@/theme';
+import { color, font, radius, space } from '@/theme';
 
 /**
  * Marca de "esto está cerrado" para las listas.
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     gap: 8,
     alignSelf: 'flex-start',
     paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: space.md,
     borderRadius: radius.pill,
     backgroundColor: color.accentSoft,
   },

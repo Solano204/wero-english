@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   previa: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   formas: { gap: space.md, marginTop: space.sm },
   forma: {
-    gap: 3,
+    gap: space.xs,
     paddingTop: space.md,
     borderTopWidth: 1,
     borderTopColor: color.border,

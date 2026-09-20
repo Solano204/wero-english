@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   cargando: { minHeight: 200, alignItems: 'center', justifyContent: 'center' },
   item: { gap: space.sm },
   itemHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  itemText: { flex: 1, gap: 2 },
+  itemText: { flex: 1, gap: space.xs },
   written: {
     fontSize: font.size.lg,
     color: color.text,

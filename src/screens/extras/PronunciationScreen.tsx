@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     padding: space.md,
     gap: space.sm,
   },
-  pairSide: { flex: 1, alignItems: 'center', gap: 2 },
+  pairSide: { flex: 1, alignItems: 'center', gap: space.xs },
   pairWord: {
     fontSize: font.size.md,
     color: color.text,

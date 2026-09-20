@@ -137,8 +137,8 @@ const styles = StyleSheet.create({
   // Pisa el flexDirection, el alineado y el gap de `row`: en columna, con
   // alignItems 'center' el texto se encogería a su contenido.
   rowMazo: { flexDirection: 'column', alignItems: 'stretch', gap: space.sm },
-  body: { flex: 1, gap: 3 },
-  bodyMazo: { gap: 3 },
+  body: { flex: 1, gap: space.xs },
+  bodyMazo: { gap: space.xs },
   separador: { height: StyleSheet.hairlineWidth, backgroundColor: color.border },
   acciones: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   ver: { flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: space.sm },
@@ -151,5 +151,5 @@ const styles = StyleSheet.create({
     color: color.text,
   },
   spanish: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
-  badges: { flexDirection: 'row', gap: space.xs, marginTop: 2 },
+  badges: { flexDirection: 'row', gap: space.xs, marginTop: space.xs },
 });

@@ -81,12 +81,12 @@ const tones: Record<Tone, { wrap: object; text: object }> = {
 
 const styles = StyleSheet.create({
   wrap: {
-    paddingHorizontal: space.sm + 2,
+    paddingHorizontal: space.md,
     paddingVertical: 4,
     borderRadius: radius.pill,
     alignSelf: 'flex-start',
   },
-  small: { paddingHorizontal: space.sm, paddingVertical: 3 },
+  small: { paddingHorizontal: space.sm, paddingVertical: space.xs },
   text: {
     fontSize: font.size.sm,
     fontFamily: font.family.bodyStrong,

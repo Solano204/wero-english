@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     fontSize: font.size.sm,
     color: color.textMuted,
     fontFamily: font.family.body,
-    marginLeft: 2,
+    marginLeft: space.xs,
   },
   field: {
     flexDirection: 'row',
@@ -96,6 +96,6 @@ const styles = StyleSheet.create({
     fontSize: font.size.sm,
     fontFamily: font.family.bodyStrong,
   },
-  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.riskStrong, marginLeft: 2 },
-  hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint, marginLeft: 2 },
+  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.riskStrong, marginLeft: space.xs },
+  hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint, marginLeft: space.xs },
 });

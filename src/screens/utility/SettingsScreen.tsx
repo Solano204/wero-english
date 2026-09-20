@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   horaTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   horaTextoOn: { color: color.accent, fontFamily: font.family.bodyStrong },
   label: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
-  hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, marginTop: 2 },
+  hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, marginTop: space.xs },
   toggle: {
     flexDirection: 'row',
     alignItems: 'center',

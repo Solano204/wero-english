@@ -105,7 +105,7 @@ Todo en `src/theme/tokens.ts`.
 - **`layout`:** `screenPad 16`, `tapMin 48`, `cardMaxWidth 520`, `adBar 56`.
 - **`iconoRedondo`** (área táctil del botón circular): `sm 48`, `md 48`, `lg 52`. **`iconoVisual`** (el círculo que se ve, centrado dentro): `sm 36`, `md 44`, `lg 52`.
 - **`depth`** (borde inferior de piezas de juego): `sm 2`, `md 3`, `lg 4`.
-- Valores sueltos que aparecen en estilos, fuera de esa escala: 1, 2, 3, 5, 6, 10 y 20 px, y márgenes negativos de −1 a −10 (detalle con archivo y línea en `DESIGN-AUDIT.md`).
+- Todo `padding`, `margin` y `gap` sale de esa escala (ESP-1 = 0); los valores de 1 a 3 pasan a 4, el 6 a 4 dentro de un grupo y a 8 entre filas, el 10 a 12 en las píldoras y a 8 en la barra de pestañas, el 20 a 24. Excepciones que no cuentan, con su motivo en el audit: `padding: 1` del filo de luz (una envoltura de 1 px que hace de borde), los bordes de 1 a 2 px y los márgenes negativos de hasta 2 px que compensan un borde.
 
 ## 1.5 Radios
 
