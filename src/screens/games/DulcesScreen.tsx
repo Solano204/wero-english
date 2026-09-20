@@ -1,12 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, {
-  FadeIn,
-  LinearTransition,
-  ZoomIn,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { Trozos, useReaccion } from '@/components/feedback';
@@ -17,10 +13,8 @@ import {
   hayMovimiento,
   rebarajar,
   resolve,
-  sonVecinas,
   swap,
-  type Board,
-} from '@/domain/match3';
+  type Board } from '@/domain/match3';
 import { applyGameGrade } from '@/db/games';
 import { getRandomEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
@@ -426,7 +420,6 @@ export function DulcesScreen() {
         setResueltas((r) => r + 1);
       } else {
         haptics.failure();
-        reaccion.falla();
       }
 
       void reproducirSecuenciaRespuesta(objetivo, bien);

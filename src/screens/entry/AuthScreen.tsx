@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Button, Input, Screen, Presionable } from '@/components/base';
 import { useAuthStore } from '@/store';
 import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';

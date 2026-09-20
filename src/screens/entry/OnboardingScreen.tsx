@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Button, Card, ProgressBar, Screen, Presionable } from '@/components/base';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { useAuthStore, useSettingsStore } from '@/store';

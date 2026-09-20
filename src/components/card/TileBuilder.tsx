@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
 import { color, depth, font, layout, radius, shadow, space, reacomodar } from '@/theme';
 import * as haptics from '@/services/haptics';
 import { Presionable } from '@/components/base';

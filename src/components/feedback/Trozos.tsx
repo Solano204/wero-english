@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withTiming,
-} from 'react-native-reanimated';
-import { color, radius, motionEasing, motionEfecto } from '@/theme';
+  withTiming } from 'react-native-reanimated';
+import { color, motionEasing, motionEfecto } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const N = 12;

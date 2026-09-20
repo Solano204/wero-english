@@ -1,14 +1,9 @@
 import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AudioButton } from '@/components/card';
 import { Icon, RiskBadge, Presionable } from '@/components/base';
 import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
 import type { Entry } from '@/types';
-
-/** Tope del stagger: en una lista de 120 renglones nadie espera a que
- *  le toque el turno al último. Pasado esto, todos entran igual de
- *  rápido. FadeInDown ya respeta ReduceMotion.System por su cuenta. */
 
 interface Props {
   entry: Entry;

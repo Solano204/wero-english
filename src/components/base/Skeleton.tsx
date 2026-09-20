@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
-  withTiming,
-} from 'react-native-reanimated';
+  withTiming } from 'react-native-reanimated';
 import { color, radius, space, motionCiclo, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 

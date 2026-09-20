@@ -42,10 +42,6 @@ export const motionEasing = {
 export const motionSpring = {
   /** Único preset: para lo que rebota a propósito (la banda de resultado, la pausa). */
   rebote: { damping: 10, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
-  // Transitorios: se van en "motion limpieza", cuando Button, AudioButton y
-  // OptionButton pasen al feedback unificado.
-  suave: { damping: 18, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
-  conRebote: { damping: 10, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
 };
 
 /** Retraso entre elementos de una lista que entra: el mismo en todas. */

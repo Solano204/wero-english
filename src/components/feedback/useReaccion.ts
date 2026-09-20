@@ -13,7 +13,7 @@ import { useCallback, useState } from 'react';
  * mirar, y en los juegos rápidos llegaba tarde a su propio acierto. Los
  * cubitos hacen el mismo trabajo sin robar la pantalla.
  *
- * `celebra` y `falla` NO llaman a haptics: cada pantalla ya lo hace en su
+ * `celebra` NO llama a haptics: cada pantalla ya lo hace en su
  * momento exacto, y duplicarlo daría dos vibraciones por respuesta.
  */
 export function useReaccion() {
@@ -24,9 +24,5 @@ export function useReaccion() {
     setTrozos((n) => n + 1);
   }, []);
 
-  /** El fallo ya no dibuja nada, pero se conserva para no tocar cinco
-   *  pantallas si mañana vuelve a tener una señal propia. */
-  const falla = useCallback(() => {}, []);
-
-  return { trozos, celebra, falla };
+  return { trozos, celebra };
 }

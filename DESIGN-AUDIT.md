@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 159 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 156 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -35,7 +35,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 0 |
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 1 |
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
-| ESP-1 | espaciado fuera de 4/8 | 30 |
+| ESP-1 | espaciado fuera de 4/8 | 27 |
 | ACC-1 | acción principal no sólida o varios sólidos a la vez | 0 |
 | ACC-3 | opciones visibles en Practicar con los grupos plegados (máximo recomendado 7) | 7 |
 | MOV-1 | áreas táctiles < 48 dp (estilos + tokens) | 0 |
@@ -50,7 +50,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
 | AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 1 |
-| MOT-1 | duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados) | 3 |
+| MOT-1 | duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados) | 0 |
 | MOT-2 | tocables sin el feedback al presionar (`Presionable`) | 0 |
 
 # Auditoría estática
@@ -65,10 +65,10 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/base/Screen.tsx:72`
 - `src/components/base/Screen.tsx:86`
 - `src/components/card/FeedbackBand.tsx:103`
-- `src/components/card/SceneImage.tsx:73`
-- `src/components/card/SceneImage.tsx:86`
+- `src/components/card/SceneImage.tsx:71`
+- `src/components/card/SceneImage.tsx:84`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
-- `src/navigation/TabNavigator.tsx:94`
+- `src/navigation/TabNavigator.tsx:92`
 
 **COLOR-3 · Cada color con escala 50–900.** Ninguno la tiene: `accent` solo trae `accent`, `accentSoft` y `accentDeep` (`tokens.ts:66-68`); igual `correct`, `wrong` y los ocho de `world`.
 
@@ -87,23 +87,23 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 
 Se quedan en 12–13 px, revisados a mano (16):
 - `src/components/base/Ads.tsx:186` — fullNota: fontSize sm = 13 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/components/list/EntryRow.tsx:150` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/components/list/EntryRow.tsx:145` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/entry/OnboardingScreen.tsx:469` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:491` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/screens/extras/LecturaScreen.tsx:310` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/extras/LecturasScreen.tsx:233` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/games/CaidaScreen.tsx:644` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/CaidaScreen.tsx:690` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
-- `src/screens/games/ColmenaScreen.tsx:619` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:694` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/games/DulcesScreen.tsx:717` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:760` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
-- `src/screens/games/GameEndScreen.tsx:250` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/GameEndScreen.tsx:256` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/ParesScreen.tsx:465` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/CaidaScreen.tsx:642` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/CaidaScreen.tsx:688` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/ColmenaScreen.tsx:610` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:687` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/games/DulcesScreen.tsx:710` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:753` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/GameEndScreen.tsx:249` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/GameEndScreen.tsx:255` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/ParesScreen.tsx:464` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
-Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/extras/PracticeScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/feedback/Toast.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
+Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/extras/PracticeScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
 
 **TIPO-2b · Line-height del cuerpo entre 1.4 y 1.6** (texto de 18 px o menos):
 - `src/screens/extras/GramaticaTemaScreen.tsx:345` — en: 18 px con lineHeight x1.35
@@ -113,7 +113,7 @@ Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son 
 
 Descartados (28 px o más, pero no son títulos):
 - `src/components/base/Card.tsx:219` — portadaVacia: inicial suelta de una portada pendiente (`textSobrePortada`), no un título
-- `src/components/card/SceneImage.tsx:126` — inicial: inicial suelta de una imagen pendiente (`textSobrePortada`), no un título
+- `src/components/card/SceneImage.tsx:124` — inicial: inicial suelta de una imagen pendiente (`textSobrePortada`), no un título
 
 ## ESPACIADO
 
@@ -123,27 +123,24 @@ Descartados (28 px o más, pero no son títulos):
 - `src/components/base/Input.tsx:72` — label: marginLeft: 2 = 2
 - `src/components/base/Input.tsx:99` — error: marginLeft: 2 = 2
 - `src/components/base/Input.tsx:100` — hint: marginLeft: 2 = 2
-- `src/components/feedback/Chispas.tsx:98` — chispa: marginLeft: -1.5 = -1.5
-- `src/components/feedback/Estrellas.tsx:83` — chispa: marginLeft: -10 = -10
-- `src/components/feedback/Estrellas.tsx:84` — chispa: marginTop: -10 = -10
-- `src/components/list/EntryRow.tsx:145` — body: gap: 3 = 3
-- `src/components/list/EntryRow.tsx:146` — bodyMazo: gap: 3 = 3
-- `src/components/list/EntryRow.tsx:159` — badges: marginTop: 2 = 2
+- `src/components/list/EntryRow.tsx:140` — body: gap: 3 = 3
+- `src/components/list/EntryRow.tsx:141` — bodyMazo: gap: 3 = 3
+- `src/components/list/EntryRow.tsx:154` — badges: marginTop: 2 = 2
 - `src/components/unlock/CandadoBadge.tsx:28` — wrap: paddingHorizontal: 10 = 10
-- `src/navigation/TabNavigator.tsx:175` — bar: paddingBottom: 10 = 10
-- `src/navigation/TabNavigator.tsx:176` — bar: paddingTop: 10 = 10
-- `src/navigation/TabNavigator.tsx:188` — label: marginTop: 2 = 2
-- `src/navigation/TabNavigator.tsx:190` — item: paddingTop: 2 = 2
+- `src/navigation/TabNavigator.tsx:173` — bar: paddingBottom: 10 = 10
+- `src/navigation/TabNavigator.tsx:174` — bar: paddingTop: 10 = 10
+- `src/navigation/TabNavigator.tsx:186` — label: marginTop: 2 = 2
+- `src/navigation/TabNavigator.tsx:188` — item: paddingTop: 2 = 2
 - `src/screens/entry/OnboardingScreen.tsx:470` — previa: gap: 2 = 2
 - `src/screens/extras/ContractionsScreen.tsx:160` — itemText: gap: 2 = 2
 - `src/screens/extras/ErrorsScreen.tsx:183` — understood: marginLeft: space.lg + space.xs = 20
 - `src/screens/extras/LecturasScreen.tsx:231` — meta: marginTop: 2 = 2
 - `src/screens/extras/PhrasalScreen.tsx:177` — forma: gap: 3 = 3
 - `src/screens/extras/PronunciationScreen.tsx:489` — pairSide: gap: 2 = 2
-- `src/screens/games/DulcesScreen.tsx:690` — metas: gap: 6 = 6
-- `src/screens/games/DulcesScreen.tsx:693` — metaCuerpo: gap: 2 = 2
+- `src/screens/games/DulcesScreen.tsx:683` — metas: gap: 6 = 6
+- `src/screens/games/DulcesScreen.tsx:686` — metaCuerpo: gap: 2 = 2
 - `src/screens/games/NivelesScreen.tsx:287` — estrellas: marginTop: 1 = 1
-- `src/screens/study/StudyScreen.tsx:296` — aciertosRow: gap: 6 = 6
+- `src/screens/study/StudyScreen.tsx:295` — aciertosRow: gap: 6 = 6
 - `src/screens/utility/ProgressScreen.tsx:173` — big: gap: 2 = 2
 - `src/screens/utility/ProgressScreen.tsx:189` — bars: gap: 3 = 3
 - `src/screens/utility/SettingsScreen.tsx:429` — hint: marginTop: 2 = 2
@@ -213,12 +210,12 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/LecturaScreen.tsx` | ✓ `:55` | ✓ `:131` | ✓ `:145` |
 | `extras/LecturasScreen.tsx` | ✓ `:48` | ✓ `:74` | ✓ `:93` |
 | `extras/PracticeScreen.tsx` | ✓ `:82` | ✗ | ✓ `:163` |
-| `games/CaidaScreen.tsx` | ✓ `:159` | ✓ `:367` | ✓ `:347` |
+| `games/CaidaScreen.tsx` | ✓ `:159` | ✓ `:365` | ✓ `:345` |
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
-| `games/ColmenaScreen.tsx` | ✓ `:120` | ✓ `:308` | ✓ `:288` |
-| `games/DulcesScreen.tsx` | ✓ `:151` | ✓ `:477` | ✓ `:457` |
+| `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
+| `games/DulcesScreen.tsx` | ✓ `:145` | ✓ `:470` | ✓ `:450` |
 | `games/NivelesScreen.tsx` | ✓ `:55` | ✗ | ✓ `:138` |
-| `games/ParesScreen.tsx` | ✓ `:110` | ✓ `:287` | ✓ `:263` |
+| `games/ParesScreen.tsx` | ✓ `:110` | ✓ `:286` | ✓ `:262` |
 | `utility/DeckScreen.tsx` | ✓ `:21` | ✓ `:24` | ✓ `:38` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
 | `utility/ProgressScreen.tsx` | ✓ `:25` | ✓ `:86` | ✓ `:57` |
@@ -245,9 +242,9 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/card/ReproductorCapitulo.tsx:54` — `setInterval` cada 250 ms con `setState`: repinta un componente hoja
 
 **Solo informativo (no cuenta):** claves por índice en listas estáticas, que solo importan si la lista se reordena o se filtra:
-- `src/components/base/Skeleton.tsx:65` — key por índice
+- `src/components/base/Skeleton.tsx:63` — key por índice
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
-- `src/components/feedback/Confetti.tsx:41` — key por índice
+- `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:290` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:177` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice
@@ -279,13 +276,11 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 ## e) Movimiento
 
 **MOT-1 · Nada de movimiento fuera de `src/theme/motion.ts`.** Cuenta duraciones y retrasos numéricos, `Easing.*`, springs sin preset, `springify` y las APIs de animación de React Native:
-- `src/components/feedback/Chispas.tsx:66` — duración literal: `withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })`
-- `src/components/feedback/Estrellas.tsx:57` — duración literal: `withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) })`
-- `src/components/feedback/Toast.tsx:20` — duración literal: `y.value = withTiming(message ? 0 : -80, { duration: 220 });`
+- (ninguno)
 
 **Excepciones revisadas a mano (no cuentan):**
 - `src/components/base/RoundTimer.tsx:76` — reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda
-- `src/screens/games/CaidaScreen.tsx:251` — reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda
+- `src/screens/games/CaidaScreen.tsx:250` — reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda
 
 **MOT-2 · Todo tocable pasa por `Presionable`** (escala 0.97 en `rapido`; con Reduce Motion baja la opacidad). Cuenta `Pressable`, `AnimatedPressable` y `Touchable*` sueltos:
 - (ninguno)
@@ -297,4 +292,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":3,"MOT-2":0} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":27,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0} -->

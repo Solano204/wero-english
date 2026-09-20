@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -234,7 +234,6 @@ export function CaidaScreen() {
     setFallada(null);
     setAcertada(null);
     haptics.failure();
-      reaccion.falla();
     void pausarConVoz(round.entry, false, () => setPerdio(true));
   }, [round, enPausa, pausarConVoz]);
 
@@ -308,7 +307,6 @@ export function CaidaScreen() {
 
       if (!bien) {
         haptics.failure();
-      reaccion.falla();
         setFallada(texto);
         void pausarConVoz(round.entry, false, () => setPerdio(true));
         return;

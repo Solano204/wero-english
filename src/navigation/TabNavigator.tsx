@@ -1,14 +1,12 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { createBottomTabNavigator, type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+  withTiming } from 'react-native-reanimated';
 import { ExploreScreen } from '@/screens/discover';
 import { PracticeScreen } from '@/screens/extras';
 import { ProgressScreen } from '@/screens/utility';

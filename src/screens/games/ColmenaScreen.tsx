@@ -2,14 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, ProgressBar, RoundTimer, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, useEfectoResultado } from '@/components/feedback';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
@@ -154,7 +147,6 @@ export function ColmenaScreen() {
         // nada, no hay vidas y no se acaba la partida. El SFX es el
         // mismo "fail" suave del resto de la app: ni esto es un regaño.
         haptics.failure();
-      reaccion.falla();
         void audio.playFail();
         sacudirHuecos();
         setFalloLetra(true);
@@ -260,7 +252,6 @@ export function ColmenaScreen() {
     setResuelta(true);
     setArmado(round.objetivo);
     haptics.failure();
-      reaccion.falla();
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
     await applyGameGrade(
       user.id,

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { AudioButton } from './AudioButton';
 import { OptionButton, type OptionState } from './OptionButton';
 import { PhraseBlock } from './PhraseBlock';

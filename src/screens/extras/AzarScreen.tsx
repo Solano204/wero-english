@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Badge, Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { SceneImage } from '@/components/card';
 import { getRandomEntries, toggleFavorite } from '@/db/queries';

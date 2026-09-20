@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Badge, Card, Header, Icon, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { loadContent } from '@/store/content';
 import { useSettingsStore } from '@/store';
-import { color, font, radius, space, aparecer, reacomodar } from '@/theme';
+import { color, font, space, aparecer, reacomodar } from '@/theme';
 import type { PhrasalVerb } from '@/types';
 
 /**

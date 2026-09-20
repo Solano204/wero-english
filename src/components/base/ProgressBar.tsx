@@ -3,9 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+  withTiming } from 'react-native-reanimated';
 import { color, radius, motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 

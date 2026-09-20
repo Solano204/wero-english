@@ -4,9 +4,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+  withTiming } from 'react-native-reanimated';
 import { color, motionEasing, motionEfecto } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 

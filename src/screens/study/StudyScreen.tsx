@@ -135,7 +135,6 @@ export function StudyScreen() {
     async (correct: boolean, elapsedMs: number, usedHint: boolean) => {
       if (!user) return;
       if (correct) reaccion.celebra();
-      else reaccion.falla();
       await answer(user.id, correct, elapsedMs, usedHint);
     },
     [user, answer]

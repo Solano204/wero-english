@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, RoundTimer, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, estiloResultado, useEfectoResultado } from '@/components/feedback';
 import { buildTablero, sonPareja } from '@/domain/pares';
@@ -14,7 +14,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, radius, space, aparecer, aparecerZoom, desaparecer, motionDuration, motionEasing } from '@/theme';
+import { color, font, radius, space, aparecer, aparecerZoom, motionDuration, motionEasing } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 import { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
@@ -218,7 +218,6 @@ export function ParesScreen() {
       // rojo, por la misma razón que en la tarjeta de estudio. Sin
       // pausa ni voz: solo el SFX suave, igual que siempre.
       haptics.failure();
-      reaccion.falla();
       void audio.playFail();
       setFallando([elegida.id, f.id]);
       if (user) {

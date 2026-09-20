@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import {
   Image,
   StyleSheet,
-  View,
   type ImageStyle,
-  type ViewStyle,
-} from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+  type ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { imageSource } from '@/services/media';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from 'react-native';

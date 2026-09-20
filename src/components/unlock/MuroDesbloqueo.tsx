@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Button, Icon } from '@/components/base';
 import { useAuthStore, useUnlockStore } from '@/store';
 import type { TipoDesbloqueo } from '@/db/unlock';

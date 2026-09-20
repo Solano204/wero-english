@@ -7,7 +7,6 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import * as media from '@/services/media';
 import { isBundled } from '@/assets/bundled';
-import { useMovimientoReducido } from '@/utils';
 
 interface Props {
   path: string | null;
