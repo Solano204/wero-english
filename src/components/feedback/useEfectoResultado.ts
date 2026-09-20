@@ -20,7 +20,7 @@ export const estiloResultado = {
  * El efecto de acierto y de fallo, IGUAL en todos los juegos.
  *
  *  - Acierto: pulso de escala 1 → 1.04 → 1 en `base`.
- *  - Fallo: sacudida horizontal (3 oscilaciones de ±6 px) en `rapido`.
+ *  - Fallo: sacudida horizontal (3 oscilaciones de ±6 px) en `base`.
  *
  * Con "reducir movimiento" no se mueve nada: queda el color, que lo pone
  * quien usa esto, y el háptico y el sonido, que ya ponen las pantallas.
@@ -46,7 +46,7 @@ export function useValoresResultado() {
   const fallo = useCallback(() => {
     if (reducido) return;
     const pasos = motionSacudida.oscilaciones * 2 + 1;
-    const duracion = motionDuration.rapido / pasos;
+    const duracion = motionDuration.base / pasos;
     const tramo = (a: number) => withTiming(a, { duration: duracion, easing: motionEasing.entrar });
     const swings = Array.from({ length: motionSacudida.oscilaciones * 2 }, (_, i) =>
       tramo(i % 2 === 0 ? motionSacudida.amplitud : -motionSacudida.amplitud)

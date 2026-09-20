@@ -1,3 +1,5 @@
+> **Documento histórico. El sistema vigente está en `DESIGN.md`.** No se edita más.
+
 # WERO · DISEÑO
 
 Referencia del sistema visual v4.0. Si vas a tocar UI, léelo antes.

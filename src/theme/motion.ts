@@ -47,12 +47,12 @@ export const motionSpring = {
 /** Retraso entre elementos de una lista que entra: el mismo en todas. */
 export const motionEscalon = {
   ms: 40,
-  /** De aquí en adelante entran sin retraso: una lista larga no debe tardar. */
+  /** Del elemento 9 en adelante el retraso se queda en el del 8: el orden se respeta y la lista no tarda. */
   max: 8,
 } as const;
 
 export function escalon(indice: number): number {
-  return indice < motionEscalon.max ? indice * motionEscalon.ms : 0;
+  return Math.min(indice, motionEscalon.max - 1) * motionEscalon.ms;
 }
 
 /** Vida de las partículas (no son transiciones de interfaz). */
@@ -73,7 +73,7 @@ export const motionPresion = {
 /** Acierto: pulso de la pieza (1 → escala → 1 en `base`). */
 export const motionPulso = { escala: 1.04 } as const;
 
-/** Fallo: sacudida horizontal de la pieza, entera dentro de `rapido`. */
+/** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 
 /** Bucles largos. */

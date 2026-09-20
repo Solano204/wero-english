@@ -44,9 +44,9 @@ const ICONO: Record<keyof MainTabParams, IconName> = {
  * La animación corre en el hilo de UI con reanimated, igual que la del
  * botón, para que no se trabe mientras la pantalla nueva está montando.
  */
-/** Cada pestaña presiona igual que el resto de la app. */
+/** Cada pestaña presiona igual que el resto de la app, sin el ripple de Android que traen las props. */
 function BotonPestana({ href: _href, ...props }: BottomTabBarButtonProps) {
-  return <Presionable {...props} />;
+  return <Presionable {...props} android_ripple={null} />;
 }
 
 function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; tint: string }) {
