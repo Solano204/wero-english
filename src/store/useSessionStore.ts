@@ -9,13 +9,7 @@ import {
   type ContentFilter,
 } from '@/db/queries';
 import { endSession, getNuevasHoy, startSession, touchStreak } from '@/db/progress';
-import {
-  MAX_REINSERCIONES,
-  cupoNuevas,
-  cupoVencidas,
-  filtroEstudio,
-  nuevasRestantesHoy,
-} from '@/domain/cola';
+import { MAX_REINSERCIONES, armarSesion, filtroEstudio } from '@/domain/cola';
 import { StudySession, gradeFrom } from '@/domain/session';
 import type { SessionSummary, StudyCard } from '@/types';
 import * as audio from '@/services/audio';
@@ -151,10 +145,13 @@ export const useSessionStore = create<SessionState>((set, get) => {
      * Hasta 3 lugares se reservan para nuevas aunque la cola sea larga, y
      * si quedan lugares de sobra se llenan con más nuevas.
      */
-    const quedan = nuevasRestantesHoy(nuevasPorDia, await getNuevasHoy(usuarioId));
-    const candidatas = quedan > 0 ? await getNewCards(usuarioId, filtro, quedan) : [];
-    const due = await getDueCards(usuarioId, filtro, cupoVencidas(meta, candidatas.length));
-    const fresh = candidatas.slice(0, cupoNuevas(meta, due.length, candidatas.length));
+    const { due, fresh } = await armarSesion({
+      size: meta,
+      nuevasPorDia,
+      yaHoy: await getNuevasHoy(usuarioId),
+      traerNuevas: (n) => getNewCards(usuarioId, filtro, n),
+      traerVencidas: (n) => getDueCards(usuarioId, filtro, n),
+    });
 
     if (due.length + fresh.length === 0) {
       set({ phase: 'empty', card: null, remaining: 0 });

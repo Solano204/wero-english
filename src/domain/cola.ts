@@ -48,3 +48,24 @@ export function cupoVencidas(size: number, nuevasPosibles: number): number {
 export function cupoNuevas(size: number, vencidasTraidas: number, nuevasPosibles: number): number {
   return Math.max(0, Math.min(nuevasPosibles, size - vencidasTraidas));
 }
+
+/**
+ * Arma la sesión: pide primero las nuevas que caben hoy (para saber cuántos
+ * lugares reservar), luego las vencidas con el cupo que queda, y por último
+ * recorta las nuevas a lo que sobra. Recibe cómo traer cada lista, así la
+ * usa la store con la base y la prueba con SQLite en memoria.
+ */
+export async function armarSesion<T>(p: {
+  size: number;
+  nuevasPorDia: number;
+  yaHoy: number;
+  traerNuevas: (limite: number) => Promise<T[]>;
+  traerVencidas: (limite: number) => Promise<T[]>;
+}): Promise<{ due: T[]; fresh: T[] }> {
+  const quedan = nuevasRestantesHoy(p.nuevasPorDia, p.yaHoy);
+  const candidatas = quedan > 0 ? await p.traerNuevas(quedan) : [];
+  const due = await p.traerVencidas(cupoVencidas(p.size, candidatas.length));
+  const fresh = candidatas.slice(0, cupoNuevas(p.size, due.length, candidatas.length));
+  return { due, fresh };
+}
+
