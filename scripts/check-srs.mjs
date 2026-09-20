@@ -47,6 +47,7 @@ const sm2 = await importar('src/domain/sm2.ts');
 const { StudySession } = await importar('src/domain/session.ts');
 const plan = await importar('src/domain/cola.ts');
 const sql = await importar('src/db/cola.ts');
+const plantillas = await importar('src/domain/plantillas.ts');
 const INFORME = process.argv.includes('--informe');
 
 // ── datos y base de prueba ───────────────────────────────────────────────
@@ -411,6 +412,43 @@ await prueba('cola de ~850 tras 30 días de uso (SM-2 real): sesión de 20 = 17 
     }
     console.log(`      sesión típica de 20 (regla: falladas, 1 vez): ${(suma / SESIONES).toFixed(1)} respuestas en promedio (de ${minimo} a ${maximo}), ${(reinsertadas / SESIONES).toFixed(1)} reinsertadas por sesión`);
   }
+});
+
+// ── notificaciones: tokens con nombre ────────────────────────────────────
+const notif = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/data/notificaciones.json'), 'utf8'));
+const TODAS = [...notif.plantillas, ...notif.vuelta];
+// Cada dato con un número distinto, para ver si cae en el lugar de otro.
+const EJEMPLO = { phrase: 'out of pocket', vencidas: 840, racha: 4, dominadas: 37, faltan: 12, titulo: 'Tiempos verbales', lo_que_dices: 'I am agree' };
+
+await prueba('cada plantilla de notificación usa solo tokens que existen', () => {
+  for (const t of TODAS) assert.deepEqual(plantillas.tokensDesconocidos(t.texto), [], t.id);
+});
+
+await prueba('cada número de una notificación cae en su lugar (vencidas 840, racha 4, dominadas 37, faltan 12)', () => {
+  for (const t of TODAS) {
+    const texto = plantillas.rellena(t.texto, EJEMPLO);
+    assert.ok(texto, `${t.id} se rellena con los datos de ejemplo`);
+    assert.ok(!/[{}]/.test(texto), `${t.id} no deja llaves: ${texto}`);
+    for (const nombre of ['vencidas', 'racha', 'dominadas', 'faltan']) {
+      const aparece = new RegExp(`\\b${EJEMPLO[nombre]}\\b`).test(texto);
+      assert.equal(aparece, plantillas.tokensDe(t.texto).includes(nombre), `${t.id}: el número de {${nombre}} ${aparece ? 'sobra' : 'falta'} en "${texto}"`);
+    }
+  }
+  assert.equal(plantillas.rellena(notif.plantillas.find((t) => t.id === 'not_racha').texto, EJEMPLO), 'Llevas 4 días seguidos');
+  assert.equal(plantillas.rellena(notif.vuelta.find((t) => t.id === 'not_vuelta_7').texto, EJEMPLO), 'Llevas 37 frases dominadas y siguen aquí.');
+  assert.equal(plantillas.rellena('V={vencidas} R={racha} D={dominadas} F={faltan}', EJEMPLO), 'V=840 R=4 D=37 F=12');
+});
+
+await prueba('un token que no existe truena y un dato que falta descarta la plantilla', () => {
+  assert.throws(() => plantillas.rellena('Llevas {racah} días', EJEMPLO), /Token desconocido/);
+  assert.equal(plantillas.rellena('Llevas {racha} días', { ...EJEMPLO, racha: 0 }), null, 'racha en cero');
+  assert.equal(plantillas.rellena('Llevas {racha} días', {}), null, 'sin dato');
+  assert.equal(plantillas.rellena('¿Sabes qué significa "{phrase}"?', { phrase: '  ' }), null, 'texto vacío');
+  assert.equal(plantillas.rellena('Hay frases por repasar hoy.', {}), 'Hay frases por repasar hoy.', 'sin tokens no pide nada');
+});
+
+await prueba('las plantillas respetan las reglas de tono del propio JSON (sin "estudiar" ni "deber")', () => {
+  for (const t of TODAS) assert.ok(!/estudi|deber/i.test(t.texto), `${t.id}: ${t.texto}`);
 });
 
 console.log(`check:srs ok (${total} pruebas)`);

@@ -35,7 +35,7 @@
     },
     {
       "id": "not_racha",
-      "texto": "Llevas {n} días seguidos",
+      "texto": "Llevas {racha} días seguidos",
       "condicion": "racha>=3",
       "peso": 10,
       "fuente": "progreso",
@@ -51,7 +51,7 @@
     },
     {
       "id": "not_desbloqueo",
-      "texto": "Te faltan {n} frases para abrir \"{titulo}\"",
+      "texto": "Te faltan {faltan} frases para abrir \"{titulo}\"",
       "condicion": "lectura_casi_desbloqueada",
       "peso": 8,
       "fuente": "lecturas",
@@ -76,7 +76,7 @@
     },
     {
       "id": "not_vuelta_7",
-      "texto": "Llevas {n} frases dominadas y siguen aquí.",
+      "texto": "Llevas {dominadas} frases dominadas y siguen aquí.",
       "condicion": "dias_sin_abrir==7",
       "fuente": "progreso",
       "abre_en": "P-13"

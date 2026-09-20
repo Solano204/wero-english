@@ -5,6 +5,7 @@ import { getDb } from '@/db/client';
 import { getLastActive } from '@/db/progress';
 import { countDue, getStuckEntries } from '@/db/queries';
 import { filtroEstudio } from '@/domain/cola';
+import { rellena, tokensDe, tokensDesconocidos, type Valores } from '@/domain/plantillas';
 import { weightedPick } from '@/utils/array';
 import { dayKey, daysBetween } from '@/utils/date';
 import type {
@@ -300,7 +301,7 @@ async function composeBody(
     return m ? Number(m[1]) === inactivo : false;
   });
 
-  if (vuelta && excluir.size === 0) {
+  if (vuelta && excluir.size === 0 && plantillaValida(vuelta)) {
     const texto = await fillTokens(vuelta.texto, ctx);
     return texto
       ? { texto, abre_en: vuelta.abre_en, plantilla: vuelta.id, entryId: null }
@@ -318,6 +319,7 @@ async function composeBody(
   );
 
   for (const p of ctx.config.plantillas) {
+    if (!plantillaValida(p)) continue;
     if (recientes.has(p.id)) continue;
     // Dos notificaciones idénticas el mismo día es peor que una sola.
     if (excluir.has(p.id)) continue;
@@ -330,7 +332,7 @@ async function composeBody(
   const pick = weightedPick(elegibles, (p) => p.peso);
   if (!pick) return null;
 
-  const texto = await fillTokens(pick.texto, ctx, { due, racha: ctx.racha });
+  const texto = await fillTokens(pick.texto, ctx, { vencidas: due, racha: ctx.racha });
   if (!texto) return null;
 
   return {
@@ -364,33 +366,49 @@ function condicionCumple(
 }
 
 /**
- * Rellena {phrase} y {n}. Devuelve null si no hay con qué rellenar,
- * porque una notificación que diga "¿Sabes qué significa {phrase}?"
- * literal es peor que ninguna notificación.
+ * Una plantilla con un token que no existe no se manda nunca. En desarrollo
+ * truena para que se arregle el JSON; en producción se descarta y la
+ * notificación cae en otra plantilla, así nadie ve "{racha}" literal.
+ */
+function plantillaValida(p: { id: string; texto: string }): boolean {
+  const malos = tokensDesconocidos(p.texto);
+  if (malos.length === 0) return true;
+  const msg = `[notificaciones] la plantilla ${p.id} usa tokens que no existen: ${malos.join(', ')}`;
+  if (__DEV__) throw new Error(msg);
+  console.warn(msg);
+  return false;
+}
+
+async function contarDominadas(usuarioId: number): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM tarjeta WHERE usuario_id = ? AND dominada = 1;',
+    [usuarioId]
+  );
+  return row?.n ?? 0;
+}
+
+/**
+ * Rellena los tokens con nombre que la plantilla pide, uno por dato:
+ * {phrase}, {vencidas}, {racha} y {dominadas}. `conocidos` trae los que el
+ * llamador ya calculó. Devuelve null si falta un dato, porque una
+ * notificación con un hueco es peor que ninguna.
  */
 async function fillTokens(
   template: string,
   ctx: ScheduleContext,
-  data?: { due: number; racha: number }
+  conocidos: Valores = {}
 ): Promise<string | null> {
-  let out = template;
-
-  if (out.includes('{phrase}')) {
-    const phrase = await pickSafePhrase(ctx);
-    if (!phrase) return null;
-    out = out.replace('{phrase}', phrase);
+  const pedidos = new Set(tokensDe(template));
+  const valores: Valores = { ...conocidos };
+  if (pedidos.has('phrase') && valores.phrase === undefined) valores.phrase = await pickSafePhrase(ctx);
+  if (pedidos.has('vencidas') && valores.vencidas === undefined) {
+    valores.vencidas = await countDue(ctx.usuarioId, filtroEstudio(ctx.filter));
   }
-
-  if (out.includes('{n}')) {
-    const n = data?.due ?? data?.racha ?? ctx.racha;
-    if (!n || n <= 0) return null;
-    out = out.replace('{n}', String(n));
-  }
-
-  // Cualquier token que quede sin resolver descarta la notificación.
-  if (/\{[a-z_]+\}/.test(out)) return null;
-
-  return out;
+  if (pedidos.has('racha') && valores.racha === undefined) valores.racha = ctx.racha;
+  if (pedidos.has('dominadas') && valores.dominadas === undefined) valores.dominadas = await contarDominadas(ctx.usuarioId);
+  // faltan, titulo y lo_que_dices aún no tienen fuente: sin valor, la plantilla no aplica.
+  return rellena(template, valores);
 }
 
 /** Una frase ya vista, de vulgaridad baja. Nunca una de vulgaridad 2. */
