@@ -6,7 +6,7 @@ import { Badge, Card, Header, Icon, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { loadContent } from '@/store/content';
 import { useSettingsStore } from '@/store';
-import { color, font, radius, space } from '@/theme';
+import { color, font, radius, space, aparecer, reacomodar } from '@/theme';
 import type { PhrasalVerb } from '@/types';
 
 /**
@@ -60,7 +60,7 @@ export function PhrasalScreen() {
         {grupos.map((g) => {
           const esta = abierto === g.verbo;
           return (
-            <Animated.View key={g.verbo} layout={LinearTransition.duration(220)}>
+            <Animated.View key={g.verbo} layout={reacomodar()}>
               <Card
                 onPress={() => setAbierto(esta ? null : g.verbo)}
                 style={styles.grupo}
@@ -78,7 +78,7 @@ export function PhrasalScreen() {
 
                 {esta ? (
                   <Animated.View
-                    entering={FadeIn.duration(200)}
+                    entering={aparecer()}
                     style={styles.formas}
                   >
                     {g.ids.map((id) => {

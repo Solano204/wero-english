@@ -9,7 +9,7 @@ import { TileBuilder } from './TileBuilder';
 import { Button, RiskBadge } from '@/components/base';
 import { answerMode, instructionFor, promptFor } from '@/domain/exercise';
 import { isCloseEnough } from '@/utils/text';
-import { color, font, motionDuration, motionSpring, radius, space } from '@/theme';
+import { color, font, motionDuration, radius, space, aparecerSubiendo, desaparecer } from '@/theme';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import type { StudyCard } from '@/types';
@@ -21,10 +21,8 @@ import type { StudyCard } from '@/types';
  * Ambos presets ya respetan la accesibilidad de movimiento reducido del
  * sistema por su cuenta (ReduceMotion.System).
  */
-const cardEntering = FadeInDown.springify()
-  .damping(motionSpring.suave.damping)
-  .stiffness(motionSpring.suave.stiffness);
-const cardExiting = FadeOut.duration(motionDuration.rapida);
+const cardEntering = aparecerSubiendo();
+const cardExiting = desaparecer(motionDuration.rapido);
 
 interface Props {
   card: StudyCard;

@@ -1,46 +1,52 @@
 import {
   Easing,
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+  ZoomIn,
   withSpring,
-  withTiming,
   type WithSpringConfig,
 } from 'react-native-reanimated';
 
 /**
- * Fuente única de movimiento.
+ * Fuente única de movimiento (MOT-1).
  *
- * Todo lo que anima en la app (tarjetas, botones, listas) sale de aquí:
- * cambiar un valor lo cambia en todos lados a la vez, y evita que cada
- * componente invente su propia sensación de "rápido" o "con rebote".
+ * Ninguna duración, curva ni spring vive fuera de este archivo: cambiar un
+ * valor lo cambia en toda la app y nadie inventa su propia idea de "rápido".
+ * Solo se anima `transform` y `opacity` (y `height` en los plegables).
  *
- * Nada de esto reemplaza `useMovimientoReducido()`: sigue siendo
- * responsabilidad de cada componente frenar o saltarse la animación
- * cuando el usuario pide menos movimiento.
+ * Con "reducir movimiento" Reanimated salta las animaciones al valor final
+ * (`ReduceMotion.System`, su valor por omisión); lo que no es Reanimated
+ * (escala al presionar, sacudida, partículas) lo frena cada componente con
+ * `useMovimientoReducido()`.
  */
 
 export const motionDuration = {
-  /** Microinteracciones: prensados, pulsos, iconos. */
-  rapida: 120,
-  /** El grueso de las transiciones: tarjetas, bandas, listas. */
-  normal: 220,
-  /** Movimientos grandes o con más peso visual. */
-  lenta: 350,
+  /** Feedback al tocar. */
+  rapido: 150,
+  /** Cambios de estado: aparecer, resaltar, resolver. */
+  base: 220,
+  /** Transiciones, secciones que entran y plegables. */
+  lento: 320,
 } as const;
 
 export const motionEasing = {
-  /** Desacelera al llegar: para todo lo que ENTRA. */
-  salida: Easing.out(Easing.cubic),
-  /** Acelera al irse: para todo lo que SALE. */
-  entrada: Easing.in(Easing.cubic),
-  /** Simétrica: para transiciones que no son ni entrada ni salida pura. */
-  estandar: Easing.inOut(Easing.cubic),
+  /** Desacelera al llegar: todo lo que ENTRA o aparece. */
+  entrar: Easing.out(Easing.cubic),
+  /** Acelera al irse: todo lo que SALE o se pliega. */
+  salir: Easing.in(Easing.cubic),
+  /** Solo para bucles que van y vienen (esqueleto, respiro). */
+  ciclo: Easing.inOut(Easing.ease),
 } as const;
 
 export const motionSpring = {
-  /** Sin rebote, se asienta directo. Para progreso y transiciones grandes. */
+  /** Único preset: para lo que rebota a propósito (la banda de resultado, la pausa). */
+  rebote: { damping: 10, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
+  // Transitorios: se van en "motion limpieza", cuando Button, AudioButton y
+  // OptionButton pasen al feedback unificado.
   suave: { damping: 18, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
-  /** Rebote ligero. Para soltar un botón, una opción o una banda. */
   conRebote: { damping: 10, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
-  /** Firme y sin sobrepaso. Para el instante exacto de presionar. */
   firme: {
     damping: 22,
     stiffness: 300,
@@ -49,22 +55,57 @@ export const motionSpring = {
   } satisfies WithSpringConfig,
 };
 
-/** Entrada suave genérica: fundido/desplazamiento con curva de salida. */
-export function entrarSuave(to = 1) {
-  'worklet';
-  return withTiming(to, {
-    duration: motionDuration.normal,
-    easing: motionEasing.salida,
-  });
+/** Retraso entre elementos de una lista que entra: el mismo en todas. */
+export const motionEscalon = {
+  ms: 40,
+  /** De aquí en adelante entran sin retraso: una lista larga no debe tardar. */
+  max: 8,
+} as const;
+
+export function escalon(indice: number): number {
+  return indice < motionEscalon.max ? indice * motionEscalon.ms : 0;
 }
 
-/** Al presionar: firme, sin sobrepaso. */
+/** Vida de las partículas (no son transiciones de interfaz). */
+export const motionEfecto = {
+  trozos: 620,
+  trozosEscalon: 8,
+  confeti: 1500,
+  confetiEscalon: 45,
+} as const;
+
+/** Bucles largos. */
+export const motionCiclo = {
+  esqueleto: 700,
+  respiro: 900,
+} as const;
+
+/** Aparecer sin desplazarse: cambios de estado. */
+export const aparecer = (retraso = 0) =>
+  FadeIn.delay(retraso).duration(motionDuration.base).easing(motionEasing.entrar);
+
+/** Aparecer subiendo: secciones y transiciones. */
+export const aparecerSubiendo = (retraso = 0) =>
+  FadeInDown.delay(retraso).duration(motionDuration.lento).easing(motionEasing.entrar);
+
+/** Aparecer creciendo: fichas y tarjetas de resultado. */
+export const aparecerZoom = (retraso = 0) =>
+  ZoomIn.delay(retraso).duration(motionDuration.base).easing(motionEasing.entrar);
+
+/** Salir: ease-in. */
+export const desaparecer = (duracion: number = motionDuration.base) =>
+  FadeOut.duration(duracion).easing(motionEasing.salir);
+
+/** Reacomodo de elementos que cambian de lugar. */
+export const reacomodar = () =>
+  LinearTransition.duration(motionDuration.base).easing(motionEasing.entrar);
+
+// Transitorios (ver arriba).
 export function presionar(to = 0.96) {
   'worklet';
   return withSpring(to, motionSpring.firme);
 }
 
-/** Al soltar: rebote ligero, nunca golpeado. */
 export function rebote(to = 1) {
   'worklet';
   return withSpring(to, motionSpring.conRebote);

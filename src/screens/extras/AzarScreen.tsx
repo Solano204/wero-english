@@ -11,7 +11,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, space } from '@/theme';
+import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -239,8 +239,8 @@ export function AzarScreen() {
       <View style={styles.cuerpo}>
         <Animated.View
           key={entry.id}
-          entering={FadeIn.duration(260)}
-          exiting={FadeOut.duration(120)}
+          entering={aparecer()}
+          exiting={desaparecer(motionDuration.rapido)}
           style={styles.tarjetaWrap}
         >
           <Card style={styles.tarjeta}>

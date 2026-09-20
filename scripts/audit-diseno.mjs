@@ -78,6 +78,12 @@ const LISTAS_SIN_VIRTUALIZAR = [
   { archivo: 'src/screens/extras/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
 ];
 
+/** MOT-1: curvas lineales válidas. Son relojes de la ronda, no animación de interfaz. */
+const MOT1_EXCEPCIONES = [
+  { archivo: 'src/components/base/RoundTimer.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda' },
+  { archivo: 'src/screens/games/CaidaScreen.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
+];
+
 // ── utilidades ───────────────────────────────────────────────────────────
 const rel =(p) => path.relative(ROOT, p).split(path.sep).join('/');
 const esComentario = (l) => /^\s*(\/\/|\*|\/\*|\{\/\*)/.test(l);
@@ -309,6 +315,33 @@ function auditaEstados(archivos) {
   return filas;
 }
 
+/** MOT-1: duraciones, curvas y springs que no salen de `src/theme/motion.ts`. */
+function auditaMovimiento(archivos) {
+  const REGLAS = [
+    [/\bduration\(\s*\d+\s*\)/, 'duración literal'],
+    [/\bduration:\s*[1-9]\d*\b/, 'duración literal'],
+    [/\.delay\(\s*\d+\s*\)|\bwithDelay\(\s*\d+/, 'retraso literal'],
+    [/\bEasing\.\w+/, 'curva fuera de `motion.ts`'],
+    [/\bwithSpring\((?![^)]*motionSpring)/, 'spring sin preset'],
+    [/\.springify\(|\b(damping|stiffness):\s*\d/, 'spring propio'],
+    [/Animated\.timing\(|LayoutAnimation\./, 'API de animación de React Native'],
+  ];
+  const sueltos = [], exentos = [];
+  for (const { r, lines } of archivos) {
+    if (r === 'src/theme/motion.ts') continue;
+    lines.forEach((l, i) => {
+      if (esComentario(l)) return;
+      for (const [re, txt] of REGLAS) {
+        if (!re.test(l)) continue;
+        const ex = MOT1_EXCEPCIONES.find((e) => e.archivo === r && e.patron.test(l));
+        (ex ? exentos : sueltos).push({ r, linea: i + 1, txt: ex ? ex.motivo : `${txt}: \`${l.trim().slice(0, 70)}\`` });
+        break;
+      }
+    });
+  }
+  return { sueltos, exentos };
+}
+
 /** b) Texto cortado con numberOfLines={1} donde el contenido importa. */
 function auditaTextoCortado(archivos) {
   const importa = [], otros = [];
@@ -469,7 +502,7 @@ function tablaEstados(filas) {
 }
 
 function conteoPorRegla(ctx) {
-  const { H, C, E, T, R, A, acc1, modos, tokensBajos } = ctx;
+  const { H, C, E, T, R, A, M, acc1, modos, tokensBajos } = ctx;
   const sinE = (k) => E.filter((f) => !f[k]).length;
   return [
     ['COLOR-1', 'colores de marca de más (mundos + `contraste`)', C.marca],
@@ -494,6 +527,7 @@ function conteoPorRegla(ctx) {
     ['RND-2', 'hooks con dependencias que cambian en cada render', R.deps.length],
     ['RND-3', 'estado por intervalo, cuadro o scroll que repinta toda la pantalla', R.intervalos.filter((x) => x.txt.includes('pantalla')).length],
     ['AUD-1', 'audios de los JSON que no están en el bundle o están vacíos', A.faltan + A.vacios.length],
+    ['MOT-1', 'duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados)', M.sueltos.length],
   ];
 }
 
@@ -628,6 +662,14 @@ ${c.A.vacios.map((p) => `- \`assets/${p}\``).join('\n') || '- (ninguno)'}
 
 Archivos que pintan \`<AudioButton>\`: ${c.A.botones.map((b) => `\`${b.r.replace('src/', '')}\` ${b.n}`).join(', ')}.
 
+## e) Movimiento
+
+**MOT-1 · Nada de movimiento fuera de \`src/theme/motion.ts\`.** Cuenta duraciones y retrasos numéricos, \`Easing.*\`, springs sin preset, \`springify\` y las APIs de animación de React Native:
+${L(c.M.sueltos)}
+
+**Excepciones revisadas a mano (no cuentan):**
+${L(c.M.exentos)}
+
 ## Notas
 
 - Los íconos salen de \`Icon\` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en \`catalogo.json\`, \`gramatica.json\` y \`medios.json\`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
@@ -647,7 +689,7 @@ function main() {
   const H = auditaEstatica(archivos);
   const coloreadas = (tokens.match(/shadowColor:\s*'#[0-9A-Fa-f]{6}'/g) || []).filter((s) => !/#000000/i.test(s)).length;
   const ctx = {
-    H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos),
+    H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos),
     A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),

@@ -10,7 +10,6 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import {
   color,
-  duration,
   font,
   layout,
   presionar,
@@ -197,4 +196,3 @@ const styles = StyleSheet.create({
   labelLg: { fontFamily: font.family.body, fontSize: font.size.lg },
 });
 
-export const BUTTON_PRESS_MS = duration.instant;

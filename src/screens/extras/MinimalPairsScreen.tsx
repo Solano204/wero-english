@@ -19,7 +19,7 @@ import { loadContent } from '@/store/content';
 import * as speech from '@/services/speech';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, radius, space } from '@/theme';
+import { color, font, radius, space, aparecer } from '@/theme';
 import type { HablaVeredicto, ParMinimoRound } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -190,7 +190,7 @@ export function MinimalPairsScreen() {
         </Card>
 
         {exp ? (
-          <Animated.View entering={FadeIn.duration(220)} style={styles.resultado}>
+          <Animated.View entering={aparecer()} style={styles.resultado}>
             <Card
               accent={acerto ? color.correct : color.wrong}
               style={styles.resultadoCard}

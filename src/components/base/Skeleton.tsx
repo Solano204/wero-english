@@ -8,10 +8,9 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { color, radius, space } from '@/theme';
+import { color, radius, space, motionCiclo, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
-const PULSO_MS = 700;
 const OPACIDAD_ALTA = 0.9;
 const OPACIDAD_BAJA = 0.45;
 
@@ -35,8 +34,8 @@ export function Skeleton({ height = 16, width = '100%', relleno = false, style }
     }
     opacidad.value = withRepeat(
       withSequence(
-        withTiming(OPACIDAD_BAJA, { duration: PULSO_MS, easing: Easing.inOut(Easing.ease) }),
-        withTiming(OPACIDAD_ALTA, { duration: PULSO_MS, easing: Easing.inOut(Easing.ease) })
+        withTiming(OPACIDAD_BAJA, { duration: motionCiclo.esqueleto, easing: motionEasing.ciclo }),
+        withTiming(OPACIDAD_ALTA, { duration: motionCiclo.esqueleto, easing: motionEasing.ciclo })
       ),
       -1
     );

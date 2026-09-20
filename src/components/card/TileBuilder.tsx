@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
-import { color, depth, font, layout, motionSpring, radius, shadow, space } from '@/theme';
+import { color, depth, font, layout, radius, shadow, space, reacomodar } from '@/theme';
 import * as haptics from '@/services/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -9,9 +9,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 /** Reflow de las fichas armadas al agregar/quitar una. Respeta
  *  useMovimientoReducido por su cuenta: los presets de layout de
  *  Reanimated ya usan ReduceMotion.System por defecto. */
-const fichaLayout = LinearTransition.springify()
-  .damping(motionSpring.suave.damping)
-  .stiffness(motionSpring.suave.stiffness);
+const fichaLayout = reacomodar();
 
 interface Props {
   /** Todas las fichas: las de la frase más los señuelos, ya barajadas. */

@@ -10,7 +10,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { imageSource } from '@/services/media';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from 'react-native';
-import { color, filoLuz, font, gradiente, radius, sol } from '@/theme';
+import { color, filoLuz, font, gradiente, radius, sol, aparecer } from '@/theme';
 
 /** Par del marcador. Mismo gris que `gradiente.neutro`.
  *  `gradiente` es un Record y TS lo da como posiblemente indefinido al
@@ -104,7 +104,7 @@ export function SceneImage({ path, size = 200, round = true, style, etiqueta, an
 
   return (
     <AnimatedImage
-      entering={FadeIn.duration(220)}
+      entering={aparecer()}
       source={source}
       style={[
         styles.image,

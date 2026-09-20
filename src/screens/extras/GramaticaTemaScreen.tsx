@@ -9,7 +9,7 @@ import { MuroDesbloqueo } from '@/components/unlock';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
-import { color, font, radius, space } from '@/theme';
+import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 import type { GramaticaTema } from '@/types';
 import { GRATIS_POR_BLOQUE } from './GramaticaScreen';
@@ -145,26 +145,26 @@ export function GramaticaTemaScreen() {
         title={gramatica.bloques[tema.bloque]?.nombre ?? 'Gramática'}
       />
 
-      <Animated.View entering={FadeInDown.duration(280)}>
+      <Animated.View entering={aparecerSubiendo()}>
         <Text style={styles.titulo}>{tema.titulo}</Text>
         <Text style={styles.gancho}>{tema.gancho}</Text>
       </Animated.View>
 
-      <Bloque titulo="Qué es" retraso={60}>
+      <Bloque titulo="Qué es" retraso={escalon(1)}>
         <Text style={styles.parrafo}>{tema.idea}</Text>
       </Bloque>
 
-      <Bloque titulo="Cuándo se usa" retraso={100}>
+      <Bloque titulo="Cuándo se usa" retraso={escalon(2)}>
         <Text style={styles.parrafo}>{tema.cuando}</Text>
       </Bloque>
 
-      <Bloque titulo="Cómo se arma" retraso={140}>
+      <Bloque titulo="Cómo se arma" retraso={escalon(3)}>
         <Card style={styles.formulaCard}>
           <Negrita texto={tema.formula} estilo={styles.formula} />
         </Card>
       </Bloque>
 
-      <Bloque titulo="Así se dice" retraso={180}>
+      <Bloque titulo="Así se dice" retraso={escalon(4)}>
         <Button
           icon={reproduciendoTodos ? 'stop' : 'play'}
           label={reproduciendoTodos ? 'Detener' : 'Escuchar todos los ejemplos'}
@@ -202,14 +202,14 @@ export function GramaticaTemaScreen() {
       </Bloque>
 
       {tema.contraste ? (
-        <Bloque titulo="La diferencia" retraso={220}>
+        <Bloque titulo="La diferencia" retraso={escalon(5)}>
           <Card style={styles.contraste}>
             <Negrita texto={tema.contraste} estilo={styles.contrasteTxt} />
           </Card>
         </Bloque>
       ) : null}
 
-      <Bloque titulo="En qué te vas a equivocar" retraso={260}>
+      <Bloque titulo="En qué te vas a equivocar" retraso={escalon(6)}>
         <Card style={styles.error}>
           <View style={styles.linea}>
             <Icon name="close" size="md" color={color.wrong} />
@@ -239,7 +239,7 @@ export function GramaticaTemaScreen() {
       </Bloque>
 
       {tema.ojo ? (
-        <Bloque titulo="Ojo" retraso={300}>
+        <Bloque titulo="Ojo" retraso={escalon(7)}>
           <Card style={styles.ojo}>
             <Negrita texto={tema.ojo} estilo={styles.ojoTxt} />
           </Card>
@@ -270,7 +270,7 @@ function Bloque({ titulo, retraso, children }: {
   titulo: string; retraso: number; children: React.ReactNode;
 }) {
   return (
-    <Animated.View entering={FadeInDown.delay(retraso).duration(300)} style={styles.seccion}>
+    <Animated.View entering={aparecerSubiendo(retraso)} style={styles.seccion}>
       <Text style={styles.seccionTitulo}>{titulo}</Text>
       {children}
     </Animated.View>

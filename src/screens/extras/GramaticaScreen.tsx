@@ -9,7 +9,7 @@ import { SectionTitle } from '@/components/list';
 import { loadContent } from '@/store/content';
 import { useUnlockStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
-import { color, font, space } from '@/theme';
+import { color, font, space, aparecerSubiendo, escalon } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 import type { GramaticaTema } from '@/types';
 
@@ -64,7 +64,7 @@ export function GramaticaScreen() {
         const temas = porBloque.get(clave) ?? [];
         const desplegado = abierto === clave;
         return (
-          <Animated.View key={clave} entering={FadeInDown.delay(i * 45).duration(280)}>
+          <Animated.View key={clave} entering={aparecerSubiendo(escalon(i))}>
             <Card
               onPress={() => setAbierto(desplegado ? null : clave)}
               style={styles.bloque}

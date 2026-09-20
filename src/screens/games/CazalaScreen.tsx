@@ -24,7 +24,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, space } from '@/theme';
+import { color, font, space, aparecerSubiendo } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -199,7 +199,7 @@ export function CazalaScreen() {
       </View>
 
       {checked ? (
-        <Animated.View entering={FadeInDown.duration(240)} style={styles.result}>
+        <Animated.View entering={aparecerSubiendo()} style={styles.result}>
           <Text style={styles.resultHead}>
             {aciertos === 3 ? 'Las tres' : `${aciertos} de 3`}
           </Text>

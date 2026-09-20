@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { color } from '@/theme';
+import { color, motionEasing, motionEfecto } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const PIECES = 18;
@@ -50,12 +50,12 @@ function Piece({ index, width }: { index: number; width: number }) {
   const drift = Math.random() * 70 - 35;
   const spin = Math.random() * 540 - 270;
   const tint = TINTS[index % TINTS.length] ?? color.accent;
-  const delay = index * 45;
+  const delay = index * motionEfecto.confetiEscalon;
 
   useEffect(() => {
     fall.value = withDelay(
       delay,
-      withTiming(1, { duration: 1500, easing: Easing.out(Easing.quad) })
+      withTiming(1, { duration: motionEfecto.confeti, easing: motionEasing.entrar })
     );
   }, [fall, delay]);
 

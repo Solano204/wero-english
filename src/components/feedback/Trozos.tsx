@@ -7,7 +7,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import { color, radius } from '@/theme';
+import { color, radius, motionEasing, motionEfecto } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const N = 12;
@@ -64,8 +64,8 @@ function Cubo({ i, tinte }: { i: number; tinte: string }) {
 
   useEffect(() => {
     p.value = withDelay(
-      i * 8,
-      withTiming(1, { duration: 620, easing: Easing.out(Easing.quad) })
+      i * motionEfecto.trozosEscalon,
+      withTiming(1, { duration: motionEfecto.trozos, easing: motionEasing.entrar })
     );
   }, [i, p]);
 

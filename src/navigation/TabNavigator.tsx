@@ -12,7 +12,7 @@ import Animated, {
 import { ExploreScreen } from '@/screens/discover';
 import { PracticeScreen } from '@/screens/extras';
 import { ProgressScreen } from '@/screens/utility';
-import { color, duration, filoLuz, font, radius, shadow, sol, space } from '@/theme';
+import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motionEasing } from '@/theme';
 import { AdBar, Icon, type IconName } from '@/components/base';
 import { useMovimientoReducido } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,8 +52,8 @@ function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; ti
 
   useEffect(() => {
     v.value = withTiming(activo ? 1 : 0, {
-      duration: reducido ? 0 : duration.fast,
-      easing: Easing.bezier(0.2, 0.7, 0.3, 1),
+      duration: reducido ? 0 : motionDuration.base,
+      easing: motionEasing.entrar,
     });
   }, [activo, v, reducido]);
 

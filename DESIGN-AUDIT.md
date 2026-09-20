@@ -50,6 +50,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
 | AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 1 |
+| MOT-1 | duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados) | 10 |
 
 # Auditoría estática
 
@@ -85,7 +86,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 
 Se quedan en 12–13 px, revisados a mano (16):
 - `src/components/base/Ads.tsx:185` — fullNota: fontSize sm = 13 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/components/list/EntryRow.tsx:161` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/components/list/EntryRow.tsx:157` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/entry/OnboardingScreen.tsx:470` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/screens/extras/LecturaScreen.tsx:309` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
@@ -124,9 +125,9 @@ Descartados (28 px o más, pero no son títulos):
 - `src/components/feedback/Chispas.tsx:98` — chispa: marginLeft: -1.5 = -1.5
 - `src/components/feedback/Estrellas.tsx:83` — chispa: marginLeft: -10 = -10
 - `src/components/feedback/Estrellas.tsx:84` — chispa: marginTop: -10 = -10
-- `src/components/list/EntryRow.tsx:156` — body: gap: 3 = 3
-- `src/components/list/EntryRow.tsx:157` — bodyMazo: gap: 3 = 3
-- `src/components/list/EntryRow.tsx:170` — badges: marginTop: 2 = 2
+- `src/components/list/EntryRow.tsx:152` — body: gap: 3 = 3
+- `src/components/list/EntryRow.tsx:153` — bodyMazo: gap: 3 = 3
+- `src/components/list/EntryRow.tsx:166` — badges: marginTop: 2 = 2
 - `src/components/unlock/CandadoBadge.tsx:28` — wrap: paddingHorizontal: 10 = 10
 - `src/navigation/TabNavigator.tsx:169` — bar: paddingBottom: 10 = 10
 - `src/navigation/TabNavigator.tsx:170` — bar: paddingTop: 10 = 10
@@ -207,7 +208,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `entry/BootScreen.tsx` | ✓ `:88` | ✓ `:37` | ✓ `:25` |
 | `extras/AzarScreen.tsx` | ✓ `:73` | ✓ `:206` | ✓ `:197` |
 | `extras/ContractionsScreen.tsx` | ✓ `:41` | ✓ `:52` | ✓ `:99` |
-| `extras/EarModeScreen.tsx` | ✓ `:93` | ✓ `:198` | ✓ `:181` |
+| `extras/EarModeScreen.tsx` | ✓ `:93` | ✓ `:202` | ✓ `:185` |
 | `extras/LecturaScreen.tsx` | ✓ `:55` | ✓ `:131` | ✓ `:145` |
 | `extras/LecturasScreen.tsx` | ✓ `:48` | ✓ `:74` | ✓ `:93` |
 | `extras/PracticeScreen.tsx` | ✓ `:82` | ✗ | ✓ `:163` |
@@ -243,7 +244,7 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/card/ReproductorCapitulo.tsx:54` — `setInterval` cada 250 ms con `setState`: repinta un componente hoja
 
 **Solo informativo (no cuenta):** claves por índice en listas estáticas, que solo importan si la lista se reordena o se filtra:
-- `src/components/base/Skeleton.tsx:66` — key por índice
+- `src/components/base/Skeleton.tsx:65` — key por índice
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
 - `src/components/feedback/Confetti.tsx:41` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:290` — key por índice
@@ -274,6 +275,24 @@ Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pi
 
 Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `screens/extras/GramaticaTemaScreen.tsx` 5, `components/list/EntryRow.tsx` 4, `components/card/PhraseBlock.tsx` 3, `components/card/StudyCardView.tsx` 3, `screens/extras/PronunciationScreen.tsx` 3, `screens/games/CazalaScreen.tsx` 3, `screens/extras/ContractionsScreen.tsx` 2, `screens/extras/ErrorDetailScreen.tsx` 2, `screens/extras/MinimalPairsScreen.tsx` 1, `screens/games/DulcesScreen.tsx` 1.
 
+## e) Movimiento
+
+**MOT-1 · Nada de movimiento fuera de `src/theme/motion.ts`.** Cuenta duraciones y retrasos numéricos, `Easing.*`, springs sin preset, `springify` y las APIs de animación de React Native:
+- `src/components/card/OptionButton.tsx:69` — duración literal: `withTiming(-7, { duration: 55 }),`
+- `src/components/card/OptionButton.tsx:70` — duración literal: `withTiming(7, { duration: 55 }),`
+- `src/components/card/OptionButton.tsx:71` — duración literal: `withTiming(-4, { duration: 55 }),`
+- `src/components/card/OptionButton.tsx:72` — duración literal: `withTiming(0, { duration: 55 })`
+- `src/components/feedback/Chispas.tsx:66` — duración literal: `withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })`
+- `src/components/feedback/Estrellas.tsx:57` — duración literal: `withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) })`
+- `src/components/feedback/Toast.tsx:20` — duración literal: `y.value = withTiming(message ? 0 : -80, { duration: 220 });`
+- `src/screens/games/ColmenaScreen.tsx:165` — duración literal: `withTiming(-8, { duration: 55 }),`
+- `src/screens/games/ColmenaScreen.tsx:166` — duración literal: `withTiming(8, { duration: 55 }),`
+- `src/screens/games/ColmenaScreen.tsx:167` — spring sin preset: `withSpring(0)`
+
+**Excepciones revisadas a mano (no cuentan):**
+- `src/components/base/RoundTimer.tsx:76` — reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda
+- `src/screens/games/CaidaScreen.tsx:248` — reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda
+
 ## Notas
 
 - Los íconos salen de `Icon` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en `catalogo.json`, `gramatica.json` y `medios.json`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
@@ -281,4 +300,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":10} -->

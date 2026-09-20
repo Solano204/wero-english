@@ -14,7 +14,7 @@ import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as ads from '@/services/ads';
 import * as audio from '@/services/audio';
 import { PARTIDA_PERFECTA, TRES_ESTRELLAS, elegirFrase } from '@/utils/frases';
-import { color, font, space } from '@/theme';
+import { color, font, space, aparecerSubiendo, motionDuration } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -103,7 +103,7 @@ export function GameEndScreen() {
        * de la partida sin saber cómo le había ido. Lo primero que hay
        * que poder leer sin buscar es el marcador.
        */}
-      <Animated.View entering={FadeInDown.duration(320)} style={styles.head}>
+      <Animated.View entering={aparecerSubiendo()} style={styles.head}>
         <Text style={styles.marcador} maxFontSizeMultiplier={1.2}>
           {aciertos}
           <Text style={styles.marcadorTotal}> / {rondas}</Text>
@@ -145,7 +145,7 @@ export function GameEndScreen() {
       </Animated.View>
 
       {aciertos > 0 ? (
-        <Animated.View entering={FadeInDown.delay(180).duration(320)}>
+        <Animated.View entering={aparecerSubiendo(motionDuration.rapido)}>
           <Card style={styles.repaso}>
             <Text style={styles.repasoTexto}>
               {aciertos}{' '}

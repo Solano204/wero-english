@@ -17,7 +17,7 @@ import { isBundled } from '@/assets/bundled';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import { loadContent } from '@/store/content';
-import { color, font, radius, space } from '@/theme';
+import { color, font, radius, space, aparecer } from '@/theme';
 import type { Fonema } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -313,7 +313,7 @@ const FonemaCard = memo(function FonemaCard({
       )}
 
       {open ? (
-        <Animated.View entering={FadeIn.duration(200)} style={styles.detail}>
+        <Animated.View entering={aparecer()} style={styles.detail}>
           <Section title="Cómo se hace" body={fonema.como_producirlo} />
           <Section title="Qué sale mal" body={fonema.el_error_tipico} />
 

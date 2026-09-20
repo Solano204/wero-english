@@ -6,7 +6,7 @@ import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as notifications from '@/services/notifications';
-import { color, font, layout, radius, space } from '@/theme';
+import { color, font, layout, radius, space, aparecer } from '@/theme';
 import type { Nivel } from '@/types';
 
 /**
@@ -278,7 +278,7 @@ function Presentacion({
   if (!s) return null;
 
   return (
-    <Animated.View entering={FadeIn.duration(260)} style={styles.paso}>
+    <Animated.View entering={aparecer()} style={styles.paso}>
       <View style={[styles.marca, { backgroundColor: s.tinte }]} />
       <Text style={styles.titulo}>{s.titulo}</Text>
       <Text style={styles.bajada}>{s.cuerpo}</Text>
@@ -322,7 +322,7 @@ function Pregunta({
   nota?: string;
 }) {
   return (
-    <Animated.View entering={FadeIn.duration(220)} style={styles.paso}>
+    <Animated.View entering={aparecer()} style={styles.paso}>
       <Text style={styles.titulo}>{titulo}</Text>
       <Text style={styles.bajada}>{bajada}</Text>
 
@@ -377,7 +377,7 @@ function PasoCuantas({
   ];
 
   return (
-    <Animated.View entering={FadeIn.duration(220)} style={styles.paso}>
+    <Animated.View entering={aparecer()} style={styles.paso}>
       <Text style={styles.titulo}>Recibe frases todo el día</Text>
       <Text style={styles.bajada}>
         Cada aviso es una sola frase

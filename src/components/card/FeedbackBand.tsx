@@ -67,27 +67,27 @@ export function FeedbackBand({
   useEffect(() => {
     if (visible) {
       // Ligero overshoot: se siente a resultado que llega, no a menú.
-      y.value = reducido ? 0 : withSpring(0, motionSpring.conRebote);
+      y.value = reducido ? 0 : withSpring(0, motionSpring.rebote);
       fade.value = withTiming(1, {
-        duration: reducido ? 0 : motionDuration.rapida,
-        easing: motionEasing.salida,
+        duration: reducido ? 0 : motionDuration.rapido,
+        easing: motionEasing.entrar,
       });
       // Solo "Exacto" hace el pop: el fallo no necesita más énfasis del
       // que ya tiene, es ámbar y ya, nunca un signo de exclamación extra.
       if (correct && !reducido) {
         verdictScale.value = 0.9;
-        verdictScale.value = withSpring(1, motionSpring.conRebote);
+        verdictScale.value = withSpring(1, motionSpring.rebote);
       } else {
         verdictScale.value = 1;
       }
     } else {
       y.value = withTiming(240, {
-        duration: reducido ? 0 : motionDuration.rapida,
-        easing: motionEasing.entrada,
+        duration: reducido ? 0 : motionDuration.rapido,
+        easing: motionEasing.salir,
       });
       fade.value = withTiming(0, {
-        duration: reducido ? 0 : motionDuration.rapida,
-        easing: motionEasing.entrada,
+        duration: reducido ? 0 : motionDuration.rapido,
+        easing: motionEasing.salir,
       });
     }
   }, [visible, correct, reducido, y, fade, verdictScale]);

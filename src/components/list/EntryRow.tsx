@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AudioButton } from '@/components/card';
 import { Icon, RiskBadge } from '@/components/base';
-import { color, font, motionDuration, radius, space } from '@/theme';
+import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
 import type { Entry } from '@/types';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -11,8 +11,6 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 /** Tope del stagger: en una lista de 120 renglones nadie espera a que
  *  le toque el turno al último. Pasado esto, todos entran igual de
  *  rápido. FadeInDown ya respeta ReduceMotion.System por su cuenta. */
-const STAGGER_MAX = 9;
-const STAGGER_MS = 30;
 
 interface Props {
   entry: Entry;
@@ -92,9 +90,7 @@ export const EntryRow = memo(function EntryRow({
   const esMazo = variant === 'mazo';
   return (
     <AnimatedPressable
-      entering={FadeInDown.delay(Math.min(index, STAGGER_MAX) * STAGGER_MS).duration(
-        motionDuration.normal
-      )}
+      entering={aparecerSubiendo(escalon(index))}
       onPress={() => onPress(entry)}
       accessibilityRole="button"
       accessibilityLabel={`${entry.phrase}. ${entry.spanish_main}`}

@@ -6,7 +6,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { color, motionSpring, radius } from '@/theme';
+import { color, radius, motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 interface Props {
@@ -30,8 +30,8 @@ export function ProgressBar({ value, total, tint = color.accent, height = 6 }: P
 
   useEffect(() => {
     progreso.value = reducido
-      ? withTiming(pct, { duration: 0 })
-      : withSpring(pct, motionSpring.suave);
+      ? pct
+      : withTiming(pct, { duration: motionDuration.lento, easing: motionEasing.entrar });
   }, [pct, progreso, reducido]);
 
   // Solo transform: animar `width` fuerza layout nativo en cada cuadro.

@@ -56,8 +56,8 @@ export function OptionButton({ label, state, onPress, disabled, index }: Props) 
       : withDelay(
           index * 30,
           withTiming(1, {
-            duration: motionDuration.normal,
-            easing: motionEasing.salida,
+            duration: motionDuration.base,
+            easing: motionEasing.entrar,
           })
         );
   }, [enter, reducido, index]);
@@ -77,8 +77,8 @@ export function OptionButton({ label, state, onPress, disabled, index }: Props) 
         ? 1
         : withSequence(
             withTiming(1.08, {
-              duration: motionDuration.rapida,
-              easing: motionEasing.salida,
+              duration: motionDuration.rapido,
+              easing: motionEasing.entrar,
             }),
             withSpring(1, motionSpring.suave)
           );

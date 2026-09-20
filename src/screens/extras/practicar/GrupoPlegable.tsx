@@ -2,10 +2,8 @@ import React, { useEffect, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Icon } from '@/components/base';
-import { color, font, layout, motionEasing, radius, space } from '@/theme';
+import { color, font, layout, motionEasing, radius, space, motionDuration } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
-
-const DURACION_MS = 200;
 
 interface Props {
   titulo: string;
@@ -29,7 +27,11 @@ export function GrupoPlegable({ titulo, total, abierto, onAlternar, children }: 
     const meta = abierto ? 1 : 0;
     progreso.value = reducido
       ? meta
-      : withTiming(meta, { duration: DURACION_MS, easing: motionEasing.salida });
+      : withTiming(meta, {
+          duration: motionDuration.lento,
+          // Abrir desacelera; cerrar acelera.
+          easing: abierto ? motionEasing.entrar : motionEasing.salir,
+        });
   }, [abierto, reducido, progreso]);
 
   const estilo = useAnimatedStyle(() => ({

@@ -29,7 +29,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, depth, font, radius, shadow, space } from '@/theme';
+import { color, depth, font, radius, shadow, space, aparecer, aparecerZoom, escalon, reacomodar } from '@/theme';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -520,7 +520,7 @@ export function DulcesScreen() {
       </View>
 
       {pregunta ? (
-        <Animated.View entering={FadeIn.duration(240)} style={styles.preguntaWrap}>
+        <Animated.View entering={aparecer()} style={styles.preguntaWrap}>
           <Card style={styles.preguntaCard} accent={TINTES[pregunta.objetivo.color]}>
             <Text style={styles.preguntaEtiqueta}>Llenaste esta</Text>
             <Text style={styles.preguntaFrase}>
@@ -616,8 +616,8 @@ export function DulcesScreen() {
                 // nueva y reanimated le corre la entrada. Sin eso el
                 // tablero se recolorea de golpe y no se ve caer nada.
                 key={`c-${i}-${c}`}
-                entering={ZoomIn.duration(220).delay((i % COLS) * 18)}
-                layout={LinearTransition.duration(180)}
+                entering={aparecerZoom(escalon(i % COLS))}
+                layout={reacomodar()}
                 onPress={() => tocar(i)}
                 accessibilityRole="button"
                 accessibilityLabel="Pieza"

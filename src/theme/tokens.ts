@@ -327,14 +327,6 @@ export const font = {
   },
 } as const;
 
-export const duration = {
-  instant: 120,
-  fast: 180,
-  base: 240,
-  slow: 380,
-  reveal: 520,
-} as const;
-
 export const layout = {
   tapMin: 48,
   cardMaxWidth: 520,

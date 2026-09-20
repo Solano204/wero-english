@@ -6,7 +6,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Button, Icon } from '@/components/base';
 import { useAuthStore, useUnlockStore } from '@/store';
 import type { TipoDesbloqueo } from '@/db/unlock';
-import { color, filoLuz, font, radius, shadow, sol, space } from '@/theme';
+import { color, filoLuz, font, radius, shadow, sol, space, aparecer, aparecerSubiendo } from '@/theme';
 
 interface Props {
   tipo: TipoDesbloqueo;
@@ -67,12 +67,12 @@ export function MuroDesbloqueo({
         {children}
       </View>
 
-      <Animated.View entering={FadeIn.duration(240)} style={StyleSheet.absoluteFill}>
+      <Animated.View entering={aparecer()} style={StyleSheet.absoluteFill}>
         <BlurView intensity={38} tint="dark" style={StyleSheet.absoluteFill} />
         <View style={[StyleSheet.absoluteFill, styles.velo]} />
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.duration(320)} style={styles.centro}>
+      <Animated.View entering={aparecerSubiendo()} style={styles.centro}>
         <LinearGradient
           colors={filoLuz}
           start={sol.start}

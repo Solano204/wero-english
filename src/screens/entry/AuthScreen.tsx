@@ -10,7 +10,7 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Button, Input, Screen } from '@/components/base';
 import { useAuthStore } from '@/store';
-import { color, font, space } from '@/theme';
+import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';
 
 type Mode = 'in' | 'up';
 
@@ -78,8 +78,8 @@ export function AuthScreen() {
 
           {error ? (
             <Animated.Text
-              entering={FadeIn.duration(160)}
-              exiting={FadeOut.duration(120)}
+              entering={aparecer()}
+              exiting={desaparecer(motionDuration.rapido)}
               style={styles.error}
             >
               {error}

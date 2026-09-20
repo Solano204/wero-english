@@ -16,7 +16,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
-import { color, font, space } from '@/theme';
+import { color, font, space, motionCiclo, motionEasing } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -174,7 +174,11 @@ export function EarModeScreen() {
     }
     playingRef.current = true;
     setPlaying(true);
-    pulse.value = withRepeat(withTiming(1.08, { duration: 900 }), -1, true);
+    pulse.value = withRepeat(
+      withTiming(1.08, { duration: motionCiclo.respiro, easing: motionEasing.ciclo }),
+      -1,
+      true
+    );
     void loop(pasoIdxRef.current);
   }, [loop, pulse, detener]);
 

@@ -271,10 +271,10 @@ export function CaidaScreen() {
     if (enPausa) {
       overlayOpacity.value = reducido
         ? 1
-        : withTiming(1, { duration: motionDuration.rapida });
-      overlayScale.value = reducido ? 1 : withSpring(1, motionSpring.conRebote);
+        : withTiming(1, { duration: motionDuration.rapido });
+      overlayScale.value = reducido ? 1 : withSpring(1, motionSpring.rebote);
     } else {
-      overlayOpacity.value = reducido ? 0 : withTiming(0, { duration: motionDuration.rapida });
+      overlayOpacity.value = reducido ? 0 : withTiming(0, { duration: motionDuration.rapido });
       overlayScale.value = 0.92;
     }
   }, [enPausa, reducido, overlayOpacity, overlayScale]);

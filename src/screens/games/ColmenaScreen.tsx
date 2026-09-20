@@ -30,7 +30,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, layout, radius, space } from '@/theme';
+import { color, font, layout, radius, space, aparecer } from '@/theme';
 import type { ColmenaRound, NivelColmena } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -467,7 +467,7 @@ export function ColmenaScreen() {
         </Animated.View>
 
         {resuelta ? (
-          <Animated.View entering={FadeIn.duration(240)} style={styles.revelado}>
+          <Animated.View entering={aparecer()} style={styles.revelado}>
             <Text style={styles.frase}>{round.entry.phrase}</Text>
             <Text style={styles.fraseEs}>{round.entry.spanish_main}</Text>
           </Animated.View>

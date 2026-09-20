@@ -22,7 +22,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, radius, space } from '@/theme';
+import { color, font, radius, space, aparecer, aparecerZoom, desaparecer } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -344,7 +344,7 @@ export function ParesScreen() {
             return (
               <Animated.View
                 key={f.id}
-                exiting={FadeOut.duration(220)}
+                exiting={desaparecer()}
                 style={[styles.ficha, styles.fichaFuera]}
               />
             );
@@ -375,11 +375,11 @@ export function ParesScreen() {
 
       {enPausa && parPausado ? (
         <Animated.View
-          entering={FadeIn.duration(180)}
+          entering={aparecer()}
           style={styles.overlay}
           pointerEvents="box-none"
         >
-          <Animated.View entering={ZoomIn.duration(220)} style={styles.overlayCard}>
+          <Animated.View entering={aparecerZoom()} style={styles.overlayCard}>
             <Text style={styles.overlayEn}>{parPausado.en}</Text>
             <Text style={styles.overlayEs}>{parPausado.es}</Text>
             <Pressable
