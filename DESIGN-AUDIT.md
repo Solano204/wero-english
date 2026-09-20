@@ -46,7 +46,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | EST-vacio | pantallas que cargan datos sin estado vacío | 5 |
 | EST-error | pantallas que cargan datos sin estado de error | 0 |
 | TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 1 |
-| RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 2 |
+| RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 0 |
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
 | AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 1 |
@@ -134,10 +134,10 @@ Descartados (28 px o más, pero no son títulos):
 - `src/navigation/TabNavigator.tsx:184` — item: paddingTop: 2 = 2
 - `src/screens/entry/OnboardingScreen.tsx:471` — previa: gap: 2 = 2
 - `src/screens/extras/ContractionsScreen.tsx:167` — itemText: gap: 2 = 2
-- `src/screens/extras/ErrorsScreen.tsx:147` — understood: marginLeft: space.lg + space.xs = 20
+- `src/screens/extras/ErrorsScreen.tsx:183` — understood: marginLeft: space.lg + space.xs = 20
 - `src/screens/extras/LecturasScreen.tsx:231` — meta: marginTop: 2 = 2
 - `src/screens/extras/PhrasalScreen.tsx:177` — forma: gap: 3 = 3
-- `src/screens/extras/PronunciationScreen.tsx:452` — pairSide: gap: 2 = 2
+- `src/screens/extras/PronunciationScreen.tsx:497` — pairSide: gap: 2 = 2
 - `src/screens/games/DulcesScreen.tsx:705` — metas: gap: 6 = 6
 - `src/screens/games/DulcesScreen.tsx:708` — metaCuerpo: gap: 2 = 2
 - `src/screens/games/NivelesScreen.tsx:294` — estrellas: marginTop: 1 = 1
@@ -234,8 +234,7 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 ## c) Rendimiento
 
 **Listas:** `FlatList` o `SectionList` sin `keyExtractor`, con clave por índice, con el ítem sin `memo` o con el separador creado en cada render, y colecciones grandes pintadas con `.map` dentro de un `ScrollView`:
-- `src/screens/extras/ErrorsScreen.tsx:76` — sin virtualizar: hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render
-- `src/screens/extras/PronunciationScreen.tsx:190` — sin virtualizar: hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez
+- (ninguno)
 
 **Dependencias que cambian en cada render** (el efecto o el callback se vuelve a disparar sin necesidad, como pasaba con `grupos` en `ContractionsScreen`):
 - (ninguno)
@@ -256,10 +255,11 @@ Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es 
 
 ## d) Audio
 
-Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pinta **apagado** (opacidad 0.4, deshabilitado) si la ruta no está empaquetada ni descargada (`hayAudio`, `AudioButton.tsx`). Rutas de audio que los JSON de `assets/data/` piden y **no están en `bundled.ts`** (0 de 6344):
+Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pinta **apagado** (opacidad 0.4, deshabilitado) si la ruta no está empaquetada ni descargada (`hayAudio`, `AudioButton.tsx`). Rutas de audio que los JSON de `assets/data/` piden y **no están en `bundled.ts`** (1 de 6344):
 
 | grupo | pedidas | sin empaquetar |
 |---|---|---|
+| `aud/phrasal` | 1242 | 1 (ej. `aud/phrasal/5_ejemplo_en_lento.mp3`) |
 | `aud` | 3048 | 0 |
 | `aud/rules` | 300 | 0 |
 | `aud/caza` | 60 | 0 |
@@ -268,10 +268,9 @@ Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pi
 | `aud/reg` | 75 | 0 |
 | `aud/gram` | 800 | 0 |
 | `aud/lec` | 29 | 0 |
-| `aud/phrasal` | 1242 | 0 |
 
 **Audios vacíos** (empaquetados, pero de menos de 1000 bytes: `isBundled` dice que existen, así que su botón se pinta **activo** y falla en silencio):
-- `assets/aud/phrasal/5_ejemplo_en_lento.mp3`
+- (ninguno)
 
 Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `screens/extras/GramaticaTemaScreen.tsx` 5, `components/list/EntryRow.tsx` 4, `components/card/PhraseBlock.tsx` 3, `components/card/StudyCardView.tsx` 3, `screens/extras/PronunciationScreen.tsx` 3, `screens/games/CazalaScreen.tsx` 3, `screens/extras/ContractionsScreen.tsx` 2, `screens/extras/ErrorDetailScreen.tsx` 2, `screens/extras/MinimalPairsScreen.tsx` 1, `screens/games/DulcesScreen.tsx` 1.
 
@@ -282,4 +281,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":2,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1} -->

@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Badge, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
 import { loadContent } from '@/store/content';
 import { color, font, radius, space } from '@/theme';
-import type { ErrorCategoria } from '@/types';
+import type { ErrorCard, ErrorCategoria } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -27,10 +27,23 @@ export function ErrorsScreen() {
   const content = useMemo(loadContent, []);
   const [cat, setCat] = useState<ErrorCategoria | 'todos'>('todos');
 
-  const lista = content.errores.errores
-    .filter((e) => (cat === 'todos' ? true : e.categoria === cat))
-    // Los de gravedad 3 primero: son los que cambian el significado.
-    .sort((a, b) => b.gravedad - a.gravedad || a.orden - b.orden);
+  const lista = useMemo(
+    () =>
+      content.errores.errores
+        .filter((e) => (cat === 'todos' ? true : e.categoria === cat))
+        // Los de gravedad 3 primero: son los que cambian el significado.
+        .sort((a, b) => b.gravedad - a.gravedad || a.orden - b.orden),
+    [content, cat]
+  );
+
+  const abrir = useCallback(
+    (errorId: string) => nav.navigate('ErrorDetail', { errorId }),
+    [nav]
+  );
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<ErrorCard>) => <FilaError error={item} onAbrir={abrir} />,
+    [abrir]
+  );
 
   if (content.errores.errores.length === 0) {
     return (
@@ -45,8 +58,8 @@ export function ErrorsScreen() {
     );
   }
 
-  return (
-    <Screen scroll>
+  const cabecera = (
+    <>
       <Header
         onBack={() => nav.goBack()}
         title="Errores que te delatan"
@@ -71,37 +84,58 @@ export function ErrorsScreen() {
           </Pressable>
         ))}
       </ScrollView>
+    </>
+  );
 
-      <View style={styles.list}>
-        {lista.map((e) => (
-          <Card
-            key={e.id}
-            style={styles.item}
-            accent={gravedadTint(e.gravedad)}
-            onPress={() => nav.navigate('ErrorDetail', { errorId: e.id })}
-          >
-            <View style={styles.row}>
-              <Icon name="close" size="md" color={color.riskStrong} />
-              <Text style={styles.bad} numberOfLines={2}>
-                {e.lo_que_dices}
-              </Text>
-            </View>
-            <Text style={styles.understood}>{e.lo_que_entienden}</Text>
-            <View style={styles.row}>
-              <Icon name="check" size="md" color={color.correct} />
-              <Text style={styles.good} numberOfLines={2}>
-                {e.lo_correcto}
-              </Text>
-            </View>
-            {e.gravedad === 3 ? (
-              <Badge label="Cambia el significado" tone="strong" small />
-            ) : null}
-          </Card>
-        ))}
-      </View>
+  return (
+    <Screen padded={false}>
+      <FlatList
+        data={lista}
+        keyExtractor={claveError}
+        renderItem={renderItem}
+        ListHeaderComponent={cabecera}
+        ListHeaderComponentStyle={styles.cabecera}
+        ItemSeparatorComponent={Separador}
+        contentContainerStyle={styles.list}
+        initialNumToRender={10}
+        windowSize={7}
+        removeClippedSubviews
+      />
     </Screen>
   );
 }
+
+const claveError = (e: ErrorCard) => e.id;
+
+function Separador() {
+  return <View style={styles.sep} />;
+}
+
+interface FilaProps {
+  error: ErrorCard;
+  onAbrir: (errorId: string) => void;
+}
+
+const FilaError = memo(function FilaError({ error: e, onAbrir }: FilaProps) {
+  return (
+    <Card style={styles.item} accent={gravedadTint(e.gravedad)} onPress={() => onAbrir(e.id)}>
+      <View style={styles.row}>
+        <Icon name="close" size="md" color={color.riskStrong} />
+        <Text style={styles.bad} numberOfLines={2}>
+          {e.lo_que_dices}
+        </Text>
+      </View>
+      <Text style={styles.understood}>{e.lo_que_entienden}</Text>
+      <View style={styles.row}>
+        <Icon name="check" size="md" color={color.correct} />
+        <Text style={styles.good} numberOfLines={2}>
+          {e.lo_correcto}
+        </Text>
+      </View>
+      {e.gravedad === 3 ? <Badge label="Cambia el significado" tone="strong" small /> : null}
+    </Card>
+  );
+});
 
 function gravedadTint(g: 1 | 2 | 3): string {
   if (g === 3) return color.riskStrong;
@@ -123,7 +157,9 @@ const styles = StyleSheet.create({
   chipText: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   chipTextOn: { color: color.accent, fontFamily: font.family.bodyStrong },
 
-  list: { gap: space.sm, marginTop: space.sm },
+  cabecera: { marginBottom: space.sm },
+  list: { padding: space.lg, paddingBottom: space.xxxl },
+  sep: { height: space.sm },
   item: { gap: space.xs },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
   bad: {

@@ -331,7 +331,9 @@ function auditaRendimiento(archivos) {
   const R = { listas: [], claves: [], deps: [], intervalos: [], estado: [] };
   for (const x of LISTAS_SIN_VIRTUALIZAR) {
     const a = archivos.find((f) => f.r === x.archivo);
-    if (a) R.listas.push({ r: x.archivo, linea: primeraLinea(a.lines, x.patron) ?? 1, txt: `sin virtualizar: ${x.motivo}` });
+    // Solo cuenta mientras el `.map` siga ahí: al pasar la lista a FlatList el hallazgo se apaga solo.
+    const linea = a ? primeraLinea(a.lines, x.patron) : null;
+    if (linea) R.listas.push({ r: x.archivo, linea, txt: `sin virtualizar: ${x.motivo}` });
   }
   for (const { r, src, lines } of archivos) {
     for (const tag of ['FlatList', 'SectionList']) {
@@ -341,7 +343,11 @@ function auditaRendimiento(archivos) {
         else if (/,\s*(i|idx|index)\s*\)/.test(ke)) R.listas.push({ r, linea: t.linea, txt: `${tag}: \`keyExtractor\` usa el índice` });
         if (/^\(\)\s*=>/.test((atributo(t.texto, 'ItemSeparatorComponent') || '').trim())) R.listas.push({ r, linea: t.linea, txt: `${tag}: \`ItemSeparatorComponent\` es una función nueva en cada render` });
         const desde = src.indexOf(t.texto);
-        const item = (src.slice(src.indexOf('renderItem', desde), src.indexOf('renderItem', desde) + 400).match(/<(\w+)/) || [])[1];
+        // `renderItem={renderItem}` apunta a un callback definido antes: se mira ahí, no en lo que siga a la lista.
+        const nombreRender = (atributo(t.texto, 'renderItem') || '').trim();
+        const defRender = /^\w+$/.test(nombreRender) ? src.search(new RegExp(`const ${nombreRender}\\s*=`)) : -1;
+        const desdeRender = defRender >= 0 ? defRender : src.indexOf('renderItem', desde);
+        const item = (src.slice(desdeRender, desdeRender + 400).match(/(?<![\w$])<([A-Z]\w*)/) || [])[1];
         if (item && !memo.has(item) && /renderItem=\{/.test(t.texto)) R.listas.push({ r, linea: t.linea, txt: `${tag}: el ítem \`<${item}>\` no está envuelto en \`memo\`` });
       }
     }

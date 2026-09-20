@@ -23,3 +23,6 @@ keys/
 assets/aud/**/_respaldo_*/
 assets/aud/fon/_viejo_vocales/
 assets/aud/fon/_prueba/
+
+# skills clonadas (stop-slop trae su propio .git)
+.claude/skills/

@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type ListRenderItemInfo,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -111,9 +119,31 @@ export function PronunciationScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fonemas = content.fonemas.fonemas
-    .filter((f) => (tipo ? f.tipo === tipo : true))
-    .filter((f) => (soloDificiles ? !f.existe_en_espanol : true));
+  const fonemas = useMemo(
+    () =>
+      content.fonemas.fonemas
+        .filter((f) => (tipo ? f.tipo === tipo : true))
+        .filter((f) => (soloDificiles ? !f.existe_en_espanol : true)),
+    [content, tipo, soloDificiles]
+  );
+
+  const alternarAbierto = useCallback(
+    (id: string) => setAbierto((actual) => (actual === id ? null : id)),
+    []
+  );
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<Fonema>) => (
+      <FonemaCard
+        fonema={item}
+        open={abierto === item.id}
+        onToggle={alternarAbierto}
+        repitiendo={repitiendo === item.id}
+        onToggleRepetir={alternarRepetir}
+      />
+    ),
+    [abierto, repitiendo, alternarAbierto, alternarRepetir]
+  );
 
   // Conteo por tipo con el filtro de dificultad ya aplicado: es lo que
   // se ve si tocas ese chip, no el total absoluto del tipo.
@@ -148,8 +178,8 @@ export function PronunciationScreen() {
     );
   }
 
-  return (
-    <Screen scroll>
+  const cabecera = (
+    <>
       <Header
         onBack={() => nav.goBack()}
         title="Los sonidos del inglés"
@@ -176,46 +206,59 @@ export function PronunciationScreen() {
           />
         ))}
       </ScrollView>
+    </>
+  );
 
-      {fonemas.length === 0 ? (
-        <EmptyState
-          icon="info"
-          title="Estos sonidos ya existen en español"
-          body="Por eso no salen en 'Los difíciles'. Puedes verlos igual."
-          actionLabel="Ver todos"
-          onAction={() => setSoloDificiles(false)}
-        />
-      ) : (
-        <View style={styles.list}>
-          {fonemas.map((f) => (
-            <FonemaCard
-              key={f.id}
-              fonema={f}
-              open={abierto === f.id}
-              onToggle={() => setAbierto(abierto === f.id ? null : f.id)}
-              repitiendo={repitiendo === f.id}
-              onToggleRepetir={() => alternarRepetir(f)}
-            />
-          ))}
-        </View>
-      )}
+  // Las tarjetas cambian de alto al abrirse: no hay getItemLayout.
+  return (
+    <Screen padded={false}>
+      <FlatList
+        data={fonemas}
+        keyExtractor={claveFonema}
+        renderItem={renderItem}
+        ListHeaderComponent={cabecera}
+        ListHeaderComponentStyle={styles.cabecera}
+        ListEmptyComponent={
+          <EmptyState
+            icon="info"
+            title="Estos sonidos ya existen en español"
+            body="Por eso no salen en 'Los difíciles'. Puedes verlos igual."
+            actionLabel="Ver todos"
+            onAction={() => setSoloDificiles(false)}
+          />
+        }
+        ItemSeparatorComponent={Separador}
+        contentContainerStyle={styles.list}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={7}
+        removeClippedSubviews
+      />
     </Screen>
   );
 }
 
-function FonemaCard({
+const claveFonema = (f: Fonema) => f.id;
+
+function Separador() {
+  return <View style={styles.sep} />;
+}
+
+interface FonemaCardProps {
+  fonema: Fonema;
+  open: boolean;
+  onToggle: (id: string) => void;
+  repitiendo: boolean;
+  onToggleRepetir: (fonema: Fonema) => void;
+}
+
+const FonemaCard = memo(function FonemaCard({
   fonema,
   open,
   onToggle,
   repitiendo,
   onToggleRepetir,
-}: {
-  fonema: Fonema;
-  open: boolean;
-  onToggle: () => void;
-  repitiendo: boolean;
-  onToggleRepetir: () => void;
-}) {
+}: FonemaCardProps) {
   // audio_manual: true = todavía no hay sonido aislado (pendiente de
   // grabación humana). Tampoco hay botón si el mp3 no está en el bundle:
   // mejor ocultarlos que fingir uno que no suena.
@@ -224,7 +267,7 @@ function FonemaCard({
 
   return (
     <Card
-      onPress={onToggle}
+      onPress={() => onToggle(fonema.id)}
       onLongPress={() => {
         if (hayAislado) void audio.play(fonema.audio);
       }}
@@ -257,7 +300,7 @@ function FonemaCard({
             icon={repitiendo ? 'stop' : 'volume'}
             label={repitiendo ? 'Repitiendo…' : 'Solo el sonido'}
             active={repitiendo}
-            onPress={onToggleRepetir}
+            onPress={() => onToggleRepetir(fonema)}
           />
           {hayLento ? (
             <AudioButton path={fonema.audio_lento} size="md" slow />
@@ -310,7 +353,7 @@ function FonemaCard({
       ) : null}
     </Card>
   );
-}
+});
 
 function PairSide({
   word,
@@ -388,7 +431,9 @@ const styles = StyleSheet.create({
   chipText: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
   chipTextOn: { color: color.accent, fontFamily: font.family.bodyStrong },
 
-  list: { gap: space.sm, marginTop: space.sm },
+  cabecera: { marginBottom: space.sm },
+  list: { padding: space.lg, paddingBottom: space.xxxl },
+  sep: { height: space.sm },
   card: { gap: space.md },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   // Charis SIL solo trae Regular: se compensa con tamaño, no con peso.
