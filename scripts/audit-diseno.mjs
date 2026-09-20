@@ -339,7 +339,16 @@ function auditaMovimiento(archivos) {
       }
     });
   }
-  return { sueltos, exentos };
+  // MOT-2: todo tocable pasa por `Presionable` (escala 0.97 en `rapido`, o solo opacidad con Reduce Motion).
+  const sinFeedback = [];
+  const TOCABLE = /<(Pressable|AnimatedPressable|TouchableOpacity|TouchableHighlight|TouchableWithoutFeedback)\b|createAnimatedComponent\(Pressable\)/;
+  for (const { r, lines } of archivos) {
+    if (r === 'src/components/base/Presionable.tsx') continue;
+    lines.forEach((l, i) => {
+      if (!esComentario(l) && TOCABLE.test(l)) sinFeedback.push({ r, linea: i + 1, txt: 'tocable que no usa `Presionable`' });
+    });
+  }
+  return { sueltos, exentos, sinFeedback };
 }
 
 /** b) Texto cortado con numberOfLines={1} donde el contenido importa. */
@@ -528,6 +537,7 @@ function conteoPorRegla(ctx) {
     ['RND-3', 'estado por intervalo, cuadro o scroll que repinta toda la pantalla', R.intervalos.filter((x) => x.txt.includes('pantalla')).length],
     ['AUD-1', 'audios de los JSON que no están en el bundle o están vacíos', A.faltan + A.vacios.length],
     ['MOT-1', 'duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados)', M.sueltos.length],
+    ['MOT-2', 'tocables sin el feedback al presionar (`Presionable`)', M.sinFeedback.length],
   ];
 }
 
@@ -669,6 +679,9 @@ ${L(c.M.sueltos)}
 
 **Excepciones revisadas a mano (no cuentan):**
 ${L(c.M.exentos)}
+
+**MOT-2 · Todo tocable pasa por \`Presionable\`** (escala 0.97 en \`rapido\`; con Reduce Motion baja la opacidad). Cuenta \`Pressable\`, \`AnimatedPressable\` y \`Touchable*\` sueltos:
+${L(c.M.sinFeedback)}
 
 ## Notas
 

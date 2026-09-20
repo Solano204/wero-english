@@ -1,13 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-} from 'react-native-reanimated';
-import { color, font, layout, motionSpring, radius, space } from '@/theme';
+import { StyleSheet, Text, View } from 'react-native';
+import { color, font, layout, radius, space } from '@/theme';
 import { Icon } from '@/components/base/Icon';
+import { Presionable } from '@/components/base/Presionable';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import * as media from '@/services/media';
@@ -47,28 +42,15 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
   const apagado = missing || sinAudio;
   // El reloj de arena solo no dice "lento": en slow el texto siempre se ve.
   const etiqueta = slow ? (label ?? 'Lento') : label;
-  const pulse = useSharedValue(1);
-  const reducido = useMovimientoReducido();
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-  }));
-
   const onPress = useCallback(async () => {
     onBeforePlay?.();
     haptics.tapLight();
-    if (!reducido) {
-      pulse.value = withSequence(
-        withSpring(1.12, motionSpring.conRebote),
-        withSpring(1, motionSpring.suave)
-      );
-    }
     const ok = slow ? await audio.playSlow(path) : await audio.play(path);
     if (!ok) setMissing(true);
-  }, [path, pulse, slow, reducido, onBeforePlay]);
+  }, [path, slow, onBeforePlay]);
 
   return (
-    <Pressable
+    <Presionable
       onPress={onPress}
       disabled={sinAudio}
       accessibilityRole="button"
@@ -81,19 +63,18 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
       }
       style={styles.toque}
     >
-      <Animated.View
+      <View
         style={[
           styles.btn,
           sizes[size],
           apagado && styles.missing,
           sinAudio && styles.sinAudio,
-          style,
         ]}
       >
         <Icon name={slow ? 'slow' : 'play'} size={size} color={apagado ? color.textFaint : color.accent} />
         {etiqueta ? <Text style={styles.label}>{etiqueta}</Text> : null}
-      </Animated.View>
-    </Pressable>
+      </View>
+    </Presionable>
   );
 }
 

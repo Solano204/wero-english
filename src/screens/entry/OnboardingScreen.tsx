@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Button, Card, ProgressBar, Screen } from '@/components/base';
+import { Button, Card, ProgressBar, Screen, Presionable } from '@/components/base';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
@@ -85,14 +85,14 @@ export function OnboardingScreen() {
           <ProgressBar value={paso} total={total} />
         </View>
         {paso > 0 ? (
-          <Pressable
+          <Presionable
             onPress={saltarTodo}
             hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel="Saltar la configuración"
           >
             <Text style={styles.saltar}>Saltar</Text>
-          </Pressable>
+          </Presionable>
         ) : null}
       </View>
 
@@ -328,15 +328,15 @@ function Pregunta({
 
       <View style={styles.opciones}>
         {opciones.map((o) => (
-          <Pressable
+          <Presionable
             key={o.label}
             onPress={() => onPick(o.valor)}
             accessibilityRole="button"
             accessibilityLabel={o.label}
-            style={({ pressed }) => [styles.opcion, pressed && styles.press]}
+            style={styles.opcion}
           >
             <Text style={styles.opcionTexto}>{o.label}</Text>
-          </Pressable>
+          </Presionable>
         ))}
       </View>
 
@@ -393,7 +393,7 @@ function PasoCuantas({
       <Text style={styles.etiqueta}>Cuántas al día</Text>
       <View style={styles.chips}>
         {opciones.map((n) => (
-          <Pressable
+          <Presionable
             key={n}
             onPress={() => onChange(n)}
             accessibilityRole="button"
@@ -403,7 +403,7 @@ function PasoCuantas({
             <Text style={[styles.chipTexto, valor === n && styles.chipTextoOn]}>
               {n === 0 ? 'ninguna' : n}
             </Text>
-          </Pressable>
+          </Presionable>
         ))}
       </View>
 
@@ -414,7 +414,7 @@ function PasoCuantas({
             {ventanas.map((v) => {
               const activa = v.desde === desde && v.hasta === hasta;
               return (
-                <Pressable
+                <Presionable
                   key={v.label}
                   onPress={() => onVentana(v.desde, v.hasta)}
                   accessibilityRole="button"
@@ -426,7 +426,7 @@ function PasoCuantas({
                   >
                     {v.label}
                   </Text>
-                </Pressable>
+                </Presionable>
               );
             })}
           </View>
@@ -465,7 +465,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.border,
   },
-  press: { opacity: 0.75 },
   opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   nota: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   previa: { gap: 2, backgroundColor: color.surfaceAlt },

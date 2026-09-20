@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Badge, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
+import { Badge, Card, EmptyState, Header, Icon, Screen, Presionable } from '@/components/base';
 import { loadContent } from '@/store/content';
 import { color, font, radius, space } from '@/theme';
 import type { ErrorCard, ErrorCategoria } from '@/types';
@@ -72,7 +72,7 @@ export function ErrorsScreen() {
         contentContainerStyle={styles.chips}
       >
         {CATS.map((c) => (
-          <Pressable
+          <Presionable
             key={c.id}
             onPress={() => setCat(c.id)}
             style={[styles.chip, cat === c.id && styles.chipOn]}
@@ -81,7 +81,7 @@ export function ErrorsScreen() {
             <Text style={[styles.chipText, cat === c.id && styles.chipTextOn]}>
               {c.label}
             </Text>
-          </Pressable>
+          </Presionable>
         ))}
       </ScrollView>
     </>

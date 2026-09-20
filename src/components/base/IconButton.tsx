@@ -1,8 +1,9 @@
 import React from 'react';
-import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { color, iconoRedondo, iconoVisual, shadow } from '@/theme';
 import * as haptics from '@/services/haptics';
 import { Icon, type IconName } from './Icon';
+import { Presionable } from './Presionable';
 
 type Tamano = keyof typeof iconoRedondo;
 type Tono = 'claro' | 'acento' | 'contraste';
@@ -43,7 +44,7 @@ export function IconButton({
   const lado = iconoVisual[tamano];
 
   return (
-    <Pressable
+    <Presionable
       onPress={() => {
         haptics.tapLight();
         onPress();
@@ -55,11 +56,10 @@ export function IconButton({
       // El Pressable mide lo que se toca (48 o más) y el círculo lo que se
       // ve: un objetivo más chico que 48 se falla y la culpa se la lleva la
       // app. Sin hitSlop, que se solapa con los vecinos.
-      style={({ pressed }) => [
+      style={[
         styles.centrado,
         { width: toque, height: toque },
         disabled && styles.apagado,
-        pressed && styles.press,
         style,
       ]}
     >
@@ -72,7 +72,7 @@ export function IconButton({
       >
         <Icon name={icono} size="lg" color={colores[tono]} />
       </View>
-    </Pressable>
+    </Presionable>
   );
 }
 
@@ -91,5 +91,4 @@ const colores: Record<Tono, string> = {
 const styles = StyleSheet.create({
   centrado: { alignItems: 'center', justifyContent: 'center' },
   apagado: { opacity: 0.4 },
-  press: { opacity: 0.7, transform: [{ scale: 0.94 }] },
 });

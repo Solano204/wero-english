@@ -1,15 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
@@ -78,7 +71,7 @@ export function ContractionsScreen() {
         contentContainerStyle={styles.tabs}
       >
         {grupos.map((g) => (
-          <Pressable
+          <Presionable
             key={g.id}
             onPress={() => setActivo(g.id)}
             style={[styles.tab, activo === g.id && styles.tabOn]}
@@ -90,7 +83,7 @@ export function ContractionsScreen() {
             >
               {g.nombre}
             </Text>
-          </Pressable>
+          </Presionable>
         ))}
       </ScrollView>
 

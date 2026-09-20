@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { color, font, layout, radius, space } from '@/theme';
 import * as ads from '@/services/ads';
 import { Icon } from './Icon';
+import { Presionable } from './Presionable';
 
 /**
  * Los tres huecos de publicidad, en un solo archivo.
@@ -76,7 +77,7 @@ export function AdFullScreen({ visible, onClose, segundos = 3 }: FullProps) {
         </Text>
       </View>
 
-      <Pressable
+      <Presionable
         style={styles.fullCerrar}
         onPress={restan > 0 ? undefined : onClose}
         accessibilityRole="button"
@@ -86,7 +87,7 @@ export function AdFullScreen({ visible, onClose, segundos = 3 }: FullProps) {
           {restan > 0 ? `Cerrar en ${restan}` : 'Cerrar'}
         </Text>
         {restan > 0 ? null : <Icon name="close" size="md" color={color.text} />}
-      </Pressable>
+      </Presionable>
     </View>
   );
 }

@@ -1,14 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Button, Input, Screen } from '@/components/base';
+import { Button, Input, Screen, Presionable } from '@/components/base';
 import { useAuthStore } from '@/store';
 import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';
 
@@ -95,7 +88,7 @@ export function AuthScreen() {
             full
           />
 
-          <Pressable
+          <Presionable
             onPress={() => setMode((m) => (m === 'up' ? 'in' : 'up'))}
             hitSlop={12}
             accessibilityRole="button"
@@ -105,7 +98,7 @@ export function AuthScreen() {
                 ? '¿Ya tienes cuenta? Entra aquí'
                 : '¿Primera vez? Crea tu cuenta'}
             </Text>
-          </Pressable>
+          </Presionable>
         </View>
 
         <Text style={styles.disclaimer}>

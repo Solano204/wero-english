@@ -1,12 +1,10 @@
 import React, { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AudioButton } from '@/components/card';
-import { Icon, RiskBadge } from '@/components/base';
+import { Icon, RiskBadge, Presionable } from '@/components/base';
 import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
 import type { Entry } from '@/types';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /** Tope del stagger: en una lista de 120 renglones nadie espera a que
  *  le toque el turno al último. Pasado esto, todos entran igual de
@@ -89,16 +87,12 @@ export const EntryRow = memo(function EntryRow({
 }: Props) {
   const esMazo = variant === 'mazo';
   return (
-    <AnimatedPressable
+    <Presionable
       entering={aparecerSubiendo(escalon(index))}
       onPress={() => onPress(entry)}
       accessibilityRole="button"
       accessibilityLabel={`${entry.phrase}. ${entry.spanish_main}`}
-      style={({ pressed }: { pressed: boolean }) => [
-        styles.row,
-        esMazo && styles.rowMazo,
-        pressed && styles.pressed,
-      ]}
+      style={[styles.row, esMazo && styles.rowMazo]}
     >
       {esMazo ? (
         <ContenidoMazo entry={entry} dominada={dominada} showAudio={showAudio} />
@@ -129,7 +123,7 @@ export const EntryRow = memo(function EntryRow({
           ) : null}
         </>
       )}
-    </AnimatedPressable>
+    </Presionable>
   );
 });
 
@@ -148,7 +142,6 @@ const styles = StyleSheet.create({
   // Pisa el flexDirection, el alineado y el gap de `row`: en columna, con
   // alignItems 'center' el texto se encogería a su contenido.
   rowMazo: { flexDirection: 'column', alignItems: 'stretch', gap: space.sm },
-  pressed: { opacity: 0.7 },
   body: { flex: 1, gap: 3 },
   bodyMazo: { gap: 3 },
   separador: { height: StyleSheet.hairlineWidth, backgroundColor: color.border },

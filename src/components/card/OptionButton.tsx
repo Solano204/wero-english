@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,12 +15,11 @@ import {
   motionDuration,
   motionEasing,
   motionSpring,
-  presionar,
   radius,
-  rebote,
   space,
 } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
+import { Presionable } from '@/components/base/Presionable';
 
 export type OptionState = 'idle' | 'chosen' | 'correct' | 'wrong' | 'dimmed';
 
@@ -31,8 +30,6 @@ interface Props {
   disabled?: boolean;
   index: number;
 }
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /**
  * Opción de respuesta.
@@ -46,7 +43,6 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export function OptionButton({ label, state, onPress, disabled, index }: Props) {
   const enter = useSharedValue(0);
   const shake = useSharedValue(0);
-  const press = useSharedValue(1);
   const pulse = useSharedValue(1);
   const reducido = useMovimientoReducido();
 
@@ -90,33 +86,23 @@ export function OptionButton({ label, state, onPress, disabled, index }: Props) 
     transform: [
       { translateY: (1 - enter.value) * 12 },
       { translateX: shake.value },
-      { scale: press.value * pulse.value },
+      { scale: pulse.value },
     ],
   }));
 
   return (
-    <AnimatedPressable
+    <Presionable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
-      onPressIn={() => {
-        if (disabled) return;
-        press.value = reducido ? 0.96 : presionar(0.96);
-      }}
-      onPressOut={() => {
-        press.value = reducido ? 1 : rebote(1);
-      }}
-      style={[
-        styles.base,
-        stateStyles[state],
-        { zIndex: 10 - index },
-        anim,
-      ]}
+      style={{ zIndex: 10 - index }}
     >
-      <Text style={[styles.label, textStyles[state]]}>{label}</Text>
-    </AnimatedPressable>
+      <Animated.View style={[styles.base, stateStyles[state], anim]}>
+        <Text style={[styles.label, textStyles[state]]}>{label}</Text>
+      </Animated.View>
+    </Presionable>
   );
 }
 

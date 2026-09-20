@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { color, font, space } from '@/theme';
+import { Presionable } from '@/components/base';
 
 interface Props {
   title: string;
@@ -19,9 +20,9 @@ export function SectionTitle({ title, count, actionLabel, onAction }: Props) {
         ) : null}
       </Text>
       {actionLabel && onAction ? (
-        <Pressable onPress={onAction} hitSlop={10} accessibilityRole="button">
+        <Presionable onPress={onAction} hitSlop={10} accessibilityRole="button">
           <Text style={styles.action}>{actionLabel}</Text>
-        </Pressable>
+        </Presionable>
       ) : null}
     </View>
   );

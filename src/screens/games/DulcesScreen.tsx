@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, {
@@ -7,7 +7,7 @@ import Animated, {
   LinearTransition,
   ZoomIn,
 } from 'react-native-reanimated';
-import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { Estrellas, Trozos, useReaccion } from '@/components/feedback';
 import {
@@ -531,39 +531,31 @@ export function DulcesScreen() {
               const esCorrecta = o === pregunta.objetivo.entry.spanish_main;
               const marcar = respondiendo && (esCorrecta || o === elegidaOpcion);
               return (
-                <Pressable
+                <Presionable
                   key={o}
                   onPress={() => responder(o)}
                   disabled={respondiendo}
                   accessibilityRole="button"
                   accessibilityLabel={o}
-                  style={({ pressed }) => [
-                    styles.opcion,
-                    pressed && !respondiendo && styles.opcionPress,
-                    marcar && esCorrecta && styles.opcionCorrecta,
-                    marcar && !esCorrecta && styles.opcionFallada,
-                  ]}
+                  style={[styles.opcion, marcar && esCorrecta && styles.opcionCorrecta, marcar && !esCorrecta && styles.opcionFallada]}
                 >
                   <Text style={styles.opcionTexto}>{o}</Text>
-                </Pressable>
+                </Presionable>
               );
             })}
 
             {respondiendo ? (
-              <Pressable
+              <Presionable
                 onPress={seguirAhora}
                 disabled={avanzando}
                 accessibilityRole="button"
                 accessibilityLabel="Siguiente"
                 hitSlop={8}
-                style={({ pressed }) => [
-                  styles.seguir,
-                  pressed && !avanzando && styles.seguirPress,
-                ]}
+                style={styles.seguir}
               >
                 <Text style={styles.seguirTexto}>Siguiente</Text>
                 <Icon name="chevron-right" size="sm" color={color.textFaint} />
-              </Pressable>
+              </Presionable>
             ) : (
               <AudioButton
                 path={pregunta.objetivo.entry.audio_en}
@@ -610,7 +602,7 @@ export function DulcesScreen() {
 
           <View style={styles.tablero}>
             {board.cells.map((c, i) => (
-              <AnimatedPressable
+              <Presionable
                 // La clave incluye el color: cuando una pieza cambia de
                 // color tras una cascada, React la trata como pieza
                 // nueva y reanimated le corre la entrada. Sin eso el
@@ -691,8 +683,6 @@ const TINTES: string[] = [
   color.world.fonetica,
 ];
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   jugadas: {
@@ -761,7 +751,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: depth.md,
     borderBottomColor: color.borderStrong,
   },
-  opcionPress: { opacity: 0.75 },
   opcionCorrecta: {
     borderColor: color.correct,
     backgroundColor: color.correctSoft,
@@ -772,7 +761,6 @@ const styles = StyleSheet.create({
   },
   opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   seguir: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'center', marginTop: space.sm, padding: space.sm },
-  seguirPress: { opacity: 0.6 },
   seguirTexto: {
     fontSize: font.size.sm,
     color: color.textFaint,

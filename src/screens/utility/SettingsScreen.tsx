@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Header, Screen } from '@/components/base';
+import { Button, Card, Header, Screen, Presionable } from '@/components/base';
 import { SectionTitle } from '@/components/list';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
@@ -390,7 +390,7 @@ function HoraFila({
       <Text style={styles.label}>{label}</Text>
       <View style={styles.horaChips}>
         {opciones.map((h) => (
-          <Pressable
+          <Presionable
             key={h}
             onPress={() => onChange(h)}
             accessibilityRole="button"
@@ -402,7 +402,7 @@ function HoraFila({
             >
               {h}
             </Text>
-          </Pressable>
+          </Presionable>
         ))}
       </View>
     </View>

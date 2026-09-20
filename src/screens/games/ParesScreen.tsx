@@ -1,17 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
-import {
-  Button,
-  EmptyState,
-  ErrorCarga,
-  Header,
-  Icon,
-  RoundTimer,
-  Screen,
-} from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Icon, RoundTimer, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { buildTablero, sonPareja } from '@/domain/pares';
 import { useNivel } from './useNivel';
@@ -352,23 +344,17 @@ export function ParesScreen() {
           const activa = elegida?.id === f.id;
           const falla = fallando.includes(f.id);
           return (
-            <Pressable
+            <Presionable
               key={f.id}
               onPress={() => tocar(f)}
               accessibilityRole="button"
               accessibilityLabel={f.texto}
-              style={({ pressed }) => [
-                styles.ficha,
-                f.lado === 'en' ? styles.fichaEn : styles.fichaEs,
-                activa && styles.fichaActiva,
-                falla && styles.fichaFalla,
-                pressed && styles.fichaPress,
-              ]}
+              style={[styles.ficha, f.lado === 'en' ? styles.fichaEn : styles.fichaEs, activa && styles.fichaActiva, falla && styles.fichaFalla]}
             >
               <Text style={styles.fichaTexto} numberOfLines={3}>
                 {f.texto}
               </Text>
-            </Pressable>
+            </Presionable>
           );
         })}
       </View>
@@ -382,20 +368,17 @@ export function ParesScreen() {
           <Animated.View entering={aparecerZoom()} style={styles.overlayCard}>
             <Text style={styles.overlayEn}>{parPausado.en}</Text>
             <Text style={styles.overlayEs}>{parPausado.es}</Text>
-            <Pressable
+            <Presionable
               onPress={saltarPausa}
               disabled={saltando}
               accessibilityRole="button"
               accessibilityLabel="Saltar"
               hitSlop={8}
-              style={({ pressed }) => [
-                styles.saltar,
-                pressed && !saltando && styles.saltarPress,
-              ]}
+              style={styles.saltar}
             >
               <Text style={styles.saltarTexto}>Saltar</Text>
               <Icon name="chevron-right" size="sm" color={color.textFaint} />
-            </Pressable>
+            </Presionable>
           </Animated.View>
         </Animated.View>
       ) : null}
@@ -455,7 +438,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   saltar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm, padding: space.sm },
-  saltarPress: { opacity: 0.6 },
   saltarTexto: {
     fontSize: font.size.sm,
     color: color.textFaint,
@@ -501,7 +483,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.wrongSoft,
   },
   fichaFuera: { backgroundColor: 'transparent', borderColor: 'transparent' },
-  fichaPress: { opacity: 0.75 },
   fichaTexto: {
     color: color.text,
     fontFamily: font.family.body,

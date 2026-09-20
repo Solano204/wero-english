@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -12,7 +12,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Icon, Screen } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
@@ -483,20 +483,17 @@ export function CaidaScreen() {
           <Animated.View style={[styles.overlayCard, overlayAnim]}>
             <Text style={styles.overlayEn}>{pausaInfo.en}</Text>
             <Text style={styles.overlayEs}>{pausaInfo.es}</Text>
-            <Pressable
+            <Presionable
               onPress={tocarSiguienteEnPausa}
               disabled={avanzando}
               accessibilityRole="button"
               accessibilityLabel="Siguiente"
               hitSlop={8}
-              style={({ pressed }) => [
-                styles.siguiente,
-                pressed && !avanzando && styles.siguientePress,
-              ]}
+              style={styles.siguiente}
             >
               <Text style={styles.siguienteTexto}>Siguiente</Text>
               <Icon name="chevron-right" size="sm" color={color.textFaint} />
-            </Pressable>
+            </Presionable>
           </Animated.View>
         </View>
       ) : null}
@@ -506,16 +503,16 @@ export function CaidaScreen() {
 
 function Ficha({ texto, onPress }: { texto: string; onPress: () => void }) {
   return (
-    <Pressable
+    <Presionable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={texto}
-      style={({ pressed }) => [styles.ficha, pressed && styles.fichaPress]}
+      style={styles.ficha}
     >
       <Text style={styles.fichaTexto} numberOfLines={4}>
         {texto}
       </Text>
-    </Pressable>
+    </Presionable>
   );
 }
 
@@ -564,7 +561,6 @@ const styles = StyleSheet.create({
     padding: space.md,
     ...shadow.card,
   },
-  fichaPress: { opacity: 0.8 },
   fichaTexto: {
     fontFamily: font.family.body,
     fontSize: font.size.md,
@@ -658,7 +654,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   siguiente: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm, padding: space.sm },
-  siguientePress: { opacity: 0.6 },
   siguienteTexto: {
     fontSize: font.size.sm,
     color: color.textFaint,

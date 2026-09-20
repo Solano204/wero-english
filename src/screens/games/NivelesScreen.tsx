@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Header, Icon, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
+import { Card, Carga, Header, Icon, Screen, SkeletonLista, pedirRecompensa, Presionable } from '@/components/base';
 import { FilaEstrellas } from '@/components/card';
 import {
   abrirConAnuncio,
@@ -166,7 +166,7 @@ export function NivelesScreen() {
                       // El primer cerrado es el único que se puede saltar.
                       const saltable = !abierto && nv.n === siguiente + 1;
                       return (
-                        <Pressable
+                        <Presionable
                           key={nv.n}
                           disabled={!abierto && !saltable}
                           onPress={() => {
@@ -181,13 +181,7 @@ export function NivelesScreen() {
                           accessibilityLabel={`Nivel ${nv.n}${
                             abierto ? '' : ', cerrado'
                           }`}
-                          style={({ pressed }) => [
-                            styles.celda,
-                            !abierto && styles.celdaCerrada,
-                            actual && styles.celdaActual,
-                            est && est.estrellas > 0 && styles.celdaHecha,
-                            pressed && styles.celdaPress,
-                          ]}
+                          style={[styles.celda, !abierto && styles.celdaCerrada, actual && styles.celdaActual, est && est.estrellas > 0 && styles.celdaHecha]}
                         >
                           <Text
                             style={[
@@ -209,7 +203,7 @@ export function NivelesScreen() {
                               <Text style={styles.anuncio}>·</Text>
                             )}
                           </View>
-                        </Pressable>
+                        </Presionable>
                       );
                     })}
                   </View>
@@ -284,7 +278,6 @@ const styles = StyleSheet.create({
   celdaCerrada: { backgroundColor: color.surfaceAlt, borderBottomWidth: 1 },
   celdaActual: { borderColor: color.accent, borderBottomColor: color.accentDeep },
   celdaHecha: { backgroundColor: color.correctSoft },
-  celdaPress: { opacity: 0.75 },
   celdaNum: {
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,

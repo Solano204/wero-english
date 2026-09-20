@@ -25,14 +25,13 @@ export {
   motionEscalon,
   motionEfecto,
   motionCiclo,
+  motionPresion,
   escalon,
   aparecer,
   aparecerSubiendo,
   aparecerZoom,
   desaparecer,
   reacomodar,
-  presionar,
-  rebote,
 } from './motion';
 export { text } from './typography';
 export { fuentes } from './fuentes';

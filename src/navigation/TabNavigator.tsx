@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -13,7 +13,7 @@ import { ExploreScreen } from '@/screens/discover';
 import { PracticeScreen } from '@/screens/extras';
 import { ProgressScreen } from '@/screens/utility';
 import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motionEasing } from '@/theme';
-import { AdBar, Icon, type IconName } from '@/components/base';
+import { AdBar, Icon, Presionable, type IconName } from '@/components/base';
 import { useMovimientoReducido } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { MainTabParams } from './routes';
@@ -46,6 +46,11 @@ const ICONO: Record<keyof MainTabParams, IconName> = {
  * La animación corre en el hilo de UI con reanimated, igual que la del
  * botón, para que no se trabe mientras la pantalla nueva está montando.
  */
+/** Cada pestaña presiona igual que el resto de la app. */
+function BotonPestana({ href: _href, ...props }: BottomTabBarButtonProps) {
+  return <Presionable {...props} />;
+}
+
 function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; tint: string }) {
   const v = useSharedValue(activo ? 1 : 0);
   const reducido = useMovimientoReducido();
@@ -125,6 +130,7 @@ export function TabNavigator() {
         tabBarInactiveTintColor: color.textFaint,
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: styles.item,
+        tabBarButton: BotonPestana,
         tabBarIcon: ({ color: tint, focused }) => (
           <Icono nombre={ICONO[route.name]} activo={focused} tint={tint} />
         ),

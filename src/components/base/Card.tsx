@@ -1,10 +1,11 @@
 import React, { type ReactNode } from 'react';
-import { Platform, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, View, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Text } from 'react-native';
 import { imageSource } from '@/services/media';
 import { blur, color, filoLuz, font, gradiente, radius, shadow, sol, space } from '@/theme';
+import { Presionable } from './Presionable';
 
 /** Dos letras a partir del id de la portada: 'dia_a_dia' -> 'DD'. */
 function iniciales(id: string): string {
@@ -175,14 +176,13 @@ export function Card({
   if (!onPress && !onLongPress) return body;
 
   return (
-    <Pressable
+    <Presionable
       onPress={onPress}
       onLongPress={onLongPress}
       accessibilityRole="button"
-      style={({ pressed }) => (pressed ? styles.pressed : undefined)}
     >
       {body}
-    </Pressable>
+    </Presionable>
   );
 }
 
@@ -233,5 +233,4 @@ const styles = StyleSheet.create({
    * el estilo propio se aplica después.
    */
   contenido: { padding: space.lg, gap: space.md },
-  pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
 });

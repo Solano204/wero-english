@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { Icon } from '@/components/base';
+import { StyleSheet, Text } from 'react-native';
+import { Icon, Presionable } from '@/components/base';
 import { color, font, layout, space } from '@/theme';
 
 interface Props {
@@ -13,10 +13,10 @@ interface Props {
 /** Renglón compacto de un grupo: nombre, dato opcional y chevron. 48 dp como mínimo. */
 export function FilaModo({ titulo, dato, primera, onPress }: Props) {
   return (
-    <Pressable
+    <Presionable
       onPress={onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.fila, !primera && styles.separada, pressed && styles.pulsada]}
+      style={[styles.fila, !primera && styles.separada]}
     >
       <Text style={styles.nombre} numberOfLines={2}>
         {titulo}
@@ -27,7 +27,7 @@ export function FilaModo({ titulo, dato, primera, onPress }: Props) {
         </Text>
       ) : null}
       <Icon name="chevron-right" size="md" color={color.textFaint} />
-    </Pressable>
+    </Presionable>
   );
 }
 
@@ -40,7 +40,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
   },
   separada: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.border },
-  pulsada: { backgroundColor: color.surfaceAlt },
   nombre: {
     flexGrow: 1,
     flexShrink: 1,

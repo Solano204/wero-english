@@ -5,7 +5,6 @@ import {
   FadeOut,
   LinearTransition,
   ZoomIn,
-  withSpring,
   type WithSpringConfig,
 } from 'react-native-reanimated';
 
@@ -47,12 +46,6 @@ export const motionSpring = {
   // OptionButton pasen al feedback unificado.
   suave: { damping: 18, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
   conRebote: { damping: 10, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
-  firme: {
-    damping: 22,
-    stiffness: 300,
-    mass: 0.8,
-    overshootClamping: true,
-  } satisfies WithSpringConfig,
 };
 
 /** Retraso entre elementos de una lista que entra: el mismo en todas. */
@@ -72,6 +65,13 @@ export const motionEfecto = {
   trozosEscalon: 8,
   confeti: 1500,
   confetiEscalon: 45,
+} as const;
+
+/** Feedback al presionar (`Presionable`). */
+export const motionPresion = {
+  escala: 0.97,
+  /** Con "reducir movimiento" no hay escala: baja la opacidad. */
+  opacidad: 0.7,
 } as const;
 
 /** Bucles largos. */
@@ -99,14 +99,3 @@ export const desaparecer = (duracion: number = motionDuration.base) =>
 /** Reacomodo de elementos que cambian de lugar. */
 export const reacomodar = () =>
   LinearTransition.duration(motionDuration.base).easing(motionEasing.entrar);
-
-// Transitorios (ver arriba).
-export function presionar(to = 0.96) {
-  'worklet';
-  return withSpring(to, motionSpring.firme);
-}
-
-export function rebote(to = 1) {
-  'worklet';
-  return withSpring(to, motionSpring.conRebote);
-}

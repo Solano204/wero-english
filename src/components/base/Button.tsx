@@ -1,26 +1,15 @@
 import React, { useCallback } from 'react';
 import {
   ActivityIndicator,
-  Pressable,
   StyleSheet,
   Text,
   View,
   type ViewStyle,
 } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import {
-  color,
-  font,
-  layout,
-  presionar,
-  radius,
-  rebote,
-  shadow,
-  space,
-} from '@/theme';
+import { color, font, layout, radius, shadow, space } from '@/theme';
 import * as haptics from '@/services/haptics';
 import { Icon, type IconName } from './Icon';
-import { useMovimientoReducido } from '@/utils';
+import { Presionable } from './Presionable';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'md' | 'lg';
@@ -48,8 +37,6 @@ type Props = BaseProps &
     | { label?: undefined; icon: IconName; accessibilityLabel: string }
   );
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 /**
  * Botón con respuesta táctil inmediata.
  *
@@ -71,21 +58,6 @@ export function Button({
   iconAlFinal = false,
   style,
 }: Props) {
-  const scale = useSharedValue(1);
-  const reducido = useMovimientoReducido();
-
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handleIn = useCallback(() => {
-    scale.value = reducido ? 0.96 : presionar(0.96);
-  }, [scale, reducido]);
-
-  const handleOut = useCallback(() => {
-    scale.value = reducido ? 1 : rebote(1);
-  }, [scale, reducido]);
-
   const handlePress = useCallback(() => {
     if (disabled || loading) return;
     haptics.tapLight();
@@ -95,14 +67,12 @@ export function Button({
   const blocked = disabled || loading;
 
   return (
-    <AnimatedPressable
+    <Presionable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: blocked, busy: loading }}
       onPress={handlePress}
-      onPressIn={handleIn}
-      onPressOut={handleOut}
       disabled={blocked}
       style={[
         styles.base,
@@ -110,7 +80,6 @@ export function Button({
         variants[variant],
         full && styles.full,
         blocked && styles.blocked,
-        animStyle,
         style,
       ]}
     >
@@ -138,7 +107,7 @@ export function Button({
           ) : null}
         </View>
       )}
-    </AnimatedPressable>
+    </Presionable>
   );
 }
 

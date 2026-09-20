@@ -1,17 +1,9 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type ListRenderItemInfo,
-} from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Badge, Card, EmptyState, Header, Icon, Screen, type IconName } from '@/components/base';
+import { Badge, Card, EmptyState, Header, Icon, Screen, type IconName, Presionable } from '@/components/base';
 import { AudioButton, SceneImage } from '@/components/card';
 import { isBundled } from '@/assets/bundled';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -397,14 +389,14 @@ function Chip({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <Presionable
       onPress={onPress}
       style={[styles.chip, active && styles.chipOn]}
       accessibilityRole="button"
     >
       {icon ? <Icon name={icon} size="sm" color={active ? color.accent : color.textMuted} /> : null}
       <Text style={[styles.chipText, active && styles.chipTextOn]}>{label}</Text>
-    </Pressable>
+    </Presionable>
   );
 }
 

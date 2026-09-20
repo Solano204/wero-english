@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, {
@@ -10,16 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import {
-  Button,
-  EmptyState,
-  ErrorCarga,
-  Header,
-  Icon,
-  ProgressBar,
-  RoundTimer,
-  Screen,
-} from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Icon, ProgressBar, RoundTimer, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
 import { useNivel } from './useNivel';
@@ -422,18 +413,14 @@ export function ColmenaScreen() {
         <Text style={styles.pista}>{round.pista}</Text>
 
         {!resuelta ? (
-          <Pressable
+          <Presionable
             onPress={() => void escucharPalabra()}
             disabled={escuchas <= 0 || sonandoEscuchar}
             accessibilityRole="button"
             accessibilityLabel="Escuchar la palabra"
             accessibilityState={{ disabled: escuchas <= 0 || sonandoEscuchar }}
             hitSlop={8}
-            style={({ pressed }) => [
-              styles.escuchar,
-              (escuchas <= 0 || sonandoEscuchar) && styles.escucharApagado,
-              pressed && escuchas > 0 && !sonandoEscuchar && styles.escucharPress,
-            ]}
+            style={[styles.escuchar, (escuchas <= 0 || sonandoEscuchar) && styles.escucharApagado]}
           >
             <View style={styles.escucharFila}>
               <Icon
@@ -450,7 +437,7 @@ export function ColmenaScreen() {
                 {escuchas}
               </Text>
             </View>
-          </Pressable>
+          </Presionable>
         ) : null}
 
         <Animated.View style={[styles.huecos, anim]}>
@@ -476,26 +463,21 @@ export function ColmenaScreen() {
             {round.letras.map((l, i) => {
               const gastada = usadas.includes(i);
               return (
-                <Pressable
+                <Presionable
                   key={`letra-${i}`}
                   onPress={() => tocarLetra(i)}
                   disabled={gastada}
                   accessibilityRole="button"
                   accessibilityLabel={`Letra ${l}`}
                   hitSlop={4}
-                  style={({ pressed }) => [
-                    styles.letra,
-                    { width: tamLetra, height: tamLetra },
-                    gastada && styles.letraGastada,
-                    pressed && !gastada && styles.letraPress,
-                  ]}
+                  style={[styles.letra, { width: tamLetra, height: tamLetra }, gastada && styles.letraGastada]}
                 >
                   <Text
                     style={[styles.letraTexto, gastada && styles.letraTextoOff]}
                   >
                     {l}
                   </Text>
-                </Pressable>
+                </Presionable>
               );
             })}
           </View>
@@ -544,7 +526,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   escucharApagado: { backgroundColor: color.surfaceHigh },
-  escucharPress: { opacity: 0.75 },
   escucharFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   escucharTexto: {
     fontSize: font.size.md,
@@ -592,7 +573,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   letraGastada: { backgroundColor: color.surface, borderColor: color.surface },
-  letraPress: { opacity: 0.7 },
   letraTexto: {
     fontSize: font.size.xl,
     color: color.text,

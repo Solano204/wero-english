@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import {
   useFocusEffect,
   useNavigation,
@@ -8,7 +8,7 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Button, Card, Carga, EmptyState, Header, Screen } from '@/components/base';
+import { Button, Card, Carga, EmptyState, Header, Screen, Presionable } from '@/components/base';
 import { ReproductorCapitulo } from '@/components/card';
 import { partirTexto, type Trozo } from '@/domain/lectura';
 import { getCardStates, getEntriesByIds } from '@/db/queries';
@@ -167,7 +167,7 @@ export function LecturaScreen() {
                 const esCorrecta = k === p.correcta;
                 const revelada = dada !== undefined;
                 return (
-                  <Pressable
+                  <Presionable
                     key={o}
                     onPress={() => responder(i, k)}
                     disabled={revelada}
@@ -180,7 +180,7 @@ export function LecturaScreen() {
                     ]}
                   >
                     <Text style={styles.opcionTexto}>{o}</Text>
-                  </Pressable>
+                  </Presionable>
                 );
               })}
               {dada !== undefined ? (

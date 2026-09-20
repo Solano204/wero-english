@@ -1,13 +1,7 @@
 import React, { forwardRef, useState } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  type TextInputProps,
-} from 'react-native';
+import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { color, font, layout, radius, space } from '@/theme';
+import { Presionable } from './Presionable';
 
 interface Props extends TextInputProps {
   label?: string;
@@ -50,14 +44,14 @@ export const Input = forwardRef<TextInput, Props>(function Input(
           {...rest}
         />
         {secureToggle ? (
-          <Pressable
+          <Presionable
             onPress={() => setHidden((v) => !v)}
             hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel={hidden ? 'Mostrar contraseña' : 'Ocultar contraseña'}
           >
             <Text style={styles.toggle}>{hidden ? 'Ver' : 'Ocultar'}</Text>
-          </Pressable>
+          </Presionable>
         ) : null}
       </View>
       {error ? (

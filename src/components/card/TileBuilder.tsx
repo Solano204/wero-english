@@ -1,10 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 import { color, depth, font, layout, radius, shadow, space, reacomodar } from '@/theme';
 import * as haptics from '@/services/haptics';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { Presionable } from '@/components/base';
 
 /** Reflow de las fichas armadas al agregar/quitar una. Respeta
  *  useMovimientoReducido por su cuenta: los presets de layout de
@@ -66,7 +65,7 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
           <Text style={styles.placeholder}>Toca las palabras en orden</Text>
         ) : (
           usados.map((i, pos) => (
-            <AnimatedPressable
+            <Presionable
               key={`puesta-${pos}-${i}`}
               layout={fichaLayout}
               onPress={() => quitar(pos)}
@@ -74,14 +73,10 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
               accessibilityRole="button"
               accessibilityLabel={`Quitar ${tiles[i] ?? ''}`}
               accessibilityHint="La quita de la frase que estás armando"
-              style={({ pressed }: { pressed: boolean }) => [
-                styles.ficha,
-                styles.fichaPuesta,
-                pressed && styles.fichaPress,
-              ]}
+              style={[styles.ficha, styles.fichaPuesta]}
             >
               <Text style={styles.fichaTextoPuesta}>{tiles[i]}</Text>
-            </AnimatedPressable>
+            </Presionable>
           ))
         )}
       </View>
@@ -90,7 +85,7 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
         {tiles.map((t, i) => {
           const gastada = usados.includes(i);
           return (
-            <Pressable
+            <Presionable
               key={`banco-${i}-${t}`}
               onPress={() => tomar(i)}
               disabled={locked || gastada}
@@ -98,23 +93,19 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
               accessibilityLabel={t}
               accessibilityHint="La añade a la frase que estás armando"
               accessibilityState={{ disabled: gastada }}
-              style={({ pressed }) => [
-                styles.ficha,
-                gastada && styles.fichaGastada,
-                pressed && !gastada && styles.fichaPress,
-              ]}
+              style={[styles.ficha, gastada && styles.fichaGastada]}
             >
               <Text style={[styles.fichaTexto, gastada && styles.textoGastado]}>
                 {t}
               </Text>
-            </Pressable>
+            </Presionable>
           );
         })}
       </View>
 
       {!locked ? (
         <View style={styles.acciones}>
-          <Pressable
+          <Presionable
             onPress={() => setUsados([])}
             disabled={usados.length === 0}
             accessibilityRole="button"
@@ -129,21 +120,17 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
             >
               Empezar de nuevo
             </Text>
-          </Pressable>
+          </Presionable>
 
-          <Pressable
+          <Presionable
             onPress={() => onSubmit(armado)}
             disabled={usados.length === 0}
             accessibilityRole="button"
             accessibilityLabel="Revisar la frase"
-            style={({ pressed }) => [
-              styles.revisar,
-              usados.length === 0 && styles.revisarApagado,
-              pressed && styles.fichaPress,
-            ]}
+            style={[styles.revisar, usados.length === 0 && styles.revisarApagado]}
           >
             <Text style={styles.revisarTexto}>Revisar</Text>
-          </Pressable>
+          </Presionable>
         </View>
       ) : null}
     </View>
@@ -185,7 +172,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.surface,
     borderColor: color.surface,
   },
-  fichaPress: { opacity: 0.7 },
   fichaTexto: { color: color.text, fontFamily: font.family.body, fontSize: font.size.md },
   fichaTextoPuesta: {
     color: color.accent,
