@@ -46,7 +46,7 @@ function etiquetaHoy(
  * en grupos plegados. Ningún modo se quitó: solo cambió la jerarquía.
  *
  * HOY sale de lo que la app ya guarda (ver `elegirHoy`): frases atoradas,
- * el último modo usado o, sin historial, Frases al azar.
+ * el último modo usado o, sin historial, Estudiar.
  */
 export function PracticeScreen() {
   const nav = useNavigation<Nav>();

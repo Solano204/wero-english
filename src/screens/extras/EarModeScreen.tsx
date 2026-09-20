@@ -235,7 +235,7 @@ export function EarModeScreen() {
       </View>
 
       <Button
-        label={playing ? 'Pausar' : 'Reproducir'}
+        label={playing ? 'Pausar' : 'Reanudar'}
         onPress={alternar}
         size="lg"
         full

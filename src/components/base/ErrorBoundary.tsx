@@ -39,8 +39,8 @@ export class ErrorBoundary extends Component<Props, State> {
       <View style={styles.wrap}>
         <Text style={styles.title}>Algo se rompió</Text>
         <Text style={styles.body}>
-          La app encontró un problema. Suele pasar cuando un archivo de
-          assets/data tiene una forma distinta a la esperada.
+          La app tuvo un error y no pudo seguir. Toca Reintentar. Si vuelve a
+          pasar, ciérrala y ábrela otra vez.
         </Text>
         <ScrollView style={styles.detail}>
           <Text style={styles.mono}>{error.message}</Text>

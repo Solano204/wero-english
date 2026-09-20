@@ -403,7 +403,7 @@ export function ParesScreen() {
             : 'Se acabaron las jugadas, pero el tablero se queda'}
         </Text>
         <Button
-          label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo te fue'}
+          label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo me fue'}
           variant={restantes > 0 ? 'ghost' : 'primary'}
           onPress={terminar}
           full

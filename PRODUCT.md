@@ -51,6 +51,30 @@ Lo gratuito va primero: los primeros temas de cada bloque de gramática están a
 - "¡Ups! Inténtalo de nuevo"
 - "Estimado usuario, su sesión ha finalizado"
 
+**Se evita:** desbloquea, potencia, sumérgete, domina (como promesa), viaje de aprendizaje, increíble, épico, exclamaciones y el contraste "no es X, es Y". Los errores dicen qué pasó y qué hacer, en una o dos frases. Las felicitaciones son cortas, con un dato y variadas (`src/utils/frases.ts`).
+
+## Glosario de la interfaz
+
+La misma acción se llama igual en toda la app.
+
+| Acción o cosa | Se dice | No se dice |
+|---|---|---|
+| Oír el audio de una frase | Escuchar; a menor velocidad, Lento (el ícono va siempre con el texto) | Reproducir |
+| Controlar una reproducción larga | Pausar, Reanudar, Detener | Reproducir, Parar |
+| Pasar a la siguiente tarjeta, pregunta o paso | Siguiente | Seguir, Continuar, Avanzar |
+| Retomar lo que ya empezó | Seguir repasando, Seguir estudiando, Seguir con (modo) | Continuar |
+| Volver atrás | Volver (botón), flecha de atrás | Regresar |
+| Guardar una frase en la lista propia | Guardar, Mi mazo | Favoritos, Marcar |
+| Sesión de repaso con frases nuevas | Estudiar | Frases al azar |
+| Pasar frases sin repaso ni cuenta | Frases sueltas | Al azar |
+| Repaso que toca hoy | Repasar N frases; el total aparte: "N pendientes" | tarjetas listas, cola de repaso |
+| Aciertos seguidos en una sesión | N seguidas | racha |
+| Días seguidos entrando | Racha: N días | streak |
+| Frase que ya se sabe | dominada | aprendida |
+| Frase que se falla seguido | atorada (Se me atoran) | difícil |
+| Ver el resultado de una partida | Ver cómo me fue | Ver cómo te fue |
+| Ver un anuncio para abrir contenido | Ver anuncio y abrir, Ver anuncio y descargar | desbloquear |
+
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
 ## Restricciones

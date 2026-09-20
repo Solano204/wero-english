@@ -51,8 +51,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "Wero necesita el microfono para oirte decir la palabra.",
-          "speechRecognitionPermission": "El reconocimiento corre en tu telefono, sin enviar audio.",
+          "microphonePermission": "Wero necesita el micrófono para oírte decir la palabra.",
+          "speechRecognitionPermission": "El reconocimiento corre en tu teléfono, sin enviar audio.",
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox"
           ]

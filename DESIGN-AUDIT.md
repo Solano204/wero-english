@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 152 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 153 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -62,7 +62,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/base/Card.tsx:161`
 - `src/components/base/Screen.tsx:72`
 - `src/components/base/Screen.tsx:86`
-- `src/components/card/FeedbackBand.tsx:112`
+- `src/components/card/FeedbackBand.tsx:115`
 - `src/components/card/SceneImage.tsx:73`
 - `src/components/card/SceneImage.tsx:86`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
@@ -96,8 +96,8 @@ Se quedan en 12–13 px, revisados a mano (16):
 - `src/screens/games/DulcesScreen.tsx:706` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
 - `src/screens/games/DulcesScreen.tsx:729` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/DulcesScreen.tsx:774` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
-- `src/screens/games/GameEndScreen.tsx:242` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/GameEndScreen.tsx:248` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/GameEndScreen.tsx:248` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/GameEndScreen.tsx:254` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/ParesScreen.tsx:456` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 

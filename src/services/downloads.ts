@@ -83,7 +83,7 @@ export async function downloadPack(
 
     const manifest = await fetchManifest(pack.url);
     if (!manifest) {
-      return { kind: 'error', message: 'No se pudo leer el manifiesto.' };
+      return { kind: 'error', message: 'No se pudo leer la lista de archivos del pack. Revisa tu conexión y vuelve a intentar.' };
     }
 
     let done = 0;
@@ -108,9 +108,8 @@ export async function downloadPack(
       try {
         if (dest.exists) dest.delete();
         await File.downloadFileAsync(`${pack.url}${item.ruta}`, dest);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'error de red';
-        return { kind: 'error', message: `Falló ${item.ruta}: ${msg}` };
+      } catch {
+        return { kind: 'error', message: `No se pudo bajar ${item.ruta}. Revisa tu conexión y vuelve a intentar.` };
       }
 
       done++;
@@ -121,10 +120,8 @@ export async function downloadPack(
     media.invalidate();
     await markDownloaded(usuarioId, pack.id, bytes, manifest.version);
     return { kind: 'done', bytes };
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Error de red desconocido.';
-    return { kind: 'error', message };
+  } catch {
+    return { kind: 'error', message: 'No se pudo descargar el pack. Revisa tu conexión y vuelve a intentar.' };
   } finally {
     running.delete(pack.id);
   }

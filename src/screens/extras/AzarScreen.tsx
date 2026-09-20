@@ -36,7 +36,7 @@ function pasosSecuencia(entry: Entry): { path: string | null; pauseMs: number }[
 }
 
 /**
- * Frases al azar, sin algoritmo.
+ * Frases sueltas, sin algoritmo.
  *
  * Todo lo demás en la app decide por el usuario: SM-2 elige qué toca
  * hoy, los mundos agrupan, los niveles ordenan. Esta pantalla no decide
@@ -198,7 +198,7 @@ export function AzarScreen() {
   if (loading && pool.length === 0) {
     return (
       <Screen>
-        <Header onBack={() => nav.goBack()} title="Al azar" />
+        <Header onBack={() => nav.goBack()} title="Frases sueltas" />
         <View style={styles.centro}>
           <Text style={styles.cargando}>Barajando…</Text>
         </View>
@@ -209,7 +209,7 @@ export function AzarScreen() {
   if (!entry) {
     return (
       <Screen>
-        <Header onBack={() => nav.goBack()} title="Al azar" />
+        <Header onBack={() => nav.goBack()} title="Frases sueltas" />
         <EmptyState
           title="No salió nada"
           body="Con los filtros que traes puestos no hay frases disponibles. Prueba subiendo el nivel o quitando el modo limpio en Ajustes."
@@ -224,7 +224,7 @@ export function AzarScreen() {
     <Screen>
       <Header
         onBack={() => nav.goBack()}
-        title="Al azar"
+        title="Frases sueltas"
         right={<Text style={styles.contador}>{vistas}</Text>}
       />
 

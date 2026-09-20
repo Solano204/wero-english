@@ -24,5 +24,5 @@ export const AUTH_MESSAGES: Record<AuthError, string> = {
   usuario_ocupado: 'Ese usuario ya existe en este teléfono.',
   password_corto: 'La contraseña necesita al menos 6 caracteres.',
   credenciales_malas: 'Usuario o contraseña incorrectos.',
-  desconocido: 'Algo salió mal. Intenta de nuevo.',
+  desconocido: 'No se pudo completar. Intenta de nuevo; si sigue igual, cierra y abre la app.',
 };

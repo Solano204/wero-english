@@ -19,7 +19,7 @@
     },
     {
       "id": "not_pendiente",
-      "texto": "Tienes {n} tarjetas listas. Van 3 minutos.",
+      "texto": "Hay frases por repasar hoy. Van 3 minutos.",
       "condicion": "tarjetas_vencidas>=8",
       "peso": 20,
       "fuente": "cola",
@@ -76,14 +76,14 @@
     },
     {
       "id": "not_vuelta_7",
-      "texto": "Llevas {n} frases dominadas. No las pierdas.",
+      "texto": "Llevas {n} frases dominadas y siguen aquí.",
       "condicion": "dias_sin_abrir==7",
       "fuente": "progreso",
       "abre_en": "P-13"
     },
     {
       "id": "not_vuelta_14",
-      "texto": "Sigues aquí. Empezamos con 8 fáciles.",
+      "texto": "Seguimos aquí. Empezamos con 8 fáciles.",
       "condicion": "dias_sin_abrir==14",
       "fuente": "ninguna",
       "abre_en": "P-05"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -24,6 +24,7 @@ import {
 } from '@/theme';
 import * as audio from '@/services/audio';
 import { useMovimientoReducido } from '@/utils';
+import { ACIERTO, elegirFrase } from '@/utils/frases';
 
 interface Props {
   visible: boolean;
@@ -57,6 +58,8 @@ export function FeedbackBand({
 }: Props) {
   const [esperando, setEsperando] = useState(false);
   const reducido = useMovimientoReducido();
+  // Una felicitación distinta cada vez que aparece la banda, nunca la misma dos veces seguidas.
+  const titular = useMemo(() => (correct ? elegirFrase(ACIERTO) : 'Era esta'), [visible, correct, answer]);
   const y = useSharedValue(240);
   const fade = useSharedValue(0);
   const verdictScale = useSharedValue(0.9);
@@ -118,13 +121,13 @@ export function FeedbackBand({
         <View
           style={[styles.wrap, correct ? styles.ok : styles.miss]}
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`${correct ? 'Exacto' : 'Era esta'}. ${answer}`}
+          accessibilityLabel={`${titular}. ${answer}`}
         >
       <View style={styles.head}>
         <Animated.Text
           style={[styles.verdict, correct ? styles.okText : styles.missText, verdictAnim]}
         >
-          {correct ? 'Exacto' : 'Era esta'}
+          {titular}
         </Animated.Text>
         {nextLabel ? <Text style={styles.next}>{nextLabel}</Text> : null}
       </View>

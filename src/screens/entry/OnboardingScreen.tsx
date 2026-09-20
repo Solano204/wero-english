@@ -254,14 +254,14 @@ const PRESENTACION: {
   {
     titulo: 'Y con quién NO decirlo',
     cuerpo:
-      'Cada frase trae marcado su riesgo social. Sabrás cuál va con tus amigos, cuál aguanta en el trabajo y cuál te puede costar una entrevista. Ninguna otra app te dice eso.',
-    pie: 'Es la razón de que exista esta app.',
+      'Cada frase trae su nivel de riesgo: sabes si va con tus amigos o si te puede costar una entrevista.',
+    pie: 'Lo ves en la ficha de cada frase.',
     tinte: color.riskWarn,
   },
   {
     titulo: 'Tres minutos al día, sin castigos',
     cuerpo:
-      'Sin vidas, sin cronómetro, sin tabla de posiciones. Si un día no entras, no pasa nada y la app no te lo menciona. Tu avance se queda guardado en tu teléfono aunque vuelvas en un mes.',
+      'Sin vidas y sin cronómetro. Si un día no entras, la app no te lo menciona. Tu avance se queda guardado en tu teléfono aunque vuelvas en un mes.',
     pie: 'Ahora sí, tres preguntas rápidas.',
     tinte: color.correct,
   },
@@ -380,7 +380,7 @@ function PasoCuantas({
     <Animated.View entering={FadeIn.duration(220)} style={styles.paso}>
       <Text style={styles.titulo}>Recibe frases todo el día</Text>
       <Text style={styles.bajada}>
-        Una notificación es una frase, no un regaño
+        Cada aviso es una sola frase
       </Text>
 
       <Card style={styles.previa}>
@@ -433,7 +433,7 @@ function PasoCuantas({
         </>
       ) : null}
 
-      <Button label="Continuar" onPress={onSiguiente} full />
+      <Button label="Siguiente" onPress={onSiguiente} full />
     </Animated.View>
   );
 }

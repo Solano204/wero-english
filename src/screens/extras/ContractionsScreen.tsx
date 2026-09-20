@@ -64,7 +64,7 @@ export function ContractionsScreen() {
   if (grupos.length === 0) {
     return (
       <Screen>
-        <Header onBack={() => nav.goBack()} title="Cómo suena" />
+        <Header onBack={() => nav.goBack()} title="Cómo suena de verdad" />
         <EmptyState
           icon="warning"
           title="Falta el contenido"

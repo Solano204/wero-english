@@ -34,10 +34,10 @@ type Ruta = RouteProp<RootStackParams, 'Niveles'>;
 const TITULOS: Record<string, string> = {
   colmena: 'Colmena',
   pares: 'Pares',
-  caida: 'Caida',
+  caida: 'Caída',
   dulces: 'Dulces',
-  cazala: 'Cazala',
-  pares_minimos: 'Pares minimos',
+  cazala: 'Cázala',
+  pares_minimos: 'Pares mínimos',
 };
 
 export function NivelesScreen() {
@@ -230,7 +230,7 @@ export function NivelesScreen() {
       tipo="juego"
       id={juego}
       nombre={TITULOS[juego] ?? "Este juego"}
-      detalle="200 niveles, todos con frases de tu catalogo."
+      detalle="200 niveles, todos con frases de tu catálogo."
       onVolver={() => nav.goBack()}
     >
       {contenido}

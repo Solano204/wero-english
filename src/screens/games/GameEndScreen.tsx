@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as ads from '@/services/ads';
 import * as audio from '@/services/audio';
+import { PARTIDA_PERFECTA, TRES_ESTRELLAS, elegirFrase } from '@/utils/frases';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -75,6 +76,12 @@ export function GameEndScreen() {
 
   const pct = rondas > 0 ? Math.round((aciertos / rondas) * 100) : 0;
   const merece = rondas >= 5 && pct >= 70;
+  // Las felicitaciones se eligen una vez por pantalla, no en cada render.
+  const perfecta = useMemo(
+    () => elegirFrase(PARTIDA_PERFECTA).split('{n}').join(String(rondas)),
+    [rondas]
+  );
+  const tresEstrellas = useMemo(() => elegirFrase(TRES_ESTRELLAS), []);
 
   useEffect(() => {
     // Una sola vez, al mostrar el resultado: nivel_completo si fue un
@@ -104,7 +111,7 @@ export function GameEndScreen() {
 
         <Text style={styles.sub}>
           {aciertos === rondas
-            ? 'Todas. Sin fallar una.'
+            ? perfecta
             : aciertos === 0
               ? 'Ninguna esta vez.'
               : `${pct}% de acierto`}
@@ -128,7 +135,7 @@ export function GameEndScreen() {
             </View>
             <Text style={styles.estrellasNota}>
               {estrellas === 3
-                ? 'Las tres. No hay más que sacarle.'
+                ? tresEstrellas
                 : estrellas === 0
                   ? `El siguiente ya está abierto. Con ${umbrales[0]} sacas tu primera estrella aquí.`
                   : `Con ${umbrales[estrellas]} sacas ${estrellas + 1}.`}
@@ -142,8 +149,7 @@ export function GameEndScreen() {
           <Card style={styles.repaso}>
             <Text style={styles.repasoTexto}>
               {aciertos}{' '}
-              {aciertos === 1 ? 'frase se movió' : 'frases se movieron'} en tu
-              cola de repaso
+              {aciertos === 1 ? 'frase avanzó' : 'frases avanzaron'} en tu repaso
             </Text>
             <Text style={styles.repasoNota}>
               Jugar cuenta igual que estudiar. Es la misma tarjeta.
@@ -182,7 +188,7 @@ export function GameEndScreen() {
           />
         ) : null}
         <Button
-          label="Recoger"
+          label="Volver a Practicar"
           variant={nivel ? 'secondary' : 'primary'}
           onPress={salir}
           full

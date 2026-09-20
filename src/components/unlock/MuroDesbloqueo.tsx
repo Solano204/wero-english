@@ -94,7 +94,7 @@ export function MuroDesbloqueo({
             </View>
 
             <Button
-              label={abriendo ? 'Abriendo…' : 'Ver anuncio y desbloquear'}
+              label={abriendo ? 'Abriendo…' : 'Ver anuncio y abrir'}
               accessibilityHint="Muestra un anuncio y abre esto para siempre, también sin internet"
               onPress={desbloquear}
               disabled={abriendo}

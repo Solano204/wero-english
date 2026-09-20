@@ -551,14 +551,14 @@ export function DulcesScreen() {
                 onPress={seguirAhora}
                 disabled={avanzando}
                 accessibilityRole="button"
-                accessibilityLabel="Seguir"
+                accessibilityLabel="Siguiente"
                 hitSlop={8}
                 style={({ pressed }) => [
                   styles.seguir,
                   pressed && !avanzando && styles.seguirPress,
                 ]}
               >
-                <Text style={styles.seguirTexto}>Seguir</Text>
+                <Text style={styles.seguirTexto}>Siguiente</Text>
                 <Icon name="chevron-right" size="sm" color={color.textFaint} />
               </Pressable>
             ) : (

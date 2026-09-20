@@ -112,8 +112,8 @@ export const MODOS: Record<ModoId, Modo> = {
     ir: (nav) => nav.navigate('Phrasal'),
   },
   azar: {
-    titulo: 'Al azar',
-    cuerpo: 'Frases sueltas, sin algoritmo y sin llevar cuenta',
+    titulo: 'Frases sueltas',
+    cuerpo: 'Pasa frases una por una, sin repaso y sin llevar cuenta',
     arte: 'azar',
     grupo: 'leer',
     ir: (nav) => nav.navigate('Azar'),

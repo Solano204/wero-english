@@ -175,7 +175,7 @@ export function SettingsScreen() {
         ) : null}
         <Toggle
           label="Frases durante el día"
-          hint="Cada aviso es una frase, no un regaño"
+          hint="Cada aviso es una sola frase"
           value={s.notificaciones}
           onChange={async (v) => {
             await cambiar('notificaciones', v as never);
@@ -203,7 +203,7 @@ export function SettingsScreen() {
                   onChange={(v) => void cambiar('horaNotificacion', v as never)}
                 />
                 <Text style={styles.hint}>
-                  Con una sola al día llega exactamente a esa hora.
+                  Con una sola al día, llega a esa hora.
                 </Text>
               </>
             ) : s.notifPorDia > 1 ? (
