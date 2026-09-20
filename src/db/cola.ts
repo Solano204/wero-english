@@ -1,3 +1,4 @@
+import { dayKey, startOfDay } from '@/utils/date';
 import type { CardState, Nivel } from '@/types';
 
 /**
@@ -48,8 +49,8 @@ export function buildFilter(f: ContentFilter): Fragment {
  *    estudió tiene fila con `vence_en = 0`, pero no tiene turno: es nueva;
  *  - su fecha ya llegó (`vence_en <= ahora`);
  *  - no es una tarjeta en aprendizaje (`intervalo = 0`) respondida hoy. Los
- *    pasos de 1 y 10 min de SM-2 le tocan al motor de la sesión, que no las
- *    reinserta más de lo permitido: lo que sobre vuelve mañana.
+ *    pasos de 1 y 10 min de SM-2 no se repiten en la sesión (el motor solo
+ *    reinserta una vez las FALLADAS): lo demás vuelve mañana.
  *
  * Parámetros, en orden: ahora, inicio del día local.
  */
@@ -59,7 +60,7 @@ export const SQL_VENCIDA =
 const SIN_REGLAS = "e.tipo != 'regla_fonetica'";
 
 /** Params: usuario, ...filtro.args, ahora, inicioDelDia. */
-export function sqlContarVencidas(filtro: string): string {
+function sqlContarVencidas(filtro: string): string {
   return `SELECT COUNT(*) AS n
        FROM entrada e
        JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
@@ -67,7 +68,7 @@ export function sqlContarVencidas(filtro: string): string {
 }
 
 /** Las más atrasadas primero. Params: usuario, ...filtro.args, ahora, inicioDelDia, límite. */
-export function sqlVencidas(filtro: string): string {
+function sqlVencidas(filtro: string): string {
   return `SELECT e.*, t.repeticiones, t.intervalo, t.facilidad,
             t.vence_en, t.ultimo_repaso, t.fallos, t.aciertos,
             t.dominada, t.favorito
@@ -82,7 +83,7 @@ export function sqlVencidas(filtro: string): string {
  * Frases sin turno: sin fila en `tarjeta` o con fila que nunca se repasó
  * (una favorita). Por nivel y luego id. Params: usuario, ...filtro.args, límite.
  */
-export function sqlNuevas(filtro: string): string {
+function sqlNuevas(filtro: string): string {
   return `SELECT e.*, NULL AS repeticiones, NULL AS intervalo,
             NULL AS facilidad, NULL AS vence_en, NULL AS ultimo_repaso,
             NULL AS fallos, NULL AS aciertos, NULL AS dominada,
@@ -101,7 +102,7 @@ export function sqlNuevas(filtro: string): string {
  * (fila sin repasar). Params: ahora, inicioDelDia, ahora, inicioDelDia,
  * usuario, ...filtro.args.
  */
-export function sqlDiagnosticoCola(filtro: string): string {
+function sqlDiagnosticoCola(filtro: string): string {
   return `SELECT
             COALESCE(SUM(CASE WHEN ${SQL_VENCIDA} THEN 1 ELSE 0 END), 0) AS vencidas,
             COALESCE(SUM(CASE WHEN ${SQL_VENCIDA} AND t.intervalo = 0 THEN 1 ELSE 0 END), 0) AS aprendizaje,
@@ -136,5 +137,47 @@ export function paramsUpsertTarjeta(usuarioId: number, s: CardState): (number | 
  * Nuevas que ya entraron hoy: `sesion.nuevas` de las sesiones del día local.
  * No cuenta las que entran por juegos. Params: usuario, dayKey (YYYY-MM-DD).
  */
-export const SQL_NUEVAS_HOY =
+const SQL_NUEVAS_HOY =
   'SELECT COALESCE(SUM(nuevas), 0) AS n FROM sesion WHERE usuario_id = ? AND dia = ?;';
+
+/**
+ * Cada consulta de la cola sale de aquí con su SQL Y sus parámetros, en el
+ * orden en que aparecen los `?`. queries.ts las ejecuta tal cual y
+ * scripts/check-srs.mjs las prueba tal cual: si el orden cambia, la prueba
+ * lo ve. Nadie más arma parámetros a mano.
+ */
+export interface Consulta {
+  sql: string;
+  params: (string | number)[];
+}
+
+/** Cuántas tarjetas están vencidas (ver SQL_VENCIDA). */
+export function consultaContarVencidas(usuarioId: number, filter: ContentFilter, now: number): Consulta {
+  const f = buildFilter(filter);
+  return { sql: sqlContarVencidas(f.sql), params: [usuarioId, ...f.args, now, startOfDay(now)] };
+}
+
+/** Las vencidas más atrasadas, hasta `limite`. */
+export function consultaVencidas(usuarioId: number, filter: ContentFilter, limite: number, now: number): Consulta {
+  const f = buildFilter(filter);
+  return { sql: sqlVencidas(f.sql), params: [usuarioId, ...f.args, now, startOfDay(now), limite] };
+}
+
+/** Frases sin turno, hasta `limite`. */
+export function consultaNuevas(usuarioId: number, filter: ContentFilter, limite: number): Consulta {
+  const f = buildFilter(filter);
+  return { sql: sqlNuevas(f.sql), params: [usuarioId, ...f.args, limite] };
+}
+
+/** Vencidas / de aprendizaje / fantasma. */
+export function consultaDiagnosticoCola(usuarioId: number, filter: ContentFilter, now: number): Consulta {
+  const f = buildFilter(filter);
+  const inicio = startOfDay(now);
+  return { sql: sqlDiagnosticoCola(f.sql), params: [now, inicio, now, inicio, usuarioId, ...f.args] };
+}
+
+/** Nuevas que ya entraron hoy (día local). */
+export function consultaNuevasHoy(usuarioId: number, now: number): Consulta {
+  return { sql: SQL_NUEVAS_HOY, params: [usuarioId, dayKey(now)] };
+}
+

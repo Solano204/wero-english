@@ -64,12 +64,12 @@ const tabla = (nombre) => {
   return m[0];
 };
 
-function base({ entradas = 100, filas = [], sesiones = [] } = {}) {
+function base({ entradas = 100, filas = [], sesiones = [], nivelDe = () => 1 } = {}) {
   const db = new SQL.Database();
   db.run('CREATE TABLE entrada (id INTEGER PRIMARY KEY, tipo TEXT, is_canonical INT, revisar INT, vulgaridad INT, nivel INT, pack_final TEXT, mundo TEXT)');
   db.run(tabla('tarjeta'));
   db.run(tabla('sesion'));
-  for (let i = 1; i <= entradas; i++) db.run("INSERT INTO entrada VALUES (?, 'frase', 1, 0, 0, 1, NULL, NULL)", [i]);
+  for (let i = 1; i <= entradas; i++) db.run("INSERT INTO entrada VALUES (?, 'frase', 1, 0, 0, ?, NULL, NULL)", [i, nivelDe(i)]);
   for (const f of filas) guardarFila(db, f);
   for (const s of sesiones) db.run('INSERT INTO sesion (usuario_id, dia, inicio, nuevas) VALUES (1, ?, ?, ?)', [s.dia, s.inicio ?? 0, s.nuevas]);
   return db;
@@ -88,13 +88,15 @@ function consulta(db, texto, params) {
   return out;
 }
 
-// Las mismas llamadas que hace db/queries.ts, con el filtro que usa Study.
-const F = sql.buildFilter(plan.filtroEstudio({ modoLimpio: false, niveles: [1, 2, 3] }));
-const contar = (db, now) => consulta(db, sql.sqlContarVencidas(F.sql), [1, ...F.args, now, fecha.startOfDay(now)])[0].n;
-const vencidas = (db, now, limite) => consulta(db, sql.sqlVencidas(F.sql), [1, ...F.args, now, fecha.startOfDay(now), limite]);
-const nuevas = (db, limite) => consulta(db, sql.sqlNuevas(F.sql), [1, ...F.args, limite]);
-const nuevasHoy = (db, now) => consulta(db, sql.SQL_NUEVAS_HOY, [1, fecha.dayKey(now)])[0].n;
-const diagnostico = (db, now) => consulta(db, sql.sqlDiagnosticoCola(F.sql), [now, fecha.startOfDay(now), now, fecha.startOfDay(now), 1, ...F.args])[0];
+// Las consultas salen de db/cola.ts con su SQL y sus parámetros, igual que en
+// db/queries.ts: aquí no se arma ningún parámetro a mano.
+const FILTRO = plan.filtroEstudio({ modoLimpio: false, niveles: [1, 2, 3] });
+const correr = (db, q) => consulta(db, q.sql, q.params);
+const contar = (db, now, filtro = FILTRO) => correr(db, sql.consultaContarVencidas(1, filtro, now))[0].n;
+const vencidas = (db, now, limite, filtro = FILTRO) => correr(db, sql.consultaVencidas(1, filtro, limite, now));
+const nuevas = (db, limite, filtro = FILTRO) => correr(db, sql.consultaNuevas(1, filtro, limite));
+const nuevasHoy = (db, now) => correr(db, sql.consultaNuevasHoy(1, now))[0].n;
+const diagnostico = (db, now, filtro = FILTRO) => correr(db, sql.consultaDiagnosticoCola(1, filtro, now))[0];
 const estadoDe = (r) => ({ entry_id: r.id ?? r.entry_id, repeticiones: r.repeticiones ?? 0, intervalo: r.intervalo ?? 0, facilidad: r.facilidad ?? 2.5, vence_en: r.vence_en ?? 0, ultimo_repaso: r.ultimo_repaso ?? null, fallos: r.fallos ?? 0, aciertos: r.aciertos ?? 0, dominada: r.dominada ?? 0, favorito: r.favorito ?? 0 });
 const entrada = (id) => ({ id, phrase: `phrase ${id}`, phrase_tts: `this is phrase ${id}`, spanish_main: `frase ${id}`, audio_en: null, word_count: 4, completar_palabra: null, completar_distractores: [], no_usar_cuando: null });
 const pares = (rows) => rows.map((r) => ({ entry: entrada(r.id), state: estadoDe(r) }));
@@ -139,6 +141,13 @@ await prueba('en aprendizaje y respondida ayer sí es vencida', () => {
   assert.equal(contar(db, AHORA), 1);
 });
 
+await prueba('en aprendizaje respondida a las 11:55 pm de ayer sí toca hoy, aunque venza a las 00:05', () => {
+  const ayer2355 = new Date(2026, 8, 18, 23, 55, 0).getTime();
+  const db = base({ entradas: 3, filas: [{ entry_id: 1, repeticiones: 1, vence_en: ayer2355 + 10 * MIN, ultimo_repaso: ayer2355 }] });
+  assert.equal(contar(db, AHORA), 1);
+  assert.deepEqual(ids(vencidas(db, AHORA, 5)), [1]);
+});
+
 await prueba('las más atrasadas van primero', () => {
   const db = base({ entradas: 5, filas: [graduada(1, 1), graduada(2, 10), graduada(3, 3)] });
   assert.deepEqual(ids(vencidas(db, AHORA, 10)), [2, 3, 1]);
@@ -161,6 +170,18 @@ await prueba('diagnóstico: vencidas / de aprendizaje / fantasma', () => {
     ],
   });
   assert.deepEqual({ ...diagnostico(db, AHORA) }, { vencidas: 3, aprendizaje: 1, fantasma: 2 });
+});
+
+await prueba('un filtro que agrega parámetros no desordena los de la cola', () => {
+  const nivelDe = (i) => 1 + (i % 3);
+  const filas = [1, 2, 3, 4, 5, 6].map((id) => graduada(id, id));
+  const db = base({ entradas: 9, filas, nivelDe });
+  const soloNivel1 = { modoLimpio: false, niveles: [1] };
+  const esperado = filas.filter((f) => nivelDe(f.entry_id) === 1).map((f) => f.entry_id).sort((a, b) => b - a); // más atrasadas primero
+  assert.deepEqual(ids(vencidas(db, AHORA, 10, soloNivel1)), esperado);
+  assert.equal(contar(db, AHORA, soloNivel1), esperado.length);
+  assert.equal(diagnostico(db, AHORA, soloNivel1).vencidas, esperado.length);
+  assert.ok(nuevas(db, 10, soloNivel1).every((r) => nivelDe(r.id) === 1));
 });
 
 // ── sesión: orden, nuevas y topes ────────────────────────────────────────
@@ -280,46 +301,69 @@ await prueba('horario de verano de la frontera norte (Tijuana): el repaso de ma�
   assert.equal(r.state.vence_en, new Date(2026, 10, 1, 0, 0, 0).getTime());
 });
 
-// ── reinserción ──────────────────────────────────────────────────────────
-// Tarjetas ya graduadas: contestarlas bien no las deja en aprendizaje, así que solo se reinserta la fallada.
+// ── reinserción: solo las falladas, una vez ───────────────────────────────
+// Tarjetas ya graduadas: contestarlas bien no las deja en aprendizaje.
 const motor = (n, extra = {}) => new StudySession({ due: pares(Array.from({ length: n }, (_, i) => ({ id: i + 1, ...graduada(i + 1, 1) }))), fresh: [], meta: 50, distractorsFor: () => [], ...extra });
 const responder = (s, bien) => {
   const id = s.current().entry.id;
   s.answer({ grade: bien ? 3 : 1, correct: bien, elapsedMs: 5000, usedHint: false });
   return id;
 };
-
-await prueba('una tarjeta fallada vuelve 3 a 5 tarjetas después, máximo 2 veces', () => {
-  const azares = [0, 0.99]; // 3 tarjetas la primera vez, 5 la segunda
-  const s = motor(12, { maxReinserciones: 2, azar: () => azares.shift() ?? 0 });
+/** Recorre la sesión; `falla(id, vez)` dice si esa aparición se contesta mal. */
+const recorrer = (s, falla) => {
   const vistas = [];
+  const veces = new Map();
   while (!s.terminada) {
     const id = s.current().entry.id;
-    vistas.push(responder(s, id !== 1));
+    const vez = (veces.get(id) ?? 0) + 1;
+    veces.set(id, vez);
+    vistas.push(responder(s, !falla(id, vez)));
   }
-  assert.deepEqual(vistas, [1, 2, 3, 4, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]);
-  assert.equal(s.totalReinserciones, 2);
+  return vistas;
+};
+
+await prueba('una tarjeta fallada vuelve una sola vez, 3 tarjetas después, y no dos', () => {
+  const s = motor(8, { maxReinserciones: plan.MAX_REINSERCIONES, azar: () => 0 });
+  const vistas = recorrer(s, (id) => id === 1); // la 1 falla siempre
+  assert.deepEqual(vistas, [1, 2, 3, 4, 1, 5, 6, 7, 8]);
+  assert.equal(s.totalReinserciones, 1);
 });
 
-await prueba('una tarjeta nueva contestada bien se ve 3 veces (2 pasos de aprendizaje) y se gradúa', () => {
-  const s = new StudySession({ due: [], fresh: pares(Array.from({ length: 8 }, (_, i) => ({ id: i + 1 }))), meta: 50, distractorsFor: () => [], maxReinserciones: 2, azar: () => 0 });
-  const vistas = [];
-  while (!s.terminada) vistas.push(responder(s, true));
-  assert.equal(vistas.filter((id) => id === 1).length, 3);
-  assert.equal(s.totalReinserciones, 2 * 8);
+await prueba('la fallada vuelve entre 3 y 5 tarjetas después', () => {
+  for (const [azar, entre] of [[0, 3], [0.5, 4], [0.99, 5]]) {
+    const s = motor(12, { maxReinserciones: 1, azar: () => azar });
+    const vistas = recorrer(s, (id, vez) => id === 1 && vez === 1);
+    assert.equal(vistas.indexOf(1, 1) - 1, entre, `azar ${azar}: ${entre} tarjetas entre las dos apariciones`);
+  }
 });
 
-await prueba('sin reinserción configurada nada se repite en la sesión', () => {
-  const s = motor(6);
-  const vistas = [];
-  while (!s.terminada) vistas.push(responder(s, false));
-  assert.deepEqual(vistas, [1, 2, 3, 4, 5, 6]);
+await prueba('una fallada que se corrige al volver no vuelve más', () => {
+  const s = motor(8, { maxReinserciones: 1, azar: () => 0 });
+  const vistas = recorrer(s, (id, vez) => id === 1 && vez === 1);
+  assert.equal(vistas.filter((id) => id === 1).length, 2);
+  assert.equal(s.totalReinserciones, 1);
+});
+
+await prueba('una acertada no vuelve, ni siquiera la que SM-2 deja en aprendizaje', () => {
+  const nuevasTarjetas = pares(Array.from({ length: 8 }, (_, i) => ({ id: i + 1 })));
+  const s = new StudySession({ due: [], fresh: nuevasTarjetas, meta: 50, distractorsFor: () => [], maxReinserciones: plan.MAX_REINSERCIONES, azar: () => 0 });
+  const vistas = recorrer(s, () => false);
+  assert.deepEqual(vistas, [1, 2, 3, 4, 5, 6, 7, 8]);
   assert.equal(s.totalReinserciones, 0);
-  assert.equal(plan.MAX_REINSERCIONES, 0, 'la constante de la app sigue en 0 hasta confirmarlo');
+});
+
+await prueba('sin reinserción configurada nada se repite en la sesión, ni las falladas', () => {
+  const s = motor(6);
+  assert.deepEqual(recorrer(s, () => true), [1, 2, 3, 4, 5, 6]);
+  assert.equal(s.totalReinserciones, 0);
+});
+
+await prueba('la app reinserta las falladas una vez', () => {
+  assert.equal(plan.MAX_REINSERCIONES, 1);
 });
 
 await prueba('las reinsertadas no inflan la cola: el total sube solo lo reinsertado', () => {
-  const s = motor(6, { maxReinserciones: 2, azar: () => 0 });
+  const s = motor(6, { maxReinserciones: 1, azar: () => 0 });
   const antes = s.progress.goal;
   responder(s, false);
   assert.equal(s.progress.goal, antes + 1);
@@ -356,12 +400,16 @@ await prueba('cola de ~850 tras 30 días de uso (SM-2 real): sesión de 20 = 17 
   assert.deepEqual(ids(due), ids(vencidas(db, AHORA, 17)));
   if (INFORME) {
     console.log(`      informe: vencidas=${diag.vencidas} (de aprendizaje ${diag.aprendizaje}, fantasma ${diag.fantasma}); sesión: ${due.length} vencidas + ${fresh.length} nuevas`);
-    for (const max of [0, 1, 2]) {
-      const s = new StudySession({ due: pares(due), fresh: pares(fresh), meta: 20, distractorsFor: () => [], maxReinserciones: max, azar });
-      let contestadas = 0;
-      while (!s.terminada) { const bien = azar() < 0.8; s.answer({ grade: bien ? 3 : 1, correct: bien, elapsedMs: 5000, usedHint: false }); contestadas++; }
-      console.log(`      reinserciones máx. ${max} por tarjeta (80 % de aciertos): ${s.totalReinserciones} reinserciones, ${contestadas} respuestas en total`);
+    // 300 sesiones con esa misma cola y 80 % de aciertos, con la regla de la app.
+    const SESIONES = 300;
+    let suma = 0, minimo = Infinity, maximo = 0, reinsertadas = 0;
+    for (let k = 0; k < SESIONES; k++) {
+      const s = new StudySession({ due: pares(due), fresh: pares(fresh), meta: 20, distractorsFor: () => [], maxReinserciones: plan.MAX_REINSERCIONES, azar });
+      let respuestas = 0;
+      while (!s.terminada) { const bien = azar() < 0.8; s.answer({ grade: bien ? 3 : 1, correct: bien, elapsedMs: 5000, usedHint: false }); respuestas++; }
+      suma += respuestas; minimo = Math.min(minimo, respuestas); maximo = Math.max(maximo, respuestas); reinsertadas += s.totalReinserciones;
     }
+    console.log(`      sesión típica de 20 (regla: falladas, 1 vez): ${(suma / SESIONES).toFixed(1)} respuestas en promedio (de ${minimo} a ${maximo}), ${(reinsertadas / SESIONES).toFixed(1)} reinsertadas por sesión`);
   }
 });
 

@@ -30,8 +30,8 @@ export interface SessionInput {
   wordDecoysFor?: (entry: Entry) => string[];
   meta: number;
   /**
-   * Cuántas veces puede volver a salir, en esta sesión, una tarjeta que
-   * SM-2 deja en aprendizaje (pasos de 1 y 10 min). 0 = nunca vuelve.
+   * Cuántas veces puede volver a salir, en esta sesión, una tarjeta FALLADA.
+   * 0 = nunca vuelve. Las acertadas no vuelven, estén o no en aprendizaje.
    */
   maxReinserciones?: number;
   /** Azar para elegir a cuántas tarjetas vuelve (3 a 5). Se inyecta en las pruebas. */
@@ -76,9 +76,13 @@ export class StudySession {
     this.wordDecoysFor = input.wordDecoysFor ?? (() => []);
 
     // Una frase no viene dos veces en la lista inicial, aunque esté en las
-    // dos. Dentro de la sesión solo se repite una tarjeta en aprendizaje, y
-    // solo hasta `maxReinserciones` veces: ver la misma tarjeta dos veces en
-    // tres minutos es lo que hacía sentir la práctica interminable.
+    // dos. Dentro de la sesión tampoco se repite, con una sola excepción: la
+    // FALLADA vuelve una vez, 3 a 5 tarjetas después, para corregir el error
+    // en fresco. Las acertadas, incluso las que SM-2 deja en aprendizaje, no
+    // vuelven: se programan para mañana, que es donde de verdad sirven.
+    // Ver la misma tarjeta dos veces en tres minutos es lo que hacía sentir
+    // la práctica interminable, y reinsertar también los pasos de aprendizaje
+    // llevaba una sesión de 20 a 40 o 55 respuestas.
     const vistas = new Set<number>();
 
     const dueCards = input.due
@@ -189,13 +193,13 @@ export class StudySession {
 
     this.queue.splice(pos, 1);
 
-    // SM-2 pide `requeue` para los pasos de aprendizaje. Aquí se respeta
-    // con un tope: la tarjeta vuelve entre 3 y 5 tarjetas después y no más
-    // de `maxReinserciones` veces por sesión. Lo que sobre lo programa
-    // SM-2 para otro día.
+    // Solo la fallada (grado 1) vuelve, entre 3 y 5 tarjetas después y no más
+    // de `maxReinserciones` veces por sesión. `requeue` de SM-2 también pide
+    // volver a las acertadas en aprendizaje; eso no se respeta en la sesión:
+    // SM-2 ya las dejó programadas para mañana.
     const id = pending.card.entry.id;
     const veces = this.reinsertadas.get(id) ?? 0;
-    if (requeue && veces < this.maxReinserciones) {
+    if (grade === 1 && veces < this.maxReinserciones) {
       this.reinsertadas.set(id, veces + 1);
       this.reinserciones++;
       this.total++;

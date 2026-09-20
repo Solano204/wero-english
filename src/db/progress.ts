@@ -1,5 +1,5 @@
 import { getDb } from './client';
-import { SQL_NUEVAS_HOY } from './cola';
+import { consultaNuevasHoy } from './cola';
 import { dayKey, daysBetween } from '@/utils/date';
 
 export interface DayRecord {
@@ -102,7 +102,8 @@ export async function endSession(
 /** Cuántas frases nuevas entraron hoy (hora local) por sesiones de estudio. */
 export async function getNuevasHoy(usuarioId: number, now = Date.now()): Promise<number> {
   const db = await getDb();
-  const row = await db.getFirstAsync<{ n: number }>(SQL_NUEVAS_HOY, [usuarioId, dayKey(now)]);
+  const q = consultaNuevasHoy(usuarioId, now);
+  const row = await db.getFirstAsync<{ n: number }>(q.sql, q.params);
   return row?.n ?? 0;
 }
 

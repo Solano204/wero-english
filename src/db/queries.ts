@@ -1,7 +1,15 @@
 import { getDb } from './client';
-import { buildFilter, type ContentFilter, paramsUpsertTarjeta, sqlContarVencidas, sqlDiagnosticoCola, sqlNuevas, sqlVencidas, SQL_UPSERT_TARJETA } from './cola';
+import {
+  buildFilter,
+  consultaContarVencidas,
+  consultaDiagnosticoCola,
+  consultaNuevas,
+  consultaVencidas,
+  paramsUpsertTarjeta,
+  SQL_UPSERT_TARJETA,
+  type ContentFilter,
+} from './cola';
 import { toEntry, type EntryRow } from './rows';
-import { startOfDay } from '@/utils/date';
 import type { CardState, Entry, Nivel, Registro, Vulgaridad } from '@/types';
 
 /* ============================================================
@@ -58,10 +66,8 @@ export async function getDueCards(
   now = Date.now()
 ): Promise<{ entry: Entry; state: CardState }[]> {
   const db = await getDb();
-  const f = buildFilter(filter);
-  const rows = await db.getAllAsync<QueueRow>(sqlVencidas(f.sql), [
-    usuarioId, ...f.args, now, startOfDay(now), limit,
-  ]);
+  const q = consultaVencidas(usuarioId, filter, limit, now);
+  const rows = await db.getAllAsync<QueueRow>(q.sql, q.params);
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
 }
 
@@ -72,8 +78,8 @@ export async function getNewCards(
   limit: number
 ): Promise<{ entry: Entry; state: CardState }[]> {
   const db = await getDb();
-  const f = buildFilter(filter);
-  const rows = await db.getAllAsync<QueueRow>(sqlNuevas(f.sql), [usuarioId, ...f.args, limit]);
+  const q = consultaNuevas(usuarioId, filter, limit);
+  const rows = await db.getAllAsync<QueueRow>(q.sql, q.params);
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
 }
 
@@ -83,10 +89,8 @@ export async function countDue(
   now = Date.now()
 ): Promise<number> {
   const db = await getDb();
-  const f = buildFilter(filter);
-  const row = await db.getFirstAsync<{ n: number }>(sqlContarVencidas(f.sql), [
-    usuarioId, ...f.args, now, startOfDay(now),
-  ]);
+  const q = consultaContarVencidas(usuarioId, filter, now);
+  const row = await db.getFirstAsync<{ n: number }>(q.sql, q.params);
   return row?.n ?? 0;
 }
 
@@ -97,11 +101,10 @@ export async function getDiagnosticoCola(
   now = Date.now()
 ): Promise<{ vencidas: number; aprendizaje: number; fantasma: number }> {
   const db = await getDb();
-  const f = buildFilter(filter);
-  const inicio = startOfDay(now);
+  const q = consultaDiagnosticoCola(usuarioId, filter, now);
   const row = await db.getFirstAsync<{ vencidas: number; aprendizaje: number; fantasma: number }>(
-    sqlDiagnosticoCola(f.sql),
-    [now, inicio, now, inicio, usuarioId, ...f.args]
+    q.sql,
+    q.params
   );
   return { vencidas: row?.vencidas ?? 0, aprendizaje: row?.aprendizaje ?? 0, fantasma: row?.fantasma ?? 0 };
 }

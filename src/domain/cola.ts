@@ -14,16 +14,14 @@ import type { Nivel } from '@/types';
 export const NUEVAS_RESERVADAS = 3;
 
 /**
- * Cuántas veces puede reinsertarse en UNA sesión una tarjeta en aprendizaje.
+ * Cuántas veces puede volver, en UNA sesión, una tarjeta FALLADA: una. Las
+ * acertadas no vuelven, ni las que SM-2 deja en aprendizaje: vuelven mañana.
  *
- * Está en 0 a propósito. Los pasos de 1 y 10 min de SM-2 pedían volver a
- * ver la tarjeta en la misma sesión, y el motor dejó de hacerlo con esta
- * razón escrita en session.ts: "ver la misma tarjeta dos veces en tres
- * minutos es lo que hacía sentir la práctica interminable". El motor ya
- * sabe reinsertar (`maxReinserciones`, probado en check:srs); activarlo es
- * poner aquí 2, y queda pendiente de que lo confirme quien decide.
+ * Corrige el error en fresco sin hacer la sesión interminable. Reinsertar
+ * también los pasos de aprendizaje (hasta 2 veces por tarjeta) llevaba una
+ * sesión de 20 tarjetas a 40 o 55 respuestas.
  */
-export const MAX_REINSERCIONES = 0;
+export const MAX_REINSERCIONES = 1;
 
 /** Una tarjeta reinsertada vuelve entre 3 y 5 tarjetas después. */
 export const REINSERCION_MIN = 3;
