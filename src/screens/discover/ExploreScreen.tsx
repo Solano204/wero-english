@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Input, ProgressBar, Screen } from '@/components/base';
+import { Card, Carga, Input, ProgressBar, Screen } from '@/components/base';
 import { EntryRow, SectionTitle } from '@/components/list';
 import { getWorldCounts, searchEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { PORTADA_MUNDO, color, font, space } from '@/theme';
@@ -20,17 +21,14 @@ export function ExploreScreen() {
   const filter = useSettingsStore((s) => s.filter);
   const content = useMemo(loadContent, []);
 
-  const [counts, setCounts] = useState<
-    Record<string, { total: number; vistas: number }>
-  >({});
   const [term, setTerm] = useState('');
   const [results, setResults] = useState<Entry[]>([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      void getWorldCounts(user.id, filter()).then(setCounts);
-    }, [user, filter])
+  const cargaMundos = useCarga(
+    async (): Promise<Record<string, { total: number; vistas: number }>> =>
+      user ? getWorldCounts(user.id, filter()) : {},
+    [user, filter],
+    { alEnfocar: true }
   );
 
   const buscar = useCallback(
@@ -78,42 +76,46 @@ export function ExploreScreen() {
           )}
         </View>
       ) : (
-        <View style={styles.worlds}>
-          {mundos.map((m) => {
-            const c = counts[m.id] ?? { total: 0, vistas: 0 };
-            const tint =
-              color.world[m.id as keyof typeof color.world] ?? color.accent;
-            return (
-              <Card
-                key={m.id}
-                accent={tint}
-                onPress={() => nav.navigate('WorldDetail', { worldId: m.id })}
-                style={styles.world}
-                // Portada: la imagen si existe, y si no el degradado del
-                // mundo. Las dos se ven bien; una se ve mejor.
-                portada={m.id}
-                imagen={PORTADA_MUNDO[m.id]}
-                altoPortada={96}
-              >
-                <View style={styles.worldHead}>
-                  <Text style={styles.worldName}>{m.nombre}</Text>
-                  <Text style={styles.worldCount}>
-                    {c.vistas}/{c.total}
-                  </Text>
-                </View>
-                <Text style={styles.worldDesc} numberOfLines={2}>
-                  {m.descripcion}
-                </Text>
-                <ProgressBar
-                  value={c.vistas}
-                  total={Math.max(1, c.total)}
-                  tint={tint}
-                  height={4}
-                />
-              </Card>
-            );
-          })}
-        </View>
+        <Carga carga={cargaMundos}>
+          {(counts) => (
+            <View style={styles.worlds}>
+              {mundos.map((m) => {
+                const c = counts[m.id] ?? { total: 0, vistas: 0 };
+                const tint =
+                  color.world[m.id as keyof typeof color.world] ?? color.accent;
+                return (
+                  <Card
+                    key={m.id}
+                    accent={tint}
+                    onPress={() => nav.navigate('WorldDetail', { worldId: m.id })}
+                    style={styles.world}
+                    // Portada: la imagen si existe, y si no el degradado del
+                    // mundo. Las dos se ven bien; una se ve mejor.
+                    portada={m.id}
+                    imagen={PORTADA_MUNDO[m.id]}
+                    altoPortada={96}
+                  >
+                    <View style={styles.worldHead}>
+                      <Text style={styles.worldName}>{m.nombre}</Text>
+                      <Text style={styles.worldCount}>
+                        {c.vistas}/{c.total}
+                      </Text>
+                    </View>
+                    <Text style={styles.worldDesc} numberOfLines={2}>
+                      {m.descripcion}
+                    </Text>
+                    <ProgressBar
+                      value={c.vistas}
+                      total={Math.max(1, c.total)}
+                      tint={tint}
+                      height={4}
+                    />
+                  </Card>
+                );
+              })}
+            </View>
+          )}
+        </Carga>
       )}
     </Screen>
   );

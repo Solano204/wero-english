@@ -1,15 +1,15 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import {
-  useFocusEffect,
   useNavigation,
   useRoute,
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Header, Screen } from '@/components/base';
+import { Button, Carga, Header, Screen, SkeletonLista } from '@/components/base';
 import { EntryRow } from '@/components/list';
 import { getPackEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { color, font, space } from '@/theme';
@@ -31,13 +31,9 @@ export function PackDetailScreen() {
   const filter = useSettingsStore((s) => s.filter);
   const content = useMemo(loadContent, []);
 
-  const [entries, setEntries] = useState<Entry[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      void getPackEntries(params.packId, filter()).then(setEntries);
-    }, [params.packId, filter])
-  );
+  const carga = useCarga(() => getPackEntries(params.packId, filter()), [params.packId, filter], {
+    alEnfocar: true,
+  });
 
   const pack = content.packs.packs.find((p) => p.id === params.packId);
 
@@ -52,7 +48,7 @@ export function PackDetailScreen() {
         <Header
           onBack={() => nav.goBack()}
           title={pack?.nombre ?? 'Pack'}
-          subtitle={`${entries.length} frases`}
+          subtitle={carga.datos ? `${carga.datos.length} frases` : undefined}
         />
         <Button
           label="Estudiar este pack"
@@ -61,26 +57,41 @@ export function PackDetailScreen() {
         />
       </View>
 
-      <FlatList
-        data={entries}
-        keyExtractor={(e) => String(e.id)}
-        renderItem={({ item, index }) => (
-          <EntryRow entry={item} index={index} onPress={abrir} />
-        )}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.sep} />}
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            No hay frases con los filtros actuales.
-          </Text>
+      <Carga
+        carga={carga}
+        esqueleto={
+          <View style={styles.list}>
+            <SkeletonLista />
+          </View>
         }
-        initialNumToRender={12}
-        maxToRenderPerBatch={10}
-        windowSize={7}
-        removeClippedSubviews
-      />
+      >
+        {(entries) => (
+          <FlatList
+            data={entries}
+            keyExtractor={(e) => String(e.id)}
+            renderItem={({ item, index }) => (
+              <EntryRow entry={item} index={index} onPress={abrir} />
+            )}
+            contentContainerStyle={styles.list}
+            ItemSeparatorComponent={Separador}
+            ListEmptyComponent={
+              <Text style={styles.empty}>
+                No hay frases con los filtros actuales.
+              </Text>
+            }
+            initialNumToRender={12}
+            maxToRenderPerBatch={10}
+            windowSize={7}
+            removeClippedSubviews
+          />
+        )}
+      </Carga>
     </Screen>
   );
+}
+
+function Separador() {
+  return <View style={styles.sep} />;
 }
 
 const styles = StyleSheet.create({

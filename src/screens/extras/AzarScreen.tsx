@@ -3,9 +3,10 @@ import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Badge, Button, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Badge, Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { SceneImage } from '@/components/card';
 import { getRandomEntries, toggleFavorite } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -59,7 +60,6 @@ export function AzarScreen() {
   const [i, setI] = useState(0);
   const [vistas, setVistas] = useState(0);
   const [guardada, setGuardada] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [bloqueado, setBloqueado] = useState(false);
   // Qué texto está sonando ahorita: la frase EN o el significado ES.
   const [sonando, setSonando] = useState<'en' | 'es' | null>(null);
@@ -70,23 +70,22 @@ export function AzarScreen() {
   const vozToken = useRef(0);
   const avanzarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const cargar = useCallback(async () => {
-    // Recargar la baraja corta cualquier voz de la tanda anterior.
-    vozToken.current++;
-    audio.stop();
-    setSonando(null);
-    setLoading(true);
-    // Se piden de golpe y se recorren en orden: pedir una por una haría
-    // una consulta por toque y se sentiría el salto.
-    const list = await getRandomEntries(filter(), 60);
-    setPool(list);
-    setI(0);
-    setLoading(false);
-  }, [filter]);
-
-  useEffect(() => {
-    void cargar();
-  }, [cargar]);
+  const carga = useCarga(
+    async () => {
+      // Recargar la baraja corta cualquier voz de la tanda anterior.
+      vozToken.current++;
+      audio.stop();
+      setSonando(null);
+      // Se piden de golpe y se recorren en orden: pedir una por una haría
+      // una consulta por toque y se sentiría el salto.
+      const list = await getRandomEntries(filter(), 60);
+      setPool(list);
+      setI(0);
+    },
+    [filter]
+  );
+  const loading = carga.estado === 'cargando';
+  const cargar = carga.reintentar;
 
   const entry = pool[i];
 
@@ -194,6 +193,15 @@ export function AzarScreen() {
     setGuardada(true);
     haptics.success();
   }, [user, entry, guardada]);
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Frases sueltas" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
 
   if (loading && pool.length === 0) {
     return (

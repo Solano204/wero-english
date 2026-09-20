@@ -12,12 +12,13 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, EmptyState, Header, Icon, Screen } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Icon, Screen } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
 import { getRandomEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -97,7 +98,6 @@ export function CaidaScreen() {
   const reaccion = useReaccion();
   const [idx, setIdx] = useState(0);
   const [aciertos, setAciertos] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [perdio, setPerdio] = useState(false);
   const [fallada, setFallada] = useState<string | null>(null);
   // Pausa al acertar: congela la caída y bloquea las fichas mientras se
@@ -154,13 +154,10 @@ export function CaidaScreen() {
     };
   }, [y]);
 
-  useEffect(() => {
-    if (!user || !nv) return;
-    let vivo = true;
-
-    (async () => {
+  const carga = useCarga(
+    async () => {
+      if (!user || !nv) return;
       const pool = await getRandomEntries(filter(), 200, { maxLen: 32 });
-      if (!vivo) return;
       const dentro = filtrar(pool, nv.rondas);
       setRounds(
         buildRounds(dentro, nv.rondas, {
@@ -169,13 +166,10 @@ export function CaidaScreen() {
           aceleraMs: nv.aceleraMs,
         })
       );
-      setLoading(false);
-    })();
-
-    return () => {
-      vivo = false;
-    };
-  }, [user, filter, nv, filtrar]);
+    },
+    [user, filter, nv, filtrar]
+  );
+  const loading = carga.estado === 'cargando';
 
   /**
    * Termina la pausa de fin de ronda y corre lo que tocaba: ronda
@@ -345,6 +339,15 @@ export function CaidaScreen() {
     },
     [round, perdio, enPausa, y, user, idx, rounds.length, nav, nivel, pausarConVoz]
   );
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Caída" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
 
   if (loading) {
     return (

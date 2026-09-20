@@ -7,7 +7,7 @@ import Animated, {
   LinearTransition,
   ZoomIn,
 } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, Icon, ProgressBar, Screen } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { Estrellas, Trozos, useReaccion } from '@/components/feedback';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@/domain/match3';
 import { applyGameGrade } from '@/db/games';
 import { getRandomEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { shuffle } from '@/utils/array';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -104,7 +105,6 @@ export function DulcesScreen() {
   const reaccion = useReaccion();
   const [jugadas, setJugadas] = useState(JUGADAS_DEF);
   const [resueltas, setResueltas] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [pregunta, setPregunta] = useState<{
     objetivo: DulceObjetivo;
     opciones: string[];
@@ -150,16 +150,13 @@ export function DulcesScreen() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!user || !nv) return;
-    let vivo = true;
-
-    (async () => {
+  const carga = useCarga(
+    async () => {
+      if (!user || !nv) return;
       const entradas = await getRandomEntries(filter(), 120, {
         maxWords: 6,
         maxLen: 34,
       });
-      if (!vivo) return;
 
       const mezcladas = shuffle(filtrar(entradas, nv.frases));
       setPool(mezcladas);
@@ -176,14 +173,11 @@ export function DulcesScreen() {
       siguienteFrase.current = nv.frases;
       setJugadas(nv.jugadas);
       setBoard(createBoard(nv.cols, nv.rows, nv.colores));
-      setLoading(false);
       empezoEn.current = Date.now();
-    })();
-
-    return () => {
-      vivo = false;
-    };
-  }, [user, filter, nv, filtrar]);
+    },
+    [user, filter, nv, filtrar]
+  );
+  const loading = carga.estado === 'cargando';
 
   const terminar = useCallback(() => {
     audio.stop();
@@ -464,6 +458,15 @@ export function DulcesScreen() {
     }
     return undefined;
   }, [jugadas, pregunta, terminar]);
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Dulces" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
 
   if (loading) {
     return (

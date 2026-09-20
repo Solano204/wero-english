@@ -10,8 +10,9 @@ import Animated, {
   withTiming,
   cancelAnimation,
 } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { getRandomEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -79,7 +80,6 @@ export function EarModeScreen() {
   const [queue, setQueue] = useState<Entry[]>([]);
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(true);
   // Paso (0-based) dentro de pasosFrase() de la frase actual. Sirve
   // para mostrar "Repetición X/3" y para que "reanudar" retome ESE
   // paso en vez de reiniciar la frase desde la ronda 1.
@@ -90,13 +90,15 @@ export function EarModeScreen() {
   const pasoIdxRef = useRef(0);
   const pulse = useSharedValue(1);
 
-  useEffect(() => {
-    if (!user) return;
-    void getRandomEntries(filter(), 40, { conAudio: true }).then((list) => {
+  const carga = useCarga(
+    async () => {
+      if (!user) return;
+      const list = await getRandomEntries(filter(), 40, { conAudio: true });
       setQueue(list.filter((e) => e.audio_en));
-      setLoading(false);
-    });
-  }, [user, filter]);
+    },
+    [user, filter]
+  );
+  const loading = carga.estado === 'cargando';
 
   const detener = useCallback(() => {
     playingRef.current = false;
@@ -175,6 +177,15 @@ export function EarModeScreen() {
     pulse.value = withRepeat(withTiming(1.08, { duration: 900 }), -1, true);
     void loop(pasoIdxRef.current);
   }, [loop, pulse, detener]);
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Modo oído" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
 
   if (loading) {
     return (

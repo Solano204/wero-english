@@ -294,9 +294,9 @@ function primeraLinea(lines, re) {
 /** a) ¿Cada pantalla que carga datos tiene estado de carga, vacío y error? */
 function auditaEstados(archivos) {
   const RE = {
-    carga: /\b(setLoading|setCargando|isLoading|loading|cargando|Repartiendo|Cargando)\b|<ActivityIndicator/,
+    carga: /\b(setLoading|setCargando|isLoading|loading|cargando|Repartiendo|Cargando)\b|<ActivityIndicator|\buseCarga\(|<Carga\b/,
     vacio: /<EmptyState|\.length === 0|\.length == 0|!\w+\.length\b/,
-    error: /\.catch\(|\bcatch\s*[({]|setError|useState<[^>]*rror/,
+    error: /\.catch\(|\bcatch\s*[({]|setError|useState<[^>]*rror|<Carga\b|<ErrorCarga|estado === 'error'/,
   };
   const filas = [];
   for (const { r, lines, src } of archivos.filter((a) => esPantalla(a.r))) {
@@ -580,7 +580,7 @@ const SECCION_COMPORTAMIENTO = (c) => {
 
 ## a) Estados: carga, vacío y error
 
-Pantallas de \`src/screens/\` que leen de la base (\`@/db/\`). Cada celda apunta a la primera línea que evidencia el estado; ✗ es que no se detectó ninguno. La detección busca nombres de estado (\`loading\`, \`cargando\`, \`EmptyState\`, \`.length === 0\`, \`.catch\`, \`setError\`), así que un estado con otro nombre saldría ✗ y hay que confirmarlo.
+Pantallas de \`src/screens/\` que leen de la base (\`@/db/\`). Cada celda apunta a la primera línea que evidencia el estado; ✗ es que no se detectó ninguno. La detección busca nombres de estado (\`loading\`, \`cargando\`, \`useCarga\`, \`<Carga>\`, \`ErrorCarga\`, \`EmptyState\`, \`.length === 0\`, \`.catch\`, \`setError\`), así que un estado con otro nombre saldría ✗ y hay que confirmarlo.
 
 ${tablaEstados(c.E)}
 

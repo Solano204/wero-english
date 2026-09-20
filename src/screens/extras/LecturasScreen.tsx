@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Badge, Card, Header, ProgressBar, Screen } from '@/components/base';
+import { Badge, Card, Carga, Header, ProgressBar, Screen } from '@/components/base';
 import { SectionTitle } from '@/components/list';
 import {
   dificultadPara,
@@ -10,6 +10,7 @@ import {
   etiquetaDificultad,
 } from '@/domain/lectura';
 import { getCardStates, getDominadasPorMundo, getEntriesByIds } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
@@ -44,52 +45,41 @@ export function LecturasScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const content = useMemo(loadContent, []);
-  const [filas, setFilas] = useState<Fila[]>([]);
+  const carga = useCarga(
+    async (): Promise<Fila[]> => {
+      if (!user) return [];
+      const lecturas = content.lecturas.lecturas;
+      const ids = [...new Set(lecturas.flatMap((l) => l.frases))];
+      const entradas = await getEntriesByIds(ids);
+      const estados = await getCardStates(user.id, ids);
+      const porMundo = await getDominadasPorMundo(user.id);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      let vivo = true;
+      const mapaEntradas = new Map<number, Entry>(entradas.map((e) => [e.id, e]));
+      const mapaEstados = new Map<number, CardState>(estados);
 
-      (async () => {
-        const lecturas = content.lecturas.lecturas;
-        const ids = [...new Set(lecturas.flatMap((l) => l.frases))];
-        const entradas = await getEntriesByIds(ids);
-        const estados = await getCardStates(user.id, ids);
-        const porMundo = await getDominadasPorMundo(user.id);
-        if (!vivo) return;
-
-        const mapaEntradas = new Map<number, Entry>(
-          entradas.map((e) => [e.id, e])
-        );
-        const mapaEstados = new Map<number, CardState>(estados);
-
-        setFilas(
-          lecturas.map((l) => {
-            const est = dificultadPara(l, mapaEntradas, mapaEstados);
-            const bloq = estadoDesbloqueo(l, porMundo);
-            return {
-              lectura: l,
-              dificultad: est.dificultad,
-              dominadas: est.dominadas,
-              total: est.total,
-              abierta: bloq.abierta,
-              faltan: bloq.faltan,
-            };
-          })
-        );
-      })();
-
-      return () => {
-        vivo = false;
-        // Red de seguridad: ninguna voz de lectura sobrevive a salir de aquí.
-        audio.stop();
-      };
-    }, [user, content])
+      return lecturas.map((l) => {
+        const est = dificultadPara(l, mapaEntradas, mapaEstados);
+        const bloq = estadoDesbloqueo(l, porMundo);
+        return {
+          lectura: l,
+          dificultad: est.dificultad,
+          dominadas: est.dominadas,
+          total: est.total,
+          abierta: bloq.abierta,
+          faltan: bloq.faltan,
+        };
+      });
+    },
+    [user, content],
+    { alEnfocar: true, esVacio: (f) => f.length === 0 }
   );
 
-  const ninos = filas.filter((f) => f.lectura.publico === 'ninos');
-  const general = filas.filter((f) => f.lectura.publico === 'general');
+  // Red de seguridad: ninguna voz de lectura sobrevive a salir de aquí.
+  useFocusEffect(
+    useCallback(() => () => {
+      audio.stop();
+    }, [])
+  );
 
   return (
     <Screen scroll>
@@ -100,48 +90,59 @@ export function LecturasScreen() {
         sola conforme aprendes.
       </Text>
 
-      {ninos.length > 0 ? (
-        <>
-          <SectionTitle title="Para niños" count={ninos.length} />
-          <View style={styles.list}>
-            {ninos.map((f) => (
-              <FilaLectura
-                key={f.lectura.id}
-                fila={f}
-                onPress={() =>
-                  nav.navigate('Lectura', { lecturaId: f.lectura.id })
-                }
-              />
-            ))}
-          </View>
-        </>
-      ) : null}
+      <Carga
+        carga={carga}
+        vacio={
+          <Card>
+            <Text style={styles.vacio}>
+              Todavía no hay historias cargadas. El archivo lecturas.json está
+              vacío o no se generó.
+            </Text>
+          </Card>
+        }
+      >
+        {(filas) => {
+          const ninos = filas.filter((f) => f.lectura.publico === 'ninos');
+          const general = filas.filter((f) => f.lectura.publico === 'general');
+          return (
+            <>
+              {ninos.length > 0 ? (
+                <>
+                  <SectionTitle title="Para niños" count={ninos.length} />
+                  <View style={styles.list}>
+                    {ninos.map((f) => (
+                      <FilaLectura
+                        key={f.lectura.id}
+                        fila={f}
+                        onPress={() =>
+                          nav.navigate('Lectura', { lecturaId: f.lectura.id })
+                        }
+                      />
+                    ))}
+                  </View>
+                </>
+              ) : null}
 
-      {general.length > 0 ? (
-        <>
-          <SectionTitle title="Para todos" count={general.length} />
-          <View style={styles.list}>
-            {general.map((f) => (
-              <FilaLectura
-                key={f.lectura.id}
-                fila={f}
-                onPress={() =>
-                  nav.navigate('Lectura', { lecturaId: f.lectura.id })
-                }
-              />
-            ))}
-          </View>
-        </>
-      ) : null}
-
-      {filas.length === 0 ? (
-        <Card>
-          <Text style={styles.vacio}>
-            Todavía no hay historias cargadas. El archivo lecturas.json está
-            vacío o no se generó.
-          </Text>
-        </Card>
-      ) : null}
+              {general.length > 0 ? (
+                <>
+                  <SectionTitle title="Para todos" count={general.length} />
+                  <View style={styles.list}>
+                    {general.map((f) => (
+                      <FilaLectura
+                        key={f.lectura.id}
+                        fila={f}
+                        onPress={() =>
+                          nav.navigate('Lectura', { lecturaId: f.lectura.id })
+                        }
+                      />
+                    ))}
+                  </View>
+                </>
+              ) : null}
+            </>
+          );
+        }}
+      </Carga>
     </Screen>
   );
 }

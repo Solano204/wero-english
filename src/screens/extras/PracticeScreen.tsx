@@ -1,13 +1,14 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, ProgressBar, Screen } from '@/components/base';
+import { Button, Card, ErrorCarga, ProgressBar, Screen, Skeleton } from '@/components/base';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
 import { getRecentDays } from '@/db/progress';
 import { countDue, getStats } from '@/db/queries';
 import { filtroEstudio } from '@/domain/cola';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { PORTADA_JUEGO, color, font, radius, shadow, space, text } from '@/theme';
@@ -21,6 +22,28 @@ import { GRUPOS, MODOS, type Modo } from './practicar/modos';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Resumen = Awaited<ReturnType<typeof getStats>>;
+
+interface Datos {
+  records: Record<string, JuegoRecord>;
+  reto: RetoSemanal | null;
+  habla: { intentos: number; dominados: number };
+  niveles: Record<string, { jugados: number; estrellas: number; siguiente: number }>;
+  stats: Resumen | null;
+  uso: Uso;
+  hoyFrases: number;
+  vencidas: number;
+}
+
+const SIN_DATOS: Datos = {
+  records: {},
+  reto: null,
+  habla: { intentos: 0, dominados: 0 },
+  niveles: {},
+  stats: null,
+  uso: {},
+  hoyFrases: 0,
+  vencidas: 0,
+};
 
 /** El botón de HOY dice qué va a pasar al tocarlo. */
 function etiquetaHoy(
@@ -56,43 +79,29 @@ export function PracticeScreen() {
   const filter = useSettingsStore((s) => s.filter);
   const metaDiaria = useSettingsStore((s) => s.metaDiaria);
 
-  const [records, setRecords] = useState<Record<string, JuegoRecord>>({});
-  const [reto, setReto] = useState<RetoSemanal | null>(null);
-  const [habla, setHabla] = useState({ intentos: 0, dominados: 0 });
-  const [niveles, setNiveles] = useState<
-    Record<string, { jugados: number; estrellas: number; siguiente: number }>
-  >({});
-  const [stats, setStats] = useState<Resumen | null>(null);
-  const [uso, setUso] = useState<Uso>({});
-  const [hoyFrases, setHoyFrases] = useState(0);
-  const [vencidas, setVencidas] = useState(0);
-  // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
-  // el caso "usuario nuevo" un instante y luego saltaría a otro.
-  const [listo, setListo] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      void getGameRecords(user.id).then(setRecords);
-      void getRetoSemanal(user.id).then(setReto);
-      void getHablaResumen(user.id).then(setHabla);
-      void resumenTodos(user.id).then(setNiveles);
-      void Promise.all([
+  const carga = useCarga(
+    async (): Promise<Datos> => {
+      if (!user) return SIN_DATOS;
+      const [records, reto, habla, niveles, stats, uso, dias, vencidas] = await Promise.all([
+        getGameRecords(user.id),
+        getRetoSemanal(user.id),
+        getHablaResumen(user.id),
+        resumenTodos(user.id),
         getStats(user.id),
         getUsoModos(user.id),
         getRecentDays(user.id, 1),
         countDue(user.id, filtroEstudio(filter())),
-      ])
-        .then(([s, u, dias, venc]) => {
-          setStats(s);
-          setUso(u);
-          setVencidas(venc);
-          setHoyFrases(dias[0]?.dia === dayKey() ? dias[0].respuestas : 0);
-        })
-        .catch((err) => console.warn('[Practicar] no se pudo leer el progreso', err))
-        .finally(() => setListo(true));
-    }, [user, filter])
+      ]);
+      const hoyFrases = dias[0]?.dia === dayKey() ? dias[0].respuestas : 0;
+      return { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas };
+    },
+    [user, filter],
+    { alEnfocar: true }
   );
+  // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
+  // el caso "usuario nuevo" un instante y luego saltaría a otro.
+  const listo = carga.estado === 'listo';
+  const { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas } = carga.datos ?? SIN_DATOS;
 
   const atoradas = stats?.atoradas ?? 0;
   const racha = stats?.racha ?? 0;
@@ -151,26 +160,33 @@ export function PracticeScreen() {
       <View style={styles.bloques}>
         <View style={styles.bloque}>
           <Text style={styles.title}>Practicar</Text>
-          <View style={styles.hoy}>
-            <View
-              style={listo ? styles.hoyContenido : styles.hoyOculto}
-              accessibilityElementsHidden={!listo}
-              importantForAccessibility={listo ? 'auto' : 'no-hide-descendants'}
-            >
-              <View style={styles.hoyTexto}>
-                <Text style={styles.hoyEtiqueta}>Hoy</Text>
-                <Text style={styles.hoyTitulo}>{modoHoy.titulo}</Text>
-                <Text style={styles.hoyCuerpo}>{modoHoy.cuerpo}</Text>
+          {carga.estado === 'error' ? (
+            <ErrorCarga onReintentar={carga.reintentar} />
+          ) : (
+            <View style={styles.hoy}>
+              {carga.estado === 'cargando' && carga.demora ? (
+                <Skeleton relleno style={styles.hoyEsqueleto} />
+              ) : null}
+              <View
+                style={listo ? styles.hoyContenido : styles.hoyOculto}
+                accessibilityElementsHidden={!listo}
+                importantForAccessibility={listo ? 'auto' : 'no-hide-descendants'}
+              >
+                <View style={styles.hoyTexto}>
+                  <Text style={styles.hoyEtiqueta}>Hoy</Text>
+                  <Text style={styles.hoyTitulo}>{modoHoy.titulo}</Text>
+                  <Text style={styles.hoyCuerpo}>{modoHoy.cuerpo}</Text>
+                </View>
+                <Button
+                  label={etiquetaHoy(hoy.motivo, hoy.modo, atoradas, vencidas, metaDiaria)}
+                  size="lg"
+                  full
+                  onPress={() => modoHoy.ir(nav)}
+                />
+                {datoHoy ? <Text style={styles.hoyDato}>{datoHoy}</Text> : null}
               </View>
-              <Button
-                label={etiquetaHoy(hoy.motivo, hoy.modo, atoradas, vencidas, metaDiaria)}
-                size="lg"
-                full
-                onPress={() => modoHoy.ir(nav)}
-              />
-              {datoHoy ? <Text style={styles.hoyDato}>{datoHoy}</Text> : null}
             </View>
-          </View>
+          )}
         </View>
 
         <View style={styles.bloque}>
@@ -276,6 +292,7 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   hoyContenido: { gap: space.lg },
+  hoyEsqueleto: { borderRadius: radius.lg },
   hoyOculto: { gap: space.lg, opacity: 0, pointerEvents: 'none' },
   hoyTexto: { gap: space.sm },
   hoyEtiqueta: {

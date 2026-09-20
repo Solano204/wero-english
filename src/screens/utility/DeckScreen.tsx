@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { EmptyState, Header, Screen } from '@/components/base';
+import { Carga, EmptyState, Header, Screen } from '@/components/base';
 import { EntryRow } from '@/components/list';
 import { getFavorites } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { space } from '@/theme';
 import type { Entry } from '@/types';
@@ -17,13 +18,10 @@ export function DeckScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
-  const [items, setItems] = useState<Entry[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      void getFavorites(user.id, filter()).then(setItems);
-    }, [user, filter])
+  const carga = useCarga(
+    async () => (user ? getFavorites(user.id, filter()) : []),
+    [user, filter],
+    { alEnfocar: true, esVacio: (d) => d.length === 0 }
   );
 
   const abrir = useCallback(
@@ -31,15 +29,24 @@ export function DeckScreen() {
     [nav]
   );
 
-  if (items.length === 0) {
+  const items = carga.datos ?? [];
+
+  if (carga.estado !== 'listo') {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Mi mazo" />
-        <EmptyState
-          icon="star"
-          title="Tu mazo está vacío"
-          body="Toca la estrella en cualquier frase para guardarla aquí."
-        />
+        <Carga
+          carga={carga}
+          vacio={
+            <EmptyState
+              icon="star"
+              title="Tu mazo está vacío"
+              body="Toca la estrella en cualquier frase para guardarla aquí."
+            />
+          }
+        >
+          {() => null}
+        </Carga>
       </Screen>
     );
   }
@@ -60,13 +67,17 @@ export function DeckScreen() {
           <EntryRow entry={item} index={index} variant="mazo" onPress={abrir} />
         )}
         contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.sep} />}
+        ItemSeparatorComponent={Separador}
         initialNumToRender={12}
         windowSize={7}
         removeClippedSubviews
       />
     </Screen>
   );
+}
+
+function Separador() {
+  return <View style={styles.sep} />;
 }
 
 const styles = StyleSheet.create({

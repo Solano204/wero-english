@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   useNavigation,
@@ -10,6 +10,8 @@ import {
   Badge,
   Button,
   Card,
+  Carga,
+  EmptyState,
   Header,
   LevelBadge,
   RegistroBadge,
@@ -18,9 +20,9 @@ import {
 } from '@/components/base';
 import { PhraseBlock, SceneImage } from '@/components/card';
 import { getEntry, toggleFavorite } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { color, font, space } from '@/theme';
-import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -37,12 +39,11 @@ export function DetailScreen() {
   const { params } = useRoute<Rt>();
   const user = useAuthStore((s) => s.user);
 
-  const [entry, setEntry] = useState<Entry | null>(null);
+  const carga = useCarga(() => getEntry(params.entryId), [params.entryId], {
+    esVacio: (e) => e === null,
+  });
+  const entry = carga.datos;
   const [fav, setFav] = useState(false);
-
-  useEffect(() => {
-    void getEntry(params.entryId).then(setEntry);
-  }, [params.entryId]);
 
   const alternar = useCallback(async () => {
     if (!user || !entry) return;
@@ -53,6 +54,12 @@ export function DetailScreen() {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} />
+        <Carga
+          carga={carga}
+          vacio={<EmptyState icon="warning" title="No se encontró la frase." />}
+        >
+          {() => null}
+        </Carga>
       </Screen>
     );
   }

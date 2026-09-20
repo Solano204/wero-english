@@ -1,11 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, ProgressBar, Screen } from '@/components/base';
+import { Card, Carga, ProgressBar, Screen, SkeletonLista } from '@/components/base';
 import { SectionTitle } from '@/components/list';
-import { getStats, type Stats } from '@/db/queries';
-import { getRecentDays, type DayRecord } from '@/db/progress';
+import { getStats } from '@/db/queries';
+import { getRecentDays } from '@/db/progress';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { color, font, radius, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
@@ -21,16 +22,17 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function ProgressScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [days, setDays] = useState<DayRecord[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      void getStats(user.id).then(setStats);
-      void getRecentDays(user.id, 21).then((d) => setDays([...d].reverse()));
-    }, [user])
+  const carga = useCarga(
+    async () => {
+      if (!user) return { stats: null, days: [] };
+      const [stats, recientes] = await Promise.all([getStats(user.id), getRecentDays(user.id, 21)]);
+      return { stats, days: [...recientes].reverse() };
+    },
+    [user],
+    { alEnfocar: true }
   );
+  const stats = carga.datos?.stats ?? null;
+  const days = carga.datos?.days ?? [];
 
   const max = Math.max(1, ...days.map((d) => d.respuestas));
 
@@ -47,6 +49,17 @@ export function ProgressScreen() {
     }
     return out;
   }, [days]);
+
+  if (carga.estado !== 'listo') {
+    return (
+      <Screen>
+        <Text style={styles.title}>Tu progreso</Text>
+        <Carga carga={carga} esqueleto={<SkeletonLista filas={3} alto={110} />}>
+          {() => null}
+        </Carga>
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll>

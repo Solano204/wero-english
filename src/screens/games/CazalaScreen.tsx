@@ -6,10 +6,12 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import {
   Button,
   Card,
+  Carga,
   EmptyState,
   Header,
   ProgressBar,
   Screen,
+  SkeletonLista,
 } from '@/components/base';
 import { AudioButton, OptionButton, type OptionState } from '@/components/card';
 import { getEntriesByIds } from '@/db/queries';
@@ -18,6 +20,7 @@ import { itemsCazalaValidos } from '@/domain/cazala';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { shuffle } from '@/utils/array';
+import { useCarga } from '@/hooks/useCarga';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
@@ -49,7 +52,6 @@ export function CazalaScreen() {
   const user = useAuthStore((st) => st.user);
   const [picked, setPicked] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
-  const [labels, setLabels] = useState<Map<number, string>>(new Map());
   const [order, setOrder] = useState<number[]>([]);
   const autoAudio = useSettingsStore((s) => s.autoAudio);
   useMusicaPantalla('juegos');
@@ -65,16 +67,20 @@ export function CazalaScreen() {
     setPicked([]);
     setChecked(false);
     setOrder(shuffle(item.opciones));
+  }, [item]);
 
-    void getEntriesByIds(item.opciones).then((entries) => {
+  const carga = useCarga(
+    async () => {
       const map = new Map<number, string>();
-      for (const e of entries) {
+      if (!item) return map;
+      for (const e of await getEntriesByIds(item.opciones)) {
         // phrase_tts trae la forma reducida y audible: "chillin'", no "chilling".
         map.set(e.id, e.phrase_tts);
       }
-      setLabels(map);
-    });
-  }, [item]);
+      return map;
+    },
+    [item]
+  );
 
   const toggle = useCallback(
     (id: number) => {
@@ -176,16 +182,20 @@ export function CazalaScreen() {
       </Card>
 
       <View style={styles.options}>
-        {order.map((id, i) => (
-          <OptionButton
-            key={id}
-            index={i}
-            label={labels.get(id) ?? `#${id}`}
-            state={stateFor(id)}
-            disabled={checked}
-            onPress={() => toggle(id)}
-          />
-        ))}
+        <Carga carga={carga} esqueleto={<SkeletonLista filas={6} alto={56} />}>
+          {(labels) =>
+            order.map((id, i) => (
+              <OptionButton
+                key={id}
+                index={i}
+                label={labels.get(id) ?? `#${id}`}
+                state={stateFor(id)}
+                disabled={checked}
+                onPress={() => toggle(id)}
+              />
+            ))
+          }
+        </Carga>
       </View>
 
       {checked ? (

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,9 +9,10 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { getEntriesByIds } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { loadContent } from '@/store/content';
 import { color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
@@ -37,29 +38,16 @@ export function ContractionsScreen() {
   );
 
   const [activo, setActivo] = useState<string>(grupos[0]?.id ?? '');
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [cargando, setCargando] = useState(true);
-
-  useEffect(() => {
-    const g = grupos.find((x) => x.id === activo);
-    if (!g) return;
-    let vivo = true;
-    setCargando(true);
-    setEntries([]);
-    getEntriesByIds(g.entradas)
-      .then((es) => {
-        if (!vivo) return;
-        setEntries(es);
-        setCargando(false);
-      })
-      .catch((err: unknown) => {
-        console.warn('[Contracciones] no se pudieron cargar las entradas', err);
-        if (vivo) setCargando(false);
-      });
-    return () => {
-      vivo = false;
-    };
-  }, [activo, grupos]);
+  const carga = useCarga(
+    async (): Promise<Entry[]> => {
+      const g = grupos.find((x) => x.id === activo);
+      return g ? getEntriesByIds(g.entradas) : [];
+    },
+    [activo, grupos]
+  );
+  const entries = carga.datos ?? [];
+  // El giro de carga sale de inmediato, sin el retraso del esqueleto: es lo que ya se veía.
+  const cargando = carga.estado === 'cargando';
 
   if (grupos.length === 0) {
     return (
@@ -108,7 +96,9 @@ export function ContractionsScreen() {
 
       {grupo ? <Text style={styles.desc}>{grupo.descripcion}</Text> : null}
 
-      {cargando ? (
+      {carga.estado === 'error' ? (
+        <ErrorCarga onReintentar={carga.reintentar} />
+      ) : cargando ? (
         <View style={styles.cargando}>
           <ActivityIndicator color={color.accent} />
         </View>

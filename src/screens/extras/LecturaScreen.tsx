@@ -8,10 +8,11 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, Screen } from '@/components/base';
+import { Button, Card, Carga, EmptyState, Header, Screen } from '@/components/base';
 import { ReproductorCapitulo } from '@/components/card';
 import { partirTexto, type Trozo } from '@/domain/lectura';
 import { getCardStates, getEntriesByIds } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
@@ -22,6 +23,9 @@ import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Lectura'>;
+
+const SIN_ENTRADAS = new Map<number, Entry>();
+const SIN_ESTADOS = new Map<number, CardState>();
 
 /**
  * El lector.
@@ -45,27 +49,20 @@ export function LecturaScreen() {
   );
 
   const [cap, setCap] = useState(0);
-  const [entradas, setEntradas] = useState<Map<number, Entry>>(new Map());
-  const [estados, setEstados] = useState<Map<number, CardState>>(new Map());
   const [enPreguntas, setEnPreguntas] = useState(false);
   const [respuestas, setRespuestas] = useState<Record<number, number>>({});
 
-  useEffect(() => {
-    if (!user || !lectura) return;
-    let vivo = true;
-
-    (async () => {
+  const carga = useCarga(
+    async () => {
+      if (!user || !lectura) return null;
       const es = await getEntriesByIds(lectura.frases);
       const st = await getCardStates(user.id, lectura.frases);
-      if (!vivo) return;
-      setEntradas(new Map(es.map((e) => [e.id, e])));
-      setEstados(st);
-    })();
-
-    return () => {
-      vivo = false;
-    };
-  }, [user, lectura]);
+      return { entradas: new Map(es.map((e) => [e.id, e])), estados: st };
+    },
+    [user, lectura]
+  );
+  const entradas = carga.datos?.entradas ?? SIN_ENTRADAS;
+  const estados = carga.datos?.estados ?? SIN_ESTADOS;
 
   // Perder el foco (salir, cambiar de pestaña, abrir la ficha de una
   // frase) corta la voz: el player de frases es uno solo y compartido.
@@ -137,6 +134,15 @@ export function LecturaScreen() {
           actionLabel="Volver"
           onAction={() => nav.goBack()}
         />
+      </Screen>
+    );
+  }
+
+  if (carga.estado !== 'listo') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Lectura" />
+        <Carga carga={carga}>{() => null}</Carga>
       </Screen>
     );
   }

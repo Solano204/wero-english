@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { EmptyState, Header, Screen } from '@/components/base';
+import { Carga, EmptyState, Header, Screen } from '@/components/base';
 import { EntryRow } from '@/components/list';
 import { getStuckEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { color, font, space } from '@/theme';
-import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -22,24 +22,29 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function StuckScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
-  const [items, setItems] = useState<{ entry: Entry; fallos: number }[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      void getStuckEntries(user.id, 3, 30).then(setItems);
-    }, [user])
+  const carga = useCarga(
+    async () => (user ? getStuckEntries(user.id, 3, 30) : []),
+    [user],
+    { alEnfocar: true, esVacio: (d) => d.length === 0 }
   );
+  const items = carga.datos ?? [];
 
-  if (items.length === 0) {
+  if (carga.estado !== 'listo') {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Se me atoran" />
-        <EmptyState
-          icon="check"
-          title="Ninguna por ahora"
-          body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma."
-        />
+        <Carga
+          carga={carga}
+          vacio={
+            <EmptyState
+              icon="check"
+              title="Ninguna por ahora"
+              body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma."
+            />
+          }
+        >
+          {() => null}
+        </Carga>
       </Screen>
     );
   }

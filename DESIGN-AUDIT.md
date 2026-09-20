@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 153 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 157 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -42,11 +42,11 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | IA-1 | líneas con emojis | 0 |
 | IA-1b | líneas con glifos de texto como íconos | 0 |
 | IA-3 | sombras de color o fuera de tokens | 0 |
-| EST-carga | pantallas que cargan datos sin estado de carga | 13 |
-| EST-vacio | pantallas que cargan datos sin estado vacío | 6 |
-| EST-error | pantallas que cargan datos sin estado de error | 18 |
+| EST-carga | pantallas que cargan datos sin estado de carga | 0 |
+| EST-vacio | pantallas que cargan datos sin estado vacío | 5 |
+| EST-error | pantallas que cargan datos sin estado de error | 0 |
 | TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 1 |
-| RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 4 |
+| RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 2 |
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
 | AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 1 |
@@ -88,17 +88,17 @@ Se quedan en 12–13 px, revisados a mano (16):
 - `src/components/list/EntryRow.tsx:161` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/entry/OnboardingScreen.tsx:470` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
-- `src/screens/extras/LecturaScreen.tsx:303` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/extras/LecturasScreen.tsx:232` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/games/CaidaScreen.tsx:613` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/CaidaScreen.tsx:660` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
-- `src/screens/games/ColmenaScreen.tsx:620` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:706` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/games/DulcesScreen.tsx:729` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:774` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/extras/LecturaScreen.tsx:309` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/extras/LecturasScreen.tsx:233` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/games/CaidaScreen.tsx:616` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/CaidaScreen.tsx:663` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/ColmenaScreen.tsx:624` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:709` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/games/DulcesScreen.tsx:732` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:777` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/GameEndScreen.tsx:248` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/GameEndScreen.tsx:254` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/ParesScreen.tsx:456` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/ParesScreen.tsx:460` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
 Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/extras/PracticeScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/feedback/Toast.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
@@ -133,19 +133,19 @@ Descartados (28 px o más, pero no son títulos):
 - `src/navigation/TabNavigator.tsx:182` — label: marginTop: 2 = 2
 - `src/navigation/TabNavigator.tsx:184` — item: paddingTop: 2 = 2
 - `src/screens/entry/OnboardingScreen.tsx:471` — previa: gap: 2 = 2
-- `src/screens/extras/ContractionsScreen.tsx:177` — itemText: gap: 2 = 2
+- `src/screens/extras/ContractionsScreen.tsx:167` — itemText: gap: 2 = 2
 - `src/screens/extras/ErrorsScreen.tsx:147` — understood: marginLeft: space.lg + space.xs = 20
-- `src/screens/extras/LecturasScreen.tsx:230` — meta: marginTop: 2 = 2
+- `src/screens/extras/LecturasScreen.tsx:231` — meta: marginTop: 2 = 2
 - `src/screens/extras/PhrasalScreen.tsx:177` — forma: gap: 3 = 3
 - `src/screens/extras/PronunciationScreen.tsx:452` — pairSide: gap: 2 = 2
-- `src/screens/games/DulcesScreen.tsx:702` — metas: gap: 6 = 6
-- `src/screens/games/DulcesScreen.tsx:705` — metaCuerpo: gap: 2 = 2
-- `src/screens/games/NivelesScreen.tsx:288` — estrellas: marginTop: 1 = 1
+- `src/screens/games/DulcesScreen.tsx:705` — metas: gap: 6 = 6
+- `src/screens/games/DulcesScreen.tsx:708` — metaCuerpo: gap: 2 = 2
+- `src/screens/games/NivelesScreen.tsx:294` — estrellas: marginTop: 1 = 1
 - `src/screens/study/StudyScreen.tsx:296` — aciertosRow: gap: 6 = 6
-- `src/screens/utility/ProgressScreen.tsx:160` — big: gap: 2 = 2
-- `src/screens/utility/ProgressScreen.tsx:176` — bars: gap: 3 = 3
+- `src/screens/utility/ProgressScreen.tsx:173` — big: gap: 2 = 2
+- `src/screens/utility/ProgressScreen.tsx:189` — bars: gap: 3 = 3
 - `src/screens/utility/SettingsScreen.tsx:429` — hint: marginTop: 2 = 2
-- `src/screens/utility/StuckScreen.tsx:84` — slot: gap: 2 = 2
+- `src/screens/utility/StuckScreen.tsx:89` — slot: gap: 2 = 2
 
 ## JERARQUÍA Y ACCIÓN
 
@@ -196,33 +196,33 @@ Estilos interactivos con alto menor a 48 (verificar si llevan `hitSlop`):
 
 ## a) Estados: carga, vacío y error
 
-Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a la primera línea que evidencia el estado; ✗ es que no se detectó ninguno. La detección busca nombres de estado (`loading`, `cargando`, `EmptyState`, `.length === 0`, `.catch`, `setError`), así que un estado con otro nombre saldría ✗ y hay que confirmarlo.
+Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a la primera línea que evidencia el estado; ✗ es que no se detectó ninguno. La detección busca nombres de estado (`loading`, `cargando`, `useCarga`, `<Carga>`, `ErrorCarga`, `EmptyState`, `.length === 0`, `.catch`, `setError`), así que un estado con otro nombre saldría ✗ y hay que confirmarlo.
 
 | pantalla (archivo) | carga | vacío | error |
 |---|---|---|---|
-| `discover/DetailScreen.tsx` | ✗ | ✗ | ✗ |
-| `discover/ExploreScreen.tsx` | ✗ | ✓ `:67` | ✗ |
-| `discover/PackDetailScreen.tsx` | ✗ | ✗ | ✗ |
-| `discover/WorldDetailScreen.tsx` | ✗ | ✗ | ✗ |
+| `discover/DetailScreen.tsx` | ✓ `:42` | ✓ `:59` | ✓ `:57` |
+| `discover/ExploreScreen.tsx` | ✓ `:27` | ✓ `:65` | ✓ `:79` |
+| `discover/PackDetailScreen.tsx` | ✓ `:34` | ✗ | ✓ `:60` |
+| `discover/WorldDetailScreen.tsx` | ✓ `:28` | ✗ | ✓ `:51` |
 | `entry/BootScreen.tsx` | ✓ `:88` | ✓ `:37` | ✓ `:25` |
-| `extras/AzarScreen.tsx` | ✓ `:62` | ✓ `:198` | ✗ |
-| `extras/ContractionsScreen.tsx` | ✓ `:41` | ✓ `:64` | ✓ `:55` |
-| `extras/EarModeScreen.tsx` | ✓ `:82` | ✓ `:187` | ✗ |
-| `extras/LecturaScreen.tsx` | ✗ | ✓ `:134` | ✗ |
-| `extras/LecturasScreen.tsx` | ✗ | ✓ `:137` | ✗ |
-| `extras/PracticeScreen.tsx` | ✗ | ✗ | ✓ `:92` |
-| `games/CaidaScreen.tsx` | ✓ `:100` | ✓ `:360` | ✗ |
-| `games/CazalaScreen.tsx` | ✗ | ✓ `:135` | ✗ |
-| `games/ColmenaScreen.tsx` | ✓ `:107` | ✓ `:311` | ✗ |
-| `games/DulcesScreen.tsx` | ✓ `:107` | ✓ `:479` | ✗ |
-| `games/NivelesScreen.tsx` | ✗ | ✗ | ✗ |
-| `games/ParesScreen.tsx` | ✓ `:70` | ✓ `:290` | ✗ |
-| `utility/DeckScreen.tsx` | ✗ | ✓ `:34` | ✗ |
-| `utility/DiagnosticsScreen.tsx` | ✗ | ✗ | ✗ |
-| `utility/ProgressScreen.tsx` | ✗ | ✓ `:73` | ✗ |
-| `utility/StuckScreen.tsx` | ✗ | ✓ `:34` | ✗ |
+| `extras/AzarScreen.tsx` | ✓ `:73` | ✓ `:206` | ✓ `:197` |
+| `extras/ContractionsScreen.tsx` | ✓ `:41` | ✓ `:52` | ✓ `:99` |
+| `extras/EarModeScreen.tsx` | ✓ `:93` | ✓ `:198` | ✓ `:181` |
+| `extras/LecturaScreen.tsx` | ✓ `:55` | ✓ `:131` | ✓ `:145` |
+| `extras/LecturasScreen.tsx` | ✓ `:48` | ✓ `:74` | ✓ `:93` |
+| `extras/PracticeScreen.tsx` | ✓ `:82` | ✗ | ✓ `:163` |
+| `games/CaidaScreen.tsx` | ✓ `:157` | ✓ `:363` | ✓ `:343` |
+| `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
+| `games/ColmenaScreen.tsx` | ✓ `:125` | ✓ `:315` | ✓ `:295` |
+| `games/DulcesScreen.tsx` | ✓ `:153` | ✓ `:482` | ✓ `:462` |
+| `games/NivelesScreen.tsx` | ✓ `:55` | ✗ | ✓ `:138` |
+| `games/ParesScreen.tsx` | ✓ `:117` | ✓ `:294` | ✓ `:270` |
+| `utility/DeckScreen.tsx` | ✓ `:21` | ✓ `:24` | ✓ `:38` |
+| `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
+| `utility/ProgressScreen.tsx` | ✓ `:25` | ✓ `:86` | ✓ `:57` |
+| `utility/StuckScreen.tsx` | ✓ `:25` | ✓ `:28` | ✓ `:36` |
 
-Sin carga: 13 de 21 · sin vacío: 6 · sin error: 18.
+Sin carga: 0 de 21 · sin vacío: 5 · sin error: 0.
 
 ## b) Texto cortado
 
@@ -236,8 +236,6 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 **Listas:** `FlatList` o `SectionList` sin `keyExtractor`, con clave por índice, con el ítem sin `memo` o con el separador creado en cada render, y colecciones grandes pintadas con `.map` dentro de un `ScrollView`:
 - `src/screens/extras/ErrorsScreen.tsx:76` — sin virtualizar: hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render
 - `src/screens/extras/PronunciationScreen.tsx:190` — sin virtualizar: hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez
-- `src/screens/discover/PackDetailScreen.tsx:64` — FlatList: `ItemSeparatorComponent` es una función nueva en cada render
-- `src/screens/utility/DeckScreen.tsx:56` — FlatList: `ItemSeparatorComponent` es una función nueva en cada render
 
 **Dependencias que cambian en cada render** (el efecto o el callback se vuelve a disparar sin necesidad, como pasaba con `grupos` en `ContractionsScreen`):
 - (ninguno)
@@ -246,6 +244,7 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/card/ReproductorCapitulo.tsx:54` — `setInterval` cada 250 ms con `setState`: repinta un componente hoja
 
 **Solo informativo (no cuenta):** claves por índice en listas estáticas, que solo importan si la lista se reordena o se filtra:
+- `src/components/base/Skeleton.tsx:66` — key por índice
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
 - `src/components/feedback/Confetti.tsx:41` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:290` — key por índice
@@ -253,7 +252,7 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:292` — key por índice
 
-Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `extras/PracticeScreen.tsx` 10, `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 13, `games/ParesScreen.tsx` 10.
+Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 10, `games/ColmenaScreen.tsx` 11, `games/DulcesScreen.tsx` 12, `games/ParesScreen.tsx` 9.
 
 ## d) Audio
 
@@ -283,4 +282,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":13,"EST-vacio":6,"EST-error":18,"TXT-1":1,"RND-1":4,"RND-2":0,"RND-3":0,"AUD-1":1} -->
+<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":30,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":2,"RND-2":0,"RND-3":0,"AUD-1":1} -->

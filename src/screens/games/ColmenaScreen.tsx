@@ -13,6 +13,7 @@ import Animated, {
 import {
   Button,
   EmptyState,
+  ErrorCarga,
   Header,
   Icon,
   ProgressBar,
@@ -24,6 +25,7 @@ import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
 import { getRandomSpellable } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -104,7 +106,6 @@ export function ColmenaScreen() {
   const [usadas, setUsadas] = useState<number[]>([]);
   const [aciertos, setAciertos] = useState(0);
   const [resuelta, setResuelta] = useState(false);
-  const [loading, setLoading] = useState(true);
   // Las pistas ya no se compran: el nivel trae las que trae.
   const [pistas, setPistas] = useState(0);
   // Escuchas de la PALABRA completa (independientes de las pistas de
@@ -121,26 +122,20 @@ export function ColmenaScreen() {
     transform: [{ translateX: shake.value }],
   }));
 
-  useEffect(() => {
-    if (!user || !nv) return;
-    let vivo = true;
-
-    (async () => {
+  const carga = useCarga(
+    async () => {
+      if (!user || !nv) return;
       // Se piden más de las necesarias porque el filtro de longitud de
       // esUsable descarta bastantes: pedir justo las del nivel deja
       // partidas cortas.
       const pool = await getRandomSpellable(filter(), 160);
-      if (!vivo) return;
       const dentro = filtrar(pool, nv.rondas);
       setRounds(buildRounds(dentro, nv.rondas, nv.senuelos));
       setPistas(nv.pistasGratis);
-      setLoading(false);
-    })();
-
-    return () => {
-      vivo = false;
-    };
-  }, [user, filter, nv, filtrar]);
+    },
+    [user, filter, nv, filtrar]
+  );
+  const loading = carga.estado === 'cargando';
 
   const round = rounds[idx];
 
@@ -296,6 +291,15 @@ export function ColmenaScreen() {
       'producir'
     );
   }, [user, round, resuelta]);
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Colmena" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
 
   if (loading) {
     return (

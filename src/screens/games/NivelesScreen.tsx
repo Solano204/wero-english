@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Header, Icon, Screen, pedirRecompensa } from '@/components/base';
+import { Card, Carga, Header, Icon, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
 import { FilaEstrellas } from '@/components/card';
 import {
   abrirConAnuncio,
@@ -11,6 +11,7 @@ import {
   nivelesPagados,
   type NivelEstado,
 } from '@/db/levels';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
@@ -18,6 +19,8 @@ import { color, depth, font, radius, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+
+const SIN_ESTADOS = new Map<number, NivelEstado>();
 type Ruta = RouteProp<RootStackParams, 'Niveles'>;
 
 /**
@@ -49,10 +52,23 @@ export function NivelesScreen() {
   const juego = params.juego;
   const def = content.niveles.juegos[juego];
 
-  const [estados, setEstados] = useState<Map<number, NivelEstado>>(new Map());
-  const [siguiente, setSiguiente] = useState(1);
-  // Niveles abiertos con anuncio: se abren de uno en uno y no encadenan.
-  const [pagados, setPagados] = useState<number[]>([]);
+  const carga = useCarga(
+    async () => {
+      if (!user) return null;
+      const estados = await getNiveles(user.id, juego);
+      const siguiente = await nivelDesbloqueado(user.id, juego);
+      const pagados = await nivelesPagados(user.id, juego);
+      return { estados, siguiente, pagados };
+    },
+    [user, juego],
+    { alEnfocar: true }
+  );
+  const estados = carga.datos?.estados ?? SIN_ESTADOS;
+  const siguiente = carga.datos?.siguiente ?? 1;
+  // Niveles abiertos con anuncio en esta visita, además de los que ya guardó la base.
+  // Se abren de uno en uno y no encadenan.
+  const [abiertosAhora, setAbiertosAhora] = useState<number[]>([]);
+  const pagados = [...(carga.datos?.pagados ?? []), ...abiertosAhora];
   const scroll = useRef<ScrollView>(null);
   const [abriendo, setAbriendo] = useState(false);
 
@@ -72,37 +88,23 @@ export function NivelesScreen() {
         // Un anuncio abre UN nivel: el que se pagó, y nada más. No toca
         // `siguiente`, porque eso es la cadena de niveles jugados.
         await abrirConAnuncio(user.id, juego, nivel);
-        setPagados((prev) => [...prev, nivel]);
+        setAbiertosAhora((prev) => [...prev, nivel]);
       }
       setAbriendo(false);
     },
     [user, juego, abriendo]
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!user) return;
-      let vivo = true;
-      (async () => {
-        const e = await getNiveles(user.id, juego);
-        const s = await nivelDesbloqueado(user.id, juego);
-        const p = await nivelesPagados(user.id, juego);
-        if (!vivo) return;
-        setEstados(e);
-        setSiguiente(s);
-        setPagados(p);
-        // Cinco por fila, cada fila unos 68 px de alto.
-        const fila = Math.max(0, Math.floor((s - 1) / 5) - 2);
-        setTimeout(
-          () => scroll.current?.scrollTo({ y: fila * 68, animated: false }),
-          60
-        );
-      })();
-      return () => {
-        vivo = false;
-      };
-    }, [user, juego])
-  );
+  // Al llegar los datos, baja hasta el nivel actual. Cinco por fila, cada fila unos 68 px de alto.
+  useEffect(() => {
+    if (!carga.datos) return;
+    const fila = Math.max(0, Math.floor((carga.datos.siguiente - 1) / 5) - 2);
+    const t = setTimeout(
+      () => scroll.current?.scrollTo({ y: fila * 68, animated: false }),
+      60
+    );
+    return () => clearTimeout(t);
+  }, [carga.datos]);
 
   if (!def) {
     return (
@@ -129,96 +131,100 @@ export function NivelesScreen() {
         <Header
           onBack={() => nav.goBack()}
           title={def.nombre}
-          subtitle={`${totalEstrellas} de ${def.total * 3} estrellas`}
+          subtitle={carga.datos ? `${totalEstrellas} de ${def.total * 3} estrellas` : undefined}
         />
       </View>
 
-      <ScrollView
-        ref={scroll}
-        contentContainerStyle={styles.lista}
-        showsVerticalScrollIndicator={false}
-        // Sin esto, Android mantiene las 200 celdas montadas todo el
-        // tiempo y el scroll se arrastra.
-        removeClippedSubviews
-      >
-        {def.bandas.map((banda) => {
-          const niveles = def.niveles.filter(
-            (n) => n.n >= banda.desde && n.n <= banda.hasta
-          );
-          return (
-            <View key={banda.id} style={styles.banda}>
-              <View style={styles.bandaCabeza}>
-                <Text style={styles.bandaNombre}>{banda.nombre}</Text>
-                <Text style={styles.bandaRango}>
-                  {banda.desde} a {banda.hasta} · {banda.ids.length} frases
-                </Text>
-              </View>
+      <Carga carga={carga} esqueleto={<View style={styles.lista}><SkeletonLista filas={6} alto={68} /></View>}>
+        {() => (
+          <ScrollView
+            ref={scroll}
+            contentContainerStyle={styles.lista}
+            showsVerticalScrollIndicator={false}
+            // Sin esto, Android mantiene las 200 celdas montadas todo el
+            // tiempo y el scroll se arrastra.
+            removeClippedSubviews
+          >
+            {def.bandas.map((banda) => {
+              const niveles = def.niveles.filter(
+                (n) => n.n >= banda.desde && n.n <= banda.hasta
+              );
+              return (
+                <View key={banda.id} style={styles.banda}>
+                  <View style={styles.bandaCabeza}>
+                    <Text style={styles.bandaNombre}>{banda.nombre}</Text>
+                    <Text style={styles.bandaRango}>
+                      {banda.desde} a {banda.hasta} · {banda.ids.length} frases
+                    </Text>
+                  </View>
 
-              <View style={styles.rejilla}>
-                {niveles.map((nv) => {
-                  const est = estados.get(nv.n);
-                  const abierto = nv.n <= siguiente || pagados.includes(nv.n);
-                  const actual = nv.n === siguiente;
-                  // El primer cerrado es el único que se puede saltar.
-                  const saltable = !abierto && nv.n === siguiente + 1;
-                  return (
-                    <Pressable
-                      key={nv.n}
-                      disabled={!abierto && !saltable}
-                      onPress={() => {
-                        if (!abierto) {
-                          void saltar(nv.n);
-                          return;
-                        }
-                        const ruta = RUTA[juego];
-                        if (ruta) nav.navigate(ruta, { nivel: nv.n });
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Nivel ${nv.n}${
-                        abierto ? '' : ', cerrado'
-                      }`}
-                      style={({ pressed }) => [
-                        styles.celda,
-                        !abierto && styles.celdaCerrada,
-                        actual && styles.celdaActual,
-                        est && est.estrellas > 0 && styles.celdaHecha,
-                        pressed && styles.celdaPress,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.celdaNum,
-                          !abierto && styles.celdaNumOff,
-                        ]}
-                      >
-                        {nv.n}
-                      </Text>
-                      <View style={styles.estrellas}>
-                        {abierto ? (
-                          <FilaEstrellas llenas={est?.estrellas ?? 0} color={color.world.fonetica} />
-                        ) : saltable ? (
-                          <>
-                            <Icon name="play" size="sm" color={color.world.fonetica} />
-                            <Text style={styles.anuncio}>anuncio</Text>
-                          </>
-                        ) : (
-                          <Text style={styles.anuncio}>·</Text>
-                        )}
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          );
-        })}
+                  <View style={styles.rejilla}>
+                    {niveles.map((nv) => {
+                      const est = estados.get(nv.n);
+                      const abierto = nv.n <= siguiente || pagados.includes(nv.n);
+                      const actual = nv.n === siguiente;
+                      // El primer cerrado es el único que se puede saltar.
+                      const saltable = !abierto && nv.n === siguiente + 1;
+                      return (
+                        <Pressable
+                          key={nv.n}
+                          disabled={!abierto && !saltable}
+                          onPress={() => {
+                            if (!abierto) {
+                              void saltar(nv.n);
+                              return;
+                            }
+                            const ruta = RUTA[juego];
+                            if (ruta) nav.navigate(ruta, { nivel: nv.n });
+                          }}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Nivel ${nv.n}${
+                            abierto ? '' : ', cerrado'
+                          }`}
+                          style={({ pressed }) => [
+                            styles.celda,
+                            !abierto && styles.celdaCerrada,
+                            actual && styles.celdaActual,
+                            est && est.estrellas > 0 && styles.celdaHecha,
+                            pressed && styles.celdaPress,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.celdaNum,
+                              !abierto && styles.celdaNumOff,
+                            ]}
+                          >
+                            {nv.n}
+                          </Text>
+                          <View style={styles.estrellas}>
+                            {abierto ? (
+                              <FilaEstrellas llenas={est?.estrellas ?? 0} color={color.world.fonetica} />
+                            ) : saltable ? (
+                              <>
+                                <Icon name="play" size="sm" color={color.world.fonetica} />
+                                <Text style={styles.anuncio}>anuncio</Text>
+                              </>
+                            ) : (
+                              <Text style={styles.anuncio}>·</Text>
+                            )}
+                          </View>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              );
+            })}
 
-        <Text style={styles.pie}>
-          Terminar un nivel abre el siguiente, saques una estrella o tres.
-          El que sigue del último también se puede abrir viendo un anuncio.
-          Rejugar nunca te baja lo que ya tenías.
-        </Text>
-      </ScrollView>
+            <Text style={styles.pie}>
+              Terminar un nivel abre el siguiente, saques una estrella o tres.
+              El que sigue del último también se puede abrir viendo un anuncio.
+              Rejugar nunca te baja lo que ya tenías.
+            </Text>
+          </ScrollView>
+        )}
+      </Carga>
     </Screen>
   );
 

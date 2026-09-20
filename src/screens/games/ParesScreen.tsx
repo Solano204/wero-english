@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
 import {
   Button,
   EmptyState,
+  ErrorCarga,
   Header,
   Icon,
   RoundTimer,
@@ -16,6 +17,7 @@ import { buildTablero, sonPareja } from '@/domain/pares';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
 import { getRandomEntries } from '@/db/queries';
+import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -67,7 +69,6 @@ export function ParesScreen() {
   const [resueltas, setResueltas] = useState<number[]>([]);
   const [fallando, setFallando] = useState<string[]>([]);
   const [jugadas, setJugadas] = useState(0);
-  const [loading, setLoading] = useState(true);
   // Pausa al acertar un par: congela reloj y tablero mientras se oyen
   // las dos frases. `parPausado` trae lo que muestra el overlay.
   const [enPausa, setEnPausa] = useState(false);
@@ -113,29 +114,23 @@ export function ParesScreen() {
     };
   }, [abortarPausa]);
 
-  useEffect(() => {
-    if (!user || !nv) return;
-    let vivo = true;
-
-    (async () => {
+  const carga = useCarga(
+    async () => {
+      if (!user || !nv) return;
       const pool = await getRandomEntries(filter(), 120, {
         maxWords: 4,
         maxLen: 30,
       });
-      if (!vivo) return;
       const dentro = filtrar(pool, nv.pares);
       entradas.current = new Map(dentro.map((e) => [e.id, e]));
       const t = buildTablero(dentro, nv.pares);
       // El colchón de jugadas lo pone el nivel, no el dominio.
       setTablero({ ...t, jugadas: nv.jugadas });
-      setLoading(false);
       empezoEn.current = Date.now();
-    })();
-
-    return () => {
-      vivo = false;
-    };
-  }, [user, filter, nv, filtrar]);
+    },
+    [user, filter, nv, filtrar]
+  );
+  const loading = carga.estado === 'cargando';
 
   /**
    * Al acertar: suena el efecto de acierto, luego la frase en inglés y
@@ -271,6 +266,15 @@ export function ParesScreen() {
     }
     return undefined;
   }, [resueltas.length, tablero, terminar, enPausa]);
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Pares" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
 
   if (loading) {
     return (
