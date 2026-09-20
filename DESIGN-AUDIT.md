@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 156 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 157 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -28,8 +28,8 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 
 | Regla | Qué mide | Hallazgos |
 |---|---|---|
-| COLOR-1 | colores de marca de más (mundos + `contraste`) | 9 |
-| COLOR-3 | colores sin escala 50–900 | 1 |
+| COLOR-1 | colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos), salvo las piezas de Dulces | 0 |
+| COLOR-3 | colores de marca (acento, primario, neutro) sin escala 50–900 | 0 |
 | COLOR-4 | pares texto/superficie bajo AA | 0 |
 | TIPO-1 | familias: fuente del sistema, `CharisSIL` sin cargar, `monospace` | 0 |
 | TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 0 |
@@ -57,11 +57,19 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 
 ## COLOR
 
-**COLOR-1 · Máximo 3 colores de marca.** Hoy hay: acento cian `accent` (`src/theme/tokens.ts:66`), superficie `contraste` (`:75`) y una paleta de **8 colores de mundo** (`:99-108`) usada como color de categoría en tarjetas y chips. Aparte, `riskStrong` (`:92`), el rojo de lenguaje explícito.
+**COLOR-1 · Máximo 3 colores de marca: primario (`contraste`), acento (`accent`) y neutro.** Los ocho colores de mundo son una familia (misma luminosidad y saturación, solo cambia el tono) y van en chico: un punto, una etiqueta, una barra fina y el tinte de los cubitos. Solo cuentan como marca si tiñen fondos grandes. Portadas tintadas en `gradiente` (0) y `backgroundColor: color.world…` fuera del tema:
+- (ninguno)
 
-**COLOR-2 · Degradados dentro de un mismo tono.** Los `gradiente` por mundo (`tokens.ts:194-212`) son de un solo tono. Para revisar: `filoLuz` (`:165-169`) mezcla blanco y cian, y `FONDO` (`:149`). Usos de `<LinearGradient`:
-- `src/components/base/Card.tsx:126`
-- `src/components/base/Card.tsx:162`
+**Excepción revisada a mano (no cuenta):**
+- `src/screens/games/DulcesScreen.tsx:667` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
+- `src/screens/games/DulcesScreen.tsx:668` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
+- `src/screens/games/DulcesScreen.tsx:669` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
+- `src/screens/games/DulcesScreen.tsx:670` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
+- `src/screens/games/DulcesScreen.tsx:671` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
+
+**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (`gradiente.neutro`). Para revisar: `filoLuz` (`:165-169`) mezcla blanco y cian, y `FONDO` (`:149`). Usos de `<LinearGradient`:
+- `src/components/base/Card.tsx:123`
+- `src/components/base/Card.tsx:159`
 - `src/components/base/Screen.tsx:72`
 - `src/components/base/Screen.tsx:86`
 - `src/components/card/FeedbackBand.tsx:103`
@@ -70,7 +78,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
 - `src/navigation/TabNavigator.tsx:92`
 
-**COLOR-3 · Cada color con escala 50–900.** Ninguno la tiene: `accent` solo trae `accent`, `accentSoft` y `accentDeep` (`tokens.ts:66-68`); igual `correct`, `wrong` y los ocho de `world`.
+**COLOR-3 · Cada color de marca con escala 50–900.** Se exige a `accent`, `contraste` (primario) y `neutral`, con los diez pasos en `tokens.ts`. Sin escala completa: ninguno. Los colores de estado y los de mundo no llevan escala.
 
 **COLOR-4 · Contraste AA (4.5:1).** Pares texto/superficie que fallan (calculados de los tokens):
 - (ninguno)
@@ -91,7 +99,7 @@ Se quedan en 12–13 px, revisados a mano (16):
 - `src/screens/entry/OnboardingScreen.tsx:469` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:491` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/screens/extras/LecturaScreen.tsx:310` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/extras/LecturasScreen.tsx:233` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/extras/LecturasScreen.tsx:236` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
 - `src/screens/games/CaidaScreen.tsx:642` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/CaidaScreen.tsx:688` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/ColmenaScreen.tsx:610` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
@@ -112,7 +120,7 @@ Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son 
 - (ninguno)
 
 Descartados (28 px o más, pero no son títulos):
-- `src/components/base/Card.tsx:219` — portadaVacia: inicial suelta de una portada pendiente (`textSobrePortada`), no un título
+- `src/components/base/Card.tsx:216` — portadaVacia: inicial suelta de una portada pendiente (`textSobrePortada`), no un título
 - `src/components/card/SceneImage.tsx:124` — inicial: inicial suelta de una imagen pendiente (`textSobrePortada`), no un título
 
 ## ESPACIADO
@@ -133,10 +141,10 @@ Descartados (28 px o más, pero no son títulos):
 - `src/navigation/TabNavigator.tsx:188` — item: paddingTop: 2 = 2
 - `src/screens/entry/OnboardingScreen.tsx:470` — previa: gap: 2 = 2
 - `src/screens/extras/ContractionsScreen.tsx:160` — itemText: gap: 2 = 2
-- `src/screens/extras/ErrorsScreen.tsx:183` — understood: marginLeft: space.lg + space.xs = 20
-- `src/screens/extras/LecturasScreen.tsx:231` — meta: marginTop: 2 = 2
+- `src/screens/extras/ErrorsScreen.tsx:177` — understood: marginLeft: space.lg + space.xs = 20
+- `src/screens/extras/LecturasScreen.tsx:234` — meta: marginTop: 2 = 2
 - `src/screens/extras/PhrasalScreen.tsx:177` — forma: gap: 3 = 3
-- `src/screens/extras/PronunciationScreen.tsx:489` — pairSide: gap: 2 = 2
+- `src/screens/extras/PronunciationScreen.tsx:482` — pairSide: gap: 2 = 2
 - `src/screens/games/DulcesScreen.tsx:683` — metas: gap: 6 = 6
 - `src/screens/games/DulcesScreen.tsx:686` — metaCuerpo: gap: 2 = 2
 - `src/screens/games/NivelesScreen.tsx:287` — estrellas: marginTop: 1 = 1
@@ -202,7 +210,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `discover/DetailScreen.tsx` | ✓ `:42` | ✓ `:59` | ✓ `:57` |
 | `discover/ExploreScreen.tsx` | ✓ `:27` | ✓ `:65` | ✓ `:79` |
 | `discover/PackDetailScreen.tsx` | ✓ `:34` | ✗ | ✓ `:60` |
-| `discover/WorldDetailScreen.tsx` | ✓ `:28` | ✗ | ✓ `:51` |
+| `discover/WorldDetailScreen.tsx` | ✓ `:29` | ✗ | ✓ `:52` |
 | `entry/BootScreen.tsx` | ✓ `:88` | ✓ `:37` | ✓ `:25` |
 | `extras/AzarScreen.tsx` | ✓ `:73` | ✓ `:206` | ✓ `:197` |
 | `extras/ContractionsScreen.tsx` | ✓ `:34` | ✓ `:45` | ✓ `:92` |
@@ -292,4 +300,4 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":9,"COLOR-3":1,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":27,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":27,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0} -->

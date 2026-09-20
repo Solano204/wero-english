@@ -105,7 +105,7 @@ export function DetailScreen() {
       </View>
 
       {entry.no_usar_cuando ? (
-        <Card style={styles.warn} accent={color.riskWarn}>
+        <Card style={styles.warn}>
           <Text style={styles.warnHead}>Cuándo NO decirla</Text>
           <Text style={styles.warnBody}>{entry.no_usar_cuando}</Text>
         </Card>

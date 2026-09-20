@@ -183,7 +183,7 @@ export function OnboardingScreen() {
           </Text>
 
           {!notifEstado.ok ? (
-            <Card style={styles.aviso} accent={color.textFaint}>
+            <Card style={styles.aviso}>
               <Text style={styles.avisoTitulo}>Aquí todavía no llegan</Text>
               <Text style={styles.avisoTexto}>
                 {notifEstado.razon} Tus ajustes se guardan de una vez, así que
@@ -191,7 +191,7 @@ export function OnboardingScreen() {
               </Text>
             </Card>
           ) : permisoNegado ? (
-            <Card style={styles.aviso} accent={color.riskWarn}>
+            <Card style={styles.aviso}>
               <Text style={styles.avisoTitulo}>El permiso quedó apagado</Text>
               <Text style={styles.avisoTexto}>
                 Sin permiso no llega ninguna frase. Se prende desde los ajustes

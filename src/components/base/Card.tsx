@@ -24,8 +24,6 @@ interface Props {
   onLongPress?: () => void;
   style?: ViewStyle;
   elevated?: boolean;
-  /** Tiñe el borde. Ya no pinta franja lateral. */
-  accent?: string;
   /**
    * Id de degradado para las tarjetas que hacen de portada: una
    * categoría, un juego, un mundo. Sin esto la tarjeta es vidrio liso.
@@ -73,7 +71,6 @@ export function Card({
   onLongPress,
   style,
   elevated,
-  accent,
   portada,
   imagen,
   altoPortada,

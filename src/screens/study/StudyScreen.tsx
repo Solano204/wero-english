@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   seguidas: {
     fontSize: font.size.xs,
-    color: color.world.fonetica,
+    color: color.star,
     fontFamily: font.family.bodyStrong,
     letterSpacing: 0.6,
     marginBottom: 4,

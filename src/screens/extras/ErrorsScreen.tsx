@@ -118,7 +118,7 @@ interface FilaProps {
 
 const FilaError = memo(function FilaError({ error: e, onAbrir }: FilaProps) {
   return (
-    <Card style={styles.item} accent={gravedadTint(e.gravedad)} onPress={() => onAbrir(e.id)}>
+    <Card style={styles.item} onPress={() => onAbrir(e.id)}>
       <View style={styles.row}>
         <Icon name="close" size="md" color={color.riskStrong} />
         <Text style={styles.bad} numberOfLines={2}>
@@ -136,12 +136,6 @@ const FilaError = memo(function FilaError({ error: e, onAbrir }: FilaProps) {
     </Card>
   );
 });
-
-function gravedadTint(g: 1 | 2 | 3): string {
-  if (g === 3) return color.riskStrong;
-  if (g === 2) return color.riskWarn;
-  return color.textFaint;
-}
 
 const styles = StyleSheet.create({
   chips: { gap: space.xs, paddingVertical: space.sm, paddingRight: space.lg },

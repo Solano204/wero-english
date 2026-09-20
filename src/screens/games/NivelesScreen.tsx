@@ -193,10 +193,10 @@ export function NivelesScreen() {
                           </Text>
                           <View style={styles.estrellas}>
                             {abierto ? (
-                              <FilaEstrellas llenas={est?.estrellas ?? 0} color={color.world.fonetica} />
+                              <FilaEstrellas llenas={est?.estrellas ?? 0} color={color.star} />
                             ) : saltable ? (
                               <>
-                                <Icon name="play" size="sm" color={color.world.fonetica} />
+                                <Icon name="play" size="sm" color={color.star} />
                                 <Text style={styles.anuncio}>anuncio</Text>
                               </>
                             ) : (
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   celdaNumOff: { color: color.textFaint },
   estrellas: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: 1 },
-  anuncio: { fontFamily: font.family.body, fontSize: 9, color: color.world.fonetica },
+  anuncio: { fontFamily: font.family.body, fontSize: 9, color: color.star },
   pie: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

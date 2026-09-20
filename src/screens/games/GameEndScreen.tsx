@@ -129,7 +129,7 @@ export function GameEndScreen() {
               <FilaEstrellas
                 llenas={estrellas}
                 size="xl"
-                color={color.world.fonetica}
+                color={color.star}
                 colorVacia={color.border}
                 gap={space.sm}
               />

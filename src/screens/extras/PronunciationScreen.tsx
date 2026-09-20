@@ -264,7 +264,6 @@ const FonemaCard = memo(function FonemaCard({
         if (hayAislado) void audio.play(fonema.audio);
       }}
       style={styles.card}
-      accent={difTint(fonema.dificultad)}
     >
       <View style={styles.cardHead}>
         <Text style={styles.symbol}>{fonema.ipa}</Text>
@@ -398,12 +397,6 @@ function Chip({
       <Text style={[styles.chipText, active && styles.chipTextOn]}>{label}</Text>
     </Presionable>
   );
-}
-
-function difTint(d: 1 | 2 | 3): string {
-  if (d === 3) return color.riskStrong;
-  if (d === 2) return color.riskWarn;
-  return color.correct;
 }
 
 const styles = StyleSheet.create({

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Badge, Card, Carga, Header, ProgressBar, Screen } from '@/components/base';
-import { SectionTitle } from '@/components/list';
+import { SectionTitle, PuntoMundo } from '@/components/list';
 import {
   dificultadPara,
   estadoDesbloqueo,
@@ -154,12 +154,14 @@ function FilaLectura({ fila, onPress }: { fila: Fila; onPress: () => void }) {
 
   return (
     <Card
-      accent={fila.abierta ? tint : color.borderStrong}
       onPress={fila.abierta ? onPress : undefined}
       style={fila.abierta ? styles.item : { ...styles.item, ...styles.cerrada }}
     >
       <View style={styles.itemTop}>
-        <Text style={styles.itemTitle}>{l.titulo}</Text>
+        <View style={styles.itemNombre}>
+          <PuntoMundo tinte={tint} />
+          <Text style={styles.itemTitle}>{l.titulo}</Text>
+        </View>
         {l.publico === 'ninos' ? <Badge label="Niños" tone="good" small /> : null}
       </View>
 
@@ -221,6 +223,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: space.sm,
   },
+  itemNombre: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flex: 1 },
   itemTitle: {
     fontSize: font.size.lg,
     fontFamily: font.family.heading,

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Input, ProgressBar, Screen } from '@/components/base';
-import { EntryRow, SectionTitle } from '@/components/list';
+import { EntryRow, SectionTitle, PuntoMundo } from '@/components/list';
 import { getWorldCounts, searchEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
@@ -86,7 +86,6 @@ export function ExploreScreen() {
                 return (
                   <Card
                     key={m.id}
-                    accent={tint}
                     onPress={() => nav.navigate('WorldDetail', { worldId: m.id })}
                     style={styles.world}
                     // Portada: la imagen si existe, y si no el degradado del
@@ -96,7 +95,10 @@ export function ExploreScreen() {
                     altoPortada={96}
                   >
                     <View style={styles.worldHead}>
-                      <Text style={styles.worldName}>{m.nombre}</Text>
+                      <View style={styles.worldTitulo}>
+                        <PuntoMundo tinte={tint} />
+                        <Text style={styles.worldName}>{m.nombre}</Text>
+                      </View>
                       <Text style={styles.worldCount}>
                         {c.vistas}/{c.total}
                       </Text>
@@ -136,6 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  worldTitulo: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexShrink: 1 },
   worldName: {
     fontSize: font.size.lg,
     fontFamily: font.family.heading,

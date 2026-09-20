@@ -51,6 +51,10 @@ Todo en `src/theme/tokens.ts`.
 | `accent` | `#45D9FF` |
 | `accentSoft` | `rgba(69,217,255,0.14)` |
 | `accentDeep` | `#17ABD8` |
+| `accent50`…`accent900` | Escala del acento; el `400` es `accent` (`#E7F9FE`, `#CDF3FF`, `#A9EAFE`, `#7FE1FE`, `#45D9FF`, `#2EC4E8`, `#19A2C2`, `#147E97`, `#15596A`, `#113B47`) |
+| `contraste50`…`contraste900` | Escala del primario; el `800` es `contraste` (`#0B3A50`) |
+| `neutral50`…`neutral900` | Escala de los neutros (tinta azulada); `50`, `200`, `300`, `700`, `800` y `900` son `text`, `textMuted`, `textFaint`, `surfaceHigh`, `surface` y `bg` |
+| `star` | `#E9C944`, dorado para estrellas y aciertos seguidos: a 16° del ámbar de fallo (`wrong`) y a 16° de `world.fonetica`; 7.4:1 sobre las superficies |
 | `accentBorde` | `rgba(69,217,255,0.32)` |
 | `onAccent` | `#04141C` (texto sobre el cian: nunca blanco) |
 
@@ -63,14 +67,14 @@ Todo en `src/theme/tokens.ts`.
 | `riskWarn` | `#F2B33D` | Advertencia de contenido |
 | `riskStrong` (+`Soft`) | `#FF7A66` | Único rojo: lenguaje explícito |
 
-**Mundos** (`color.world`, categorías de contenido): `dia_a_dia #66A2EA`, `calle #F08A4B`, `dinero #4ADE9B`, `gente #E27BC5`, `cultura #A390F6`, `tech #4FAAC5`, `legal #96A0AE`, `fonetica #E0B441`.
+**Mundos** (`color.world`, categorías de contenido): una familia con la misma luminosidad (OKLCH L 0.73) y saturación (C 0.12); solo cambia el tono. `dia_a_dia #71ABF2` (254°), `calle #E1925A` (55°), `dinero #86B96A` (135°), `gente #DD88B9` (345°), `cultura #A89AED` (291°), `tech #21BFBB` (192°), `legal #C78FD9` (318°), `fonetica #AAAF4F` (112°). Ninguno queda a menos de 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan 4.5:1 sobre las ocho superficies (el más bajo, `gente`, da 4.78). **Se usan en chico**: un punto junto al nombre (`PuntoMundo`), una etiqueta, una barra fina (`ProgressBar` de 4 a 5 px) y el tinte de los cubitos. Nunca en fondos grandes ni en botones. Excepción documentada en el audit: las 5 piezas del tablero de Dulces (`TINTES`) son contenido de juego, no marca.
 
 **Velos y auxiliares:** `velo` (0.94), `veloPortada` (0.42), `veloMuro` (0.72), `veloBarra` (0.72), `trackFondo` (negro 0.38), `biselSombra` (negro 0.45), `textSobrePortada` (0.22), `shadow` `#000000`, `notifAndroid` `#E8543F` (requisito del sistema operativo).
 
 **Degradados**
 
 - `FONDO`: `#0E1620` → `bgFin`, de pantalla. Dirección `sol`: inicio `(0,0)`, fin `(0.9,1)`.
-- `gradiente`: 17 pares oscuros y tintados, uno por mundo y por juego (ej. `calle: #3A2318 → #1B120D`, `dinero: #123021 → #0B1A13`), para tarjetas con portada.
+- `gradiente`: un solo par neutro (`neutro: #1B242F → #111820`) para todas las tarjetas con portada, sea de mundo o de modo. **Si al verlo en el teléfono Practicar se ve plano, probar un tinte del mundo con croma ≤ 0.03.** No está aplicado.
 - `filoLuz`: blanco 0.28 → blanco 0.04 → cian 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
 - `resplandorSol`: cian 0.16 → 0.04 → 0, el halo de `Screen`.
 
@@ -132,7 +136,7 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 | `Header` | Fila de mínimo 48 dp. Flecha atrás a la izquierda (ancho fijo 56), título `lg` semibold centrado de hasta 2 líneas, subtítulo `sm` muted de 1 línea, lado derecho que crece con su contenido |
 | `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`riskStrong`). Bloqueado: opacidad 0.45. Vibración ligera al tocar Ícono opcional (`icon`, 20 px en `md` y 24 en `lg`, gap 8, antes del texto o con `iconAlFinal`); un botón solo con ícono exige `accessibilityLabel` |
 | `IconButton` | Círculo `iconoVisual` (36, 44 o 52) dentro de un área táctil `iconoRedondo` (48, 48 o 52), con un `Icon` de 24 px (`icono`). Sin `hitSlop` |
-| `Card` | Filo de luz de 1 px sobre `surface`, radio `lg`, padding `lg`, `gap md`. Props: `accent` (tiñe el borde), `elevated`, `portada` (degradado o imagen con alto reservado), `onLongPress` |
+| `Card` | Filo de luz de 1 px sobre `surface`, radio `lg`, padding `lg`, `gap md`. Props: `elevated`, `portada` (degradado o imagen con alto reservado), `onLongPress` |
 | `Badge` | Píldora, texto `sm` semibold (`xs` en `small`) |
 | `ProgressBar` | Carril `trackFondo`, relleno `accent` animado con `scaleX`; alto 6 por defecto |
 | `RoundTimer` | Reloj de ronda de los juegos |
@@ -152,7 +156,7 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 
 **Practicar (Home).** `Screen` con scroll y cuatro bloques separados por 32 (dentro de cada bloque, 16). Título "Practicar" (`xxl`). **Hoy**: la única superficie de color (`contraste`), con el modo que toca, un botón `primary` grande que dice qué hará ("Repasar N frases" si hay repasos vencidos, con N tope de `metaDiaria` y el total aparte como "Tienes N pendientes"; "Corregir N errores" si no y hay frases atoradas, "Seguir con X" con el último modo usado, "Empezar" sin historial) y, si existen, "Llevas N frases hoy" y "Racha: N días". **Destacados**: 3 tarjetas medianas con portada de 56 (los más usados por días de uso; sin datos, los primeros del orden de siempre; nunca el de Hoy). **Todo lo demás**: 3 grupos plegados por defecto ("Juegos", "Oír y hablar", "Leer y repasar", cada uno con su cuenta) que se despliegan en 320 ms (alto y opacidad; abrir con ease-out y cerrar con ease-in; sin animación con Reduce Motion); los que el usuario deja abiertos se guardan en `practicarGruposAbiertos`. Cada renglón: nombre, dato opcional y chevron, 48 dp como mínimo. Al final, el reto de la semana. Con los grupos plegados hay 7 opciones (1 + 3 + 3) para 17 destinos; el código está en `screens/extras/practicar/`.
 
-**Estudio.** Arriba, barra de progreso y contador `xs`; debajo, aciertos (`lg` bold en `accent` + `sm` muted) y una racha `xs` semibold. `StudyCardView`: instrucción `xs` en mayúsculas, escenario con la frase en español (`xl`, ×1.35), `AudioButton` grande, opciones (`OptionButton`, alto 56, `gap md`) o un campo de texto (alto 58, radio `md`, borde 1.5), y `FeedbackBand` al responder.
+**Estudio.** Arriba, barra de progreso y contador `xs`; debajo, aciertos (`lg` bold en `accent` + `sm` muted) y una racha `xs` semibold en `star`. `StudyCardView`: instrucción `xs` en mayúsculas, escenario con la frase en español (`xl`, ×1.35), `AudioButton` grande, opciones (`OptionButton`, alto 56, `gap md`) o un campo de texto (alto 58, radio `md`, borde 1.5), y `FeedbackBand` al responder.
 
 **Pares.** `Header` con "Nivel N" y contador `xs`; reloj; instrucción `sm`. Tablero de dos columnas con fichas de 47.5 % de ancho, alto mínimo 62 y radio `md` (inglés en `surfaceAlt`, español en `surface`; activa con borde `accent`; fallo en ámbar). Al acertar, un velo con tarjeta (inglés `xl` bold, español `md`, "Saltar con chevron"). Pie con la cuenta de jugadas (`xs`) y un botón (`ghost` mientras hay jugadas, `primary` al terminar).
 
@@ -168,9 +172,9 @@ Serán la ley para todo cambio futuro. Donde una regla choque con `docs/DISENO.m
 
 ## COLOR
 
-- **COLOR-1.** Máximo 3 colores de marca: primario, acento y neutro. Los de estado (correcto, error, advertencia) aparte y solo para estado.
+- **COLOR-1.** Máximo 3 colores de marca: primario (`contraste`), acento (`accent`) y neutro. Los de estado (correcto, error, advertencia) aparte y solo para estado. Los colores de mundo son una familia que va en chico (punto, etiqueta, barra fina, cubitos), nunca en fondos grandes.
 - **COLOR-2.** Degradados, si existen, dentro de un mismo tono. Nunca entre colores no relacionados.
-- **COLOR-3.** Cada color con escala de tonos (50–900).
+- **COLOR-3.** Cada color de marca (acento, primario y neutro) con escala de tonos (50–900), en `tokens.ts`; el audit la exige.
 - **COLOR-4.** Contraste texto/fondo mínimo 4.5:1 (WCAG AA); texto grande 3:1.
 
 ## TIPOGRAFÍA

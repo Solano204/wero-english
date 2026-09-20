@@ -13,6 +13,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
+import { PuntoMundo } from '@/components/list';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'WorldDetail'>;
@@ -56,12 +57,14 @@ export function WorldDetailScreen() {
               return (
                 <Card
                   key={p.id}
-                  accent={tint}
                   onPress={() => nav.navigate('PackDetail', { packId: p.id })}
                   style={styles.pack}
                 >
                   <View style={styles.head}>
+                    <View style={styles.titulo}>
+                    <PuntoMundo tinte={tint} />
                     <Text style={styles.name}>{p.nombre}</Text>
+                  </View>
                     {p.empaquetado ? (
                       <Text style={styles.tag}>Ya incluido</Text>
                     ) : null}
@@ -97,6 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  titulo: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flex: 1 },
   name: {
     fontSize: font.size.lg,
     fontFamily: font.family.heading,

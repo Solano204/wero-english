@@ -58,6 +58,20 @@ export const color = {
   textMuted: '#B4C2CE',
   textFaint: '#90A2B4',
 
+  // Escala 50–900 de los neutros (COLOR-3), tinta azulada. Los pasos 50, 200,
+  // 300, 700, 800 y 900 son `text`, `textMuted`, `textFaint`, `surfaceHigh`,
+  // `surface` y `bg`; el resto está interpolado entre ellos.
+  neutral50: '#EAF2F9',
+  neutral100: '#CFDAE3',
+  neutral200: '#B4C2CE',
+  neutral300: '#90A2B4',
+  neutral400: '#728395',
+  neutral500: '#566677',
+  neutral600: '#3B4A5A',
+  neutral700: '#22303F',
+  neutral800: '#141D28',
+  neutral900: '#0A0F16',
+
   border: 'rgba(255, 255, 255, 0.08)',
   borderStrong: 'rgba(255, 255, 255, 0.18)',
 
@@ -66,6 +80,18 @@ export const color = {
   accent: '#45D9FF',
   accentSoft: 'rgba(69, 217, 255, 0.14)',
   accentDeep: '#17ABD8',
+  // Escala 50–900 del acento (COLOR-3). El 400 es `accent`; los demás salen de
+  // la misma familia en OKLCH, con luminosidad pareja entre pasos.
+  accent50: '#E7F9FE',
+  accent100: '#CDF3FF',
+  accent200: '#A9EAFE',
+  accent300: '#7FE1FE',
+  accent400: '#45D9FF',
+  accent500: '#2EC4E8',
+  accent600: '#19A2C2',
+  accent700: '#147E97',
+  accent800: '#15596A',
+  accent900: '#113B47',
 
   // Texto encima del cian: tinta, no blanco. Blanco sobre cian no pasa
   // contraste y se ve lavado.
@@ -74,6 +100,17 @@ export const color = {
   /** La única superficie de color. De contraste, no de tema. */
   contraste: '#0B3A50',
   onContraste: '#EAF7FD',
+  // Escala 50–900 del primario (COLOR-3). El 800 es `contraste`.
+  contraste50: '#ECF7FD',
+  contraste100: '#D5ECF9',
+  contraste200: '#B2D7ED',
+  contraste300: '#8BBFDE',
+  contraste400: '#63A4C8',
+  contraste500: '#4086AB',
+  contraste600: '#286B8C',
+  contraste700: '#195370',
+  contraste800: '#0B3A50',
+  contraste900: '#0C2A39',
 
   correct: '#4ADE9B',
   correctSoft: 'rgba(74, 222, 155, 0.12)',
@@ -85,6 +122,10 @@ export const color = {
   wrongSoft: 'rgba(242, 179, 61, 0.12)',
   wrongDeep: '#CF9320',
 
+  // Estrellas y aciertos seguidos. Dorado (tono 95), a 16° del ámbar de fallo
+  // (`wrong`, tono 79) y a 16° de `world.fonetica` (tono 112). Pasa 7.4:1.
+  star: '#E9C944',
+
   riskWarn: '#F2B33D',
   riskWarnSoft: 'rgba(242, 179, 61, 0.12)',
   // El único rojo que queda, y solo para lenguaje explícito. Es el lugar
@@ -92,21 +133,21 @@ export const color = {
   riskStrong: '#FF7A66',
   riskStrongSoft: 'rgba(255, 122, 102, 0.12)',
 
-  // Colores de mundo. Suben de luminancia respecto a la versión clara
-  // para pasar contraste sobre tinta, pero se quedan un paso por debajo
-  // del acento en saturación: el cian tiene que seguir siendo lo más
-  // encendido de la pantalla.
-  // Todos (y accentDeep, wrongDeep) pasan 4.5:1 sobre las ocho superficies,
-  // `contraste` incluida: se aclararon lo mínimo para cruzar ese umbral.
+  // Colores de mundo (COLOR-1). Una familia: misma luminosidad (OKLCH L 0.73) y
+  // misma saturación (C 0.12); solo cambia el tono. Ninguno queda a menos de
+  // 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan
+  // 4.5:1 sobre las ocho superficies. Van en chico: un punto, una etiqueta, una
+  // barra fina y el tinte de los cubitos; nunca en fondos grandes ni en botones
+  // (salvo las piezas de Dulces, que son contenido de juego).
   world: {
-    dia_a_dia: '#66A2EA',
-    calle: '#F08A4B',
-    dinero: '#4ADE9B',
-    gente: '#E27BC5',
-    cultura: '#A390F6',
-    tech: '#4FAAC5',
-    legal: '#96A0AE',
-    fonetica: '#E0B441',
+    dia_a_dia: '#71ABF2',
+    calle: '#E1925A',
+    dinero: '#86B96A',
+    gente: '#DD88B9',
+    cultura: '#A89AED',
+    tech: '#21BFBB',
+    legal: '#C78FD9',
+    fonetica: '#AAAF4F',
   },
 
   /** Velo de la respuesta. Opaco de verdad: tapa lo de atrás. */
@@ -193,24 +234,13 @@ export const resplandorSol: [string, string, string] = [
  * Degradados de portada. Tintados y oscuros, para que el texto claro
  * encima se lea sin necesidad de velo negro.
  */
+/**
+ * Degradado de las portadas: uno solo, neutro. El color del mundo ya no tiñe
+ * fondos grandes (COLOR-1): aparece en un punto, una etiqueta y una barra fina.
+ * `Card` cae aquí con cualquier clave de mundo o de modo.
+ */
 export const gradiente: Record<string, [string, string]> = {
-  calle: ['#3A2318', '#1B120D'],
-  dinero: ['#123021', '#0B1A13'],
-  dia_a_dia: ['#152740', '#0D1826'],
-  gente: ['#33162B', '#1A0D17'],
-  cultura: ['#241C40', '#130F21'],
-  tech: ['#12303B', '#0A1B22'],
-  legal: ['#1D2631', '#10161C'],
-  fonetica: ['#33290F', '#1A1509'],
   neutro: ['#1B242F', '#111820'],
-  azar:      ['#12303B', '#0A1B22'],
-  gramatica: ['#1D2631', '#10161C'],
-  oido:      ['#152740', '#0D1826'],
-  sonidos:   ['#33290F', '#1A1509'],
-  suena:     ['#12303B', '#0A1B22'],
-  errores:   ['#33231F', '#1C1413'],
-  atoran:    ['#33162B', '#1A0D17'],
-  mazo:      ['#22301F', '#151C16'],
 };
 
 export const space = {

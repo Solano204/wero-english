@@ -508,7 +508,7 @@ export function DulcesScreen() {
 
       {pregunta ? (
         <Animated.View entering={aparecer()} style={styles.preguntaWrap}>
-          <Card style={styles.preguntaCard} accent={TINTES[pregunta.objetivo.color]}>
+          <Card style={styles.preguntaCard}>
             <Text style={styles.preguntaEtiqueta}>Llenaste esta</Text>
             <Text style={styles.preguntaFrase}>
               {pregunta.objetivo.entry.phrase}

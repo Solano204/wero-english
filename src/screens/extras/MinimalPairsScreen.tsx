@@ -201,7 +201,6 @@ export function MinimalPairsScreen() {
           <Animated.View entering={aparecer()} style={styles.resultado}>
             <Animated.View style={efecto.estilo}>
               <Card
-                accent={acerto ? color.correct : color.wrong}
                 style={styles.resultadoCard}
               >
                 <Text

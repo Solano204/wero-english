@@ -78,6 +78,15 @@ const LISTAS_SIN_VIRTUALIZAR = [
   { archivo: 'src/screens/extras/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
 ];
 
+/** COLOR-1: usos de un color de mundo como relleno que sí se aceptan, con su motivo. */
+const COLOR1_EXCEPCIONES = [
+  { archivo: 'src/screens/games/DulcesScreen.tsx', patron: /^\s+color\.world\.\w+,\s*$/, motivo: 'las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse' },
+];
+
+/** COLOR-3: los colores de marca que necesitan escala 50–900. */
+const COLORES_DE_MARCA = ['accent', 'contraste', 'neutral'];
+const PASOS_ESCALA = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+
 /** MOT-1: curvas lineales válidas. Son relojes de la ronda, no animación de interfaz. */
 const MOT1_EXCEPCIONES = [
   { archivo: 'src/components/base/RoundTimer.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda' },
@@ -199,11 +208,14 @@ function contrastes(tokens) {
   };
   const cr = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
   const superficies = ['bg', 'bgAlto', 'surface', 'surfaceAlt', 'surfaceHigh', 'contraste', 'correctFondo', 'wrongFondo'].filter((s) => hex[s]);
-  const textos = ['text', 'textMuted', 'textFaint', 'accent', 'accentDeep', 'correct', 'correctDeep', 'wrong', 'wrongDeep', 'riskWarn', 'riskStrong', ...Object.keys(hex).filter((k) => k.startsWith('world.'))].filter((t) => hex[t]);
+  const textos = ['text', 'textMuted', 'textFaint', 'star', 'accent', 'accentDeep', 'correct', 'correctDeep', 'wrong', 'wrongDeep', 'riskWarn', 'riskStrong', ...Object.keys(hex).filter((k) => k.startsWith('world.'))].filter((t) => hex[t]);
   const fallos = [];
   for (const t of textos) for (const s of superficies) { const v = cr(hex[t], hex[s]); if (v < 4.5) fallos.push({ t, s, v }); }
-  const marca = Object.keys(hex).filter((k) => k.startsWith('world.')).length + (hex.contraste ? 1 : 0);
-  return { fallos, marca };
+  // COLOR-1: un color de mundo solo cuenta como de marca si tiñe fondos grandes; el
+  // primero son las portadas (`gradiente`), con cualquier clave que no sea `neutro`.
+  const bloqueGrad = tokens.slice(tokens.indexOf('export const gradiente'));
+  const gradTint = [...bloqueGrad.slice(0, bloqueGrad.indexOf('};')).matchAll(/^\s+(\w+):\s*\[/gm)].map((m) => m[1]).filter((k) => k !== 'neutro');
+  return { fallos, marca: gradTint.length, gradTint };
 }
 
 // ── auditoría estática ───────────────────────────────────────────────────
@@ -313,6 +325,26 @@ function auditaEstados(archivos) {
     filas.push({ r, ...ev });
   }
   return filas;
+}
+
+/** COLOR-1: `backgroundColor: color.world…` fuera del tema (relleno grande), y las excepciones revisadas. */
+function auditaColorMarca(archivos) {
+  const rellenos = [], exentos = [];
+  for (const { r, lines } of archivos) {
+    if (r.startsWith('src/theme/')) continue;
+    lines.forEach((l, i) => {
+      if (esComentario(l)) return;
+      const ex = COLOR1_EXCEPCIONES.find((e) => e.archivo === r && e.patron.test(l));
+      if (ex) { exentos.push({ r, linea: i + 1, txt: ex.motivo }); return; }
+      if (/backgroundColor:\s*[^,\n]*color\.world/.test(l)) rellenos.push({ r, linea: i + 1, txt: `relleno con color de mundo: \`${l.trim().slice(0, 70)}\`` });
+    });
+  }
+  return { rellenos, exentos };
+}
+
+/** COLOR-3: colores de marca a los que les falta algún paso de la escala 50–900. */
+function auditaEscalas(tokens) {
+  return COLORES_DE_MARCA.filter((n) => !PASOS_ESCALA.every((p) => new RegExp(`\\b${n}${p}:`).test(tokens)));
 }
 
 /** MOT-1: duraciones, curvas y springs que no salen de `src/theme/motion.ts`. */
@@ -514,8 +546,8 @@ function conteoPorRegla(ctx) {
   const { H, C, E, T, R, A, M, acc1, modos, tokensBajos } = ctx;
   const sinE = (k) => E.filter((f) => !f[k]).length;
   return [
-    ['COLOR-1', 'colores de marca de más (mundos + `contraste`)', C.marca],
-    ['COLOR-3', 'colores sin escala 50–900', ctx.sinEscala ? 1 : 0],
+    ['COLOR-1', 'colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos), salvo las piezas de Dulces', C.marca + ctx.K.rellenos.length],
+    ['COLOR-3', 'colores de marca (acento, primario, neutro) sin escala 50–900', ctx.escalas.length],
     ['COLOR-4', 'pares texto/superficie bajo AA', C.fallos.length],
     ['TIPO-1', 'familias: fuente del sistema, `CharisSIL` sin cargar, `monospace`', ctx.tipo1],
     ['TIPO-2', 'cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano)', H.cuerpoMd.length + H.cuerpoSm.length],
@@ -545,12 +577,16 @@ const SECCION_ESTATICA = (c) => `# Auditoría estática
 
 ## COLOR
 
-**COLOR-1 · Máximo 3 colores de marca.** Hoy hay: acento cian \`accent\` (\`src/theme/tokens.ts:66\`), superficie \`contraste\` (\`:75\`) y una paleta de **8 colores de mundo** (\`:99-108\`) usada como color de categoría en tarjetas y chips. Aparte, \`riskStrong\` (\`:92\`), el rojo de lenguaje explícito.
+**COLOR-1 · Máximo 3 colores de marca: primario (\`contraste\`), acento (\`accent\`) y neutro.** Los ocho colores de mundo son una familia (misma luminosidad y saturación, solo cambia el tono) y van en chico: un punto, una etiqueta, una barra fina y el tinte de los cubitos. Solo cuentan como marca si tiñen fondos grandes. Portadas tintadas en \`gradiente\` (${c.C.gradTint.length}) y \`backgroundColor: color.world…\` fuera del tema:
+${L(c.K.rellenos)}
 
-**COLOR-2 · Degradados dentro de un mismo tono.** Los \`gradiente\` por mundo (\`tokens.ts:194-212\`) son de un solo tono. Para revisar: \`filoLuz\` (\`:165-169\`) mezcla blanco y cian, y \`FONDO\` (\`:149\`). Usos de \`<LinearGradient\`:
+**Excepción revisada a mano (no cuenta):**
+${L(c.K.exentos)}
+
+**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (\`gradiente.neutro\`). Para revisar: \`filoLuz\` (\`:165-169\`) mezcla blanco y cian, y \`FONDO\` (\`:149\`). Usos de \`<LinearGradient\`:
 ${L(c.H.gradiente)}
 
-**COLOR-3 · Cada color con escala 50–900.** Ninguno la tiene: \`accent\` solo trae \`accent\`, \`accentSoft\` y \`accentDeep\` (\`tokens.ts:66-68\`); igual \`correct\`, \`wrong\` y los ocho de \`world\`.
+**COLOR-3 · Cada color de marca con escala 50–900.** Se exige a \`accent\`, \`contraste\` (primario) y \`neutral\`, con los diez pasos en \`tokens.ts\`. Sin escala completa: ${c.escalas.length ? c.escalas.map((n) => '\`' + n + '\`').join(', ') : 'ninguno'}. Los colores de estado y los de mundo no llevan escala.
 
 **COLOR-4 · Contraste AA (4.5:1).** Pares texto/superficie que fallan (calculados de los tokens):
 ${c.C.fallos.map((f) => `- \`${f.t}\` sobre \`${f.s}\`: ${f.v.toFixed(2)}`).join('\n') || '- (ninguno)'}
@@ -706,7 +742,7 @@ function main() {
     A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),
-    sinEscala: !/accent(50|100|200|300|400|500|600|700|800|900)\b/.test(tokens),
+    K: auditaColorMarca(archivos), escalas: auditaEscalas(tokens),
     tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.length,
     sombras: coloreadas + H.sombra.length + H.propio.length,
   };
