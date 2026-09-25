@@ -1,7 +1,7 @@
 import React, { useContext, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, View, type ScrollViewProps, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedScrollHandler, type SharedValue } from 'react-native-reanimated';
-import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONDO, color, layout, radius, resplandorSol, space } from '@/theme';
@@ -70,13 +70,14 @@ export function Screen({
    * situaciones.
    */
   const altoPestanas = useContext(BottomTabBarHeightContext) ?? 0;
+  const { bottom: insetAbajo } = useSafeAreaInsets();
   // Con footer no hace falta este colchón: el footer ya reserva su
   // propio espacio fijo abajo, y sumarlo aquí solo le roba altura al
   // contenido de en medio sin ganar nada.
   const huecoAbajo = footer
     ? 0
     : altoPestanas > 0
-      ? altoPestanas + layout.adBar + space.xl
+      ? altoPestanas + space.md + layout.adBar + insetAbajo + space.md
       : space.xxxl;
 
   return (

@@ -4,6 +4,7 @@ export { FondoAurora } from './FondoAurora';
 export { FxSeguro } from './FxSeguro';
 export { Marcador } from './Marcador';
 export { OndaSenal } from './OndaSenal';
+export { PildoraLiquida } from './PildoraLiquida';
 export { PortadaJuego } from './PortadaJuego';
 export { TarjetaTilt } from './TarjetaTilt';
 export { TransicionHoy } from './TransicionHoy';

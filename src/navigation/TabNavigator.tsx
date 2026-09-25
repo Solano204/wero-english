@@ -1,17 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { createBottomTabNavigator, type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import {
+  BottomTabBar,
+  createBottomTabNavigator,
+  type BottomTabBarButtonProps,
+  type BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withTiming } from 'react-native-reanimated';
 import { ExploreScreen } from '@/screens/discover';
 import { PracticeScreen } from '@/screens/extras';
 import { ProgressScreen } from '@/screens/utility';
 import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motionEasing } from '@/theme';
 import { AdBar, Icon, Presionable, type IconName } from '@/components/base';
+import { PildoraLiquida } from '@/components/fx';
+import * as haptics from '@/services/haptics';
 import { useMovimientoReducido } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { MainTabParams } from './routes';
@@ -45,33 +53,44 @@ const ICONO: Record<keyof MainTabParams, IconName> = {
  * botón, para que no se trabe mientras la pantalla nueva está montando.
  */
 /** Cada pestaña presiona igual que el resto de la app, sin el ripple de Android que traen las props. */
-function BotonPestana({ href: _href, ...props }: BottomTabBarButtonProps) {
-  return <Presionable {...props} android_ripple={null} />;
+function BotonPestana({ href: _href, onPress, ...props }: BottomTabBarButtonProps) {
+  return (
+    <Presionable
+      {...props}
+      android_ripple={null}
+      onPress={(e) => {
+        // Solo un cambio de pestaña da háptico: tocar la que ya está abierta no.
+        if (!props.accessibilityState?.selected) haptics.tapLight();
+        onPress?.(e);
+      }}
+    />
+  );
 }
 
 function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; tint: string }) {
-  const v = useSharedValue(activo ? 1 : 0);
   const reducido = useMovimientoReducido();
+  const escala = useSharedValue(1);
+  const montado = useRef(false);
 
   useEffect(() => {
-    v.value = withTiming(activo ? 1 : 0, {
-      duration: reducido ? 0 : motionDuration.base,
-      easing: motionEasing.entrar,
-    });
-  }, [activo, v, reducido]);
-
-  const pastilla = useAnimatedStyle(() => ({
-    opacity: v.value,
-    transform: [{ scale: 0.6 + v.value * 0.4 }],
-  }));
+    // Al montar no hay pulso: solo cuando la pestaña se vuelve la activa.
+    if (!montado.current) {
+      montado.current = true;
+      return;
+    }
+    if (!activo || reducido) return;
+    escala.value = withSequence(
+      withTiming(1.12, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
+      withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar })
+    );
+  }, [activo, reducido, escala]);
 
   const simbolo = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 + v.value * 0.12 }],
+    transform: [{ scale: escala.value }],
   }));
 
   return (
     <View style={styles.icon}>
-      <Animated.View style={[styles.pastilla, pastilla]} />
       <Animated.View style={simbolo}>
         <Icon name={nombre} size="lg" color={tint} />
       </Animated.View>
@@ -88,6 +107,8 @@ function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; ti
  * pasa abajo, y el mismo filo de luz que las tarjetas.
  */
 function FondoBarra() {
+  const indice = useContext(IndicePestana);
+  const [ancho, setAncho] = useState(0);
   return (
     <LinearGradient
       colors={filoLuz}
@@ -95,13 +116,32 @@ function FondoBarra() {
       end={sol.end}
       style={styles.filo}
     >
-      <View style={styles.filoInterior}>
+      <View style={styles.filoInterior} onLayout={(e) => setAncho(e.nativeEvent.layout.width)}>
         <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
         <View style={[StyleSheet.absoluteFill, styles.veloBarra]} />
+        <PildoraLiquida indice={indice} total={Object.keys(ICONO).length} ancho={ancho} arriba={ARRIBA_PILDORA} />
       </View>
     </LinearGradient>
   );
 }
+
+/** Pestaña activa, para que la píldora del fondo sepa a dónde deslizarse. */
+const IndicePestana = createContext(0);
+
+/**
+ * Barra por defecto de React Navigation, más la pestaña activa por contexto. La
+ * píldora vive en el fondo (detrás de los íconos) y desde ahí no recibe props.
+ */
+function BarraLiquida(props: BottomTabBarProps) {
+  return (
+    <IndicePestana.Provider value={props.state.index}>
+      <BottomTabBar {...props} />
+    </IndicePestana.Provider>
+  );
+}
+
+/** Aire arriba de la barra (paddingTop) + paddingTop del ítem, menos el px del filo. */
+const ARRIBA_PILDORA = space.sm + space.xs - 1;
 
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
@@ -117,6 +157,7 @@ export function TabNavigator() {
     <View style={{ flex: 1, backgroundColor: color.bg }}>
       <Tab.Navigator
       initialRouteName="Practice"
+      tabBar={(props) => <BarraLiquida {...props} />}
       screenOptions={({ route }) => ({
         headerShown: false,
         // La barra flota: se despega de los bordes y deja ver el
@@ -191,14 +232,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 54,
     height: 28,
-  },
-  pastilla: {
-    position: 'absolute',
-    width: 54,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: color.accentSoft,
-    borderWidth: 1,
-    borderColor: color.accentBorde,
   },
 });
