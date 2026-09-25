@@ -157,6 +157,24 @@ export function consultaContarVencidas(usuarioId: number, filter: ContentFilter,
   return { sql: sqlContarVencidas(f.sql), params: [usuarioId, ...f.args, now, startOfDay(now)] };
 }
 
+/**
+ * Frases y dominadas por mundo, contadas sobre el MISMO filtro de contenido (Modo Limpio,
+ * niveles, packs): así el «N de M» de un mundo nunca tiene más dominadas que frases.
+ */
+export function consultaProgresoPorMundo(usuarioId: number, filter: ContentFilter): Consulta {
+  const f = buildFilter(filter);
+  return {
+    sql: `SELECT e.mundo AS mundo,
+                 COUNT(*) AS total,
+                 COALESCE(SUM(CASE WHEN t.dominada = 1 THEN 1 ELSE 0 END), 0) AS dominadas
+            FROM entrada e
+            LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+           WHERE ${f.sql}
+           GROUP BY e.mundo;`,
+    params: [usuarioId, ...f.args],
+  };
+}
+
 /** Las vencidas más atrasadas, hasta `limite`. */
 export function consultaVencidas(usuarioId: number, filter: ContentFilter, limite: number, now: number): Consulta {
   const f = buildFilter(filter);

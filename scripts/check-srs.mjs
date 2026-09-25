@@ -414,6 +414,44 @@ await prueba('cola de ~850 tras 30 días de uso (SM-2 real): sesión de 20 = 17 
   }
 });
 
+// ── progreso por mundo ───────────────────────────────────────────────────
+// 12 frases: calle 1-4 (la 2 es vulgar), dinero 5-8, tech 9-10 y gente 11-12 (las 9 a 12, de nivel 2).
+function baseMundos() {
+  const db = base({
+    entradas: 12,
+    nivelDe: (i) => (i >= 9 ? 2 : 1),
+    filas: [{ entry_id: 1, dominada: 1 }, { entry_id: 2, dominada: 1 }, { entry_id: 3, dominada: 0 }, { entry_id: 6, dominada: 1 }, { entry_id: 9, dominada: 1 }],
+  });
+  db.run("UPDATE entrada SET mundo = 'calle' WHERE id BETWEEN 1 AND 4");
+  db.run("UPDATE entrada SET mundo = 'dinero' WHERE id BETWEEN 5 AND 8");
+  db.run("UPDATE entrada SET mundo = 'tech' WHERE id BETWEEN 9 AND 10");
+  db.run("UPDATE entrada SET mundo = 'gente' WHERE id BETWEEN 11 AND 12");
+  db.run('UPDATE entrada SET vulgaridad = 2 WHERE id = 2');
+  return db;
+}
+const porMundo = (db, filtro) => Object.fromEntries(correr(db, sql.consultaProgresoPorMundo(1, filtro)).map((r) => [r.mundo, { total: r.total, dominadas: r.dominadas }]));
+
+await prueba('progreso por mundo: total y dominadas de cada mundo; con 0 dominadas sale 0, no nulo', () => {
+  const db = baseMundos();
+  assert.deepEqual(porMundo(db, FILTRO), { calle: { total: 4, dominadas: 2 }, dinero: { total: 4, dominadas: 1 }, tech: { total: 2, dominadas: 1 }, gente: { total: 2, dominadas: 0 } });
+});
+
+await prueba('progreso por mundo: el Modo Limpio y el nivel filtran el total Y las dominadas', () => {
+  const db = baseMundos();
+  const limpio = porMundo(db, { modoLimpio: true, niveles: [1, 2, 3] });
+  assert.deepEqual(limpio.calle, { total: 3, dominadas: 1 }, 'la vulgar sale de las dos cuentas');
+  const nivel2 = porMundo(db, { modoLimpio: false, niveles: [2] });
+  assert.deepEqual(nivel2, { tech: { total: 2, dominadas: 1 }, gente: { total: 2, dominadas: 0 } });
+  for (const m of Object.values({ ...limpio, ...nivel2 })) assert.ok(m.dominadas <= m.total, 'nunca más dominadas que frases');
+});
+
+await prueba('progreso por mundo: solo cuentan las dominadas de ese usuario', () => {
+  const db = baseMundos();
+  const otro = { entry_id: 3, repeticiones: 0, intervalo: 0, facilidad: 2.5, vence_en: 0, ultimo_repaso: null, fallos: 0, aciertos: 0, dominada: 1, favorito: 0 };
+  db.run(sql.SQL_UPSERT_TARJETA, sql.paramsUpsertTarjeta(2, otro));
+  assert.deepEqual(porMundo(db, FILTRO).calle, { total: 4, dominadas: 2 });
+});
+
 // ── notificaciones: tokens con nombre ────────────────────────────────────
 const notif = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/data/notificaciones.json'), 'utf8'));
 const TODAS = [...notif.plantillas, ...notif.vuelta];

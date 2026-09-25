@@ -4,6 +4,7 @@ import {
   consultaContarVencidas,
   consultaDiagnosticoCola,
   consultaNuevas,
+  consultaProgresoPorMundo,
   consultaVencidas,
   paramsUpsertTarjeta,
   SQL_UPSERT_TARJETA,
@@ -397,6 +398,22 @@ export async function getWorldCounts(
   );
   const out: Record<string, { total: number; vistas: number }> = {};
   for (const r of rows) out[r.mundo] = { total: r.total, vistas: r.vistas };
+  return out;
+}
+
+/**
+ * Frases y dominadas por mundo bajo el mismo filtro de contenido. Para «Por mundo» en
+ * Progreso; `getWorldCounts` cuenta las vistas y `getDominadasPorMundo` no aplica el filtro.
+ */
+export async function getProgresoPorMundo(
+  usuarioId: number,
+  filter: ContentFilter
+): Promise<Record<string, { total: number; dominadas: number }>> {
+  const db = await getDb();
+  const q = consultaProgresoPorMundo(usuarioId, filter);
+  const rows = await db.getAllAsync<{ mundo: string | null; total: number; dominadas: number }>(q.sql, q.params);
+  const out: Record<string, { total: number; dominadas: number }> = {};
+  for (const r of rows) if (r.mundo) out[r.mundo] = { total: r.total, dominadas: r.dominadas };
   return out;
 }
 

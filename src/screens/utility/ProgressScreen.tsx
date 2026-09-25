@@ -13,16 +13,17 @@ import {
   SkeletonLista,
 } from '@/components/base';
 import { SectionTitle } from '@/components/list';
-import { PanelSenal } from '@/components/progreso/PanelSenal';
+import { FilaMundo, PanelSenal } from '@/components/progreso';
 import { Espectrograma } from '@/components/fx';
 import { useVisto } from '@/components/fx/useVisibilidad';
-import { ventana } from '@/components/progreso/datos';
-import { getStats, type Stats } from '@/db/queries';
+import { filasMundo, ventana, type ProgresoMundo } from '@/components/progreso/datos';
+import { getProgresoPorMundo, getStats, type Stats } from '@/db/queries';
 import { getRecentDays } from '@/db/progress';
 import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
-import { useAuthStore } from '@/store';
-import { color, font, motionEntrada, space } from '@/theme';
+import { useAuthStore, useSettingsStore } from '@/store';
+import { loadContent } from '@/store/content';
+import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { dayKey } from '@/utils/date';
 import { conteo } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
@@ -32,9 +33,10 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 interface Datos {
   stats: Stats | null;
   dias: { dia: string; respuestas: number; aciertos: number }[];
+  mundos: Record<string, ProgresoMundo>;
 }
 
-const SIN_DATOS: Datos = { stats: null, dias: [] };
+const SIN_DATOS: Datos = { stats: null, dias: [], mundos: {} };
 
 /**
  * P-13, el progreso. Señal en vivo: el medidor de dominadas es el único momento
@@ -47,14 +49,19 @@ export function ProgressScreen() {
   const scrollY = useSharedValue(0);
   const { primera, estiloFundido } = useEntradaPantalla('progreso');
   const [pulsos, setPulsos] = useState(0);
+  const filter = useSettingsStore((s) => s.filter);
 
   const carga = useCarga(
     async (): Promise<Datos> => {
       if (!user) return SIN_DATOS;
-      const [stats, dias] = await Promise.all([getStats(user.id), getRecentDays(user.id, 21)]);
-      return { stats, dias };
+      const [stats, dias, mundos] = await Promise.all([
+        getStats(user.id),
+        getRecentDays(user.id, 21),
+        getProgresoPorMundo(user.id, filter()),
+      ]);
+      return { stats, dias, mundos };
     },
-    [user],
+    [user, filter],
     { alEnfocar: true }
   );
 
@@ -69,6 +76,7 @@ export function ProgressScreen() {
   // Sin días registrados, o ninguno dentro de las últimas tres semanas: nada de gráfica en ceros.
   const sinDias = registrados.length === 0 || dias.every((d) => d.respuestas === 0);
   const espectro = useVisto(scrollY);
+  const seccionMundos = useVisto(scrollY);
 
   return (
     <Screen
@@ -82,7 +90,7 @@ export function ProgressScreen() {
     >
       <Animated.View style={[styles.bloques, estiloFundido]}>
         <Carga carga={carga} esqueleto={<SkeletonLista filas={3} alto={110} />}>
-          {({ stats }) => (
+          {({ stats, mundos }) => (
             <>
               {stats ? (
                 <PanelSenal stats={stats} usuarioId={user?.id ?? null} entrada={primera} scrollY={scrollY} pulsos={pulsos} />
@@ -97,6 +105,26 @@ export function ProgressScreen() {
                     <Espectrograma dias={dias} activo={espectro.visto} retraso={primera ? motionEntrada.espectro : 0} />
                   )}
                 </Card>
+              </Animated.View>
+
+              <Animated.View ref={seccionMundos.ref} collapsable={false} onLayout={seccionMundos.alAcomodar} style={styles.bloque}>
+                <SectionTitle title="Por mundo" variante="bloque" />
+                <View style={styles.grupo}>
+                  {filasMundo(loadContent().packs.mundos, mundos).map((m, i) => (
+                    <FilaMundo
+                      key={m.id}
+                      nombre={m.nombre}
+                      tinte={color.world[m.id as WorldId] ?? color.accent}
+                      dominadas={m.dominadas}
+                      total={m.total}
+                      fraccion={m.fraccion}
+                      primera={i === 0}
+                      indice={i}
+                      activo={seccionMundos.visto}
+                      onPress={() => nav.navigate('WorldDetail', { worldId: m.id })}
+                    />
+                  ))}
+                </View>
               </Animated.View>
 
               <View style={styles.bloque}>
@@ -130,6 +158,13 @@ const styles = StyleSheet.create({
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
   noData: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
+  grupo: {
+    backgroundColor: color.surface,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.border,
+    overflow: 'hidden',
+  },
   rows: { gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: space.md },
   rowLabel: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
