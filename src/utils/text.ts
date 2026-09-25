@@ -75,3 +75,17 @@ function escapeRegex(s: string): string {
 export function capitalize(s: string): string {
   return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
 }
+
+/**
+ * La palabra en singular o en plural según la cantidad: `plural(1, 'frase')` da
+ * 'frase' y `plural(2, 'frase')` da 'frases'. Para lo irregular se pasa la forma:
+ * `plural(2, 'error', 'errores')`.
+ */
+export function plural(n: number, singular: string, formaPlural: string = `${singular}s`): string {
+  return n === 1 ? singular : formaPlural;
+}
+
+/** Cantidad y palabra: `conteo(1, 'frase')` da '1 frase'; `conteo(5, 'error', 'errores')` da '5 errores'. */
+export function conteo(n: number, singular: string, formaPlural?: string): string {
+  return `${n} ${plural(n, singular, formaPlural)}`;
+}

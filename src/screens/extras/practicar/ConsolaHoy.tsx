@@ -33,10 +33,10 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { conteo, plural, useMovimientoReducido } from '@/utils';
 import { dayKey } from '@/utils/date';
-import { energiaOnda, metaCumplida, textoFrases } from './consola';
-import { celebrarSiToca } from './metaDia';
+import { energiaOnda, metaCumplida } from './consola';
+import { celebrarSiToca } from './celebracion';
 import type { Modo } from './modos';
 
 interface Props {
@@ -142,7 +142,7 @@ export function ConsolaHoy({
   useEffect(() => {
     if (!listo || !cumplida || usuarioId === null) return;
     let vivo = true;
-    void celebrarSiToca(usuarioId, dayKey()).then((toca) => {
+    void celebrarSiToca(usuarioId, 'meta', dayKey()).then((toca) => {
       if (vivo && toca) setCelebrar(true);
     });
     return () => {
@@ -208,7 +208,7 @@ export function ConsolaHoy({
               diametro={anillo.hoy}
               trazo={anillo.trazo}
               celebrar={celebrar}
-              etiqueta={`Meta diaria: ${hoyFrases} de ${textoFrases(meta)}`}
+              etiqueta={`Meta diaria: ${hoyFrases} de ${conteo(meta, 'frase')}`}
             >
               <Text style={styles.anilloNumero} numberOfLines={1} adjustsFontSizeToFit>
                 {hoyFrases}
@@ -220,7 +220,7 @@ export function ConsolaHoy({
             {pendientes > 0 ? (
               <ChipDato
                 valor={pendientes}
-                despues={pendientes === 1 ? 'pendiente' : 'pendientes'}
+                despues={plural(pendientes, 'pendiente')}
                 tinte={color.accent}
                 retraso={retrasoChips}
               />
@@ -230,7 +230,7 @@ export function ConsolaHoy({
               <ChipDato
                 valor={racha}
                 antes="Racha:"
-                despues={racha === 1 ? 'día' : 'días'}
+                despues={plural(racha, 'día')}
                 tinte={color.star}
                 retraso={retrasoChips}
               />

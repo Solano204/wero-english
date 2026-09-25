@@ -1,4 +1,5 @@
 /** Lógica pura de los destacados. Sin React: `check:practicar` la prueba con node. */
+import { conteo } from '@/utils/text';
 
 /** Niveles de cada juego con niveles (Colmena, Pares, Caída y Dulces). */
 export const TOTAL_NIVELES = 200;
@@ -21,7 +22,7 @@ export function resumenNivel(n: Niveles | undefined): ResumenNivel | null {
   if (!n) return null;
   if (n.jugados <= 0) return { texto: `Nivel 1 · ${TOTAL_NIVELES} niveles`, nivel: 1 };
   return {
-    texto: `Nivel ${n.siguiente} · ${n.estrellas} ${n.estrellas === 1 ? 'estrella' : 'estrellas'}`,
+    texto: `Nivel ${n.siguiente} · ${conteo(n.estrellas, 'estrella')}`,
     nivel: Math.min(n.siguiente, TOTAL_NIVELES),
   };
 }

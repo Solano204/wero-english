@@ -112,6 +112,8 @@ export const motionSenal = {
   onda: 600,
   /** Bucle corto de las portadas de juego. */
   portada: 3200,
+  /** Los segmentos del medidor VU se encienden de izquierda a derecha en este total. */
+  medidor: 600,
 } as const;
 
 /**

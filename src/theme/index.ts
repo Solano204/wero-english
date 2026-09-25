@@ -22,6 +22,7 @@ export {
   grano,
   tarjeta,
   anillo,
+  medidor,
   inclinacion,
 } from './tokens';
 export type { WorldId } from './tokens';

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -381,7 +382,7 @@ export function ParesScreen() {
       <View style={styles.pie}>
         <Text style={styles.jugadas}>
           {restantes > 0
-            ? `Te quedan ${restantes} ${restantes === 1 ? 'jugada' : 'jugadas'}`
+            ? `Te quedan ${conteo(restantes, 'jugada')}`
             : 'Se acabaron las jugadas, pero el tablero se queda'}
         </Text>
         <Button

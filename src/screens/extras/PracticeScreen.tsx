@@ -1,10 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ErrorCarga, Screen } from '@/components/base';
+import { SectionTitle } from '@/components/list';
 import { FondoAurora } from '@/components/fx';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
@@ -14,8 +15,8 @@ import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { motionDuration, motionEasing, space, tarjeta, text } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { motionDuration, motionEasing, space, tarjeta } from '@/theme';
+import { conteo, useMovimientoReducido } from '@/utils';
 import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -25,9 +26,11 @@ import { EncabezadoPracticar, ALTO_ENCABEZADO } from './practicar/EncabezadoPrac
 import { tomarEntrada } from './practicar/entrada';
 import { FilaModo } from './practicar/FilaModo';
 import { GrupoPlegable } from './practicar/GrupoPlegable';
+import { ICONO_GRUPO, ICONO_MODO } from './practicar/iconos';
+import { metaDe, textoMeta, type FuentesMeta } from './practicar/metadatos';
 import { RetoSemana } from './practicar/RetoSemana';
 import { ORDEN, elegirDestacados, elegirHoy, type ModoId, type MotivoHoy, type Uso } from './practicar/hoy';
-import { GRUPOS, MODOS, type Modo } from './practicar/modos';
+import { GRUPOS, MODOS } from './practicar/modos';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Resumen = Awaited<ReturnType<typeof getStats>>;
@@ -65,10 +68,10 @@ function etiquetaHoy(
   if (motivo === 'vencidas') {
     // El botón lleva lo que cabe en una sesión; el total pendiente va aparte.
     const n = Math.min(vencidas, meta);
-    return `Repasar ${n} ${n === 1 ? 'frase' : 'frases'}`;
+    return `Repasar ${conteo(n, 'frase')}`;
   }
   if (motivo === 'ultimo' && modo === 'study') return 'Seguir estudiando';
-  if (motivo === 'atoradas') return `Corregir ${atoradas} ${atoradas === 1 ? 'error' : 'errores'}`;
+  if (motivo === 'atoradas') return `Corregir ${conteo(atoradas, 'error', 'errores')}`;
   if (motivo === 'ultimo') return `Seguir con ${MODOS[modo].titulo}`;
   return 'Empezar';
 }
@@ -136,35 +139,16 @@ export function PracticeScreen() {
   const destacados = elegirDestacados(uso, hoy.modo);
   const modoHoy = MODOS[hoy.modo];
 
-  /** Con niveles, lo útil es dónde te quedaste; sin ellos, el mejor puntaje. */
-  const marca = (juego: string): string | null => {
-    const n = niveles[juego];
-    if (n && n.jugados > 0) return `nivel ${n.siguiente} · ${n.estrellas} estrellas`;
-    if (n) return 'nivel 1 · 200 niveles';
-    const r = records[juego];
-    return r && r.partidas > 0 ? `mejor: ${r.mejor}` : null;
+  const fuentesMeta: FuentesMeta = {
+    niveles,
+    records,
+    paresLimpios: habla.dominados,
+    atoradas,
+    guardadas: stats?.favoritas ?? 0,
+    frasesPhrasal: loadContent().phrasal.verbos.length,
   };
-
-  const datoDe = (id: ModoId): string | null => {
-    switch (id) {
-      case 'colmena':
-      case 'pares':
-      case 'caida':
-      case 'dulces':
-      case 'cazala':
-        return marca(id);
-      case 'pares_minimos':
-        return habla.dominados > 0 ? `${habla.dominados} pares limpios` : 'nuevo';
-      case 'phrasal':
-        return `${loadContent().phrasal.verbos.length} frases`;
-      case 'atoran':
-        return atoradas > 0 ? `${atoradas} frases` : null;
-      case 'mazo':
-        return stats && stats.favoritas > 0 ? `${stats.favoritas} guardadas` : null;
-      default:
-        return null;
-    }
-  };
+  /** El dato de un modo como línea de texto (la de una tarjeta destacada sin niveles). */
+  const datoDe = (id: ModoId): string | null => textoMeta(metaDe(id, fuentesMeta));
 
   const alternar = (grupo: string) => {
     if (!user) return;
@@ -205,7 +189,7 @@ export function PracticeScreen() {
         </View>
 
         <View style={styles.bloque}>
-          <Text style={text.h3}>Destacados</Text>
+          <SectionTitle title="Destacados" variante="bloque" />
           {carga.estado === 'cargando' ? (
             <View style={styles.reservaDestacados} />
           ) : (
@@ -221,26 +205,29 @@ export function PracticeScreen() {
         </View>
 
         <View style={styles.bloque}>
-          <Text style={text.h3}>Todo lo demás</Text>
+          <SectionTitle title="Todo lo demás" variante="bloque" />
           {GRUPOS.map((g) => {
             const ids = ORDEN.filter((id) => MODOS[id].grupo === g.id && !destacados.includes(id));
             return (
               <GrupoPlegable
                 key={g.id}
                 titulo={g.titulo}
+                icono={ICONO_GRUPO[g.id]}
                 total={ids.length}
                 abierto={abiertos.includes(g.id)}
                 onAlternar={() => alternar(g.id)}
               >
-                {(progreso) =>
+                {(avance) =>
                   ids.map((id, i) => (
                     <FilaModo
                       key={id}
                       titulo={MODOS[id].titulo}
-                      dato={datoDe(id)}
+                      corta={MODOS[id].corta}
+                      icono={ICONO_MODO[id]}
+                      meta={metaDe(id, fuentesMeta)}
                       primera={i === 0}
                       indice={i}
-                      progreso={progreso}
+                      avance={avance}
                       onPress={() => MODOS[id].ir(nav)}
                     />
                   ))
@@ -252,8 +239,16 @@ export function PracticeScreen() {
 
         {reto ? (
           <View style={styles.bloque}>
-            <Text style={text.h3}>Esta semana</Text>
-            <RetoSemana llevas={reto.llevas} meta={reto.meta} cumplido={reto.cumplido} desde={reto.desde} hoy={dayKey()} />
+            <SectionTitle title="Esta semana" variante="bloque" />
+            <RetoSemana
+              llevas={reto.llevas}
+              meta={reto.meta}
+              cumplido={reto.cumplido}
+              desde={reto.desde}
+              hoy={dayKey()}
+              usuarioId={user?.id ?? null}
+              scrollY={scrollY}
+            />
           </View>
         ) : null}
       </Animated.View>

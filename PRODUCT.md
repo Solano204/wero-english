@@ -77,6 +77,8 @@ La misma acción se llama igual en toda la app.
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
+**Plural:** todo conteo se escribe con `plural()` y `conteo()` de `src/utils/text.ts`, nunca con un ternario suelto: «1 estrella», «1 frase», «1 guardada», «1 día», «Queda 1 día».
+
 ## Restricciones
 
 - **Móvil primero.** Se diseña para una pantalla de teléfono; nada depende de tener un mouse ni una pantalla grande.

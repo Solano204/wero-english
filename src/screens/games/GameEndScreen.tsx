@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -149,8 +150,7 @@ export function GameEndScreen() {
         <Animated.View entering={merece ? aparecerSubiendo(motionDuration.rapido) : aparecer(motionDuration.rapido)}>
           <Card style={styles.repaso}>
             <Text style={styles.repasoTexto}>
-              {aciertos}{' '}
-              {aciertos === 1 ? 'frase avanzó' : 'frases avanzaron'} en tu repaso
+              {conteo(aciertos, 'frase avanzó', 'frases avanzaron')} en tu repaso
             </Text>
             <Text style={styles.repasoNota}>
               Jugar cuenta igual que estudiar. Es la misma tarjeta.

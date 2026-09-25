@@ -33,7 +33,7 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { plural, useMovimientoReducido } from '@/utils';
 import type { CaidaRound, Entry, NivelCaida } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -421,7 +421,7 @@ export function CaidaScreen() {
         >
           <Text style={styles.finNum} maxFontSizeMultiplier={1.2}>{aciertos}</Text>
           <Text style={styles.finLabel}>
-            {aciertos === 1 ? 'frase seguida' : 'frases seguidas'}
+            {plural(aciertos, 'frase seguida', 'frases seguidas')}
           </Text>
 
           {round ? (

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -500,7 +501,7 @@ export function DulcesScreen() {
           title={nivel ? `Nivel ${nivel}` : undefined}
           right={
             <Text style={styles.jugadas}>
-              {jugadas} {jugadas === 1 ? 'jugada' : 'jugadas'}
+              {conteo(jugadas, 'jugada')}
             </Text>
           }
         />
@@ -613,7 +614,7 @@ export function DulcesScreen() {
 
           <Text style={styles.pieNota}>
             {resueltas > 0
-              ? `${resueltas} ${resueltas === 1 ? 'frase resuelta' : 'frases resueltas'}`
+              ? conteo(resueltas, 'frase resuelta', 'frases resueltas')
               : 'Junta tres del mismo color para llenar su barra'}
           </Text>
         </ScrollView>

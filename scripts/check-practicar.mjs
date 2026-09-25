@@ -16,12 +16,20 @@ const fuente = fs.readFileSync(path.join(ROOT, 'src/screens/extras/practicar/hoy
 const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const { elegirHoy, elegirDestacados, ORDEN, NUM_DESTACADOS } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 
-const cargar = async (rel) => {
+// Los módulos puros importan `@/utils/text`: se resuelve a mano al cargarlos.
+const ALIAS = { '@/utils/text': 'src/utils/text.ts' };
+const cargarUrl = async (rel) => {
   const fuenteRel = fs.readFileSync(path.join(ROOT, rel), 'utf8');
-  const out = ts.transpileModule(fuenteRel, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
-  return import(`data:text/javascript;base64,${Buffer.from(out).toString('base64')}`);
+  let out = ts.transpileModule(fuenteRel, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+  for (const [alias, destino] of Object.entries(ALIAS)) {
+    if (out.includes(`'${alias}'`)) out = out.replaceAll(`'${alias}'`, `'${await cargarUrl(destino)}'`);
+  }
+  return `data:text/javascript;base64,${Buffer.from(out).toString('base64')}`;
 };
+const cargar = async (rel) => import(await cargarUrl(rel));
 const { energiaOnda, progresoMeta, metaCumplida, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+const { plural, conteo } = await cargar('src/utils/text.ts');
+const { metaDe, textoMeta } = await cargar('src/screens/extras/practicar/metadatos.ts');
 const { diasQueQuedan, textoDiasReto } = await cargar('src/screens/extras/practicar/reto.ts');
 const { resumenNivel, TOTAL_NIVELES } = await cargar('src/screens/extras/practicar/resumenNiveles.ts');
 
@@ -73,7 +81,41 @@ assert.equal(diasQueQuedan('2026-09-21', '2026-09-24'), 4);
 assert.equal(diasQueQuedan('2026-09-21', '2026-09-27'), 1, 'el domingo es el último día');
 assert.equal(diasQueQuedan('2026-09-21', '2026-09-20'), 7, 'un día antes del lunes no pasa de 7');
 assert.equal(diasQueQuedan('2026-09-21', '2026-10-05'), 1, 'pasada la semana no baja de 1');
-assert.equal(textoDiasReto(1), 'Último día');
+assert.equal(textoDiasReto(1), 'Queda 1 día');
 assert.equal(textoDiasReto(4), 'Quedan 4 días');
 
-console.log('check:practicar ok (35 casos)');
+// Pluralización: «1 estrella», «1 frase», «1 guardada», «1 día».
+assert.equal(plural(1, 'frase'), 'frase');
+assert.equal(plural(0, 'frase'), 'frases', 'el cero va en plural');
+assert.equal(plural(2, 'error', 'errores'), 'errores');
+assert.equal(conteo(1, 'estrella'), '1 estrella');
+assert.equal(conteo(36, 'estrella'), '36 estrellas');
+assert.equal(conteo(1, 'guardada'), '1 guardada');
+assert.equal(conteo(1, 'día'), '1 día');
+assert.equal(conteo(1, 'frase avanzó', 'frases avanzaron'), '1 frase avanzó');
+
+// Metadatos de los renglones: Badge de nivel, «nuevo», atoradas, guardadas; sin dato, nada.
+const fuentes = {
+  niveles: { pares: { jugados: 22, estrellas: 36, siguiente: 23 }, colmena: { jugados: 0, estrellas: 0, siguiente: 1 } },
+  records: { cazala: { partidas: 3, mejor: 12 } },
+  paresLimpios: 0,
+  atoradas: 5,
+  guardadas: 1,
+  frasesPhrasal: 207,
+};
+assert.deepEqual(metaDe('pares', fuentes), { tipo: 'nivel', nivel: 23, estrellas: 36 });
+assert.deepEqual(metaDe('colmena', fuentes), { tipo: 'nivel', nivel: 1, estrellas: 0 }, 'sin jugar arranca en el nivel 1');
+assert.equal(metaDe('caida', fuentes), null, 'un juego sin niveles ni partidas no lleva Badge');
+assert.deepEqual(metaDe('cazala', fuentes), { tipo: 'texto', texto: 'mejor: 12' });
+assert.deepEqual(metaDe('pares_minimos', fuentes), { tipo: 'nuevo' });
+assert.deepEqual(metaDe('pares_minimos', { ...fuentes, paresLimpios: 1 }), { tipo: 'texto', texto: '1 par limpio' });
+assert.deepEqual(metaDe('atoran', fuentes), { tipo: 'atoradas', n: 5 });
+assert.equal(metaDe('atoran', { ...fuentes, atoradas: 0 }), null, 'sin atoradas el renglón queda limpio');
+assert.deepEqual(metaDe('mazo', fuentes), { tipo: 'guardadas', n: 1 });
+assert.equal(metaDe('oido', fuentes), null);
+assert.equal(textoMeta(metaDe('mazo', fuentes)), '1 guardada');
+assert.equal(textoMeta({ tipo: 'nivel', nivel: 23, estrellas: 36 }), 'Nivel 23 · 36 estrellas');
+assert.equal(textoMeta({ tipo: 'nivel', nivel: 1, estrellas: 0 }), 'Nivel 1');
+assert.equal(textoMeta(null), null);
+
+console.log('check:practicar ok (61 casos)');

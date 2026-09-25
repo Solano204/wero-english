@@ -23,7 +23,3 @@ export function progresoMeta(hoy: number, meta: number): number {
 export function metaCumplida(hoy: number, meta: number): boolean {
   return meta > 0 && hoy >= meta;
 }
-
-export function textoFrases(n: number): string {
-  return `${n} ${n === 1 ? 'frase' : 'frases'}`;
-}

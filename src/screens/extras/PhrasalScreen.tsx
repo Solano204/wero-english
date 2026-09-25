@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
@@ -69,8 +70,7 @@ export function PhrasalScreen() {
                   <Text style={styles.verbo}>{g.verbo}</Text>
                   <View style={styles.cuantosFila}>
                     <Text style={styles.cuantos}>
-                      {g.ids.length}{' '}
-                      {g.ids.length === 1 ? 'forma' : 'formas'}
+                      {conteo(g.ids.length, 'forma')}
                     </Text>
                     <Icon name={esta ? 'chevron-down' : 'chevron-right'} size="sm" color={color.textFaint} />
                   </View>

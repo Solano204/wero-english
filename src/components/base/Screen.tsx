@@ -77,7 +77,7 @@ export function Screen({
   const huecoAbajo = footer
     ? 0
     : altoPestanas > 0
-      ? altoPestanas + space.md + layout.adBar + insetAbajo + space.md
+      ? altoPestanas + layout.adBar + insetAbajo + space.xl
       : space.xxxl;
 
   return (

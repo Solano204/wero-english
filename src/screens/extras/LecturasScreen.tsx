@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { conteo, plural } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -168,9 +169,8 @@ function FilaLectura({ fila, onPress }: { fila: Fila; onPress: () => void }) {
       <Text style={styles.itemSub}>{l.subtitulo}</Text>
 
       <Text style={styles.meta}>
-        {l.palabras} palabras · {l.capitulos.length}{' '}
-        {l.capitulos.length === 1 ? 'capítulo' : 'capítulos'} ·{' '}
-        {fila.dominadas} de {fila.total} frases tuyas
+        {conteo(l.palabras, 'palabra')} · {conteo(l.capitulos.length, 'capítulo')} ·{' '}
+        {fila.dominadas} de {fila.total} {plural(fila.total, 'frase tuya', 'frases tuyas')}
       </Text>
 
       {fila.abierta ? (

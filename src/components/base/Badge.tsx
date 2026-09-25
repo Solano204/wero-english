@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { color, font, radius, space } from '@/theme';
 import type { Registro, Vulgaridad } from '@/types';
+import { Icon, type IconName } from './Icon';
 
 type Tone = 'neutral' | 'warn' | 'strong' | 'accent' | 'good';
 
@@ -9,17 +10,27 @@ interface Props {
   label: string;
   tone?: Tone;
   small?: boolean;
+  /** Un punto de color antes del texto (p. ej. el ámbar de "se me atoran"). */
+  punto?: string;
+  /** Un ícono antes del texto. */
+  icono?: IconName;
+  iconoColor?: string;
+  /** Lo que va después del texto (p. ej. las estrellas de un nivel). */
+  children?: ReactNode;
 }
 
-export function Badge({ label, tone = 'neutral', small = false }: Props) {
+export function Badge({ label, tone = 'neutral', small = false, punto, icono, iconoColor, children }: Props) {
   return (
     <View style={[styles.wrap, tones[tone].wrap, small && styles.small]}>
+      {punto ? <View style={[styles.punto, { backgroundColor: punto }]} /> : null}
+      {icono ? <Icon name={icono} size="sm" color={iconoColor ?? color.textMuted} /> : null}
       <Text
         style={[styles.text, tones[tone].text, small && styles.textSmall]}
         numberOfLines={1}
       >
         {label}
       </Text>
+      {children}
     </View>
   );
 }
@@ -85,7 +96,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.pill,
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
   },
+  punto: { width: 8, height: 8, borderRadius: 4 },
   small: { paddingHorizontal: space.sm, paddingVertical: space.xs },
   text: {
     fontSize: font.size.sm,

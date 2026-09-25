@@ -376,6 +376,8 @@ export const layout = {
   screenPad: space.lg,
   /** Alto de la barra de anuncios. El tab bar se levanta esto. */
   adBar: 56,
+  /** Alto mínimo de un renglón de modo en Practicar. */
+  filaModo: 56,
 } as const;
 
 /**
@@ -394,6 +396,9 @@ export const tarjeta = { heroe: 180, compacta: 150, portadaHeroe: 96, portadaCom
 
 /** Anillos de progreso: diámetro y grosor del trazo. */
 export const anillo = { hoy: 88, reto: 56, trazo: 8, trazoReto: 6 } as const;
+
+/** Medidor VU del reto: un segmento por acierto de la meta. */
+export const medidor = { segmento: 4, separacion: 2, alto: 28 } as const;
 
 /** Inclinación 3D de las tarjetas al mantener presionado. */
 export const inclinacion = { maxGrados: 6, perspectiva: 800 } as const;

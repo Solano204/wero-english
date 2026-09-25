@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { plural } from '@/utils/text';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -242,7 +243,7 @@ export function StudyScreen() {
         <View style={styles.aciertosRow}>
           <Text style={styles.aciertosNum}>{aciertos}</Text>
           <Text style={styles.aciertosTxt}>
-            {aciertos === 1 ? 'frase atinada' : 'frases atinadas'}
+            {plural(aciertos, 'frase atinada', 'frases atinadas')}
           </Text>
         </View>
       </View>

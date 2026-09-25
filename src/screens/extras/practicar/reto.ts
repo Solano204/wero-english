@@ -1,4 +1,5 @@
 /** Lógica pura del reto de la semana. Sin React: `check:practicar` la prueba con node. */
+import { conteo, plural } from '@/utils/text';
 
 const DIAS_SEMANA = 7;
 const MS_DIA = 24 * 60 * 60 * 1000;
@@ -18,5 +19,5 @@ export function diasQueQuedan(desde: string, hoy: string): number {
 }
 
 export function textoDiasReto(restantes: number): string {
-  return restantes <= 1 ? 'Último día' : `Quedan ${restantes} días`;
+  return `${plural(restantes, 'Queda', 'Quedan')} ${conteo(restantes, 'día')}`;
 }

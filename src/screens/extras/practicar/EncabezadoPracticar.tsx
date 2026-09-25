@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '@/components/base';
+import { conteo } from '@/utils';
 import { aparecer, blur, color, font, layout, radius, space, text } from '@/theme';
 
 /** Alto del encabezado ya comprimido, debajo del safe area. */
@@ -34,7 +35,7 @@ function ChipRacha({ dias }: { dias: number }) {
     <View
       style={styles.chip}
       accessible
-      accessibilityLabel={`Racha: ${dias} ${dias === 1 ? 'día' : 'días'}`}
+      accessibilityLabel={`Racha: ${conteo(dias, 'día')}`}
     >
       <Icon name="fire" size="md" color={color.star} />
       <Text style={styles.chipNumero}>{dias}</Text>

@@ -1,14 +1,15 @@
 import type { IconName } from '@/components/base';
 import type { ModoId } from './hoy';
+import type { GrupoId } from './modos';
 
-/** Ícono de la portada estática de cada modo (sin letras). */
+/** Ícono de cada modo: la ficha de su renglón y la portada estática de un destacado (sin letras). */
 export const ICONO_MODO: Record<ModoId, IconName> = {
   study: 'cards',
   gramatica: 'book',
   colmena: 'hexagon',
-  pares: 'cards',
-  caida: 'arrow-right',
-  dulces: 'star',
+  pares: 'link',
+  caida: 'arrow-down',
+  dulces: 'cube',
   cazala: 'target',
   pares_minimos: 'microphone',
   oido: 'headphones',
@@ -20,4 +21,11 @@ export const ICONO_MODO: Record<ModoId, IconName> = {
   errores: 'warning',
   atoran: 'anchor',
   mazo: 'bookmark',
+};
+
+/** Ícono de cada grupo plegable de "Todo lo demás". */
+export const ICONO_GRUPO: Record<GrupoId, IconName> = {
+  juegos: 'game',
+  oir: 'ear',
+  leer: 'books',
 };

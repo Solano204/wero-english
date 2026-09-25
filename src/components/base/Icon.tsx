@@ -39,6 +39,10 @@ import { PuzzlePieceIcon } from 'phosphor-react-native/src/icons/PuzzlePiece';
 import { ShuffleIcon } from 'phosphor-react-native/src/icons/Shuffle';
 import { TargetIcon } from 'phosphor-react-native/src/icons/Target';
 import { WaveformIcon } from 'phosphor-react-native/src/icons/Waveform';
+import { ArrowDownIcon } from 'phosphor-react-native/src/icons/ArrowDown';
+import { CubeIcon } from 'phosphor-react-native/src/icons/Cube';
+import { GameControllerIcon } from 'phosphor-react-native/src/icons/GameController';
+import { LinkIcon } from 'phosphor-react-native/src/icons/Link';
 import { color } from '@/theme';
 
 /**
@@ -102,6 +106,10 @@ const ICONOS = {
   shuffle: { Componente: ShuffleIcon },
   target: { Componente: TargetIcon },
   waveform: { Componente: WaveformIcon },
+  'arrow-down': { Componente: ArrowDownIcon },
+  cube: { Componente: CubeIcon },
+  game: { Componente: GameControllerIcon },
+  link: { Componente: LinkIcon },
 } satisfies Record<string, Definicion>;
 
 export type IconName = keyof typeof ICONOS;
