@@ -180,6 +180,19 @@ export async function toggleFavorite(
   return (row?.favorito ?? 0) === 1;
 }
 
+/** ¿Está esta frase guardada en Mi mazo? Solo lectura: no toca `toggleFavorite`. */
+export async function isFavorite(
+  usuarioId: number,
+  entryId: number
+): Promise<boolean> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ favorito: number }>(
+    'SELECT favorito FROM tarjeta WHERE usuario_id = ? AND entry_id = ?;',
+    [usuarioId, entryId]
+  );
+  return (row?.favorito ?? 0) === 1;
+}
+
 /* ============================================================
    Consultas de exploración
    ============================================================ */

@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, StyleSheet, Text, View } from 'react-native';
 import {
   useNavigation,
   useRoute,
@@ -21,13 +21,14 @@ import {
 import { hayImagen } from '@/components/card';
 import {
   Aparece,
+  BotonGuardar,
   CuandoNoDecirla,
   EscalaRegistro,
   FilaDondeVive,
   HeroeFrase,
   ImagenSangre,
 } from '@/components/detalle';
-import { getEntry, toggleFavorite } from '@/db/queries';
+import { getEntry, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
@@ -56,11 +57,31 @@ export function DetailScreen() {
   });
   const entry = carga.datos;
   const [fav, setFav] = useState(false);
+  // Sube cada vez que la frase pasa a guardada (la fiesta); quitarla no lo sube.
+  const [pulso, setPulso] = useState(0);
   const [imagenFallo, setImagenFallo] = useState(false);
+  // Si el usuario ya tocó el botón, la lectura inicial de la base no lo pisa.
+  const tocado = useRef(false);
+
+  // El estado real: antes el botón arrancaba siempre en «Guardar», aunque la frase ya estuviera guardada.
+  useEffect(() => {
+    if (!user) return;
+    let vigente = true;
+    void isFavorite(user.id, params.entryId).then((guardada) => {
+      if (vigente && !tocado.current) setFav(guardada);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [user, params.entryId]);
 
   const alternar = useCallback(async () => {
     if (!user || !entry) return;
-    setFav(await toggleFavorite(user.id, entry.id));
+    tocado.current = true;
+    const guardada = await toggleFavorite(user.id, entry.id);
+    setFav(guardada);
+    if (guardada) setPulso((n) => n + 1);
+    AccessibilityInfo.announceForAccessibility(guardada ? 'Guardada en Mi mazo' : 'Quitada de Mi mazo');
   }, [user, entry]);
 
   if (!entry) {
@@ -96,14 +117,10 @@ export function DetailScreen() {
         // Flota sobre la imagen (o sobre el fondo, sin ella) y no se va con el scroll.
         <View style={[styles.encabezado, { paddingTop: top + space.xs }]} pointerEvents="box-none">
           <IconButton icono="back" etiqueta="Atrás" tamano="sm" onPress={() => nav.goBack()} />
-          <IconButton
-            icono={fav ? 'star-filled' : 'star'}
-            etiqueta={fav ? 'Quitar de mi mazo' : 'Guardar en mi mazo'}
-            tamano="sm"
-            onPress={alternar}
-          />
         </View>
       }
+      // Guardar es la acción principal y vive en la zona del pulgar, no arriba.
+      footer={<BotonGuardar guardada={fav} pulso={pulso} onPress={alternar} />}
     >
       {conImagen ? (
         <ImagenSangre path={entry.imagen} scrollY={scrollY} alFallar={() => setImagenFallo(true)} />

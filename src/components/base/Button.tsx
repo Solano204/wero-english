@@ -28,6 +28,8 @@ interface BaseProps {
   icon?: IconName;
   /** Pone el ícono después del texto (las flechas de "seguir"). */
   iconAlFinal?: boolean;
+  /** Reemplaza al ícono por algo propio (una estrella que se anima). Va donde iría `icon` y sigue `iconAlFinal`. */
+  iconNode?: ReactNode;
   style?: ViewStyle;
   /** Capa decorativa detrás de la etiqueta, recortada por el borde del botón (reflejo, onda). */
   fondo?: ReactNode;
@@ -62,6 +64,7 @@ export function Button({
   full = false,
   icon,
   iconAlFinal = false,
+  iconNode,
   style,
   fondo,
   onPressIn,
@@ -75,6 +78,8 @@ export function Button({
   }, [disabled, loading, onPress, haptico]);
 
   const blocked = disabled || loading;
+  const glifo =
+    iconNode ?? (icon ? <Icon name={icon} size={size === 'lg' ? 'lg' : 'md'} color={textColor[variant]} /> : null);
 
   return (
     <Presionable
@@ -99,9 +104,7 @@ export function Button({
         <ActivityIndicator color={textColor[variant]} size="small" />
       ) : (
         <View style={styles.row}>
-          {icon && !iconAlFinal ? (
-            <Icon name={icon} size={size === 'lg' ? 'lg' : 'md'} color={textColor[variant]} />
-          ) : null}
+          {!iconAlFinal ? glifo : null}
           {label ? (
             <Text
               style={[
@@ -114,9 +117,7 @@ export function Button({
               {label}
             </Text>
           ) : null}
-          {icon && iconAlFinal ? (
-            <Icon name={icon} size={size === 'lg' ? 'lg' : 'md'} color={textColor[variant]} />
-          ) : null}
+          {iconAlFinal ? glifo : null}
         </View>
       )}
     </Presionable>
