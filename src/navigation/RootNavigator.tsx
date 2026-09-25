@@ -39,7 +39,7 @@ import {
 import { useAuthStore, useSettingsStore } from '@/store';
 import * as music from '@/services/music';
 import * as notifications from '@/services/notifications';
-import { color } from '@/theme';
+import { color, motionDuration } from '@/theme';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 
@@ -108,7 +108,11 @@ export function RootNavigator() {
         <Stack.Screen
           name="GameEnd"
           component={GameEndScreen}
-          options={{ gestureEnabled: false }}
+          // Pares cierra su tablero con una ola de luz: el resumen entra con un fundido en vez de subir desde abajo.
+          options={({ route }) => ({
+            gestureEnabled: false,
+            ...(route.params?.juego === 'pares' ? { animation: 'fade' as const, animationDuration: motionDuration.lento } : null),
+          })}
         />
         <Stack.Screen name="MinimalPairs" component={MinimalPairsScreen} />
       </Stack.Group>

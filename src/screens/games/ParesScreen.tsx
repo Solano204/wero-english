@@ -22,7 +22,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, space } from '@/theme';
+import { color, escalon, font, motionDuration, space } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -47,6 +47,8 @@ const PAUSA_MAXIMA_MS = 10000;
 const UNION_MAXIMA_MS = 1500;
 /** Tope del vuelo de la tarjeta de un par después de su voz: entrada de 450 ms más 320 ms de vuelo, con margen. */
 const FUSION_MAXIMA_MS = 2000;
+/** Lo que tarda el cierre del tablero (la ola de segmentos y los sellos que se van) antes de pasar al resumen. */
+const CIERRE_MS = escalon(8) + motionDuration.rapido + motionDuration.base;
 /** Bloqueo de "Saltar" contra doble toque. */
 const SALTAR_DEBOUNCE_MS = 400;
 
@@ -334,17 +336,14 @@ export function ParesScreen() {
     return () => clearTimeout(t);
   }, [fusion, enPausa]);
 
+  // El tablero se cierra cuando el último par ya se oyó y su tarjeta llegó al segmento: primero se
+  // oye la frase, después la ola de segmentos y los sellos que se van, y al final el resumen.
+  const cerrando = tablero !== null && resueltas.length > 0 && resueltas.length === tablero.totalPares && !enPausa && !union && !fusion;
   useEffect(() => {
-    if (!tablero || enPausa || fusion) return;
-    // Si el último par disparó pausarConVoz, esto no corre hasta que
-    // enPausa vuelva a false y su tarjeta llegue al segmento: primero se
-    // oye la frase, después se termina la partida.
-    if (resueltas.length > 0 && resueltas.length === tablero.totalPares) {
-      const t = setTimeout(terminar, 620);
-      return () => clearTimeout(t);
-    }
-    return undefined;
-  }, [resueltas.length, tablero, terminar, enPausa, fusion]);
+    if (!cerrando) return undefined;
+    const t = setTimeout(terminar, CIERRE_MS);
+    return () => clearTimeout(t);
+  }, [cerrando, terminar]);
 
   if (carga.estado === 'error') {
     return (
@@ -407,7 +406,7 @@ export function ParesScreen() {
             title={nivel ? `Nivel ${nivel}` : undefined}
             right={
               <View ref={segmentosRef} collapsable={false} onLayout={medirSegmentos}>
-                <SegmentosPares total={tablero.totalPares} resueltos={resueltas.length - (fusion ? 1 : 0)} />
+                <SegmentosPares total={tablero.totalPares} resueltos={resueltas.length - (fusion ? 1 : 0)} cierre={cerrando} />
               </View>
             }
           />
@@ -457,7 +456,7 @@ export function ParesScreen() {
                   const recta = geo.rectas[i];
                   if (!recta) return null;
                   const uniendo = union !== null && (union.a === i || union.b === i);
-                  if (resueltas.includes(f.entryId) && !uniendo) return <Sello key={f.id} recta={recta} />;
+                  if (resueltas.includes(f.entryId) && !uniendo) return <Sello key={f.id} recta={recta} saliendo={cerrando} retraso={escalon(i)} />;
                   return (
                     <FichaPar
                       key={f.id}

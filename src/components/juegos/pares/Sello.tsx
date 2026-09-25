@@ -9,23 +9,31 @@ import type { Rect } from './geometria';
 
 interface Props {
   recta: Rect;
-  /** Retraso (ms) de la aparición: en el cierre del tablero los sellos entran escalonados. */
+  /** El tablero se cerró: el sello se desvanece. */
+  saliendo?: boolean;
+  /** Retraso (ms) del desvanecimiento: los sellos se van escalonados, en el orden de lectura. */
   retraso?: number;
 }
 
 /**
  * Lo que queda donde estuvo una ficha cuyo par ya se juntó: un borde punteado y una
  * palomita en `textFaint`. Es un hueco «cumplido», no una ficha apagada: el tablero no se
- * mueve y se lee de un vistazo cuánto falta. Decorativo: el progreso lo dice el
- * `progressbar` de arriba.
+ * mueve y se lee de un vistazo cuánto falta. Al cerrar el tablero se desvanece uno tras
+ * otro; con «reducir movimiento» ni aparece ni se va con animación. Decorativo: el
+ * progreso lo dice el `progressbar` de arriba.
  */
-export function Sello({ recta, retraso = 0 }: Props) {
+export function Sello({ recta, saliendo = false, retraso = 0 }: Props) {
   const reducido = useMovimientoReducido();
-  const presencia = useSharedValue(0);
+  const presencia = useSharedValue(reducido ? 1 : 0);
 
   useEffect(() => {
-    presencia.value = reducido ? 1 : withDelay(retraso, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-  }, [reducido, retraso, presencia]);
+    if (reducido) {
+      presencia.value = 1;
+      return;
+    }
+    const cfg = { duration: motionDuration.base, easing: motionEasing.entrar };
+    presencia.value = saliendo ? withDelay(retraso, withTiming(0, cfg)) : withTiming(1, cfg);
+  }, [saliendo, reducido, retraso, presencia]);
 
   const estilo = useAnimatedStyle(() => ({ opacity: presencia.value }));
 

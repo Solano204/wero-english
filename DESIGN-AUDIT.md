@@ -223,7 +223,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
 | `games/NivelesScreen.tsx` | ✓ `:84` | ✗ | ✓ `:300` |
-| `games/ParesScreen.tsx` | ✓ `:179` | ✓ `:373` | ✓ `:349` |
+| `games/ParesScreen.tsx` | ✓ `:181` | ✓ `:372` | ✓ `:348` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
 | `utility/ProgressScreen.tsx` | ✓ `:71` | ✓ `:96` | ✓ `:113` |
@@ -256,7 +256,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
 - `src/components/juegos/pares/FichasJugadas.tsx:39` — key por índice
-- `src/components/juegos/pares/SegmentosPares.tsx:66` — key por índice
+- `src/components/juegos/pares/SegmentosPares.tsx:94` — key por índice
 - `src/components/niveles/EstrellasCelda.tsx:79` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:291` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:177` — key por índice
