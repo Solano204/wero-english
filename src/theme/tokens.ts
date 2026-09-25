@@ -231,6 +231,19 @@ export const resplandorSol: [string, string, string] = [
 ];
 
 /**
+ * Señal (v5.0). Degradado dentro del mismo tono (COLOR-2): del cian hondo a la
+ * luz. Sale de la escala del acento, no de hex nuevos.
+ */
+export const senal: [string, string, string] = [color.accent900, color.accent400, color.accent100];
+
+/** Reflejo metálico que cruza el botón principal: blanco que aparece y se va. */
+export const reflejo: [string, string, string] = [
+  'rgba(255, 255, 255, 0)',
+  'rgba(255, 255, 255, 0.38)',
+  'rgba(255, 255, 255, 0)',
+];
+
+/**
  * Degradados de portada. Tintados y oscuros, para que el texto claro
  * encima se lea sin necesidad de velo negro.
  */
@@ -364,5 +377,25 @@ export const layout = {
   /** Alto de la barra de anuncios. El tab bar se levanta esto. */
   adBar: 56,
 } as const;
+
+/**
+ * Luz de escena de la señal (v5.0). No es sombra de color (IA-3): es luz que
+ * vive detrás del contenido. `opacidadMax` es el techo de la aurora; `paralaje`
+ * lo que se desplaza con el giroscopio; `resolucion` la escala a la que se
+ * pinta el shader (media resolución, sube a pantalla sin costo perceptible).
+ */
+export const aurora = { opacidadMax: 0.18, paralaje: 8, resolucion: 0.25 } as const;
+
+/** Grano fino sobre el fondo. Estático: se pinta una vez. */
+export const grano = { opacidad: 0.03 } as const;
+
+/** Alto de las tarjetas de Destacados: la héroe a todo el ancho y las compactas en dos columnas. */
+export const tarjeta = { heroe: 180, compacta: 150 } as const;
+
+/** Anillos de progreso: diámetro y grosor del trazo. */
+export const anillo = { hoy: 88, reto: 56, trazo: 8 } as const;
+
+/** Inclinación 3D de las tarjetas al mantener presionado. */
+export const inclinacion = { maxGrados: 6, perspectiva: 800 } as const;
 
 export type WorldId = keyof typeof color.world;

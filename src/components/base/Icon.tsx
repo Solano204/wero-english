@@ -25,6 +25,20 @@ import { StarIcon } from 'phosphor-react-native/src/icons/Star';
 import { StopIcon } from 'phosphor-react-native/src/icons/Stop';
 import { WarningIcon } from 'phosphor-react-native/src/icons/Warning';
 import { XIcon } from 'phosphor-react-native/src/icons/X';
+import { AnchorIcon } from 'phosphor-react-native/src/icons/Anchor';
+import { BookmarkIcon } from 'phosphor-react-native/src/icons/Bookmark';
+import { BookOpenIcon } from 'phosphor-react-native/src/icons/BookOpen';
+import { BooksIcon } from 'phosphor-react-native/src/icons/Books';
+import { CardsIcon } from 'phosphor-react-native/src/icons/Cards';
+import { EarIcon } from 'phosphor-react-native/src/icons/Ear';
+import { FlameIcon } from 'phosphor-react-native/src/icons/Flame';
+import { HeadphonesIcon } from 'phosphor-react-native/src/icons/Headphones';
+import { HexagonIcon } from 'phosphor-react-native/src/icons/Hexagon';
+import { MicrophoneIcon } from 'phosphor-react-native/src/icons/Microphone';
+import { PuzzlePieceIcon } from 'phosphor-react-native/src/icons/PuzzlePiece';
+import { ShuffleIcon } from 'phosphor-react-native/src/icons/Shuffle';
+import { TargetIcon } from 'phosphor-react-native/src/icons/Target';
+import { WaveformIcon } from 'phosphor-react-native/src/icons/Waveform';
 import { color } from '@/theme';
 
 /**
@@ -74,6 +88,20 @@ const ICONOS = {
   explore: { Componente: CompassIcon },
   practice: { Componente: BarbellIcon },
   progress: { Componente: ChartLineUpIcon },
+  anchor: { Componente: AnchorIcon },
+  bookmark: { Componente: BookmarkIcon },
+  book: { Componente: BookOpenIcon },
+  books: { Componente: BooksIcon },
+  cards: { Componente: CardsIcon },
+  ear: { Componente: EarIcon },
+  fire: { Componente: FlameIcon },
+  headphones: { Componente: HeadphonesIcon },
+  hexagon: { Componente: HexagonIcon },
+  microphone: { Componente: MicrophoneIcon },
+  puzzle: { Componente: PuzzlePieceIcon },
+  shuffle: { Componente: ShuffleIcon },
+  target: { Componente: TargetIcon },
+  waveform: { Componente: WaveformIcon },
 } satisfies Record<string, Definicion>;
 
 export type IconName = keyof typeof ICONOS;

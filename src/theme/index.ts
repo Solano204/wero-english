@@ -16,6 +16,13 @@ export {
   shadow,
   blur,
   depth,
+  senal,
+  reflejo,
+  aurora,
+  grano,
+  tarjeta,
+  anillo,
+  inclinacion,
 } from './tokens';
 export type { WorldId } from './tokens';
 export {
@@ -25,6 +32,7 @@ export {
   motionEscalon,
   motionEfecto,
   motionCiclo,
+  motionSenal,
   motionPresion,
   motionPulso,
   motionSacudida,
