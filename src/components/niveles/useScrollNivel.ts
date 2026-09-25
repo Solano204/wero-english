@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { offsetCentrado, type ItemLista, type Medidas } from '@/domain/niveles';
 import { motionDuration, motionEasing } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { ALTO_TRAMO } from './EncabezadoTramo';
 
 /** La primera vez por sesión el scroll al nivel actual es animado; las siguientes, directo. */
@@ -26,7 +27,6 @@ interface Opciones {
   indiceActual: number;
   /** Ya llegaron los datos y la lista está montada. */
   hayDatos: boolean;
-  reducido: boolean;
 }
 
 /**
@@ -38,7 +38,8 @@ interface Opciones {
  * para el botón «Ir al nivel». Tocar la lista corta cualquier animación. La animación
  * corre en el hilo de UI (`scrollTo` de Reanimated); con reducir movimiento es directo.
  */
-export function useScrollNivel({ medidas, indiceActual, hayDatos, reducido }: Opciones) {
+export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
+  const reducido = useMovimientoReducido();
   const listaRef = useAnimatedRef<Animated.FlatList<ItemLista>>();
   const scrollY = useSharedValue(0);
   const posicion = useSharedValue(0);

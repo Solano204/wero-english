@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
 import { color, motionDuration, motionEasing, radius } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { BordePunteado } from './BordePunteado';
 
 /** Cuánto se inclina el candado al abrirse (grados) y cuánto sube. */
@@ -26,11 +27,12 @@ interface Props {
  * simplemente cambia (quien la usa no monta esto).
  */
 export function DesbloqueoCelda({ lado }: Props) {
+  const reducido = useMovimientoReducido();
   const avance = useSharedValue(0);
 
   useEffect(() => {
-    avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
-  }, [avance]);
+    if (!reducido) avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
+  }, [reducido, avance]);
 
   // El punteado desaparece en el primer tercio; el sólido entra, se sostiene y se va.
   const punteado = useAnimatedStyle(() => ({ opacity: 1 - Math.min(1, avance.value * 3) }));
@@ -41,6 +43,9 @@ export function DesbloqueoCelda({ lado }: Props) {
     opacity: 1 - avance.value,
     transform: [{ rotate: `${GIRO * avance.value}deg` }, { translateY: -SUBE * avance.value }],
   }));
+
+  // Con reducir movimiento la celda solo cambia de estado: no hay punteado que se apague ni candado.
+  if (reducido) return null;
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">

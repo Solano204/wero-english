@@ -7,9 +7,11 @@ import { Button, Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa, ra
 import {
   ALTO_TRAMO,
   CONFIGURACION_VISTA,
+  EncabezadoNiveles,
   EncabezadoTramo,
   FilaNiveles,
   HUECO_CELDAS,
+  RETRASO_LOGRO,
   SIN_RECOMPENSA,
   useRecompensaNiveles,
   useScrollNivel,
@@ -37,7 +39,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
-import { aparecer, color, desaparecer, escalon, font, layout, motionDuration, radius, space } from '@/theme';
+import { aparecer, color, desaparecer, escalon, font, layout, motionDuration, motionLogro, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -192,17 +194,30 @@ export function NivelesScreen() {
   // donde te quedaste es una molestia diaria. Sale de las medidas reales de la lista.
   const reducido = useMovimientoReducido();
   const indiceActual = useMemo(() => indiceDeNivel(items, siguiente), [items, siguiente]);
-  const { listaRef, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual } = useScrollNivel({
+  const { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual } = useScrollNivel({
     medidas,
     indiceActual,
     hayDatos: Boolean(carga.datos),
-    reducido,
   });
 
   // Al volver con estrellas nuevas (o un nivel actual nuevo), la celebración espera a que el mapa
   // esté en su lugar.
   const recompensaHallada = useRecompensaNiveles(juego, estrellas, siguiente, Boolean(carga.datos));
   const recompensa = posicionada ? recompensaHallada : SIN_RECOMPENSA;
+
+  // El contador del encabezado arranca en la cifra de antes y rueda hasta la nueva cuando las
+  // estrellas nuevas terminan de encenderse.
+  const total = totalEstrellas(estrellas);
+  const [contadoId, setContadoId] = useState(0);
+  useEffect(() => {
+    if (!posicionada || recompensaHallada.ganadas === 0 || contadoId === recompensaHallada.id) return;
+    const t = setTimeout(
+      () => setContadoId(recompensaHallada.id),
+      RETRASO_LOGRO + recompensaHallada.ganadas * motionLogro.entreEstrellas
+    );
+    return () => clearTimeout(t);
+  }, [posicionada, recompensaHallada, contadoId]);
+  const cuenta = recompensaHallada.ganadas > 0 && contadoId !== recompensaHallada.id ? total - recompensaHallada.ganadas : total;
 
   // La entrada: los renglones que se montan mientras entra la pantalla aparecen escalonados, y las
   // estrellas del tramo actual se encienden en cascada. Pasado ese momento, lo que aparece al hacer
@@ -274,13 +289,13 @@ export function NivelesScreen() {
         ) : undefined
       }
     >
-      <View style={styles.top}>
-        <Header
-          onBack={() => nav.goBack()}
-          title={def.nombre}
-          subtitle={carga.datos ? `${totalEstrellas(estrellas)} de ${def.total * 3} estrellas` : undefined}
-        />
-      </View>
+      <EncabezadoNiveles
+        titulo={def.nombre}
+        estrellas={carga.datos ? cuenta : null}
+        maximo={def.total * 3}
+        scrollY={scrollY}
+        onBack={() => nav.goBack()}
+      />
 
       <Carga carga={carga} esqueleto={<View style={styles.esqueleto}><SkeletonLista filas={6} alto={68} /></View>}>
         {() => (
@@ -369,7 +384,6 @@ const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
 };
 
 const styles = StyleSheet.create({
-  top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   esqueleto: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
   lista: { flex: 1 },
   // Pegado abajo, sobre la lista y encima del footer (el footer queda fuera de este contenedor).

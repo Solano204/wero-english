@@ -77,7 +77,9 @@ La misma acción se llama igual en toda la app.
 | Frase que ya se sabe | dominada | aprendida |
 | Frase que se falla seguido | atorada (Se me atoran) | difícil |
 | Ver el resultado de una partida | Ver cómo me fue | Ver cómo te fue |
-| Ver un anuncio para abrir contenido | Ver anuncio y abrir, Ver anuncio y descargar | desbloquear |
+| Ver un anuncio para abrir contenido | Ver anuncio y abrir, Ver anuncio y descargar (en la celda de un nivel basta «Anuncio») | desbloquear |
+| Jugar el nivel que sigue | Jugar nivel N (con el número real) | Empezar nivel, Continuar |
+| Los tres tramos del mapa de niveles | «Niveles 1–70»; bloqueado: «Se abre al terminar el nivel N» | Fase, Mundo, Etapa |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 

@@ -406,6 +406,7 @@ const ESTUDIO_SENAL = new Set([
 const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
   r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
+  r.startsWith('src/components/niveles/') || r === 'src/screens/games/NivelesScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -420,6 +421,8 @@ const LOOPS_POR_PANTALLA = {
   Estudio: [],
   // Detalle: el héroe es la frase con su onda (mismo OndaVoz, movida por el audio); ningún bucle.
   Detalle: [],
+  // Niveles: el único bucle es la onda del anillo del nivel actual (`AnilloActual`, con `useReloj`), que no es un canvas de Skia.
+  Niveles: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
