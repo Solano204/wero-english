@@ -10,6 +10,7 @@ import { CaretRightIcon } from 'phosphor-react-native/src/icons/CaretRight';
 import { CaretUpIcon } from 'phosphor-react-native/src/icons/CaretUp';
 import { ChartLineUpIcon } from 'phosphor-react-native/src/icons/ChartLineUp';
 import { CheckIcon } from 'phosphor-react-native/src/icons/Check';
+import { ClockIcon } from 'phosphor-react-native/src/icons/Clock';
 import { CompassIcon } from 'phosphor-react-native/src/icons/Compass';
 import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
 import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMedium';
@@ -110,6 +111,8 @@ const ICONOS = {
   cube: { Componente: CubeIcon },
   game: { Componente: GameControllerIcon },
   link: { Componente: LinkIcon },
+  // El reloj de ronda de los juegos (Pares): el ícono dice que la barra es tiempo.
+  clock: { Componente: ClockIcon },
 } satisfies Record<string, Definicion>;
 
 export type IconName = keyof typeof ICONOS;

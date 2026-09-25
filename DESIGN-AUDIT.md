@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 233 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 237 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -127,10 +127,10 @@ Se quedan en 12–13 px, revisados a mano (19):
 - `src/screens/games/DulcesScreen.tsx:754` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/GameEndScreen.tsx:249` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/GameEndScreen.tsx:255` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/ParesScreen.tsx:465` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/ParesScreen.tsx:497` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
-Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/components/fx/Espectrograma.tsx` 3, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/detalle/EscalaRegistro.tsx` 2, `src/components/fx/HojaVeredicto.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/components/niveles/EncabezadoTramo.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/screens/games/NivelesScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/BloqueVoz.tsx` 1, `src/components/card/DiffFrase.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/card/StudyCardView.tsx` 1, `src/components/detalle/CuandoNoDecirla.tsx` 1, `src/components/detalle/FilaDondeVive.tsx` 1, `src/components/fx/ChipMarcador.tsx` 1, `src/components/niveles/CeldaNivel.tsx` 1, `src/components/niveles/EncabezadoNiveles.tsx` 1, `src/components/progreso/CuadroDato.tsx` 1, `src/components/progreso/FichaJuego.tsx` 1, `src/components/progreso/FilaMundo.tsx` 1, `src/components/progreso/PanelSenal.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/DetailScreen.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/ConsolaHoy.tsx` 1, `src/screens/extras/practicar/Destacados.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/extras/practicar/MetaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/ProgressScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
+Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/components/fx/Espectrograma.tsx` 3, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/detalle/EscalaRegistro.tsx` 2, `src/components/fx/HojaVeredicto.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/components/niveles/EncabezadoTramo.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/screens/games/NivelesScreen.tsx` 2, `src/screens/games/ParesScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/BloqueVoz.tsx` 1, `src/components/card/DiffFrase.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/card/StudyCardView.tsx` 1, `src/components/detalle/CuandoNoDecirla.tsx` 1, `src/components/detalle/FilaDondeVive.tsx` 1, `src/components/fx/ChipMarcador.tsx` 1, `src/components/niveles/CeldaNivel.tsx` 1, `src/components/niveles/EncabezadoNiveles.tsx` 1, `src/components/progreso/CuadroDato.tsx` 1, `src/components/progreso/FichaJuego.tsx` 1, `src/components/progreso/FilaMundo.tsx` 1, `src/components/progreso/PanelSenal.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/DetailScreen.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/ConsolaHoy.tsx` 1, `src/screens/extras/practicar/Destacados.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/extras/practicar/MetaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/ProgressScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
 
 **TIPO-2b · Line-height del cuerpo entre 1.4 y 1.6** (texto de 18 px o menos):
 - `src/screens/extras/GramaticaTemaScreen.tsx:345` — en: 18 px con lineHeight x1.35
@@ -223,7 +223,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
 | `games/NivelesScreen.tsx` | ✓ `:84` | ✗ | ✓ `:300` |
-| `games/ParesScreen.tsx` | ✓ `:111` | ✓ `:287` | ✓ `:263` |
+| `games/ParesScreen.tsx` | ✓ `:125` | ✓ `:301` | ✓ `:277` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
 | `utility/ProgressScreen.tsx` | ✓ `:71` | ✓ `:96` | ✓ `:113` |
@@ -255,13 +255,15 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
+- `src/components/juegos/pares/FichasJugadas.tsx:39` — key por índice
+- `src/components/juegos/pares/SegmentosPares.tsx:60` — key por índice
 - `src/components/niveles/EstrellasCelda.tsx:79` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:291` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:177` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:292` — key por índice
 
-Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 11, `games/ParesScreen.tsx` 9.
+Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 11, `games/ParesScreen.tsx` 10.
 
 ## d) Audio
 
@@ -290,7 +292,7 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 - (ninguno)
 
 **Excepciones revisadas a mano (no cuentan):**
-- `src/components/base/RoundTimer.tsx:76` — reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda
+- `src/components/base/RoundTimer.tsx:67` — reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda
 - `src/screens/games/CaidaScreen.tsx:250` — reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda
 
 **MOT-2 · Todo tocable pasa por `Presionable`** (escala 0.97 en `rapido`; con Reduce Motion baja la opacidad). Cuenta `Pressable`, `AnimatedPressable` y `Touchable*` sueltos:

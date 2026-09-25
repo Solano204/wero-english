@@ -145,6 +145,8 @@ export const motionSenal = {
   muestreo: 50,
   /** El anillo del nivel actual emite una onda cada 2.4 s (Niveles: el único bucle de la pantalla). */
   ondaNivel: 2400,
+  /** El reloj de Pares late suave en `accent` durante su último 20 %. */
+  latido: 1200,
 } as const;
 
 /**

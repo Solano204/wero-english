@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { conteo } from '@/utils/text';
-import { AppState, StyleSheet, Text, View } from 'react-native';
+import { AppState, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Icon, RoundTimer, Screen, Presionable } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, estiloResultado, useEfectoResultado } from '@/components/feedback';
+import { FichasJugadas } from '@/components/juegos/pares/FichasJugadas';
+import { distribuir, type Rect } from '@/components/juegos/pares/geometria';
+import { RelojRonda } from '@/components/juegos/pares/RelojRonda';
+import { SegmentosPares } from '@/components/juegos/pares/SegmentosPares';
 import { buildTablero, sonPareja } from '@/domain/pares';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -70,6 +74,16 @@ export function ParesScreen() {
     null
   );
   const [saltando, setSaltando] = useState(false);
+  // Lo que mide la zona del tablero: de ahí sale dónde cae cada ficha.
+  const [zona, setZona] = useState({ ancho: 0, alto: 0 });
+  const geo = useMemo(
+    () => distribuir(tablero?.fichas.length ?? 0, zona.ancho, zona.alto),
+    [tablero?.fichas.length, zona.ancho, zona.alto]
+  );
+  const alMedirZona = useCallback((e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setZona((z) => (z.ancho === width && z.alto === height ? z : { ancho: width, alto: height }));
+  }, []);
 
   const empezoEn = useRef(Date.now());
   // Las fichas solo traen entryId, no el Entry completo: hace falta este
@@ -304,15 +318,11 @@ export function ParesScreen() {
         <Header
           onBack={() => nav.goBack()}
           title={nivel ? `Nivel ${nivel}` : undefined}
-          right={
-            <Text style={styles.contador}>
-              {resueltas.length}/{tablero.totalPares}
-            </Text>
-          }
+          right={<SegmentosPares total={tablero.totalPares} resueltos={resueltas.length} />}
         />
         {nv ? (
           <View style={styles.reloj}>
-            <RoundTimer
+            <RelojRonda
               segundos={nv.segundosTablero}
               llave={nivel ?? 0}
               // Al resolver el tablero el reloj se congela: seguir
@@ -324,35 +334,50 @@ export function ParesScreen() {
             />
           </View>
         ) : null}
-
-        <Text style={styles.instruccion}>
-          Junta cada frase con lo que significa
-        </Text>
       </View>
 
-      <View style={styles.tablero} pointerEvents={enPausa ? 'none' : 'auto'}>
-        {tablero.fichas.map((f) => {
-          const fuera = resueltas.includes(f.entryId);
-          if (fuera) {
-            return <FichaResuelta key={f.id} texto={f.texto} />;
-          }
-          const activa = elegida?.id === f.id;
-          const falla = fallando.includes(f.id);
-          return (
-            <Presionable
-              key={f.id}
-              onPress={() => tocar(f)}
-              accessibilityRole="button"
-              accessibilityLabel={f.texto}
-              resultado={falla ? 'fallo' : null}
-              style={[styles.ficha, f.lado === 'en' ? styles.fichaEn : styles.fichaEs, activa && styles.fichaActiva, falla && styles.fichaFalla]}
-            >
-              <Text style={styles.fichaTexto} numberOfLines={3}>
-                {f.texto}
-              </Text>
-            </Presionable>
-          );
-        })}
+      <Text style={styles.instruccion}>Junta cada frase con lo que significa</Text>
+
+      <View style={styles.zona} onLayout={alMedirZona} pointerEvents={enPausa ? 'none' : 'auto'}>
+        {zona.ancho > 0 ? (
+          <ScrollView
+            scrollEnabled={geo.desborda}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.zonaContenido}
+          >
+            <View style={{ width: zona.ancho, height: geo.altoContenido }}>
+              {tablero.fichas.map((f, i) => {
+                const recta = geo.rectas[i];
+                if (!recta) return null;
+                if (resueltas.includes(f.entryId)) {
+                  return <FichaResuelta key={f.id} texto={f.texto} recta={recta} />;
+                }
+                const activa = elegida?.id === f.id;
+                const falla = fallando.includes(f.id);
+                return (
+                  <Presionable
+                    key={f.id}
+                    onPress={() => tocar(f)}
+                    accessibilityRole="button"
+                    accessibilityLabel={f.texto}
+                    resultado={falla ? 'fallo' : null}
+                    style={[
+                      styles.ficha,
+                      enRecta(recta),
+                      f.lado === 'en' ? styles.fichaEn : styles.fichaEs,
+                      activa && styles.fichaActiva,
+                      falla && styles.fichaFalla,
+                    ]}
+                  >
+                    <Text style={styles.fichaTexto} numberOfLines={3}>
+                      {f.texto}
+                    </Text>
+                  </Presionable>
+                );
+              })}
+            </View>
+          </ScrollView>
+        ) : null}
       </View>
 
       {enPausa && parPausado ? (
@@ -380,11 +405,14 @@ export function ParesScreen() {
       ) : null}
 
       <View style={styles.pie}>
-        <Text style={styles.jugadas}>
-          {restantes > 0
-            ? `Te quedan ${conteo(restantes, 'jugada')}`
-            : 'Se acabaron las jugadas, pero el tablero se queda'}
-        </Text>
+        <View style={styles.jugadasFila}>
+          {restantes > 0 ? <FichasJugadas total={tablero.jugadas} restantes={restantes} /> : null}
+          <Text style={[styles.jugadas, restantes > 0 && styles.jugadasAlLado]}>
+            {restantes > 0
+              ? `Te quedan ${conteo(restantes, 'jugada')}`
+              : 'Se acabaron las jugadas, pero el tablero se queda'}
+          </Text>
+        </View>
         <Button
           label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo me fue'}
           variant={restantes > 0 ? 'ghost' : 'primary'}
@@ -396,11 +424,16 @@ export function ParesScreen() {
   );
 }
 
+/** Coloca una ficha en la posición que le calculó `distribuir`. */
+function enRecta(r: Rect): ViewStyle {
+  return { position: 'absolute', left: r.x, top: r.y, width: r.width, height: r.height };
+}
+
 /**
  * Ficha de un par resuelto: pulso con el color de acierto y, pasado `base`,
  * se apaga. Se queda como hueco invisible para que el tablero no se mueva.
  */
-function FichaResuelta({ texto }: { texto: string }) {
+function FichaResuelta({ texto, recta }: { texto: string; recta: Rect }) {
   const { estilo, acierto } = useEfectoResultado();
   const opacidad = useSharedValue(1);
 
@@ -415,7 +448,7 @@ function FichaResuelta({ texto }: { texto: string }) {
   const apagado = useAnimatedStyle(() => ({ opacity: opacidad.value }));
 
   return (
-    <Animated.View style={[styles.ficha, estiloResultado.acierto, apagado, estilo]}>
+    <Animated.View style={[styles.ficha, enRecta(recta), estiloResultado.acierto, apagado, estilo]}>
       <Text style={styles.fichaTexto} numberOfLines={3}>
         {texto}
       </Text>
@@ -425,7 +458,6 @@ function FichaResuelta({ texto }: { texto: string }) {
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  contador: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   reloj: { marginTop: space.sm, marginBottom: space.md },
   overlay: {
     position: 'absolute',
@@ -470,19 +502,12 @@ const styles = StyleSheet.create({
     fontFamily: font.family.body,
     fontSize: font.size.sm,
     color: color.textMuted,
+    paddingHorizontal: space.lg,
     marginBottom: space.md,
   },
-  tablero: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: space.sm,
-    paddingHorizontal: space.lg,
-    alignContent: 'flex-start',
-  },
+  zona: { flex: 1, marginHorizontal: space.lg },
+  zonaContenido: { flexGrow: 1, justifyContent: 'center' },
   ficha: {
-    width: '47.5%',
-    minHeight: 62,
     borderRadius: radius.md,
     borderWidth: 1,
     padding: space.sm,
@@ -517,12 +542,15 @@ const styles = StyleSheet.create({
     paddingTop: space.md,
     gap: space.sm,
   },
+  jugadasFila: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   jugadas: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
-    color: color.textFaint,
+    color: color.textMuted,
     textAlign: 'center',
+    flex: 1,
   },
+  jugadasAlLado: { textAlign: 'right' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });
