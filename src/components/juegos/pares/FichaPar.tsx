@@ -14,7 +14,7 @@ const ELEVACION = 4;
 interface Props {
   ficha: ParFicha;
   recta: Rect;
-  /** Es la primera ficha de la jugada: sube, gana sombra y borde `accent`. */
+  /** Es la primera ficha de la jugada (o una de las dos que se están uniendo): sube, gana sombra y borde `accent`. */
   elevada: boolean;
   /** Esta ficha fue parte de una jugada fallida: ámbar y ícono, nunca rojo. */
   falla: boolean;
@@ -32,15 +32,20 @@ interface Props {
 export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress }: Props) {
   const reducido = useMovimientoReducido();
   const alzada = useSharedValue(elevada ? 1 : 0);
+  const marcada = useSharedValue(elevada && !falla ? 1 : 0);
   const esEn = ficha.lado === 'en';
 
   useEffect(() => {
-    const meta = elevada ? 1 : 0;
-    alzada.value = reducido ? meta : withTiming(meta, { duration: motionDuration.rapido, easing: motionEasing.entrar });
-  }, [elevada, reducido, alzada]);
+    const suave = { duration: motionDuration.rapido, easing: motionEasing.entrar };
+    const sube = elevada ? 1 : 0;
+    // En un fallo la ficha queda ámbar: el anillo `accent` se va.
+    const borde = elevada && !falla ? 1 : 0;
+    alzada.value = reducido ? sube : withTiming(sube, suave);
+    marcada.value = reducido ? borde : withTiming(borde, suave);
+  }, [elevada, falla, reducido, alzada, marcada]);
 
   const alzar = useAnimatedStyle(() => ({ transform: [{ translateY: -ELEVACION * alzada.value }] }));
-  const luz = useAnimatedStyle(() => ({ opacity: alzada.value }));
+  const borde = useAnimatedStyle(() => ({ opacity: marcada.value }));
 
   return (
     <Animated.View
@@ -50,7 +55,6 @@ export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress }: Prop
         alzar,
       ]}
     >
-      <Animated.View pointerEvents="none" style={[styles.sombra, luz]} />
       <Presionable
         onPress={onPress}
         accessibilityRole="button"
@@ -58,7 +62,8 @@ export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress }: Prop
         accessibilityLanguage={esEn ? 'en-US' : 'es-MX'}
         accessibilityState={{ selected: elevada }}
         resultado={sacude ? 'fallo' : null}
-        style={[styles.ficha, esEn ? styles.fichaEn : styles.fichaEs, falla && styles.fichaFalla]}
+        // La sombra va en la propia ficha: en Android una capa con elevación se dibuja sobre sus hermanas.
+        style={[styles.ficha, esEn ? styles.fichaEn : styles.fichaEs, falla && styles.fichaFalla, elevada && shadow.card]}
       >
         <Text style={styles.idioma}>{esEn ? 'EN' : 'ES'}</Text>
         {falla ? (
@@ -74,16 +79,16 @@ export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress }: Prop
         >
           {ficha.texto}
         </Text>
+        <Animated.View pointerEvents="none" style={[styles.anillo, borde]} />
       </Presionable>
-      <Animated.View pointerEvents="none" style={[styles.anillo, luz]} />
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   lugar: { position: 'absolute' },
-  sombra: { ...StyleSheet.absoluteFill, borderRadius: radius.md, backgroundColor: color.surfaceAlt, ...shadow.card },
-  anillo: { ...StyleSheet.absoluteFill, borderRadius: radius.md, borderWidth: 2, borderColor: color.accent },
+  // Cubre también el borde de la ficha: el filo del inglés queda debajo del anillo.
+  anillo: { position: 'absolute', top: -1, left: -1, right: -1, bottom: -1, borderRadius: radius.md, borderWidth: 2, borderColor: color.accent },
   ficha: {
     width: '100%',
     height: '100%',
@@ -97,7 +102,7 @@ const styles = StyleSheet.create({
   },
   fichaEn: { backgroundColor: color.surfaceAlt, borderColor: color.filo },
   fichaEs: { backgroundColor: color.surface, borderColor: 'transparent' },
-  fichaFalla: { backgroundColor: color.wrongSoft, borderColor: color.wrong },
+  fichaFalla: { backgroundColor: color.wrongFondo, borderColor: color.wrong },
   idioma: {
     position: 'absolute',
     top: space.xs,

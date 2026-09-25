@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, estiloResultado, useEfectoResultado } from '@/components/feedback';
+import { CableSenal, type ParIndices } from '@/components/juegos/pares/CableSenal';
 import { FichaPar } from '@/components/juegos/pares/FichaPar';
 import { FichasJugadas } from '@/components/juegos/pares/FichasJugadas';
 import { distribuir, type Rect } from '@/components/juegos/pares/geometria';
@@ -33,6 +34,8 @@ type Ruta = RouteProp<RootStackParams, 'Pares'>;
  * Tiene que alcanzar para efecto + inglés + español.
  */
 const PAUSA_MAXIMA_MS = 10000;
+/** Tope de la unión de un par (el cable tarda unos 370 ms): pasado esto se suelta el tablero igual. */
+const UNION_MAXIMA_MS = 1500;
 /** Bloqueo de "Saltar" contra doble toque. */
 const SALTAR_DEBOUNCE_MS = 400;
 
@@ -85,6 +88,22 @@ export function ParesScreen() {
     const { width, height } = e.nativeEvent.layout;
     setZona((z) => (z.ancho === width && z.alto === height ? z : { ancho: width, alto: height }));
   }, []);
+  // Las dos fichas de un acierto siguen en el tablero mientras el cable las une.
+  const [union, setUnion] = useState<ParIndices | null>(null);
+  const alTerminarUnion = useCallback(() => setUnion(null), []);
+  // Si el aviso del cable no llega (app en segundo plano a media unión), el tablero no se queda bloqueado.
+  useEffect(() => {
+    if (!union) return undefined;
+    const t = setTimeout(() => setUnion(null), UNION_MAXIMA_MS);
+    return () => clearTimeout(t);
+  }, [union]);
+  const libres = useMemo(() => tablero?.fichas.map((f) => !resueltas.includes(f.entryId)) ?? [], [tablero, resueltas]);
+  const fallo = useMemo(() => {
+    if (!tablero || fallando.length !== 2) return null;
+    const a = tablero.fichas.findIndex((f) => f.id === fallando[0]);
+    const b = tablero.fichas.findIndex((f) => f.id === fallando[1]);
+    return a >= 0 && b >= 0 ? { a, b } : null;
+  }, [tablero, fallando]);
 
   const empezoEn = useRef(Date.now());
   // Las fichas solo traen entryId, no el Entry completo: hace falta este
@@ -185,7 +204,7 @@ export function ParesScreen() {
 
   const tocar = useCallback(
     (f: ParFicha) => {
-      if (!tablero || fallando.length > 0 || enPausa) return;
+      if (!tablero || fallando.length > 0 || enPausa || union) return;
       if (resueltas.includes(f.entryId)) return;
 
       if (!elegida) {
@@ -204,8 +223,12 @@ export function ParesScreen() {
 
       if (sonPareja(elegida, f)) {
         haptics.success();
-      reaccion.celebra();
+        reaccion.celebra();
         setResueltas((prev) => [...prev, f.entryId]);
+        setUnion({
+          a: tablero.fichas.findIndex((x) => x.id === elegida.id),
+          b: tablero.fichas.findIndex((x) => x.id === f.id),
+        });
         setElegida(null);
         const entry = entradas.current.get(f.entryId);
         // Siempre se oyen las dos frases al acertar un par, sin mirar
@@ -250,8 +273,19 @@ export function ParesScreen() {
         setElegida(null);
       }, 520);
     },
-    [tablero, elegida, resueltas, fallando, enPausa, user, pausarConVoz]
+    [tablero, elegida, resueltas, fallando, enPausa, union, user, pausarConVoz]
   );
+
+  // El cable arrastra: soltar sobre una ficha es el segundo toque, y una ficha que no tenía
+  // par elegida al arrancar el arrastre es el primero.
+  const tocarIndice = useCallback(
+    (i: number) => {
+      const f = tablero?.fichas[i];
+      if (f) tocar(f);
+    },
+    [tablero, tocar]
+  );
+  const cancelarArrastre = useCallback(() => setElegida(null), []);
 
   const terminar = useCallback(() => {
     audio.stop();
@@ -346,11 +380,26 @@ export function ParesScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.zonaContenido}
           >
-            <View style={{ width: zona.ancho, height: geo.altoContenido }}>
+            <CableSenal
+              ancho={zona.ancho}
+              alto={geo.altoContenido}
+              rectas={geo.rectas}
+              ancla={elegida ? tablero.fichas.findIndex((f) => f.id === elegida.id) : -1}
+              libres={libres}
+              bloqueado={enPausa || fallando.length > 0 || union !== null}
+              arrastrable={!geo.desborda}
+              union={union}
+              fallo={fallo}
+              onIniciar={tocarIndice}
+              onSoltar={tocarIndice}
+              onCancelar={cancelarArrastre}
+              onUnionLista={alTerminarUnion}
+            >
               {tablero.fichas.map((f, i) => {
                 const recta = geo.rectas[i];
                 if (!recta) return null;
-                if (resueltas.includes(f.entryId)) {
+                const uniendo = union !== null && (union.a === i || union.b === i);
+                if (resueltas.includes(f.entryId) && !uniendo) {
                   return <FichaResuelta key={f.id} texto={f.texto} recta={recta} />;
                 }
                 return (
@@ -358,7 +407,7 @@ export function ParesScreen() {
                     key={f.id}
                     ficha={f}
                     recta={recta}
-                    elevada={elegida?.id === f.id}
+                    elevada={uniendo || elegida?.id === f.id}
                     falla={fallando.includes(f.id)}
                     // La segunda ficha de la jugada es la que se sacude.
                     sacude={fallando[1] === f.id}
@@ -366,12 +415,12 @@ export function ParesScreen() {
                   />
                 );
               })}
-            </View>
+            </CableSenal>
           </ScrollView>
         ) : null}
       </View>
 
-      {enPausa && parPausado ? (
+      {enPausa && parPausado && !union ? (
         <Animated.View
           entering={aparecer()}
           style={styles.overlay}

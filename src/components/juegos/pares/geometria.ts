@@ -67,6 +67,7 @@ export function distribuir(fichas: number, ancho: number, disponible: number, hu
 
 /** El índice de la ficha bajo el punto (x, y), o -1 si el dedo está en un hueco o fuera. */
 export function fichaEn(rectas: readonly Rect[], x: number, y: number): number {
+  'worklet';
   for (let i = 0; i < rectas.length; i++) {
     const r = rectas[i];
     if (r && x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height) return i;
@@ -76,5 +77,6 @@ export function fichaEn(rectas: readonly Rect[], x: number, y: number): number {
 
 /** El centro de una ficha: de ahí sale y a ahí llega el cable. */
 export function centroDe(r: Rect): { x: number; y: number } {
+  'worklet';
   return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
 }
