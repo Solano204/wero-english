@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
 import { Presionable } from '@/components/base/Presionable';
-import { color, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
+import { color, font, motionDuration, motionEasing, motionSpring, radius, shadow, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { ParFicha } from '@/types';
 import type { Rect } from './geometria';
 
 /** Cuánto sube la primera ficha elegida. */
 const ELEVACION = 4;
+/** De qué altura cae cada ficha al repartirse el tablero. */
+const CAIDA = 40;
 
 interface Props {
   ficha: ParFicha;
@@ -21,6 +23,8 @@ interface Props {
   /** Además de fallar, es la segunda: la que hace la sacudida estándar. */
   sacude: boolean;
   onPress: () => void;
+  /** Al repartirse el tablero la ficha cae con este retraso (ms) y un rebote corto; sin él aparece ya puesta. */
+  entra?: number;
 }
 
 /**
@@ -29,11 +33,27 @@ interface Props {
  * Instrument Sans. Cada una lleva su idioma escrito (`EN` / `ES`) y lo anuncia el lector
  * de pantalla, así el par no depende solo de la forma ni del color.
  */
-export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress }: Props) {
+export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress, entra }: Props) {
   const reducido = useMovimientoReducido();
   const alzada = useSharedValue(elevada ? 1 : 0);
   const marcada = useSharedValue(elevada && !falla ? 1 : 0);
+  const caida = useSharedValue(entra === undefined ? 0 : 1);
+  const aparece = useSharedValue(entra === undefined ? 1 : 0);
   const esEn = ficha.lado === 'en';
+
+  // La entrada es de la primera vez que se monta: un `entra` que cambie después no vuelve a dejarla caer.
+  useEffect(() => {
+    if (entra === undefined) return;
+    const fundido = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+    if (reducido) {
+      caida.value = 0;
+      aparece.value = fundido;
+      return;
+    }
+    aparece.value = withDelay(entra, fundido);
+    caida.value = withDelay(entra, withSpring(0, motionSpring.liquido));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const suave = { duration: motionDuration.rapido, easing: motionEasing.entrar };
@@ -44,7 +64,10 @@ export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress }: Prop
     marcada.value = reducido ? borde : withTiming(borde, suave);
   }, [elevada, falla, reducido, alzada, marcada]);
 
-  const alzar = useAnimatedStyle(() => ({ transform: [{ translateY: -ELEVACION * alzada.value }] }));
+  const alzar = useAnimatedStyle(() => ({
+    opacity: aparece.value,
+    transform: [{ translateY: -ELEVACION * alzada.value - CAIDA * caida.value }],
+  }));
   const borde = useAnimatedStyle(() => ({ opacity: marcada.value }));
 
   return (

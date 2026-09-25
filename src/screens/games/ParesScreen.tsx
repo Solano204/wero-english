@@ -23,6 +23,7 @@ import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, escalon, font, motionDuration, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -88,6 +89,10 @@ export function ParesScreen() {
   // las dos frases. La tarjeta de fusión es lo que se ve mientras dura.
   const [enPausa, setEnPausa] = useState(false);
   const [saltando, setSaltando] = useState(false);
+  const reducido = useMovimientoReducido();
+  // El tablero se reparte con las fichas cayendo una tras otra; el reloj y los toques esperan a que caiga la última.
+  const [repartidoDe, setRepartidoDe] = useState<ParesTablero | null>(null);
+  const repartido = tablero !== null && repartidoDe === tablero;
   // Lo que mide la zona del tablero: de ahí sale dónde cae cada ficha.
   const [zona, setZona] = useState({ x: 0, y: 0, ancho: 0, alto: 0 });
   const geo = useMemo(
@@ -98,6 +103,13 @@ export function ParesScreen() {
     const { x, y, width, height } = e.nativeEvent.layout;
     setZona((z) => (z.x === x && z.y === y && z.ancho === width && z.alto === height ? z : { x, y, ancho: width, alto: height }));
   }, []);
+  const fichasTotal = tablero?.fichas.length ?? 0;
+  useEffect(() => {
+    if (!tablero || zona.ancho === 0 || repartidoDe === tablero) return undefined;
+    const demora = reducido ? motionDuration.rapido : escalon(fichasTotal - 1) + motionDuration.escena;
+    const t = setTimeout(() => setRepartidoDe(tablero), demora);
+    return () => clearTimeout(t);
+  }, [tablero, zona.ancho, repartidoDe, fichasTotal, reducido]);
   // La capa donde se funden las fichas mide lo que toda la pantalla; `segmentos` es la esquina de la fila de progreso en esa capa.
   const capaRef = useRef<View>(null);
   const segmentosRef = useRef<View>(null);
@@ -236,7 +248,7 @@ export function ParesScreen() {
 
   const tocar = useCallback(
     (f: ParFicha) => {
-      if (!tablero || fallando.length > 0 || enPausa || union || fusion) return;
+      if (!tablero || !repartido || fallando.length > 0 || enPausa || union || fusion) return;
       if (resueltas.includes(f.entryId)) return;
 
       if (!elegida) {
@@ -305,7 +317,7 @@ export function ParesScreen() {
         setElegida(null);
       }, 520);
     },
-    [tablero, elegida, resueltas, fallando, enPausa, union, fusion, user, pausarConVoz]
+    [tablero, repartido, elegida, resueltas, fallando, enPausa, union, fusion, user, pausarConVoz]
   );
 
   // El cable arrastra: soltar sobre una ficha es el segundo toque, y una ficha que no tenía
@@ -418,8 +430,9 @@ export function ParesScreen() {
                 // Al resolver el tablero el reloj se congela: seguir
                 // contando mientras corre la animación de salida haría
                 // perder partidas ya ganadas. También se congela mientras
-                // se oye la voz de un par recién acertado.
-                pausado={enPausa || resueltas.length >= (tablero?.totalPares ?? 0)}
+                // se oye la voz de un par recién acertado. Y no arranca hasta
+                // que cae la última ficha: la duración del nivel no cambia.
+                pausado={!repartido || enPausa || resueltas.length >= (tablero?.totalPares ?? 0)}
                 onFin={terminar}
               />
             </View>
@@ -443,7 +456,7 @@ export function ParesScreen() {
                 rectas={geo.rectas}
                 ancla={elegida ? tablero.fichas.findIndex((f) => f.id === elegida.id) : -1}
                 libres={libres}
-                bloqueado={enPausa || fallando.length > 0 || union !== null || fusion !== null}
+                bloqueado={!repartido || enPausa || fallando.length > 0 || union !== null || fusion !== null}
                 arrastrable={!geo.desborda}
                 union={union}
                 fallo={fallo}
@@ -467,6 +480,7 @@ export function ParesScreen() {
                       // La segunda ficha de la jugada es la que se sacude.
                       sacude={fallando[1] === f.id}
                       onPress={() => tocar(f)}
+                      entra={escalon(i)}
                     />
                   );
                 })}

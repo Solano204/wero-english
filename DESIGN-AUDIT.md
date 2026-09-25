@@ -223,7 +223,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
 | `games/NivelesScreen.tsx` | ✓ `:84` | ✗ | ✓ `:300` |
-| `games/ParesScreen.tsx` | ✓ `:181` | ✓ `:372` | ✓ `:348` |
+| `games/ParesScreen.tsx` | ✓ `:193` | ✓ `:384` | ✓ `:360` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
 | `utility/ProgressScreen.tsx` | ✓ `:71` | ✓ `:96` | ✓ `:113` |
@@ -263,7 +263,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:292` — key por índice
 
-Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 11, `games/ParesScreen.tsx` 13.
+Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 11, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 11, `games/ParesScreen.tsx` 14.
 
 ## d) Audio
 
