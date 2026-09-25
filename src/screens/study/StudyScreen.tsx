@@ -58,8 +58,9 @@ export function StudyScreen() {
   // Al terminar una sesión completa con vencidas pendientes se ofrece seguir.
   const [cierre, setCierre] = useState(false);
 
-  // Cara y cubitos al responder.
+  // Cubitos al responder. Salen de la opción acertada; sin opción (armar, escribir) del centro.
   const reaccion = useReaccion();
+  const [origenTrozos, setOrigenTrozos] = useState<{ x: number; y: number } | null>(null);
 
   // Misma pista que el resto de la app, pero más baja: aquí se estudia.
   useMusicaPantalla('app', { volumenFactor: 0.4 });
@@ -145,6 +146,7 @@ export function StudyScreen() {
 
   const handleContinue = useCallback(() => {
     setChosen(null);
+    setOrigenTrozos(null);
     next();
   }, [next]);
 
@@ -195,7 +197,7 @@ export function StudyScreen() {
 
   return (
     <Screen padded={false}>
-      <Trozos disparo={reaccion.trozos} tinte={color.accent} y="46%" />
+      <Trozos disparo={reaccion.trozos} tinte={color.accent} y="46%" origen={origenTrozos ?? undefined} />
       <View style={styles.top}>
         {/*
           * Fila de arriba: atrás a la izquierda, "Saltar" a la derecha y en
@@ -225,6 +227,7 @@ export function StudyScreen() {
             disabled={avanzando}
             onPress={() => {
               setChosen(null);
+              setOrigenTrozos(null);
               skip();
             }}
           />
@@ -249,6 +252,7 @@ export function StudyScreen() {
           autoAudio={settings.autoAudio}
           onChoose={setChosen}
           onAnswer={handleAnswer}
+          onOrigenAcierto={setOrigenTrozos}
         />
       </View>
 

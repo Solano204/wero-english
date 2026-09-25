@@ -38,11 +38,13 @@ export {
   motionPresion,
   motionPulso,
   motionSacudida,
+  motionVeredicto,
   escalon,
   aparecer,
   aparecerSubiendo,
   aparecerZoom,
   desaparecer,
+  entrarRebote,
   reacomodar,
 } from './motion';
 export { text } from './typography';

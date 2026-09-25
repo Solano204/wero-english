@@ -54,6 +54,13 @@ export const motionSpring = {
   aguja: { duration: 550, dampingRatio: 0.55 } satisfies WithSpringConfig,
 };
 
+/**
+ * El veredicto de Estudio dentro de la pieza. Las palabras de una frase armada se
+ * iluminan una tras otra (`palabra` ms entre cada una, hasta `maxPalabras`: una
+ * frase larga no tarda más de ~600 ms) y las letras de un dictado, igual.
+ */
+export const motionVeredicto = { palabra: 60, maxPalabras: 10 } as const;
+
 /** Retraso entre elementos de una lista que entra: el mismo en todas. */
 export const motionEscalon = {
   ms: 40,
@@ -151,6 +158,13 @@ export const aparecer = (retraso = 0) =>
 /** Aparecer subiendo: secciones y transiciones. */
 export const aparecerSubiendo = (retraso = 0) =>
   FadeInDown.delay(retraso).duration(motionDuration.lento).easing(motionEasing.entrar);
+
+/** Una pieza que salta a su lugar con el resorte de `rebote` (una ficha que entra a la frase que se arma). */
+export const entrarRebote = () =>
+  ZoomIn.springify()
+    .damping(motionSpring.rebote.damping)
+    .stiffness(motionSpring.rebote.stiffness)
+    .mass(motionSpring.rebote.mass);
 
 /** Aparecer creciendo: fichas y tarjetas de resultado. */
 export const aparecerZoom = (retraso = 0) =>

@@ -1,13 +1,45 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { color, depth, font, layout, radius, shadow, space, reacomodar } from '@/theme';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
+import {
+  color,
+  depth,
+  entrarRebote,
+  font,
+  layout,
+  motionDuration,
+  motionEasing,
+  motionVeredicto,
+  radius,
+  shadow,
+  space,
+  reacomodar,
+} from '@/theme';
 import * as haptics from '@/services/haptics';
 import { Presionable } from '@/components/base';
+import { normalizeAnswer } from '@/utils/text';
+import { useMovimientoReducido } from '@/utils';
 
 /** Reflow de las fichas armadas al agregar/quitar una. Respeta
  *  useMovimientoReducido por su cuenta: los presets de layout de
  *  Reanimated ya usan ReduceMotion.System por defecto. */
 const fichaLayout = reacomodar();
+/** Una ficha que entra a la frase salta a su lugar con el resorte de `rebote`. */
+const fichaEntra = entrarRebote();
+
+// Copias locales: un worklet captura estos textos, no el objeto de tema entero.
+const ACENTO = color.accent;
+const ACENTO_SUAVE = color.accentSoft;
+const OK = color.correct;
+const FONDO_OK = color.correctFondo;
+const MAL = color.wrong;
+const FONDO_MAL = color.wrongFondo;
 
 interface Props {
   /** Todas las fichas: las de la frase más los señuelos, ya barajadas. */
@@ -15,8 +47,68 @@ interface Props {
   locked: boolean;
   /** Lo que el usuario armó cuando ya se calificó, para pintar el fallo. */
   onSubmit: (armado: string) => void;
+  /** La frase correcta: al calificar, cada ficha puesta se compara con la palabra que le tocaba. */
+  respuesta: string;
   /** Teléfono chico: huecos de 8 en el banco. */
   compacto?: boolean;
+}
+
+type VeredictoFicha = 'ok' | 'mal';
+
+interface FichaPuestaProps {
+  texto: string;
+  pos: number;
+  veredicto: VeredictoFicha | null;
+  onQuitar: () => void;
+}
+
+/**
+ * Una ficha ya puesta en la frase. Al calificar se ilumina palabra por palabra, de
+ * izquierda a derecha: en verde si era la palabra que tocaba en ese lugar, en ámbar
+ * (y subrayada, para no depender del color) si no.
+ */
+function FichaPuesta({ texto, pos, veredicto, onQuitar }: FichaPuestaProps) {
+  const reducido = useMovimientoReducido();
+  const luz = useSharedValue(0);
+
+  useEffect(() => {
+    if (!veredicto) {
+      luz.value = 0;
+      return;
+    }
+    const retraso = Math.min(pos, motionVeredicto.maxPalabras) * motionVeredicto.palabra;
+    luz.value = reducido
+      ? 1
+      : withDelay(retraso, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+  }, [veredicto, pos, reducido, luz]);
+
+  const fondo = veredicto === 'mal' ? FONDO_MAL : FONDO_OK;
+  const borde = veredicto === 'mal' ? MAL : OK;
+  const estilo = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(luz.value, [0, 1], [ACENTO_SUAVE, fondo]),
+    borderColor: interpolateColor(luz.value, [0, 1], [ACENTO, borde]),
+  }));
+  const tinta = useAnimatedStyle(() => ({ color: interpolateColor(luz.value, [0, 1], [ACENTO, borde]) }));
+
+  return (
+    <Presionable
+      layout={fichaLayout}
+      entering={fichaEntra}
+      onPress={onQuitar}
+      disabled={veredicto !== null}
+      accessibilityRole="button"
+      accessibilityLabel={
+        veredicto === null ? `Quitar ${texto}` : `${texto}. ${veredicto === 'ok' ? 'Correcta' : 'No era esta'}`
+      }
+      accessibilityHint={veredicto === null ? 'La quita de la frase que estás armando' : undefined}
+    >
+      <Animated.View style={[styles.ficha, styles.fichaPuesta, estilo]}>
+        <Animated.Text style={[styles.fichaTextoPuesta, veredicto === 'mal' && styles.subrayada, tinta]}>
+          {texto}
+        </Animated.Text>
+      </Animated.View>
+    </Presionable>
+  );
 }
 
 /**
@@ -31,7 +123,7 @@ interface Props {
  * parte del ejercicio, y quitarlas al acertar le confirmaría la
  * respuesta antes de tiempo.
  */
-export function TileBuilder({ tiles, locked, onSubmit, compacto = false }: Props) {
+export function TileBuilder({ tiles, locked, onSubmit, respuesta, compacto = false }: Props) {
   // Se guardan índices, no textos: una frase puede repetir palabra
   // ("the ... the") y con textos se apagarían las dos de un toque.
   const [usados, setUsados] = useState<number[]>([]);
@@ -40,6 +132,12 @@ export function TileBuilder({ tiles, locked, onSubmit, compacto = false }: Props
     () => usados.map((i) => tiles[i] ?? '').join(' '),
     [usados, tiles]
   );
+
+  // Al calificar, cada ficha puesta contra la palabra que le tocaba en ese lugar.
+  const veredictos = useMemo<VeredictoFicha[]>(() => {
+    const esperadas = respuesta.split(/\s+/).filter(Boolean).map(normalizeAnswer);
+    return usados.map((i, pos) => (normalizeAnswer(tiles[i] ?? '') === esperadas[pos] ? 'ok' : 'mal'));
+  }, [respuesta, usados, tiles]);
 
   const tomar = useCallback(
     (i: number) => {
@@ -72,19 +170,16 @@ export function TileBuilder({ tiles, locked, onSubmit, compacto = false }: Props
         {usados.length === 0 ? (
           <Text style={styles.placeholder}>Toca las palabras en orden</Text>
         ) : (
+          // La llave es la ficha, no su lugar: al quitar una del medio las demás no se
+          // remontan y solo salta la que entra.
           usados.map((i, pos) => (
-            <Presionable
-              key={`puesta-${pos}-${i}`}
-              layout={fichaLayout}
-              onPress={() => quitar(pos)}
-              disabled={locked}
-              accessibilityRole="button"
-              accessibilityLabel={`Quitar ${tiles[i] ?? ''}`}
-              accessibilityHint="La quita de la frase que estás armando"
-              style={[styles.ficha, styles.fichaPuesta]}
-            >
-              <Text style={styles.fichaTextoPuesta}>{tiles[i]}</Text>
-            </Presionable>
+            <FichaPuesta
+              key={`puesta-${i}`}
+              texto={tiles[i] ?? ''}
+              pos={pos}
+              veredicto={locked ? (veredictos[pos] ?? null) : null}
+              onQuitar={() => quitar(pos)}
+            />
           ))
         )}
       </View>
@@ -196,6 +291,7 @@ const styles = StyleSheet.create({
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,
   },
+  subrayada: { textDecorationLine: 'underline' },
   textoGastado: { color: 'transparent' },
   acciones: {
     flexDirection: 'row',

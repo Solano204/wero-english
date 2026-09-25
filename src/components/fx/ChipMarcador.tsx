@@ -27,7 +27,7 @@ export function ChipMarcador({ valor, sufijo, icono, tinte, etiqueta }: Props) {
     <Animated.View
       entering={reducido ? undefined : aparecerZoom()}
       exiting={reducido ? undefined : desaparecer(motionDuration.rapido)}
-      style={styles.chip}
+      style={styles.pastilla}
       accessible
       accessibilityRole="text"
       accessibilityLabel={etiqueta}
@@ -40,12 +40,13 @@ export function ChipMarcador({ valor, sufijo, icono, tinte, etiqueta }: Props) {
 }
 
 const styles = StyleSheet.create({
-  chip: {
+  // No se toca: es solo lectura, por eso mide menos de 48 dp.
+  pastilla: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.xs,
     height: 28,
-    paddingHorizontal: space.sm + 2,
+    paddingHorizontal: space.sm,
     borderRadius: radius.pill,
     backgroundColor: color.surface,
     borderWidth: StyleSheet.hairlineWidth,

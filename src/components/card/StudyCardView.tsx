@@ -2,18 +2,23 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
+import { DiffFrase } from './DiffFrase';
+import { FraseHueco } from './FraseHueco';
 import { OptionButton, type OptionState } from './OptionButton';
-import { PhraseBlock } from './PhraseBlock';
+import { PalabraVoladora } from './PalabraVoladora';
 import { SceneImage } from './SceneImage';
 import { TileBuilder } from './TileBuilder';
 import { Button, RiskBadge } from '@/components/base';
 import { answerMode, instructionFor, promptFor } from '@/domain/exercise';
 import { isCloseEnough } from '@/utils/text';
 import { color, font, motionDuration, radius, space, aparecerSubiendo, desaparecer } from '@/theme';
+import type { RellenoHueco } from './FraseHueco';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import type { StudyCard } from '@/types';
 import { useEfectoResultado } from '@/components/feedback';
+import { useDesfaseVentana, type Rect } from '@/components/fx';
+import { useMovimientoReducido } from '@/utils';
 
 /**
  * Entrada de la tarjeta: cae con un resorte suave, sin sobrepaso (no es
@@ -40,6 +45,8 @@ interface Props {
   autoAudio: boolean;
   onAnswer: (correct: boolean, elapsedMs: number, usedHint: boolean) => void;
   onChoose: (value: string) => void;
+  /** Desde dónde (ventana, px) salen los cubitos si aciertas tocando una opción. */
+  onOrigenAcierto?: (punto: { x: number; y: number }) => void;
 }
 
 /**
@@ -56,6 +63,7 @@ export function StudyCardView({
   autoAudio,
   onAnswer,
   onChoose,
+  onOrigenAcierto,
 }: Props) {
   const startedAt = useRef(Date.now());
   const compacto = useWindowDimensions().height < ALTURA_COMPACTA;
@@ -73,9 +81,34 @@ export function StudyCardView({
   // Con opciones cada `OptionButton` hace su efecto; al armar o escribir la
   // respuesta, la pieza es todo el bloque.
   const { estilo: estiloBloque, disparar } = useEfectoResultado();
+  // Igual que la calificación: las opciones por igualdad; las fichas y el texto
+  // escrito con la tolerancia de `isCloseEnough` (un typo aceptado es un acierto).
+  const acierto =
+    chosen !== null && (modo === 'choice' ? chosen === card.answer : isCloseEnough(chosen, card.answer));
+
+  // Completar: la palabra tocada vuela de su opción al hueco. El vuelo es decoración; el
+  // hueco se llena al llegar, o al calificar si no hubo vuelo (movimiento reducido o sin medir).
+  const reducido = useMovimientoReducido();
+  const esCompletar = card.kind === 'completar';
+  const huecoRef = useRef<View>(null);
+  const capa = useDesfaseVentana();
+  const [vuelo, setVuelo] = useState<{ palabra: string; de: Rect; a: Rect } | null>(null);
+  const [aterrizo, setAterrizo] = useState(false);
+  const anchoHueco = useMemo(
+    () => Math.min(220, Math.max(72, ...card.options.map((o) => o.length * font.size.xxl * 0.55))),
+    [card.options]
+  );
+  const relleno: RellenoHueco | null =
+    esCompletar && aterrizo && chosen !== null ? { palabra: chosen, estado: acierto ? 'ok' : 'mal' } : null;
+  useEffect(() => {
+    if (!esCompletar || !locked || aterrizo) return;
+    if (!reducido && vuelo) return;
+    const t = setTimeout(() => setAterrizo(true), reducido ? 0 : motionDuration.lento);
+    return () => clearTimeout(t);
+  }, [esCompletar, locked, aterrizo, reducido, vuelo]);
   useEffect(() => {
     if (!locked || modo === 'choice') return;
-    disparar(chosen === card.answer ? 'acierto' : 'fallo');
+    disparar(acierto ? 'acierto' : 'fallo');
     // Solo al bloquearse la tarjeta.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locked]);
@@ -152,6 +185,16 @@ export function StudyCardView({
     );
   };
 
+  /** La opción tocada dice dónde está: si es la correcta, de ahí salen los cubitos. */
+  const alMedirOpcion = (opt: string, r: Rect) => {
+    if (opt === card.answer) onOrigenAcierto?.({ x: r.x + r.width / 2, y: r.y + r.height / 2 });
+    if (esCompletar && !reducido) {
+      huecoRef.current?.measureInWindow((x, y, width, height) =>
+        setVuelo((v) => v ?? { palabra: opt, de: r, a: { x, y, width, height } })
+      );
+    }
+  };
+
   const stateFor = (option: string): OptionState => {
     if (!locked) return chosen === option ? 'chosen' : 'idle';
     if (option === card.answer) return 'correct';
@@ -182,12 +225,7 @@ export function StudyCardView({
         ) : card.kind === 'construir' ? (
           <BloqueVoz entry={card.entry} variante="pista" pista={prompt} compacto={compacto} />
         ) : card.kind === 'completar' ? (
-          <PhraseBlock
-            entry={card.entry}
-            override={prompt}
-            showAudio={false}
-            showIpa={false}
-          />
+          <FraseHueco texto={prompt} relleno={relleno} huecoRef={huecoRef} anchoHueco={anchoHueco} />
         ) : card.kind === 'escribir' ? (
           <Text style={styles.spanishPrompt}>{prompt}</Text>
         ) : (
@@ -211,6 +249,7 @@ export function StudyCardView({
             key={`tiles-${card.entry.id}-${card.state.repeticiones}`}
             tiles={card.options}
             locked={locked}
+            respuesta={card.answer}
             compacto={compacto}
             onSubmit={handleTiles}
           />
@@ -220,7 +259,7 @@ export function StudyCardView({
           <TextInput
             style={[
               styles.input,
-              locked && (chosen === card.answer ? styles.inputOk : styles.inputMiss),
+              locked && (acierto ? styles.inputOk : styles.inputMiss),
             ]}
             value={typed}
             onChangeText={setTyped}
@@ -254,7 +293,10 @@ export function StudyCardView({
                 style={styles.grow}
               />
             </View>
-          ) : null}
+          ) : acierto ? null : (
+            // Fallaste: la frase con lo que faltó y lo que sobró marcado en su lugar.
+            <DiffFrase dado={chosen ?? ''} esperado={card.answer} />
+          )}
         </Animated.View>
       ) : (
         <ScrollView
@@ -272,11 +314,27 @@ export function StudyCardView({
               state={stateFor(opt)}
               disabled={locked}
               compacta={compacto}
+              alMedir={(r) => alMedirOpcion(opt, r)}
+              vaciada={esCompletar && chosen === opt && vuelo !== null}
               onPress={() => handleChoice(opt)}
             />
           ))}
         </ScrollView>
       )}
+
+      {esCompletar ? (
+        <View ref={capa.ref} collapsable={false} onLayout={capa.alAcomodar} pointerEvents="none" style={StyleSheet.absoluteFill}>
+          {vuelo && !aterrizo ? (
+            <PalabraVoladora
+              palabra={vuelo.palabra}
+              de={vuelo.de}
+              a={vuelo.a}
+              desfase={capa.desfase}
+              alTerminar={() => setAterrizo(true)}
+            />
+          ) : null}
+        </View>
+      ) : null}
     </Animated.View>
   );
 }

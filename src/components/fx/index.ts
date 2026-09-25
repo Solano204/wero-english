@@ -16,5 +16,6 @@ export { PortadaJuego } from './PortadaJuego';
 export { TarjetaTilt } from './TarjetaTilt';
 export { TransicionHoy } from './TransicionHoy';
 export { iniciarTransicionHoy, publicarBarraEstudio } from './estadoTransicion';
+export { useDesfaseVentana, type Rect } from './useDesfaseVentana';
 export { useReloj, useSenalActiva } from './useSenalActiva';
 export { useVozEnVivo, type VozEnVivo } from './useVozEnVivo';

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, interpolateColor, useAnimatedStyle } from 'react-native-reanimated';
 import type { Palabra } from '@/domain/marcas';
-import { color, font } from '@/theme';
+import { color, font, space } from '@/theme';
 import type { VozEnVivo } from './useVozEnVivo';
 
 // Copias locales: un worklet captura estos textos, no el objeto de tema entero.
@@ -80,8 +80,9 @@ export function FraseKaraoke({ palabras, voz, tamano = 'lg' }: Props) {
 
 const styles = StyleSheet.create({
   fila: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline' },
-  filaLg: { columnGap: font.size.xxl * 0.25 },
-  filaMd: { columnGap: font.size.xl * 0.25 },
+  // El espacio entre palabras va como hueco de la fila y no como carácter: a los lados de cada renglón no sobra nada.
+  filaLg: { columnGap: space.sm },
+  filaMd: { columnGap: space.sm },
   palabraLg: {
     fontSize: font.size.xxl,
     letterSpacing: font.size.xxl * -0.015,

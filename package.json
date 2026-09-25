@@ -23,6 +23,7 @@
     "check:color": "node scripts/check-color.mjs",
     "check:practicar": "node scripts/check-practicar.mjs",
     "check:marcas": "node scripts/check-marcas.mjs",
+    "check:estudio": "node scripts/check-estudio.mjs",
     "check:srs": "node scripts/check-srs.mjs",
     "reinstala": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps"
   },

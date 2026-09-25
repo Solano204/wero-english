@@ -5,6 +5,7 @@ import Animated, {
   useSharedValue,
   withDelay,
   withTiming } from 'react-native-reanimated';
+import { useDesfaseVentana } from '@/components/fx/useDesfaseVentana';
 import { color, motionEasing, motionEfecto } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
@@ -18,6 +19,12 @@ interface Props {
   /** Dónde revienta, en porcentaje de la capa. Por defecto, el centro. */
   x?: `${number}%`;
   y?: `${number}%`;
+  /**
+   * Dónde revienta, en píxeles de la ventana (lo que da `measureInWindow`): sale de una
+   * pieza concreta, como la opción que acertaste. Manda sobre `x` e `y`. Puede llegar un
+   * cuadro después del disparo: los cubitos apenas se han movido y salen del punto nuevo.
+   */
+  origen?: { x: number; y: number };
 }
 
 /**
@@ -36,16 +43,20 @@ interface Props {
  * margen o en el alto no resuelve bien en Android y arrastra el layout
  * del padre. Ese error ya nos costó una pantalla entera.
  */
-export function Trozos({ disparo, tinte = color.accent, x = '50%', y = '50%' }: Props) {
+export function Trozos({ disparo, tinte = color.accent, x = '50%', y = '50%', origen }: Props) {
   const reducido = useMovimientoReducido();
-  if (disparo === 0 || reducido) return null;
+  const { ref, alAcomodar, desfase } = useDesfaseVentana();
+  if (reducido) return null;
+  const punto = origen ? { left: origen.x - desfase.x, top: origen.y - desfase.y } : { left: x, top: y };
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <View style={[styles.origen, { left: x, top: y }]}>
-        {Array.from({ length: N }).map((_, i) => (
-          <Cubo key={`${disparo}-${i}`} i={i} tinte={tinte} />
-        ))}
-      </View>
+    <View ref={ref} collapsable={false} onLayout={alAcomodar} style={StyleSheet.absoluteFill} pointerEvents="none">
+      {disparo > 0 ? (
+        <View style={[styles.origen, punto]}>
+          {Array.from({ length: N }).map((_, i) => (
+            <Cubo key={`${disparo}-${i}`} i={i} tinte={tinte} />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
