@@ -13,6 +13,8 @@ interface Props {
   style?: ViewStyle;
   /** Contenido fijo abajo, fuera del scroll. */
   footer?: ReactNode;
+  /** Luz de escena detrás del contenido (p. ej. la aurora de Practicar). No recibe toques. */
+  fondo?: ReactNode;
 }
 
 /**
@@ -32,6 +34,7 @@ export function Screen({
   edges = ['top', 'bottom'],
   style,
   footer,
+  fondo,
 }: Props) {
   const inner: ViewStyle = padded ? { padding: layout.screenPad } : {};
 
@@ -90,6 +93,7 @@ export function Screen({
         style={styles.resplandor}
         pointerEvents="none"
       />
+      {fondo}
       {scroll ? (
         <ScrollView
           style={styles.flex}

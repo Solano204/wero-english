@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, ErrorCarga, ProgressBar, Screen, Skeleton } from '@/components/base';
+import { FondoAurora } from '@/components/fx';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
 import { getRecentDays } from '@/db/progress';
@@ -156,7 +157,7 @@ export function PracticeScreen() {
   };
 
   return (
-    <Screen scroll>
+    <Screen scroll fondo={<FondoAurora />}>
       <View style={styles.bloques}>
         <View style={styles.bloque}>
           <Text style={styles.title}>Practicar</Text>
