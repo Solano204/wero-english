@@ -53,6 +53,24 @@ export function isCloseEnough(given: string, expected: string): boolean {
   return levenshtein(g, e) <= budget;
 }
 
+/**
+ * ¿Dicen lo mismo aunque cambien las mayúsculas, los acentos, la puntuación o
+ * los espacios de más? La ñ cuenta como letra propia: «año» y «ano» no son lo
+ * mismo. Sirve para no mostrar dos veces una traducción que solo difiere de la
+ * otra en un punto final.
+ */
+export function mismoTexto(a: string, b: string): boolean {
+  const limpia = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/ñ/g, 'ñ')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim();
+  return limpia(a) === limpia(b);
+}
+
 /** Corta a n caracteres sin partir palabras. */
 export function truncate(s: string, n: number): string {
   if (s.length <= n) return s;

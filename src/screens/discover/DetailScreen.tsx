@@ -19,11 +19,20 @@ import {
   Screen,
 } from '@/components/base';
 import { hayImagen } from '@/components/card';
-import { Aparece, CuandoNoDecirla, EscalaRegistro, HeroeFrase, ImagenSangre } from '@/components/detalle';
+import {
+  Aparece,
+  CuandoNoDecirla,
+  EscalaRegistro,
+  FilaDondeVive,
+  HeroeFrase,
+  ImagenSangre,
+} from '@/components/detalle';
 import { getEntry, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
-import { color, font, layout, space } from '@/theme';
+import { loadContent } from '@/store/content';
+import { color, font, layout, space, type WorldId } from '@/theme';
+import { mismoTexto } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -68,9 +77,12 @@ export function DetailScreen() {
     );
   }
 
-  const tieneVariantes = entry.spanish !== entry.spanish_main;
+  // Una traducción que solo difiere de la principal en un punto o un acento no es «otra forma».
+  const tieneVariantes = !mismoTexto(entry.spanish, entry.spanish_main);
   const tieneNeutro =
-    entry.vulgaridad > 0 && entry.es_neutro !== entry.spanish_main;
+    entry.vulgaridad > 0 && !mismoTexto(entry.es_neutro, entry.spanish_main);
+  const mundo = loadContent().packs.mundos.find((m) => m.id === entry.mundo);
+  const tinteMundo = color.world[entry.mundo as WorldId] ?? color.accent;
   // Sin imagen no se reserva su lugar: la pantalla arranca con la frase.
   const conImagen = hayImagen(entry.imagen) && !imagenFallo;
 
@@ -139,10 +151,15 @@ export function DetailScreen() {
           />
         ) : null}
 
-        <Block
-          title="Dónde vive"
-          body={`${entry.block} · ${entry.mundo}`}
-        />
+        <View style={styles.block}>
+          <Text style={styles.blockTitle}>Dónde vive</Text>
+          <FilaDondeVive
+            nombre={mundo?.nombre ?? entry.mundo}
+            bloque={entry.block}
+            tinte={tinteMundo}
+            onPress={() => nav.navigate('WorldDetail', { worldId: entry.mundo })}
+          />
+        </View>
       </View>
     </Screen>
   );

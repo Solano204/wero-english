@@ -32,7 +32,7 @@ const cargarUrl = async (rel) => {
 const cargar = async (rel) => import(await cargarUrl(rel));
 const { energiaOnda, progresoMeta, metaCumplida, etiquetaCorregir, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
 const P = await cargar('src/components/progreso/datos.ts');
-const { plural, conteo, miles } = await cargar('src/utils/text.ts');
+const { plural, conteo, miles, mismoTexto } = await cargar('src/utils/text.ts');
 const { metaDe, textoMeta } = await cargar('src/screens/extras/practicar/metadatos.ts');
 const { diasQueQuedan, textoDiasReto } = await cargar('src/screens/extras/practicar/reto.ts');
 const { resumenNivel, TOTAL_NIVELES } = await cargar('src/screens/extras/practicar/resumenNiveles.ts');
@@ -121,6 +121,25 @@ assert.equal(textoMeta(metaDe('mazo', fuentes)), '1 guardada');
 assert.equal(textoMeta({ tipo: 'nivel', nivel: 23, estrellas: 36 }), 'Nivel 23 · 36 estrellas');
 assert.equal(textoMeta({ tipo: 'nivel', nivel: 1, estrellas: 0 }), 'Nivel 1');
 assert.equal(textoMeta(null), null);
+
+// Detalle: dos traducciones «iguales» aunque cambien mayúsculas, acentos, puntuación o espacios.
+assert.equal(mismoTexto('Me encanta ver a mis seres queridos.', 'Me encanta ver a mis seres queridos'), true, 'un punto final no las distingue');
+assert.equal(mismoTexto('¿Qué onda, güey?', 'que onda guey'), true, 'mayúsculas, acentos y signos');
+assert.equal(mismoTexto('Así  que   podemos…', 'asi que podemos'), true, 'espacios de más y puntos suspensivos');
+assert.equal(mismoTexto('(de neta) va', 'de neta va'), true, 'los paréntesis son puntuación');
+assert.equal(mismoTexto('año', 'ano'), false, 'la ñ es otra letra');
+assert.equal(mismoTexto('Vamos ya', 'Vamos allá'), false, 'palabras distintas');
+assert.equal(mismoTexto('', ''), true);
+assert.equal(mismoTexto('', 'a'), false);
+const rutaCatalogo = path.join(ROOT, 'assets/data/catalogo.json');
+if (fs.existsSync(rutaCatalogo)) {
+  const { entries } = JSON.parse(fs.readFileSync(rutaCatalogo, 'utf8'));
+  const distintas = entries.filter((e) => !mismoTexto(e.spanish, e.spanish_main)).length;
+  const estrictas = entries.filter((e) => e.spanish !== e.spanish_main).length;
+  assert.ok(distintas < estrictas, 'la comparación normalizada esconde duplicados que la estricta dejaba pasar');
+  assert.ok(distintas > 0, 'y sigue habiendo traducciones distintas que mostrar');
+  console.log(`  «Otras formas de traducirla»: ${estrictas} con comparación estricta, ${distintas} con la normalizada (de ${entries.length})`);
+}
 
 // Miles con coma y el botón de las atoradas.
 assert.equal(miles(1436), '1,436');
