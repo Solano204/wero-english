@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { conteo } from '@/utils/text';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Header, Icon, Screen, SkeletonLista, pedirRecompensa, Presionable } from '@/components/base';
-import { FilaEstrellas } from '@/components/card';
+import { Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
+import { ALTO_TRAMO, EncabezadoTramo, FilaNiveles, HUECO_CELDAS } from '@/components/niveles';
 import {
   abrirConAnuncio,
   getNiveles,
@@ -12,11 +11,23 @@ import {
   nivelesPagados,
   type NivelEstado,
 } from '@/db/levels';
+import {
+  COLUMNAS,
+  aplanar,
+  armarTramos,
+  indiceDeNivel,
+  indicesEncabezado,
+  medir,
+  totalEstrellas,
+  type BandaDef,
+  type EstadoNivel,
+  type ItemLista,
+} from '@/domain/niveles';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
-import { color, depth, font, radius, space } from '@/theme';
+import { color, font, layout, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -27,13 +38,11 @@ type Ruta = RouteProp<RootStackParams, 'Niveles'>;
 /**
  * El mapa de niveles.
  *
- * Doscientos por juego, en cuadrícula de cinco. Se abren de uno en uno y
- * el candado se quita con una estrella, que es la mitad del nivel: no
- * hay forma de quedarse atorado por no sacar el puntaje perfecto.
- *
- * Al abrir, la pantalla salta sola al primer nivel sin terminar. Con
- * doscientos, obligar a bajar hasta donde te quedaste es una molestia
- * diaria que se arregla con una línea.
+ * Doscientos por juego, en tres tramos (las bandas del juego) de renglones de cinco.
+ * Se abren de uno en uno: terminar un nivel abre el siguiente, saques una estrella o
+ * tres, y un anuncio abre UN nivel adelantado, el que sigue del siguiente. La lista
+ * está virtualizada (no se pintan los doscientos de golpe) y cada tramo lleva su
+ * encabezado pegado arriba mientras se recorre.
  */
 const TITULOS: Record<string, string> = {
   colmena: 'Colmena',
@@ -49,6 +58,7 @@ export function NivelesScreen() {
   const { params } = useRoute<Ruta>();
   const user = useAuthStore((s) => s.user);
   const content = useMemo(loadContent, []);
+  const { width } = useWindowDimensions();
 
   const juego = params.juego;
   const def = content.niveles.juegos[juego];
@@ -69,9 +79,8 @@ export function NivelesScreen() {
   // Niveles abiertos con anuncio en esta visita, además de los que ya guardó la base.
   // Se abren de uno en uno y no encadenan.
   const [abiertosAhora, setAbiertosAhora] = useState<number[]>([]);
-  const pagados = [...(carga.datos?.pagados ?? []), ...abiertosAhora];
-  const scroll = useRef<ScrollView>(null);
   const [abriendo, setAbriendo] = useState(false);
+  const [expandidos, setExpandidos] = useState<ReadonlySet<string>>(new Set());
 
   /**
    * Abre un nivel adelantado a cambio de un anuncio.
@@ -96,16 +105,64 @@ export function NivelesScreen() {
     [user, juego, abriendo]
   );
 
-  // Al llegar los datos, baja hasta el nivel actual. Cinco por fila, cada fila unos 68 px de alto.
-  useEffect(() => {
-    if (!carga.datos) return;
-    const fila = Math.max(0, Math.floor((carga.datos.siguiente - 1) / 5) - 2);
-    const t = setTimeout(
-      () => scroll.current?.scrollTo({ y: fila * 68, animated: false }),
-      60
-    );
-    return () => clearTimeout(t);
-  }, [carga.datos]);
+  const alTocar = useCallback(
+    (n: number, estado: EstadoNivel) => {
+      if (estado === 'anuncio') {
+        void saltar(n);
+        return;
+      }
+      if (estado === 'bloqueado') return;
+      const ruta = RUTA[juego];
+      if (ruta) nav.navigate(ruta, { nivel: n });
+    },
+    [saltar, juego, nav]
+  );
+
+  const alternarTramo = useCallback((id: string) => {
+    setExpandidos((prev) => {
+      const siguienteSet = new Set(prev);
+      if (!siguienteSet.delete(id)) siguienteSet.add(id);
+      return siguienteSet;
+    });
+  }, []);
+
+  // La celda sale del ancho de la pantalla; el renglón mide exactamente celda + hueco, y con
+  // eso la lista sabe dónde está cada cosa sin medir nada en pantalla.
+  const lado = Math.floor((width - 2 * layout.screenPad - HUECO_CELDAS * (COLUMNAS - 1)) / COLUMNAS);
+  const altoFila = lado + HUECO_CELDAS;
+
+  const estrellas = useMemo(() => new Map([...estados].map(([n, e]) => [n, e.estrellas] as const)), [estados]);
+  const pagados = useMemo(() => new Set([...(carga.datos?.pagados ?? []), ...abiertosAhora]), [carga.datos, abiertosAhora]);
+  const bandas = useMemo<BandaDef[]>(
+    () => (def?.bandas ?? []).map((b) => ({ id: b.id, nombre: b.nombre, desde: b.desde, hasta: b.hasta, frases: b.ids.length })),
+    [def]
+  );
+  const tramos = useMemo(
+    () => armarTramos(bandas, { total: def?.total ?? 0, siguiente, pagados, estrellas }),
+    [bandas, def, siguiente, pagados, estrellas]
+  );
+  const items = useMemo(() => aplanar(tramos, expandidos), [tramos, expandidos]);
+  const medidas = useMemo(() => medir(items, ALTO_TRAMO, altoFila), [items, altoFila]);
+  const pegados = useMemo(() => indicesEncabezado(items), [items]);
+
+  const getItemLayout = useCallback(
+    (_: ArrayLike<ItemLista> | null | undefined, index: number) => ({
+      length: medidas.alturas[index] ?? altoFila,
+      offset: medidas.offsets[index] ?? 0,
+      index,
+    }),
+    [medidas, altoFila]
+  );
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<ItemLista>) =>
+      item.tipo === 'tramo' ? (
+        <EncabezadoTramo tramo={item.tramo} expandido={item.expandido} onAlternar={alternarTramo} />
+      ) : (
+        <FilaNiveles niveles={item.niveles} lado={lado} onPress={alTocar} />
+      ),
+    [lado, alTocar, alternarTramo]
+  );
 
   if (!def) {
     return (
@@ -121,10 +178,10 @@ export function NivelesScreen() {
     );
   }
 
-  const totalEstrellas = [...estados.values()].reduce(
-    (s, e) => s + e.estrellas,
-    0
-  );
+  // Al abrir, la lista arranca cerca del nivel actual (sin animar): con doscientos,
+  // obligar a bajar hasta donde te quedaste es una molestia diaria.
+  const indiceActual = indiceDeNivel(items, siguiente);
+  const arranque = indiceActual > 2 ? indiceActual - 2 : undefined;
 
   const contenido = (
     <Screen padded={false}>
@@ -132,92 +189,31 @@ export function NivelesScreen() {
         <Header
           onBack={() => nav.goBack()}
           title={def.nombre}
-          subtitle={carga.datos ? `${totalEstrellas} de ${def.total * 3} estrellas` : undefined}
+          subtitle={carga.datos ? `${totalEstrellas(estrellas)} de ${def.total * 3} estrellas` : undefined}
         />
       </View>
 
-      <Carga carga={carga} esqueleto={<View style={styles.lista}><SkeletonLista filas={6} alto={68} /></View>}>
+      <Carga carga={carga} esqueleto={<View style={styles.esqueleto}><SkeletonLista filas={6} alto={68} /></View>}>
         {() => (
-          <ScrollView
-            ref={scroll}
-            contentContainerStyle={styles.lista}
+          <FlatList
+            data={items}
+            renderItem={renderItem}
+            keyExtractor={(it) => it.key}
+            getItemLayout={getItemLayout}
+            stickyHeaderIndices={pegados}
+            initialScrollIndex={arranque}
+            initialNumToRender={12}
+            maxToRenderPerBatch={8}
+            windowSize={7}
             showsVerticalScrollIndicator={false}
-            // Sin esto, Android mantiene las 200 celdas montadas todo el
-            // tiempo y el scroll se arrastra.
-            removeClippedSubviews
-          >
-            {def.bandas.map((banda) => {
-              const niveles = def.niveles.filter(
-                (n) => n.n >= banda.desde && n.n <= banda.hasta
-              );
-              return (
-                <View key={banda.id} style={styles.banda}>
-                  <View style={styles.bandaCabeza}>
-                    <Text style={styles.bandaNombre}>{banda.nombre}</Text>
-                    <Text style={styles.bandaRango}>
-                      {banda.desde} a {banda.hasta} · {conteo(banda.ids.length, 'frase')}
-                    </Text>
-                  </View>
-
-                  <View style={styles.rejilla}>
-                    {niveles.map((nv) => {
-                      const est = estados.get(nv.n);
-                      const abierto = nv.n <= siguiente || pagados.includes(nv.n);
-                      const actual = nv.n === siguiente;
-                      // El primer cerrado es el único que se puede saltar.
-                      const saltable = !abierto && nv.n === siguiente + 1;
-                      return (
-                        <Presionable
-                          key={nv.n}
-                          disabled={!abierto && !saltable}
-                          onPress={() => {
-                            if (!abierto) {
-                              void saltar(nv.n);
-                              return;
-                            }
-                            const ruta = RUTA[juego];
-                            if (ruta) nav.navigate(ruta, { nivel: nv.n });
-                          }}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Nivel ${nv.n}${
-                            abierto ? '' : ', cerrado'
-                          }`}
-                          style={[styles.celda, !abierto && styles.celdaCerrada, actual && styles.celdaActual, est && est.estrellas > 0 && styles.celdaHecha]}
-                        >
-                          <Text
-                            style={[
-                              styles.celdaNum,
-                              !abierto && styles.celdaNumOff,
-                            ]}
-                          >
-                            {nv.n}
-                          </Text>
-                          <View style={styles.estrellas}>
-                            {abierto ? (
-                              <FilaEstrellas llenas={est?.estrellas ?? 0} color={color.star} />
-                            ) : saltable ? (
-                              <>
-                                <Icon name="play" size="sm" color={color.star} />
-                                <Text style={styles.anuncio}>anuncio</Text>
-                              </>
-                            ) : (
-                              <Text style={styles.anuncio}>·</Text>
-                            )}
-                          </View>
-                        </Presionable>
-                      );
-                    })}
-                  </View>
-                </View>
-              );
-            })}
-
-            <Text style={styles.pie}>
-              Terminar un nivel abre el siguiente, saques una estrella o tres.
-              El que sigue del último también se puede abrir viendo un anuncio.
-              Rejugar nunca te baja lo que ya tenías.
-            </Text>
-          </ScrollView>
+            ListFooterComponent={
+              <Text style={styles.pie}>
+                Terminar un nivel abre el siguiente, saques una estrella o tres.
+                El que sigue del último también se abre con «Ver anuncio y abrir».
+                Rejugar nunca te baja lo que ya tenías.
+              </Text>
+            }
+          />
         )}
       </Carga>
     </Screen>
@@ -248,51 +244,14 @@ const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  lista: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
-  banda: { marginBottom: space.xl },
-  bandaCabeza: { marginBottom: space.md },
-  bandaNombre: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.text,
-  },
-  bandaRango: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  rejilla: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  /*
-   * Sin sombra por celda, a propósito.
-   *
-   * Son doscientas celdas en una sola lista, y en Android cada
-   * `elevation` es una capa que el sistema compone aparte: doscientas
-   * traban el scroll en cualquier teléfono de gama media. El relieve lo
-   * da el borde inferior, que no cuesta nada.
-   */
-  celda: {
-    width: '18%',
-    aspectRatio: 1,
-    borderRadius: radius.md,
-    backgroundColor: color.surface,
-    borderBottomWidth: depth.md,
-    borderBottomColor: color.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  celdaCerrada: { backgroundColor: color.surfaceAlt, borderBottomWidth: 1 },
-  celdaActual: { borderColor: color.accent, borderBottomColor: color.accentDeep },
-  celdaHecha: { backgroundColor: color.correctSoft },
-  celdaNum: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.text,
-  },
-  celdaNumOff: { color: color.textFaint },
-  estrellas: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xs },
-  anuncio: { fontFamily: font.family.body, fontSize: 9, color: color.star },
+  esqueleto: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
   pie: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
     color: color.textFaint,
     textAlign: 'center',
-    marginTop: space.md,
+    margin: space.lg,
+    marginBottom: space.xxxl,
   },
   vacio: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });

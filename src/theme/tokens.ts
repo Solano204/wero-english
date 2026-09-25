@@ -125,6 +125,9 @@ export const color = {
   // Estrellas y aciertos seguidos. Dorado (tono 95), a 16° del ámbar de fallo
   // (`wrong`, tono 79) y a 16° de `world.fonetica` (tono 112). Pasa 7.4:1.
   star: '#E9C944',
+  // El filo de las celdas con las tres estrellas: `star` al 32 %. Es un borde fijo, no un
+  // degradado: son hasta doscientas celdas en una lista y cada capa cuesta al hacer scroll.
+  starFilo: 'rgba(233, 201, 68, 0.32)',
 
   riskWarn: '#F2B33D',
   riskWarnSoft: 'rgba(242, 179, 61, 0.12)',
