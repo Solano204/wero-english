@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,6 +11,7 @@ import {
   Screen,
 } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
+import { publicarBarraEstudio } from '@/components/fx';
 import { FeedbackBand, StudyCardView } from '@/components/card';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
@@ -31,6 +32,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function StudyScreen() {
   useKeepAwake();
   const nav = useNavigation<Nav>();
+  const barra = useRef<View>(null);
   const user = useAuthStore((s) => s.user);
   const settings = useSettingsStore();
   const {
@@ -222,7 +224,12 @@ export function StudyScreen() {
           <Text style={styles.seguidas}>{seguidas} seguidas</Text>
         ) : null}
 
-        <View style={styles.barRow}>
+        <View
+          ref={barra}
+          collapsable={false}
+          style={styles.barRow}
+          onLayout={() => barra.current?.measureInWindow((_x, y, _w, alto) => publicarBarraEstudio(y + alto / 2))}
+        >
           <ProgressBar value={done} total={goal} />
           <Text style={styles.counter}>
             {done}/{goal}

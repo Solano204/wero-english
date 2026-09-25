@@ -114,6 +114,17 @@ export const motionSenal = {
   portada: 3200,
 } as const;
 
+/**
+ * Coreografía de entrada de Practicar (solo la primera vez por sesión). Cada
+ * pieza arranca en su retraso y todas cierran antes de `motionDuration.coreografia`.
+ */
+export const motionEntrada = {
+  hoy: 100,
+  onda: 350,
+  chips: 450,
+  destacados: 500,
+} as const;
+
 /** Aparecer sin desplazarse: cambios de estado. */
 export const aparecer = (retraso = 0) =>
   FadeIn.delay(retraso).duration(motionDuration.base).easing(motionEasing.entrar);

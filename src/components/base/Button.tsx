@@ -1,9 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
   Text,
   View,
+  type GestureResponderEvent,
   type ViewStyle,
 } from 'react-native';
 import { color, font, layout, radius, shadow, space } from '@/theme';
@@ -28,6 +29,11 @@ interface BaseProps {
   /** Pone el ícono después del texto (las flechas de "seguir"). */
   iconAlFinal?: boolean;
   style?: ViewStyle;
+  /** Capa decorativa detrás de la etiqueta, recortada por el borde del botón (reflejo, onda). */
+  fondo?: ReactNode;
+  onPressIn?: (e: GestureResponderEvent) => void;
+  /** Intensidad del háptico al soltar. Ligero por omisión. */
+  haptico?: 'ligero' | 'medio';
 }
 
 /** Un botón solo con ícono no tiene texto que leer: su etiqueta es obligatoria. */
@@ -57,12 +63,16 @@ export function Button({
   icon,
   iconAlFinal = false,
   style,
+  fondo,
+  onPressIn,
+  haptico = 'ligero',
 }: Props) {
   const handlePress = useCallback(() => {
     if (disabled || loading) return;
-    haptics.tapLight();
+    if (haptico === 'medio') haptics.tapMedium();
+    else haptics.tapLight();
     onPress();
-  }, [disabled, loading, onPress]);
+  }, [disabled, loading, onPress, haptico]);
 
   const blocked = disabled || loading;
 
@@ -73,6 +83,7 @@ export function Button({
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: blocked, busy: loading }}
       onPress={handlePress}
+      onPressIn={onPressIn}
       disabled={blocked}
       style={[
         styles.base,
@@ -83,6 +94,7 @@ export function Button({
         style,
       ]}
     >
+      {fondo}
       {loading ? (
         <ActivityIndicator color={textColor[variant]} size="small" />
       ) : (

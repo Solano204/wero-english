@@ -16,6 +16,13 @@ const fuente = fs.readFileSync(path.join(ROOT, 'src/screens/extras/practicar/hoy
 const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const { elegirHoy, elegirDestacados, ORDEN, NUM_DESTACADOS } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 
+const cargar = async (rel) => {
+  const fuenteRel = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  const out = ts.transpileModule(fuenteRel, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+  return import(`data:text/javascript;base64,${Buffer.from(out).toString('base64')}`);
+};
+const { energiaOnda, progresoMeta, metaCumplida, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+
 const uso = (o) => Object.fromEntries(Object.entries(o).map(([k, [dias, ultimo]]) => [k, { dias, ultimo }]));
 
 // Caso a: los repasos vencidos mandan sobre las atoradas y sobre el último modo.
@@ -40,4 +47,15 @@ assert.deepEqual(elegirDestacados(uso({ caida: [9, 1] }), 'caida'), ['study', 'g
 
 assert.equal(new Set(ORDEN).size, 17, 'ORDEN debe tener los 17 destinos sin repetir');
 assert.equal(NUM_DESTACADOS, 3);
-console.log('check:practicar ok (13 casos)');
+// Consola de HOY: la onda, el anillo de meta y el marcador.
+assert.equal(energiaOnda(0), ENERGIA_MIN, '0 pendientes: onda casi plana');
+assert.equal(energiaOnda(-5), ENERGIA_MIN, 'negativos no bajan del mínimo');
+assert.equal(energiaOnda(95), 1, 'muchas pendientes: toda la energía');
+assert.ok(energiaOnda(10) > energiaOnda(5) && energiaOnda(5) > energiaOnda(0), 'más pendientes, más energía');
+assert.equal(progresoMeta(2, 20), 0.1);
+assert.equal(progresoMeta(30, 20), 1, 'el anillo no pasa de lleno');
+assert.equal(progresoMeta(5, 0), 0, 'sin meta, anillo vacío');
+assert.equal(metaCumplida(20, 20), true);
+assert.equal(metaCumplida(19, 20), false);
+assert.equal(metaCumplida(3, 0), false);
+console.log('check:practicar ok (23 casos)');

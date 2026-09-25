@@ -33,6 +33,7 @@ export {
   motionEfecto,
   motionCiclo,
   motionSenal,
+  motionEntrada,
   motionPresion,
   motionPulso,
   motionSacudida,

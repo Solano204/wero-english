@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font';
 import { RootNavigator, navTheme, navigationRef } from '@/navigation';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { ErrorBoundary } from '@/components/base/ErrorBoundary';
+import { TransicionHoy } from '@/components/fx';
 import * as audio from '@/services/audio';
 import { color, fuentes } from '@/theme';
 
@@ -64,6 +65,7 @@ export default function App() {
           >
             <StatusBar style="dark" />
             <RootNavigator />
+            <TransicionHoy />
           </NavigationContainer>
         </ErrorBoundary>
       </SafeAreaProvider>
