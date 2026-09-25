@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { color, depth, font, layout, radius, shadow, space, reacomodar } from '@/theme';
 import * as haptics from '@/services/haptics';
 import { Presionable } from '@/components/base';
@@ -15,6 +15,8 @@ interface Props {
   locked: boolean;
   /** Lo que el usuario armó cuando ya se calificó, para pintar el fallo. */
   onSubmit: (armado: string) => void;
+  /** Teléfono chico: huecos de 8 en el banco. */
+  compacto?: boolean;
 }
 
 /**
@@ -29,7 +31,7 @@ interface Props {
  * parte del ejercicio, y quitarlas al acertar le confirmaría la
  * respuesta antes de tiempo.
  */
-export function TileBuilder({ tiles, locked, onSubmit }: Props) {
+export function TileBuilder({ tiles, locked, onSubmit, compacto = false }: Props) {
   // Se guardan índices, no textos: una frase puede repetir palabra
   // ("the ... the") y con textos se apagarían las dos de un toque.
   const [usados, setUsados] = useState<number[]>([]);
@@ -59,6 +61,13 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
 
   return (
     <View style={styles.wrap}>
+      <ScrollView
+        style={styles.cuerpo}
+        contentContainerStyle={[styles.cuerpoContenido, compacto && styles.cuerpoCompacto]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        overScrollMode="never"
+      >
       <View style={[styles.linea, usados.length === 0 && styles.lineaVacia]}>
         {usados.length === 0 ? (
           <Text style={styles.placeholder}>Toca las palabras en orden</Text>
@@ -80,7 +89,7 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
         )}
       </View>
 
-      <View style={styles.banco}>
+      <View style={[styles.banco, compacto && styles.bancoCompacto]}>
         {tiles.map((t, i) => {
           const gastada = usados.includes(i);
           return (
@@ -101,6 +110,7 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
           );
         })}
       </View>
+      </ScrollView>
 
       {!locked ? (
         <View style={styles.acciones}>
@@ -131,13 +141,22 @@ export function TileBuilder({ tiles, locked, onSubmit }: Props) {
             <Text style={styles.revisarTexto}>Revisar</Text>
           </Presionable>
         </View>
-      ) : null}
+      ) : (
+        <View style={styles.accionesReserva} />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space.md },
+  wrap: { flexShrink: 1, gap: space.md },
+  // Las fichas scrollean solas si no caben; "Revisar" y "Empezar de nuevo" quedan fijos abajo.
+  cuerpo: { flexGrow: 0, flexShrink: 1 },
+  cuerpoContenido: { gap: space.md },
+  cuerpoCompacto: { gap: space.sm },
+  bancoCompacto: { gap: space.sm },
+  // Al calificar las acciones se van, pero su hueco se queda: el banco no salta.
+  accionesReserva: { minHeight: 48 },
   linea: {
     flexDirection: 'row',
     flexWrap: 'wrap',

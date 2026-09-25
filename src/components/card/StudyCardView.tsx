@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { AudioButton } from './AudioButton';
 import { OptionButton, type OptionState } from './OptionButton';
@@ -24,6 +24,14 @@ import { useEfectoResultado } from '@/components/feedback';
  */
 const cardEntering = aparecerSubiendo();
 const cardExiting = desaparecer(motionDuration.rapido);
+
+/**
+ * Por debajo de esta altura de ventana (un teléfono de 640 dp) todo se aprieta:
+ * huecos de 8, opciones de 52 y la imagen a 72. Por encima se queda holgado.
+ */
+const ALTURA_COMPACTA = 700;
+const IMAGEN_COMPACTA = 72;
+const IMAGEN_HOLGADA = 150;
 
 interface Props {
   card: StudyCard;
@@ -50,6 +58,7 @@ export function StudyCardView({
   onChoose,
 }: Props) {
   const startedAt = useRef(Date.now());
+  const compacto = useWindowDimensions().height < ALTURA_COMPACTA;
   const [typed, setTyped] = useState('');
   // Bloquea el paso mientras suena el audio. En Escuchar y Dictado el
   // audio ES el ejercicio: dejar avanzar a media reproducción es dejar
@@ -152,31 +161,22 @@ export function StudyCardView({
 
   return (
     /*
-     * La tarjeta va dentro de un scroll.
+     * Estructura fija, pensada para el pulgar: la instrucción y la frase
+     * arriba (tercio superior) y lo que se toca abajo (mitad inferior).
      *
-     * Antes era una vista fija de flex:1, y cuando la frase ocupaba dos
-     * renglones más la imagen, el IPA y los dos botones de audio, la
-     * cuarta opción quedaba pegada al borde de abajo o directamente
-     * fuera de pantalla. En un teléfono chico eso significaba responder
-     * sin haber visto todas las opciones.
-     *
-     * `flexGrow: 1` mantiene el centrado cuando la tarjeta es corta y
-     * deja crecer cuando es larga: no hay que elegir entre las dos.
+     * Nada scrollea si cabe. Antes toda la tarjeta era un scroll, y la
+     * cuarta opción quedaba fuera de pantalla en un teléfono chico. Ahora
+     * el bloque de la frase no encoge y solo la zona de abajo se acorta y
+     * scrollea si de verdad no cabe (con la acción principal fija fuera
+     * del scroll), así que las opciones siempre están donde el dedo llega.
      */
-    <Animated.ScrollView
-      entering={cardEntering}
-      exiting={cardExiting}
-      style={styles.wrap}
-      contentContainerStyle={styles.contenido}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
+    <Animated.View entering={cardEntering} exiting={cardExiting} style={[styles.wrap, compacto && styles.wrapCompacto]}>
       <View style={styles.top}>
         <Text style={styles.instruction}>{instructionFor(card.kind)}</Text>
         <RiskBadge vulgaridad={card.entry.vulgaridad} />
       </View>
 
-      <View style={styles.stage}>
+      <View style={[styles.stage, compacto && styles.stageCompacto]}>
         {card.kind === 'escuchar' || card.kind === 'dictado' ? (
           <View style={styles.listen}>
             <AudioButton path={card.entry.audio_en} size="lg" label="Otra vez" />
@@ -193,7 +193,7 @@ export function StudyCardView({
             ) : null}
           </View>
         ) : card.kind === 'construir' ? (
-          <View style={styles.reveal}>
+          <View style={[styles.reveal, compacto && styles.revealCompacto]}>
             <Text style={styles.spanishPrompt}>{prompt}</Text>
             <AudioButton path={card.entry.audio_en} size="md" label="Escuchar" />
           </View>
@@ -207,9 +207,14 @@ export function StudyCardView({
         ) : card.kind === 'escribir' ? (
           <Text style={styles.spanishPrompt}>{prompt}</Text>
         ) : (
-          <View style={styles.reveal}>
+          <View style={[styles.reveal, compacto && styles.revealCompacto]}>
             {card.entry.imagen ? (
-              <SceneImage path={card.entry.imagen} size={150} ancha etiqueta={card.entry.phrase} />
+              <SceneImage
+                path={card.entry.imagen}
+                size={compacto ? IMAGEN_COMPACTA : IMAGEN_HOLGADA}
+                ancha
+                etiqueta={card.entry.phrase}
+              />
             ) : null}
             <PhraseBlock entry={card.entry} />
           </View>
@@ -217,16 +222,17 @@ export function StudyCardView({
       </View>
 
       {modo === 'tiles' ? (
-        <Animated.View style={estiloBloque}>
+        <Animated.View style={[styles.zona, estiloBloque]}>
           <TileBuilder
             key={`tiles-${card.entry.id}-${card.state.repeticiones}`}
             tiles={card.options}
             locked={locked}
+            compacto={compacto}
             onSubmit={handleTiles}
           />
         </Animated.View>
       ) : isTyping ? (
-        <Animated.View style={[styles.typeArea, estiloBloque]}>
+        <Animated.View style={[styles.zona, styles.typeArea, estiloBloque]}>
           <TextInput
             style={[
               styles.input,
@@ -267,7 +273,13 @@ export function StudyCardView({
           ) : null}
         </Animated.View>
       ) : (
-        <View style={styles.options}>
+        <ScrollView
+          style={styles.zona}
+          contentContainerStyle={[styles.options, compacto && styles.optionsCompacto]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          overScrollMode="never"
+        >
           {card.options.map((opt, i) => (
             <OptionButton
               key={`${card.entry.id}-${opt}`}
@@ -275,12 +287,13 @@ export function StudyCardView({
               index={i}
               state={stateFor(opt)}
               disabled={locked}
+              compacta={compacto}
               onPress={() => handleChoice(opt)}
             />
           ))}
-        </View>
+        </ScrollView>
       )}
-    </Animated.ScrollView>
+    </Animated.View>
   );
 }
 
@@ -291,8 +304,8 @@ function firstWords(answer: string): string {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1 },
-  contenido: { flexGrow: 1, gap: space.lg, paddingBottom: space.lg },
+  wrap: { flex: 1, gap: space.md },
+  wrapCompacto: { gap: space.sm },
   top: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -306,12 +319,17 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     fontFamily: font.family.bodyStrong,
   },
+  // La frase se ancla arriba y no encoge: si algo tiene que ceder, es la zona de abajo.
   stage: {
-    flex: 1,
-    justifyContent: 'center',
+    flexGrow: 1,
+    flexShrink: 0,
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    minHeight: 140,
+    paddingTop: space.lg,
   },
+  stageCompacto: { paddingTop: space.xs },
+  // Lo que se toca: no crece, y si no cabe es lo único que se acorta (y scrollea).
+  zona: { flexGrow: 0, flexShrink: 1, minHeight: 120 },
   listen: { alignItems: 'center', gap: space.md },
   hintLine: {
     fontFamily: font.family.body,
@@ -326,9 +344,11 @@ const styles = StyleSheet.create({
     lineHeight: font.size.xl * 1.35,
     fontFamily: font.family.body,
   },
-  reveal: { alignItems: 'center', gap: space.lg },
+  reveal: { alignItems: 'center', gap: space.md },
+  revealCompacto: { gap: space.sm },
   options: { gap: space.md },
-  typeArea: { gap: space.md },
+  optionsCompacto: { gap: space.sm },
+  typeArea: { gap: space.md, flexShrink: 0 },
   input: {
     minHeight: 58,
     backgroundColor: color.surface,

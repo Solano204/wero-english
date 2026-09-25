@@ -1,5 +1,7 @@
 export { AnilloMeta } from './AnilloMeta';
+export { BarraSesion } from './BarraSesion';
 export { BotonSenal } from './BotonSenal';
+export { ChipMarcador } from './ChipMarcador';
 export { Espectrograma } from './Espectrograma';
 export { FondoAurora } from './FondoAurora';
 export { FxSeguro } from './FxSeguro';

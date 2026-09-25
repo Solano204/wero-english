@@ -26,6 +26,8 @@ interface Props {
   onPress: () => void;
   disabled?: boolean;
   index: number;
+  /** Teléfono chico: opción de 52 dp en vez de 56, para que las cuatro quepan sin scroll. */
+  compacta?: boolean;
 }
 
 /**
@@ -37,7 +39,7 @@ interface Props {
  *  - La incorrecta se sacude en horizontal, no se pone roja y ya. El
  *    movimiento comunica el fallo sin gritar.
  */
-export function OptionButton({ label, state, onPress, disabled, index }: Props) {
+export function OptionButton({ label, state, onPress, disabled, index, compacta = false }: Props) {
   const enter = useSharedValue(0);
   const reducido = useMovimientoReducido();
 
@@ -68,7 +70,7 @@ export function OptionButton({ label, state, onPress, disabled, index }: Props) 
       resultado={state === 'correct' ? 'acierto' : state === 'wrong' ? 'fallo' : null}
       style={{ zIndex: 10 - index }}
     >
-      <Animated.View style={[styles.base, stateStyles[state], anim]}>
+      <Animated.View style={[styles.base, compacta && styles.baseCompacta, stateStyles[state], anim]}>
         <Text style={[styles.label, textStyles[state]]}>{label}</Text>
       </Animated.View>
     </Presionable>
@@ -119,6 +121,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
     justifyContent: 'center',
   },
+  baseCompacta: { minHeight: layout.tapMin + 4, paddingVertical: space.sm },
   label: {
     fontFamily: font.family.body,
     fontSize: font.size.md,

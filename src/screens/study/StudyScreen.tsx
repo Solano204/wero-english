@@ -8,17 +8,17 @@ import {
   Button,
   EmptyState,
   Header,
-  ProgressBar,
+  IconButton,
   Screen,
 } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
-import { publicarBarraEstudio } from '@/components/fx';
+import { BarraSesion, ChipMarcador, publicarBarraEstudio } from '@/components/fx';
 import { FeedbackBand, StudyCardView } from '@/components/card';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as notifications from '@/services/notifications';
-import { color, font, space } from '@/theme';
+import { color, font, layout, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -198,32 +198,37 @@ export function StudyScreen() {
       <Trozos disparo={reaccion.trozos} tinte={color.accent} y="46%" />
       <View style={styles.top}>
         {/*
-          * La flecha va a la IZQUIERDA y "Saltar" a la derecha.
-          *
-          * Antes las dos peleaban por el mismo hueco: Header pinta
-          * `right ?? onClose`, así que al pasar `right` el botón de
-          * salir simplemente no existía. No había forma de volver.
+          * Fila de arriba: atrás a la izquierda, "Saltar" a la derecha y en
+          * medio los chips de la sesión. Los dos chips no caben junto a la
+          * barra a 360 px (quedaba de ~40 dp), así que la barra va debajo, a
+          * todo el ancho. Ninguno de los dos se guarda ni se menciona al
+          * caerse: son un gusto pequeño mientras dura la sesión, no una deuda.
           */}
-        <Header
-          onBack={handleClose}
-          right={
-            <Button
-              label="Saltar"
-              variant="ghost"
-              disabled={avanzando}
-              onPress={() => {
-                setChosen(null);
-                skip();
-              }}
-            />
-          }
-        />
-        {/* El contador de seguidas vive solo mientras dura la sesión.
-            No se guarda, no aparece en Progreso y no hay mensaje cuando
-            se cae: es un gusto pequeño, no una deuda. */}
-        {settings.mostrarSeguidas && seguidas >= 3 ? (
-          <Text style={styles.seguidas}>{seguidas} seguidas</Text>
-        ) : null}
+        <View style={styles.filaSuperior}>
+          <IconButton icono="back" etiqueta="Atrás" tamano="sm" onPress={handleClose} />
+          <View style={styles.chips}>
+            {aciertos > 0 ? (
+              <ChipMarcador
+                valor={aciertos}
+                sufijo={plural(aciertos, 'atinada', 'atinadas')}
+                tinte={color.accent}
+                etiqueta={`${aciertos} ${plural(aciertos, 'frase atinada', 'frases atinadas')}`}
+              />
+            ) : null}
+            {settings.mostrarSeguidas && seguidas >= 3 ? (
+              <ChipMarcador valor={seguidas} icono="fire" tinte={color.star} etiqueta={`${seguidas} seguidas`} />
+            ) : null}
+          </View>
+          <Button
+            label="Saltar"
+            variant="ghost"
+            disabled={avanzando}
+            onPress={() => {
+              setChosen(null);
+              skip();
+            }}
+          />
+        </View>
 
         <View
           ref={barra}
@@ -231,20 +236,7 @@ export function StudyScreen() {
           style={styles.barRow}
           onLayout={() => barra.current?.measureInWindow((_x, y, _w, alto) => publicarBarraEstudio(y + alto / 2))}
         >
-          <ProgressBar value={done} total={goal} />
-          <Text style={styles.counter}>
-            {done}/{goal}
-          </Text>
-        </View>
-
-        {/* Aciertos de la sesión. Sube en cuanto le atinas a una frase,
-            que es el momento en que el número significa algo. Va en
-            acento porque es lo único de la barra que celebra. */}
-        <View style={styles.aciertosRow}>
-          <Text style={styles.aciertosNum}>{aciertos}</Text>
-          <Text style={styles.aciertosTxt}>
-            {plural(aciertos, 'frase atinada', 'frases atinadas')}
-          </Text>
+          <BarraSesion hecho={done} meta={goal} />
         </View>
       </View>
 
@@ -283,47 +275,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: space.md,
   },
-  top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  barRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-    marginBottom: space.md,
-  },
-  /*
-   * Aciertos de la sesión.
-   *
-   * Va debajo de la barra y no dentro de ella: la barra dice cuánto
-   * falta, y esto dice cuánto llevas bien. Son dos preguntas distintas y
-   * mezclarlas en una sola fila hacía que no se leyera ninguna.
-   */
-  aciertosRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: space.xs,
-    marginTop: space.sm,
-  },
-  aciertosNum: {
-    fontSize: font.size.lg,
-    fontFamily: font.family.display,
-    color: color.accent,
-  },
-  aciertosTxt: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  counter: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    minWidth: 44,
-    textAlign: 'right',
-  },
-  seguidas: {
-    fontSize: font.size.xs,
-    color: color.star,
-    fontFamily: font.family.bodyStrong,
-    letterSpacing: 0.6,
-    marginBottom: 4,
-  },
-  body: { flex: 1, paddingHorizontal: space.lg, paddingBottom: space.lg },
+  top: { paddingHorizontal: space.lg, paddingTop: space.xs },
+  filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: layout.tapMin },
+  chips: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  barRow: { marginBottom: space.xs },
+  body: { flex: 1, paddingHorizontal: space.lg, paddingBottom: space.md },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });
