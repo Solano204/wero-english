@@ -392,8 +392,19 @@ function auditaMovimiento(archivos) {
  * La señal en vivo (v5.0). Alcance: los efectos de `src/components/fx/`, Practicar y la barra de pestañas.
  * Los bucles anteriores a la v5.0 (Skeleton, respiro de EarModeScreen) no entran: viven donde ya se veían.
  */
+/** Estudio 5.0: las piezas de la tarjeta y la pantalla que animan (el resto de `card/` es anterior a la señal). */
+const ESTUDIO_SENAL = new Set([
+  'src/screens/study/StudyScreen.tsx',
+  'src/components/card/StudyCardView.tsx',
+  'src/components/card/OptionButton.tsx',
+  'src/components/card/TileBuilder.tsx',
+  'src/components/card/FraseHueco.tsx',
+  'src/components/card/PalabraVoladora.tsx',
+  'src/components/card/DiffFrase.tsx',
+  'src/components/card/BloqueVoz.tsx',
+]);
 const ALCANCE_SENAL = (r) =>
-  r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') ||
+  r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -404,6 +415,8 @@ const MOMENTOS_HEROE = ['ConsolaHoy', 'MedidorSenal'];
 const LOOPS_POR_PANTALLA = {
   Practicar: ['FondoAurora.tsx', 'OndaSenal.tsx', 'PortadaJuego.tsx'],
   Progreso: ['MedidorSenal.tsx'],
+  // El héroe de Estudio (OndaVoz) no es un bucle: lo mueve la posición del audio y solo mientras suena.
+  Estudio: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

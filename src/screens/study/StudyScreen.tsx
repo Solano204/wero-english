@@ -23,6 +23,7 @@ import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as notifications from '@/services/notifications';
 import { aparecerSubiendo, color, font, layout, motionDuration, space } from '@/theme';
 import type { StudyCard } from '@/types';
+import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -51,6 +52,7 @@ const lineaFinal = (c: Cierre) => `${c.aciertos} de ${c.total} ${plural(c.total,
  */
 export function StudyScreen() {
   useKeepAwake();
+  const reducido = useMovimientoReducido();
   const nav = useNavigation<Nav>();
   const barra = useRef<View>(null);
   const user = useAuthStore((s) => s.user);
@@ -242,7 +244,7 @@ export function StudyScreen() {
     return (
       <Screen>
         <Confetti active={Boolean(fin?.merece)} />
-        <Animated.View entering={aparecerSubiendo()} style={styles.cierre}>
+        <Animated.View entering={reducido ? undefined : aparecerSubiendo()} style={styles.cierre}>
           <Text style={styles.cierreTitulo}>Sesión terminada</Text>
           {fin ? <Text style={styles.cierreLinea}>{lineaFinal(fin)}</Text> : null}
           <Button label="Terminar" full onPress={() => nav.goBack()} />
@@ -328,7 +330,11 @@ export function StudyScreen() {
             onOrigenAcierto={setOrigenTrozos}
           />
         ) : fin ? (
-          <Animated.View entering={aparecerSubiendo()} style={styles.finCentro} accessibilityLiveRegion="polite">
+          <Animated.View
+            entering={reducido ? undefined : aparecerSubiendo()}
+            style={styles.finCentro}
+            accessibilityLiveRegion="polite"
+          >
             <Text style={styles.cierreTitulo}>Sesión terminada</Text>
             <Text style={styles.cierreLinea}>{lineaFinal(fin)}</Text>
           </Animated.View>

@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import type { Rect } from '@/components/fx';
 import { color, font, motionDuration, motionEasing } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 
 /** Cuánto crece al llegar: de la letra de una opción (16) a la de la frase (28). */
 const CRECE = font.size.xxl / font.size.md - 1;
@@ -26,11 +27,17 @@ interface Props {
  * igual al calificar).
  */
 export function PalabraVoladora({ palabra, de, a, desfase, alTerminar }: Props) {
+  const reducido = useMovimientoReducido();
   const avance = useSharedValue(0);
   const dx = a.x + a.width / 2 - (de.x + de.width / 2);
   const dy = a.y + a.height / 2 - (de.y + de.height / 2);
 
   useEffect(() => {
+    // Con movimiento reducido no hay vuelo: el hueco se llena de una vez.
+    if (reducido) {
+      alTerminar();
+      return;
+    }
     avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }, (terminado) => {
       if (terminado) runOnJS(alTerminar)();
     });

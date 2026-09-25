@@ -13,6 +13,8 @@ Ya está todo pegado. Corre "npm run check:data" y debe salir 7 de 7.
   lecturas.json        24 historias, 8 para niños   <- generado
   niveles.json         800 niveles, 200 por juego   <- generado
   phrasal_verbs.json   67 phrasal verbs, 38 verbos  <- generado
+  marcas.json          horas de cada palabra de audio_en (karaoke de Estudio); vacío hasta correr
+                       node scripts/polly.mjs --marcas (ver --marcas --plan para el costo)
 
 Si vuelves a generar alguno, los nombres SÍ cambian respecto al disco:
 

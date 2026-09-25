@@ -3,6 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { diffLetras } from '@/domain/diff';
 import { aparecer, color, font, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 
 interface Props {
   /** Lo que escribió el usuario. */
@@ -17,6 +18,7 @@ interface Props {
  * solo del color). Nunca dice "incorrecto": muestra dónde quedó la diferencia.
  */
 export function DiffFrase({ dado, esperado }: Props) {
+  const reducido = useMovimientoReducido();
   const tramos = useMemo(() => diffLetras(dado, esperado), [dado, esperado]);
 
   // Para el lector de pantalla: la frase con lo que faltó y lo que sobró dicho en palabras.
@@ -29,7 +31,7 @@ export function DiffFrase({ dado, esperado }: Props) {
   );
 
   return (
-    <Animated.View entering={aparecer()} style={styles.wrap} accessible accessibilityRole="text" accessibilityLabel={descripcion}>
+    <Animated.View entering={reducido ? undefined : aparecer()} style={styles.wrap} accessible accessibilityRole="text" accessibilityLabel={descripcion}>
       <Text style={styles.linea}>
         {tramos.map((t, i) => (
           <Text key={`${i}-${t.tipo}`} style={t.tipo === 'igual' ? styles.igual : t.tipo === 'falta' ? styles.falta : styles.extra}>

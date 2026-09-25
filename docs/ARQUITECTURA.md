@@ -43,15 +43,18 @@ o por una consulta de `db/queries.ts`.
      │
      ▼
   review(state, grade)           domain/sm2.ts
-     │  devuelve estado nuevo + si vuelve en la sesión
+     │  devuelve estado nuevo; StudySession.answer() dice si la
+     │  sesión de verdad la reinserta (`reinsertada`, solo la fallada)
      ▼
   upsertCardState()  ─▶ SQLite
      │
      ▼
-  FeedbackBand sube desde abajo
-     │  "Seguir"
+  HojaVeredicto sube desde abajo (fx/)
+     │  "Siguiente"
      ▼
   session.current()  →  siguiente tarjeta, o fin
+     │  al fin: finish() guarda la racha, cierra la sesión
+     │  y programa la próxima notificación
 ```
 
 ---

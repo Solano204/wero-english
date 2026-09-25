@@ -69,6 +69,9 @@ La misma acción se llama igual en toda la app.
 | Pasar frases sin repaso ni cuenta | Frases sueltas | Al azar |
 | Repaso que toca hoy | Repasar N frases; el total aparte: "N pendientes" | tarjetas listas, cola de repaso |
 | Aciertos seguidos en una sesión | N seguidas | racha |
+| Aciertos de la sesión | N frases atinadas (en el chip, «N atinadas») | correctas, aciertos |
+| Cuándo vuelve la tarjeta que acabas de responder | «Vuelve en esta sesión» (solo si de verdad se reinserta), «La vuelves a ver pronto», «La vuelves a ver mañana» | Volverá, repetición |
+| Veredicto de una tarjeta | «Eso es» al acertar, «Era esta» al fallar | Incorrecto, Error, Mal |
 | Días seguidos entrando | Racha: N días | streak |
 | Frase que ya se sabe | dominada | aprendida |
 | Frase que se falla seguido | atorada (Se me atoran) | difícil |
