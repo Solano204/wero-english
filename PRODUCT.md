@@ -80,6 +80,7 @@ La misma acción se llama igual en toda la app.
 | Ver un anuncio para abrir contenido | Ver anuncio y abrir, Ver anuncio y descargar (en la celda de un nivel basta «Anuncio») | desbloquear |
 | Jugar el nivel que sigue | Jugar nivel N (con el número real) | Empezar nivel, Continuar |
 | Los tres tramos del mapa de niveles | «Niveles 1–70»; bloqueado: «Se abre al terminar el nivel N» | Fase, Mundo, Etapa |
+| Lo que queda de un tablero de Pares | «Te quedan N jugadas», «Dejarlo aquí», «Saltar»; las fichas llevan «EN» y «ES»; el progreso, solo para el lector de pantalla: «N de M pares» | Vidas, intentos, Skip |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 

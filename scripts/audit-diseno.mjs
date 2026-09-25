@@ -407,6 +407,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
   r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
   r.startsWith('src/components/niveles/') || r === 'src/screens/games/NivelesScreen.tsx' ||
+  r.startsWith('src/components/juegos/pares/') || r === 'src/screens/games/ParesScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -423,6 +424,8 @@ const LOOPS_POR_PANTALLA = {
   Detalle: [],
   // Niveles: el único bucle es la onda del anillo del nivel actual (`AnilloActual`, con `useReloj`), que no es un canvas de Skia.
   Niveles: [],
+  // Pares: el cable (Skia) solo se dibuja mientras hay un arrastre o una unión, y el latido del reloj (`RelojRonda`) no es un canvas; ningún bucle de Skia.
+  Pares: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
