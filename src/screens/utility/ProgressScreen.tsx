@@ -6,6 +6,7 @@ import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ALTO_ENCABEZADO,
+  Button,
   Card,
   Carga,
   EncabezadoComprimido,
@@ -13,12 +14,13 @@ import {
   SkeletonLista,
 } from '@/components/base';
 import { SectionTitle } from '@/components/list';
-import { FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
-import { Espectrograma } from '@/components/fx';
+import { CuadroDato, FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
+import { AnilloMeta, Espectrograma } from '@/components/fx';
 import { useVisto } from '@/components/fx/useVisibilidad';
 import {
   JUEGOS_PROGRESO,
   filasMundo,
+  precisionPct,
   resumenJuego,
   ventana,
   type ProgresoMundo,
@@ -27,6 +29,7 @@ import { getGameRecords } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
 import { getProgresoPorMundo, getStats, type Stats } from '@/db/queries';
 import { getRecentDays } from '@/db/progress';
+import { etiquetaCorregir } from '@/screens/extras/practicar/consola';
 import { ICONO_MODO } from '@/screens/extras/practicar/iconos';
 import { MODOS } from '@/screens/extras/practicar/modos';
 import type { Niveles } from '@/screens/extras/practicar/resumenNiveles';
@@ -35,9 +38,9 @@ import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
+import { anillo, color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { dayKey } from '@/utils/date';
-import { conteo } from '@/utils/text';
+import { conteo, plural } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -97,6 +100,7 @@ export function ProgressScreen() {
   const espectro = useVisto(scrollY);
   const seccionMundos = useVisto(scrollY);
   const seccionJuegos = useVisto(scrollY);
+  const seccionDetalle = useVisto(scrollY);
 
   return (
     <Screen
@@ -170,29 +174,63 @@ export function ProgressScreen() {
                 </View>
               </Animated.View>
 
-              <View style={styles.bloque}>
-                <SectionTitle title="Detalle" variante="bloque" />
-                <View style={styles.rows}>
-                  <Row label="Precisión general" value={`${Math.round((stats?.precision ?? 0) * 100)}%`} />
-                  <Row label="Racha más larga" value={conteo(stats?.rachaMax ?? 0, 'día')} />
-                  <Row label="Guardadas con estrella" value={String(stats?.favoritas ?? 0)} onPress={() => nav.navigate('Deck')} />
-                  <Row label="Se te atoran" value={String(stats?.atoradas ?? 0)} onPress={() => nav.navigate('Stuck')} />
-                </View>
-              </View>
+              {stats ? (
+                <Animated.View ref={seccionDetalle.ref} collapsable={false} onLayout={seccionDetalle.alAcomodar} style={styles.bloque}>
+                  <SectionTitle title="Detalle" variante="bloque" />
+                  <View style={styles.cuadricula}>
+                    <View style={styles.parFichas}>
+                      <CuadroDato
+                        etiqueta="Precisión general"
+                        accessibilityLabel={`Precisión general: ${precisionPct(stats.precision)} %`}
+                        medidor={
+                          <AnilloMeta
+                            valor={seccionDetalle.visto ? precisionPct(stats.precision) : 0}
+                            total={100}
+                            diametro={anillo.reto}
+                            trazo={anillo.trazoReto}
+                            etiqueta={`Precisión general: ${precisionPct(stats.precision)} %`}
+                          >
+                            <Text style={styles.anilloNumero}>{precisionPct(stats.precision)}%</Text>
+                          </AnilloMeta>
+                        }
+                      />
+                      <CuadroDato
+                        etiqueta="Racha más larga"
+                        icono="fire"
+                        iconoColor={color.star}
+                        valor={String(stats.rachaMax)}
+                        unidad={plural(stats.rachaMax, 'día')}
+                        accessibilityLabel={`Racha más larga: ${conteo(stats.rachaMax, 'día')}`}
+                      />
+                    </View>
+                    <View style={styles.parFichas}>
+                      <CuadroDato
+                        etiqueta="Guardadas con estrella"
+                        icono="star-filled"
+                        iconoColor={color.star}
+                        valor={String(stats.favoritas)}
+                        onPress={() => nav.navigate('Deck')}
+                        accessibilityLabel={`Guardadas con estrella: ${stats.favoritas}`}
+                      />
+                      <CuadroDato
+                        etiqueta="Se te atoran"
+                        punto={color.wrong}
+                        valor={String(stats.atoradas)}
+                        onPress={() => nav.navigate('Stuck')}
+                        accessibilityLabel={`Se te atoran: ${stats.atoradas}`}
+                      />
+                    </View>
+                  </View>
+                  {stats.atoradas > 0 ? (
+                    <Button label={etiquetaCorregir(stats.atoradas)} size="lg" full onPress={() => nav.navigate('Stuck')} />
+                  ) : null}
+                </Animated.View>
+              ) : null}
             </>
           )}
         </Carga>
       </Animated.View>
     </Screen>
-  );
-}
-
-function Row({ label, value, onPress }: { label: string; value: string; onPress?: () => void }) {
-  return (
-    <Card onPress={onPress} style={styles.row}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
-    </Card>
   );
 }
 
@@ -211,8 +249,5 @@ const styles = StyleSheet.create({
     borderColor: color.border,
     overflow: 'hidden',
   },
-  rows: { gap: space.sm },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: space.md },
-  rowLabel: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
-  rowValue: { fontSize: font.size.md, color: color.textMuted, fontFamily: font.family.bodyStrong },
+  anilloNumero: { fontFamily: font.family.display, fontSize: font.size.md, fontVariant: ['tabular-nums'], color: color.text },
 });
