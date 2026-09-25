@@ -1,17 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { conteo } from '@/utils/text';
-import { AppState, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
+import { AppState, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion, estiloResultado, useEfectoResultado } from '@/components/feedback';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Trozos, useReaccion } from '@/components/feedback';
 import { CableSenal, type ParIndices } from '@/components/juegos/pares/CableSenal';
 import { FichaPar } from '@/components/juegos/pares/FichaPar';
 import { FichasJugadas } from '@/components/juegos/pares/FichasJugadas';
 import { distribuir, type Rect } from '@/components/juegos/pares/geometria';
 import { RelojRonda } from '@/components/juegos/pares/RelojRonda';
-import { SegmentosPares } from '@/components/juegos/pares/SegmentosPares';
+import { SegmentosPares, centroSegmento } from '@/components/juegos/pares/SegmentosPares';
+import { Sello } from '@/components/juegos/pares/Sello';
+import { TarjetaFusion } from '@/components/juegos/pares/TarjetaFusion';
 import { buildTablero, sonPareja } from '@/domain/pares';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -21,13 +22,21 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, radius, space, aparecer, aparecerZoom, motionDuration, motionEasing } from '@/theme';
+import { color, font, space } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
-import { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Pares'>;
+
+/** Un par que se acaba de juntar y cuya voz aún suena: la tarjeta de fusión lo lleva hasta su segmento. */
+interface Fusion {
+  a: number;
+  b: number;
+  /** El segmento del progreso que se enciende cuando la tarjeta llega. */
+  segmento: number;
+  entry: Entry;
+}
 
 /**
  * Tope duro: si el audio no carga o se atora, esto suelta la pausa igual.
@@ -36,6 +45,8 @@ type Ruta = RouteProp<RootStackParams, 'Pares'>;
 const PAUSA_MAXIMA_MS = 10000;
 /** Tope de la unión de un par (el cable tarda unos 370 ms): pasado esto se suelta el tablero igual. */
 const UNION_MAXIMA_MS = 1500;
+/** Tope del vuelo de la tarjeta de un par después de su voz: entrada de 450 ms más 320 ms de vuelo, con margen. */
+const FUSION_MAXIMA_MS = 2000;
 /** Bloqueo de "Saltar" contra doble toque. */
 const SALTAR_DEBOUNCE_MS = 400;
 
@@ -72,25 +83,51 @@ export function ParesScreen() {
   const [fallando, setFallando] = useState<string[]>([]);
   const [jugadas, setJugadas] = useState(0);
   // Pausa al acertar un par: congela reloj y tablero mientras se oyen
-  // las dos frases. `parPausado` trae lo que muestra el overlay.
+  // las dos frases. La tarjeta de fusión es lo que se ve mientras dura.
   const [enPausa, setEnPausa] = useState(false);
-  const [parPausado, setParPausado] = useState<{ en: string; es: string } | null>(
-    null
-  );
   const [saltando, setSaltando] = useState(false);
   // Lo que mide la zona del tablero: de ahí sale dónde cae cada ficha.
-  const [zona, setZona] = useState({ ancho: 0, alto: 0 });
+  const [zona, setZona] = useState({ x: 0, y: 0, ancho: 0, alto: 0 });
   const geo = useMemo(
     () => distribuir(tablero?.fichas.length ?? 0, zona.ancho, zona.alto),
     [tablero?.fichas.length, zona.ancho, zona.alto]
   );
   const alMedirZona = useCallback((e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    setZona((z) => (z.ancho === width && z.alto === height ? z : { ancho: width, alto: height }));
+    const { x, y, width, height } = e.nativeEvent.layout;
+    setZona((z) => (z.x === x && z.y === y && z.ancho === width && z.alto === height ? z : { x, y, ancho: width, alto: height }));
   }, []);
-  // Las dos fichas de un acierto siguen en el tablero mientras el cable las une.
+  // La capa donde se funden las fichas mide lo que toda la pantalla; `segmentos` es la esquina de la fila de progreso en esa capa.
+  const capaRef = useRef<View>(null);
+  const segmentosRef = useRef<View>(null);
+  const scrollY = useRef(0);
+  const [capa, setCapa] = useState({ ancho: 0, alto: 0 });
+  const [segmentos, setSegmentos] = useState<{ x: number; y: number } | null>(null);
+  const medirSegmentos = useCallback(() => {
+    const raiz = capaRef.current;
+    if (!raiz) return;
+    segmentosRef.current?.measureLayout(
+      raiz,
+      (x, y) => setSegmentos((s) => (s && s.x === x && s.y === y ? s : { x, y })),
+      () => undefined
+    );
+  }, []);
+  const alMedirCapa = useCallback(
+    (e: LayoutChangeEvent) => {
+      const { width, height } = e.nativeEvent.layout;
+      setCapa((c) => (c.ancho === width && c.alto === height ? c : { ancho: width, alto: height }));
+      medirSegmentos();
+    },
+    [medirSegmentos]
+  );
+  const alScrollear = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    scrollY.current = e.nativeEvent.contentOffset.y;
+  }, []);
+  // Las dos fichas de un acierto siguen en el tablero mientras el cable las une, y el par sigue
+  // «en vuelo» (sin encender su segmento) hasta que su tarjeta llega.
   const [union, setUnion] = useState<ParIndices | null>(null);
+  const [fusion, setFusion] = useState<Fusion | null>(null);
   const alTerminarUnion = useCallback(() => setUnion(null), []);
+  const alAterrizar = useCallback(() => setFusion(null), []);
   // Si el aviso del cable no llega (app en segundo plano a media unión), el tablero no se queda bloqueado.
   useEffect(() => {
     if (!union) return undefined;
@@ -123,10 +160,7 @@ export function ParesScreen() {
     pausaToken.current++;
     audio.stop();
     if (limiteTimer.current) clearTimeout(limiteTimer.current);
-    if (montado.current) {
-      setEnPausa(false);
-      setParPausado(null);
-    }
+    if (montado.current) setEnPausa(false);
   }, []);
 
   useEffect(() => {
@@ -169,7 +203,6 @@ export function ParesScreen() {
   const pausarConVoz = useCallback(
     async (entry: Entry) => {
       const miToken = ++pausaToken.current;
-      setParPausado({ en: entry.phrase, es: entry.spanish_main });
       setEnPausa(true);
 
       // Se guarda también en local: el finally solo debe apagar SU tope,
@@ -185,10 +218,7 @@ export function ParesScreen() {
         clearTimeout(limite);
         // Si nadie más tomó el token (ni saltarPausa ni un abort externo
         // ya lo hicieron), esta es la que cierra la pausa.
-        if (pausaToken.current === miToken && montado.current) {
-          setEnPausa(false);
-          setParPausado(null);
-        }
+        if (pausaToken.current === miToken && montado.current) setEnPausa(false);
       }
     },
     [abortarPausa]
@@ -204,7 +234,7 @@ export function ParesScreen() {
 
   const tocar = useCallback(
     (f: ParFicha) => {
-      if (!tablero || fallando.length > 0 || enPausa || union) return;
+      if (!tablero || fallando.length > 0 || enPausa || union || fusion) return;
       if (resueltas.includes(f.entryId)) return;
 
       if (!elegida) {
@@ -225,10 +255,9 @@ export function ParesScreen() {
         haptics.success();
         reaccion.celebra();
         setResueltas((prev) => [...prev, f.entryId]);
-        setUnion({
-          a: tablero.fichas.findIndex((x) => x.id === elegida.id),
-          b: tablero.fichas.findIndex((x) => x.id === f.id),
-        });
+        const a = tablero.fichas.findIndex((x) => x.id === elegida.id);
+        const b = tablero.fichas.findIndex((x) => x.id === f.id);
+        setUnion({ a, b });
         setElegida(null);
         const entry = entradas.current.get(f.entryId);
         // Siempre se oyen las dos frases al acertar un par, sin mirar
@@ -237,6 +266,7 @@ export function ParesScreen() {
         // sonarlo aparte cancelaría la frase en inglés (playSfx hace
         // stop()). Solo si no hay voz que oír suena suelto.
         if (entry && (entry.audio_en || entry.audio_es)) {
+          setFusion({ a, b, segmento: resueltas.length, entry });
           void pausarConVoz(entry);
         } else {
           void audio.playSuccess();
@@ -273,7 +303,7 @@ export function ParesScreen() {
         setElegida(null);
       }, 520);
     },
-    [tablero, elegida, resueltas, fallando, enPausa, union, user, pausarConVoz]
+    [tablero, elegida, resueltas, fallando, enPausa, union, fusion, user, pausarConVoz]
   );
 
   // El cable arrastra: soltar sobre una ficha es el segundo toque, y una ficha que no tenía
@@ -297,17 +327,24 @@ export function ParesScreen() {
     });
   }, [nav, tablero, resueltas.length, nivel]);
 
+  // Si la tarjeta no avisa que llegó, el tablero no se queda bloqueado (el vuelo tarda unos 800 ms tras la voz).
   useEffect(() => {
-    if (!tablero || enPausa) return;
+    if (!fusion || enPausa) return undefined;
+    const t = setTimeout(() => setFusion(null), FUSION_MAXIMA_MS);
+    return () => clearTimeout(t);
+  }, [fusion, enPausa]);
+
+  useEffect(() => {
+    if (!tablero || enPausa || fusion) return;
     // Si el último par disparó pausarConVoz, esto no corre hasta que
-    // enPausa vuelva a false: primero se oye la frase, después se
-    // termina la partida.
+    // enPausa vuelva a false y su tarjeta llegue al segmento: primero se
+    // oye la frase, después se termina la partida.
     if (resueltas.length > 0 && resueltas.length === tablero.totalPares) {
       const t = setTimeout(terminar, 620);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [resueltas.length, tablero, terminar, enPausa]);
+  }, [resueltas.length, tablero, terminar, enPausa, fusion]);
 
   if (carga.estado === 'error') {
     return (
@@ -346,198 +383,142 @@ export function ParesScreen() {
 
   const restantes = Math.max(0, tablero.jugadas - jugadas);
 
+  // Dónde están las fichas de un par en la capa de la pantalla (el tablero está centrado en su zona y puede ir scrolleado).
+  const desplazo = Math.max(0, (zona.alto - geo.altoContenido) / 2);
+  const enCapa = (i: number): Rect | null => {
+    const r = geo.rectas[i];
+    return r ? { x: zona.x + r.x, y: zona.y + desplazo + r.y - scrollY.current, width: r.width, height: r.height } : null;
+  };
+  const fichaA = fusion ? tablero.fichas[fusion.a] : undefined;
+  const fichaB = fusion ? tablero.fichas[fusion.b] : undefined;
+  const rectaA = fusion ? enCapa(fusion.a) : null;
+  const rectaB = fusion ? enCapa(fusion.b) : null;
+  const meta = fusion ? centroSegmento(fusion.segmento) : null;
+  const destino =
+    segmentos && meta ? { x: segmentos.x + meta.x, y: segmentos.y + meta.y } : { x: capa.ancho - space.xl, y: space.xl };
+
   return (
     <Screen padded={false}>
-      <Trozos disparo={reaccion.trozos} tinte={color.world.dia_a_dia} x="50%" y="50%" />
-      <View style={styles.top}>
-        <Header
-          onBack={() => nav.goBack()}
-          title={nivel ? `Nivel ${nivel}` : undefined}
-          right={<SegmentosPares total={tablero.totalPares} resueltos={resueltas.length} />}
-        />
-        {nv ? (
-          <View style={styles.reloj}>
-            <RelojRonda
-              segundos={nv.segundosTablero}
-              llave={nivel ?? 0}
-              // Al resolver el tablero el reloj se congela: seguir
-              // contando mientras corre la animación de salida haría
-              // perder partidas ya ganadas. También se congela mientras
-              // se oye la voz de un par recién acertado.
-              pausado={enPausa || resueltas.length >= (tablero?.totalPares ?? 0)}
-              onFin={terminar}
-            />
-          </View>
-        ) : null}
-      </View>
-
-      <Text style={styles.instruccion}>Junta cada frase con lo que significa</Text>
-
-      <View style={styles.zona} onLayout={alMedirZona} pointerEvents={enPausa ? 'none' : 'auto'}>
-        {zona.ancho > 0 ? (
-          <ScrollView
-            scrollEnabled={geo.desborda}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.zonaContenido}
-          >
-            <CableSenal
-              ancho={zona.ancho}
-              alto={geo.altoContenido}
-              rectas={geo.rectas}
-              ancla={elegida ? tablero.fichas.findIndex((f) => f.id === elegida.id) : -1}
-              libres={libres}
-              bloqueado={enPausa || fallando.length > 0 || union !== null}
-              arrastrable={!geo.desborda}
-              union={union}
-              fallo={fallo}
-              onIniciar={tocarIndice}
-              onSoltar={tocarIndice}
-              onCancelar={cancelarArrastre}
-              onUnionLista={alTerminarUnion}
-            >
-              {tablero.fichas.map((f, i) => {
-                const recta = geo.rectas[i];
-                if (!recta) return null;
-                const uniendo = union !== null && (union.a === i || union.b === i);
-                if (resueltas.includes(f.entryId) && !uniendo) {
-                  return <FichaResuelta key={f.id} texto={f.texto} recta={recta} />;
-                }
-                return (
-                  <FichaPar
-                    key={f.id}
-                    ficha={f}
-                    recta={recta}
-                    elevada={uniendo || elegida?.id === f.id}
-                    falla={fallando.includes(f.id)}
-                    // La segunda ficha de la jugada es la que se sacude.
-                    sacude={fallando[1] === f.id}
-                    onPress={() => tocar(f)}
-                  />
-                );
-              })}
-            </CableSenal>
-          </ScrollView>
-        ) : null}
-      </View>
-
-      {enPausa && parPausado && !union ? (
-        <Animated.View
-          entering={aparecer()}
-          style={styles.overlay}
-          pointerEvents="box-none"
-        >
-          <Animated.View entering={aparecerZoom()} style={styles.overlayCard}>
-            <Text style={styles.overlayEn}>{parPausado.en}</Text>
-            <Text style={styles.overlayEs}>{parPausado.es}</Text>
-            <Presionable
-              onPress={saltarPausa}
-              disabled={saltando}
-              accessibilityRole="button"
-              accessibilityLabel="Saltar"
-              hitSlop={8}
-              style={styles.saltar}
-            >
-              <Text style={styles.saltarTexto}>Saltar</Text>
-              <Icon name="chevron-right" size="sm" color={color.textFaint} />
-            </Presionable>
-          </Animated.View>
-        </Animated.View>
-      ) : null}
-
-      <View style={styles.pie}>
-        <View style={styles.jugadasFila}>
-          {restantes > 0 ? <FichasJugadas total={tablero.jugadas} restantes={restantes} /> : null}
-          <Text style={[styles.jugadas, restantes > 0 && styles.jugadasAlLado]}>
-            {restantes > 0
-              ? `Te quedan ${conteo(restantes, 'jugada')}`
-              : 'Se acabaron las jugadas, pero el tablero se queda'}
-          </Text>
+      <View ref={capaRef} style={styles.capa} onLayout={alMedirCapa}>
+        <Trozos disparo={reaccion.trozos} tinte={color.world.dia_a_dia} x="50%" y="50%" />
+        <View style={styles.top}>
+          <Header
+            onBack={() => nav.goBack()}
+            title={nivel ? `Nivel ${nivel}` : undefined}
+            right={
+              <View ref={segmentosRef} collapsable={false} onLayout={medirSegmentos}>
+                <SegmentosPares total={tablero.totalPares} resueltos={resueltas.length - (fusion ? 1 : 0)} />
+              </View>
+            }
+          />
+          {nv ? (
+            <View style={styles.reloj}>
+              <RelojRonda
+                segundos={nv.segundosTablero}
+                llave={nivel ?? 0}
+                // Al resolver el tablero el reloj se congela: seguir
+                // contando mientras corre la animación de salida haría
+                // perder partidas ya ganadas. También se congela mientras
+                // se oye la voz de un par recién acertado.
+                pausado={enPausa || resueltas.length >= (tablero?.totalPares ?? 0)}
+                onFin={terminar}
+              />
+            </View>
+          ) : null}
         </View>
-        <Button
-          label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo me fue'}
-          variant={restantes > 0 ? 'ghost' : 'primary'}
-          onPress={terminar}
-          full
-        />
+
+        <Text style={styles.instruccion}>Junta cada frase con lo que significa</Text>
+
+        <View style={styles.zona} onLayout={alMedirZona} pointerEvents={enPausa ? 'none' : 'auto'}>
+          {zona.ancho > 0 ? (
+            <ScrollView
+              scrollEnabled={geo.desborda}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.zonaContenido}
+              onScroll={alScrollear}
+              scrollEventThrottle={16}
+            >
+              <CableSenal
+                ancho={zona.ancho}
+                alto={geo.altoContenido}
+                rectas={geo.rectas}
+                ancla={elegida ? tablero.fichas.findIndex((f) => f.id === elegida.id) : -1}
+                libres={libres}
+                bloqueado={enPausa || fallando.length > 0 || union !== null || fusion !== null}
+                arrastrable={!geo.desborda}
+                union={union}
+                fallo={fallo}
+                onIniciar={tocarIndice}
+                onSoltar={tocarIndice}
+                onCancelar={cancelarArrastre}
+                onUnionLista={alTerminarUnion}
+              >
+                {tablero.fichas.map((f, i) => {
+                  const recta = geo.rectas[i];
+                  if (!recta) return null;
+                  const uniendo = union !== null && (union.a === i || union.b === i);
+                  if (resueltas.includes(f.entryId) && !uniendo) return <Sello key={f.id} recta={recta} />;
+                  return (
+                    <FichaPar
+                      key={f.id}
+                      ficha={f}
+                      recta={recta}
+                      elevada={uniendo || elegida?.id === f.id}
+                      falla={fallando.includes(f.id)}
+                      // La segunda ficha de la jugada es la que se sacude.
+                      sacude={fallando[1] === f.id}
+                      onPress={() => tocar(f)}
+                    />
+                  );
+                })}
+              </CableSenal>
+            </ScrollView>
+          ) : null}
+        </View>
+
+        {fusion && fichaA && fichaB && capa.ancho > 0 ? (
+          <TarjetaFusion
+            fichas={[fichaA, fichaB]}
+            rectas={rectaA && rectaB ? [rectaA, rectaB] : null}
+            capa={capa}
+            destino={destino}
+            entry={fusion.entry}
+            iniciar={union === null}
+            saliendo={!enPausa}
+            onAterrizo={alAterrizar}
+          />
+        ) : null}
+
+        <View style={styles.pie}>
+          <View style={styles.jugadasFila}>
+            {restantes > 0 ? <FichasJugadas total={tablero.jugadas} restantes={restantes} /> : null}
+            <Text style={[styles.jugadas, restantes > 0 && styles.jugadasAlLado]}>
+              {restantes > 0
+                ? `Te quedan ${conteo(restantes, 'jugada')}`
+                : 'Se acabaron las jugadas, pero el tablero se queda'}
+            </Text>
+          </View>
+          {enPausa ? (
+            // «Saltar» ocupa el lugar del botón de salida, en la zona del pulgar y por encima del velo de la tarjeta.
+            <Button label="Saltar" variant="ghost" icon="chevron-right" iconAlFinal onPress={saltarPausa} disabled={saltando} full />
+          ) : (
+            <Button
+              label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo me fue'}
+              variant={restantes > 0 ? 'ghost' : 'primary'}
+              onPress={terminar}
+              full
+            />
+          )}
+        </View>
       </View>
     </Screen>
   );
 }
 
-/** Coloca una ficha en la posición que le calculó `distribuir`. */
-function enRecta(r: Rect): ViewStyle {
-  return { position: 'absolute', left: r.x, top: r.y, width: r.width, height: r.height };
-}
-
-/**
- * Ficha de un par resuelto: pulso con el color de acierto y, pasado `base`,
- * se apaga. Se queda como hueco invisible para que el tablero no se mueva.
- */
-function FichaResuelta({ texto, recta }: { texto: string; recta: Rect }) {
-  const { estilo, acierto } = useEfectoResultado();
-  const opacidad = useSharedValue(1);
-
-  useEffect(() => {
-    acierto();
-    opacidad.value = withDelay(
-      motionDuration.base,
-      withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
-    );
-  }, [acierto, opacidad]);
-
-  const apagado = useAnimatedStyle(() => ({ opacity: opacidad.value }));
-
-  return (
-    <Animated.View style={[styles.ficha, enRecta(recta), estiloResultado.acierto, apagado, estilo]}>
-      <Text style={styles.fichaTexto} numberOfLines={3}>
-        {texto}
-      </Text>
-    </Animated.View>
-  );
-}
-
 const styles = StyleSheet.create({
+  capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   reloj: { marginTop: space.sm, marginBottom: space.md },
-  overlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: space.xl,
-    backgroundColor: color.velo,
-  },
-  overlayCard: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    gap: space.sm,
-    padding: space.xl,
-    borderRadius: radius.lg,
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.border,
-  },
-  overlayEn: {
-    fontSize: font.size.xl,
-    fontFamily: font.family.display,
-    color: color.text,
-    textAlign: 'center',
-  },
-  overlayEs: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.textMuted,
-    textAlign: 'center',
-  },
-  saltar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm, padding: space.sm },
-  saltarTexto: {
-    fontSize: font.size.sm,
-    color: color.textFaint,
-    fontFamily: font.family.bodyStrong,
-  },
   instruccion: {
     fontFamily: font.family.body,
     fontSize: font.size.sm,
@@ -547,19 +528,6 @@ const styles = StyleSheet.create({
   },
   zona: { flex: 1, marginHorizontal: space.lg },
   zonaContenido: { flexGrow: 1, justifyContent: 'center' },
-  ficha: {
-    borderRadius: radius.md,
-    borderWidth: 1,
-    padding: space.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fichaTexto: {
-    color: color.text,
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    textAlign: 'center',
-  },
   pie: {
     paddingHorizontal: space.lg,
     paddingBottom: space.lg,

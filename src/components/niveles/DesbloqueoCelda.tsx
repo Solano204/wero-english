@@ -10,7 +10,7 @@ import Animated, {
 import { Icon } from '@/components/base/Icon';
 import { color, motionDuration, motionEasing, radius } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
-import { BordePunteado } from './BordePunteado';
+import { BordePunteado } from '@/components/fx/BordePunteado';
 
 /** Cuánto se inclina el candado al abrirse (grados) y cuánto sube. */
 const GIRO = -25;
@@ -50,7 +50,7 @@ export function DesbloqueoCelda({ lado }: Props) {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <Animated.View style={[StyleSheet.absoluteFill, punteado]}>
-        <BordePunteado lado={lado} />
+        <BordePunteado ancho={lado} alto={lado} />
       </Animated.View>
       <Animated.View style={[StyleSheet.absoluteFill, styles.solido, solido]} />
       <Animated.View style={[StyleSheet.absoluteFill, styles.centro, candado]}>

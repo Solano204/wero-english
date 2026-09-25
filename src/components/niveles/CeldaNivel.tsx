@@ -26,7 +26,7 @@ import {
 } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { AnilloActual } from './AnilloActual';
-import { BordePunteado } from './BordePunteado';
+import { BordePunteado } from '@/components/fx/BordePunteado';
 import { DesbloqueoCelda } from './DesbloqueoCelda';
 import { EstrellasCelda } from './EstrellasCelda';
 import type { Logro } from './useRecompensaNiveles';
@@ -128,7 +128,7 @@ export const CeldaNivel = memo(function CeldaNivel({ n, estado, estrellas, lado,
       ]}
     >
       {actual ? <LinearGradient colors={senal} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} /> : null}
-      {anuncio ? <BordePunteado lado={lado} /> : null}
+      {anuncio ? <BordePunteado ancho={lado} alto={lado} /> : null}
       {desbloqueando ? <DesbloqueoCelda lado={lado} /> : null}
 
       <Text

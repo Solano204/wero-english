@@ -1,5 +1,4 @@
 export { AnilloActual } from './AnilloActual';
-export { BordePunteado } from './BordePunteado';
 export { CeldaNivel, ESCALA_ACTUAL, RETRASO_LOGRO } from './CeldaNivel';
 export { EncabezadoNiveles } from './EncabezadoNiveles';
 export { ALTO_TRAMO, EncabezadoTramo } from './EncabezadoTramo';

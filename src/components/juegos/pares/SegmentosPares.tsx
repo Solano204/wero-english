@@ -6,6 +6,12 @@ import { useMovimientoReducido } from '@/utils';
 
 const ANCHO = 14;
 const ALTO = 8;
+const HUECO = space.xs;
+
+/** El centro del segmento `i` respecto de la esquina de la fila: a donde vuela la tarjeta de un par resuelto. */
+export function centroSegmento(i: number): { x: number; y: number } {
+  return { x: i * (ANCHO + HUECO) + ANCHO / 2, y: ALTO / 2 };
+}
 
 interface SegmentoProps {
   encendido: boolean;
@@ -64,7 +70,7 @@ export function SegmentosPares({ total, resueltos, cascada = false }: Props) {
 }
 
 const styles = StyleSheet.create({
-  fila: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
+  fila: { flexDirection: 'row', alignItems: 'center', gap: HUECO },
   segmento: { width: ANCHO, height: ALTO, borderRadius: radius.pill, backgroundColor: color.trackFondo, overflow: 'hidden' },
   relleno: { ...StyleSheet.absoluteFill, backgroundColor: color.accent, borderRadius: radius.pill, transformOrigin: 'left' },
 });
