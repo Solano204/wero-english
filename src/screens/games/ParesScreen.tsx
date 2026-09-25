@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, estiloResultado, useEfectoResultado } from '@/components/feedback';
+import { FichaPar } from '@/components/juegos/pares/FichaPar';
 import { FichasJugadas } from '@/components/juegos/pares/FichasJugadas';
 import { distribuir, type Rect } from '@/components/juegos/pares/geometria';
 import { RelojRonda } from '@/components/juegos/pares/RelojRonda';
@@ -352,27 +353,17 @@ export function ParesScreen() {
                 if (resueltas.includes(f.entryId)) {
                   return <FichaResuelta key={f.id} texto={f.texto} recta={recta} />;
                 }
-                const activa = elegida?.id === f.id;
-                const falla = fallando.includes(f.id);
                 return (
-                  <Presionable
+                  <FichaPar
                     key={f.id}
+                    ficha={f}
+                    recta={recta}
+                    elevada={elegida?.id === f.id}
+                    falla={fallando.includes(f.id)}
+                    // La segunda ficha de la jugada es la que se sacude.
+                    sacude={fallando[1] === f.id}
                     onPress={() => tocar(f)}
-                    accessibilityRole="button"
-                    accessibilityLabel={f.texto}
-                    resultado={falla ? 'fallo' : null}
-                    style={[
-                      styles.ficha,
-                      enRecta(recta),
-                      f.lado === 'en' ? styles.fichaEn : styles.fichaEs,
-                      activa && styles.fichaActiva,
-                      falla && styles.fichaFalla,
-                    ]}
-                  >
-                    <Text style={styles.fichaTexto} numberOfLines={3}>
-                      {f.texto}
-                    </Text>
-                  </Presionable>
+                  />
                 );
               })}
             </View>
@@ -513,22 +504,6 @@ const styles = StyleSheet.create({
     padding: space.sm,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  fichaEn: {
-    backgroundColor: color.surfaceAlt,
-    borderColor: color.border,
-  },
-  fichaEs: {
-    backgroundColor: color.surface,
-    borderColor: color.border,
-  },
-  fichaActiva: {
-    borderColor: color.accent,
-    backgroundColor: color.accentSoft,
-  },
-  fichaFalla: {
-    borderColor: color.wrong,
-    backgroundColor: color.wrongSoft,
   },
   fichaTexto: {
     color: color.text,
