@@ -14,6 +14,7 @@ import {
 import { Trozos, useReaccion } from '@/components/feedback';
 import { BarraSesion, ChipMarcador, HojaVeredicto, publicarBarraEstudio } from '@/components/fx';
 import { DiffFrase, StudyCardView } from '@/components/card';
+import { nivelSeguidas } from '@/domain/seguidas';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -217,7 +218,7 @@ export function StudyScreen() {
                 etiqueta={`${aciertos} ${plural(aciertos, 'frase atinada', 'frases atinadas')}`}
               />
             ) : null}
-            {settings.mostrarSeguidas && seguidas >= 3 ? (
+            {settings.mostrarSeguidas && nivelSeguidas(seguidas) > 0 ? (
               <ChipMarcador valor={seguidas} icono="fire" tinte={color.star} etiqueta={`${seguidas} seguidas`} />
             ) : null}
           </View>
@@ -239,7 +240,7 @@ export function StudyScreen() {
           style={styles.barRow}
           onLayout={() => barra.current?.measureInWindow((_x, y, _w, alto) => publicarBarraEstudio(y + alto / 2))}
         >
-          <BarraSesion hecho={done} meta={goal} />
+          <BarraSesion hecho={done} meta={goal} seguidas={settings.mostrarSeguidas ? seguidas : 0} />
         </View>
       </View>
 

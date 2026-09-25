@@ -1,19 +1,37 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { color, motionSpring, senal } from '@/theme';
+import { nivelSeguidas } from '@/domain/seguidas';
+import { color, motionDuration, motionEasing, motionSpring, senal } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const ALTO_BARRA = 6;
 const PUNTO = 12;
 const HALO = 24;
+/** Alto del resplandor de la barra cuando brilla: más alto que la barra, se desvanece hacia los lados. */
+const ALTO_RESPLANDOR = 18;
 /** Alto de la fila: lo que ocupa el halo del punto, para que nada se recorte. */
 export const ALTO_BARRA_SESION = HALO;
+
+/** Cuánto brilla cada escalón de aciertos seguidos (0 a 1). */
+const BRILLO = [0, 0.16, 0.28, 0.42] as const;
+/** Al subir de escalón el brillo se pasa un poco y se asienta. */
+const PASO_ARRIBA = 0.2;
+/** Cuánto crece el halo del punto con el brillo. */
+const CRECE_HALO = 0.6;
 
 interface Props {
   hecho: number;
   meta: number;
+  /** Aciertos seguidos (ya en cero si el usuario apagó el contador). Enciende el brillo a los 3, 5 y 10. */
+  seguidas?: number;
 }
 
 const acotar = (v: number) => {
@@ -24,23 +42,49 @@ const acotar = (v: number) => {
 /**
  * Barra de la sesión de estudio: relleno en degradado `senal` y un punto de luz
  * en la punta. Relleno y punto salen del mismo valor con el mismo resorte, así
- * que viajan juntos. Solo `transform`: el relleno crece con scaleX desde la
- * izquierda (el degradado se comprime, y la punta siempre es la parte clara).
+ * que viajan juntos. Solo `transform` y `opacity`: el relleno crece con scaleX
+ * desde la izquierda (el degradado se comprime, y la punta siempre es la parte
+ * clara). Con aciertos seguidos brilla por escalones; al fallar el brillo baja
+ * con calma, sin sacudida ni mensaje.
  */
-export function BarraSesion({ hecho, meta }: Props) {
+export function BarraSesion({ hecho, meta, seguidas = 0 }: Props) {
   const reducido = useMovimientoReducido();
   const fraccion = meta > 0 ? Math.min(1, hecho / meta) : 0;
   const progreso = useSharedValue(fraccion);
   const ancho = useSharedValue(0);
+  const brillo = useSharedValue(0);
+  const nivel = nivelSeguidas(seguidas);
+  const nivelPrevio = useRef(0);
 
   useEffect(() => {
     progreso.value = reducido ? fraccion : withSpring(fraccion, motionSpring.liquido);
   }, [fraccion, reducido, progreso]);
 
+  useEffect(() => {
+    const sube = nivel > nivelPrevio.current;
+    nivelPrevio.current = nivel;
+    const objetivo = BRILLO[nivel];
+    if (reducido) {
+      brillo.value = objetivo;
+      return;
+    }
+    brillo.value = sube
+      ? withSequence(
+          withTiming(Math.min(1, objetivo + PASO_ARRIBA), { duration: motionDuration.rapido, easing: motionEasing.entrar }),
+          withTiming(objetivo, { duration: motionDuration.lento, easing: motionEasing.salir })
+        )
+      : withTiming(objetivo, { duration: motionDuration.escena, easing: motionEasing.salir });
+  }, [nivel, reducido, brillo]);
+
   const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: acotar(progreso.value) }] }));
+  const resplandor = useAnimatedStyle(() => ({
+    opacity: brillo.value,
+    transform: [{ scaleX: acotar(progreso.value) }],
+  }));
   const punto = useAnimatedStyle(() => ({
     transform: [{ translateX: acotar(progreso.value) * ancho.value - HALO / 2 }],
   }));
+  const halo = useAnimatedStyle(() => ({ transform: [{ scale: 1 + CRECE_HALO * brillo.value }] }));
 
   const alMedir = (e: LayoutChangeEvent) => {
     ancho.value = e.nativeEvent.layout.width;
@@ -55,12 +99,20 @@ export function BarraSesion({ hecho, meta }: Props) {
       accessibilityLabel="Progreso de la sesión"
       accessibilityValue={{ min: 0, max: Math.max(meta, 1), now: Math.min(hecho, Math.max(meta, 1)) }}
     >
+      <Animated.View style={[styles.resplandor, resplandor]} pointerEvents="none">
+        <LinearGradient
+          colors={['transparent', color.accent, 'transparent']}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
       <View style={styles.pista}>
         <Animated.View style={[styles.relleno, relleno]}>
           <LinearGradient colors={senal} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={StyleSheet.absoluteFill} />
         </Animated.View>
       </View>
-      <Animated.View style={[styles.halo, punto]} pointerEvents="none">
+      <Animated.View style={[styles.contenedorPunto, punto]} pointerEvents="none">
+        <Animated.View style={[styles.halo, halo]} />
         <View style={styles.punto} />
       </Animated.View>
     </View>
@@ -76,14 +128,27 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   relleno: { ...StyleSheet.absoluteFill, transformOrigin: 'left' },
-  halo: {
+  resplandor: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: (ALTO_BARRA_SESION - ALTO_RESPLANDOR) / 2,
+    height: ALTO_RESPLANDOR,
+    borderRadius: ALTO_RESPLANDOR / 2,
+    overflow: 'hidden',
+    transformOrigin: 'left',
+  },
+  contenedorPunto: {
     position: 'absolute',
     left: 0,
     width: HALO,
     height: HALO,
-    borderRadius: HALO / 2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  halo: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: HALO / 2,
     backgroundColor: color.accentSoft,
   },
   punto: { width: PUNTO, height: PUNTO, borderRadius: PUNTO / 2, backgroundColor: color.accent100 },

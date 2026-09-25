@@ -79,4 +79,19 @@ prueba('diff: una frase larga se compara sin problema', () => {
   assert.ok(t.some((x) => x.tipo === 'falta'));
 });
 
+const { nivelSeguidas, ESCALONES_SEGUIDAS } = await cargar('src/domain/seguidas.ts');
+
+prueba('seguidas: el brillo da un escalón a los 3, 5 y 10 aciertos y no antes', () => {
+  assert.deepEqual([...ESCALONES_SEGUIDAS], [3, 5, 10]);
+  const niveles = [0, 1, 2, 3, 4, 5, 9, 10, 25].map(nivelSeguidas);
+  assert.deepEqual(niveles, [0, 0, 0, 1, 1, 2, 2, 3, 3]);
+});
+
+prueba('seguidas: un fallo (0) apaga el brillo y los valores raros no rompen', () => {
+  assert.equal(nivelSeguidas(0), 0);
+  assert.equal(nivelSeguidas(-4), 0);
+  assert.equal(nivelSeguidas(Number.NaN), 0);
+  assert.equal(nivelSeguidas(Number.POSITIVE_INFINITY), 0);
+});
+
 console.log(`\ncheck:estudio ${total} pruebas ok`);

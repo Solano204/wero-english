@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 210 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 211 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -80,7 +80,8 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/card/OptionButton.tsx:134`
 - `src/components/card/SceneImage.tsx:71`
 - `src/components/card/SceneImage.tsx:84`
-- `src/components/fx/BarraSesion.tsx:60`
+- `src/components/fx/BarraSesion.tsx:103`
+- `src/components/fx/BarraSesion.tsx:111`
 - `src/components/fx/BotonSenal.tsx:84`
 - `src/components/fx/HojaVeredicto.tsx:171`
 - `src/components/fx/MedidorVU.tsx:99`
