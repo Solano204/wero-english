@@ -14,6 +14,8 @@ interface Props {
   size?: 'md' | 'lg';
   /** Texto alternativo, por ejemplo la frase con hueco. */
   override?: string;
+  /** Reemplaza el texto de la frase (p. ej. la frase con karaoke). */
+  frase?: React.ReactNode;
 }
 
 /**
@@ -29,15 +31,18 @@ export function PhraseBlock({
   showSpanish = false,
   size = 'lg',
   override,
+  frase,
 }: Props) {
   return (
     <View style={styles.wrap}>
-      <Text
-        style={[styles.phrase, size === 'md' && styles.phraseMd]}
-        accessibilityRole="text"
-      >
-        {override ?? entry.phrase}
-      </Text>
+      {frase ?? (
+        <Text
+          style={[styles.phrase, size === 'md' && styles.phraseMd]}
+          accessibilityRole="text"
+        >
+          {override ?? entry.phrase}
+        </Text>
+      )}
 
       {showIpa && entry.ipa ? (
         <Text style={styles.ipa} numberOfLines={2}>

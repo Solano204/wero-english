@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { AudioButton } from './AudioButton';
+import { BloqueVoz } from './BloqueVoz';
 import { OptionButton, type OptionState } from './OptionButton';
 import { PhraseBlock } from './PhraseBlock';
 import { SceneImage } from './SceneImage';
@@ -178,25 +178,9 @@ export function StudyCardView({
 
       <View style={[styles.stage, compacto && styles.stageCompacto]}>
         {card.kind === 'escuchar' || card.kind === 'dictado' ? (
-          <View style={styles.listen}>
-            <AudioButton path={card.entry.audio_en} size="lg" label="Otra vez" />
-            <AudioButton
-              path={card.entry.audio_en}
-              size="md"
-              slow
-              label="Más lento"
-            />
-            {card.kind === 'dictado' ? (
-              <Text style={styles.hintLine}>
-                No hay texto. Dale las veces que quieras.
-              </Text>
-            ) : null}
-          </View>
+          <BloqueVoz entry={card.entry} variante="oido" dictado={card.kind === 'dictado'} compacto={compacto} />
         ) : card.kind === 'construir' ? (
-          <View style={[styles.reveal, compacto && styles.revealCompacto]}>
-            <Text style={styles.spanishPrompt}>{prompt}</Text>
-            <AudioButton path={card.entry.audio_en} size="md" label="Escuchar" />
-          </View>
+          <BloqueVoz entry={card.entry} variante="pista" pista={prompt} compacto={compacto} />
         ) : card.kind === 'completar' ? (
           <PhraseBlock
             entry={card.entry}
@@ -216,7 +200,7 @@ export function StudyCardView({
                 etiqueta={card.entry.phrase}
               />
             ) : null}
-            <PhraseBlock entry={card.entry} />
+            <BloqueVoz entry={card.entry} variante="frase" compacto={compacto} />
           </View>
         )}
       </View>
@@ -330,13 +314,6 @@ const styles = StyleSheet.create({
   stageCompacto: { paddingTop: space.xs },
   // Lo que se toca: no crece, y si no cabe es lo único que se acorta (y scrollea).
   zona: { flexGrow: 0, flexShrink: 1, minHeight: 120 },
-  listen: { alignItems: 'center', gap: space.md },
-  hintLine: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    textAlign: 'center',
-  },
   spanishPrompt: {
     fontSize: font.size.xl,
     color: color.text,

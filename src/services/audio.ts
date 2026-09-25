@@ -101,6 +101,32 @@ export async function initAudio(): Promise<void> {
   }
 }
 
+/** Una frase acaba de arrancar. La usa la onda de voz de Estudio; el audio no depende de ella. */
+export interface ArranqueFrase {
+  ruta: string;
+  rate: number;
+}
+
+const oyentesFrase = new Set<(e: ArranqueFrase) => void>();
+
+/** Avisa cada vez que una frase arranca (y solo entonces). Devuelve cómo dejar de escuchar. */
+export function alReproducir(oyente: (e: ArranqueFrase) => void): () => void {
+  oyentesFrase.add(oyente);
+  return () => {
+    oyentesFrase.delete(oyente);
+  };
+}
+
+function avisarReproduccion(ruta: string, rate: number): void {
+  for (const oyente of oyentesFrase) {
+    try {
+      oyente({ ruta, rate });
+    } catch {
+      // Un oyente roto no puede tumbar el audio.
+    }
+  }
+}
+
 /**
  * Resuelve, crea o reutiliza el player y reproduce a la velocidad pedida.
  *
@@ -196,6 +222,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
 
       player.play();
       resultado = true;
+      avisarReproduccion(relPath, rate);
       // Ducking: la música se agacha mientras suena esta voz y se
       // recupera sola cuando isPlaying() diga que ya no hay nada
       // sonando en el player de frases (por fin natural o por stop()).

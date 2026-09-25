@@ -126,6 +126,8 @@ export const motionSenal = {
   espectro: 600,
   /** Retraso entre una columna y la siguiente. */
   columna: 20,
+  /** Cada cuánto se lee la posición del audio para la onda de voz y el karaoke (solo mientras suena). */
+  muestreo: 50,
 } as const;
 
 /**

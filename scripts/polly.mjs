@@ -8,6 +8,18 @@
  *   node scripts/polly.mjs --todo                 genera todo lo que falte
  *   node scripts/polly.mjs --revisa               valida lo ya generado
  *
+ *   node scripts/polly.mjs --marcas --plan        marcas de palabra que faltan y cuánto cuestan
+ *   node scripts/polly.mjs --marcas --solo 1      prueba con una frase antes de gastar más
+ *   node scripts/polly.mjs --marcas               genera las marcas que falten (Catálogo EN)
+ *   node scripts/polly.mjs --consolida            rehace assets/data/marcas.json sin llamar a Polly
+ *
+ * Las marcas (SpeechMarkTypes ["word"], OutputFormat json) son las horas de cada
+ * palabra que usa el karaoke de Estudio. Sale un JSON por audio en
+ * assets/data/marcas/ y uno consolidado en assets/data/marcas.json, que es el que
+ * empaqueta la app. Sin marcas la app estima por sílabas, así que son opcionales.
+ * Se cobran por carácter como el audio (confirma la tarifa vigente en la página de
+ * precios de Polly); el --plan imprime la estimación con la tarifa de este script.
+ *
  * Es reanudable: si el archivo ya existe y pesa lo suficiente, no lo vuelve
  * a pedir. Puedes cortar con Ctrl+C y volver a lanzar sin pagar dos veces.
  *
@@ -16,7 +28,7 @@
  */
 
 import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
-import { mkdir, writeFile, readFile, stat } from "node:fs/promises";
+import { mkdir, writeFile, readFile, readdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
@@ -26,6 +38,10 @@ const ejecuta = promisify(execFile);
 const RAIZ = path.resolve(import.meta.dirname, "..");
 const MANIFIESTO = path.join(RAIZ, "assets", "medios.json");
 const REGISTRO = path.join(RAIZ, ".polly-log.json");
+const DIR_MARCAS = path.join(RAIZ, "assets", "data", "marcas");
+const INDICE_MARCAS = path.join(RAIZ, "assets", "data", "marcas.json");
+// Estudio solo usa el audio en inglés del catálogo: el resto no necesita marcas.
+const GRUPO_MARCAS = "Catálogo EN";
 
 // ── voces ────────────────────────────────────────────────────────────────
 // Matthew y Andrés son la MISMA identidad de voz en dos idiomas. Es la
@@ -103,7 +119,7 @@ function trocea(texto) {
   return trozos;
 }
 
-async function sintetiza(texto, voz, esSsml) {
+async function sintetiza(texto, voz, esSsml, extra = {}) {
   let ultimo;
   for (let intento = 1; intento <= REINTENTOS; intento++) {
     try {
@@ -113,6 +129,7 @@ async function sintetiza(texto, voz, esSsml) {
         TextType: esSsml ? "ssml" : "text",
         OutputFormat: "mp3",
         SampleRate: "22050",
+        ...extra,
       }));
       const trozos = [];
       for await (const t of r.AudioStream) trozos.push(t);
@@ -162,10 +179,66 @@ async function genera(fila) {
   return { chars: fila.texto.length, trozos: trozos.length };
 }
 
+// ── marcas de palabra ────────────────────────────────────────────────────
+const nombreMarcas = (fila) => path.basename(fila.archivo, path.extname(fila.archivo)) + ".json";
+
+async function yaEstanMarcas(fila) {
+  const destino = path.join(DIR_MARCAS, nombreMarcas(fila));
+  if (!existsSync(destino)) return false;
+  try {
+    const j = JSON.parse(await readFile(destino, "utf8"));
+    return Array.isArray(j.m) && j.m.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Pide las marcas de palabra de una frase y las guarda: [[ms, palabra], ...]. */
+async function generaMarcas(fila) {
+  const crudo = await sintetiza(fila.texto, idioma(fila), false, {
+    OutputFormat: "json",
+    SpeechMarkTypes: ["word"],
+    SampleRate: undefined,
+  });
+  const m = crudo.toString("utf8").split("\n").filter(Boolean)
+    .map((linea) => JSON.parse(linea))
+    .filter((x) => x.type === "word")
+    .map((x) => [x.time, x.value]);
+  if (m.length === 0) throw new Error("Polly no devolvió marcas de palabra");
+  await mkdir(DIR_MARCAS, { recursive: true });
+  await writeFile(path.join(DIR_MARCAS, nombreMarcas(fila)),
+    JSON.stringify({ archivo: fila.archivo, texto: fila.texto, m }) + "\n");
+  return { chars: fila.texto.length };
+}
+
+/** Junta los JSON de assets/data/marcas/ en el índice que empaqueta la app: { ruta: { m } }. */
+async function consolidaMarcas() {
+  const indice = {};
+  if (existsSync(DIR_MARCAS)) {
+    for (const nombre of (await readdir(DIR_MARCAS)).sort()) {
+      if (!nombre.endsWith(".json")) continue;
+      try {
+        const j = JSON.parse(await readFile(path.join(DIR_MARCAS, nombre), "utf8"));
+        if (j.archivo && Array.isArray(j.m) && j.m.length > 0) indice[j.archivo] = { m: j.m };
+      } catch {
+        console.error(`  saltado ${nombre}: JSON inválido`);
+      }
+    }
+  }
+  await writeFile(INDICE_MARCAS, JSON.stringify(indice) + "\n");
+  console.log(`assets/data/marcas.json: ${Object.keys(indice).length} audios con marcas`);
+}
+
 // ── entrada ──────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const bandera = (n) => args.includes(n);
 const valor = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
+
+// No necesita el manifiesto ni a Polly: solo junta lo que ya está en assets/data/marcas/.
+if (bandera("--consolida")) {
+  await consolidaMarcas();
+  process.exit(0);
+}
 
 const manifiesto = JSON.parse(await readFile(MANIFIESTO, "utf8"));
 let filas = manifiesto.filter((f) => f.tipo === "audio");
@@ -182,6 +255,46 @@ if (iSolo >= 0) {
 // Los manuales nunca se piden a Polly: un TTS no pronuncia un fonema suelto.
 const manuales = filas.filter((f) => f.manual);
 filas = filas.filter((f) => !f.manual);
+
+if (bandera("--marcas")) {
+  // Sin --grupo ni --solo, solo el catálogo en inglés; los derivados (lento) y el SSML no llevan marcas.
+  const paraMarcas = filas.filter((f) => !f.derivado_de && !f.ssml && (grupo || iSolo >= 0 || f.grupo === GRUPO_MARCAS));
+  const faltan = [];
+  for (const f of paraMarcas) if (!(await yaEstanMarcas(f))) faltan.push(f);
+  const chars = faltan.reduce((t, f) => t + f.texto.length, 0);
+  const costo = faltan.reduce((t, f) => t + f.texto.length * precioPorCaracter(f), 0);
+
+  if (bandera("--plan")) {
+    console.log(`\nregión ${REGION}` + (REGIONES_GENERATIVE.has(REGION) ? "" : "   ← SIN motor generativo, cámbiala"));
+    console.log(`faltan marcas de ${faltan.length} de ${paraMarcas.length} audios`);
+    console.log(`  ${String(chars).padStart(6)}  caracteres facturables`);
+    console.log(`  costo estimado: ${money(costo)}  (tarifa de este script; las marcas se cobran por carácter como el audio)`);
+    console.log(`\n  Antes de gastar todo: node scripts/polly.mjs --marcas --solo ${faltan[0]?.recurso ?? "1"}`);
+    process.exit(0);
+  }
+  if (!REGIONES_GENERATIVE.has(REGION)) {
+    console.error(`La región ${REGION} no tiene motor generativo. Usa us-east-1.`);
+    process.exit(1);
+  }
+
+  const registro = existsSync(REGISTRO) ? JSON.parse(await readFile(REGISTRO, "utf8")) : { fallos: [] };
+  let hechas = 0, gastados = 0, gasto = 0;
+  for (const [i, f] of faltan.entries()) {
+    try {
+      const r = await generaMarcas(f);
+      hechas++; gastados += r.chars; gasto += r.chars * precioPorCaracter(f);
+      process.stdout.write(`\r  ${((i + 1) / faltan.length * 100).toFixed(1)}%  ${hechas}/${faltan.length}  ${money(gasto)}  ${f.archivo.padEnd(28)}`);
+    } catch (e) {
+      registro.fallos.push({ archivo: f.archivo, error: `marcas: ${String(e.message || e)}` });
+      console.error(`\n  FALLÓ ${f.archivo}: ${e.message || e}`);
+    }
+    await dormir(PAUSA_MS);
+  }
+  await writeFile(REGISTRO, JSON.stringify(registro, null, 1));
+  console.log(`\n\nmarcas listas ${hechas} · ${gastados} caracteres · ${money(gasto)}`);
+  await consolidaMarcas();
+  process.exit(0);
+}
 
 const pendientes = [];
 for (const f of filas) if (!(await yaEsta(path.join(RAIZ, "assets", f.archivo)))) pendientes.push(f);
