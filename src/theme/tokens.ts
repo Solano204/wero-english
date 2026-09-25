@@ -393,7 +393,7 @@ export const grano = { opacidad: 0.03 } as const;
 export const tarjeta = { heroe: 180, compacta: 150, portadaHeroe: 96, portadaCompacta: 64 } as const;
 
 /** Anillos de progreso: diámetro y grosor del trazo. */
-export const anillo = { hoy: 88, reto: 56, trazo: 8 } as const;
+export const anillo = { hoy: 88, reto: 56, trazo: 8, trazoReto: 6 } as const;
 
 /** Inclinación 3D de las tarjetas al mantener presionado. */
 export const inclinacion = { maxGrados: 6, perspectiva: 800 } as const;

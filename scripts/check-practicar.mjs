@@ -22,6 +22,7 @@ const cargar = async (rel) => {
   return import(`data:text/javascript;base64,${Buffer.from(out).toString('base64')}`);
 };
 const { energiaOnda, progresoMeta, metaCumplida, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+const { diasQueQuedan, textoDiasReto } = await cargar('src/screens/extras/practicar/reto.ts');
 const { resumenNivel, TOTAL_NIVELES } = await cargar('src/screens/extras/practicar/resumenNiveles.ts');
 
 const uso = (o) => Object.fromEntries(Object.entries(o).map(([k, [dias, ultimo]]) => [k, { dias, ultimo }]));
@@ -66,4 +67,13 @@ assert.deepEqual(resumenNivel({ jugados: 22, estrellas: 36, siguiente: 23 }), { 
 assert.equal(resumenNivel({ jugados: 3, estrellas: 1, siguiente: 4 }).texto, 'Nivel 4 · 1 estrella', 'singular con una estrella');
 assert.equal(resumenNivel({ jugados: 200, estrellas: 500, siguiente: 201 }).nivel, TOTAL_NIVELES, 'la barra no pasa de 200');
 
-console.log('check:practicar ok (28 casos)');
+// Reto de la semana: los días que quedan contando hoy.
+assert.equal(diasQueQuedan('2026-09-21', '2026-09-21'), 7, 'el lunes quedan 7');
+assert.equal(diasQueQuedan('2026-09-21', '2026-09-24'), 4);
+assert.equal(diasQueQuedan('2026-09-21', '2026-09-27'), 1, 'el domingo es el último día');
+assert.equal(diasQueQuedan('2026-09-21', '2026-09-20'), 7, 'un día antes del lunes no pasa de 7');
+assert.equal(diasQueQuedan('2026-09-21', '2026-10-05'), 1, 'pasada la semana no baja de 1');
+assert.equal(textoDiasReto(1), 'Último día');
+assert.equal(textoDiasReto(4), 'Quedan 4 días');
+
+console.log('check:practicar ok (35 casos)');

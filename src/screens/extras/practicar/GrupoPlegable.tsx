@@ -1,7 +1,7 @@
 import React, { useEffect, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Icon, Presionable } from '@/components/base';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
+import { Badge, Icon, Presionable } from '@/components/base';
 import { color, font, layout, motionEasing, radius, space, motionDuration } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
@@ -10,12 +10,13 @@ interface Props {
   total: number;
   abierto: boolean;
   onAlternar: () => void;
-  children: ReactNode;
+  /** Recibe el avance del despliegue (0 a 1) para que las filas entren escalonadas. */
+  children: (progreso: SharedValue<number>) => ReactNode;
 }
 
 /**
- * Grupo que se despliega. Solo anima alto y opacidad, 200 ms con salida
- * suave; con "reducir movimiento" el cambio es inmediato. El contenido se
+ * Grupo que se despliega. Anima alto y opacidad, el chevron gira 180° y las
+ * filas entran escalonadas (`escalon(i)`), todo con salida suave; con "reducir movimiento" el cambio es inmediato. El contenido se
  * mide una vez con onLayout (va en absoluto para medirse aun con alto 0).
  */
 export function GrupoPlegable({ titulo, total, abierto, onAlternar, children }: Props) {
@@ -38,6 +39,9 @@ export function GrupoPlegable({ titulo, total, abierto, onAlternar, children }: 
     height: alto.value * progreso.value,
     opacity: progreso.value,
   }));
+  const giro = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${progreso.value * 180}deg` }],
+  }));
 
   return (
     <View style={styles.grupo}>
@@ -48,8 +52,13 @@ export function GrupoPlegable({ titulo, total, abierto, onAlternar, children }: 
         accessibilityState={{ expanded: abierto }}
         style={styles.cabecera}
       >
-        <Text style={styles.titulo}>{`${titulo} · ${total}`}</Text>
-        <Icon name={abierto ? 'chevron-up' : 'chevron-down'} size="md" color={color.textMuted} />
+        <View style={styles.tituloFila}>
+          <Text style={styles.titulo}>{titulo}</Text>
+          <Badge label={String(total)} small />
+        </View>
+        <Animated.View style={giro}>
+          <Icon name="chevron-down" size="md" color={color.textMuted} />
+        </Animated.View>
       </Presionable>
 
       <Animated.View
@@ -63,7 +72,7 @@ export function GrupoPlegable({ titulo, total, abierto, onAlternar, children }: 
             alto.value = e.nativeEvent.layout.height;
           }}
         >
-          {children}
+          {children(progreso)}
         </View>
       </Animated.View>
     </View>
@@ -85,6 +94,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: space.lg,
   },
+  tituloFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   titulo: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
   cuerpo: { overflow: 'hidden' },
   medida: { position: 'absolute', left: 0, right: 0, top: 0 },

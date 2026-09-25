@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '@/components/base';
-import { blur, color, font, layout, radius, space, text } from '@/theme';
+import { aparecer, blur, color, font, layout, radius, space, text } from '@/theme';
 
 /** Alto del encabezado ya comprimido, debajo del safe area. */
 const ALTO_BANDA = layout.tapMin + space.sm;
@@ -25,6 +25,8 @@ export const ALTO_ENCABEZADO = ALTO_BANDA + CAIDA + space.lg;
 interface Props {
   scrollY: SharedValue<number>;
   racha: number;
+  /** Primera vez por sesión: el título abre la coreografía con un fundido. */
+  entrada?: boolean;
 }
 
 function ChipRacha({ dias }: { dias: number }) {
@@ -45,7 +47,7 @@ function ChipRacha({ dias }: { dias: number }) {
  * compacto con banda de desenfoque. Todo va interpolado al scroll en el hilo de
  * UI (transform y opacity), sin saltos. A la derecha, el chip de racha.
  */
-export function EncabezadoPracticar({ scrollY, racha }: Props) {
+export function EncabezadoPracticar({ scrollY, racha, entrada = false }: Props) {
   const { top } = useSafeAreaInsets();
 
   const banda = useAnimatedStyle(() => ({
@@ -71,11 +73,13 @@ export function EncabezadoPracticar({ scrollY, racha }: Props) {
         )}
         <View style={styles.borde} />
       </Animated.View>
-      <Animated.View style={[styles.fila, { marginTop: top }, fila]} pointerEvents="box-none">
-        <Animated.Text accessibilityRole="header" style={[styles.titulo, titulo]}>
-          Practicar
-        </Animated.Text>
-        {racha > 0 ? <ChipRacha dias={racha} /> : null}
+      <Animated.View entering={entrada ? aparecer() : undefined} pointerEvents="box-none">
+        <Animated.View style={[styles.fila, { marginTop: top }, fila]} pointerEvents="box-none">
+          <Animated.Text accessibilityRole="header" style={[styles.titulo, titulo]}>
+            Practicar
+          </Animated.Text>
+          {racha > 0 ? <ChipRacha dias={racha} /> : null}
+        </Animated.View>
       </Animated.View>
     </View>
   );

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useSharedValue } from 'react-native-reanimated';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, ErrorCarga, ProgressBar, Screen } from '@/components/base';
+import { ErrorCarga, Screen } from '@/components/base';
 import { FondoAurora } from '@/components/fx';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
@@ -14,7 +14,8 @@ import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { color, font, space, tarjeta, text } from '@/theme';
+import { motionDuration, motionEasing, space, tarjeta, text } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -24,6 +25,7 @@ import { EncabezadoPracticar, ALTO_ENCABEZADO } from './practicar/EncabezadoPrac
 import { tomarEntrada } from './practicar/entrada';
 import { FilaModo } from './practicar/FilaModo';
 import { GrupoPlegable } from './practicar/GrupoPlegable';
+import { RetoSemana } from './practicar/RetoSemana';
 import { ORDEN, elegirDestacados, elegirHoy, type ModoId, type MotivoHoy, type Uso } from './practicar/hoy';
 import { GRUPOS, MODOS, type Modo } from './practicar/modos';
 
@@ -83,6 +85,21 @@ export function PracticeScreen() {
   const { top } = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
   const [primeraEntrada] = useState(tomarEntrada);
+  const reducido = useMovimientoReducido();
+  const fundido = useSharedValue(1);
+  const yaEnfoco = useRef(false);
+
+  // Primera vez: coreografía. Las visitas siguientes de la sesión solo hacen un fundido.
+  useFocusEffect(
+    useCallback(() => {
+      if (yaEnfoco.current && !reducido) {
+        fundido.value = 0;
+        fundido.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      }
+      yaEnfoco.current = true;
+    }, [fundido, reducido])
+  );
+  const estiloFundido = useAnimatedStyle(() => ({ opacity: fundido.value }));
   const user = useAuthStore((s) => s.user);
   const abiertos = useSettingsStore((s) => s.practicarGruposAbiertos);
   const guardarAjuste = useSettingsStore((s) => s.set);
@@ -163,10 +180,10 @@ export function PracticeScreen() {
       edges={['bottom']}
       scrollY={scrollY}
       fondo={<FondoAurora />}
-      encabezado={<EncabezadoPracticar scrollY={scrollY} racha={racha} />}
+      encabezado={<EncabezadoPracticar scrollY={scrollY} racha={racha} entrada={primeraEntrada} />}
       style={{ paddingTop: top + ALTO_ENCABEZADO }}
     >
-      <View style={styles.bloques}>
+      <Animated.View style={[styles.bloques, estiloFundido]}>
         <View style={styles.bloque}>
           {carga.estado === 'error' ? (
             <ErrorCarga onReintentar={carga.reintentar} />
@@ -215,15 +232,19 @@ export function PracticeScreen() {
                 abierto={abiertos.includes(g.id)}
                 onAlternar={() => alternar(g.id)}
               >
-                {ids.map((id, i) => (
-                  <FilaModo
-                    key={id}
-                    titulo={MODOS[id].titulo}
-                    dato={datoDe(id)}
-                    primera={i === 0}
-                    onPress={() => MODOS[id].ir(nav)}
-                  />
-                ))}
+                {(progreso) =>
+                  ids.map((id, i) => (
+                    <FilaModo
+                      key={id}
+                      titulo={MODOS[id].titulo}
+                      dato={datoDe(id)}
+                      primera={i === 0}
+                      indice={i}
+                      progreso={progreso}
+                      onPress={() => MODOS[id].ir(nav)}
+                    />
+                  ))
+                }
               </GrupoPlegable>
             );
           })}
@@ -232,23 +253,10 @@ export function PracticeScreen() {
         {reto ? (
           <View style={styles.bloque}>
             <Text style={text.h3}>Esta semana</Text>
-            <Card style={styles.reto}>
-              <View style={styles.retoTop}>
-                <Text style={styles.retoTitle}>Reto de la semana</Text>
-                <Text style={styles.retoNum}>
-                  {reto.llevas} de {reto.meta}
-                </Text>
-              </View>
-              <ProgressBar value={Math.min(reto.llevas, reto.meta)} total={reto.meta} />
-              <Text style={styles.retoBody}>
-                {reto.cumplido
-                  ? 'Cumplido. La semana que entra empieza otro.'
-                  : 'Cuenta lo que aciertas estudiando y jugando. No hay reloj y no se pierde.'}
-              </Text>
-            </Card>
+            <RetoSemana llevas={reto.llevas} meta={reto.meta} cumplido={reto.cumplido} desde={reto.desde} hoy={dayKey()} />
           </View>
         ) : null}
-      </View>
+      </Animated.View>
     </Screen>
   );
 }
@@ -258,26 +266,4 @@ const styles = StyleSheet.create({
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
   reservaDestacados: { height: tarjeta.heroe + space.md + tarjeta.compacta },
-  reto: { gap: space.sm },
-  retoTop: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-  },
-  retoTitle: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.text,
-  },
-  retoNum: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.accent,
-  },
-  retoBody: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    lineHeight: font.size.md * 1.5,
-    color: color.textMuted,
-  },
 });
