@@ -6,7 +6,6 @@ import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ALTO_ENCABEZADO,
-  Button,
   Card,
   Carga,
   EncabezadoComprimido,
@@ -14,13 +13,12 @@ import {
   SkeletonLista,
 } from '@/components/base';
 import { SectionTitle } from '@/components/list';
-import { CuadroDato, FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
-import { AnilloMeta, Espectrograma } from '@/components/fx';
+import { Detalle, FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
+import { Espectrograma } from '@/components/fx';
 import { useVisto } from '@/components/fx/useVisibilidad';
 import {
   JUEGOS_PROGRESO,
   filasMundo,
-  precisionPct,
   resumenJuego,
   ventana,
   type ProgresoMundo,
@@ -29,7 +27,6 @@ import { getGameRecords } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
 import { getProgresoPorMundo, getStats, type Stats } from '@/db/queries';
 import { getRecentDays } from '@/db/progress';
-import { etiquetaCorregir } from '@/screens/extras/practicar/consola';
 import { ICONO_MODO } from '@/screens/extras/practicar/iconos';
 import { MODOS } from '@/screens/extras/practicar/modos';
 import type { Niveles } from '@/screens/extras/practicar/resumenNiveles';
@@ -38,9 +35,8 @@ import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { anillo, color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
+import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { dayKey } from '@/utils/date';
-import { conteo, plural } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -60,7 +56,8 @@ const FILAS_JUEGOS = [JUEGOS_PROGRESO.slice(0, 2), JUEGOS_PROGRESO.slice(2, 4), 
 
 /**
  * P-13, el progreso. Señal en vivo: el medidor de dominadas es el único momento
- * héroe; el resto responde al scroll y a los toques.
+ * héroe; el resto responde al scroll y a los toques (cada sección se anima al entrar
+ * a la vista).
  */
 export function ProgressScreen() {
   const nav = useNavigation<Nav>();
@@ -114,120 +111,83 @@ export function ProgressScreen() {
     >
       <Animated.View style={[styles.bloques, estiloFundido]}>
         <Carga carga={carga} esqueleto={<SkeletonLista filas={3} alto={110} />}>
-          {({ stats, mundos, niveles, records }) => (
-            <>
-              {stats ? (
-                <PanelSenal stats={stats} usuarioId={user?.id ?? null} entrada={primera} scrollY={scrollY} pulsos={pulsos} />
-              ) : null}
+          {({ stats, mundos, niveles, records }) => {
+            const filas = filasMundo(loadContent().packs.mundos, mundos);
+            return (
+              <>
+                {stats ? (
+                  <PanelSenal stats={stats} usuarioId={user?.id ?? null} entrada={primera} scrollY={scrollY} pulsos={pulsos} />
+                ) : null}
 
-              <Animated.View ref={espectro.ref} collapsable={false} onLayout={espectro.alAcomodar} style={styles.bloque}>
-                <SectionTitle title="Últimas tres semanas" variante="bloque" />
-                <Card>
-                  {sinDias ? (
-                    <Text style={styles.noData}>Todavía no hay días registrados.</Text>
-                  ) : (
-                    <Espectrograma dias={dias} activo={espectro.visto} retraso={primera ? motionEntrada.espectro : 0} />
-                  )}
-                </Card>
-              </Animated.View>
+                <Animated.View ref={espectro.ref} collapsable={false} onLayout={espectro.alAcomodar} style={styles.bloque}>
+                  <SectionTitle title="Últimas tres semanas" variante="bloque" />
+                  <Card>
+                    {sinDias ? (
+                      <Text style={styles.noData}>Todavía no hay días registrados.</Text>
+                    ) : (
+                      <Espectrograma dias={dias} activo={espectro.visto} retraso={primera ? motionEntrada.espectro : 0} />
+                    )}
+                  </Card>
+                </Animated.View>
 
-              <Animated.View ref={seccionMundos.ref} collapsable={false} onLayout={seccionMundos.alAcomodar} style={styles.bloque}>
-                <SectionTitle title="Por mundo" variante="bloque" />
-                <View style={styles.grupo}>
-                  {filasMundo(loadContent().packs.mundos, mundos).map((m, i) => (
-                    <FilaMundo
-                      key={m.id}
-                      nombre={m.nombre}
-                      tinte={color.world[m.id as WorldId] ?? color.accent}
-                      dominadas={m.dominadas}
-                      total={m.total}
-                      fraccion={m.fraccion}
-                      primera={i === 0}
-                      indice={i}
-                      activo={seccionMundos.visto}
-                      onPress={() => nav.navigate('WorldDetail', { worldId: m.id })}
-                    />
-                  ))}
-                </View>
-              </Animated.View>
-
-              <Animated.View ref={seccionJuegos.ref} collapsable={false} onLayout={seccionJuegos.alAcomodar} style={styles.bloque}>
-                <SectionTitle title="Por juego" variante="bloque" />
-                <View style={styles.cuadricula}>
-                  {FILAS_JUEGOS.map((par, r) => (
-                    <View key={r} style={styles.parFichas}>
-                      {par.map((id, c) => (
-                        <FichaJuego
-                          key={id}
-                          nombre={MODOS[id].titulo}
-                          icono={ICONO_MODO[id]}
-                          resumen={resumenJuego(id, niveles, records)}
-                          conNiveles={id !== 'cazala'}
-                          indice={r * 2 + c}
-                          activo={seccionJuegos.visto}
-                          onPress={() => (id === 'cazala' ? nav.navigate('Cazala') : nav.navigate('Niveles', { juego: id }))}
+                {filas.length > 0 ? (
+                  <Animated.View ref={seccionMundos.ref} collapsable={false} onLayout={seccionMundos.alAcomodar} style={styles.bloque}>
+                    <SectionTitle title="Por mundo" variante="bloque" />
+                    <View style={styles.grupo}>
+                      {filas.map((m, i) => (
+                        <FilaMundo
+                          key={m.id}
+                          nombre={m.nombre}
+                          tinte={color.world[m.id as WorldId] ?? color.accent}
+                          dominadas={m.dominadas}
+                          total={m.total}
+                          fraccion={m.fraccion}
+                          primera={i === 0}
+                          indice={i}
+                          activo={seccionMundos.visto}
+                          onPress={() => nav.navigate('WorldDetail', { worldId: m.id })}
                         />
                       ))}
-                      {par.length === 1 ? <View style={styles.hueco} /> : null}
                     </View>
-                  ))}
-                </View>
-              </Animated.View>
+                  </Animated.View>
+                ) : null}
 
-              {stats ? (
-                <Animated.View ref={seccionDetalle.ref} collapsable={false} onLayout={seccionDetalle.alAcomodar} style={styles.bloque}>
-                  <SectionTitle title="Detalle" variante="bloque" />
+                <Animated.View ref={seccionJuegos.ref} collapsable={false} onLayout={seccionJuegos.alAcomodar} style={styles.bloque}>
+                  <SectionTitle title="Por juego" variante="bloque" />
                   <View style={styles.cuadricula}>
-                    <View style={styles.parFichas}>
-                      <CuadroDato
-                        etiqueta="Precisión general"
-                        accessibilityLabel={`Precisión general: ${precisionPct(stats.precision)} %`}
-                        medidor={
-                          <AnilloMeta
-                            valor={seccionDetalle.visto ? precisionPct(stats.precision) : 0}
-                            total={100}
-                            diametro={anillo.reto}
-                            trazo={anillo.trazoReto}
-                            etiqueta={`Precisión general: ${precisionPct(stats.precision)} %`}
-                          >
-                            <Text style={styles.anilloNumero}>{precisionPct(stats.precision)}%</Text>
-                          </AnilloMeta>
-                        }
-                      />
-                      <CuadroDato
-                        etiqueta="Racha más larga"
-                        icono="fire"
-                        iconoColor={color.star}
-                        valor={String(stats.rachaMax)}
-                        unidad={plural(stats.rachaMax, 'día')}
-                        accessibilityLabel={`Racha más larga: ${conteo(stats.rachaMax, 'día')}`}
-                      />
-                    </View>
-                    <View style={styles.parFichas}>
-                      <CuadroDato
-                        etiqueta="Guardadas con estrella"
-                        icono="star-filled"
-                        iconoColor={color.star}
-                        valor={String(stats.favoritas)}
-                        onPress={() => nav.navigate('Deck')}
-                        accessibilityLabel={`Guardadas con estrella: ${stats.favoritas}`}
-                      />
-                      <CuadroDato
-                        etiqueta="Se te atoran"
-                        punto={color.wrong}
-                        valor={String(stats.atoradas)}
-                        onPress={() => nav.navigate('Stuck')}
-                        accessibilityLabel={`Se te atoran: ${stats.atoradas}`}
-                      />
-                    </View>
+                    {FILAS_JUEGOS.map((par, r) => (
+                      <View key={r} style={styles.parFichas}>
+                        {par.map((id, c) => (
+                          <FichaJuego
+                            key={id}
+                            nombre={MODOS[id].titulo}
+                            icono={ICONO_MODO[id]}
+                            resumen={resumenJuego(id, niveles, records)}
+                            conNiveles={id !== 'cazala'}
+                            indice={r * 2 + c}
+                            activo={seccionJuegos.visto}
+                            onPress={() => (id === 'cazala' ? nav.navigate('Cazala') : nav.navigate('Niveles', { juego: id }))}
+                          />
+                        ))}
+                        {par.length === 1 ? <View style={styles.hueco} /> : null}
+                      </View>
+                    ))}
                   </View>
-                  {stats.atoradas > 0 ? (
-                    <Button label={etiquetaCorregir(stats.atoradas)} size="lg" full onPress={() => nav.navigate('Stuck')} />
-                  ) : null}
                 </Animated.View>
-              ) : null}
-            </>
-          )}
+
+                {stats ? (
+                  <Animated.View ref={seccionDetalle.ref} collapsable={false} onLayout={seccionDetalle.alAcomodar} style={styles.bloque}>
+                    <Detalle
+                      stats={stats}
+                      visto={seccionDetalle.visto}
+                      onGuardadas={() => nav.navigate('Deck')}
+                      onAtoradas={() => nav.navigate('Stuck')}
+                    />
+                  </Animated.View>
+                ) : null}
+              </>
+            );
+          }}
         </Carga>
       </Animated.View>
     </Screen>
@@ -249,5 +209,4 @@ const styles = StyleSheet.create({
     borderColor: color.border,
     overflow: 'hidden',
   },
-  anilloNumero: { fontFamily: font.family.display, fontSize: font.size.md, fontVariant: ['tabular-nums'], color: color.text },
 });
