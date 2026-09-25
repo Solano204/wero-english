@@ -13,12 +13,24 @@ import {
   SkeletonLista,
 } from '@/components/base';
 import { SectionTitle } from '@/components/list';
-import { FilaMundo, PanelSenal } from '@/components/progreso';
+import { FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
 import { Espectrograma } from '@/components/fx';
 import { useVisto } from '@/components/fx/useVisibilidad';
-import { filasMundo, ventana, type ProgresoMundo } from '@/components/progreso/datos';
+import {
+  JUEGOS_PROGRESO,
+  filasMundo,
+  resumenJuego,
+  ventana,
+  type ProgresoMundo,
+} from '@/components/progreso/datos';
+import { getGameRecords } from '@/db/economy';
+import { resumenTodos } from '@/db/levels';
 import { getProgresoPorMundo, getStats, type Stats } from '@/db/queries';
 import { getRecentDays } from '@/db/progress';
+import { ICONO_MODO } from '@/screens/extras/practicar/iconos';
+import { MODOS } from '@/screens/extras/practicar/modos';
+import type { Niveles } from '@/screens/extras/practicar/resumenNiveles';
+import type { JuegoRecord } from '@/types';
 import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore, useSettingsStore } from '@/store';
@@ -34,9 +46,14 @@ interface Datos {
   stats: Stats | null;
   dias: { dia: string; respuestas: number; aciertos: number }[];
   mundos: Record<string, ProgresoMundo>;
+  niveles: Record<string, Niveles>;
+  records: Record<string, JuegoRecord>;
 }
 
-const SIN_DATOS: Datos = { stats: null, dias: [], mundos: {} };
+const SIN_DATOS: Datos = { stats: null, dias: [], mundos: {}, niveles: {}, records: {} };
+
+/** Las fichas de «Por juego», de dos en dos. */
+const FILAS_JUEGOS = [JUEGOS_PROGRESO.slice(0, 2), JUEGOS_PROGRESO.slice(2, 4), JUEGOS_PROGRESO.slice(4)];
 
 /**
  * P-13, el progreso. Señal en vivo: el medidor de dominadas es el único momento
@@ -54,12 +71,14 @@ export function ProgressScreen() {
   const carga = useCarga(
     async (): Promise<Datos> => {
       if (!user) return SIN_DATOS;
-      const [stats, dias, mundos] = await Promise.all([
+      const [stats, dias, mundos, niveles, records] = await Promise.all([
         getStats(user.id),
         getRecentDays(user.id, 21),
         getProgresoPorMundo(user.id, filter()),
+        resumenTodos(user.id),
+        getGameRecords(user.id),
       ]);
-      return { stats, dias, mundos };
+      return { stats, dias, mundos, niveles, records };
     },
     [user, filter],
     { alEnfocar: true }
@@ -77,6 +96,7 @@ export function ProgressScreen() {
   const sinDias = registrados.length === 0 || dias.every((d) => d.respuestas === 0);
   const espectro = useVisto(scrollY);
   const seccionMundos = useVisto(scrollY);
+  const seccionJuegos = useVisto(scrollY);
 
   return (
     <Screen
@@ -90,7 +110,7 @@ export function ProgressScreen() {
     >
       <Animated.View style={[styles.bloques, estiloFundido]}>
         <Carga carga={carga} esqueleto={<SkeletonLista filas={3} alto={110} />}>
-          {({ stats, mundos }) => (
+          {({ stats, mundos, niveles, records }) => (
             <>
               {stats ? (
                 <PanelSenal stats={stats} usuarioId={user?.id ?? null} entrada={primera} scrollY={scrollY} pulsos={pulsos} />
@@ -127,6 +147,29 @@ export function ProgressScreen() {
                 </View>
               </Animated.View>
 
+              <Animated.View ref={seccionJuegos.ref} collapsable={false} onLayout={seccionJuegos.alAcomodar} style={styles.bloque}>
+                <SectionTitle title="Por juego" variante="bloque" />
+                <View style={styles.cuadricula}>
+                  {FILAS_JUEGOS.map((par, r) => (
+                    <View key={r} style={styles.parFichas}>
+                      {par.map((id, c) => (
+                        <FichaJuego
+                          key={id}
+                          nombre={MODOS[id].titulo}
+                          icono={ICONO_MODO[id]}
+                          resumen={resumenJuego(id, niveles, records)}
+                          conNiveles={id !== 'cazala'}
+                          indice={r * 2 + c}
+                          activo={seccionJuegos.visto}
+                          onPress={() => (id === 'cazala' ? nav.navigate('Cazala') : nav.navigate('Niveles', { juego: id }))}
+                        />
+                      ))}
+                      {par.length === 1 ? <View style={styles.hueco} /> : null}
+                    </View>
+                  ))}
+                </View>
+              </Animated.View>
+
               <View style={styles.bloque}>
                 <SectionTitle title="Detalle" variante="bloque" />
                 <View style={styles.rows}>
@@ -158,6 +201,9 @@ const styles = StyleSheet.create({
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
   noData: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
+  cuadricula: { gap: space.md },
+  parFichas: { flexDirection: 'row', gap: space.md },
+  hueco: { flex: 1 },
   grupo: {
     backgroundColor: color.surface,
     borderRadius: radius.md,

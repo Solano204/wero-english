@@ -46,6 +46,8 @@ interface Props {
    * que va a vivir esto durante semanas.
    */
   imagen?: string | null;
+  /** Lo que lee el lector de pantalla cuando la tarjeta es tocable: sin él lee su contenido. */
+  accessibilityLabel?: string;
 }
 
 /**
@@ -74,6 +76,7 @@ export function Card({
   portada,
   imagen,
   altoPortada,
+  accessibilityLabel,
 }: Props) {
   const [imagenFallo, setImagenFallo] = React.useState(false);
 
@@ -177,6 +180,7 @@ export function Card({
       onPress={onPress}
       onLongPress={onLongPress}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
     >
       {body}
     </Presionable>

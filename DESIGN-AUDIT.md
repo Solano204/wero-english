@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 191 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 195 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -73,8 +73,8 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/screens/games/DulcesScreen.tsx:672` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
 
 **COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (`gradiente.neutro`). El degradado de la señal (`senal`) va de `accent900` a `accent100`, sin hex nuevos, y `npm run check:color` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: `filoLuz` mezcla blanco y cian, y `FONDO`. Usos de `<LinearGradient`:
-- `src/components/base/Card.tsx:123`
-- `src/components/base/Card.tsx:159`
+- `src/components/base/Card.tsx:126`
+- `src/components/base/Card.tsx:162`
 - `src/components/base/Screen.tsx:117`
 - `src/components/base/Screen.tsx:131`
 - `src/components/card/FeedbackBand.tsx:103`
@@ -126,7 +126,7 @@ Se quedan en 12–13 px, revisados a mano (19):
 - `src/screens/games/ParesScreen.tsx:465` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
-Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/components/fx/Espectrograma.tsx` 3, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/progreso/PanelSenal.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/ConsolaHoy.tsx` 1, `src/screens/extras/practicar/Destacados.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/extras/practicar/MetaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/ProgressScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
+Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/components/fx/Espectrograma.tsx` 3, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/progreso/FichaJuego.tsx` 1, `src/components/progreso/FilaMundo.tsx` 1, `src/components/progreso/PanelSenal.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/ConsolaHoy.tsx` 1, `src/screens/extras/practicar/Destacados.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/extras/practicar/MetaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/ProgressScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
 
 **TIPO-2b · Line-height del cuerpo entre 1.4 y 1.6** (texto de 18 px o menos):
 - `src/screens/extras/GramaticaTemaScreen.tsx:345` — en: 18 px con lineHeight x1.35
@@ -135,7 +135,7 @@ Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son 
 - (ninguno)
 
 Descartados (28 px o más, pero no son títulos):
-- `src/components/base/Card.tsx:216` — portadaVacia: inicial suelta de una portada pendiente (`textSobrePortada`), no un título
+- `src/components/base/Card.tsx:220` — portadaVacia: inicial suelta de una portada pendiente (`textSobrePortada`), no un título
 - `src/components/card/SceneImage.tsx:124` — inicial: inicial suelta de una imagen pendiente (`textSobrePortada`), no un título
 
 ## ESPACIADO
@@ -144,7 +144,7 @@ Descartados (28 px o más, pero no son títulos):
 - (ninguno)
 
 **Excepciones revisadas (no cuentan):**
-- `src/components/base/Card.tsx:190` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/components/base/Card.tsx:194` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/card/FeedbackBand.tsx:184` — filoCapa: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/unlock/MuroDesbloqueo.tsx:126` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/navigation/TabNavigator.tsx:231` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
@@ -225,7 +225,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/ParesScreen.tsx` | ✓ `:111` | ✓ `:287` | ✓ `:263` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
-| `utility/ProgressScreen.tsx` | ✓ `:51` | ✓ `:70` | ✓ `:84` |
+| `utility/ProgressScreen.tsx` | ✓ `:71` | ✓ `:96` | ✓ `:112` |
 | `utility/StuckScreen.tsx` | ✓ `:26` | ✓ `:29` | ✓ `:37` |
 
 Sin carga: 0 de 21 · sin vacío: 5 · sin error: 0.
