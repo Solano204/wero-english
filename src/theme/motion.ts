@@ -136,6 +136,8 @@ export const motionSenal = {
   columna: 20,
   /** Cada cuánto se lee la posición del audio para la onda de voz y el karaoke (solo mientras suena). */
   muestreo: 50,
+  /** El anillo del nivel actual emite una onda cada 2.4 s (Niveles: el único bucle de la pantalla). */
+  ondaNivel: 2400,
 } as const;
 
 /**

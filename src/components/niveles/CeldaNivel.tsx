@@ -6,6 +6,7 @@ import { Presionable } from '@/components/base/Presionable';
 import { FilaEstrellas } from '@/components/card/FilaEstrellas';
 import { etiquetaNivel, type EstadoNivel } from '@/domain/niveles';
 import { color, font, layout, radius, senal, space } from '@/theme';
+import { AnilloActual } from './AnilloActual';
 import { BordePunteado } from './BordePunteado';
 
 /** La celda actual es un 12 % más grande que sus vecinas: escala, sin mover la cuadrícula. */
@@ -45,8 +46,10 @@ export const CeldaNivel = memo(function CeldaNivel({ n, estado, estrellas, lado,
       accessibilityLabel={etiquetaNivel(n, estado, estrellas)}
       accessibilityHint={anuncio ? 'Ver anuncio y abrir' : undefined}
       accessibilityState={{ disabled: bloqueado }}
-      style={{ width: lado, height: lado }}
+      // La actual va por encima de sus vecinas: su anillo y su onda se apoyan en el hueco.
+      style={{ width: lado, height: lado, zIndex: actual ? 1 : 0 }}
     >
+      {actual ? <AnilloActual lado={lado} /> : null}
       <View
         style={[
           styles.celda,

@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
+import { Button, Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
 import { ALTO_TRAMO, EncabezadoTramo, FilaNiveles, HUECO_CELDAS } from '@/components/niveles';
 import {
   abrirConAnuncio,
@@ -183,8 +183,26 @@ export function NivelesScreen() {
   const indiceActual = indiceDeNivel(items, siguiente);
   const arranque = indiceActual > 2 ? indiceActual - 2 : undefined;
 
+  // La acción principal, en la zona del pulgar: jugar el nivel que sigue. Con los 200 jugados no hay «actual».
+  const hayActual = Boolean(carga.datos) && siguiente <= def.total;
+
   const contenido = (
-    <Screen padded={false}>
+    <Screen
+      padded={false}
+      footer={
+        hayActual ? (
+          <Button
+            label={`Jugar nivel ${siguiente}`}
+            size="lg"
+            full
+            onPress={() => {
+              const ruta = RUTA[juego];
+              if (ruta) nav.navigate(ruta, { nivel: siguiente });
+            }}
+          />
+        ) : undefined
+      }
+    >
       <View style={styles.top}>
         <Header
           onBack={() => nav.goBack()}

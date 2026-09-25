@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 227 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 228 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -87,7 +87,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/fx/OndaSenal.tsx:53`
 - `src/components/fx/OndaVoz.tsx:124`
 - `src/components/fx/PortadaJuego.tsx:93`
-- `src/components/niveles/CeldaNivel.tsx:61`
+- `src/components/niveles/CeldaNivel.tsx:64`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
 - `src/navigation/TabNavigator.tsx:122`
 - `src/screens/extras/practicar/ConsolaHoy.tsx:98`
@@ -222,7 +222,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
-| `games/NivelesScreen.tsx` | ✓ `:66` | ✗ | ✓ `:196` |
+| `games/NivelesScreen.tsx` | ✓ `:66` | ✗ | ✓ `:214` |
 | `games/ParesScreen.tsx` | ✓ `:111` | ✓ `:287` | ✓ `:263` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
