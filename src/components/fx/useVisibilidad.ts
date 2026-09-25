@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import Animated, {
   measure,
   useAnimatedReaction,
   useAnimatedRef,
+  runOnJS,
   useSharedValue,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -40,4 +42,20 @@ export function useVisibilidad(scrollY: SharedValue<number>) {
   };
 
   return { ref, visible, desfase, alAcomodar };
+}
+
+/**
+ * Como `useVisibilidad`, y además avisa una sola vez (estado de React, no por cuadro)
+ * cuando el elemento entra a la vista: para animar una sección al llegar con el scroll.
+ */
+export function useVisto(scrollY: SharedValue<number>) {
+  const { ref, visible, alAcomodar } = useVisibilidad(scrollY);
+  const [visto, setVisto] = useState(false);
+  useAnimatedReaction(
+    () => visible.value,
+    (ahora, antes) => {
+      if (ahora === 1 && antes !== 1) runOnJS(setVisto)(true);
+    }
+  );
+  return { ref, alAcomodar, visto };
 }

@@ -1,7 +1,7 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
+import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ErrorCarga, Screen } from '@/components/base';
@@ -13,10 +13,11 @@ import { getRecentDays } from '@/db/progress';
 import { countDue, getStats } from '@/db/queries';
 import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/hooks/useCarga';
+import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { motionDuration, motionEasing, space, tarjeta } from '@/theme';
-import { conteo, useMovimientoReducido } from '@/utils';
+import { space, tarjeta } from '@/theme';
+import { conteo } from '@/utils';
 import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -24,7 +25,6 @@ import { ConsolaHoy } from './practicar/ConsolaHoy';
 import { etiquetaCorregir } from './practicar/consola';
 import { Destacados } from './practicar/Destacados';
 import { EncabezadoPracticar, ALTO_ENCABEZADO } from './practicar/EncabezadoPracticar';
-import { tomarEntrada } from './practicar/entrada';
 import { FilaModo } from './practicar/FilaModo';
 import { GrupoPlegable } from './practicar/GrupoPlegable';
 import { ICONO_GRUPO, ICONO_MODO } from './practicar/iconos';
@@ -88,22 +88,7 @@ export function PracticeScreen() {
   const nav = useNavigation<Nav>();
   const { top } = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
-  const [primeraEntrada] = useState(tomarEntrada);
-  const reducido = useMovimientoReducido();
-  const fundido = useSharedValue(1);
-  const yaEnfoco = useRef(false);
-
-  // Primera vez: coreografía. Las visitas siguientes de la sesión solo hacen un fundido.
-  useFocusEffect(
-    useCallback(() => {
-      if (yaEnfoco.current && !reducido) {
-        fundido.value = 0;
-        fundido.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
-      }
-      yaEnfoco.current = true;
-    }, [fundido, reducido])
-  );
-  const estiloFundido = useAnimatedStyle(() => ({ opacity: fundido.value }));
+  const { primera: primeraEntrada, estiloFundido } = useEntradaPantalla('practicar');
   const user = useAuthStore((s) => s.user);
   const abiertos = useSettingsStore((s) => s.practicarGruposAbiertos);
   const guardarAjuste = useSettingsStore((s) => s.set);

@@ -3,6 +3,7 @@ export { BotonSenal } from './BotonSenal';
 export { FondoAurora } from './FondoAurora';
 export { FxSeguro } from './FxSeguro';
 export { Marcador } from './Marcador';
+export { MedidorSenal } from './MedidorSenal';
 export { MedidorVU } from './MedidorVU';
 export { OndaSenal } from './OndaSenal';
 export { PildoraLiquida } from './PildoraLiquida';

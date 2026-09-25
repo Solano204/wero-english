@@ -17,7 +17,10 @@ const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind
 const { elegirHoy, elegirDestacados, ORDEN, NUM_DESTACADOS } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 
 // Los módulos puros importan `@/utils/text`: se resuelve a mano al cargarlos.
-const ALIAS = { '@/utils/text': 'src/utils/text.ts' };
+const ALIAS = {
+  '@/utils/text': 'src/utils/text.ts',
+  '@/screens/extras/practicar/resumenNiveles': 'src/screens/extras/practicar/resumenNiveles.ts',
+};
 const cargarUrl = async (rel) => {
   const fuenteRel = fs.readFileSync(path.join(ROOT, rel), 'utf8');
   let out = ts.transpileModule(fuenteRel, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -28,6 +31,7 @@ const cargarUrl = async (rel) => {
 };
 const cargar = async (rel) => import(await cargarUrl(rel));
 const { energiaOnda, progresoMeta, metaCumplida, etiquetaCorregir, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+const P = await cargar('src/components/progreso/datos.ts');
 const { plural, conteo, miles } = await cargar('src/utils/text.ts');
 const { metaDe, textoMeta } = await cargar('src/screens/extras/practicar/metadatos.ts');
 const { diasQueQuedan, textoDiasReto } = await cargar('src/screens/extras/practicar/reto.ts');
@@ -126,4 +130,71 @@ assert.equal(miles(1234567), '1,234,567');
 assert.equal(etiquetaCorregir(1), 'Corregir 1 error');
 assert.equal(etiquetaCorregir(7), 'Corregir 7 errores');
 
-console.log('check:practicar ok (67 casos)');
+// Progreso: medidor, chips, espectrograma, mundos, juegos y detalle.
+assert.equal(P.ratio(0, 0), 0, 'sin total no hay razón');
+assert.equal(P.ratio(2000, 1436), 1);
+assert.ok(Math.abs(P.ratio(128, 1436) - 0.0891) < 0.001);
+assert.equal(P.textoDominadas(128, 1436), 'frases dominadas de 1,436');
+assert.equal(P.textoDominadas(1, 1436), 'frase dominada de 1,436');
+assert.equal(P.textoVistas(128), '128 vistas');
+assert.equal(P.textoVistas(1), '1 vista');
+assert.equal(P.etiquetaMedidor(128, 1436, 128), '128 frases dominadas de 1,436, 128 vistas');
+assert.equal(P.textoRacha(1), '1 día seguido');
+assert.equal(P.textoRacha(4), '4 días seguidos');
+assert.equal(P.textoRacha(0), null);
+assert.equal(P.textoRecord(1, 4), 'Récord: 4 días');
+assert.equal(P.textoRecord(4, 4), 'Récord actual');
+assert.equal(P.textoRecord(5, 4), 'Récord actual', 'la racha supera el récord');
+assert.equal(P.textoRecord(0, 0), null, 'sin récord no hay chip');
+assert.equal(P.textoRecord(1, 1), 'Récord actual');
+assert.equal(P.esRecordActual(3, 4), false);
+
+const v = P.ventana([{ dia: '2026-09-25', respuestas: 10, aciertos: 8 }, { dia: '2026-09-05', respuestas: 3, aciertos: 5 }], '2026-09-25');
+assert.equal(v.length, 21);
+assert.equal(v[0].dia, '2026-09-05');
+assert.deepEqual([v[0].respuestas, v[0].aciertos], [3, 3], 'los aciertos no pasan de las respuestas');
+assert.equal(v[20].dia, '2026-09-25');
+assert.equal(v[10].respuestas, 0, 'un día sin registro entra en cero');
+assert.equal(P.ventana([], '2026-10-02')[0].dia, '2026-09-12', 'la ventana cruza el cambio de mes');
+assert.equal(P.maximo([]), 1);
+assert.equal(P.maximo(v), 10);
+assert.equal(P.alturaColumna(0, 10, 96), 0);
+assert.equal(P.alturaColumna(10, 10, 96), 96);
+assert.equal(P.alturaColumna(25, 100, 96), 48, 'raíz cuadrada: 25 % de las respuestas pesa la mitad');
+assert.equal(P.alturaColumna(1, 10000, 96), 3, 'un día con actividad nunca desaparece');
+assert.equal(P.inicial('2026-09-21'), 'L');
+assert.equal(P.inicial('2026-09-23'), 'M');
+assert.equal(P.inicial('2026-09-27'), 'D');
+assert.equal(P.etiquetaDia({ dia: '2026-09-15', respuestas: 42, aciertos: 30 }), 'Mar 15 · 42 respuestas · 30 aciertos');
+assert.equal(P.etiquetaDia({ dia: '2026-09-15', respuestas: 1, aciertos: 1 }), 'Mar 15 · 1 respuesta · 1 acierto');
+assert.equal(P.etiquetaDia({ dia: '2026-09-15', respuestas: 0, aciertos: 0 }), 'Mar 15 · sin práctica');
+assert.equal(P.resumenAccesible([{ dia: '2026-09-24', respuestas: 10, aciertos: 8 }, { dia: '2026-09-25', respuestas: 2, aciertos: 1 }]), 'Últimas tres semanas: 2 días con práctica, 12 respuestas, 75 % de aciertos.');
+assert.equal(P.resumenAccesible([{ dia: '2026-09-25', respuestas: 1, aciertos: 1 }]), 'Últimas tres semanas: 1 día con práctica, 1 respuesta, 100 % de aciertos.');
+assert.equal(P.resumenAccesible(P.ventana([], '2026-09-25')), 'Últimas tres semanas: sin días con práctica.');
+assert.deepEqual(P.listaAccesible(P.ventana([{ dia: '2026-09-25', respuestas: 4, aciertos: 3 }], '2026-09-25')), ['Vie 25 · 4 respuestas · 3 aciertos']);
+
+const mundos = [{ id: 'a', nombre: 'A', orden: 1 }, { id: 'b', nombre: 'B', orden: 2 }, { id: 'c', nombre: 'C', orden: 3 }, { id: 'z', nombre: 'Z', orden: 4 }];
+const filas = P.filasMundo(mundos, { a: { total: 10, dominadas: 15 }, b: { total: 20, dominadas: 5 }, c: { total: 0, dominadas: 0 }, z: { total: 5, dominadas: 0 } });
+assert.deepEqual(filas.map((f) => f.id), ['a', 'b', 'z'], 'ordenados por dominadas; sin frases se omiten; con 0 dominadas se quedan');
+assert.equal(filas[0].dominadas, 10, 'las dominadas no pasan del total del filtro');
+assert.equal(filas[0].fraccion, 1);
+assert.equal(P.filasMundo(mundos, {}).length, 0);
+assert.equal(P.textoMundo({ total: 1436, dominadas: 128 }), '128 de 1,436');
+
+const niv = { pares: { jugados: 22, estrellas: 36, siguiente: 23 }, colmena: { jugados: 0, estrellas: 0, siguiente: 1 }, dulces: { jugados: 200, estrellas: 500, siguiente: 201 } };
+const rec = { cazala: { partidas: 3, mejor: 12 } };
+assert.deepEqual(P.resumenJuego('pares', niv, rec), { tipo: 'nivel', nivel: 23, estrellas: 36, fraccion: 23 / 200 });
+assert.deepEqual(P.resumenJuego('colmena', niv, rec), { tipo: 'sinJugar' }, 'abierto con anuncio pero sin jugar');
+assert.deepEqual(P.resumenJuego('caida', niv, rec), { tipo: 'sinJugar' });
+assert.equal(P.resumenJuego('dulces', niv, rec).nivel, 200, 'el nivel no pasa de 200');
+assert.deepEqual(P.resumenJuego('cazala', niv, rec), { tipo: 'partidas', partidas: 3, mejor: 12 }, 'Cázala no tiene niveles: su dato real');
+assert.deepEqual(P.resumenJuego('cazala', niv, {}), { tipo: 'sinJugar' });
+assert.equal(P.textoJuego(P.resumenJuego('pares', niv, rec)), 'Nivel 23 de 200');
+assert.equal(P.textoJuego(P.resumenJuego('cazala', niv, rec)), '3 partidas · mejor 12');
+assert.equal(P.textoJuego({ tipo: 'partidas', partidas: 1, mejor: 5 }), '1 partida · mejor 5');
+assert.equal(P.textoJuego({ tipo: 'sinJugar' }), 'Sin jugar');
+assert.equal(P.precisionPct(0.874), 87);
+assert.equal(P.precisionPct(1.2), 100);
+assert.equal(P.precisionPct(-1), 0);
+
+console.log('check:practicar ok (127 casos)');

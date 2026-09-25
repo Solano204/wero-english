@@ -41,6 +41,8 @@ export const motionEasing = {
   salir: Easing.in(Easing.cubic),
   /** Solo para bucles que van y vienen (esqueleto, respiro). */
   ciclo: Easing.inOut(Easing.ease),
+  /** Solo para dirigir una animación por tramos (cada pieza aplica su propia curva). */
+  lineal: Easing.linear,
 } as const;
 
 export const motionSpring = {

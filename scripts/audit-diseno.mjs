@@ -390,12 +390,18 @@ function auditaMovimiento(archivos) {
  * Los bucles anteriores a la v5.0 (Skeleton, respiro de EarModeScreen) no entran: viven donde ya se veían.
  */
 const ALCANCE_SENAL = (r) =>
-  r.startsWith('src/components/fx/') || r.startsWith('src/screens/extras/practicar/') ||
-  r === 'src/screens/extras/PracticeScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
+  r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') ||
+  r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
+  r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
 const ANIMA = /\b(withTiming|withSpring|withRepeat|withSequence|withDelay|useFrameCallback)\(|entering=/;
 /** MOT-3: componentes que son el momento héroe animado de su pantalla. */
-const MOMENTOS_HEROE = ['ConsolaHoy'];
+const MOMENTOS_HEROE = ['ConsolaHoy', 'MedidorSenal'];
+/** MOT-3: los canvases de Skia en bucle que vive cada pantalla (máximo 3 a la vez). */
+const LOOPS_POR_PANTALLA = {
+  Practicar: ['FondoAurora.tsx', 'OndaSenal.tsx', 'PortadaJuego.tsx'],
+  Progreso: ['MedidorSenal.tsx'],
+};
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
   { archivo: 'src/components/fx/TransicionHoy.tsx', motivo: 'solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento' },
@@ -410,7 +416,7 @@ function auditaSenal(archivos) {
     const enAlcance = ALCANCE_SENAL(r);
     const codigo = lines.map((l) => (esComentario(l) ? '' : l));
     const texto = codigo.join('\n');
-    if (r.startsWith('src/screens/')) {
+    if (r.startsWith('src/screens/') || r.startsWith('src/components/progreso/')) {
       const n = MOMENTOS_HEROE.reduce((t, c) => t + (texto.match(new RegExp(`<${c}\\b`, 'g')) || []).length, 0);
       if (n > 1) S.mot3.push({ r, linea: primeraLinea(codigo, new RegExp(`<(${MOMENTOS_HEROE.join('|')})\\b`)) ?? 1, txt: `${n} momentos héroe en una pantalla` });
     }
@@ -430,8 +436,17 @@ function auditaSenal(archivos) {
       else S.mot5.push({ ...item, txt: 'anima sin consultar `useMovimientoReducido` ni `useSenalActiva`' });
     }
   }
-  if (S.canvasEnBucle.length > MAX_CANVAS_EN_BUCLE) {
-    S.mot3.push({ r: 'src/components/fx/', linea: 1, txt: `${S.canvasEnBucle.length} archivos con canvas de Skia en bucle (máximo ${MAX_CANVAS_EN_BUCLE} a la vez)` });
+  // Cada canvas en bucle debe vivir en una pantalla, y ninguna pantalla pasa de 3 a la vez.
+  const asignados = new Set(Object.values(LOOPS_POR_PANTALLA).flat());
+  for (const r of S.canvasEnBucle) {
+    if (!asignados.has(r.split('/').pop())) {
+      S.mot3.push({ r, linea: 1, txt: 'canvas de Skia en bucle sin pantalla asignada en `LOOPS_POR_PANTALLA` del audit' });
+    }
+  }
+  for (const [pantalla, archivos] of Object.entries(LOOPS_POR_PANTALLA)) {
+    if (archivos.length > MAX_CANVAS_EN_BUCLE) {
+      S.mot3.push({ r: 'src/components/fx/', linea: 1, txt: `${pantalla}: ${archivos.length} canvases de Skia en bucle (máximo ${MAX_CANVAS_EN_BUCLE} a la vez)` });
+    }
   }
   return S;
 }
