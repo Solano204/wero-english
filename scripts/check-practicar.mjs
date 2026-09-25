@@ -22,6 +22,7 @@ const cargar = async (rel) => {
   return import(`data:text/javascript;base64,${Buffer.from(out).toString('base64')}`);
 };
 const { energiaOnda, progresoMeta, metaCumplida, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+const { resumenNivel, TOTAL_NIVELES } = await cargar('src/screens/extras/practicar/resumenNiveles.ts');
 
 const uso = (o) => Object.fromEntries(Object.entries(o).map(([k, [dias, ultimo]]) => [k, { dias, ultimo }]));
 
@@ -58,4 +59,11 @@ assert.equal(progresoMeta(5, 0), 0, 'sin meta, anillo vacío');
 assert.equal(metaCumplida(20, 20), true);
 assert.equal(metaCumplida(19, 20), false);
 assert.equal(metaCumplida(3, 0), false);
-console.log('check:practicar ok (23 casos)');
+// Destacados: «Nivel N · E estrellas» y la barra fina de nivel/200.
+assert.equal(resumenNivel(undefined), null, 'un modo sin niveles no tiene resumen');
+assert.deepEqual(resumenNivel({ jugados: 0, estrellas: 0, siguiente: 1 }), { texto: 'Nivel 1 · 200 niveles', nivel: 1 });
+assert.deepEqual(resumenNivel({ jugados: 22, estrellas: 36, siguiente: 23 }), { texto: 'Nivel 23 · 36 estrellas', nivel: 23 });
+assert.equal(resumenNivel({ jugados: 3, estrellas: 1, siguiente: 4 }).texto, 'Nivel 4 · 1 estrella', 'singular con una estrella');
+assert.equal(resumenNivel({ jugados: 200, estrellas: 500, siguiente: 201 }).nivel, TOTAL_NIVELES, 'la barra no pasa de 200');
+
+console.log('check:practicar ok (28 casos)');

@@ -390,7 +390,7 @@ export const aurora = { opacidadMax: 0.18, paralaje: 8, resolucion: 0.25 } as co
 export const grano = { opacidad: 0.03 } as const;
 
 /** Alto de las tarjetas de Destacados: la héroe a todo el ancho y las compactas en dos columnas. */
-export const tarjeta = { heroe: 180, compacta: 150 } as const;
+export const tarjeta = { heroe: 180, compacta: 150, portadaHeroe: 96, portadaCompacta: 64 } as const;
 
 /** Anillos de progreso: diámetro y grosor del trazo. */
 export const anillo = { hoy: 88, reto: 56, trazo: 8 } as const;

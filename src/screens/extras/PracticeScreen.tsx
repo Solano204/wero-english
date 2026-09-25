@@ -14,11 +14,12 @@ import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { PORTADA_JUEGO, color, font, radius, shadow, space, text } from '@/theme';
+import { color, font, space, tarjeta, text } from '@/theme';
 import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 import { ConsolaHoy } from './practicar/ConsolaHoy';
+import { Destacados } from './practicar/Destacados';
 import { EncabezadoPracticar, ALTO_ENCABEZADO } from './practicar/EncabezadoPracticar';
 import { tomarEntrada } from './practicar/entrada';
 import { FilaModo } from './practicar/FilaModo';
@@ -188,9 +189,18 @@ export function PracticeScreen() {
 
         <View style={styles.bloque}>
           <Text style={text.h3}>Destacados</Text>
-          {destacados.map((id) => (
-            <Destacado key={id} modo={MODOS[id]} dato={datoDe(id)} onPress={() => MODOS[id].ir(nav)} />
-          ))}
+          {carga.estado === 'cargando' ? (
+            <View style={styles.reservaDestacados} />
+          ) : (
+            <Destacados
+              ids={destacados}
+              niveles={niveles}
+              datoDe={datoDe}
+              scrollY={scrollY}
+              entrada={primeraEntrada}
+              onIr={(id) => MODOS[id].ir(nav)}
+            />
+          )}
         </View>
 
         <View style={styles.bloque}>
@@ -243,57 +253,11 @@ export function PracticeScreen() {
   );
 }
 
-interface DestacadoProps {
-  modo: Modo;
-  dato: string | null;
-  onPress: () => void;
-}
-
-/** Tarjeta mediana: pesa menos que HOY y más que un renglón de grupo. */
-function Destacado({ modo, dato, onPress }: DestacadoProps) {
-  return (
-    <Card
-      onPress={onPress}
-      style={styles.item}
-      portada={modo.arte}
-      imagen={PORTADA_JUEGO[modo.arte]}
-      altoPortada={56}
-    >
-      <View style={styles.itemTop}>
-        <Text style={styles.itemTitle}>{modo.titulo}</Text>
-        {dato ? <Text style={styles.itemExtra}>{dato}</Text> : null}
-      </View>
-      <Text style={styles.itemBody} numberOfLines={2}>
-        {modo.cuerpo}
-      </Text>
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   // Entre bloques 32; dentro de un bloque 16 (ESP-2).
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
-  item: { gap: space.xs },
-  itemTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: space.sm,
-  },
-  itemTitle: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.text,
-    flexShrink: 1,
-  },
-  itemExtra: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  itemBody: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    lineHeight: font.size.md * 1.5,
-    color: color.textMuted,
-  },
+  reservaDestacados: { height: tarjeta.heroe + space.md + tarjeta.compacta },
   reto: { gap: space.sm },
   retoTop: {
     flexDirection: 'row',

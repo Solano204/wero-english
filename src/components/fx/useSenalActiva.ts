@@ -30,17 +30,32 @@ interface OpcionesReloj {
   reducido: boolean;
   /** Fase (0 a 1) en la que queda el fotograma limpio con "reducir movimiento". */
   faseQuieta?: number;
+  /** 1 mientras el elemento está en pantalla: fuera de ella el reloj se detiene (MOT-4). */
+  visible?: SharedValue<number>;
+  /** Una sola pasada y queda en el fotograma limpio, en vez de un bucle. */
+  unaVez?: boolean;
 }
 
 /**
  * Fase 0 a 1 que avanza en el hilo de UI mientras `activo`. Apagado, el reloj no
  * corre ni un cuadro: no cuesta nada. Con `reducido` queda en `faseQuieta`.
  */
-export function useReloj(periodo: number, { activo, reducido, faseQuieta = 0 }: OpcionesReloj): SharedValue<number> {
-  const fase = useSharedValue(faseQuieta);
+export function useReloj(
+  periodo: number,
+  { activo, reducido, faseQuieta = 0, visible, unaVez = false }: OpcionesReloj
+): SharedValue<number> {
+  const fase = useSharedValue(unaVez ? 0 : faseQuieta);
+  const acumulado = useSharedValue(0);
   const control = useFrameCallback((cuadro) => {
     'worklet';
+    if (visible && visible.value === 0) return;
+    if (unaVez && acumulado.value >= periodo) return;
     const paso = Math.min(cuadro.timeSincePreviousFrame ?? 0, MAX_PASO_MS);
+    acumulado.value += paso;
+    if (unaVez && acumulado.value >= periodo) {
+      fase.value = faseQuieta;
+      return;
+    }
     fase.value = (fase.value + paso / periodo) % 1;
   }, false);
 
