@@ -86,7 +86,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
 - `src/navigation/TabNavigator.tsx:113`
 - `src/screens/extras/practicar/ConsolaHoy.tsx:96`
-- `src/screens/extras/practicar/Destacados.tsx:72`
+- `src/screens/extras/practicar/Destacados.tsx:73`
 
 **COLOR-3 · Cada color de marca con escala 50–900.** Se exige a `accent`, `contraste` (primario) y `neutral`, con los diez pasos en `tokens.ts`. Sin escala completa: ninguno. Los colores de estado y los de mundo no llevan escala.
 
@@ -143,7 +143,7 @@ Descartados (28 px o más, pero no son títulos):
 - `src/components/card/FeedbackBand.tsx:184` — filoCapa: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/unlock/MuroDesbloqueo.tsx:126` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/navigation/TabNavigator.tsx:217` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
-- `src/screens/extras/practicar/Destacados.tsx:168` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/screens/extras/practicar/Destacados.tsx:169` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 
 ## JERARQUÍA Y ACCIÓN
 
@@ -299,7 +299,7 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 
 **Excepciones revisadas a mano (no cuentan):**
 - `src/components/fx/TransicionHoy.tsx:40` — solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento
-- `src/screens/extras/practicar/Destacados.tsx:62` — `entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)
+- `src/screens/extras/practicar/Destacados.tsx:63` — `entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)
 - `src/screens/extras/practicar/EncabezadoPracticar.tsx:76` — anima con el scroll (lo mueve el dedo, no es un bucle) y con `entering`, que salta al valor final con reducir movimiento
 
 ## Notas
