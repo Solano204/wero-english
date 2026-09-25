@@ -1,6 +1,7 @@
 import { buildCard } from './exercise';
 import { REINSERCION_MAX, REINSERCION_MIN } from './cola';
 import { review, gradeFrom, newCardState } from './sm2';
+import { conteo } from '@/utils/text';
 import type {
   AnswerResult,
   CardState,
@@ -158,13 +159,16 @@ export class StudySession {
   }
 
   /**
-   * Procesa una respuesta. Devuelve el estado nuevo para persistirlo y
-   * si la tarjeta vuelve en esta sesión.
+   * Procesa una respuesta. Devuelve el estado nuevo para persistirlo.
+   *
+   * `requeue` es lo que pide SM-2 (también para las acertadas en aprendizaje) y
+   * `reinsertada` lo que de verdad hizo la sesión: solo la fallada vuelve, y una
+   * sola vez. Lo que se le dice al usuario ("vuelve en esta sesión") sale de esta.
    */
   answer(
     result: AnswerResult,
     now: number = Date.now()
-  ): { state: CardState; grade: Grade; requeue: boolean } | null {
+  ): { state: CardState; grade: Grade; requeue: boolean; reinsertada: boolean } | null {
     const idx = this.queue.findIndex((p) => p.readyAt <= now);
     const pos = idx >= 0 ? idx : 0;
     const pending = this.queue[pos];
@@ -199,7 +203,8 @@ export class StudySession {
     // SM-2 ya las dejó programadas para mañana.
     const id = pending.card.entry.id;
     const veces = this.reinsertadas.get(id) ?? 0;
-    if (grade === 1 && veces < this.maxReinserciones) {
+    const reinsertada = grade === 1 && veces < this.maxReinserciones;
+    if (reinsertada) {
       this.reinsertadas.set(id, veces + 1);
       this.reinserciones++;
       this.total++;
@@ -207,7 +212,7 @@ export class StudySession {
       this.queue.splice(Math.min(this.queue.length, salto), 0, this.make(pending.card.entry, state, true, now));
     }
 
-    return { state, grade, requeue };
+    return { state, grade, requeue, reinsertada };
   }
 
   /**
@@ -245,3 +250,19 @@ export class StudySession {
 }
 
 export { gradeFrom };
+
+/**
+ * Lo que se le dice al usuario de cuándo vuelve la tarjeta que acaba de responder.
+ *
+ * «Vuelve en esta sesión» solo si la sesión de verdad la reinsertó. Un intervalo de 0
+ * días también sale de un acierto en paso de aprendizaje (1 o 10 minutos), y esa no
+ * vuelve en esta sesión: se ve en la siguiente vuelta.
+ */
+export function etiquetaRepaso(intervalo: number, reinsertada: boolean): string {
+  if (reinsertada) return 'Vuelve en esta sesión';
+  if (intervalo <= 0) return 'La vuelves a ver pronto';
+  if (intervalo === 1) return 'La vuelves a ver mañana';
+  if (intervalo < 7) return `La vuelves a ver en ${conteo(intervalo, 'día')}`;
+  if (intervalo < 30) return `La vuelves a ver en ${conteo(Math.round(intervalo / 7), 'semana')}`;
+  return `La vuelves a ver en ${conteo(Math.round(intervalo / 30), 'mes', 'meses')}`;
+}

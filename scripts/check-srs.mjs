@@ -44,7 +44,7 @@ const importar = (rel) => import(cargar(path.join(ROOT, rel)));
 
 const fecha = await importar('src/utils/date.ts');
 const sm2 = await importar('src/domain/sm2.ts');
-const { StudySession } = await importar('src/domain/session.ts');
+const { StudySession, etiquetaRepaso } = await importar('src/domain/session.ts');
 const plan = await importar('src/domain/cola.ts');
 const sql = await importar('src/db/cola.ts');
 const plantillas = await importar('src/domain/plantillas.ts');
@@ -361,6 +361,38 @@ await prueba('sin reinserción configurada nada se repite en la sesión, ni las 
 
 await prueba('la app reinserta las falladas una vez', () => {
   assert.equal(plan.MAX_REINSERCIONES, 1);
+});
+
+await prueba('`reinsertada` dice lo que hizo la sesión: la fallada vuelve una vez y nada más', () => {
+  const s = motor(6, { maxReinserciones: 1, azar: () => 0 });
+  const resultados = [];
+  while (!s.terminada) {
+    const id = s.current().entry.id;
+    const r = s.answer({ grade: id === 1 ? 1 : 3, correct: id !== 1, elapsedMs: 5000, usedHint: false });
+    resultados.push([id, r.reinsertada]);
+  }
+  assert.deepEqual(resultados.filter(([id]) => id === 1).map(([, re]) => re), [true, false], 'la primera falla vuelve, la segunda ya no');
+  assert.ok(resultados.filter(([id]) => id !== 1).every(([, re]) => re === false), 'las acertadas no vuelven');
+});
+
+await prueba('un acierto en aprendizaje pide volver a SM-2 (requeue) pero la sesión no lo reinserta', () => {
+  const s = new StudySession({ due: [], fresh: pares([{ id: 1 }, { id: 2 }]), meta: 50, distractorsFor: () => [], maxReinserciones: 1, azar: () => 0 });
+  const r = s.answer({ grade: 3, correct: true, elapsedMs: 5000, usedHint: false });
+  assert.equal(r.requeue, true, 'SM-2 la deja en un paso de aprendizaje');
+  assert.equal(r.state.intervalo, 0);
+  assert.equal(r.reinsertada, false, 'pero la sesión no la vuelve a mostrar');
+  assert.equal(s.remaining, 1);
+});
+
+await prueba('etiquetaRepaso: «Vuelve en esta sesión» solo si de verdad vuelve', () => {
+  assert.equal(etiquetaRepaso(0, true), 'Vuelve en esta sesión');
+  assert.equal(etiquetaRepaso(0, false), 'La vuelves a ver pronto', 'intervalo 0 sin reinserción: se ve en la siguiente vuelta');
+  assert.equal(etiquetaRepaso(1, false), 'La vuelves a ver mañana');
+  assert.equal(etiquetaRepaso(3, false), 'La vuelves a ver en 3 días');
+  assert.equal(etiquetaRepaso(7, false), 'La vuelves a ver en 1 semana');
+  assert.equal(etiquetaRepaso(14, false), 'La vuelves a ver en 2 semanas');
+  assert.equal(etiquetaRepaso(30, false), 'La vuelves a ver en 1 mes');
+  assert.equal(etiquetaRepaso(60, false), 'La vuelves a ver en 2 meses');
 });
 
 await prueba('las reinsertadas no inflan la cola: el total sube solo lo reinsertado', () => {

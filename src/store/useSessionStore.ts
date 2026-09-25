@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { conteo } from '@/utils/text';
 import {
   countDue,
   getDistractors,
@@ -11,7 +10,7 @@ import {
 } from '@/db/queries';
 import { endSession, getNuevasHoy, startSession, touchStreak } from '@/db/progress';
 import { MAX_REINSERCIONES, armarSesion, filtroEstudio } from '@/domain/cola';
-import { StudySession, gradeFrom } from '@/domain/session';
+import { StudySession, etiquetaRepaso, gradeFrom } from '@/domain/session';
 import type { SessionSummary, StudyCard } from '@/types';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
@@ -230,7 +229,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
         correct,
         answer: card.answer,
         nota: card.entry.no_usar_cuando,
-        nextLabel: labelFor(res.state.intervalo),
+        nextLabel: etiquetaRepaso(res.state.intervalo, res.reinsertada),
       },
       done: p.done,
       goal: p.goal,
@@ -330,11 +329,3 @@ export const useSessionStore = create<SessionState>((set, get) => {
   },
   };
 });
-
-function labelFor(intervalo: number): string {
-  if (intervalo === 0) return 'Vuelve en esta sesión';
-  if (intervalo === 1) return 'La vuelves a ver mañana';
-  if (intervalo < 7) return `La vuelves a ver en ${conteo(intervalo, 'día')}`;
-  if (intervalo < 30) return `La vuelves a ver en ${conteo(Math.round(intervalo / 7), 'semana')}`;
-  return `La vuelves a ver en ${conteo(Math.round(intervalo / 30), 'mes', 'meses')}`;
-}

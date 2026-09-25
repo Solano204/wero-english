@@ -12,8 +12,8 @@ import {
   Screen,
 } from '@/components/base';
 import { Trozos, useReaccion } from '@/components/feedback';
-import { BarraSesion, ChipMarcador, publicarBarraEstudio } from '@/components/fx';
-import { FeedbackBand, StudyCardView } from '@/components/card';
+import { BarraSesion, ChipMarcador, HojaVeredicto, publicarBarraEstudio } from '@/components/fx';
+import { DiffFrase, StudyCardView } from '@/components/card';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -256,12 +256,18 @@ export function StudyScreen() {
         />
       </View>
 
-      <FeedbackBand
+      <HojaVeredicto
         visible={Boolean(feedback)}
         correct={feedback?.correct ?? false}
         answer={feedback?.answer ?? ''}
         nota={feedback?.nota}
-        nextLabel={feedback?.nextLabel}
+        repaso={feedback?.nextLabel}
+        frase={
+          // Dictado y Escribir: la frase con lo que faltó y lo que sobró marcado en su lugar.
+          feedback && !feedback.correct && (card.kind === 'dictado' || card.kind === 'escribir') && chosen ? (
+            <DiffFrase dado={chosen} esperado={feedback.answer} />
+          ) : undefined
+        }
         avanzando={avanzando}
         onContinue={handleContinue}
         onDetail={() => nav.navigate('Detail', { entryId: card.entry.id })}

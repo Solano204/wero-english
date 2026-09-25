@@ -6,6 +6,7 @@ export { Espectrograma } from './Espectrograma';
 export { FondoAurora } from './FondoAurora';
 export { FraseKaraoke } from './FraseKaraoke';
 export { FxSeguro } from './FxSeguro';
+export { HojaVeredicto } from './HojaVeredicto';
 export { Marcador } from './Marcador';
 export { MedidorSenal } from './MedidorSenal';
 export { MedidorVU } from './MedidorVU';

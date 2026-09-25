@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
-import { DiffFrase } from './DiffFrase';
 import { FraseHueco } from './FraseHueco';
 import { OptionButton, type OptionState } from './OptionButton';
 import { PalabraVoladora } from './PalabraVoladora';
@@ -107,6 +106,8 @@ export function StudyCardView({
     return () => clearTimeout(t);
   }, [esCompletar, locked, aterrizo, reducido, vuelo]);
   useEffect(() => {
+    // El teclado de Dictado y Escribir se va al calificar: la hoja del veredicto sube en su lugar.
+    if (locked) Keyboard.dismiss();
     if (!locked || modo === 'choice') return;
     disparar(acierto ? 'acierto' : 'fallo');
     // Solo al bloquearse la tarjeta.
@@ -293,10 +294,7 @@ export function StudyCardView({
                 style={styles.grow}
               />
             </View>
-          ) : acierto ? null : (
-            // Fallaste: la frase con lo que faltó y lo que sobró marcado en su lugar.
-            <DiffFrase dado={chosen ?? ''} esperado={card.answer} />
-          )}
+          ) : null}
         </Animated.View>
       ) : (
         <ScrollView
