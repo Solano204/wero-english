@@ -58,6 +58,7 @@ function TarjetaJuego({ id, heroe, indice, ancho, resumenNiveles, dato, scrollY,
   return (
     <Animated.View
       ref={ref}
+      collapsable={false}
       onLayout={alAcomodar}
       entering={entrada ? aparecerSubiendo(motionEntrada.destacados + escalon(indice)) : undefined}
       style={heroe ? styles.heroe : styles.compacta}
