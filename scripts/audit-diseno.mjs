@@ -385,6 +385,57 @@ function auditaMovimiento(archivos) {
   return { sueltos, exentos, sinFeedback };
 }
 
+/**
+ * La señal en vivo (v5.0). Alcance: los efectos de `src/components/fx/`, Practicar y la barra de pestañas.
+ * Los bucles anteriores a la v5.0 (Skeleton, respiro de EarModeScreen) no entran: viven donde ya se veían.
+ */
+const ALCANCE_SENAL = (r) =>
+  r.startsWith('src/components/fx/') || r.startsWith('src/screens/extras/practicar/') ||
+  r === 'src/screens/extras/PracticeScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
+const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
+const ANIMA = /\b(withTiming|withSpring|withRepeat|withSequence|withDelay|useFrameCallback)\(|entering=/;
+/** MOT-3: componentes que son el momento héroe animado de su pantalla. */
+const MOMENTOS_HEROE = ['ConsolaHoy'];
+const MAX_CANVAS_EN_BUCLE = 3;
+const MOT5_EXCEPCIONES = [
+  { archivo: 'src/components/fx/TransicionHoy.tsx', motivo: 'solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento' },
+  { archivo: 'src/screens/extras/practicar/Destacados.tsx', motivo: '`entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)' },
+  { archivo: 'src/screens/extras/practicar/EncabezadoPracticar.tsx', motivo: 'anima con el scroll (lo mueve el dedo, no es un bucle) y con `entering`, que salta al valor final con reducir movimiento' },
+];
+
+/** MOT-3 (un solo momento héroe; máximo 3 canvases en bucle), MOT-4 (bucles con `useSenalActiva`), MOT-5 (reducir movimiento) e IA-3 (luz de escena). */
+function auditaSenal(archivos) {
+  const S = { mot3: [], mot4: [], mot5: [], mot5Exentos: [], luz: [], canvasEnBucle: [] };
+  for (const { r, lines } of archivos) {
+    const enAlcance = ALCANCE_SENAL(r);
+    const codigo = lines.map((l) => (esComentario(l) ? '' : l));
+    const texto = codigo.join('\n');
+    if (r.startsWith('src/screens/')) {
+      const n = MOMENTOS_HEROE.reduce((t, c) => t + (texto.match(new RegExp(`<${c}\\b`, 'g')) || []).length, 0);
+      if (n > 1) S.mot3.push({ r, linea: primeraLinea(codigo, new RegExp(`<(${MOMENTOS_HEROE.join('|')})\\b`)) ?? 1, txt: `${n} momentos héroe en una pantalla` });
+    }
+    if (r.startsWith('src/components/fx/') && /shadowColor/.test(texto)) {
+      S.luz.push({ r, linea: primeraLinea(codigo, /shadowColor/) ?? 1, txt: 'sombra de color en un efecto: la señal es luz de escena, no sombra' });
+    }
+    if (!enAlcance) continue;
+    const bucle = BUCLE.test(texto);
+    if (bucle && /<Canvas\b/.test(texto)) S.canvasEnBucle.push(r);
+    if (bucle && r !== 'src/components/fx/useSenalActiva.ts' && !/\buseSenalActiva\b/.test(texto)) {
+      S.mot4.push({ r, linea: primeraLinea(codigo, BUCLE) ?? 1, txt: 'bucle que no consulta `useSenalActiva` (foco, segundo plano, reducir movimiento)' });
+    }
+    if (ANIMA.test(texto) && !/\b(useMovimientoReducido|useSenalActiva)\b/.test(texto)) {
+      const item = { r, linea: primeraLinea(codigo, ANIMA) ?? 1 };
+      const ex = MOT5_EXCEPCIONES.find((e) => e.archivo === r);
+      if (ex) S.mot5Exentos.push({ ...item, txt: ex.motivo });
+      else S.mot5.push({ ...item, txt: 'anima sin consultar `useMovimientoReducido` ni `useSenalActiva`' });
+    }
+  }
+  if (S.canvasEnBucle.length > MAX_CANVAS_EN_BUCLE) {
+    S.mot3.push({ r: 'src/components/fx/', linea: 1, txt: `${S.canvasEnBucle.length} archivos con canvas de Skia en bucle (máximo ${MAX_CANVAS_EN_BUCLE} a la vez)` });
+  }
+  return S;
+}
+
 /** b) Texto cortado con numberOfLines={1} donde el contenido importa. */
 function auditaTextoCortado(archivos) {
   const importa = [], otros = [];
@@ -392,6 +443,8 @@ function auditaTextoCortado(archivos) {
     lines.forEach((l, i) => {
       if (esComentario(l) || !/numberOfLines=\{1\}/.test(l)) return;
       const bloque = lines.slice(Math.max(0, i - 1), i + 4).join(' ');
+      // Con `adjustsFontSizeToFit` el texto se encoge: no se corta con "…".
+      if (/adjustsFontSizeToFit/.test(bloque)) return;
       const expr = limpia((bloque.match(/numberOfLines=\{1\}[^>]*>\s*\{([^}]+)\}/) || [])[1]);
       const item = { r, linea: i + 1, txt: expr ? `\`{${expr.slice(0, 50)}}\`` : '' };
       (CONTENIDO.test(expr) ? importa : otros).push(item);
@@ -545,7 +598,7 @@ function tablaEstados(filas) {
 }
 
 function conteoPorRegla(ctx) {
-  const { H, C, E, T, R, A, M, acc1, modos, tokensBajos } = ctx;
+  const { H, C, E, T, R, A, M, S, acc1, modos, tokensBajos } = ctx;
   const sinE = (k) => E.filter((f) => !f[k]).length;
   return [
     ['COLOR-1', 'colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos), salvo las piezas de Dulces', C.marca + ctx.K.rellenos.length],
@@ -572,6 +625,9 @@ function conteoPorRegla(ctx) {
     ['AUD-1', 'audios de los JSON que no están en el bundle o están vacíos', A.faltan + A.vacios.length],
     ['MOT-1', 'duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados)', M.sueltos.length],
     ['MOT-2', 'tocables sin el feedback al presionar (`Presionable`)', M.sinFeedback.length],
+    ['MOT-3', 'más de un momento héroe animado por pantalla, o más de 3 canvases de Skia en bucle', S.mot3.length],
+    ['MOT-4', 'bucles de la señal que no se pausan fuera de pantalla, sin foco o en segundo plano', S.mot4.length],
+    ['MOT-5', 'efectos de la señal que no respetan reducir movimiento', S.mot5.length],
   ];
 }
 
@@ -585,7 +641,7 @@ ${L(c.K.rellenos)}
 **Excepción revisada a mano (no cuenta):**
 ${L(c.K.exentos)}
 
-**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (\`gradiente.neutro\`). Para revisar: \`filoLuz\` (\`:165-169\`) mezcla blanco y cian, y \`FONDO\` (\`:149\`). Usos de \`<LinearGradient\`:
+**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (\`gradiente.neutro\`). El degradado de la señal (\`senal\`) va de \`accent900\` a \`accent100\`, sin hex nuevos, y \`npm run check:color\` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: \`filoLuz\` mezcla blanco y cian, y \`FONDO\`. Usos de \`<LinearGradient\`:
 ${L(c.H.gradiente)}
 
 **COLOR-3 · Cada color de marca con escala 50–900.** Se exige a \`accent\`, \`contraste\` (primario) y \`neutral\`, con los diez pasos en \`tokens.ts\`. Sin escala completa: ${c.escalas.length ? c.escalas.map((n) => '\`' + n + '\`').join(', ') : 'ninguno'}. Los colores de estado y los de mundo no llevan escala.
@@ -652,17 +708,20 @@ ${L(c.H.glifo)}
 
 **IA-3 · Sombras discretas y consistentes; ninguna de color.** El halo cian (\`glow\`) se eliminó: \`primary\` usa \`shadow.soft\` (negra) y la barra de pestañas usa \`shadow.card\`. \`shadow.card\` (opacidad 0.55, radio 20) y \`shadow.raised\` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
 ${L(c.H.propio)}
+
+**Excepción (v5.0):** la luz de la señal (aurora, onda, anillo y destello de \`src/components/fx/\`) es luz de escena, no sombra de color. El audit solo exige que ningún archivo de \`fx/\` use \`shadowColor\`:
+${L(c.S.luz)}
 ${c.H.sombra.length ? '\nshadowColor que no es negro:\n' + L(c.H.sombra) : ''}
 
 ## Revisión manual (no se puede medir estáticamente)
 
 - **TIPO-3** jerarquía con tamaño y peso, no solo color; **TIPO-5** no mezclar alineaciones en un bloque.
 - **ESP-2** proximidad (lo que va junto, cerca; entre secciones, el doble).
-- **ACC-2** una sola cosa destacada por pantalla: hoy conviven el botón principal cian, la superficie \`contraste\`, el filo de luz de cada tarjeta y el acento cian.
+- **ACC-2** una sola cosa destacada por pantalla: en Practicar es HOY (\`ConsolaHoy\`, la única superficie \`contraste\`). Las portadas animadas de los destacados y la aurora son ambiente, no un segundo momento héroe (MOT-3).
 - **MOV-2** acciones frecuentes en la mitad inferior: en los juegos "Saltar" vive en el \`right\` del \`Header\` (arriba a la derecha).
-- **MOV-3** barra inferior: flota (\`TabNavigator.tsx\`, estilo \`bar\`) sobre un \`BlurView\` con filo; tiene fondo propio, así que cumple, pero no va pegada al borde.
+- **MOV-3** barra inferior: flota (\`TabNavigator.tsx\`, estilo \`bar\`) sobre un \`BlurView\` con filo y una píldora líquida; tiene fondo propio, así que cumple, pero no va pegada al borde.
 - **MOV-4** padding que empuja el contenido: revisar en dispositivo.
-- **IA-2** tarjetas de distinto tamaño y peso: \`Card\` es una sola pieza con filo y sombra \`card\`.
+- **IA-2** tarjetas de distinto tamaño y peso: en Practicar los destacados son una héroe a todo el ancho (180) y dos compactas (150); \`Card\` sigue siendo una sola pieza con filo y sombra \`card\` en el resto de la app.
 `;
 
 const SECCION_COMPORTAMIENTO = (c) => {
@@ -724,11 +783,24 @@ ${L(c.M.exentos)}
 **MOT-2 · Todo tocable pasa por \`Presionable\`** (escala 0.97 en \`rapido\`; con Reduce Motion baja la opacidad). Cuenta \`Pressable\`, \`AnimatedPressable\` y \`Touchable*\` sueltos:
 ${L(c.M.sinFeedback)}
 
+**MOT-3 · Un solo momento héroe animado por pantalla** (en Practicar es HOY, \`ConsolaHoy\`) **y como máximo 3 canvases de Skia en bucle a la vez.** Archivos con canvas en bucle (${c.S.canvasEnBucle.length}): ${c.S.canvasEnBucle.map((r) => '\`' + r.replace('src/components/fx/', '') + '\`').join(', ') || 'ninguno'}. Hallazgos:
+${L(c.S.mot3)}
+
+**MOT-4 · Todo bucle se pausa fuera de pantalla, sin foco o en segundo plano.** Los efectos de la señal consultan \`useSenalActiva\` (foco + AppState + reducir movimiento) y \`useReloj\` se detiene con \`visible\`. Bucles que no lo hacen:
+${L(c.S.mot4)}
+
+**MOT-5 · Con reducir movimiento no hay bucles, tilt, parallax ni marcador; todo queda en su estado final.** Archivos de la señal que animan sin consultar \`useMovimientoReducido\` ni \`useSenalActiva\`:
+${L(c.S.mot5)}
+
+**Excepciones revisadas a mano (no cuentan):**
+${L(c.S.mot5Exentos)}
+
 ## Notas
 
 - Los íconos salen de \`Icon\` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en \`catalogo.json\`, \`gramatica.json\` y \`medios.json\`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
 - \`padding: 1\` (Card, FeedbackBand, MuroDesbloqueo, TabNavigator) es la técnica del filo de luz y no se cuenta en ESP-1.
 - \`impeccable detect src\` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
+- Los bucles anteriores a la v5.0 (\`Skeleton\` mientras carga, el respiro de \`EarModeScreen\`) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (\`src/components/fx/\`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens \`space\` y \`font.size\`, no valores calculados en ejecución.
 `;
 };
@@ -741,15 +813,16 @@ function main() {
   const leer = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
   const tokens = leer('src/theme/tokens.ts');
   const H = auditaEstatica(archivos);
+  const S = auditaSenal(archivos);
   const coloreadas = (tokens.match(/shadowColor:\s*'#[0-9A-Fa-f]{6}'/g) || []).filter((s) => !/#000000/i.test(s)).length;
   const ctx = {
-    H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos),
+    H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos), S,
     A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),
     K: auditaColorMarca(archivos), escalas: auditaEscalas(tokens),
     tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.length,
-    sombras: coloreadas + H.sombra.length + H.propio.length,
+    sombras: coloreadas + H.sombra.length + H.propio.length + S.luz.length,
   };
   const previo = leePrevio();
   const filas = conteoPorRegla(ctx);

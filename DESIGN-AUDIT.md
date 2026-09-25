@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 157 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 182 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -22,6 +22,8 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | 10 | EST-error + RND-1 + AUD-1 | Robustez: estado de error en 19 pantallas que leen la base (y de carga en 13); `ErrorsScreen` (194 tarjetas) y `PronunciationScreen` (53) a `FlatList`; regenerar el audio vacío `aud/phrasal/5_ejemplo_en_lento.mp3` | `ErrorsScreen.tsx:76`, `PronunciationScreen.tsx:190`, tabla de la sección a) | M | medio |
 
 **Hecho en la fase B:** 1 (TIPO-2), 2 (COLOR-4), 3 (MOV-1), 4 (ACC-3: de 16 a 7 opciones visibles, y ACC-2 con Hoy como única superficie destacada), 5 (TIPO-1), 6 (IA-1 e IA-1b: íconos de Phosphor por `Icon`), 7 (IA-3 y ACC-1), 8 (TIPO-4) y 9 (TXT-1 y ACC-1). Excepciones: el subtítulo del `Header` queda en 1 línea por decisión y `DownloadsScreen` se queda `secondary` porque son 16 botones iguales. `npm run check:color` cuida que no vuelvan los colores sueltos y `npm run check:practicar` prueba la lógica de Hoy.
+
+**Practicar 5.0 (señal en vivo):** aurora, onda, anillo, marcador, portadas de Skia, inclinación 3D, barra líquida y encabezado comprimido, todo en `src/components/fx/`. Reglas nuevas: MOT-3 (un momento héroe y como mucho 3 canvases en bucle), MOT-4 (los bucles se pausan fuera de pantalla, sin foco o en segundo plano) y MOT-5 (reducir movimiento deja todo en su estado final), más la excepción de IA-3 para la luz de escena. `npm run check:color` vigila que `senal` siga en un solo tono y que ningún shader traiga colores escritos a mano.
 <!-- PLAN:end -->
 
 ## Conteo por regla
@@ -52,6 +54,9 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 1 |
 | MOT-1 | duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados) | 0 |
 | MOT-2 | tocables sin el feedback al presionar (`Presionable`) | 0 |
+| MOT-3 | más de un momento héroe animado por pantalla, o más de 3 canvases de Skia en bucle | 0 |
+| MOT-4 | bucles de la señal que no se pausan fuera de pantalla, sin foco o en segundo plano | 0 |
+| MOT-5 | efectos de la señal que no respetan reducir movimiento | 0 |
 
 # Auditoría estática
 
@@ -67,16 +72,21 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/screens/games/DulcesScreen.tsx:670` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
 - `src/screens/games/DulcesScreen.tsx:671` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
 
-**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (`gradiente.neutro`). Para revisar: `filoLuz` (`:165-169`) mezcla blanco y cian, y `FONDO` (`:149`). Usos de `<LinearGradient`:
+**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (`gradiente.neutro`). El degradado de la señal (`senal`) va de `accent900` a `accent100`, sin hex nuevos, y `npm run check:color` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: `filoLuz` mezcla blanco y cian, y `FONDO`. Usos de `<LinearGradient`:
 - `src/components/base/Card.tsx:123`
 - `src/components/base/Card.tsx:159`
-- `src/components/base/Screen.tsx:72`
-- `src/components/base/Screen.tsx:86`
+- `src/components/base/Screen.tsx:91`
+- `src/components/base/Screen.tsx:105`
 - `src/components/card/FeedbackBand.tsx:103`
 - `src/components/card/SceneImage.tsx:71`
 - `src/components/card/SceneImage.tsx:84`
+- `src/components/fx/BotonSenal.tsx:84`
+- `src/components/fx/OndaSenal.tsx:53`
+- `src/components/fx/PortadaJuego.tsx:93`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
-- `src/navigation/TabNavigator.tsx:92`
+- `src/navigation/TabNavigator.tsx:113`
+- `src/screens/extras/practicar/ConsolaHoy.tsx:96`
+- `src/screens/extras/practicar/Destacados.tsx:72`
 
 **COLOR-3 · Cada color de marca con escala 50–900.** Se exige a `accent`, `contraste` (primario) y `neutral`, con los diez pasos en `tokens.ts`. Sin escala completa: ninguno. Los colores de estado y los de mundo no llevan escala.
 
@@ -111,7 +121,7 @@ Se quedan en 12–13 px, revisados a mano (16):
 - `src/screens/games/ParesScreen.tsx:464` — saltarTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 
-Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/extras/PracticeScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
+Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son cuerpo): `src/screens/extras/PronunciationScreen.tsx` 8, `src/screens/extras/ContractionsScreen.tsx` 5, `src/components/base/Input.tsx` 4, `src/screens/extras/LecturasScreen.tsx` 4, `src/screens/extras/MinimalPairsScreen.tsx` 4, `src/screens/games/CazalaScreen.tsx` 4, `src/screens/games/NivelesScreen.tsx` 4, `src/screens/utility/DiagnosticsScreen.tsx` 4, `src/screens/utility/DownloadsScreen.tsx` 4, `src/screens/entry/AuthScreen.tsx` 3, `src/screens/entry/OnboardingScreen.tsx` 3, `src/screens/extras/AzarScreen.tsx` 3, `src/screens/extras/ErrorDetailScreen.tsx` 3, `src/screens/extras/PhrasalScreen.tsx` 3, `src/screens/games/DulcesScreen.tsx` 3, `src/screens/games/ParesScreen.tsx` 3, `src/screens/study/StudyScreen.tsx` 3, `src/screens/utility/ProgressScreen.tsx` 3, `src/components/base/Ads.tsx` 2, `src/components/base/Badge.tsx` 2, `src/components/card/FeedbackBand.tsx` 2, `src/components/card/StudyCardView.tsx` 2, `src/components/card/TileBuilder.tsx` 2, `src/components/list/SectionTitle.tsx` 2, `src/screens/discover/DetailScreen.tsx` 2, `src/screens/discover/WorldDetailScreen.tsx` 2, `src/screens/extras/EarModeScreen.tsx` 2, `src/screens/extras/ErrorsScreen.tsx` 2, `src/screens/extras/GramaticaScreen.tsx` 2, `src/screens/extras/GramaticaTemaScreen.tsx` 2, `src/screens/games/CaidaScreen.tsx` 2, `src/screens/games/ColmenaScreen.tsx` 2, `src/components/base/ErrorBoundary.tsx` 1, `src/components/base/Header.tsx` 1, `src/components/card/AudioButton.tsx` 1, `src/components/card/ReproductorCapitulo.tsx` 1, `src/components/unlock/CandadoBadge.tsx` 1, `src/components/unlock/MuroDesbloqueo.tsx` 1, `src/navigation/TabNavigator.tsx` 1, `src/screens/discover/ExploreScreen.tsx` 1, `src/screens/entry/BootScreen.tsx` 1, `src/screens/extras/practicar/ConsolaHoy.tsx` 1, `src/screens/extras/practicar/Destacados.tsx` 1, `src/screens/extras/practicar/FilaModo.tsx` 1, `src/screens/games/GameEndScreen.tsx` 1, `src/screens/utility/SettingsScreen.tsx` 1, `src/screens/utility/StuckScreen.tsx` 1.
 
 **TIPO-2b · Line-height del cuerpo entre 1.4 y 1.6** (texto de 18 px o menos):
 - `src/screens/extras/GramaticaTemaScreen.tsx:345` — en: 18 px con lineHeight x1.35
@@ -132,7 +142,8 @@ Descartados (28 px o más, pero no son títulos):
 - `src/components/base/Card.tsx:190` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/card/FeedbackBand.tsx:184` — filoCapa: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/unlock/MuroDesbloqueo.tsx:126` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
-- `src/navigation/TabNavigator.tsx:176` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/navigation/TabNavigator.tsx:217` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/screens/extras/practicar/Destacados.tsx:168` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 
 ## JERARQUÍA Y ACCIÓN
 
@@ -168,16 +179,19 @@ Estilos interactivos con alto menor a 48 (verificar si llevan `hitSlop`):
 **IA-3 · Sombras discretas y consistentes; ninguna de color.** El halo cian (`glow`) se eliminó: `primary` usa `shadow.soft` (negra) y la barra de pestañas usa `shadow.card`. `shadow.card` (opacidad 0.55, radio 20) y `shadow.raised` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
 - (ninguno)
 
+**Excepción (v5.0):** la luz de la señal (aurora, onda, anillo y destello de `src/components/fx/`) es luz de escena, no sombra de color. El audit solo exige que ningún archivo de `fx/` use `shadowColor`:
+- (ninguno)
+
 
 ## Revisión manual (no se puede medir estáticamente)
 
 - **TIPO-3** jerarquía con tamaño y peso, no solo color; **TIPO-5** no mezclar alineaciones en un bloque.
 - **ESP-2** proximidad (lo que va junto, cerca; entre secciones, el doble).
-- **ACC-2** una sola cosa destacada por pantalla: hoy conviven el botón principal cian, la superficie `contraste`, el filo de luz de cada tarjeta y el acento cian.
+- **ACC-2** una sola cosa destacada por pantalla: en Practicar es HOY (`ConsolaHoy`, la única superficie `contraste`). Las portadas animadas de los destacados y la aurora son ambiente, no un segundo momento héroe (MOT-3).
 - **MOV-2** acciones frecuentes en la mitad inferior: en los juegos "Saltar" vive en el `right` del `Header` (arriba a la derecha).
-- **MOV-3** barra inferior: flota (`TabNavigator.tsx`, estilo `bar`) sobre un `BlurView` con filo; tiene fondo propio, así que cumple, pero no va pegada al borde.
+- **MOV-3** barra inferior: flota (`TabNavigator.tsx`, estilo `bar`) sobre un `BlurView` con filo y una píldora líquida; tiene fondo propio, así que cumple, pero no va pegada al borde.
 - **MOV-4** padding que empuja el contenido: revisar en dispositivo.
-- **IA-2** tarjetas de distinto tamaño y peso: `Card` es una sola pieza con filo y sombra `card`.
+- **IA-2** tarjetas de distinto tamaño y peso: en Practicar los destacados son una héroe a todo el ancho (180) y dos compactas (150); `Card` sigue siendo una sola pieza con filo y sombra `card` en el resto de la app.
 
 # Auditoría de comportamiento
 
@@ -197,7 +211,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/EarModeScreen.tsx` | ✓ `:93` | ✓ `:202` | ✓ `:185` |
 | `extras/LecturaScreen.tsx` | ✓ `:55` | ✓ `:131` | ✓ `:145` |
 | `extras/LecturasScreen.tsx` | ✓ `:48` | ✓ `:74` | ✓ `:93` |
-| `extras/PracticeScreen.tsx` | ✓ `:82` | ✗ | ✓ `:163` |
+| `extras/PracticeScreen.tsx` | ✓ `:109` | ✗ | ✓ `:188` |
 | `games/CaidaScreen.tsx` | ✓ `:159` | ✓ `:365` | ✓ `:345` |
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
@@ -233,6 +247,7 @@ Otros 4 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/base/Skeleton.tsx:63` — key por índice
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
 - `src/components/feedback/Confetti.tsx:39` — key por índice
+- `src/components/fx/PortadaJuego.tsx:161` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:290` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:177` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice
@@ -273,11 +288,26 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 **MOT-2 · Todo tocable pasa por `Presionable`** (escala 0.97 en `rapido`; con Reduce Motion baja la opacidad). Cuenta `Pressable`, `AnimatedPressable` y `Touchable*` sueltos:
 - (ninguno)
 
+**MOT-3 · Un solo momento héroe animado por pantalla** (en Practicar es HOY, `ConsolaHoy`) **y como máximo 3 canvases de Skia en bucle a la vez.** Archivos con canvas en bucle (3): `FondoAurora.tsx`, `OndaSenal.tsx`, `PortadaJuego.tsx`. Hallazgos:
+- (ninguno)
+
+**MOT-4 · Todo bucle se pausa fuera de pantalla, sin foco o en segundo plano.** Los efectos de la señal consultan `useSenalActiva` (foco + AppState + reducir movimiento) y `useReloj` se detiene con `visible`. Bucles que no lo hacen:
+- (ninguno)
+
+**MOT-5 · Con reducir movimiento no hay bucles, tilt, parallax ni marcador; todo queda en su estado final.** Archivos de la señal que animan sin consultar `useMovimientoReducido` ni `useSenalActiva`:
+- (ninguno)
+
+**Excepciones revisadas a mano (no cuentan):**
+- `src/components/fx/TransicionHoy.tsx:40` — solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento
+- `src/screens/extras/practicar/Destacados.tsx:62` — `entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)
+- `src/screens/extras/practicar/EncabezadoPracticar.tsx:76` — anima con el scroll (lo mueve el dedo, no es un bucle) y con `entering`, que salta al valor final con reducir movimiento
+
 ## Notas
 
 - Los íconos salen de `Icon` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en `catalogo.json`, `gramatica.json` y `medios.json`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
 - `padding: 1` (Card, FeedbackBand, MuroDesbloqueo, TabNavigator) es la técnica del filo de luz y no se cuenta en ESP-1.
 - `impeccable detect src` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
+- Los bucles anteriores a la v5.0 (`Skeleton` mientras carga, el respiro de `EarModeScreen`) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (`src/components/fx/`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":1,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0} -->

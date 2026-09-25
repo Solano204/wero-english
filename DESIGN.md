@@ -6,7 +6,7 @@ Este documento tiene dos partes. La **primera** describe lo que existe hoy en el
 - Dónde el código incumple hoy las reglas: [`DESIGN-AUDIT.md`](DESIGN-AUDIT.md).
 - Por qué la dirección visual es la que es: [`docs/DISENO.md`](docs/DISENO.md).
 
-Fuente de verdad de los valores: `src/theme/` (`tokens.ts`, `typography.ts`, `motion.ts`, `portadas.ts`). `npm run check:color` falla si aparece un hex o `rgba(` fuera de esa carpeta.
+Fuente de verdad de los valores: `src/theme/` (`tokens.ts`, `typography.ts`, `motion.ts`, `portadas.ts`). `npm run check:color` falla si aparece un hex, un `rgba(` o un color escrito a mano dentro de un shader fuera de esa carpeta, y si los pasos de `senal` se separan más de 8° de tono.
 
 ---
 
@@ -15,6 +15,8 @@ Fuente de verdad de los valores: `src/theme/` (`tokens.ts`, `typography.ts`, `mo
 ## 1.1 Dirección visual
 
 "Neón nocturno" (v4.0): tinta azul profunda y un cian eléctrico. Una sola fuente de luz arriba a la izquierda (`sol`), tarjetas sin borde parejo (llevan un **filo de luz** de 1 px en degradado), fondo en degradado que se aclara arriba, y una única superficie de color (`contraste`). Un solo tema, oscuro.
+
+**Señal en vivo (v5.0).** Wero se aprende de oído, así que Practicar se comporta como una consola de audio encendida: ondas, medidores y luz cian que responden al progreso real. Solo la señal usa luz de color; todo lo demás sigue sobrio. La luz vive detrás del contenido (una aurora que nace del `sol`, un ecualizador que respira, un anillo que se llena) y se apaga cuando no se ve, no tiene foco o el sistema pide menos movimiento.
 
 ## 1.2 Color
 
@@ -77,6 +79,9 @@ Todo en `src/theme/tokens.ts`.
 - `gradiente`: un solo par neutro (`neutro: #1B242F → #111820`) para todas las tarjetas con portada, sea de mundo o de modo. **Si al verlo en el teléfono Practicar se ve plano, probar un tinte del mundo con croma ≤ 0.03.** No está aplicado.
 - `filoLuz`: blanco 0.28 → blanco 0.04 → cian 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
 - `resplandorSol`: cian 0.16 → 0.04 → 0, el halo de `Screen`.
+- `senal`: `accent900` → `accent400` → `accent100`. Un solo tono (cian, separación de 2°), sin hex nuevos. Pinta las barras de la onda de HOY y la luz de la señal.
+- `reflejo`: blanco 0 → 0.38 → 0, el reflejo metálico que cruza el botón principal de HOY.
+- `aurora`: `opacidadMax 0.18`, `paralaje 8` px y `resolucion 0.25` (el shader se pinta a un cuarto de resolución). `grano`: `opacidad 0.03`, estático.
 
 **Contraste medido** (WCAG, calculado de los tokens): `text` ≥ 10.7:1 sobre cualquier superficie; `textMuted` ≥ 6.66; `textFaint` ≥ 4.62; `accent` ≥ 7.27; `onAccent` sobre `accent` 11.25; `text` sobre `accent` 1.47. Todos los pares de texto pasan AA (mínimo 4.5:1) sobre las ocho superficies, `contraste` incluida. Para lograrlo se aclararon `accentDeep`, `wrongDeep` y cinco colores de mundo (`dia_a_dia`, `gente`, `cultura`, `tech`, `legal`), lo mínimo para cruzar el umbral. `accentDeep` solo se usa como borde inferior de fichas (no como texto) y `wrongDeep` no se usa fuera de los tokens.
 
@@ -128,6 +133,8 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 
 **Movimiento** (`src/theme/motion.ts`, la única fuente; MOT-1): `motionDuration` `rapido 150` (tocar), `base 220` (cambios de estado) y `lento 320` (transiciones y plegables). Curvas `entrar` (ease-out, lo que entra) y `salir` (ease-in, lo que sale); nunca lineal, salvo los dos relojes de ronda (`RoundTimer` y la caída de Caída, con motivo en el audit). Un solo resorte, `rebote`, para lo que rebota a propósito (banda de resultado, pausa de Caída). Escalón de listas: `escalon(i)` = 40 ms por elemento con tope de 8; del noveno en adelante el retraso se queda en el del octavo. Solo se animan `transform` y `opacity` (y `height` en los plegables). **Al presionar**, todo tocable pasa por `Presionable`: escala 0.97 en `rapido` (MOT-2). **Acierto:** pulso 1 → 1.04 → 1 en `base` y color `correct`. **Fallo:** sacudida de 3 oscilaciones de ±6 px dentro de `base` y color `wrong` (ámbar, nunca rojo). Los dos salen de `useEfectoResultado` (o de la prop `resultado` de `Presionable`), iguales en todos los juegos, con su háptico y su sonido. Un solo efecto de partículas, `Trozos`. La fiesta de fin de partida (`Confetti` y el sonido de nivel completo) solo con buen resultado: 2 o más estrellas o, sin estrellas, 5 rondas y 70 %; si no, el resumen entra sobrio y sin sonido. Con Reduce Motion no hay sacudida, partículas ni escala: quedan el color, la opacidad (0.7 al presionar), el háptico y el sonido; Reanimated salta sus animaciones al valor final (`ReduceMotion.System`).
 
+**Movimiento de la señal (v5.0).** Se suman a `motion.ts`: `motionDuration.escena` 450 (una escena que cambia: HOY que se expande) y `coreografia` 900 (tope de la entrada de una pantalla); el resorte `liquido` (la píldora de la barra); `motionSenal` con `respiro` 4000 (la onda), `aurora` 20000, `reflejo` 6000 y `reflejoPaso` 700, `interferencia` 120, `anillo` 900, `marcador` 700, `onda` 600 y `portada` 3200 (los bucles de las portadas); y `motionEntrada` con los retrasos de la coreografía (`hoy` 100, `onda` 350, `chips` 450, `destacados` 500). Los bucles de la señal corren en el hilo de UI (`useFrameCallback`), sin `setState` por fotograma, y solo se anima `transform` y `opacity` (más los uniforms del shader y el `SkPath` de la onda). Como mucho 3 canvases de Skia en bucle a la vez: la aurora, la onda de HOY y la portada de la tarjeta héroe.
+
 ## 1.7 Componentes base
 
 | Componente | Qué es hoy |
@@ -148,13 +155,14 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 | `Carga` + `Skeleton` | Una sola forma de cargar datos: `useCarga(fn, deps)` devuelve `{ estado, datos, error, demora, reintentar }` y `<Carga>` pinta el estado. Sin nada los primeros 300 ms (para no parpadear), después `Skeleton` (bloques que laten en opacidad; quietos con Reduce Motion). El error es `EmptyState` con `warning`, "No se pudo cargar. Intenta de nuevo." y un botón `primary` "Reintentar" (`ErrorCarga`) |
 | `Icon` | Única puerta a los íconos: Phosphor en `bold` (`star-filled` con relleno). 25 nombres por función (`play`, `slow`, `volume`, `star`, `check`, `close`, `chevron-right`, `arrow-right`, `back`, `lock`, `warning`, `explore`, `practice`, `progress`…), tamaños `sm 16`, `md 20`, `lg 24`, `xl 32`. Decorativo salvo que lleve `accessibilityLabel`. `slow` nunca va sin el texto "Lento". `check:imports` prohíbe importar Phosphor fuera de `Icon.tsx` |
 | `SectionTitle` | Título `lg` semibold con contador o acción `sm` |
-| Barra de pestañas | Flotante: `left`/`right` `md`, alto 68, radio `lg`, `BlurView` con velo y filo. Tres pestañas: Vocabulario, Practicar (inicial) y Progreso. Etiqueta `xs` semibold; ícono `Icon` de 24 (`explore`, `practice`, `progress`; el activo cambia de color, no de ícono) en una píldora de 54×28 que se enciende con `accentSoft` |
+| Barra de pestañas | Flotante: `left`/`right` `md`, alto 68, radio `lg`, `BlurView` con velo y filo. Tres pestañas: Vocabulario, Practicar (inicial) y Progreso. Etiqueta `xs` semibold; ícono `Icon` de 24 (`explore`, `practice`, `progress`; el activo cambia de color y hace 1 → 1.12 → 1). Una sola píldora `accentSoft` de 54×28 se desliza entre pestañas con el resorte `liquido` y se estira en el trayecto (la cabeza llega antes que la cola); cada cambio de pestaña da háptico ligero |
+| Señal (`components/fx/`) | `FondoAurora` (aurora Skia de 20 s con parallax del giroscopio y grano estático), `OndaSenal` (28 barras que respiran en 4 s), `AnilloMeta` (arco que se llena en 900 ms, destello una vez por día), `Marcador` (dígitos que ruedan), `BotonSenal` (reflejo cada 6 s y onda desde el dedo), `PortadaJuego` (escenas Skia de Pares, Caída y Dulces; el resto, su ícono), `TarjetaTilt` (inclinación de 6° máximo), `PildoraLiquida` (píldora de la barra), `TransicionHoy` (overlay que expande HOY a pantalla completa en 450 ms), y `useSenalActiva` / `useReloj` (foco, segundo plano, reducir movimiento y visibilidad en un solo lugar). Todo efecto va envuelto en `FxSeguro`: si Skia o un sensor fallan, la pantalla queda completa y estática |
 | `Presionable` | `Pressable` con el feedback unificado (escala 0.97 en `rapido`; con Reduce Motion baja la opacidad a 0.7) y la prop `resultado` (`acierto` pulsa, `fallo` sacude) |
 | Retroalimentación | `Trozos` (cubitos al acertar), `Confetti` (solo fin de partida con buen resultado), `useEfectoResultado` |
 
 ## 1.8 Las cinco pantallas más usadas
 
-**Practicar (Home).** `Screen` con scroll y cuatro bloques separados por 32 (dentro de cada bloque, 16). Título "Practicar" (`xxl`). **Hoy**: la única superficie de color (`contraste`), con el modo que toca, un botón `primary` grande que dice qué hará ("Repasar N frases" si hay repasos vencidos, con N tope de `metaDiaria` y el total aparte como "Tienes N pendientes"; "Corregir N errores" si no y hay frases atoradas, "Seguir con X" con el último modo usado, "Empezar" sin historial) y, si existen, "Llevas N frases hoy" y "Racha: N días". **Destacados**: 3 tarjetas medianas con portada de 56 (los más usados por días de uso; sin datos, los primeros del orden de siempre; nunca el de Hoy). **Todo lo demás**: 3 grupos plegados por defecto ("Juegos", "Oír y hablar", "Leer y repasar", cada uno con su cuenta) que se despliegan en 320 ms (alto y opacidad; abrir con ease-out y cerrar con ease-in; sin animación con Reduce Motion); los que el usuario deja abiertos se guardan en `practicarGruposAbiertos`. Cada renglón: nombre, dato opcional y chevron, 48 dp como mínimo. Al final, el reto de la semana. Con los grupos plegados hay 7 opciones (1 + 3 + 3) para 17 destinos; el código está en `screens/extras/practicar/`.
+**Practicar (Home) · v5.0.** `Screen` con scroll, fondo vivo (aurora y grano) y un encabezado que se comprime: «Practicar» a 34 que, con el scroll, se reduce a 22 y sube a una banda con desenfoque (solo iOS; en Android, fondo sólido), con un chip de racha (`fire`, en `star`) a la derecha. Bloques separados por 32 (dentro de cada uno, 16). **Hoy** (`ConsolaHoy`): la única superficie de color (`contraste`) y el único momento héroe. Lleva un ecualizador de fondo cuya energía sale de las frases pendientes (casi plano con 0), un anillo de meta diaria a la derecha (`hoy` de `metaDiaria`, con destello una vez por día), el modo que toca, tres chips con marcador («N pendientes», «N hoy» y «Racha: N días») y el botón `primary` grande que dice qué hará ("Repasar N frases" si hay repasos vencidos, con N tope de `metaDiaria`; "Corregir N errores" si no y hay frases atoradas; "Seguir con X" con el último modo usado; "Empezar" sin historial). Al tocarlo, la tarjeta se expande a pantalla completa (450 ms) mientras el modo se abre por debajo. **Destacados**, asimétricos (IA-2): el más usado por días de uso va en una tarjeta héroe a todo el ancho (alto ~180) y los otros dos en dos columnas (~150), nunca el de Hoy. Cada una lleva una portada de Skia (Pares, Caída y Dulces) o el ícono del modo, sin letras; «Nivel N · E estrellas» con una barra fina de nivel/200; inclinación 3D al mantener presionado y parallax de la portada de 0.15 con el scroll. **Todo lo demás**: 3 grupos plegados por defecto ("Juegos", "Oír y hablar", "Leer y repasar"; el chevron gira 180°, la cuenta va en `Badge` y las filas entran con `escalon(i)`), que se despliegan en 320 ms; los que el usuario deja abiertos se guardan en `practicarGruposAbiertos`. Al final, el reto de la semana con un anillo de progreso y los días que quedan. La primera vez por sesión hay una coreografía de entrada de 900 ms como máximo (título, HOY con un barrido de luz, la onda que se enciende, los chips que ruedan, los destacados escalonados); en las visitas siguientes, solo un fundido de 150 ms. Con los grupos plegados hay 7 opciones (1 + 3 + 3) para 17 destinos; el código está en `screens/extras/practicar/`.
 
 **Estudio.** Arriba, barra de progreso y contador `xs`; debajo, aciertos (`lg` bold en `accent` + `sm` muted) y una racha `xs` semibold en `star`. `StudyCardView`: instrucción `xs` en mayúsculas, escenario con la frase en español (`xl`, ×1.35), `AudioButton` grande, opciones (`OptionButton`, alto 56, `gap md`) o un campo de texto (alto 58, radio `md`, borde 1.5), y `FeedbackBand` al responder.
 
@@ -204,8 +212,16 @@ Serán la ley para todo cambio futuro. Donde una regla choque con `docs/DISENO.m
 - **MOV-4.** Sin padding excesivo que empuje el contenido fuera de la pantalla.
 - **MOV-5.** Respetar las convenciones de Android/iOS (Ley de Jakob): atrás arriba a la izquierda, swipe atrás, etc.
 
+## MOVIMIENTO
+
+- **MOT-1.** Ninguna duración, curva ni resorte fuera de `src/theme/motion.ts`. Nadie inventa su propia idea de "rápido".
+- **MOT-2.** Todo tocable pasa por `Presionable`: escala 0.97 en `rapido`, o solo opacidad con Reduce Motion.
+- **MOT-3.** Un solo momento héroe animado por pantalla. En Practicar es HOY (`ConsolaHoy`); la aurora y las portadas son ambiente. Como mucho 3 canvases de Skia en bucle a la vez.
+- **MOT-4.** Todo bucle se pausa fuera de pantalla, sin foco o con la app en segundo plano. Se decide en un solo lugar: `useSenalActiva` (foco + `AppState` + reducir movimiento) y `useReloj` con `visible`.
+- **MOT-5.** Con reducir movimiento no hay bucles, inclinación, parallax ni marcador: todo queda en su estado final, un fotograma limpio y pulido.
+
 ## ANTI-LOOK-IA
 
 - **IA-1.** Los emojis no se usan como íconos de interfaz. Íconos de un solo set y un solo grosor.
 - **IA-2.** No todas las tarjetas iguales en tamaño y peso: variar según importancia.
-- **IA-3.** Sombras discretas y consistentes; nada de sombras de colores.
+- **IA-3.** Sombras discretas y consistentes; nada de sombras de colores. **Excepción:** la luz de la señal (aurora, onda, anillo y destello de `src/components/fx/`) es luz de escena, no sombra de color: vive detrás del contenido y no proyecta nada. Ningún archivo de `fx/` usa `shadowColor`.
