@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 228 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 229 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -222,7 +222,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
-| `games/NivelesScreen.tsx` | ✓ `:66` | ✗ | ✓ `:214` |
+| `games/NivelesScreen.tsx` | ✓ `:75` | ✗ | ✓ `:229` |
 | `games/ParesScreen.tsx` | ✓ `:111` | ✓ `:287` | ✓ `:263` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
@@ -248,6 +248,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 
 **Estado que se actualiza por intervalo, cuadro o scroll** (`setInterval`, `requestAnimationFrame`, `onScroll` con `setState`; solo el de una pantalla cuenta como hallazgo, el de un componente hoja es informativo):
 - `src/components/card/ReproductorCapitulo.tsx:54` — `setInterval` cada 250 ms con `setState`: repinta un componente hoja
+- `src/components/niveles/useScrollNivel.ts:103` — `requestAnimationFrame` con `setState`: repinta un componente hoja
 
 **Solo informativo (no cuenta):** claves por índice en listas estáticas, que solo importan si la lista se reordena o se filtra:
 - `src/components/base/Skeleton.tsx:63` — key por índice

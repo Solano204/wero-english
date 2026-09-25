@@ -1,9 +1,17 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
-import { ALTO_TRAMO, EncabezadoTramo, FilaNiveles, HUECO_CELDAS } from '@/components/niveles';
+import {
+  ALTO_TRAMO,
+  CONFIGURACION_VISTA,
+  EncabezadoTramo,
+  FilaNiveles,
+  HUECO_CELDAS,
+  useScrollNivel,
+} from '@/components/niveles';
 import {
   abrirConAnuncio,
   getNiveles,
@@ -27,7 +35,8 @@ import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
-import { color, font, layout, space } from '@/theme';
+import { aparecer, color, desaparecer, font, layout, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
@@ -164,6 +173,17 @@ export function NivelesScreen() {
     [lado, alTocar, alternarTramo]
   );
 
+  // Al abrir, la lista deja el nivel actual centrado: con doscientos, obligar a bajar hasta
+  // donde te quedaste es una molestia diaria. Sale de las medidas reales de la lista.
+  const reducido = useMovimientoReducido();
+  const indiceActual = useMemo(() => indiceDeNivel(items, siguiente), [items, siguiente]);
+  const { listaRef, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual } = useScrollNivel({
+    medidas,
+    indiceActual,
+    hayDatos: Boolean(carga.datos),
+    reducido,
+  });
+
   if (!def) {
     return (
       <Screen>
@@ -177,11 +197,6 @@ export function NivelesScreen() {
       </Screen>
     );
   }
-
-  // Al abrir, la lista arranca cerca del nivel actual (sin animar): con doscientos,
-  // obligar a bajar hasta donde te quedaste es una molestia diaria.
-  const indiceActual = indiceDeNivel(items, siguiente);
-  const arranque = indiceActual > 2 ? indiceActual - 2 : undefined;
 
   // La acción principal, en la zona del pulgar: jugar el nivel que sigue. Con los 200 jugados no hay «actual».
   const hayActual = Boolean(carga.datos) && siguiente <= def.total;
@@ -213,27 +228,51 @@ export function NivelesScreen() {
 
       <Carga carga={carga} esqueleto={<View style={styles.esqueleto}><SkeletonLista filas={6} alto={68} /></View>}>
         {() => (
-          <FlatList
-            data={items}
-            renderItem={renderItem}
-            keyExtractor={(it) => it.key}
-            getItemLayout={getItemLayout}
-            stickyHeaderIndices={pegados}
-            initialScrollIndex={arranque}
-            initialNumToRender={12}
-            maxToRenderPerBatch={8}
-            windowSize={7}
-            showsVerticalScrollIndicator={false}
-            ListFooterComponent={
-              <Text style={styles.pie}>
-                Terminar un nivel abre el siguiente, saques una estrella o tres.
-                El que sigue del último también se abre con «Ver anuncio y abrir».
-                Rejugar nunca te baja lo que ya tenías.
-              </Text>
-            }
-          />
+          // Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba.
+          <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
+            <Animated.FlatList
+              ref={listaRef}
+              data={items}
+              renderItem={renderItem}
+              keyExtractor={(it) => it.key}
+              getItemLayout={getItemLayout}
+              stickyHeaderIndices={pegados}
+              onScroll={alScroll}
+              scrollEventThrottle={16}
+              onViewableItemsChanged={alVisibles}
+              viewabilityConfig={CONFIGURACION_VISTA}
+              initialNumToRender={12}
+              maxToRenderPerBatch={8}
+              windowSize={7}
+              showsVerticalScrollIndicator={false}
+              ListFooterComponent={
+                <Text style={styles.pie}>
+                  Terminar un nivel abre el siguiente, saques una estrella o tres.
+                  El que sigue del último también se abre con «Ver anuncio y abrir».
+                  Rejugar nunca te baja lo que ya tenías.
+                </Text>
+              }
+            />
+          </View>
         )}
       </Carga>
+
+      {/* Si te alejas del nivel actual, un atajo para volver a él (arriba del footer). */}
+      {posicionada && lejos ? (
+        <Animated.View
+          entering={reducido ? undefined : aparecer()}
+          exiting={reducido ? undefined : desaparecer()}
+          style={styles.flotante}
+          pointerEvents="box-none"
+        >
+          <Button
+            label={`Ir al nivel ${siguiente}`}
+            variant="secondary"
+            icon={lejos === 'abajo' ? 'chevron-down' : 'chevron-up'}
+            onPress={irAlActual}
+          />
+        </Animated.View>
+      ) : null}
     </Screen>
   );
 
@@ -263,6 +302,9 @@ const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   esqueleto: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
+  lista: { flex: 1 },
+  // Pegado abajo, sobre la lista y encima del footer (el footer queda fuera de este contenedor).
+  flotante: { position: 'absolute', left: 0, right: 0, bottom: space.md, alignItems: 'center' },
   pie: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
