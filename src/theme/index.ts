@@ -45,6 +45,8 @@ export {
   aparecerZoom,
   desaparecer,
   entrarRebote,
+  tarjetaEntra,
+  tarjetaSale,
   reacomodar,
 } from './motion';
 export { text } from './typography';

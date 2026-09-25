@@ -262,7 +262,13 @@ export const useSessionStore = create<SessionState>((set, get) => {
     marcarAvanzando();
     audio.stop();
     engine.skip();
-    set({ card: engine.current(), feedback: null, remaining: engine.remaining });
+    const card = engine.current();
+    // Saltar la última tarjeta también termina la sesión: sin esto quedaba una pantalla vacía.
+    if (!card) {
+      set({ phase: 'finished', card: null, feedback: null, remaining: 0 });
+      return;
+    }
+    set({ card, feedback: null, remaining: engine.remaining });
   },
 
   finish: async (usuarioId) => {

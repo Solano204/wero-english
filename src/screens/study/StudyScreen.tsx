@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { plural } from '@/utils/text';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -11,18 +12,35 @@ import {
   IconButton,
   Screen,
 } from '@/components/base';
-import { Trozos, useReaccion } from '@/components/feedback';
+import { Confetti, Trozos, useReaccion } from '@/components/feedback';
 import { BarraSesion, ChipMarcador, HojaVeredicto, publicarBarraEstudio } from '@/components/fx';
 import { DiffFrase, StudyCardView } from '@/components/card';
 import { nivelSeguidas } from '@/domain/seguidas';
+import { sesionMerece } from '@/domain/session';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as notifications from '@/services/notifications';
-import { color, font, layout, space } from '@/theme';
+import { aparecerSubiendo, color, font, layout, motionDuration, space } from '@/theme';
+import type { StudyCard } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+
+/** Lo que dejó la sesión al terminar: para la línea final y para decidir si hay celebración. */
+interface Cierre {
+  aciertos: number;
+  total: number;
+  merece: boolean;
+}
+
+/**
+ * El momento del final: la barra se llena, la luz la recorre una vez y entra la
+ * línea de resumen. Después se vuelve, sin pared entre el usuario y la salida.
+ */
+const FIN_SESION_MS = motionDuration.escena + motionDuration.base;
+
+const lineaFinal = (c: Cierre) => `${c.aciertos} de ${c.total} ${plural(c.total, 'frase atinada', 'frases atinadas')}`;
 
 /**
  * P-05, la sesión de estudio. La pantalla más importante de la app.
@@ -58,6 +76,13 @@ export function StudyScreen() {
   const [chosen, setChosen] = useState<string | null>(null);
   // Al terminar una sesión completa con vencidas pendientes se ofrece seguir.
   const [cierre, setCierre] = useState(false);
+  const [fin, setFin] = useState<Cierre | null>(null);
+  // finish() ya se pidió (lo pide la flecha o, al llegar al final, esta pantalla) y la salida fue con la flecha.
+  const cerrada = useRef(false);
+  const salidaManual = useRef(false);
+  // La hoja de veredicto sigue en pantalla mientras sale, cuando ya no hay tarjeta.
+  const ultimaTarjeta = useRef<StudyCard | null>(null);
+  if (card) ultimaTarjeta.current = card;
 
   // Cubitos al responder. Salen de la opción acertada; sin opción (armar, escribir) del centro.
   const reaccion = useReaccion();
@@ -81,17 +106,31 @@ export function StudyScreen() {
    * Antes esto abría "Listo por hoy": una pantalla entera para decir
    * "0 respondidas, 0%". Cuando la sesión sí valió la pena, el número
    * que importa ya está en Progreso, y cuando no, era una pared entre
-   * el usuario y la salida.
+   * el usuario y la salida. Ahora es un momento corto: la barra se llena,
+   * la luz la recorre y una línea dice cuántas atinaste (con fiesta solo si
+   * la sesión fue buena). Con vencidas pendientes se ofrece seguir.
    *
-   * Lo único que esa pantalla hacía además de mostrarse era programar la
-   * siguiente notificación. Eso se hace aquí, que es donde de verdad
-   * termina la sesión.
+   * Al llegar al final con «Siguiente» la sesión nunca se cerraba: no se
+   * guardaba la racha ni el fin de la sesión ni se programaba la próxima
+   * notificación (solo pasaba al salir con la flecha). Se cierra aquí.
    */
   useEffect(() => {
     if (phase !== 'finished') return;
 
-    const resumen = useSessionStore.getState().summary;
-    if (user && resumen && resumen.total > 0 && settings.notificaciones && settings.notifPorDia > 0) {
+    const estado = useSessionStore.getState();
+    const resumen = estado.summary;
+
+    if (!resumen) {
+      if (user && !cerrada.current) {
+        cerrada.current = true;
+        finish(user.id).catch(() => nav.goBack());
+        return;
+      }
+      nav.goBack();
+      return;
+    }
+
+    if (user && resumen.total > 0 && settings.notificaciones && settings.notifPorDia > 0) {
       void notifications.requestPermission().then((ok) => {
         if (!ok) return;
         void notifications.scheduleNext({
@@ -107,17 +146,32 @@ export function StudyScreen() {
       });
     }
 
-    if (useSessionStore.getState().pendientes > 0) {
+    setFin(
+      resumen.total > 0
+        ? { aciertos: resumen.correct, total: resumen.total, merece: sesionMerece(resumen.correct, resumen.total) }
+        : null
+    );
+
+    if (estado.pendientes > 0) {
       setCierre(true);
       return;
     }
 
-    nav.goBack();
-  }, [phase, nav, user, settings]);
+    // Salir con la flecha o no haber respondido nada: sin momento final.
+    if (salidaManual.current || resumen.total === 0) {
+      nav.goBack();
+      return;
+    }
+    const t = setTimeout(() => nav.goBack(), FIN_SESION_MS);
+    return () => clearTimeout(t);
+  }, [phase, nav, user, settings, finish]);
 
   const seguirRepasando = useCallback(() => {
     if (!user) return;
     setCierre(false);
+    setFin(null);
+    cerrada.current = false;
+    salidaManual.current = false;
     void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia);
   }, [user, start, settings]);
 
@@ -129,12 +183,19 @@ export function StudyScreen() {
     });
     return () => sub.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, phase]);
 
   const handleClose = useCallback(async () => {
+    // Ya terminó y se está viendo el momento final: la flecha sale de una vez.
+    if (phase === 'finished') {
+      nav.goBack();
+      return;
+    }
     if (!user) return;
+    salidaManual.current = true;
+    cerrada.current = true;
     await finish(user.id);
-  }, [user, finish]);
+  }, [user, finish, phase, nav]);
 
   const handleAnswer = useCallback(
     async (correct: boolean, elapsedMs: number, usedHint: boolean) => {
@@ -180,8 +241,10 @@ export function StudyScreen() {
   if (phase === 'finished' && cierre) {
     return (
       <Screen>
-        <View style={styles.cierre}>
+        <Confetti active={Boolean(fin?.merece)} />
+        <Animated.View entering={aparecerSubiendo()} style={styles.cierre}>
           <Text style={styles.cierreTitulo}>Sesión terminada</Text>
+          {fin ? <Text style={styles.cierreLinea}>{lineaFinal(fin)}</Text> : null}
           <Button label="Terminar" full onPress={() => nav.goBack()} />
           <Button
             label={`Seguir repasando (${pendientes} restantes)`}
@@ -189,16 +252,18 @@ export function StudyScreen() {
             full
             onPress={seguirRepasando}
           />
-        </View>
+        </Animated.View>
       </Screen>
     );
   }
 
-  if (!card) return null;
+  const terminada = phase === 'finished';
+  if (!card && !terminada) return null;
 
   return (
     <Screen padded={false}>
       <Trozos disparo={reaccion.trozos} tinte={color.accent} y="46%" origen={origenTrozos ?? undefined} />
+      <Confetti active={terminada && Boolean(fin?.merece)} />
       <View style={styles.top}>
         {/*
           * Fila de arriba: atrás a la izquierda, "Saltar" a la derecha y en
@@ -225,7 +290,7 @@ export function StudyScreen() {
           <Button
             label="Saltar"
             variant="ghost"
-            disabled={avanzando}
+            disabled={avanzando || terminada}
             onPress={() => {
               setChosen(null);
               setOrigenTrozos(null);
@@ -240,39 +305,60 @@ export function StudyScreen() {
           style={styles.barRow}
           onLayout={() => barra.current?.measureInWindow((_x, y, _w, alto) => publicarBarraEstudio(y + alto / 2))}
         >
-          <BarraSesion hecho={done} meta={goal} seguidas={settings.mostrarSeguidas ? seguidas : 0} />
+          {/* Al terminar la barra se llena (aunque hayas saltado alguna) y la luz la recorre una vez. */}
+          <BarraSesion
+            hecho={terminada ? goal : done}
+            meta={goal}
+            seguidas={settings.mostrarSeguidas && !terminada ? seguidas : 0}
+            barrido={terminada}
+          />
         </View>
       </View>
 
       <View style={styles.body}>
-        <StudyCardView
-          key={`${card.entry.id}-${card.kind}`}
-          card={card}
-          locked={Boolean(feedback)}
-          chosen={chosen}
-          autoAudio={settings.autoAudio}
-          onChoose={setChosen}
-          onAnswer={handleAnswer}
-          onOrigenAcierto={setOrigenTrozos}
-        />
+        {card ? (
+          <StudyCardView
+            key={`${card.entry.id}-${card.kind}`}
+            card={card}
+            locked={Boolean(feedback)}
+            chosen={chosen}
+            autoAudio={settings.autoAudio}
+            onChoose={setChosen}
+            onAnswer={handleAnswer}
+            onOrigenAcierto={setOrigenTrozos}
+          />
+        ) : fin ? (
+          <Animated.View entering={aparecerSubiendo()} style={styles.finCentro} accessibilityLiveRegion="polite">
+            <Text style={styles.cierreTitulo}>Sesión terminada</Text>
+            <Text style={styles.cierreLinea}>{lineaFinal(fin)}</Text>
+          </Animated.View>
+        ) : null}
       </View>
 
-      <HojaVeredicto
-        visible={Boolean(feedback)}
-        correct={feedback?.correct ?? false}
-        answer={feedback?.answer ?? ''}
-        nota={feedback?.nota}
-        repaso={feedback?.nextLabel}
-        frase={
-          // Dictado y Escribir: la frase con lo que faltó y lo que sobró marcado en su lugar.
-          feedback && !feedback.correct && (card.kind === 'dictado' || card.kind === 'escribir') && chosen ? (
-            <DiffFrase dado={chosen} esperado={feedback.answer} />
-          ) : undefined
-        }
-        avanzando={avanzando}
-        onContinue={handleContinue}
-        onDetail={() => nav.navigate('Detail', { entryId: card.entry.id })}
-      />
+      {ultimaTarjeta.current ? (
+        <HojaVeredicto
+          visible={Boolean(feedback)}
+          correct={feedback?.correct ?? false}
+          answer={feedback?.answer ?? ''}
+          nota={feedback?.nota}
+          repaso={feedback?.nextLabel}
+          frase={
+            // Dictado y Escribir: la frase con lo que faltó y lo que sobró marcado en su lugar.
+            feedback &&
+            !feedback.correct &&
+            (ultimaTarjeta.current.kind === 'dictado' || ultimaTarjeta.current.kind === 'escribir') &&
+            chosen ? (
+              <DiffFrase dado={chosen} esperado={feedback.answer} />
+            ) : undefined
+          }
+          avanzando={avanzando}
+          onContinue={handleContinue}
+          onDetail={() => {
+            const abierta = ultimaTarjeta.current;
+            if (abierta) nav.navigate('Detail', { entryId: abierta.entry.id });
+          }}
+        />
+      ) : null}
     </Screen>
   );
 }
@@ -284,8 +370,15 @@ const styles = StyleSheet.create({
     fontSize: font.size.xl,
     color: color.text,
     textAlign: 'center',
+  },
+  cierreLinea: {
+    fontFamily: font.family.body,
+    fontSize: font.size.md,
+    color: color.textMuted,
+    textAlign: 'center',
     marginBottom: space.md,
   },
+  finCentro: { flex: 1, justifyContent: 'center', gap: space.sm },
   top: { paddingHorizontal: space.lg, paddingTop: space.xs },
   filaSuperior: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: layout.tapMin },
   chips: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.sm },

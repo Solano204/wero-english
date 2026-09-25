@@ -32,7 +32,12 @@ interface Props {
   meta: number;
   /** Aciertos seguidos (ya en cero si el usuario apagó el contador). Enciende el brillo a los 3, 5 y 10. */
   seguidas?: number;
+  /** Al terminar la sesión: una pasada de luz recorre la barra, una sola vez. */
+  barrido?: boolean;
 }
+
+/** Ancho de la franja de luz de la pasada final. */
+const BANDA = 72;
 
 const acotar = (v: number) => {
   'worklet';
@@ -47,8 +52,9 @@ const acotar = (v: number) => {
  * clara). Con aciertos seguidos brilla por escalones; al fallar el brillo baja
  * con calma, sin sacudida ni mensaje.
  */
-export function BarraSesion({ hecho, meta, seguidas = 0 }: Props) {
+export function BarraSesion({ hecho, meta, seguidas = 0, barrido = false }: Props) {
   const reducido = useMovimientoReducido();
+  const pasada = useSharedValue(0);
   const fraccion = meta > 0 ? Math.min(1, hecho / meta) : 0;
   const progreso = useSharedValue(fraccion);
   const ancho = useSharedValue(0);
@@ -76,6 +82,15 @@ export function BarraSesion({ hecho, meta, seguidas = 0 }: Props) {
       : withTiming(objetivo, { duration: motionDuration.escena, easing: motionEasing.salir });
   }, [nivel, reducido, brillo]);
 
+  useEffect(() => {
+    pasada.value = barrido && !reducido ? withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }) : 0;
+  }, [barrido, reducido, pasada]);
+
+  // La franja nace y muere en los bordes de la barra: sube a plena luz en el medio del recorrido.
+  const luz = useAnimatedStyle(() => ({
+    opacity: 1 - Math.abs(2 * pasada.value - 1),
+    transform: [{ translateX: pasada.value * (ancho.value + BANDA) - BANDA }],
+  }));
   const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: acotar(progreso.value) }] }));
   const resplandor = useAnimatedStyle(() => ({
     opacity: brillo.value,
@@ -110,6 +125,14 @@ export function BarraSesion({ hecho, meta, seguidas = 0 }: Props) {
         <Animated.View style={[styles.relleno, relleno]}>
           <LinearGradient colors={senal} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={StyleSheet.absoluteFill} />
         </Animated.View>
+        <Animated.View style={[styles.pasada, luz]} pointerEvents="none">
+          <LinearGradient
+            colors={['transparent', color.accent100, 'transparent']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
       </View>
       <Animated.View style={[styles.contenedorPunto, punto]} pointerEvents="none">
         <Animated.View style={[styles.halo, halo]} />
@@ -128,6 +151,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   relleno: { ...StyleSheet.absoluteFill, transformOrigin: 'left' },
+  pasada: { position: 'absolute', top: 0, bottom: 0, left: 0, width: BANDA },
   resplandor: {
     position: 'absolute',
     left: 0,

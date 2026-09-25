@@ -3,6 +3,7 @@ import {
   FadeIn,
   FadeInDown,
   FadeOut,
+  Keyframe,
   LinearTransition,
   ZoomIn,
   type WithSpringConfig,
@@ -165,6 +166,23 @@ export const entrarRebote = () =>
     .damping(motionSpring.rebote.damping)
     .stiffness(motionSpring.rebote.stiffness)
     .mass(motionSpring.rebote.mass);
+
+/** Cuánto viaja una tarjeta al entrar y al salir (dp): un empujón, no cruzar la pantalla. */
+const DESPLAZA_TARJETA = 48;
+
+/** La tarjeta nueva entra desde la derecha con un fundido, en `lento`. */
+export const tarjetaEntra = () =>
+  new Keyframe({
+    from: { opacity: 0, transform: [{ translateX: DESPLAZA_TARJETA }] },
+    to: { opacity: 1, transform: [{ translateX: 0 }], easing: motionEasing.entrar },
+  }).duration(motionDuration.lento);
+
+/** La tarjeta que se va sale hacia la izquierda con un fundido, en `base`. */
+export const tarjetaSale = () =>
+  new Keyframe({
+    from: { opacity: 1, transform: [{ translateX: 0 }] },
+    to: { opacity: 0, transform: [{ translateX: -DESPLAZA_TARJETA }], easing: motionEasing.salir },
+  }).duration(motionDuration.base);
 
 /** Aparecer creciendo: fichas y tarjetas de resultado. */
 export const aparecerZoom = (retraso = 0) =>

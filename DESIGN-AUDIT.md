@@ -80,8 +80,9 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipograf√≠a, jerarqu√
 - `src/components/card/OptionButton.tsx:134`
 - `src/components/card/SceneImage.tsx:71`
 - `src/components/card/SceneImage.tsx:84`
-- `src/components/fx/BarraSesion.tsx:103`
-- `src/components/fx/BarraSesion.tsx:111`
+- `src/components/fx/BarraSesion.tsx:118`
+- `src/components/fx/BarraSesion.tsx:126`
+- `src/components/fx/BarraSesion.tsx:129`
 - `src/components/fx/BotonSenal.tsx:84`
 - `src/components/fx/HojaVeredicto.tsx:171`
 - `src/components/fx/MedidorVU.tsx:99`

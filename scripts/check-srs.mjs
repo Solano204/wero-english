@@ -44,7 +44,7 @@ const importar = (rel) => import(cargar(path.join(ROOT, rel)));
 
 const fecha = await importar('src/utils/date.ts');
 const sm2 = await importar('src/domain/sm2.ts');
-const { StudySession, etiquetaRepaso } = await importar('src/domain/session.ts');
+const { StudySession, etiquetaRepaso, sesionMerece } = await importar('src/domain/session.ts');
 const plan = await importar('src/domain/cola.ts');
 const sql = await importar('src/db/cola.ts');
 const plantillas = await importar('src/domain/plantillas.ts');
@@ -382,6 +382,14 @@ await prueba('un acierto en aprendizaje pide volver a SM-2 (requeue) pero la ses
   assert.equal(r.state.intervalo, 0);
   assert.equal(r.reinsertada, false, 'pero la sesión no la vuelve a mostrar');
   assert.equal(s.remaining, 1);
+});
+
+await prueba('sesionMerece: la regla de las partidas, 5 respuestas y 70%', () => {
+  assert.equal(sesionMerece(4, 4), false, 'muy corta');
+  assert.equal(sesionMerece(3, 5), false, '60%');
+  assert.equal(sesionMerece(7, 10), true, '70% justo');
+  assert.equal(sesionMerece(5, 5), true);
+  assert.equal(sesionMerece(0, 0), false, 'sin respuestas no hay fiesta ni división por cero');
 });
 
 await prueba('etiquetaRepaso: «Vuelve en esta sesión» solo si de verdad vuelve', () => {

@@ -10,7 +10,7 @@ import { TileBuilder } from './TileBuilder';
 import { Button, RiskBadge } from '@/components/base';
 import { answerMode, instructionFor, promptFor } from '@/domain/exercise';
 import { isCloseEnough } from '@/utils/text';
-import { color, font, motionDuration, radius, space, aparecerSubiendo, desaparecer } from '@/theme';
+import { color, font, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale } from '@/theme';
 import type { RellenoHueco } from './FraseHueco';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -20,14 +20,15 @@ import { useDesfaseVentana, type Rect } from '@/components/fx';
 import { useMovimientoReducido } from '@/utils';
 
 /**
- * Entrada de la tarjeta: cae con un resorte suave, sin sobrepaso (no es
- * un rebote juguetón, es una tarjeta nueva llegando). La salida de la
- * anterior es un fundido corto para no competir con la que entra.
- * Ambos presets ya respetan la accesibilidad de movimiento reducido del
- * sistema por su cuenta (ReduceMotion.System).
+ * La tarjeta que se va sale hacia la izquierda con un fundido (`base`) y la nueva
+ * entra desde la derecha (`lento`): una sola dirección, como pasar la página.
+ * Con movimiento reducido no se desliza nada: la nueva aparece con un fundido y
+ * la anterior se desvanece.
  */
-const cardEntering = aparecerSubiendo();
-const cardExiting = desaparecer(motionDuration.rapido);
+const tarjetaEntraAnim = tarjetaEntra();
+const tarjetaSaleAnim = tarjetaSale();
+const tarjetaAparece = aparecer();
+const tarjetaSeVa = desaparecer(motionDuration.rapido);
 
 /**
  * Por debajo de esta altura de ventana (un teléfono de 640 dp) todo se aprieta:
@@ -214,7 +215,11 @@ export function StudyCardView({
      * scrollea si de verdad no cabe (con la acción principal fija fuera
      * del scroll), así que las opciones siempre están donde el dedo llega.
      */
-    <Animated.View entering={cardEntering} exiting={cardExiting} style={[styles.wrap, compacto && styles.wrapCompacto]}>
+    <Animated.View
+      entering={reducido ? tarjetaAparece : tarjetaEntraAnim}
+      exiting={reducido ? tarjetaSeVa : tarjetaSaleAnim}
+      style={[styles.wrap, compacto && styles.wrapCompacto]}
+    >
       <View style={styles.top}>
         <Text style={styles.instruction}>{instructionFor(card.kind)}</Text>
         <RiskBadge vulgaridad={card.entry.vulgaridad} />

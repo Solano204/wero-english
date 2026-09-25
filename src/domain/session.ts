@@ -252,6 +252,15 @@ export class StudySession {
 export { gradeFrom };
 
 /**
+ * ¿La sesión merece celebración? La misma regla que las partidas (`GameEndScreen`):
+ * al menos 5 respuestas y 70% de aciertos. Una sesión corta o floja termina sin
+ * fiesta, y sin regaño tampoco.
+ */
+export function sesionMerece(aciertos: number, total: number): boolean {
+  return total >= 5 && aciertos / total >= 0.7;
+}
+
+/**
  * Lo que se le dice al usuario de cuándo vuelve la tarjeta que acaba de responder.
  *
  * «Vuelve en esta sesión» solo si la sesión de verdad la reinsertó. Un intervalo de 0
