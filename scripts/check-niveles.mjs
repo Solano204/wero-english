@@ -101,6 +101,7 @@ prueba('lista plana: un encabezado por tramo y renglones de cinco; lo bloqueado 
   assert.equal(nuevo.filter((i) => i.tipo === 'fila').length, 14, '70 niveles en renglones de 5');
   assert.deepEqual(indicesEncabezado(nuevo), [0, 15, 16]);
   assert.ok(nuevo.filter((i) => i.tipo === 'fila').every((f) => f.niveles.length === COLUMNAS));
+  assert.deepEqual([...new Set(nuevo.filter((i) => i.tipo === 'fila').map((f) => f.tramo))], ['facil'], 'cada renglón sabe de qué tramo es');
   const todas = Array.from({ length: 70 }, (_, i) => [i + 1, 3]);
   const tramos = armarTramos(bandasDe('pares'), ctx(71, { estrellas: todas }));
   assert.equal(aplanar(tramos, new Set()).filter((i) => i.tipo === 'fila').length, 16, 'el completo colapsa: solo los 16 de la media (80 niveles)');

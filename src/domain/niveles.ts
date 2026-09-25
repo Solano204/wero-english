@@ -98,6 +98,8 @@ export interface ItemTramo {
 export interface ItemFila {
   tipo: 'fila';
   key: string;
+  /** El tramo al que pertenece el renglón. */
+  tramo: string;
   niveles: NivelVista[];
   /** Posición del renglón entre todos los renglones de la lista: escalona la entrada. */
   fila: number;
@@ -119,7 +121,7 @@ export function aplanar(tramos: readonly Tramo[], expandidos: ReadonlySet<string
     if (!conFilas) continue;
     for (let i = 0; i < tramo.niveles.length; i += COLUMNAS) {
       const niveles = tramo.niveles.slice(i, i + COLUMNAS);
-      items.push({ tipo: 'fila', key: `fila-${tramo.id}-${niveles[0]?.n ?? i}`, niveles, fila: fila++ });
+      items.push({ tipo: 'fila', key: `fila-${tramo.id}-${niveles[0]?.n ?? i}`, tramo: tramo.id, niveles, fila: fila++ });
     }
   }
   return items;

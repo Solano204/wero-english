@@ -91,6 +91,13 @@ export const motionPresion = {
 /** Acierto: pulso de la pieza (1 → escala → 1 en `base`). */
 export const motionPulso = { escala: 1.04 } as const;
 
+/**
+ * Un logro en el mapa de niveles (Niveles): la celda pulsa 1 → `escala` → 1 y sus estrellas
+ * nuevas se encienden una por una, `entreEstrellas` ms una de otra (con un destello dorado).
+ * La cascada de entrada de las estrellas de un tramo usa `cascada`.
+ */
+export const motionLogro = { escala: 1.06, entreEstrellas: 160, cascada: 60 } as const;
+
 /** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 

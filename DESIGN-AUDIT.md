@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 229 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 232 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -87,7 +87,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/fx/OndaSenal.tsx:53`
 - `src/components/fx/OndaVoz.tsx:124`
 - `src/components/fx/PortadaJuego.tsx:93`
-- `src/components/niveles/CeldaNivel.tsx:64`
+- `src/components/niveles/CeldaNivel.tsx:130`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
 - `src/navigation/TabNavigator.tsx:122`
 - `src/screens/extras/practicar/ConsolaHoy.tsx:98`
@@ -222,7 +222,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
-| `games/NivelesScreen.tsx` | ✓ `:75` | ✗ | ✓ `:229` |
+| `games/NivelesScreen.tsx` | ✓ `:82` | ✗ | ✓ `:285` |
 | `games/ParesScreen.tsx` | ✓ `:111` | ✓ `:287` | ✓ `:263` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
@@ -255,6 +255,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
+- `src/components/niveles/EstrellasCelda.tsx:79` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:291` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:177` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:290` — key por índice

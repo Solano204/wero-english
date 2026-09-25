@@ -1,15 +1,17 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa } from '@/components/base';
+import { Button, Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa, razonMuro } from '@/components/base';
 import {
   ALTO_TRAMO,
   CONFIGURACION_VISTA,
   EncabezadoTramo,
   FilaNiveles,
   HUECO_CELDAS,
+  SIN_RECOMPENSA,
+  useRecompensaNiveles,
   useScrollNivel,
 } from '@/components/niveles';
 import {
@@ -35,7 +37,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
-import { aparecer, color, desaparecer, font, layout, space } from '@/theme';
+import { aparecer, color, desaparecer, escalon, font, layout, motionDuration, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -43,6 +45,11 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 
 const SIN_ESTADOS = new Map<number, NivelEstado>();
 type Ruta = RouteProp<RootStackParams, 'Niveles'>;
+
+/** Cuánto se queda el aviso de un anuncio que falló. */
+const DURACION_AVISO_MS = 5000;
+/** La entrada escalonada cuenta desde unos renglones arriba del nivel actual (lo que cabe en pantalla). */
+const FILAS_ANTES_DEL_ACTUAL = 4;
 
 /**
  * El mapa de niveles.
@@ -91,6 +98,21 @@ export function NivelesScreen() {
   const [abriendo, setAbriendo] = useState(false);
   const [expandidos, setExpandidos] = useState<ReadonlySet<string>>(new Set());
 
+  // El aviso cuando el anuncio falla o se cierra antes de tiempo: unos segundos y se va.
+  const [aviso, setAviso] = useState<string | null>(null);
+  const temporizadorAviso = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const avisar = useCallback((mensaje: string) => {
+    setAviso(mensaje);
+    if (temporizadorAviso.current) clearTimeout(temporizadorAviso.current);
+    temporizadorAviso.current = setTimeout(() => setAviso(null), DURACION_AVISO_MS);
+  }, []);
+  useEffect(
+    () => () => {
+      if (temporizadorAviso.current) clearTimeout(temporizadorAviso.current);
+    },
+    []
+  );
+
   /**
    * Abre un nivel adelantado a cambio de un anuncio.
    *
@@ -108,10 +130,13 @@ export function NivelesScreen() {
         // `siguiente`, porque eso es la cadena de niveles jugados.
         await abrirConAnuncio(user.id, juego, nivel);
         setAbiertosAhora((prev) => [...prev, nivel]);
+      } else {
+        // La celda se queda como estaba y se dice por qué, con el tono de siempre.
+        avisar(razonMuro(r));
       }
       setAbriendo(false);
     },
-    [user, juego, abriendo]
+    [user, juego, abriendo, avisar]
   );
 
   const alTocar = useCallback(
@@ -163,16 +188,6 @@ export function NivelesScreen() {
     [medidas, altoFila]
   );
 
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<ItemLista>) =>
-      item.tipo === 'tramo' ? (
-        <EncabezadoTramo tramo={item.tramo} expandido={item.expandido} onAlternar={alternarTramo} />
-      ) : (
-        <FilaNiveles niveles={item.niveles} lado={lado} onPress={alTocar} />
-      ),
-    [lado, alTocar, alternarTramo]
-  );
-
   // Al abrir, la lista deja el nivel actual centrado: con doscientos, obligar a bajar hasta
   // donde te quedaste es una molestia diaria. Sale de las medidas reales de la lista.
   const reducido = useMovimientoReducido();
@@ -183,6 +198,47 @@ export function NivelesScreen() {
     hayDatos: Boolean(carga.datos),
     reducido,
   });
+
+  // Al volver con estrellas nuevas (o un nivel actual nuevo), la celebración espera a que el mapa
+  // esté en su lugar.
+  const recompensaHallada = useRecompensaNiveles(juego, estrellas, siguiente, Boolean(carga.datos));
+  const recompensa = posicionada ? recompensaHallada : SIN_RECOMPENSA;
+
+  // La entrada: los renglones que se montan mientras entra la pantalla aparecen escalonados, y las
+  // estrellas del tramo actual se encienden en cascada. Pasado ese momento, lo que aparece al hacer
+  // scroll no se anima.
+  const [entrando, setEntrando] = useState(true);
+  useEffect(() => {
+    if (!posicionada) return;
+    const t = setTimeout(() => setEntrando(false), motionDuration.coreografia);
+    return () => clearTimeout(t);
+  }, [posicionada]);
+  const { filaBase, tramoActual } = useMemo(() => {
+    const it = items[indiceActual];
+    return it && it.tipo === 'fila'
+      ? { filaBase: Math.max(0, it.fila - FILAS_ANTES_DEL_ACTUAL), tramoActual: it.tramo }
+      : { filaBase: 0, tramoActual: null };
+  }, [items, indiceActual]);
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<ItemLista>) =>
+      item.tipo === 'tramo' ? (
+        <EncabezadoTramo tramo={item.tramo} expandido={item.expandido} onAlternar={alternarTramo} />
+      ) : (
+        <FilaNiveles
+          niveles={item.niveles}
+          lado={lado}
+          onPress={alTocar}
+          logros={recompensa.logros}
+          saltoActual={recompensa.saltoActual}
+          retrasoEntrada={entrando && !reducido ? escalon(Math.max(0, item.fila - filaBase)) : undefined}
+          cascada={item.tramo === tramoActual}
+        />
+      ),
+    [lado, alTocar, alternarTramo, recompensa, entrando, reducido, filaBase, tramoActual]
+  );
+  // Sin esto la lista no repinta renglones ya montados cuando cambia la recompensa o termina la entrada.
+  const extraData = useMemo(() => ({ recompensa: recompensa.id, entrando }), [recompensa.id, entrando]);
 
   if (!def) {
     return (
@@ -236,6 +292,7 @@ export function NivelesScreen() {
               renderItem={renderItem}
               keyExtractor={(it) => it.key}
               getItemLayout={getItemLayout}
+              extraData={extraData}
               stickyHeaderIndices={pegados}
               onScroll={alScroll}
               scrollEventThrottle={16}
@@ -257,22 +314,34 @@ export function NivelesScreen() {
         )}
       </Carga>
 
-      {/* Si te alejas del nivel actual, un atajo para volver a él (arriba del footer). */}
-      {posicionada && lejos ? (
-        <Animated.View
-          entering={reducido ? undefined : aparecer()}
-          exiting={reducido ? undefined : desaparecer()}
-          style={styles.flotante}
-          pointerEvents="box-none"
-        >
-          <Button
-            label={`Ir al nivel ${siguiente}`}
-            variant="secondary"
-            icon={lejos === 'abajo' ? 'chevron-down' : 'chevron-up'}
-            onPress={irAlActual}
-          />
-        </Animated.View>
-      ) : null}
+      {/* Sobre la lista y encima del footer: el aviso del anuncio y, si te alejas del nivel actual, un atajo para volver. */}
+      <View style={styles.flotante} pointerEvents="box-none">
+        {aviso ? (
+          <Animated.View
+            entering={reducido ? undefined : aparecer()}
+            exiting={reducido ? undefined : desaparecer()}
+            style={styles.aviso}
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
+            <Text style={styles.avisoTexto}>{aviso}</Text>
+          </Animated.View>
+        ) : null}
+        {posicionada && lejos ? (
+          <Animated.View
+            entering={reducido ? undefined : aparecer()}
+            exiting={reducido ? undefined : desaparecer()}
+            pointerEvents="box-none"
+          >
+            <Button
+              label={`Ir al nivel ${siguiente}`}
+              variant="secondary"
+              icon={lejos === 'abajo' ? 'chevron-down' : 'chevron-up'}
+              onPress={irAlActual}
+            />
+          </Animated.View>
+        ) : null}
+      </View>
     </Screen>
   );
 
@@ -304,7 +373,16 @@ const styles = StyleSheet.create({
   esqueleto: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
   lista: { flex: 1 },
   // Pegado abajo, sobre la lista y encima del footer (el footer queda fuera de este contenedor).
-  flotante: { position: 'absolute', left: 0, right: 0, bottom: space.md, alignItems: 'center' },
+  flotante: { position: 'absolute', left: 0, right: 0, bottom: space.md, alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
+  aviso: {
+    alignSelf: 'stretch',
+    backgroundColor: color.surfaceHigh,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.borderStrong,
+    padding: space.md,
+  },
+  avisoTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text, textAlign: 'center', lineHeight: font.size.md * 1.5 },
   pie: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

@@ -1,8 +1,11 @@
 import React, { memo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import Animated from 'react-native-reanimated';
 import type { EstadoNivel, NivelVista } from '@/domain/niveles';
-import { layout } from '@/theme';
+import { aparecerSubiendo, layout, motionDuration } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { CeldaNivel } from './CeldaNivel';
+import type { Logro } from './useRecompensaNiveles';
 
 /** Hueco entre celdas, en los dos sentidos (escala 4/8). */
 export const HUECO_CELDAS = 8;
@@ -11,6 +14,16 @@ interface Props {
   niveles: NivelVista[];
   lado: number;
   onPress: (n: number, estado: EstadoNivel) => void;
+  /** Estrellas nuevas por nivel desde la última visita. */
+  logros?: ReadonlyMap<number, Logro>;
+  saltoActual?: boolean;
+  /**
+   * Solo mientras entra la pantalla: el renglón aparece con este retraso (`escalon(i)`).
+   * `undefined`: sin animación de entrada (los renglones que aparecen al hacer scroll).
+   */
+  retrasoEntrada?: number;
+  /** Las estrellas de este renglón (es del tramo actual) se encienden en cascada, una sola vez. */
+  cascada?: boolean;
 }
 
 /**
@@ -18,13 +31,27 @@ interface Props {
  * porque la lista calcula con él dónde está cada cosa (`getItemLayout`) y a dónde
  * llevar el scroll.
  */
-export const FilaNiveles = memo(function FilaNiveles({ niveles, lado, onPress }: Props) {
+export const FilaNiveles = memo(function FilaNiveles({ niveles, lado, onPress, logros, saltoActual, retrasoEntrada, cascada = false }: Props) {
+  const reducido = useMovimientoReducido();
   return (
-    <View style={[styles.fila, { height: lado + HUECO_CELDAS }]}>
+    <Animated.View
+      entering={!reducido && retrasoEntrada !== undefined ? aparecerSubiendo(retrasoEntrada) : undefined}
+      style={[styles.fila, { height: lado + HUECO_CELDAS }]}
+    >
       {niveles.map((v) => (
-        <CeldaNivel key={v.n} n={v.n} estado={v.estado} estrellas={v.estrellas} lado={lado} onPress={onPress} />
+        <CeldaNivel
+          key={v.n}
+          n={v.n}
+          estado={v.estado}
+          estrellas={v.estrellas}
+          lado={lado}
+          onPress={onPress}
+          logro={logros?.get(v.n)}
+          saltoActual={saltoActual}
+          cascada={cascada && retrasoEntrada !== undefined ? retrasoEntrada + motionDuration.base : undefined}
+        />
       ))}
-    </View>
+    </Animated.View>
   );
 });
 

@@ -38,6 +38,7 @@ export {
   motionPresion,
   motionPulso,
   motionSacudida,
+  motionLogro,
   motionVeredicto,
   escalon,
   aparecer,
