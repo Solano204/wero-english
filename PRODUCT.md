@@ -64,7 +64,8 @@ La misma acción se llama igual en toda la app.
 | Pasar a la siguiente tarjeta, pregunta o paso | Siguiente | Seguir, Continuar, Avanzar |
 | Retomar lo que ya empezó | Seguir repasando, Seguir estudiando, Seguir con (modo) | Continuar |
 | Volver atrás | Volver (botón), flecha de atrás | Regresar |
-| Guardar una frase en la lista propia | Guardar, Mi mazo | Favoritos, Marcar |
+| Guardar una frase en la lista propia | Guardar, Mi mazo; ya guardada, «Guardada» | Favoritos, Marcar |
+| Qué tan formal o informal es una frase | Registro: Formal, Neutro, Informal, Muy informal, Solo con amigos | Nivel de lenguaje, Jerga |
 | Sesión de repaso con frases nuevas | Estudiar | Frases al azar |
 | Pasar frases sin repaso ni cuenta | Frases sueltas | Al azar |
 | Repaso que toca hoy | Repasar N frases; el total aparte: "N pendientes" | tarjetas listas, cola de repaso |

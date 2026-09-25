@@ -150,6 +150,10 @@ export const motionEntrada = {
   /** Progreso: los chips y el espectrograma entran mientras la aguja termina de asentarse. */
   chipsProgreso: 350,
   espectro: 300,
+  /** Detalle: la escala de registro, luego «Cuándo no decirla» y luego el contexto (cada uno dura `lento`). */
+  detalleRegistro: 200,
+  detalleAviso: 350,
+  detalleContexto: 500,
 } as const;
 
 /** Aparecer sin desplazarse: cambios de estado. */

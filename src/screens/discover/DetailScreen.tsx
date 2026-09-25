@@ -6,7 +6,7 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Badge,
@@ -32,12 +32,16 @@ import { getEntry, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { color, font, layout, space, type WorldId } from '@/theme';
+import { color, font, layout, motionDuration, motionEasing, motionEntrada, space, type WorldId } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { mismoTexto } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'Detail'>;
+
+/** De qué tamaño llega la ficha: crece hasta 1 mientras aparece. */
+const ESCALA_LLEGADA = 0.96;
 
 /**
  * P-12, la ficha completa de una frase.
@@ -62,6 +66,17 @@ export function DetailScreen() {
   const [imagenFallo, setImagenFallo] = useState(false);
   // Si el usuario ya tocó el botón, la lectura inicial de la base no lo pisa.
   const tocado = useRef(false);
+
+  // La llegada: fundido y escala de 0.96 a 1 en `escena`. Con reducir movimiento, ya está.
+  const reducido = useMovimientoReducido();
+  const entrada = useSharedValue(reducido ? 1 : 0);
+  useEffect(() => {
+    entrada.value = reducido ? 1 : withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar });
+  }, [reducido, entrada]);
+  const entradaAnim = useAnimatedStyle(() => ({
+    opacity: entrada.value,
+    transform: [{ scale: ESCALA_LLEGADA + (1 - ESCALA_LLEGADA) * entrada.value }],
+  }));
 
   // El estado real: antes el botón arrancaba siempre en «Guardar», aunque la frase ya estuviera guardada.
   useEffect(() => {
@@ -108,77 +123,93 @@ export function DetailScreen() {
   const conImagen = hayImagen(entry.imagen) && !imagenFallo;
 
   return (
-    <Screen
-      scroll
-      padded={false}
-      edges={['bottom']}
-      scrollY={scrollY}
-      encabezado={
-        // Flota sobre la imagen (o sobre el fondo, sin ella) y no se va con el scroll.
-        <View style={[styles.encabezado, { paddingTop: top + space.xs }]} pointerEvents="box-none">
-          <IconButton icono="back" etiqueta="Atrás" tamano="sm" onPress={() => nav.goBack()} />
-        </View>
-      }
-      // Guardar es la acción principal y vive en la zona del pulgar, no arriba.
-      footer={<BotonGuardar guardada={fav} pulso={pulso} onPress={alternar} />}
-    >
-      {conImagen ? (
-        <ImagenSangre path={entry.imagen} scrollY={scrollY} alFallar={() => setImagenFallo(true)} />
-      ) : (
-        <View style={{ height: top + layout.tapMin + space.sm }} />
-      )}
-
-      <View style={styles.cuerpo}>
-        <HeroeFrase entry={entry} />
-
-        <View style={styles.fila}>
-          <EscalaRegistro registro={entry.registro} vulgaridad={entry.vulgaridad} />
-          <View style={styles.chips}>
-            <LevelBadge nivel={entry.nivel} />
-            {entry.vigencia === 'efimera' ? (
-              <Badge label="Puede pasar de moda" tone="warn" small />
-            ) : null}
-            {/* La vulgaridad 2 ya es el último paso de la escala; la 1 lleva su aviso aparte. */}
-            {entry.vulgaridad === 1 ? <RiskBadge vulgaridad={entry.vulgaridad} /> : null}
+    // Al llegar (desde una lista o desde «Ver detalle») la ficha aparece con un fundido y una
+    // escala de 0.96 a 1. La transición compartida de Reanimated sigue siendo experimental y
+    // necesita build nativo, no Expo Go; esto funciona igual en todas partes.
+    <Animated.View style={[styles.raiz, entradaAnim]}>
+      <Screen
+        scroll
+        padded={false}
+        edges={['bottom']}
+        scrollY={scrollY}
+        encabezado={
+          // Flota sobre la imagen (o sobre el fondo, sin ella) y no se va con el scroll.
+          <View style={[styles.encabezado, { paddingTop: top + space.xs }]} pointerEvents="box-none">
+            <IconButton icono="back" etiqueta="Atrás" tamano="sm" onPress={() => nav.goBack()} />
           </View>
-        </View>
+        }
+        // Guardar es la acción principal y vive en la zona del pulgar, no arriba.
+        footer={<BotonGuardar guardada={fav} pulso={pulso} onPress={alternar} />}
+      >
+        {conImagen ? (
+          <ImagenSangre path={entry.imagen} scrollY={scrollY} alFallar={() => setImagenFallo(true)} />
+        ) : (
+          <View style={{ height: top + layout.tapMin + space.sm }} />
+        )}
 
-        {entry.no_usar_cuando ? (
-          <View style={styles.warn}>
-            <Aparece scrollY={scrollY}>
-              <CuandoNoDecirla texto={entry.no_usar_cuando} />
+        <View style={styles.cuerpo}>
+          <HeroeFrase entry={entry} />
+
+          {/* Entran escalonados: la escala de registro, «Cuándo NO decirla» y el contexto. */}
+          <View style={styles.fila}>
+            <Aparece scrollY={scrollY} retraso={motionEntrada.detalleRegistro}>
+              <View style={styles.registro}>
+                <EscalaRegistro
+                  registro={entry.registro}
+                  vulgaridad={entry.vulgaridad}
+                  retraso={motionEntrada.detalleRegistro + motionDuration.base}
+                />
+                <View style={styles.chips}>
+                  <LevelBadge nivel={entry.nivel} />
+                  {entry.vigencia === 'efimera' ? (
+                    <Badge label="Puede pasar de moda" tone="warn" small />
+                  ) : null}
+                  {/* La vulgaridad 2 ya es el último paso de la escala; la 1 lleva su aviso aparte. */}
+                  {entry.vulgaridad === 1 ? <RiskBadge vulgaridad={entry.vulgaridad} /> : null}
+                </View>
+              </View>
             </Aparece>
           </View>
-        ) : null}
 
-        {tieneVariantes ? (
-          <Block title="Otras formas de traducirla" body={entry.spanish} />
-        ) : null}
+          {entry.no_usar_cuando ? (
+            <View style={styles.warn}>
+              <Aparece scrollY={scrollY} retraso={motionEntrada.detalleAviso}>
+                <CuandoNoDecirla texto={entry.no_usar_cuando} />
+              </Aparece>
+            </View>
+          ) : null}
 
-        {tieneNeutro ? (
-          <Block title="Versión sin groserías" body={entry.es_neutro} />
-        ) : null}
+          <Aparece scrollY={scrollY} retraso={motionEntrada.detalleContexto}>
+            {tieneVariantes ? (
+              <Block title="Otras formas de traducirla" body={entry.spanish} />
+            ) : null}
 
-        {entry.note ? <Block title="Nota" body={entry.note} /> : null}
+            {tieneNeutro ? (
+              <Block title="Versión sin groserías" body={entry.es_neutro} />
+            ) : null}
 
-        {entry.vulgar_marks.length > 0 ? (
-          <Block
-            title="Palabras fuertes"
-            body={entry.vulgar_marks.join(' · ')}
-          />
-        ) : null}
+            {entry.note ? <Block title="Nota" body={entry.note} /> : null}
 
-        <View style={styles.block}>
-          <Text style={styles.blockTitle}>Dónde vive</Text>
-          <FilaDondeVive
-            nombre={mundo?.nombre ?? entry.mundo}
-            bloque={entry.block}
-            tinte={tinteMundo}
-            onPress={() => nav.navigate('WorldDetail', { worldId: entry.mundo })}
-          />
+            {entry.vulgar_marks.length > 0 ? (
+              <Block
+                title="Palabras fuertes"
+                body={entry.vulgar_marks.join(' · ')}
+              />
+            ) : null}
+
+            <View style={styles.block}>
+              <Text style={styles.blockTitle}>Dónde vive</Text>
+              <FilaDondeVive
+                nombre={mundo?.nombre ?? entry.mundo}
+                bloque={entry.block}
+                tinte={tinteMundo}
+                onPress={() => nav.navigate('WorldDetail', { worldId: entry.mundo })}
+              />
+            </View>
+          </Aparece>
         </View>
-      </View>
-    </Screen>
+      </Screen>
+    </Animated.View>
   );
 }
 
@@ -198,8 +229,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: space.md,
   },
+  raiz: { flex: 1 },
   cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.xl },
-  fila: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, marginTop: space.xl },
+  fila: { marginTop: space.xl },
+  registro: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
   chips: { alignItems: 'flex-end', gap: space.xs },
   warn: { marginTop: space.lg },
   block: { marginTop: space.lg, gap: space.xs },

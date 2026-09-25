@@ -206,7 +206,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 
 | pantalla (archivo) | carga | vacío | error |
 |---|---|---|---|
-| `discover/DetailScreen.tsx` | ✓ `:55` | ✓ `:93` | ✓ `:91` |
+| `discover/DetailScreen.tsx` | ✓ `:59` | ✓ `:108` | ✓ `:106` |
 | `discover/ExploreScreen.tsx` | ✓ `:27` | ✓ `:65` | ✓ `:79` |
 | `discover/PackDetailScreen.tsx` | ✓ `:35` | ✗ | ✓ `:61` |
 | `discover/WorldDetailScreen.tsx` | ✓ `:29` | ✗ | ✓ `:52` |

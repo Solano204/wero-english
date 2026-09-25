@@ -405,6 +405,7 @@ const ESTUDIO_SENAL = new Set([
 ]);
 const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
+  r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -417,6 +418,8 @@ const LOOPS_POR_PANTALLA = {
   Progreso: ['MedidorSenal.tsx'],
   // El héroe de Estudio (OndaVoz) no es un bucle: lo mueve la posición del audio y solo mientras suena.
   Estudio: [],
+  // Detalle: el héroe es la frase con su onda (mismo OndaVoz, movida por el audio); ningún bucle.
+  Detalle: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
