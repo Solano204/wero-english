@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { conteo } from '@/utils/text';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -57,7 +58,7 @@ export function DeckScreen() {
         <Header
           onBack={() => nav.goBack()}
           title="Mi mazo"
-          subtitle={`${items.length} guardadas`}
+          subtitle={conteo(items.length, 'guardada')}
         />
       </View>
       <FlatList

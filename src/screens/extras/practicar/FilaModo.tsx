@@ -104,7 +104,12 @@ export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice 
           <Text style={styles.nombre}>{titulo}</Text>
           <Text style={styles.corta}>{corta}</Text>
         </View>
-        {meta ? <MetaModo meta={meta} avance={avance} /> : null}
+        {meta ? (
+          // `Badge` se alinea arriba por sí mismo: aquí va centrado con el resto del renglón.
+          <View style={styles.meta}>
+            <MetaModo meta={meta} avance={avance} />
+          </View>
+        ) : null}
         <Animated.View style={estiloChevron}>
           <Icon name="chevron-right" size="md" color={color.textFaint} />
         </Animated.View>
@@ -134,6 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   texto: { flex: 1 },
+  meta: { alignSelf: 'center' },
   nombre: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
   corta: {
     fontFamily: font.family.body,

@@ -14,6 +14,8 @@ export interface ResultadoCarga<T> {
   demora: boolean;
   /** Vuelve a cargar mostrando el estado de carga (botón "Reintentar"). */
   reintentar: () => void;
+  /** Recarga sin volver a 'cargando': lo que ya se ve se queda hasta que llegue lo nuevo (jalar para refrescar). */
+  refrescar: () => Promise<void>;
 }
 
 interface Opciones<T> {
@@ -102,6 +104,7 @@ export function useCarga<T>(
   );
 
   const reintentar = useCallback(() => void ejecutar(false), [ejecutar]);
+  const refrescar = useCallback(() => ejecutar(true), [ejecutar]);
 
-  return { estado, datos, error, demora, reintentar };
+  return { estado, datos, error, demora, reintentar, refrescar };
 }

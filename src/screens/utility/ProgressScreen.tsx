@@ -1,4 +1,5 @@
 import React from 'react';
+import { conteo } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -110,7 +111,7 @@ export function ProgressScreen() {
           label="Precisión general"
           value={`${Math.round((stats?.precision ?? 0) * 100)}%`}
         />
-        <Row label="Racha más larga" value={`${stats?.rachaMax ?? 0} días`} />
+        <Row label="Racha más larga" value={conteo(stats?.rachaMax ?? 0, 'día')} />
         <Row
           label="Guardadas con estrella"
           value={String(stats?.favoritas ?? 0)}

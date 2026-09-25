@@ -20,3 +20,4 @@ export { Icon, ICON_NAMES, ICON_SIZE, type IconName, type IconSize } from './Ico
 export { Presionable, usePresion } from './Presionable';
 export { Skeleton, SkeletonLista } from './Skeleton';
 export { Carga, ErrorCarga } from './Carga';
+export { EncabezadoComprimido, ALTO_ENCABEZADO } from './EncabezadoComprimido';

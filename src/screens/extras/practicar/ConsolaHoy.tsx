@@ -53,6 +53,8 @@ interface Props {
   cargando: boolean;
   /** Primera vez por sesión: coreografía de entrada. */
   entrada: boolean;
+  /** Cuántas veces se refrescó la pantalla: cada una da un pulso de interferencia en la onda. */
+  refrescos?: number;
   onIr: () => void;
 }
 
@@ -115,6 +117,7 @@ export function ConsolaHoy({
   listo,
   cargando,
   entrada,
+  refrescos = 0,
   onIr,
 }: Props) {
   const reducido = useMovimientoReducido();
@@ -160,6 +163,16 @@ export function ConsolaHoy({
       withTiming(0, { duration: mitad })
     );
   };
+
+  const primerRefresco = useRef(true);
+  useEffect(() => {
+    if (primerRefresco.current) {
+      primerRefresco.current = false;
+      return;
+    }
+    interferir();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refrescos]);
 
   const alTocar = () => {
     if (reducido) {

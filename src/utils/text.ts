@@ -89,3 +89,8 @@ export function plural(n: number, singular: string, formaPlural: string = `${sin
 export function conteo(n: number, singular: string, formaPlural?: string): string {
   return `${n} ${plural(n, singular, formaPlural)}`;
 }
+
+/** Miles con coma, como se escribe en México: `miles(1436)` da '1,436'. */
+export function miles(n: number): string {
+  return String(Math.trunc(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}

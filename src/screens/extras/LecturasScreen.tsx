@@ -187,7 +187,7 @@ function FilaLectura({ fila, onPress }: { fila: Fila; onPress: () => void }) {
         </View>
       ) : (
         <Text style={styles.bloqueo}>
-          Se abre al dominar {l.desbloquea?.dominadas} frases de{' '}
+          Se abre al dominar {conteo(l.desbloquea?.dominadas ?? 0, 'frase')} de{' '}
           {NOMBRE_MUNDO[l.mundo] ?? l.mundo} · te faltan {fila.faltan}
         </Text>
       )}

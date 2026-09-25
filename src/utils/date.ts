@@ -1,3 +1,5 @@
+import { conteo } from '@/utils/text';
+
 const MS_DAY = 86_400_000;
 
 /** Clave de día en hora local, formato YYYY-MM-DD. */
@@ -56,13 +58,13 @@ export function relativeDay(ts: number, now = Date.now()): string {
   if (diff === -1) return 'ayer';
   if (diff < 0) {
     const n = Math.abs(diff);
-    if (n < 7) return `hace ${n} días`;
-    if (n < 30) return `hace ${Math.round(n / 7)} semanas`;
-    return `hace ${Math.round(n / 30)} meses`;
+    if (n < 7) return `hace ${conteo(n, 'día')}`;
+    if (n < 30) return `hace ${conteo(Math.round(n / 7), 'semana')}`;
+    return `hace ${conteo(Math.round(n / 30), 'mes', 'meses')}`;
   }
-  if (diff < 7) return `en ${diff} días`;
-  if (diff < 30) return `en ${Math.round(diff / 7)} semanas`;
-  return `en ${Math.round(diff / 30)} meses`;
+  if (diff < 7) return `en ${conteo(diff, 'día')}`;
+  if (diff < 30) return `en ${conteo(Math.round(diff / 7), 'semana')}`;
+  return `en ${conteo(Math.round(diff / 30), 'mes', 'meses')}`;
 }
 
 /** Formatea milisegundos como "3 min" o "45 s". */

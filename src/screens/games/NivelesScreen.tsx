@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -154,7 +155,7 @@ export function NivelesScreen() {
                   <View style={styles.bandaCabeza}>
                     <Text style={styles.bandaNombre}>{banda.nombre}</Text>
                     <Text style={styles.bandaRango}>
-                      {banda.desde} a {banda.hasta} · {banda.ids.length} frases
+                      {banda.desde} a {banda.hasta} · {conteo(banda.ids.length, 'frase')}
                     </Text>
                   </View>
 

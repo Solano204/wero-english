@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, ProgressBar, Screen, Presionable } from '@/components/base';
@@ -178,7 +179,7 @@ export function OnboardingScreen() {
           <Text style={styles.titulo}>Ya está</Text>
           <Text style={styles.bajada}>
             {settings.notifPorDia > 0
-              ? `Te van a llegar ${settings.notifPorDia} frases al día entre las ${settings.notifDesde} y las ${settings.notifHasta}.`
+              ? `Te van a llegar ${conteo(settings.notifPorDia, 'frase')} al día entre las ${settings.notifDesde} y las ${settings.notifHasta}.`
               : 'No te vamos a mandar nada. Puedes prenderlo después en Ajustes.'}
           </Text>
 

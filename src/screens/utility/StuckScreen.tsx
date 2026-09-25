@@ -1,4 +1,5 @@
 import React from 'react';
+import { conteo } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -54,7 +55,7 @@ export function StuckScreen() {
       <Header
         onBack={() => nav.goBack()}
         title="Se me atoran"
-        subtitle={`${items.length} frases`}
+        subtitle={conteo(items.length, 'frase')}
       />
       <Text style={styles.intro}>
         Sin cronómetro ni calificación. Léelas, escúchalas y ya.

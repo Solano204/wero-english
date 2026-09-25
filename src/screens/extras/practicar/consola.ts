@@ -2,6 +2,7 @@
  * Lógica pura de la consola de HOY. Sin React ni Skia: `check:practicar` la
  * prueba con node.
  */
+import { conteo } from '@/utils/text';
 
 /** Energía de la onda con 0 pendientes: casi plana y en calma. */
 export const ENERGIA_MIN = 0.06;
@@ -22,4 +23,9 @@ export function progresoMeta(hoy: number, meta: number): number {
 
 export function metaCumplida(hoy: number, meta: number): boolean {
   return meta > 0 && hoy >= meta;
+}
+
+/** El botón que lleva a las frases atoradas. Lo dice igual en HOY y en Progreso. */
+export function etiquetaCorregir(atoradas: number): string {
+  return `Corregir ${conteo(atoradas, 'error', 'errores')}`;
 }

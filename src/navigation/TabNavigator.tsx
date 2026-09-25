@@ -42,16 +42,9 @@ const ICONO: Record<keyof MainTabParams, IconName> = {
   Progress: 'progress',
 };
 
-/**
- * Icono de pestaña.
- *
- * La pestaña activa recibe una pastilla de cian que crece por detrás del
- * glifo. Un cambio de color solo se nota poco sobre tinta; la pastilla se
- * ve de reojo y dice dónde estás sin tener que leer la etiqueta.
- *
- * La animación corre en el hilo de UI con reanimated, igual que la del
- * botón, para que no se trabe mientras la pantalla nueva está montando.
- */
+/** Las pestañas en el orden en que se dibujan: el índice que la barra reporta como activo. */
+const ORDEN_PESTANAS: string[] = Object.keys(ICONO);
+
 /** Cada pestaña presiona igual que el resto de la app, sin el ripple de Android que traen las props. */
 function BotonPestana({ href: _href, onPress, ...props }: BottomTabBarButtonProps) {
   return (
@@ -60,15 +53,31 @@ function BotonPestana({ href: _href, onPress, ...props }: BottomTabBarButtonProp
       android_ripple={null}
       onPress={(e) => {
         // Solo un cambio de pestaña da háptico: tocar la que ya está abierta no.
-        if (!props.accessibilityState?.selected) haptics.tapLight();
+        if (!props['aria-selected']) haptics.tapLight();
         onPress?.(e);
       }}
     />
   );
 }
 
-function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; tint: string }) {
+/**
+ * Ícono de pestaña. Un cambio de color solo se nota poco sobre tinta, así que el
+ * ícono de la pestaña que se vuelve activa hace 1 → 1.12 → 1 en el hilo de UI. La
+ * píldora que dice dónde estás no vive aquí: la pinta `PildoraLiquida` en el
+ * fondo de la barra y se desliza entre pestañas.
+ */
+interface IconoProps {
+  nombre: IconName;
+  /** El `focused` con el que React Navigation pinta esta copia: cada ícono se dibuja dos veces (activa e inactiva) y este valor no cambia. */
+  activo: boolean;
+  tint: string;
+  /** Posición de la pestaña: la que se vuelve activa es la que pulsa. */
+  indice: number;
+}
+
+function Icono({ nombre, activo, tint, indice }: IconoProps) {
   const reducido = useMovimientoReducido();
+  const enfocada = useContext(IndicePestana) === indice;
   const escala = useSharedValue(1);
   const montado = useRef(false);
 
@@ -78,12 +87,12 @@ function Icono({ nombre, activo, tint }: { nombre: IconName; activo: boolean; ti
       montado.current = true;
       return;
     }
-    if (!activo || reducido) return;
+    if (!enfocada || !activo || reducido) return;
     escala.value = withSequence(
       withTiming(1.12, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar })
     );
-  }, [activo, reducido, escala]);
+  }, [enfocada, activo, reducido, escala]);
 
   const simbolo = useAnimatedStyle(() => ({
     transform: [{ scale: escala.value }],
@@ -140,8 +149,13 @@ function BarraLiquida(props: BottomTabBarProps) {
   );
 }
 
-/** Aire arriba de la barra (paddingTop) + paddingTop del ítem, menos el px del filo. */
-const ARRIBA_PILDORA = space.sm + space.xs - 1;
+/**
+ * Dónde empieza el ícono contando desde el borde de arriba de la barra: el paddingTop
+ * de la barra (`sm`), el del ítem (`xs`) y el `padding: 5` que React Navigation le
+ * pone al botón de cada pestaña (variante uikit); menos el px del filo de luz.
+ */
+const PADDING_BOTON_PESTANA = 5;
+const ARRIBA_PILDORA = space.sm + space.xs + PADDING_BOTON_PESTANA - 1;
 
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
@@ -171,7 +185,7 @@ export function TabNavigator() {
         tabBarItemStyle: styles.item,
         tabBarButton: BotonPestana,
         tabBarIcon: ({ color: tint, focused }) => (
-          <Icono nombre={ICONO[route.name]} activo={focused} tint={tint} />
+          <Icono nombre={ICONO[route.name]} activo={focused} tint={tint} indice={ORDEN_PESTANAS.indexOf(route.name)} />
         ),
       })}
     >

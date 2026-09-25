@@ -48,6 +48,8 @@ export const motionSpring = {
   rebote: { damping: 10, stiffness: 180, mass: 1 } satisfies WithSpringConfig,
   /** La píldora de la barra de pestañas: llega con holgura, sin rebote de más. */
   liquido: { damping: 16, stiffness: 190, mass: 1.1 } satisfies WithSpringConfig,
+  /** La aguja del medidor se asienta en `duration` ms, con rebote: por eso el total de su entrada es fijo. */
+  aguja: { duration: 550, dampingRatio: 0.55 } satisfies WithSpringConfig,
 };
 
 /** Retraso entre elementos de una lista que entra: el mismo en todas. */
@@ -114,6 +116,14 @@ export const motionSenal = {
   portada: 3200,
   /** Los segmentos del medidor VU se encienden de izquierda a derecha en este total. */
   medidor: 600,
+  /** La aguja sube hasta pasarse un poco del valor; después se asienta con `motionSpring.aguja`. */
+  aguja: 350,
+  /** Un ciclo del temblor casi imperceptible de la aguja en reposo. */
+  temblor: 3000,
+  /** Las columnas del espectrograma suben de izquierda a derecha en este total. */
+  espectro: 600,
+  /** Retraso entre una columna y la siguiente. */
+  columna: 20,
 } as const;
 
 /**
@@ -125,6 +135,9 @@ export const motionEntrada = {
   onda: 350,
   chips: 450,
   destacados: 500,
+  /** Progreso: los chips y el espectrograma entran mientras la aguja termina de asentarse. */
+  chipsProgreso: 350,
+  espectro: 300,
 } as const;
 
 /** Aparecer sin desplazarse: cambios de estado. */

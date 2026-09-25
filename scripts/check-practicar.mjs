@@ -27,8 +27,8 @@ const cargarUrl = async (rel) => {
   return `data:text/javascript;base64,${Buffer.from(out).toString('base64')}`;
 };
 const cargar = async (rel) => import(await cargarUrl(rel));
-const { energiaOnda, progresoMeta, metaCumplida, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
-const { plural, conteo } = await cargar('src/utils/text.ts');
+const { energiaOnda, progresoMeta, metaCumplida, etiquetaCorregir, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+const { plural, conteo, miles } = await cargar('src/utils/text.ts');
 const { metaDe, textoMeta } = await cargar('src/screens/extras/practicar/metadatos.ts');
 const { diasQueQuedan, textoDiasReto } = await cargar('src/screens/extras/practicar/reto.ts');
 const { resumenNivel, TOTAL_NIVELES } = await cargar('src/screens/extras/practicar/resumenNiveles.ts');
@@ -118,4 +118,12 @@ assert.equal(textoMeta({ tipo: 'nivel', nivel: 23, estrellas: 36 }), 'Nivel 23 Â
 assert.equal(textoMeta({ tipo: 'nivel', nivel: 1, estrellas: 0 }), 'Nivel 1');
 assert.equal(textoMeta(null), null);
 
-console.log('check:practicar ok (61 casos)');
+// Miles con coma y el botÃ³n de las atoradas.
+assert.equal(miles(1436), '1,436');
+assert.equal(miles(0), '0');
+assert.equal(miles(999), '999');
+assert.equal(miles(1234567), '1,234,567');
+assert.equal(etiquetaCorregir(1), 'Corregir 1 error');
+assert.equal(etiquetaCorregir(7), 'Corregir 7 errores');
+
+console.log('check:practicar ok (67 casos)');

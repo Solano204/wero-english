@@ -1,5 +1,5 @@
-import React, { useContext, type ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, type ScrollViewProps, type ViewStyle } from 'react-native';
+import React, { useCallback, useContext, useState, type ReactNode } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, View, type ScrollViewProps, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedScrollHandler, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
@@ -20,6 +20,10 @@ interface Props {
   encabezado?: ReactNode;
   /** Si viene, el scroll escribe aquí su desplazamiento en el hilo de UI, sin pasar por JS. */
   scrollY?: SharedValue<number>;
+  /** Jalar para refrescar: la pantalla recarga sin esqueleto. Solo con `scroll`. */
+  alRefrescar?: () => Promise<unknown>;
+  /** Dónde aparece el indicador desde el borde de arriba (debajo de un encabezado flotante). */
+  desfaseRefresco?: number;
 }
 
 /** Scroll que publica su desplazamiento en un valor compartido. Solo existe si una pantalla lo pide. */
@@ -50,8 +54,30 @@ export function Screen({
   fondo,
   encabezado,
   scrollY,
+  alRefrescar,
+  desfaseRefresco = 0,
 }: Props) {
   const inner: ViewStyle = padded ? { padding: layout.screenPad } : {};
+  const [refrescando, setRefrescando] = useState(false);
+  const refrescar = useCallback(async () => {
+    if (!alRefrescar) return;
+    setRefrescando(true);
+    try {
+      await alRefrescar();
+    } finally {
+      setRefrescando(false);
+    }
+  }, [alRefrescar]);
+  const refreshControl = alRefrescar ? (
+    <RefreshControl
+      refreshing={refrescando}
+      onRefresh={refrescar}
+      tintColor={color.accent}
+      colors={[color.accent]}
+      progressBackgroundColor={color.surface}
+      progressViewOffset={desfaseRefresco}
+    />
+  ) : undefined;
 
   /*
    * Hueco de las barras de abajo.
@@ -118,6 +144,7 @@ export function Screen({
             contentContainerStyle={[inner, { paddingBottom: huecoAbajo }, style]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            refreshControl={refreshControl}
           >
             {children}
           </ScrollAnimado>
@@ -127,6 +154,7 @@ export function Screen({
             contentContainerStyle={[inner, { paddingBottom: huecoAbajo }, style]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            refreshControl={refreshControl}
           >
             {children}
           </ScrollView>

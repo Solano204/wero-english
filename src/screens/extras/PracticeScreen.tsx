@@ -21,6 +21,7 @@ import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 import { ConsolaHoy } from './practicar/ConsolaHoy';
+import { etiquetaCorregir } from './practicar/consola';
 import { Destacados } from './practicar/Destacados';
 import { EncabezadoPracticar, ALTO_ENCABEZADO } from './practicar/EncabezadoPracticar';
 import { tomarEntrada } from './practicar/entrada';
@@ -71,7 +72,7 @@ function etiquetaHoy(
     return `Repasar ${conteo(n, 'frase')}`;
   }
   if (motivo === 'ultimo' && modo === 'study') return 'Seguir estudiando';
-  if (motivo === 'atoradas') return `Corregir ${conteo(atoradas, 'error', 'errores')}`;
+  if (motivo === 'atoradas') return etiquetaCorregir(atoradas);
   if (motivo === 'ultimo') return `Seguir con ${MODOS[modo].titulo}`;
   return 'Empezar';
 }
@@ -131,6 +132,13 @@ export function PracticeScreen() {
   // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
   // el caso "usuario nuevo" un instante y luego saltaría a otro.
   const listo = carga.estado === 'listo';
+
+  // Jalar para refrescar: recarga sin esqueleto y la onda de HOY da un pulso al terminar.
+  const [refrescos, setRefrescos] = useState(0);
+  const refrescar = useCallback(async () => {
+    await carga.refrescar();
+    setRefrescos((n) => n + 1);
+  }, [carga.refrescar]);
   const { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas } = carga.datos ?? SIN_DATOS;
 
   const atoradas = stats?.atoradas ?? 0;
@@ -166,6 +174,8 @@ export function PracticeScreen() {
       fondo={<FondoAurora />}
       encabezado={<EncabezadoPracticar scrollY={scrollY} racha={racha} entrada={primeraEntrada} />}
       style={{ paddingTop: top + ALTO_ENCABEZADO }}
+      alRefrescar={refrescar}
+      desfaseRefresco={top + ALTO_ENCABEZADO}
     >
       <Animated.View style={[styles.bloques, estiloFundido]}>
         <View style={styles.bloque}>
@@ -183,6 +193,7 @@ export function PracticeScreen() {
               listo={listo}
               cargando={carga.estado === 'cargando' && carga.demora}
               entrada={primeraEntrada}
+              refrescos={refrescos}
               onIr={() => modoHoy.ir(nav)}
             />
           )}

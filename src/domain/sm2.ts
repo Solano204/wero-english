@@ -1,4 +1,5 @@
 import { addDays, startOfDay } from '@/utils/date';
+import { conteo } from '@/utils/text';
 import type { CardState, Grade } from '@/types';
 
 /**
@@ -149,7 +150,7 @@ export function gradeFrom(
 export function nextReviewLabel(s: CardState): string {
   if (s.intervalo === 0) return 'en esta sesión';
   if (s.intervalo === 1) return 'mañana';
-  if (s.intervalo < 7) return `en ${s.intervalo} días`;
-  if (s.intervalo < 30) return `en ${Math.round(s.intervalo / 7)} semanas`;
-  return `en ${Math.round(s.intervalo / 30)} meses`;
+  if (s.intervalo < 7) return `en ${conteo(s.intervalo, 'día')}`;
+  if (s.intervalo < 30) return `en ${conteo(Math.round(s.intervalo / 7), 'semana')}`;
+  return `en ${conteo(Math.round(s.intervalo / 30), 'mes', 'meses')}`;
 }

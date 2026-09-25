@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/** Qué se celebra: la meta del día o el reto de la semana. */
-export type TemaCelebracion = 'meta' | 'reto';
+/** Qué se celebra: la meta del día, el reto de la semana o un récord de racha. */
+export type TemaCelebracion = 'meta' | 'reto' | 'record';
 
 /**
  * true solo la primera vez que se pide para esa `marca` (el día o el lunes de la

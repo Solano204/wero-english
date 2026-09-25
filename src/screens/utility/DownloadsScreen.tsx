@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { conteo } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -116,7 +117,7 @@ export function DownloadsScreen() {
                 <View style={styles.headText}>
                   <Text style={styles.name}>{p.nombre}</Text>
                   <Text style={styles.meta}>
-                    {p.total_entradas} frases · {p.peso_mb} MB
+                    {conteo(p.total_entradas, 'frase')} · {p.peso_mb} MB
                   </Text>
                 </View>
                 {p.empaquetado ? (

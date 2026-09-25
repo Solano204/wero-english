@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { conteo } from '@/utils/text';
 import {
   countDue,
   getDistractors,
@@ -333,7 +334,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
 function labelFor(intervalo: number): string {
   if (intervalo === 0) return 'Vuelve en esta sesión';
   if (intervalo === 1) return 'La vuelves a ver mañana';
-  if (intervalo < 7) return `La vuelves a ver en ${intervalo} días`;
-  if (intervalo < 30) return `La vuelves a ver en ${Math.round(intervalo / 7)} semanas`;
-  return `La vuelves a ver en ${Math.round(intervalo / 30)} meses`;
+  if (intervalo < 7) return `La vuelves a ver en ${conteo(intervalo, 'día')}`;
+  if (intervalo < 30) return `La vuelves a ver en ${conteo(Math.round(intervalo / 7), 'semana')}`;
+  return `La vuelves a ver en ${conteo(Math.round(intervalo / 30), 'mes', 'meses')}`;
 }

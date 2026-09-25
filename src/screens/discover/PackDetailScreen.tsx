@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { conteo } from '@/utils/text';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import {
   useNavigation,
@@ -48,7 +49,7 @@ export function PackDetailScreen() {
         <Header
           onBack={() => nav.goBack()}
           title={pack?.nombre ?? 'Pack'}
-          subtitle={carga.datos ? `${carga.datos.length} frases` : undefined}
+          subtitle={carga.datos ? conteo(carga.datos.length, 'frase') : undefined}
         />
         <Button
           label="Estudiar este pack"
