@@ -4,6 +4,6 @@ export { PhraseBlock } from './PhraseBlock';
 export { OptionButton, type OptionState } from './OptionButton';
 export { DiffFrase } from './DiffFrase';
 export { FilaEstrellas } from './FilaEstrellas';
-export { SceneImage } from './SceneImage';
+export { SceneImage, hayImagen } from './SceneImage';
 export { TileBuilder } from './TileBuilder';
 export { StudyCardView } from './StudyCardView';

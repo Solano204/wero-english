@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 211 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 213 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -73,13 +73,11 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/screens/games/DulcesScreen.tsx:672` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
 
 **COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (`gradiente.neutro`). El degradado de la señal (`senal`) va de `accent900` a `accent100`, sin hex nuevos, y `npm run check:color` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: `filoLuz` mezcla blanco y cian, y `FONDO`. Usos de `<LinearGradient`:
-- `src/components/base/Card.tsx:126`
-- `src/components/base/Card.tsx:162`
+- `src/components/base/Card.tsx:116`
+- `src/components/base/Card.tsx:144`
 - `src/components/base/Screen.tsx:117`
 - `src/components/base/Screen.tsx:131`
 - `src/components/card/OptionButton.tsx:134`
-- `src/components/card/SceneImage.tsx:71`
-- `src/components/card/SceneImage.tsx:84`
 - `src/components/fx/BarraSesion.tsx:118`
 - `src/components/fx/BarraSesion.tsx:126`
 - `src/components/fx/BarraSesion.tsx:129`
@@ -139,9 +137,6 @@ Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son 
 **TIPO-4 · Títulos ≥ 28 px con letterSpacing de −1% a −2%:**
 - (ninguno)
 
-Descartados (28 px o más, pero no son títulos):
-- `src/components/base/Card.tsx:220` — portadaVacia: inicial suelta de una portada pendiente (`textSobrePortada`), no un título
-- `src/components/card/SceneImage.tsx:124` — inicial: inicial suelta de una imagen pendiente (`textSobrePortada`), no un título
 
 ## ESPACIADO
 
@@ -149,7 +144,7 @@ Descartados (28 px o más, pero no son títulos):
 - (ninguno)
 
 **Excepciones revisadas (no cuentan):**
-- `src/components/base/Card.tsx:194` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/components/base/Card.tsx:176` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/fx/HojaVeredicto.tsx:220` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/unlock/MuroDesbloqueo.tsx:126` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/navigation/TabNavigator.tsx:231` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
@@ -211,7 +206,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 
 | pantalla (archivo) | carga | vacío | error |
 |---|---|---|---|
-| `discover/DetailScreen.tsx` | ✓ `:42` | ✓ `:59` | ✓ `:57` |
+| `discover/DetailScreen.tsx` | ✓ `:47` | ✓ `:65` | ✓ `:63` |
 | `discover/ExploreScreen.tsx` | ✓ `:27` | ✓ `:65` | ✓ `:79` |
 | `discover/PackDetailScreen.tsx` | ✓ `:35` | ✗ | ✓ `:61` |
 | `discover/WorldDetailScreen.tsx` | ✓ `:29` | ✗ | ✓ `:52` |

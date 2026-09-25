@@ -2,20 +2,10 @@ import React, { type ReactNode } from 'react';
 import { Platform, StyleSheet, View, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Text } from 'react-native';
+import { Image } from 'react-native';
 import { imageSource } from '@/services/media';
-import { blur, color, filoLuz, font, gradiente, radius, shadow, sol, space } from '@/theme';
+import { blur, color, filoLuz, gradiente, radius, shadow, sol, space } from '@/theme';
 import { Presionable } from './Presionable';
-
-/** Dos letras a partir del id de la portada: 'dia_a_dia' -> 'DD'. */
-function iniciales(id: string): string {
-  const partes = id.split(/[_\s-]+/).filter(Boolean);
-  const a = partes[0];
-  if (!a) return '';
-  const b = partes[1];
-  if (!b) return a.slice(0, 2).toUpperCase();
-  return (a[0]! + b[0]!).toUpperCase();
-}
 
 interface Props {
   children: ReactNode;
@@ -31,10 +21,10 @@ interface Props {
   portada?: keyof typeof gradiente | string;
   /**
    * Alto del hueco de portada. Cuando viene, la tarjeta reserva esa
-   * franja arriba SIEMPRE, exista la imagen o no. Si el alto cambiara
-   * según haya archivo, la lista entera se reacomodaría el día que
-   * metas las imágenes, y hasta entonces se ve distinta a como va a
-   * quedar.
+   * franja arriba SIEMPRE, exista la imagen o no (sin imagen se ve el
+   * degradado del mundo, sin letras). Si el alto cambiara según haya
+   * archivo, la lista entera se reacomodaría el día que metas las
+   * imágenes.
    */
   altoPortada?: number;
   /**
@@ -142,15 +132,7 @@ export function Card({
       ) : null}
       {colores || fuente ? <View style={styles.velo} /> : null}
 
-      {altoPortada ? (
-        <View style={[styles.portada, { height: altoPortada }]}>
-          {!fuente ? (
-            <Text style={styles.portadaVacia}>
-              {portada ? iniciales(String(portada)) : ''}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
+      {altoPortada ? <View style={{ height: altoPortada }} /> : null}
 
       <View style={styles.contenido}>{children}</View>
     </View>
@@ -209,18 +191,6 @@ const styles = StyleSheet.create({
   velo: {
     ...StyleSheet.absoluteFill,
     backgroundColor: color.veloPortada,
-  },
-  /**
-   * El hueco de la portada. Mientras no haya archivo se ve el degradado
-   * con la inicial en grande; cuando metas la imagen, ocupa esta misma
-   * franja y nada se mueve de lugar.
-   */
-  portada: { alignItems: 'center', justifyContent: 'center', padding: space.md },
-  portadaVacia: {
-    fontSize: 34,
-    fontFamily: font.family.display,
-    letterSpacing: 2,
-    color: color.textSobrePortada,
   },
   /*
    * `gap` por defecto dentro de toda tarjeta.

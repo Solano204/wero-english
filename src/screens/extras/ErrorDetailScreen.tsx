@@ -57,7 +57,6 @@ export function ErrorDetailScreen() {
             size={180}
             ancha
             style={styles.errImg}
-            etiqueta={err.lo_correcto}
           />
         ) : null}
       </Card>

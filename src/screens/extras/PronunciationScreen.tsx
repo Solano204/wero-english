@@ -279,7 +279,7 @@ const FonemaCard = memo(function FonemaCard({
       </View>
 
       {fonema.imagen ? (
-        <SceneImage path={fonema.imagen} size={160} ancha etiqueta={fonema.palabra_ancla} />
+        <SceneImage path={fonema.imagen} size={160} ancha />
       ) : null}
 
       {hayAislado ? (

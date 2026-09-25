@@ -241,7 +241,6 @@ export function StudyCardView({
                 path={card.entry.imagen}
                 size={compacto ? IMAGEN_COMPACTA : IMAGEN_HOLGADA}
                 ancha
-                etiqueta={card.entry.phrase}
               />
             ) : null}
             <BloqueVoz entry={card.entry} variante="frase" compacto={compacto} />

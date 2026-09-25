@@ -245,7 +245,7 @@ export function AzarScreen() {
         >
           <Card style={styles.tarjeta}>
             <View style={styles.hueco}>
-              <SceneImage path={entry.imagen} size={180} ancha etiqueta={entry.phrase} />
+              <SceneImage path={entry.imagen} size={180} ancha />
             </View>
 
             <Text style={[styles.frase, sonando === 'en' && styles.sonando]}>
