@@ -16,12 +16,11 @@ import {
   Header,
   IconButton,
   LevelBadge,
-  RegistroBadge,
   RiskBadge,
   Screen,
 } from '@/components/base';
 import { hayImagen } from '@/components/card';
-import { HeroeFrase, ImagenSangre } from '@/components/detalle';
+import { EscalaRegistro, HeroeFrase, ImagenSangre } from '@/components/detalle';
 import { getEntry, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
@@ -104,13 +103,16 @@ export function DetailScreen() {
       <View style={styles.cuerpo}>
         <HeroeFrase entry={entry} />
 
-        <View style={styles.tags}>
-          <RiskBadge vulgaridad={entry.vulgaridad} />
-          <RegistroBadge registro={entry.registro} />
-          <LevelBadge nivel={entry.nivel} />
-          {entry.vigencia === 'efimera' ? (
-            <Badge label="Puede pasar de moda" tone="warn" small />
-          ) : null}
+        <View style={styles.fila}>
+          <EscalaRegistro registro={entry.registro} vulgaridad={entry.vulgaridad} />
+          <View style={styles.chips}>
+            <LevelBadge nivel={entry.nivel} />
+            {entry.vigencia === 'efimera' ? (
+              <Badge label="Puede pasar de moda" tone="warn" small />
+            ) : null}
+            {/* La vulgaridad 2 ya es el último paso de la escala; la 1 lleva su aviso aparte. */}
+            {entry.vulgaridad === 1 ? <RiskBadge vulgaridad={entry.vulgaridad} /> : null}
+          </View>
         </View>
 
         {entry.no_usar_cuando ? (
@@ -163,12 +165,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
   },
   cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.xl },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: space.xs,
-    marginTop: space.md,
-  },
+  fila: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, marginTop: space.xl },
+  chips: { alignItems: 'flex-end', gap: space.xs },
   warn: { marginTop: space.lg, gap: space.xs },
   warnHead: {
     fontSize: font.size.xs,

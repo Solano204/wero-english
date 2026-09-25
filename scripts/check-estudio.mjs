@@ -94,4 +94,37 @@ prueba('seguidas: un fallo (0) apaga el brillo y los valores raros no rompen', (
   assert.equal(nivelSeguidas(Number.POSITIVE_INFINITY), 0);
 });
 
+const { pasoRegistro, textoRegistro, PASOS_REGISTRO, PASO_EXPLICITO } = await cargar('src/domain/registro.ts');
+
+prueba('registro: cada registro cae en su paso y la vulgaridad 2 manda', () => {
+  assert.equal(PASOS_REGISTRO.length, 5);
+  assert.equal(PASO_EXPLICITO, 4);
+  assert.deepEqual(['formal', 'neutro', 'informal', 'muy_informal'].map((r) => pasoRegistro(r, 0)), [0, 1, 2, 3]);
+  assert.equal(pasoRegistro('informal', 1), 2, 'la vulgaridad 1 no mueve el paso (lleva su propio badge)');
+  for (const r of ['formal', 'informal', 'muy_informal']) assert.equal(pasoRegistro(r, 2), 4, r);
+  assert.equal(pasoRegistro('desconocido', 0), 1, 'un registro que no se conoce cae en Neutro');
+});
+
+prueba('registro: el texto para el lector de pantalla', () => {
+  assert.equal(textoRegistro(3), 'Registro: muy informal, 4 de 5');
+  assert.equal(textoRegistro(0), 'Registro: formal, 1 de 5');
+  assert.equal(textoRegistro(4), 'Registro: solo con amigos, 5 de 5');
+  assert.equal(textoRegistro(99), 'Registro: solo con amigos, 5 de 5', 'se acota');
+  assert.equal(textoRegistro(-2), 'Registro: formal, 1 de 5');
+});
+
+if (fs.existsSync(path.join(ROOT, 'assets/data/catalogo.json'))) {
+  prueba('registro: las 1,524 frases del catálogo caen en un paso válido', () => {
+    const { entries } = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/data/catalogo.json'), 'utf8'));
+    const cuenta = [0, 0, 0, 0, 0];
+    for (const e of entries) {
+      const p = pasoRegistro(e.registro, e.vulgaridad);
+      assert.ok(Number.isInteger(p) && p >= 0 && p <= 4, `id ${e.id}`);
+      cuenta[p]++;
+    }
+    assert.ok(cuenta.every((n) => n > 0), `todos los pasos se usan: ${cuenta.join(', ')}`);
+    console.log(`      pasos (formal a solo con amigos): ${cuenta.join(' · ')}`);
+  });
+}
+
 console.log(`\ncheck:estudio ${total} pruebas ok`);
