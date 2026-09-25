@@ -64,6 +64,9 @@ const TIPO2_SE_QUEDAN = {
   'src/screens/utility/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/games/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/components/list/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/components/fx/Espectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
+  'src/components/fx/Espectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/components/fx/Espectrograma.tsx:listaTexto': 'texto alternativo de la gráfica: una línea por día, información secundaria',
 };
 
 /** TIPO-4: estilos de 28 px o más que no son títulos, revisados a mano. */

@@ -14,13 +14,15 @@ import {
 } from '@/components/base';
 import { SectionTitle } from '@/components/list';
 import { PanelSenal } from '@/components/progreso/PanelSenal';
-import { maximo, ventana } from '@/components/progreso/datos';
+import { Espectrograma } from '@/components/fx';
+import { useVisto } from '@/components/fx/useVisibilidad';
+import { ventana } from '@/components/progreso/datos';
 import { getStats, type Stats } from '@/db/queries';
 import { getRecentDays } from '@/db/progress';
 import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore } from '@/store';
-import { color, font, radius, space } from '@/theme';
+import { color, font, motionEntrada, space } from '@/theme';
 import { dayKey } from '@/utils/date';
 import { conteo } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
@@ -62,9 +64,11 @@ export function ProgressScreen() {
     setPulsos((n) => n + 1);
   }, [carga.refrescar]);
 
-  const dias = useMemo(() => ventana(carga.datos?.dias ?? [], dayKey()), [carga.datos]);
-  const max = maximo(dias);
-  const sinDias = dias.every((d) => d.respuestas === 0);
+  const registrados = carga.datos?.dias ?? [];
+  const dias = useMemo(() => ventana(registrados, dayKey()), [registrados]);
+  // Sin días registrados, o ninguno dentro de las últimas tres semanas: nada de gráfica en ceros.
+  const sinDias = registrados.length === 0 || dias.every((d) => d.respuestas === 0);
+  const espectro = useVisto(scrollY);
 
   return (
     <Screen
@@ -84,30 +88,16 @@ export function ProgressScreen() {
                 <PanelSenal stats={stats} usuarioId={user?.id ?? null} entrada={primera} scrollY={scrollY} pulsos={pulsos} />
               ) : null}
 
-              <View style={styles.bloque}>
+              <Animated.View ref={espectro.ref} collapsable={false} onLayout={espectro.alAcomodar} style={styles.bloque}>
                 <SectionTitle title="Últimas tres semanas" variante="bloque" />
-                <Card style={styles.chart}>
-                  <View style={styles.bars}>
-                    {sinDias ? (
-                      <Text style={styles.noData}>Todavía no hay días registrados.</Text>
-                    ) : (
-                      dias.map((d) => (
-                        <View key={d.dia} style={styles.barSlot}>
-                          <View
-                            style={[
-                              styles.bar,
-                              {
-                                height: Math.max(4, (d.respuestas / max) * 88),
-                                backgroundColor: d.respuestas > 0 ? color.accent : color.surfaceHigh,
-                              },
-                            ]}
-                          />
-                        </View>
-                      ))
-                    )}
-                  </View>
+                <Card>
+                  {sinDias ? (
+                    <Text style={styles.noData}>Todavía no hay días registrados.</Text>
+                  ) : (
+                    <Espectrograma dias={dias} activo={espectro.visto} retraso={primera ? motionEntrada.espectro : 0} />
+                  )}
                 </Card>
-              </View>
+              </Animated.View>
 
               <View style={styles.bloque}>
                 <SectionTitle title="Detalle" variante="bloque" />
@@ -139,10 +129,6 @@ const styles = StyleSheet.create({
   // Entre bloques 32; dentro de un bloque 16 (ESP-2).
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
-  chart: { paddingVertical: space.lg },
-  bars: { flexDirection: 'row', alignItems: 'flex-end', height: 96, gap: space.xs },
-  barSlot: { flex: 1, justifyContent: 'flex-end' },
-  bar: { width: '100%', borderRadius: radius.sm / 4 },
   noData: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
   rows: { gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: space.md },

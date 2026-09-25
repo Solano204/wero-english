@@ -1,5 +1,6 @@
 export { AnilloMeta } from './AnilloMeta';
 export { BotonSenal } from './BotonSenal';
+export { Espectrograma } from './Espectrograma';
 export { FondoAurora } from './FondoAurora';
 export { FxSeguro } from './FxSeguro';
 export { Marcador } from './Marcador';
