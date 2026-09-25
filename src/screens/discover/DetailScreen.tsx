@@ -10,7 +10,6 @@ import { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Badge,
-  Card,
   Carga,
   EmptyState,
   Header,
@@ -20,7 +19,7 @@ import {
   Screen,
 } from '@/components/base';
 import { hayImagen } from '@/components/card';
-import { EscalaRegistro, HeroeFrase, ImagenSangre } from '@/components/detalle';
+import { Aparece, CuandoNoDecirla, EscalaRegistro, HeroeFrase, ImagenSangre } from '@/components/detalle';
 import { getEntry, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
@@ -116,10 +115,11 @@ export function DetailScreen() {
         </View>
 
         {entry.no_usar_cuando ? (
-          <Card style={styles.warn}>
-            <Text style={styles.warnHead}>Cuándo NO decirla</Text>
-            <Text style={styles.warnBody}>{entry.no_usar_cuando}</Text>
-          </Card>
+          <View style={styles.warn}>
+            <Aparece scrollY={scrollY}>
+              <CuandoNoDecirla texto={entry.no_usar_cuando} />
+            </Aparece>
+          </View>
         ) : null}
 
         {tieneVariantes ? (
@@ -167,20 +167,7 @@ const styles = StyleSheet.create({
   cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.xl },
   fila: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, marginTop: space.xl },
   chips: { alignItems: 'flex-end', gap: space.xs },
-  warn: { marginTop: space.lg, gap: space.xs },
-  warnHead: {
-    fontSize: font.size.xs,
-    color: color.riskWarn,
-    fontFamily: font.family.bodyStrong,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  warnBody: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.text,
-    lineHeight: font.size.md * 1.5,
-  },
+  warn: { marginTop: space.lg },
   block: { marginTop: space.lg, gap: space.xs },
   blockTitle: {
     fontSize: font.size.xs,
