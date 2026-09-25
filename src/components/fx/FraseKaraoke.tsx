@@ -16,10 +16,12 @@ const LEVANTE = 2;
 const ENTRADA_S = 0.08;
 const SALIDA_S = 0.12;
 
+type Tamano = 'display' | 'lg' | 'md';
+
 interface PalabraProps {
   palabra: Palabra;
   voz: VozEnVivo;
-  tamano: 'lg' | 'md';
+  tamano: Tamano;
 }
 
 function PalabraKaraoke({ palabra, voz, tamano }: PalabraProps) {
@@ -51,13 +53,14 @@ function PalabraKaraoke({ palabra, voz, tamano }: PalabraProps) {
     };
   });
 
-  return <Animated.Text style={[tamano === 'lg' ? styles.palabraLg : styles.palabraMd, estilo]}>{palabra.texto}</Animated.Text>;
+  return <Animated.Text style={[ESTILO_PALABRA[tamano], estilo]}>{palabra.texto}</Animated.Text>;
 }
 
 interface Props {
   palabras: Palabra[];
   voz: VozEnVivo;
-  tamano?: 'lg' | 'md';
+  /** `display` (34, la frase héroe de Detalle), `lg` (28, Estudio) o `md` (22). */
+  tamano?: Tamano;
 }
 
 /**
@@ -70,7 +73,7 @@ interface Props {
 export function FraseKaraoke({ palabras, voz, tamano = 'lg' }: Props) {
   const frase = palabras.map((p) => p.texto).join(' ');
   return (
-    <View style={[styles.fila, tamano === 'lg' ? styles.filaLg : styles.filaMd]} accessible accessibilityRole="text" accessibilityLabel={frase}>
+    <View style={styles.fila} accessible accessibilityRole="text" accessibilityLabel={frase}>
       {palabras.map((p, i) => (
         <PalabraKaraoke key={`${i}-${p.texto}`} palabra={p} voz={voz} tamano={tamano} />
       ))}
@@ -79,10 +82,15 @@ export function FraseKaraoke({ palabras, voz, tamano = 'lg' }: Props) {
 }
 
 const styles = StyleSheet.create({
-  fila: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline' },
   // El espacio entre palabras va como hueco de la fila y no como carácter: a los lados de cada renglón no sobra nada.
-  filaLg: { columnGap: space.sm },
-  filaMd: { columnGap: space.sm },
+  fila: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: space.sm },
+  palabraDisplay: {
+    fontSize: font.size.display,
+    letterSpacing: font.size.display * -0.015,
+    fontFamily: font.family.display,
+    lineHeight: font.size.display * 1.2,
+    color: ACTUAL,
+  },
   palabraLg: {
     fontSize: font.size.xxl,
     letterSpacing: font.size.xxl * -0.015,
@@ -97,3 +105,5 @@ const styles = StyleSheet.create({
     color: ACTUAL,
   },
 });
+
+const ESTILO_PALABRA = { display: styles.palabraDisplay, lg: styles.palabraLg, md: styles.palabraMd } as const;

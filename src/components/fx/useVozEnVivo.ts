@@ -18,6 +18,8 @@ export interface VozEnVivo {
   duracion: number;
   /** El último audio que arrancó fue el lento. */
   lenta: boolean;
+  /** Esta frase está sonando (queda en true hasta que termina de aplanarse la onda). */
+  sonando: boolean;
   /** El sistema pidió reducir movimiento: el karaoke cambia de color sin transiciones y la onda no se mueve. */
   reducido: boolean;
 }
@@ -36,10 +38,12 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
   const activa = useSharedValue(0);
   const [duracion, setDuracion] = useState(0);
   const [lenta, setLenta] = useState(false);
+  const [sonando, setSonando] = useState(false);
 
   useEffect(() => {
     if (!ruta || !vivo) return;
     let reloj: ReturnType<typeof setInterval> | null = null;
+    let apagar: ReturnType<typeof setTimeout> | null = null;
     let velocidad = 1;
     let arrancoEn = 0;
     let sono = false;
@@ -50,6 +54,9 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
         reloj = null;
       }
       activa.value = reducido ? 0 : withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir });
+      // `sonando` baja cuando la onda ya se aplanó, no antes: quien cambia de estilo por él no la corta.
+      if (apagar) clearTimeout(apagar);
+      apagar = setTimeout(() => setSonando(false), reducido ? 0 : motionDuration.base);
     };
 
     const muestrear = () => {
@@ -82,6 +89,8 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
       }
       velocidad = e.rate;
       setLenta(e.rate < 1);
+      setSonando(true);
+      if (apagar) clearTimeout(apagar);
       sono = false;
       arrancoEn = Date.now();
       cancelAnimation(pos);
@@ -94,11 +103,12 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
     return () => {
       dejarDeEscuchar();
       if (reloj) clearInterval(reloj);
+      if (apagar) clearTimeout(apagar);
       cancelAnimation(pos);
       cancelAnimation(activa);
       activa.value = 0;
     };
   }, [ruta, vivo, reducido, pos, activa]);
 
-  return { pos, activa, duracion, lenta, reducido };
+  return { pos, activa, duracion, lenta, sonando, reducido };
 }

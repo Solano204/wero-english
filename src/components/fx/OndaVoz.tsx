@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Canvas, LinearGradient, Path, Skia, vec, type SkPath, type SkSize } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { ENV_HZ } from '@/domain/marcas';
-import { motionDuration, motionEasing, senal } from '@/theme';
+import { color, motionDuration, motionEasing, senal } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { FxSeguro } from './FxSeguro';
 import type { VozEnVivo } from './useVozEnVivo';
@@ -69,14 +69,19 @@ function energiaEn(envolvente: number[], pos: number): number {
   return a + (b - a) * (x - i);
 }
 
+/** El tono de la onda cuando suena el español (Detalle): neutro, para distinguir los dos idiomas sin otro color de marca. */
+const NEUTRO: [string, string, string] = [color.textMuted, color.textMuted, color.textMuted];
+
 interface Props {
   voz: VozEnVivo;
   /** Energía de la voz de 0 a 1 (`analizar().envolvente`). */
   envolvente: number[];
   alto: number;
+  /** `senal` (el degradado de siempre) o `neutro` (`textMuted`, la voz en español). */
+  tono?: 'senal' | 'neutro';
 }
 
-function Barras({ voz, envolvente, alto }: Props) {
+function Barras({ voz, envolvente, alto, tono = 'senal' }: Props) {
   const { pos, activa, lenta } = voz;
   const reducido = useMovimientoReducido();
   const tam = useSharedValue<SkSize>({ width: 0, height: alto });
@@ -116,7 +121,7 @@ function Barras({ voz, envolvente, alto }: Props) {
   return (
     <Canvas style={[styles.lienzo, { height: alto }]} onSize={tam} pointerEvents="none" accessible={false}>
       <Path path={trazo} opacity={opacidad}>
-        <LinearGradient start={vec(0, 0)} end={fin} colors={senal} />
+        <LinearGradient start={vec(0, 0)} end={fin} colors={tono === 'neutro' ? NEUTRO : senal} />
       </Path>
     </Canvas>
   );

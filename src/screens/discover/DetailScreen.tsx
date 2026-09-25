@@ -20,8 +20,8 @@ import {
   RiskBadge,
   Screen,
 } from '@/components/base';
-import { PhraseBlock, hayImagen } from '@/components/card';
-import { ImagenSangre } from '@/components/detalle';
+import { hayImagen } from '@/components/card';
+import { HeroeFrase, ImagenSangre } from '@/components/detalle';
 import { getEntry, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
@@ -102,9 +102,7 @@ export function DetailScreen() {
       )}
 
       <View style={styles.cuerpo}>
-        <View style={styles.frase}>
-          <PhraseBlock entry={entry} size="lg" showSpanish />
-        </View>
+        <HeroeFrase entry={entry} />
 
         <View style={styles.tags}>
           <RiskBadge vulgaridad={entry.vulgaridad} />
@@ -139,8 +137,6 @@ export function DetailScreen() {
           />
         ) : null}
 
-        {entry.ipa_note ? <Block title="Pronunciación" body={entry.ipa_note} /> : null}
-
         <Block
           title="Dónde vive"
           body={`${entry.block} · ${entry.mundo}`}
@@ -167,7 +163,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
   },
   cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.xl },
-  frase: { alignItems: 'center' },
   tags: {
     flexDirection: 'row',
     flexWrap: 'wrap',

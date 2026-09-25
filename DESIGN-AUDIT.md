@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 213 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 215 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -85,7 +85,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/fx/HojaVeredicto.tsx:171`
 - `src/components/fx/MedidorVU.tsx:99`
 - `src/components/fx/OndaSenal.tsx:53`
-- `src/components/fx/OndaVoz.tsx:119`
+- `src/components/fx/OndaVoz.tsx:124`
 - `src/components/fx/PortadaJuego.tsx:93`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
 - `src/navigation/TabNavigator.tsx:122`
@@ -279,7 +279,7 @@ Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pi
 **Audios vacíos** (empaquetados, pero de menos de 1000 bytes: `isBundled` dice que existen, así que su botón se pinta **activo** y falla en silencio):
 - (ninguno)
 
-Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `screens/extras/GramaticaTemaScreen.tsx` 5, `components/list/EntryRow.tsx` 4, `components/card/BloqueVoz.tsx` 3, `components/card/PhraseBlock.tsx` 3, `screens/extras/PronunciationScreen.tsx` 3, `screens/games/CazalaScreen.tsx` 3, `screens/extras/ContractionsScreen.tsx` 2, `screens/extras/ErrorDetailScreen.tsx` 2, `screens/extras/MinimalPairsScreen.tsx` 1, `screens/games/DulcesScreen.tsx` 1.
+Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `screens/extras/GramaticaTemaScreen.tsx` 5, `components/list/EntryRow.tsx` 4, `components/card/BloqueVoz.tsx` 3, `components/card/PhraseBlock.tsx` 3, `components/detalle/HeroeFrase.tsx` 3, `screens/extras/PronunciationScreen.tsx` 3, `screens/games/CazalaScreen.tsx` 3, `screens/extras/ContractionsScreen.tsx` 2, `screens/extras/ErrorDetailScreen.tsx` 2, `screens/extras/MinimalPairsScreen.tsx` 1, `screens/games/DulcesScreen.tsx` 1.
 
 ## e) Movimiento
 
