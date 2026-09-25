@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSharedValue } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, ErrorCarga, ProgressBar, Screen, Skeleton } from '@/components/base';
 import { FondoAurora } from '@/components/fx';
@@ -16,6 +18,7 @@ import { PORTADA_JUEGO, color, font, radius, shadow, space, text } from '@/theme
 import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
+import { EncabezadoPracticar, ALTO_ENCABEZADO } from './practicar/EncabezadoPracticar';
 import { FilaModo } from './practicar/FilaModo';
 import { GrupoPlegable } from './practicar/GrupoPlegable';
 import { ORDEN, elegirDestacados, elegirHoy, type ModoId, type MotivoHoy, type Uso } from './practicar/hoy';
@@ -74,6 +77,8 @@ function etiquetaHoy(
  */
 export function PracticeScreen() {
   const nav = useNavigation<Nav>();
+  const { top } = useSafeAreaInsets();
+  const scrollY = useSharedValue(0);
   const user = useAuthStore((s) => s.user);
   const abiertos = useSettingsStore((s) => s.practicarGruposAbiertos);
   const guardarAjuste = useSettingsStore((s) => s.set);
@@ -157,10 +162,16 @@ export function PracticeScreen() {
   };
 
   return (
-    <Screen scroll fondo={<FondoAurora />}>
+    <Screen
+      scroll
+      edges={['bottom']}
+      scrollY={scrollY}
+      fondo={<FondoAurora />}
+      encabezado={<EncabezadoPracticar scrollY={scrollY} racha={racha} />}
+      style={{ paddingTop: top + ALTO_ENCABEZADO }}
+    >
       <View style={styles.bloques}>
         <View style={styles.bloque}>
-          <Text style={styles.title}>Practicar</Text>
           {carga.estado === 'error' ? (
             <ErrorCarga onReintentar={carga.reintentar} />
           ) : (
@@ -278,12 +289,6 @@ const styles = StyleSheet.create({
   // Entre bloques 32; dentro de un bloque 16 (ESP-2).
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
-  title: {
-    fontSize: font.size.xxl,
-    letterSpacing: font.size.xxl * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-  },
   // La única superficie de color de la app (ver tokens.ts, decisión 5).
   hoy: {
     backgroundColor: color.contraste,

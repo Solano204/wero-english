@@ -1,5 +1,6 @@
 import React, { useContext, type ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, View, type ScrollViewProps, type ViewStyle } from 'react-native';
+import Animated, { useAnimatedScrollHandler, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,6 +16,18 @@ interface Props {
   footer?: ReactNode;
   /** Luz de escena detrás del contenido (p. ej. la aurora de Practicar). No recibe toques. */
   fondo?: ReactNode;
+  /** Encabezado que flota sobre el scroll (p. ej. el título que se comprime). Recibe toques solo en sus hijos. */
+  encabezado?: ReactNode;
+  /** Si viene, el scroll escribe aquí su desplazamiento en el hilo de UI, sin pasar por JS. */
+  scrollY?: SharedValue<number>;
+}
+
+/** Scroll que publica su desplazamiento en un valor compartido. Solo existe si una pantalla lo pide. */
+function ScrollAnimado({ y, ...props }: ScrollViewProps & { y: SharedValue<number> }) {
+  const alDesplazar = useAnimatedScrollHandler((e) => {
+    y.value = e.contentOffset.y;
+  });
+  return <Animated.ScrollView {...props} onScroll={alDesplazar} scrollEventThrottle={16} />;
 }
 
 /**
@@ -35,6 +48,8 @@ export function Screen({
   style,
   footer,
   fondo,
+  encabezado,
+  scrollY,
 }: Props) {
   const inner: ViewStyle = padded ? { padding: layout.screenPad } : {};
 
@@ -95,19 +110,36 @@ export function Screen({
       />
       {fondo}
       {scroll ? (
-        <ScrollView
-          style={styles.flex}
-          contentContainerStyle={[inner, { paddingBottom: huecoAbajo }, style]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {children}
-        </ScrollView>
+        scrollY ? (
+          <ScrollAnimado
+            y={scrollY}
+            style={styles.flex}
+            contentContainerStyle={[inner, { paddingBottom: huecoAbajo }, style]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollAnimado>
+        ) : (
+          <ScrollView
+            style={styles.flex}
+            contentContainerStyle={[inner, { paddingBottom: huecoAbajo }, style]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
+        )
       ) : (
         <View style={[styles.flex, inner, { paddingBottom: huecoAbajo }, style]}>
           {children}
         </View>
       )}
+      {encabezado ? (
+        <View style={styles.encabezado} pointerEvents="box-none">
+          {encabezado}
+        </View>
+      ) : null}
       {footer ? <View style={styles.footer}>{footer}</View> : null}
     </SafeAreaView>
   );
@@ -124,6 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 180,
   },
   flex: { flex: 1 },
+  encabezado: { position: 'absolute', top: 0, left: 0, right: 0 },
   footer: {
     paddingHorizontal: layout.screenPad,
     paddingTop: space.md,
