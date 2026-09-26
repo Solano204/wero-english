@@ -121,6 +121,12 @@ La misma acción se llama igual en toda la app.
 | Los tres pasos de un error | «Lo que dices», «Lo que entienden», «Lo correcto»; «Ver otra vez»; «Por qué pasa» | Incorrecto, Interpretación, Solución, Repetir |
 | El duelo de un error de pronunciación | «Así suena mal» y «Así suena bien» | Incorrecto, Correcto, Versus |
 | Sacar un error de la app | «Compartir» (menú del sistema); la etiqueta «Para contar» | Enviar, Publicar, Viral |
+| Quitar una frase de Mi mazo | «Quitar de mi mazo» (al mantener presionado y para el lector); el aviso «Quitada de tu mazo» con «Deshacer»; la cuenta «N guardadas» | Eliminar, Borrar, Desguardar |
+| Un mazo sin frases | «Tu mazo está vacío», «Toca la estrella en cualquier frase para guardarla aquí.» y «Ir a Frases sueltas» | Sin favoritos, Vacío |
+| Los fallos de una frase atorada | «N fallos» («1 fallo»); el lector oye «4 fallos» | Intentos fallidos, Errores |
+| Una frase que dejó de atorarse | «Ya no se te atora» | Superada, Resuelta, Aprobada |
+| Cuando no hay atoradas | «Ninguna por ahora» | Sin errores, Todo bien |
+| Llegar a las atoradas desde Hoy o Progreso | «Corregir N errores» abre Se me atoran; ahí no hay otro botón principal | Repasar las atoradas, Reintentar |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 

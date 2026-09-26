@@ -114,7 +114,7 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 
 Activar en Android: Ajustes > Accesibilidad > Quitar animaciones.
 
-- [ ] Repetir las secciones a) a g), j), k) y l) con la opción activa; nada debe romperse ni quedar sin mostrar
+- [ ] Repetir las secciones a) a g), j), k), l), m) y n) con la opción activa; nada debe romperse ni quedar sin mostrar
 - [ ] Botones, tarjetas, filas y pestañas: al tocar no escalan, solo bajan a 70 % de opacidad
 - [ ] Acierto: sin pulso ni cubitos; el verde sí aparece y siguen el háptico y el sonido
 - [ ] Fallo: sin temblor; el ámbar sí aparece y siguen el háptico y el sonido
@@ -189,6 +189,33 @@ Marcas de oración de Polly: sin ellas el seguimiento del audio es una estimaci�
 - [ ] Ningún rojo salvo lenguaje explícito: el error de un campo (contraseña mal escrita), «Borrar mi cuenta», los mensajes de error de arranque y descargas y el chequeo fallido de Diagnóstico se ven en ámbar, y el texto del botón «Borrar mi cuenta» se lee sobre el ámbar
 - [ ] 360 px y fuente grande: las tarjetas de la lista no se cortan (el medidor baja su etiqueta a dos líneas), los chips se pueden tocar y el duelo apila su texto sin encimarse
 - [ ] Consola: entrar a la lista, cambiar filtros, abrir varios detalles y usar «Ver otra vez» sin ningún aviso de Reanimated ni de Skia
+
+## m) Mi mazo
+
+- [ ] Detalle con traducción larga: abre una frase con traducción larga (por ejemplo «She's been working here for three years» o cualquiera de las de más de 60 caracteres) en el Detalle y en Estudio: la traducción baja a otra línea y el botón de audio se ve completo, sin cortarse
+- [ ] Mazo con 2 frases: arriba «2 guardadas» con el número rodando; cada tarjeta lleva la frase en h3, la traducción, Inglés · Español y un chevron; tocar la frase la reproduce con karaoke y tocar fuera de los controles abre el Detalle
+- [ ] Mazo con 30 frases: scrollea fluido, las primeras 8 entran escalonadas y el resto directo; el audio de una tarjeta no enciende otra
+- [ ] Quitar deslizando: despacio a la izquierda aparece «Quitar» con la estrella en ámbar; pasando ~1.5 cm y soltando la tarjeta se va, las de abajo suben con resorte, «N guardadas» baja y aparece «Quitada de tu mazo · Deshacer» con una barra que se vacía en 5 s; con menos, la tarjeta regresa con resorte; a la derecha apenas cede; el scroll vertical de la lista no se traba con el gesto
+- [ ] Deshacer: la tarjeta vuelve a su lugar con una entrada, el contador sube y la frase sigue guardada al salir y volver; quitar otra antes de los 5 s confirma la anterior; sin tocar nada el aviso se va a los 5 s y la frase queda quitada (en su Detalle la estrella está apagada)
+- [ ] Mantener presionada una tarjeta muestra el botón «Quitar de mi mazo» y hace lo mismo que deslizar
+- [ ] Mazo vacío: quitar la última muestra el vacío («Tu mazo está vacío…» y «Ir a Frases sueltas») con el aviso todavía; «Deshacer» la regresa; el botón lleva a Frases sueltas; entrar con el mazo vacío muestra lo mismo
+- [ ] Reducir movimiento: sin deslizamiento ni resorte, el aviso aparece con un fundido y sin barra, y se quita con el botón de mantener presionado
+- [ ] TalkBack: cada tarjeta se lee «frase. traducción» y ofrece las acciones «Quitar de mi mazo», «Escuchar en inglés» y «Escuchar en español»; el aviso se anuncia solo y «Deshacer» se enfoca
+- [ ] 360 px y fuente grande: la tarjeta cabe, el grupo Inglés · Español no se sale y el chevron no se corta
+- [ ] Consola: deslizar, quitar y deshacer varias veces sin ningún aviso de Reanimated ni de Gesture Handler
+
+## n) Se me atoran
+
+- [ ] Con 1 atorada: una tarjeta con su medidor («3 fallos» debajo de 3 puntos encendidos), la nota «Sin cronómetro ni calificación. Léelas, escúchalas y ya.» arriba y «1 frase» de subtítulo
+- [ ] Con 6 atoradas: van por fallos, las de 5 o más arriba y algo más grandes; una con más de 5 fallos dice el número real («7 fallos») con los 5 puntos encendidos; el audio es Inglés · Español y tocar la frase la reproduce
+- [ ] Una frase que se destrabó desde la última visita: domina en Estudio una frase atorada y vuelve a Se me atoran; arriba aparece «Ya no se te atora» con sus puntos apagándose uno por uno, el destello verde, y la tarjeta sube y se va sin que la lista de abajo salte; volver a entrar no la repite
+- [ ] Varias destrabadas (hasta 3): van una tras otra, cada una un poco después de la anterior
+- [ ] Corregir: el botón «Corregir N errores» de Hoy (y el de Progreso) abre esta pantalla; aquí no hay botón principal en el pie
+- [ ] Lista vacía: el check en verde y «Ninguna por ahora»; si acaba de destrabarse la última, primero la animación y debajo el vacío
+- [ ] Reducir movimiento: sin animación de desatorar; la tarjeta aparece con los puntos ya apagados, la etiqueta entra con un fundido y se retira sola a los ~2.5 s
+- [ ] TalkBack: el medidor dice «4 fallos»; la tarjeta dice frase, traducción y fallos y ofrece «Escuchar en inglés» y «Escuchar en español»; «Ya no se te atora» se anuncia
+- [ ] 360 px y fuente grande: la tarjeta con su medidor no se corta ni se encima
+- [ ] Consola: entrar, abrir un Detalle y volver, y ver una desatorada sin ningún aviso de Reanimated
 
 ## Cómo reportar
 
