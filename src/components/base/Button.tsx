@@ -30,6 +30,8 @@ interface BaseProps {
   iconAlFinal?: boolean;
   /** Reemplaza al ícono por algo propio (una estrella que se anima). Va donde iría `icon` y sigue `iconAlFinal`. */
   iconNode?: ReactNode;
+  /** Algo propio después del texto (un contador que rueda). Es decorativo: el lector oye `accessibilityLabel`. */
+  sufijo?: ReactNode;
   style?: ViewStyle;
   /** Capa decorativa detrás de la etiqueta, recortada por el borde del botón (reflejo, onda). */
   fondo?: ReactNode;
@@ -65,6 +67,7 @@ export function Button({
   icon,
   iconAlFinal = false,
   iconNode,
+  sufijo,
   style,
   fondo,
   onPressIn,
@@ -117,6 +120,7 @@ export function Button({
               {label}
             </Text>
           ) : null}
+          {sufijo}
           {iconAlFinal ? glifo : null}
         </View>
       )}
