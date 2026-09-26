@@ -100,6 +100,10 @@ La misma acción se llama igual en toda la app.
 | Un tema de Gramática que abre con un anuncio | «Anuncio» (con el candado, en la lista); dentro del tema, «Ver anuncio y abrir» | Premium, Bloqueado, Con anuncio |
 | El nivel de un tema de Gramática | Las barras del medidor; para el lector «Nivel 2 de 5»; la leyenda «Más barras, más avanzado» | N2, Dificultad, Básico/Avanzado |
 | Repetir la corrección de una frase de Gramática | «Ver otra vez»; la sección se llama «El error que se corrige»; el lector oye «Incorrecta: … Correcta: …» | Repetir, Reproducir otra vez, Error típico |
+| Buscar en Phrasal verbs | «Busca un verbo o una partícula»; sin resultados, «Ningún verbo coincide con «x»» y «Borrar búsqueda» | Filtrar, Sin resultados, Limpiar |
+| Cuántas frases tiene un verbo | «14 formas» (con una sola, «1 forma») | 14 frases, 14 usos, 14 variantes |
+| Elegir la partícula de un verbo | La ruleta («Partícula de get»), los chips «Todas las formas de get» y «N de 14» arriba; una partícula repetida va «out (1)» y «out (2)» | Carrusel, Selector, Página 1 de 14 |
+| Los botones de audio de una forma de Phrasal verbs | «Escuchar» y «Lento» en la frase; «Inglés», «Lento» y «Español» en el ejemplo; en el significado, el lector oye «Escuchar el significado en español» | Reproducir, Play |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
