@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 250 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 253 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -66,11 +66,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - (ninguno)
 
 **Excepción revisada a mano (no cuenta):**
-- `src/screens/games/DulcesScreen.tsx:668` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
-- `src/screens/games/DulcesScreen.tsx:669` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
-- `src/screens/games/DulcesScreen.tsx:670` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
-- `src/screens/games/DulcesScreen.tsx:671` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
-- `src/screens/games/DulcesScreen.tsx:672` — las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse
+- (ninguno)
 
 **COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (`gradiente.neutro`). El degradado de la señal (`senal`) va de `accent900` a `accent100`, sin hex nuevos, y `npm run check:color` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: `filoLuz` mezcla blanco y cian, y `FONDO`. Usos de `<LinearGradient`:
 - `src/components/base/Card.tsx:116`
@@ -90,6 +86,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/juegos/caida/HojaPausa.tsx:122`
 - `src/components/juegos/caida/PisoResplandor.tsx:77`
 - `src/components/juegos/caida/PistaCaida.tsx:62`
+- `src/components/juegos/dulces/SimboloPieza.tsx:52`
 - `src/components/juegos/pares/CableSenal.tsx:388`
 - `src/components/niveles/CeldaNivel.tsx:130`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
@@ -125,9 +122,9 @@ Se quedan en 12–13 px, revisados a mano (17):
 - `src/screens/extras/LecturaScreen.tsx:310` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/extras/LecturasScreen.tsx:236` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
 - `src/screens/games/ColmenaScreen.tsx:610` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:688` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/games/DulcesScreen.tsx:711` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:754` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/DulcesScreen.tsx:686` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
+- `src/screens/games/DulcesScreen.tsx:696` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:739` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/GameEndScreen.tsx:249` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/GameEndScreen.tsx:255` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
@@ -224,7 +221,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/CaidaScreen.tsx` | ✓ `:211` | ✓ `:487` | ✓ `:174` |
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
-| `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
+| `games/DulcesScreen.tsx` | ✓ `:152` | ✓ `:477` | ✓ `:457` |
 | `games/NivelesScreen.tsx` | ✓ `:84` | ✗ | ✓ `:300` |
 | `games/ParesScreen.tsx` | ✓ `:193` | ✓ `:384` | ✓ `:360` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |

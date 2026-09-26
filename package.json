@@ -27,6 +27,7 @@
     "check:niveles": "node scripts/check-niveles.mjs",
     "check:pares": "node scripts/check-pares.mjs",
     "check:caida": "node scripts/check-caida.mjs",
+    "check:dulces": "node scripts/check-dulces.mjs",
     "check:srs": "node scripts/check-srs.mjs",
     "reinstala": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps"
   },

@@ -6,6 +6,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
+import { Pieza } from '@/components/juegos/dulces/Pieza';
+import { CaraPieza, tinteDe } from '@/components/juegos/dulces/SimboloPieza';
 import { Trozos, useReaccion } from '@/components/feedback';
 import {
   clone,
@@ -52,9 +54,13 @@ const AVANZAR_DEBOUNCE_MS = 400;
 /** Entre matches muy seguidos, no suena más de una voz cada tanto. */
 const VOZ_MATCH_THROTTLE_MS = 700;
 
-/** El lado de la pieza depende de cuántas columnas pida el nivel. */
+/**
+ * El lado de la pieza depende de cuántas columnas pida el nivel. El tablero usa casi todo el ancho (márgenes
+ * y huecos de `space.xs`) para acercarse a los 48 dp: con 8 columnas en un teléfono de 360 dp salen de 42 y el
+ * área táctil se completa con `hitSlop` (ver `Pieza`).
+ */
 function ladoPara(cols: number): number {
-  return Math.floor((ANCHO - space.lg * 2 - (cols - 1) * 4) / cols);
+  return Math.floor((ANCHO - space.xs * 2 - (cols - 1) * space.xs) / cols);
 }
 
 /**
@@ -568,12 +574,12 @@ export function DulcesScreen() {
           <View style={styles.metas}>
             {objetivos.map((o) => (
               <View key={o.color} style={styles.meta}>
-                {/* El punto usa el MISMO tinte que las fichas de ese
-                    color en el tablero. Si no coinciden, el usuario no
-                    puede saber qué barra está llenando. */}
-                <View
-                  style={[styles.punto, { backgroundColor: TINTES[o.color] }]}
-                />
+                {/* La pieza pequeña es la MISMA de ese color en el tablero, con su
+                    forma: si no coinciden, el usuario no puede saber qué barra
+                    está llenando (y sin distinguir colores, menos aún). */}
+                <View style={styles.simbolo}>
+                  <CaraPieza color={o.color} lado={LADO_SIMBOLO} />
+                </View>
                 <View style={styles.metaCuerpo}>
                   <Text style={styles.metaFrase} numberOfLines={2}>
                     {o.entry.phrase}
@@ -581,7 +587,7 @@ export function DulcesScreen() {
                   <ProgressBar
                     value={Math.min(o.llevas, o.meta)}
                     total={o.meta}
-                    tint={TINTES[o.color]}
+                    tint={tinteDe(o.color).medio}
                     height={4}
                   />
                 </View>
@@ -591,23 +597,20 @@ export function DulcesScreen() {
 
           <View style={styles.tablero}>
             {board.cells.map((c, i) => (
-              <Presionable
+              <Pieza
                 // La clave incluye el color: cuando una pieza cambia de
                 // color tras una cascada, React la trata como pieza
                 // nueva y reanimated le corre la entrada. Sin eso el
                 // tablero se recolorea de golpe y no se ve caer nada.
                 key={`c-${i}-${c}`}
+                color={c}
+                fila={Math.floor(i / COLS)}
+                col={i % COLS}
+                lado={LADO}
+                elegida={elegida === i}
                 entering={aparecerZoom(escalon(i % COLS))}
                 layout={reacomodar()}
                 onPress={() => tocar(i)}
-                accessibilityRole="button"
-                accessibilityLabel="Pieza"
-                style={[
-                  styles.pieza,
-                  { width: LADO, height: LADO },
-                  { backgroundColor: TINTES[c] ?? color.surfaceHigh },
-                  elegida === i && styles.piezaElegida,
-                ]}
               />
             ))}
           </View>
@@ -664,13 +667,8 @@ function mejorColor(
   return mejor;
 }
 
-const TINTES: string[] = [
-  color.world.calle,
-  color.world.dia_a_dia,
-  color.world.dinero,
-  color.world.cultura,
-  color.world.fonetica,
-];
+/** El lado de la pieza pequeña que va junto a cada meta. */
+const LADO_SIMBOLO = 28;
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
@@ -683,28 +681,15 @@ const styles = StyleSheet.create({
   medioContenido: { paddingBottom: space.sm },
   metas: { paddingHorizontal: space.lg, gap: space.sm, marginBottom: space.md },
   meta: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  punto: { width: 12, height: 12, borderRadius: 6 },
+  simbolo: { width: LADO_SIMBOLO, height: LADO_SIMBOLO },
   metaCuerpo: { flex: 1, gap: space.xs },
   metaFrase: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   tablero: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
-    paddingHorizontal: space.lg,
+    gap: space.xs,
+    paddingHorizontal: space.xs,
     justifyContent: 'center',
-  },
-  pieza: {
-    borderRadius: radius.sm,
-    borderBottomWidth: depth.md,
-    // Sobre tinta el canto se hunde con negro, no con tinta translucida:
-    // un 12% de tinta sobre un fondo ya oscuro no se ve.
-    borderBottomColor: color.biselSombra,
-    ...shadow.soft,
-  },
-  piezaElegida: {
-    borderWidth: 3,
-    borderColor: color.text,
-    borderBottomWidth: 3,
   },
   pieNota: {
     fontFamily: font.family.body,

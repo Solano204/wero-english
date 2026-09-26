@@ -226,6 +226,30 @@ export const filoWrong: [string, string, string] = [
   'rgba(242, 179, 61, 0.30)',
 ];
 
+/**
+ * Las piezas de Dulces: contenido de juego, no marca (la excepción de `TINTES` del audit). Seis tintes, los
+ * cinco de siempre (`calle`, `dia_a_dia`, `dinero`, `cultura`, `fonetica`) y `tech` para los niveles de seis
+ * colores. Cada pieza es un degradado del MISMO tono (COLOR-2): el claro donde da el sol (arriba a la
+ * izquierda), el medio y el oscuro. La luminosidad del medio (OKLCH ~0.55) es la que deja el símbolo blanco al
+ * 70 % a 3.2:1 de contraste, para poder jugar solo con las formas (daltonismo); el croma y el tono son los de
+ * `color.world`. Se calcularon en OKLCH con `luminosidad -0.07 / +0.06` alrededor del medio.
+ */
+export const pieza = {
+  /** El símbolo de cada pieza: blanco al 70 %. */
+  simbolo: 'rgba(255, 255, 255, 0.7)',
+  /** El brillo del sol arriba a la izquierda: blanco que se apaga. */
+  brillo: 'rgba(255, 255, 255, 0.26)',
+  brilloFin: 'rgba(255, 255, 255, 0)',
+  tintes: [
+    { claro: '#BC7037', medio: '#A95E23', oscuro: '#924A03' },
+    { claro: '#4D86CA', medio: '#3B73B6', oscuro: '#265EA0' },
+    { claro: '#5F9043', medio: '#4E7E30', oscuro: '#3A691A' },
+    { claro: '#887ACA', medio: '#7768B6', oscuro: '#6353A0' },
+    { claro: '#848823', medio: '#737601', oscuro: '#5E6102' },
+    { claro: '#00918E', medio: '#007E7B', oscuro: '#006765' },
+  ],
+} as const;
+
 /** El resplandor del piso de Caída: del aire (arriba) al `accent` al 40 % (abajo). Nunca rojo ni ámbar: todavía no ha pasado nada. */
 export const resplandorPiso: [string, string] = ['rgba(69, 217, 255, 0)', 'rgba(69, 217, 255, 0.4)'];
 
