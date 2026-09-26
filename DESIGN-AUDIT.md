@@ -86,7 +86,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipograf√≠a, jerarqu√
 - `src/components/juegos/caida/HojaPausa.tsx:120`
 - `src/components/juegos/caida/PisoResplandor.tsx:77`
 - `src/components/juegos/caida/PistaCaida.tsx:62`
-- `src/components/juegos/colmena/Hexagono.tsx:349`
+- `src/components/juegos/colmena/Hexagono.tsx:354`
 - `src/components/juegos/dulces/HojaPregunta.tsx:161`
 - `src/components/juegos/dulces/SimboloPieza.tsx:52`
 - `src/components/juegos/pares/CableSenal.tsx:388`

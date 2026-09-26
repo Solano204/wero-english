@@ -179,6 +179,8 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   const destello = useSharedValue(0);
   const caida = useSharedValue(0);
   const [sacude, setSacude] = useState(false);
+  // La capa del destello ámbar solo se monta si esta ficha llega a equivocarse: 26 SVG menos en reposo.
+  const [conAviso, setConAviso] = useState(false);
 
   // Al armarse el panal: cada ficha crece y se aclara con el escalón de su distancia al centro.
   useEffect(() => {
@@ -239,6 +241,7 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   // Una letra que no va: llega, rebota de regreso y destella en ámbar.
   useEffect(() => {
     if (!rechazo) return undefined;
+    setConAviso(true);
     setSacude(true);
     const t = setTimeout(() => setSacude(false), motionDuration.base);
     vx.value = rechazo.dx;
@@ -322,20 +325,22 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
         />
       ) : null}
 
-      <Animated.View pointerEvents="none" style={[styles.abs, styles.llena, aviso]}>
-        <Svg width={ancho} height={alto}>
-          <Polygon
-            points={puntosHexagono(ancho, alto, FILO / 2)}
-            fill={color.wrongSoft}
-            stroke={color.wrong}
-            strokeWidth={FILO}
-            strokeLinejoin="round"
-          />
-        </Svg>
-        <View style={styles.icono}>
-          <Icon name="close" size="sm" color={color.wrong} />
-        </View>
-      </Animated.View>
+      {conAviso ? (
+        <Animated.View pointerEvents="none" style={[styles.abs, styles.llena, aviso]}>
+          <Svg width={ancho} height={alto}>
+            <Polygon
+              points={puntosHexagono(ancho, alto, FILO / 2)}
+              fill={color.wrongSoft}
+              stroke={color.wrong}
+              strokeWidth={FILO}
+              strokeLinejoin="round"
+            />
+          </Svg>
+          <View style={styles.icono}>
+            <Icon name="close" size="sm" color={color.wrong} />
+          </View>
+        </Animated.View>
+      ) : null}
 
       <Animated.Text allowFontScaling={false} style={[styles.letra, { lineHeight: alto, color: paleta.letra }, texto]}>
         {letra}
