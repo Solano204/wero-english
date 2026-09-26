@@ -20,6 +20,8 @@ interface Props {
   onFin: () => void;
   /** Congela la cuenta: mientras se oye la voz de un par, antes de que caiga la última ficha y al resolver el tablero. */
   pausado?: boolean;
+  /** Lo que dice el lector de pantalla; en Colmena es el reloj de la ronda, no el del tablero. */
+  etiqueta?: string;
 }
 
 /**
@@ -29,7 +31,7 @@ interface Props {
  * en el hilo de UI. El latido es un bucle que se pausa sin foco, en segundo plano, con el
  * reloj en pausa y con reducir movimiento (queda la barra fija en `accent`).
  */
-export function RelojRonda({ segundos, llave, onFin, pausado = false }: Props) {
+export function RelojRonda({ segundos, llave, onFin, pausado = false, etiqueta = 'Reloj del tablero' }: Props) {
   const { activo, reducido } = useSenalActiva();
   const avance = useCuentaRegresiva({ segundos, llave, onFin, pausado });
 
@@ -53,7 +55,7 @@ export function RelojRonda({ segundos, llave, onFin, pausado = false }: Props) {
   });
 
   return (
-    <View style={styles.fila} accessible accessibilityRole="timer" accessibilityLabel="Reloj del tablero">
+    <View style={styles.fila} accessible accessibilityRole="timer" accessibilityLabel={etiqueta}>
       <Icon name="clock" size="sm" color={color.textMuted} />
       <View style={styles.pista}>
         <Animated.View style={[styles.relleno, barra]} />

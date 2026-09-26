@@ -405,6 +405,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/pares/') || r === 'src/screens/games/ParesScreen.tsx' ||
   r.startsWith('src/components/juegos/caida/') || r === 'src/screens/games/CaidaScreen.tsx' ||
   r.startsWith('src/components/juegos/dulces/') || r === 'src/screens/games/DulcesScreen.tsx' ||
+  r.startsWith('src/components/juegos/colmena/') || r === 'src/screens/games/ColmenaScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -427,6 +428,8 @@ const LOOPS_POR_PANTALLA = {
   Caida: [],
   // Dulces: las partículas de los trozos son un canvas de Skia (`Estallidos`) que solo dibuja mientras vuela alguna; no hay bucle propio.
   Dulces: [],
+  // Colmena: el héroe es el panal (fichas SVG movidas por valores compartidos) y la onda de la voz (`OndaVoz`) la mueve el audio; ningún bucle de Skia.
+  Colmena: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

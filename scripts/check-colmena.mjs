@@ -20,7 +20,7 @@ const cargar = async (rel, sustituir = (s) => s) => {
 const G = await cargar('src/components/juegos/colmena/geometria.ts');
 const { formaPalabras } = await cargar('src/utils/text.ts');
 const { normaliza } = await cargar('src/domain/colmena.ts', (s) => s.replace(/import \{ shuffle \} from '@\/utils\/array';/, 'const shuffle = (a) => a;'));
-const { distribuirRanuras, disposicionPanal, ordenDesdeCentro, fichasParaCompletar, retrasoVuelo, etiquetaRanura } = G;
+const { distribuirRanuras, disposicionPanal, ordenDesdeCentro, fichasParaCompletar, retrasoVuelo, etiquetaRanura, puntosHexagono } = G;
 
 let total = 0;
 const prueba = (nombre, fn) => {
@@ -184,6 +184,19 @@ prueba('panal: las filas alternan y se acomodan sobre la misma retícula', () =>
       }
     }
   }
+});
+
+prueba('puntosHexagono: seis vértices con punta arriba, simétricos y dentro de la caja', () => {
+  const puntos = puntosHexagono(20, 23).split(' ').map((p) => p.split(',').map(Number));
+  assert.equal(puntos.length, 6);
+  assert.deepEqual(puntos[0], [10, 0]);
+  assert.deepEqual(puntos[3], [10, 23]);
+  for (const [x, y] of puntos) assert.ok(x >= 0 && x <= 20 && y >= 0 && y <= 23);
+  assert.equal(puntos[1][0], 20);
+  assert.equal(puntos[5][0], 0);
+  assert.ok(Math.abs(puntos[1][1] - (23 - puntos[2][1])) < 0.02, 'simétrico de arriba abajo');
+  const adentro = puntosHexagono(20, 23, 1).split(' ').map((p) => p.split(',').map(Number));
+  assert.ok(adentro.every(([x, y]) => x >= 1 && x <= 19 && y >= 1 && y <= 22), 'el margen los mete hacia adentro');
 });
 
 prueba('panal: el orden del centro hacia afuera es una permutación y empieza por el más central', () => {

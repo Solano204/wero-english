@@ -3,8 +3,10 @@ import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Icon, ProgressBar, RoundTimer, Screen, Presionable } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, useEfectoResultado } from '@/components/feedback';
+import { ProgresoHex } from '@/components/juegos/colmena/ProgresoHex';
+import { RelojRonda } from '@/components/juegos/pares/RelojRonda';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -313,6 +315,9 @@ export function ColmenaScreen() {
 
   if (!round) return null;
 
+  // Todos los niveles traen reloj (de 22 a 60 s por ronda); sin él no hay barra.
+  const tieneReloj = nv !== null && nv.segundosRonda > 0;
+
   const puedePista =
     !resuelta && pistas > 0 && armado.length < round.objetivo.length;
 
@@ -366,24 +371,17 @@ export function ColmenaScreen() {
     >
       <Trozos disparo={reaccion.trozos} tinte={color.world.fonetica} x="50%" y="50%" />
       <View style={styles.top}>
-        <Header
-          onBack={() => nav.goBack()}
-          title={nivel ? `Nivel ${nivel}` : undefined}
-          right={
-            <Text style={styles.contador}>
-              {idx + 1} de {rounds.length}
-            </Text>
-          }
-        />
-        <ProgressBar value={idx} total={rounds.length} />
+        <Header onBack={() => nav.goBack()} title={nivel ? `Nivel ${nivel}` : undefined} />
+        <ProgresoHex total={rounds.length} actual={idx} resuelta={resuelta} />
 
-        {nv ? (
+        {tieneReloj ? (
           <View style={styles.reloj}>
-            <RoundTimer
+            <RelojRonda
               segundos={nv.segundosRonda}
               llave={`${nivel ?? 0}-${idx}`}
               pausado={resuelta}
               onFin={() => void seAcaboElTiempo()}
+              etiqueta="Reloj de la ronda"
             />
           </View>
         ) : null}
@@ -487,7 +485,6 @@ export function ColmenaScreen() {
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  contador: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
   reloj: { marginTop: space.sm },
   body: { flex: 1 },
   bodyContenido: {

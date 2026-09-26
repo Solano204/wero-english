@@ -178,6 +178,28 @@ export function disposicionPanal(cantidad: number, ancho: number, o: OpcionesPan
   };
 }
 
+/**
+ * Los seis vértices de un hexágono con punta arriba dentro de una caja de `ancho` × `alto`, como el `points` de
+ * un `Polygon`. `margen` los mete hacia adentro (la mitad del grosor del trazo, para que no se recorte).
+ */
+export function puntosHexagono(ancho: number, alto: number, margen = 0): string {
+  const x0 = margen;
+  const x1 = ancho - margen;
+  const y0 = margen;
+  const y1 = alto - margen;
+  const cx = ancho / 2;
+  const cuarto = (y1 - y0) / 4;
+  const puntos = [
+    [cx, y0],
+    [x1, y0 + cuarto],
+    [x1, y1 - cuarto],
+    [cx, y1],
+    [x0, y1 - cuarto],
+    [x0, y0 + cuarto],
+  ];
+  return puntos.map(([x, y]) => `${(x ?? 0).toFixed(2)},${(y ?? 0).toFixed(2)}`).join(' ');
+}
+
 /** Qué lugar ocupa cada hexágono si se cuentan del centro hacia afuera (0 es el más cercano al centro). */
 export function ordenDesdeCentro(hexagonos: readonly Hexagono[], hexAncho: number, hexAlto: number): number[] {
   if (hexagonos.length === 0) return [];
