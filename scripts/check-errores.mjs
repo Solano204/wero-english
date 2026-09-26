@@ -248,4 +248,29 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
   assert.match(detalle, /audio\.stop\(\)/, 'salir corta la voz');
 });
 
+await prueba('el detalle: el duelo solo sale con audio de contraste (los 22 de pronunciación), «Por qué pasa» con NotaInfo y Compartir solo si se puede contar', () => {
+  const conContraste = errores.filter((e) => e.audio_contraste_archivo);
+  assert.equal(conContraste.length, 22);
+  assert.ok(conContraste.every((e) => e.categoria === 'pronunciacion' && e.audio_contraste && e.audio), 'todos son de pronunciación y traen texto y audio');
+  assert.equal(errores.filter((e) => e.categoria === 'pronunciacion').length, 22, 'y todos los de pronunciación lo traen');
+  assert.equal(errores.filter((e) => e.compartible).length, 112);
+  const d = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
+  assert.match(d, /<DueloContraste error=\{err\} \/>/);
+  assert.match(d, /<NotaInfo>\s*<Text style=\{styles\.whyBody\}>\{err\.por_que\}<\/Text>\s*<\/NotaInfo>/, '«Por qué pasa» lleva el ícono info y el filo accent de NotaInfo');
+  assert.match(d, /<MedidorGravedad gravedad=\{err\.gravedad\} disposicion="fila" animado/);
+  assert.match(d, /\{err\.compartible \? <Badge label="Para contar" tone="accent" small \/> : null\}/);
+  assert.match(d, /\{err\.compartible \? \(\s*<View style=\{styles\.compartir\}>/, 'Compartir solo si se puede contar');
+  assert.match(d, /<Button variant="secondary" icon="share" label="Compartir"/, 'Compartir es secondary: no compite con la acción principal');
+  assert.match(d, /Share\.share\(\{ message: textoParaCompartir\(err\) \}\)/, 'abre el menú del sistema con el texto armado');
+  assert.match(d, /setFalloCompartir\(true\)/, 'si el menú no abre se avisa: no se traga el error');
+  assert.ok(!/GenerarImagen|captureRef|ViewShot/.test(d), 'sin imagen generada por ahora');
+  const duelo = sinComentarios(leer('src/components/errores/DueloContraste.tsx'));
+  assert.match(duelo, /if \(!e\.audio_contraste_archivo\) return null;/);
+  assert.match(duelo, /titulo="Así suena mal"/);
+  assert.match(duelo, /titulo="Así suena bien"/);
+  assert.match(duelo, /tono === 'mal' \? color\.wrong : color\.correct/, 'ámbar contra verde, nunca rojo');
+  assert.match(duelo, /name=\{tono === 'mal' \? 'signal-broken' : 'check'\}/, 'cada mitad lleva su ícono: el color no es lo único');
+  assert.ok(!/riskStrong|tone="strong"/.test(duelo));
+});
+
 console.log(`\ncheck:errores ${total} pruebas ok\n`);
