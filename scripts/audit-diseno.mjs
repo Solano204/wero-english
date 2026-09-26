@@ -64,6 +64,8 @@ const TIPO2_SE_QUEDAN = {
   'src/components/fx/Espectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
   'src/components/fx/Espectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
   'src/components/fx/Espectrograma.tsx:listaTexto': 'texto alternativo de la gráfica: una línea por día, información secundaria',
+  'src/components/gramatica/BloqueGramatica.tsx:resumen': 'una línea de lo que reúne el bloque, como `FilaModo.corta` de Practicar: apoya al título, no es lo que se estudia',
+  'src/components/gramatica/RenglonTema.tsx:gancho': 'una o dos líneas que apoyan al título del renglón, como `FilaModo.corta` de Practicar; el gancho del tema se lee en 16 px en su pantalla',
 };
 
 /** TIPO-4: estilos de 28 px o más que no son títulos, revisados a mano. */
@@ -409,6 +411,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/cazala/') || r === 'src/screens/games/CazalaScreen.tsx' ||
   r === 'src/screens/extras/EarModeScreen.tsx' ||
   r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
+  r.startsWith('src/components/gramatica/') || r === 'src/screens/extras/GramaticaScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;

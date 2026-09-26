@@ -194,4 +194,15 @@ prueba('«Detener»: el ícono stop existe y el botón se monta de nuevo al camb
   assert.match(leer('src/screens/extras/GramaticaTemaScreen.tsx'), /'Detener'/);
 });
 
+prueba('la regla de temas abiertos no cambió: 3 por bloque, y un tema con clave desbloqueada ya no es cerrado', () => {
+  const lista = leer('src/screens/extras/GramaticaScreen.tsx');
+  assert.match(lista, /export const GRATIS_POR_BLOQUE = 3;/);
+  assert.match(lista, /n >= GRATIS_POR_BLOQUE && !clavesVistas\.has\(`gramatica:\$\{tema\.id\}`\)/);
+  assert.match(leer('src/screens/extras/GramaticaTemaScreen.tsx'), /GRATIS_POR_BLOQUE/);
+  const porBloque = new Map();
+  for (const t of temas) porBloque.set(t.bloque, [...(porBloque.get(t.bloque) ?? []), t]);
+  assert.equal(porBloque.size, 9);
+  for (const lista of porBloque.values()) assert.ok(lista.length > 3, 'cada bloque tiene temas cerrados y abiertos');
+});
+
 console.log(`\ncheck:gramatica ${total} pruebas ok\n`);

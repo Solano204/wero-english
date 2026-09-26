@@ -1,15 +1,19 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { Card, Header, Icon, Screen } from '@/components/base';
-import { CandadoBadge } from '@/components/unlock';
+import { Header, Screen } from '@/components/base';
+import { BloqueGramatica } from '@/components/gramatica/BloqueGramatica';
+import { MedidorNivel } from '@/components/gramatica/MedidorNivel';
+import { RenglonTema } from '@/components/gramatica/RenglonTema';
 import { SectionTitle } from '@/components/list';
+import { nivelMaximo } from '@/domain/gramatica';
 import { loadContent } from '@/store/content';
 import { useUnlockStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { color, font, space, aparecerSubiendo, escalon } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 import type { GramaticaTema } from '@/types';
 
@@ -18,8 +22,9 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 /**
  * Gramática, el índice.
  *
- * Ocho bloques, cincuenta temas. Se entra por bloque y no por lista
- * plana: cincuenta filas seguidas no se leen, se abandonan.
+ * Nueve bloques, ochenta temas. Se entra por bloque y no por lista plana:
+ * ochenta filas seguidas no se leen, se abandonan. Cada bloque es una
+ * tarjeta como las de Practicar y sus temas son renglones dentro de ella.
  *
  * Los tres primeros temas de cada bloque están abiertos. El resto pide
  * un anuncio, una vez, y queda abierto para siempre. La razón de que
@@ -33,11 +38,19 @@ export const GRATIS_POR_BLOQUE = 3;
 
 export function GramaticaScreen() {
   const nav = useNavigation<Nav>();
+  const enfocada = useIsFocused();
+  const reducido = useMovimientoReducido();
   const { gramatica } = loadContent();
   const claves = useUnlockStore((s) => s.claves);
+  // Lo que se abre con un anuncio dentro del tema se refleja al volver a la lista, no antes: así el candado se ve abrirse.
+  const [clavesVistas, setClavesVistas] = useState(claves);
   const [abierto, setAbierto] = useState<string | null>(null);
   // Misma pista que el resto de la app, pero más baja: aquí se lee.
   useMusicaPantalla('app', { volumenFactor: 0.4 });
+
+  useEffect(() => {
+    if (enfocada) setClavesVistas(claves);
+  }, [enfocada, claves]);
 
   const porBloque = useMemo(() => {
     const m = new Map<string, GramaticaTema[]>();
@@ -48,6 +61,7 @@ export function GramaticaScreen() {
     }
     return m;
   }, [gramatica]);
+  const niveles = useMemo(() => nivelMaximo(gramatica.temas), [gramatica]);
 
   const bloques = Object.entries(gramatica.bloques);
 
@@ -59,50 +73,42 @@ export function GramaticaScreen() {
         {gramatica.temas.length} temas explicados desde el español: qué es,
         cuándo va y en qué te vas a equivocar.
       </Text>
+      <View style={styles.filaLeyenda}>
+        <MedidorNivel nivel={Math.ceil(niveles / 2)} total={niveles} decorativo />
+        <Text style={styles.leyenda}>Más barras, más avanzado</Text>
+      </View>
 
-      {bloques.map(([clave, bloque], i) => {
-        const temas = porBloque.get(clave) ?? [];
-        const desplegado = abierto === clave;
-        return (
-          <Animated.View key={clave} entering={aparecerSubiendo(escalon(i))}>
-            <Card
-              onPress={() => setAbierto(desplegado ? null : clave)}
-              style={styles.bloque}
-            >
-              <View style={styles.bloqueTop}>
-                <Text style={styles.bloqueNombre}>{bloque.nombre}</Text>
-                <View style={styles.bloqueNumFila}>
-                  <Text style={styles.bloqueNum}>{temas.length}</Text>
-                  <Icon name={desplegado ? 'chevron-down' : 'chevron-right'} size="sm" color={color.accent} />
-                </View>
-              </View>
-              <Text style={styles.bloqueResumen}>{bloque.resumen}</Text>
-            </Card>
-
-            {desplegado
-              ? temas.map((tema, n) => {
-                  const cerrado =
-                    n >= GRATIS_POR_BLOQUE &&
-                    !claves.has(`gramatica:${tema.id}`);
-                  return (
-                    <Card
+      <View style={styles.bloques}>
+        {bloques.map(([clave, bloque], i) => {
+          const temas = porBloque.get(clave) ?? [];
+          return (
+            <Animated.View key={clave} entering={reducido ? undefined : aparecerSubiendo(escalon(i))}>
+              <BloqueGramatica
+                nombre={bloque.nombre}
+                resumen={bloque.resumen}
+                total={temas.length}
+                abierto={abierto === clave}
+                onAlternar={() => setAbierto(abierto === clave ? null : clave)}
+              >
+                {(avance) =>
+                  temas.map((tema, n) => (
+                    <RenglonTema
                       key={tema.id}
+                      tema={tema}
+                      niveles={niveles}
+                      cerrado={n >= GRATIS_POR_BLOQUE && !clavesVistas.has(`gramatica:${tema.id}`)}
+                      primero={n === 0}
+                      indice={n}
+                      avance={avance}
                       onPress={() => nav.navigate('GramaticaTema', { temaId: tema.id })}
-                      style={styles.tema}
-                    >
-                      <View style={styles.temaTop}>
-                        <Text style={styles.temaTitulo}>{tema.titulo}</Text>
-                        <Text style={styles.temaNivel}>N{tema.nivel}</Text>
-                      </View>
-                      <Text style={styles.temaGancho}>{tema.gancho}</Text>
-                      {cerrado ? <CandadoBadge /> : null}
-                    </Card>
-                  );
-                })
-              : null}
-          </Animated.View>
-        );
-      })}
+                    />
+                  ))
+                }
+              </BloqueGramatica>
+            </Animated.View>
+          );
+        })}
+      </View>
 
       {gramatica.temas.length === 0 ? (
         <SectionTitle title="Todavía no hay temas cargados" />
@@ -117,44 +123,19 @@ const styles = StyleSheet.create({
     fontSize: font.size.md,
     color: color.textMuted,
     lineHeight: font.size.md * 1.5,
-    marginBottom: space.lg,
+    marginBottom: space.md,
+  },
+  filaLeyenda: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.lg },
+  leyenda: {
+    fontFamily: font.family.body,
+    fontSize: font.size.sm,
+    lineHeight: font.size.sm * 1.45,
+    color: color.textMuted,
   },
   /*
    * Los bloques son la unidad que se escanea, asi que necesitan
-   * separarse entre si mas de lo que se separan de sus temas. Sin este
-   * margen, ocho bloques seguidos se leian como una sola lista larga.
+   * separarse entre si. Sin este espacio, nueve bloques seguidos se
+   * leian como una sola lista larga.
    */
-  bloque: { gap: space.xs, marginBottom: space.md },
-  bloqueTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  bloqueNombre: {
-    fontSize: font.size.lg,
-    fontFamily: font.family.heading,
-    color: color.text,
-  },
-  bloqueNumFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  bloqueNum: { fontSize: font.size.sm, color: color.accent, fontFamily: font.family.bodyStrong },
-  bloqueResumen: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted, lineHeight: font.size.sm * 1.5 },
-  /*
-   * Los temas van sangrados y con su propio aire. La sangria dice que
-   * cuelgan del bloque; el margen evita que se peguen entre ellos.
-   */
-  tema: { gap: 4, marginLeft: space.lg, marginBottom: space.sm },
-  temaTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: space.sm,
-  },
-  temaTitulo: {
-    flex: 1,
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.text,
-  },
-  temaNivel: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  temaGancho: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted, lineHeight: font.size.sm * 1.45 },
+  bloques: { gap: space.md },
 });
