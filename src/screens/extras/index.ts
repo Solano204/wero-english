@@ -8,6 +8,7 @@ export { ErrorDetailScreen } from './ErrorDetailScreen';
 export { LecturasScreen } from './LecturasScreen';
 export { LecturaScreen } from './LecturaScreen';
 export { PhrasalScreen } from './PhrasalScreen';
+export { PhrasalVerboScreen } from './PhrasalVerboScreen';
 export { AzarScreen } from './AzarScreen';
 export { GramaticaScreen } from './GramaticaScreen';
 export { GramaticaTemaScreen } from './GramaticaTemaScreen';

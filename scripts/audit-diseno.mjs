@@ -412,6 +412,7 @@ const ALCANCE_SENAL = (r) =>
   r === 'src/screens/extras/EarModeScreen.tsx' ||
   r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
   r.startsWith('src/components/gramatica/') || r === 'src/screens/extras/GramaticaScreen.tsx' || r === 'src/screens/extras/GramaticaTemaScreen.tsx' ||
+  r.startsWith('src/components/phrasal/') || r === 'src/screens/extras/PhrasalScreen.tsx' || r === 'src/screens/extras/PhrasalVerboScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;

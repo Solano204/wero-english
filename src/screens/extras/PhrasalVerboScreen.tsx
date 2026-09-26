@@ -1,0 +1,100 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { EmptyState, Header, Screen } from '@/components/base';
+import { ViajeVerbo, type Viaje } from '@/components/phrasal/ViajeVerbo';
+import { loadContent } from '@/store/content';
+import { useSettingsStore } from '@/store';
+import { color, font, space, text } from '@/theme';
+import type { RootStackParams } from '@/navigation/routes';
+import type { PhrasalVerb } from '@/types';
+
+type Nav = NativeStackNavigationProp<RootStackParams>;
+type R = RouteProp<RootStackParams, 'PhrasalVerbo'>;
+
+/** Si el verbo no llega a su título en este tiempo (ms), se muestra igual: el vuelo nunca deja la página sin título. */
+const VIAJE_MAX_MS = 1350;
+
+/**
+ * La página de un verbo: el verbo grande y, junto a él, la partícula elegida. El verbo no se mueve y la partícula
+ * cambia todo el significado. Llega desde la lista con el verbo volando de su renglón a su lugar aquí (`origen`).
+ */
+export function PhrasalVerboScreen() {
+  const nav = useNavigation<Nav>();
+  const { params } = useRoute<R>();
+  const content = useMemo(loadContent, []);
+  const modoLimpio = useSettingsStore((s) => s.modoLimpio);
+  const verboRef = useRef<View>(null);
+  const [indice] = useState(0);
+  const [viaje, setViaje] = useState<Viaje | null>(() =>
+    params.origen ? { verbo: params.verbo, desde: params.origen, hasta: null } : null
+  );
+  const volando = viaje !== null;
+
+  // Las formas del verbo, con el mismo filtro que la lista: el modo limpio esconde las fuertes.
+  const formas = useMemo(() => {
+    const grupo = content.phrasal.grupos.find((g) => g.verbo === params.verbo);
+    if (!grupo) return [];
+    const porId = new Map<number, PhrasalVerb>(content.phrasal.verbos.map((v) => [v.id, v]));
+    return grupo.ids
+      .map((id) => porId.get(id))
+      .filter((v): v is PhrasalVerb => v !== undefined && !(modoLimpio && v.vulgaridad === 2));
+  }, [content, params.verbo, modoLimpio]);
+
+  const medirVerbo = useCallback(() => {
+    verboRef.current?.measureInWindow((x, y, width, height) =>
+      setViaje((v) => (v && !v.hasta ? { ...v, hasta: { x, y, width, height } } : v))
+    );
+  }, []);
+  const finViaje = useCallback(() => setViaje(null), []);
+
+  useEffect(() => {
+    if (!volando) return;
+    const t = setTimeout(() => setViaje(null), VIAJE_MAX_MS);
+    return () => clearTimeout(t);
+  }, [volando]);
+
+  const forma = formas[indice];
+  if (!forma) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} />
+        <EmptyState
+          title="Ese verbo no existe"
+          body="Puede que el catálogo se haya actualizado."
+          actionLabel="Volver"
+          onAction={() => nav.goBack()}
+        />
+      </Screen>
+    );
+  }
+
+  return (
+    <>
+      <Screen scroll>
+        <Header
+          onBack={() => nav.goBack()}
+          right={formas.length > 1 ? <Text style={styles.contador}>{`${indice + 1} de ${formas.length}`}</Text> : undefined}
+        />
+        <View style={styles.heroe}>
+          <View ref={verboRef} collapsable={false} onLayout={medirVerbo} style={volando ? styles.oculto : null}>
+            <Text style={styles.verbo} accessibilityRole="header">
+              {params.verbo}
+            </Text>
+          </View>
+          <Text style={styles.particula}>{forma.particula}</Text>
+        </View>
+      </Screen>
+      {viaje ? <ViajeVerbo viaje={viaje} onFin={finViaje} /> : null}
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  contador: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  heroe: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  oculto: { opacity: 0 },
+  verbo: { ...text.display, color: color.text },
+  particula: { ...text.display, color: color.accent },
+});

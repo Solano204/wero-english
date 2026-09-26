@@ -45,6 +45,8 @@ export type RootStackParams = {
   GramaticaTema: { temaId: string };
 
   Phrasal: undefined;
+  /** `origen`: dónde estaba el verbo en la lista (coordenadas de la ventana), para que viaje hasta su título. */
+  PhrasalVerbo: { verbo: string; origen?: { x: number; y: number; width: number; height: number } | null };
   Azar: undefined;
   Lecturas: undefined;
   Lectura: { lecturaId: string };

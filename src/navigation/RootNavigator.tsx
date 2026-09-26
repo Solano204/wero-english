@@ -30,6 +30,7 @@ import {
   PackDetailScreen,
   ParesScreen,
   PhrasalScreen,
+  PhrasalVerboScreen,
   PronunciationScreen,
   SettingsScreen,
   StudyScreen,
@@ -132,6 +133,12 @@ export function RootNavigator() {
       <Stack.Screen name="Gramatica" component={GramaticaScreen} />
       <Stack.Screen name="GramaticaTema" component={GramaticaTemaScreen} />
       <Stack.Screen name="Phrasal" component={PhrasalScreen} />
+      {/* El verbo viaja del renglón a su título: la pantalla entra con un fundido y ese vuelo es la transición. */}
+      <Stack.Screen
+        name="PhrasalVerbo"
+        component={PhrasalVerboScreen}
+        options={{ animation: 'fade', animationDuration: motionDuration.lento }}
+      />
       <Stack.Screen name="Azar" component={AzarScreen} />
       <Stack.Screen name="Lecturas" component={LecturasScreen} />
       <Stack.Screen name="Lectura" component={LecturaScreen} />

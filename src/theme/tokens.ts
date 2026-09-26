@@ -46,6 +46,8 @@ export const color = {
   surfaceAlt: '#1A2532',
   surfaceHigh: '#22303F',
   surfaceSolida: '#141D28',
+  /** `surface` sin opacidad: el extremo transparente de un degradado que se funde con ella (el final de una fila recortada). */
+  surfaceSinAlfa: 'rgba(20, 29, 40, 0)',
 
   // Texto. Hueso azulado, no blanco puro: el #FFF sobre tinta vibra y
   // cansa igual que el negro sobre papel blanco.
