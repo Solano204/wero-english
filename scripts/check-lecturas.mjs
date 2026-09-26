@@ -26,7 +26,7 @@ const cargar = async (rel) => {
 };
 
 const O = await cargar('src/domain/oraciones.ts');
-const { partirTexto } = await cargar('src/domain/lectura.ts');
+const { partirTexto, nivelDificultad, etiquetaDificultad, destacarLectura } = await cargar('src/domain/lectura.ts');
 const lecturas = JSON.parse(leer('assets/data/lecturas.json')).lecturas;
 const catalogo = new Map(JSON.parse(leer('assets/data/catalogo.json')).entries.map((e) => [e.id, e]));
 const capitulos = lecturas.flatMap((l) => l.capitulos.map((c) => ({ l, c })));
@@ -169,6 +169,40 @@ prueba('frases del catálogo: los trozos se reparten entre las oraciones sin per
   }
   console.log(`      ${frases} frases del catálogo repartidas; ${cruzan} cruzan el límite de una oración`);
   assert.equal(cruzan, 0, 'una frase del catálogo no debería cruzar dos oraciones');
+});
+
+/* ---------- la lista ---------- */
+
+prueba('dificultad: tres franjas con los cortes de siempre y las mismas etiquetas largas', () => {
+  assert.deepEqual([0, 25, 26, 55, 56, 100].map(nivelDificultad), [1, 1, 2, 2, 3, 3]);
+  assert.equal(etiquetaDificultad(10), 'fácil para ti');
+  assert.equal(etiquetaDificultad(40), 'te va a costar tantito');
+  assert.equal(etiquetaDificultad(90), 'todavía pesada');
+});
+
+prueba('destacada: la abierta con más frases dominadas va primero; con empate gana la que ya iba primero; sin ninguna, nada', () => {
+  const f = (id, dominadas, abierta = true) => ({ id, dominadas, abierta });
+  const ids = (r) => r.map((x) => x.fila.id);
+  const r = destacarLectura([f('a', 1), f('b', 4), f('c', 4), f('d', 2)]);
+  assert.deepEqual(ids(r), ['b', 'a', 'c', 'd']);
+  assert.deepEqual(r.map((x) => x.destacada), [true, false, false, false]);
+  assert.deepEqual(ids(destacarLectura([f('a', 9, false), f('b', 2)])), ['b', 'a'], 'una cerrada nunca se destaca');
+  const nadie = destacarLectura([f('a', 0), f('b', 0)]);
+  assert.deepEqual(ids(nadie), ['a', 'b']);
+  assert.ok(nadie.every((x) => !x.destacada));
+  assert.deepEqual(destacarLectura([]), []);
+  assert.ok(destacarLectura([f('a', 5, false)]).every((x) => !x.destacada));
+});
+
+prueba('la lista: sin números de 0 a 100 a la vista, «Niños» con ícono neutro y la entrada separada de Presionable', () => {
+  const tarjeta = leer('src/components/lectura/TarjetaLectura.tsx');
+  assert.match(tarjeta, /Te sabes \$\{fila\.dominadas\} de \$\{conteo\(fila\.total, 'frase'\)\}/);
+  assert.match(tarjeta, /<Badge label="Niños" icono="smile" small \/>/);
+  assert.match(tarjeta, /<LevelBadge nivel=\{nivelDificultad\(fila\.dificultad\)\} \/>/);
+  assert.ok(!/Dificultad \{/.test(tarjeta), 'el número de dificultad no va a la vista');
+  assert.match(tarjeta, /Dificultad \$\{fila\.dificultad\} de 100/, 'sí va en el accessibilityLabel');
+  assert.match(tarjeta, /<Animated\.View entering=\{reducido \? undefined : aparecerSubiendo\(retraso\)\}>\s*<Presionable/);
+  assert.match(leer('src/screens/extras/LecturasScreen.tsx'), /destacarLectura\(filas\)/);
 });
 
 /* ---------- generador y datos ---------- */

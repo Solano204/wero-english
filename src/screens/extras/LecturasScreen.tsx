@@ -1,34 +1,21 @@
 import React, { useCallback, useMemo } from 'react';
-import { conteo, plural } from '@/utils/text';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Badge, Card, Carga, Header, ProgressBar, Screen } from '@/components/base';
-import { SectionTitle, PuntoMundo } from '@/components/list';
-import {
-  dificultadPara,
-  estadoDesbloqueo,
-  etiquetaDificultad,
-} from '@/domain/lectura';
+import { Card, Carga, Header, Screen } from '@/components/base';
+import { SectionTitle } from '@/components/list';
+import { TarjetaLectura, type LecturaFila } from '@/components/lectura/TarjetaLectura';
+import { destacarLectura, dificultadPara, estadoDesbloqueo } from '@/domain/lectura';
 import { getCardStates, getDominadasPorMundo, getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
 import { color, font, space } from '@/theme';
-import type { CardState, Entry, Lectura } from '@/types';
+import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
-
-interface Fila {
-  lectura: Lectura;
-  dificultad: number;
-  dominadas: number;
-  total: number;
-  abierta: boolean;
-  faltan: number;
-}
 
 /**
  * P-21, la biblioteca.
@@ -41,13 +28,16 @@ interface Fila {
  * Las cerradas se muestran, no se esconden. Una historia gris que dice
  * "llevas 11 de 15" es una razón para hacer otra sesión; una historia
  * invisible no es nada.
+ *
+ * En cada sección va primero, y más grande, la abierta con más frases
+ * tuyas: la que más se parece a lo que ya sabes.
  */
 export function LecturasScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const content = useMemo(loadContent, []);
   const carga = useCarga(
-    async (): Promise<Fila[]> => {
+    async (): Promise<LecturaFila[]> => {
       if (!user) return [];
       const lecturas = content.lecturas.lecturas;
       const ids = [...new Set(lecturas.flatMap((l) => l.frases))];
@@ -82,13 +72,33 @@ export function LecturasScreen() {
     }, [])
   );
 
+  const abrir = useCallback((lecturaId: string) => nav.navigate('Lectura', { lecturaId }), [nav]);
+
+  const grupo = (titulo: string, filas: LecturaFila[]) =>
+    filas.length === 0 ? null : (
+      <>
+        <SectionTitle title={titulo} count={filas.length} />
+        <View style={styles.list}>
+          {destacarLectura(filas).map(({ fila, destacada }, i) => (
+            <TarjetaLectura
+              key={fila.lectura.id}
+              fila={fila}
+              destacada={destacada}
+              indice={i}
+              onPress={() => abrir(fila.lectura.id)}
+            />
+          ))}
+        </View>
+      </>
+    );
+
   return (
     <Screen scroll>
       <Header onBack={() => nav.goBack()} title="Lecturas" />
 
       <Text style={styles.intro}>
-        Historias hechas con frases que ya viste. La dificultad es tuya: baja
-        sola conforme aprendes.
+        Historias hechas con frases que ya viste. El anillo se llena con las que ya te sabes y la
+        etiqueta baja sola conforme aprendes.
       </Text>
 
       <Carga
@@ -102,109 +112,16 @@ export function LecturasScreen() {
           </Card>
         }
       >
-        {(filas) => {
-          const ninos = filas.filter((f) => f.lectura.publico === 'ninos');
-          const general = filas.filter((f) => f.lectura.publico === 'general');
-          return (
-            <>
-              {ninos.length > 0 ? (
-                <>
-                  <SectionTitle title="Para niños" count={ninos.length} />
-                  <View style={styles.list}>
-                    {ninos.map((f) => (
-                      <FilaLectura
-                        key={f.lectura.id}
-                        fila={f}
-                        onPress={() =>
-                          nav.navigate('Lectura', { lecturaId: f.lectura.id })
-                        }
-                      />
-                    ))}
-                  </View>
-                </>
-              ) : null}
-
-              {general.length > 0 ? (
-                <>
-                  <SectionTitle title="Para todos" count={general.length} />
-                  <View style={styles.list}>
-                    {general.map((f) => (
-                      <FilaLectura
-                        key={f.lectura.id}
-                        fila={f}
-                        onPress={() =>
-                          nav.navigate('Lectura', { lecturaId: f.lectura.id })
-                        }
-                      />
-                    ))}
-                  </View>
-                </>
-              ) : null}
-            </>
-          );
-        }}
+        {(filas) => (
+          <>
+            {grupo('Para niños', filas.filter((f) => f.lectura.publico === 'ninos'))}
+            {grupo('Para todos', filas.filter((f) => f.lectura.publico === 'general'))}
+          </>
+        )}
       </Carga>
     </Screen>
   );
 }
-
-function FilaLectura({ fila, onPress }: { fila: Fila; onPress: () => void }) {
-  const l = fila.lectura;
-  const tint =
-    color.world[l.mundo as keyof typeof color.world] ?? color.world.dia_a_dia;
-
-  return (
-    <Card
-      onPress={fila.abierta ? onPress : undefined}
-      style={fila.abierta ? styles.item : { ...styles.item, ...styles.cerrada }}
-    >
-      <View style={styles.itemTop}>
-        <View style={styles.itemNombre}>
-          <PuntoMundo tinte={tint} />
-          <Text style={styles.itemTitle}>{l.titulo}</Text>
-        </View>
-        {l.publico === 'ninos' ? <Badge label="Niños" tone="good" small /> : null}
-      </View>
-
-      <Text style={styles.itemSub}>{l.subtitulo}</Text>
-
-      <Text style={styles.meta}>
-        {conteo(l.palabras, 'palabra')} · {conteo(l.capitulos.length, 'capítulo')} ·{' '}
-        {fila.dominadas} de {fila.total} {plural(fila.total, 'frase tuya', 'frases tuyas')}
-      </Text>
-
-      {fila.abierta ? (
-        <View style={styles.dif}>
-          <ProgressBar
-            value={100 - fila.dificultad}
-            total={100}
-            tint={tint}
-            height={5}
-          />
-          <Text style={styles.difTexto}>
-            Dificultad {fila.dificultad} · {etiquetaDificultad(fila.dificultad)}
-          </Text>
-        </View>
-      ) : (
-        <Text style={styles.bloqueo}>
-          Se abre al dominar {conteo(l.desbloquea?.dominadas ?? 0, 'frase')} de{' '}
-          {NOMBRE_MUNDO[l.mundo] ?? l.mundo} · te faltan {fila.faltan}
-        </Text>
-      )}
-    </Card>
-  );
-}
-
-const NOMBRE_MUNDO: Record<string, string> = {
-  dia_a_dia: 'Día a día',
-  calle: 'Calle y jerga',
-  dinero: 'Dinero y trabajo',
-  gente: 'Gente y vínculos',
-  cultura: 'Cultura y escuela',
-  tech: 'Tecnología',
-  legal: 'Legal y trámites',
-  fonetica: 'Pronunciación',
-};
 
 const styles = StyleSheet.create({
   intro: {
@@ -215,30 +132,5 @@ const styles = StyleSheet.create({
     marginBottom: space.lg,
   },
   list: { gap: space.sm, marginBottom: space.md },
-  item: { gap: 4 },
-  cerrada: { opacity: 0.6 },
-  itemTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: space.sm,
-  },
-  itemNombre: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flex: 1 },
-  itemTitle: {
-    fontSize: font.size.lg,
-    fontFamily: font.family.heading,
-    color: color.text,
-    flexShrink: 1,
-  },
-  itemSub: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  meta: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint, marginTop: space.xs },
-  dif: { gap: 4, marginTop: space.sm },
-  difTexto: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  bloqueo: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xs,
-    color: color.riskWarn,
-    marginTop: space.sm,
-  },
-  vacio: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  vacio: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
 });

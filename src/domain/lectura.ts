@@ -162,9 +162,31 @@ function partirUno(
   ];
 }
 
-/** Etiqueta corta para la lista. */
+/** En cuál de las tres franjas cae una dificultad (0 a 100): 1 fácil, 2 media, 3 difícil. Los cortes son los de siempre. */
+export function nivelDificultad(d: number): 1 | 2 | 3 {
+  if (d <= 25) return 1;
+  if (d <= 55) return 2;
+  return 3;
+}
+
+/** Etiqueta larga de la dificultad: para el lector de pantalla, no para la lista. */
 export function etiquetaDificultad(d: number): string {
-  if (d <= 25) return 'fácil para ti';
-  if (d <= 55) return 'te va a costar tantito';
+  const nivel = nivelDificultad(d);
+  if (nivel === 1) return 'fácil para ti';
+  if (nivel === 2) return 'te va a costar tantito';
   return 'todavía pesada';
+}
+
+/**
+ * Pone primero, y marca como destacada, la lectura abierta con más frases dominadas del grupo (IA-2: no todas las
+ * tarjetas iguales). Con las mismas frases dominadas gana la que ya iba primero; si nadie ha dominado ninguna no se
+ * destaca nada y el orden queda como está. Las demás siguen en su orden.
+ */
+export function destacarLectura<T extends { abierta: boolean; dominadas: number }>(
+  filas: readonly T[]
+): { fila: T; destacada: boolean }[] {
+  let mejor: T | undefined;
+  for (const f of filas) if (f.abierta && f.dominadas > (mejor?.dominadas ?? 0)) mejor = f;
+  if (!mejor) return filas.map((fila) => ({ fila, destacada: false }));
+  return [{ fila: mejor, destacada: true }, ...filas.filter((f) => f !== mejor).map((fila) => ({ fila, destacada: false }))];
 }

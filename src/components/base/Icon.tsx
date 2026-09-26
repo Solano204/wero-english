@@ -17,6 +17,7 @@ import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMe
 import { InfoIcon } from 'phosphor-react-native/src/icons/Info';
 import { LightbulbIcon } from 'phosphor-react-native/src/icons/Lightbulb';
 import { LockSimpleIcon } from 'phosphor-react-native/src/icons/LockSimple';
+import { SmileyIcon } from 'phosphor-react-native/src/icons/Smiley';
 import { MicrophoneSlashIcon } from 'phosphor-react-native/src/icons/MicrophoneSlash';
 import { PauseIcon } from 'phosphor-react-native/src/icons/Pause';
 import { PlayIcon } from 'phosphor-react-native/src/icons/Play';
@@ -103,6 +104,7 @@ const ICONOS = {
   books: { Componente: BooksIcon },
   cards: { Componente: CardsIcon },
   ear: { Componente: EarIcon },
+  smile: { Componente: SmileyIcon },
   fire: { Componente: FlameIcon },
   headphones: { Componente: HeadphonesIcon },
   hexagon: { Componente: HexagonIcon },
