@@ -30,7 +30,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 
 | Regla | Qué mide | Hallazgos |
 |---|---|---|
-| COLOR-1 | colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos), salvo las piezas de Dulces | 0 |
+| COLOR-1 | colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos) | 0 |
 | COLOR-3 | colores de marca (acento, primario, neutro) sin escala 50–900 | 0 |
 | COLOR-4 | pares texto/superficie bajo AA | 0 |
 | TIPO-1 | familias: fuente del sistema, `CharisSIL` sin cargar, `monospace` | 0 |

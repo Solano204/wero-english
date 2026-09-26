@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { color, font, motionDuration, motionEasing } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 
 /** La frase de la meta: fuente `md`; el título de la hoja: `xxl` de display. */
 const TAMANO_META = font.size.md;
@@ -27,12 +28,18 @@ interface Props {
 /**
  * La frase de la meta que se llenó, que se despega de su lugar y vuela hasta el título de la pregunta
  * (`lento`, `entrar`): crece de la letra de la meta a la del título mientras cruza, y se apaga al llegar para
- * dejar su lugar al título de verdad. Es un adorno: la hoja funciona igual sin ella. Va en el hilo de UI.
+ * dejar su lugar al título de verdad. Es un adorno: la hoja funciona igual sin ella. Va en el hilo de UI. Con «reducir
+ * movimiento» no vuela: avisa que llegó y no dibuja nada.
  */
 export function FraseVoladora({ texto, desde, hasta, onFin }: Props) {
+  const reducido = useMovimientoReducido();
   const avance = useSharedValue(0);
 
   useEffect(() => {
+    if (reducido) {
+      onFin();
+      return;
+    }
     avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }, (terminada) => {
       'worklet';
       if (terminada) runOnJS(onFin)();
@@ -54,6 +61,7 @@ export function FraseVoladora({ texto, desde, hasta, onFin }: Props) {
     };
   });
 
+  if (reducido) return null;
   return (
     <Animated.Text
       pointerEvents="none"

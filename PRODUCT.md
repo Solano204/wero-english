@@ -84,6 +84,10 @@ La misma acción se llama igual en toda la app.
 | Volver a jugar una partida perdida de Caída | Otra vez | Reintentar, Otra partida |
 | El mejor puntaje de un nivel | Récord: N; Récord nuevo | Highscore, Mejor marca |
 | Qué tan rápido va la ronda de Caída | Ritmo N de 5 (solo para el lector de pantalla) | Nivel de dificultad, Velocidad |
+| Cuando una cascada arma otra línea en Dulces | Cascada ×2, Cascada ×3 (sin exclamaciones) | Combo, ¡Increíble!, Chain |
+| Cuando un tablero de Dulces no tiene jugadas posibles | Rebarajando el tablero | Sin movimientos, Mezclando |
+| Lo que queda de un tablero de Dulces | «N jugadas» (1: «1 jugada»), «Dejarlo aquí»; la pieza se lee «Pieza naranja, círculo, fila 2 columna 3» | Movimientos, Turnos, Vidas |
+| La pregunta que sale al llenar una meta de Dulces | Llenaste esta, ¿Qué significa?, Siguiente | Bonus, Reto, Desafío |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 

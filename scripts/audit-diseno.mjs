@@ -79,9 +79,7 @@ const LISTAS_SIN_VIRTUALIZAR = [
 ];
 
 /** COLOR-1: usos de un color de mundo como relleno que sí se aceptan, con su motivo. */
-const COLOR1_EXCEPCIONES = [
-  { archivo: 'src/screens/games/DulcesScreen.tsx', patron: /^\s+color\.world\.\w+,\s*$/, motivo: 'las 5 piezas del tablero (`TINTES`) son contenido de juego, no marca: necesitan cinco colores distintos para poder jugarse' },
-];
+const COLOR1_EXCEPCIONES = [];
 
 /** COLOR-3: los colores de marca que necesitan escala 50–900. */
 const COLORES_DE_MARCA = ['accent', 'contraste', 'neutral'];
@@ -406,6 +404,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/niveles/') || r === 'src/screens/games/NivelesScreen.tsx' ||
   r.startsWith('src/components/juegos/pares/') || r === 'src/screens/games/ParesScreen.tsx' ||
   r.startsWith('src/components/juegos/caida/') || r === 'src/screens/games/CaidaScreen.tsx' ||
+  r.startsWith('src/components/juegos/dulces/') || r === 'src/screens/games/DulcesScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -426,6 +425,8 @@ const LOOPS_POR_PANTALLA = {
   Pares: [],
   // Caída: la capa de Skia (carriles y estela) se dibuja desde el valor `y` que mueve las fichas y no corre un bucle propio; el piso y su resplandor son vistas.
   Caida: [],
+  // Dulces: las partículas de los trozos son un canvas de Skia (`Estallidos`) que solo dibuja mientras vuela alguna; no hay bucle propio.
+  Dulces: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
@@ -641,7 +642,7 @@ function conteoPorRegla(ctx) {
   const { H, C, E, T, R, A, M, S, acc1, modos, tokensBajos } = ctx;
   const sinE = (k) => E.filter((f) => !f[k]).length;
   return [
-    ['COLOR-1', 'colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos), salvo las piezas de Dulces', C.marca + ctx.K.rellenos.length],
+    ['COLOR-1', 'colores de mundo que tiñen fondos grandes (portadas tintadas y rellenos)', C.marca + ctx.K.rellenos.length],
     ['COLOR-3', 'colores de marca (acento, primario, neutro) sin escala 50–900', ctx.escalas.length],
     ['COLOR-4', 'pares texto/superficie bajo AA', C.fallos.length],
     ['TIPO-1', 'familias: fuente del sistema, `CharisSIL` sin cargar, `monospace`', ctx.tipo1],
