@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState, type ReactNode } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View, type ScrollViewProps, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedScrollHandler, type SharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedScrollHandler, type AnimatedRef, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,18 +20,33 @@ interface Props {
   encabezado?: ReactNode;
   /** Si viene, el scroll escribe aquí su desplazamiento en el hilo de UI, sin pasar por JS. */
   scrollY?: SharedValue<number>;
+  /** Con `scrollY`: para mover el scroll desde la pantalla con `scrollTo` de Reanimated (llevar algo a la vista). */
+  scrollRef?: AnimatedRef<Animated.ScrollView>;
+  /** Con `scrollY`: se pone en 0 cuando el dedo toma el scroll, para que una animación de scroll de la pantalla lo suelte. */
+  soltarScroll?: SharedValue<number>;
   /** Jalar para refrescar: la pantalla recarga sin esqueleto. Solo con `scroll`. */
   alRefrescar?: () => Promise<unknown>;
   /** Dónde aparece el indicador desde el borde de arriba (debajo de un encabezado flotante). */
   desfaseRefresco?: number;
 }
 
+interface PropsScrollAnimado extends ScrollViewProps {
+  y: SharedValue<number>;
+  refScroll?: AnimatedRef<Animated.ScrollView>;
+  soltar?: SharedValue<number>;
+}
+
 /** Scroll que publica su desplazamiento en un valor compartido. Solo existe si una pantalla lo pide. */
-function ScrollAnimado({ y, ...props }: ScrollViewProps & { y: SharedValue<number> }) {
-  const alDesplazar = useAnimatedScrollHandler((e) => {
-    y.value = e.contentOffset.y;
+function ScrollAnimado({ y, refScroll, soltar, ...props }: PropsScrollAnimado) {
+  const alDesplazar = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      y.value = e.contentOffset.y;
+    },
+    onBeginDrag: () => {
+      if (soltar) soltar.value = 0;
+    },
   });
-  return <Animated.ScrollView {...props} onScroll={alDesplazar} scrollEventThrottle={16} />;
+  return <Animated.ScrollView {...props} ref={refScroll} onScroll={alDesplazar} scrollEventThrottle={16} />;
 }
 
 /**
@@ -54,6 +69,8 @@ export function Screen({
   fondo,
   encabezado,
   scrollY,
+  scrollRef,
+  soltarScroll,
   alRefrescar,
   desfaseRefresco = 0,
 }: Props) {
@@ -140,6 +157,8 @@ export function Screen({
         scrollY ? (
           <ScrollAnimado
             y={scrollY}
+            refScroll={scrollRef}
+            soltar={soltarScroll}
             style={styles.flex}
             contentContainerStyle={[inner, { paddingBottom: huecoAbajo }, style]}
             keyboardShouldPersistTaps="handled"

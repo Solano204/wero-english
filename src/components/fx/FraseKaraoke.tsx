@@ -73,6 +73,8 @@ interface Props {
   destacadas?: ReadonlySet<number>;
   /** En reposo (sin sonar) la frase va en `textMuted`: la lengua que no está sonando (Modo oído). */
   apagada?: boolean;
+  /** `inicio` alinea las palabras a la izquierda (una frase dentro de una tarjeta); por omisión van centradas. */
+  alinear?: 'centro' | 'inicio';
 }
 
 /**
@@ -82,10 +84,15 @@ interface Props {
  * el hilo de UI, sin re-render de React. Para el lector de pantalla es una sola
  * frase; las palabras sueltas no se anuncian.
  */
-export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas, apagada = false }: Props) {
+export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas, apagada = false, alinear = 'centro' }: Props) {
   const frase = palabras.map((p) => p.texto).join(' ');
   return (
-    <View style={styles.fila} accessible accessibilityRole="text" accessibilityLabel={frase}>
+    <View
+      style={alinear === 'inicio' ? [styles.fila, styles.filaInicio] : styles.fila}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={frase}
+    >
       {palabras.map((p, i) => (
         <PalabraKaraoke
           key={`${i}-${p.texto}`}
@@ -103,6 +110,7 @@ export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas, apagada
 const styles = StyleSheet.create({
   // El espacio entre palabras va como hueco de la fila y no como carácter: a los lados de cada renglón no sobra nada.
   fila: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'baseline', columnGap: space.sm },
+  filaInicio: { justifyContent: 'flex-start' },
   palabraDisplay: {
     fontSize: font.size.display,
     letterSpacing: font.size.display * -0.015,

@@ -1,17 +1,26 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { useSharedValue } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  runOnUI,
+  scrollTo,
+  useAnimatedRef,
+  useDerivedValue,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { Button, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
+import { EjemploFrase } from '@/components/gramatica/EjemploFrase';
 import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
 import { MuroDesbloqueo } from '@/components/unlock';
 import { segmentos } from '@/domain/gramatica';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
-import { color, font, radius, space, text, aparecerSubiendo, escalon } from '@/theme';
+import { color, font, layout, motionDuration, motionEasing, radius, space, text, aparecerSubiendo, escalon } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 import type { GramaticaTema } from '@/types';
@@ -21,6 +30,8 @@ import { GRATIS_POR_BLOQUE } from './GramaticaScreen';
 const PAUSA_ENTRE_EJEMPLOS_MS = 600;
 /** Pausa entre el inglés y el español de un mismo ejemplo. */
 const PAUSA_INGLES_ESPANOL_MS = 350;
+/** Lo que ocupa el encabezado arriba: un ejemplo que suena no debe quedar debajo de él. */
+const RESERVA_ENCABEZADO = layout.tapMin + space.lg;
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type R = RouteProp<RootStackParams, 'GramaticaTema'>;
@@ -69,6 +80,51 @@ export function GramaticaTemaScreen() {
   useMusicaPantalla('silencio');
   const reducido = useMovimientoReducido();
   const scrollY = useSharedValue(0);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const destinoScroll = useSharedValue(0);
+  // 1 mientras el scroll lo lleva la pantalla; el dedo lo suelta (`soltarScroll` de `Screen`).
+  const animandoScroll = useSharedValue(0);
+  const { height: altoVentana } = useWindowDimensions();
+  const { top: insetArriba, bottom: insetAbajo } = useSafeAreaInsets();
+
+  useDerivedValue(() => {
+    if (animandoScroll.value === 0) return;
+    scrollTo(scrollRef, 0, destinoScroll.value, false);
+  });
+
+  const irAlScroll = useCallback(
+    (y: number) => {
+      if (reducido) {
+        runOnUI((v: number) => {
+          'worklet';
+          scrollTo(scrollRef, 0, v, false);
+        })(y);
+        return;
+      }
+      animandoScroll.value = 1;
+      destinoScroll.value = scrollY.value;
+      destinoScroll.value = withTiming(y, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
+        animandoScroll.value = 0;
+      });
+    },
+    [reducido, scrollRef, scrollY, destinoScroll, animandoScroll]
+  );
+
+  /** Lleva la tarjeta del ejemplo que empieza a sonar a la parte visible de la pantalla, sin moverla si ya se ve. */
+  const llevarAVista = useCallback(
+    (vista: View | null) => {
+      vista?.measureInWindow((_x, y, _ancho, alto) => {
+        const techo = insetArriba + RESERVA_ENCABEZADO;
+        const piso = altoVentana - insetAbajo - space.xl;
+        let delta = 0;
+        if (y < techo) delta = y - techo;
+        else if (y + alto > piso) delta = Math.min(y + alto - piso, y - techo);
+        if (Math.abs(delta) < 1) return;
+        irAlScroll(Math.max(0, scrollY.value + delta));
+      });
+    },
+    [insetArriba, insetAbajo, altoVentana, irAlScroll, scrollY]
+  );
 
   const tema = useMemo(
     () => gramatica.temas.find((t) => t.id === params.temaId) ?? null,
@@ -144,7 +200,7 @@ export function GramaticaTemaScreen() {
   }
 
   const cuerpo = (
-    <Screen scroll scrollY={scrollY}>
+    <Screen scroll scrollY={scrollY} scrollRef={scrollRef} soltarScroll={animandoScroll}>
       <Header
         onBack={() => nav.goBack()}
         title={gramatica.bloques[tema.bloque]?.nombre ?? 'Gramática'}
@@ -177,33 +233,17 @@ export function GramaticaTemaScreen() {
           variant={reproduciendoTodos ? 'secondary' : 'primary'}
           style={styles.escucharTodos}
         />
-        {tema.ejemplos.map((e, i) => (
-          <Card
-            key={i}
-            style={i === ejemploActivo ? { ...styles.ejemplo, ...styles.ejemploActivo } : styles.ejemplo}
-          >
-            <Text style={styles.en}>{e.en}</Text>
-            <Text style={styles.es}>{e.es}</Text>
-            <View style={styles.audioRow}>
-              <AudioButton path={e.audio} size="sm" label="Inglés" onBeforePlay={soltarSecuencia} />
-              <AudioButton
-                path={e.audio_lento}
-                size="sm"
-                slow
-                label="Lento"
-                onBeforePlay={soltarSecuencia}
-              />
-              {e.audio_es ? (
-                <AudioButton
-                  path={e.audio_es}
-                  size="sm"
-                  label="Español"
-                  onBeforePlay={soltarSecuencia}
-                />
-              ) : null}
-            </View>
-          </Card>
-        ))}
+        <View style={styles.ejemplos}>
+          {tema.ejemplos.map((e, i) => (
+            <EjemploFrase
+              key={i}
+              ejemplo={e}
+              activo={i === ejemploActivo}
+              antes={soltarSecuencia}
+              alActivarse={llevarAVista}
+            />
+          ))}
+        </View>
       </Bloque>
 
       {tema.contraste ? (
@@ -326,17 +366,9 @@ const styles = StyleSheet.create({
     color: color.text,
     lineHeight: font.size.md * 1.6,
   },
-  escucharTodos: { alignSelf: 'flex-start', marginBottom: space.sm },
-  ejemplo: { gap: 4 },
-  ejemploActivo: { borderWidth: 1, borderColor: color.accent, backgroundColor: color.accentSoft },
+  escucharTodos: { alignSelf: 'flex-start', marginBottom: space.md },
+  ejemplos: { gap: space.md },
   audioRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
-  en: {
-    fontSize: font.size.lg,
-    fontFamily: font.family.heading,
-    color: color.text,
-    lineHeight: font.size.lg * 1.35,
-  },
-  es: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
   contraste: { backgroundColor: color.surfaceAlt },
   contrasteTxt: {
     fontFamily: font.family.body,
