@@ -42,6 +42,7 @@ export {
   motionSacudida,
   motionLogro,
   motionDulces,
+  motionColmena,
   motionVeredicto,
   escalon,
   aparecer,

@@ -12,7 +12,7 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Polygon, Stop } from 'react-native-svg';
 import { Icon } from '@/components/base/Icon';
 import { Presionable } from '@/components/base/Presionable';
-import { color, font, motionDuration, motionEasing, motionSpring, radius, senal } from '@/theme';
+import { color, font, motionColmena, motionDuration, motionEasing, motionSpring, radius, senal } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { puntosHexagono } from './geometria';
 
@@ -27,6 +27,8 @@ const ENTRA_DESDE = 0.5;
 const FILO = 1.5;
 /** Desde qué punto del vuelo (0 a 1) el hexágono se funde con la ranura. */
 const FUNDE_DESDE = 0.45;
+/** Con la ronda resuelta los contornos del panal se quedan a esta opacidad, detrás de la frase. */
+const OPACIDAD_TENUE = 0.35;
 
 /** Una ficha que vuela a su ranura: por un toque, por una pista o porque la ayuda completó la frase. */
 export interface Vuelo {
@@ -54,21 +56,56 @@ interface ContornoProps {
   y: number;
   ancho: number;
   alto: number;
+  /** La ronda se resolvió: el contorno se atenúa y queda de fondo de la frase. */
+  atenuado: boolean;
+  /** Se pasa a la ronda siguiente: el contorno sale hacia abajo. */
+  saliendo: boolean;
+  /** Cuánto espera para salir (el escalón de su distancia al centro). */
+  retrasoSalida: number;
 }
 
-/** El lugar del hexágono cuando su ficha se fue: un contorno fino que no se toca. */
-export const ContornoHex = memo(function ContornoHex({ x, y, ancho, alto }: ContornoProps) {
+/**
+ * El lugar del hexágono cuando su ficha se fue: un contorno fino que no se toca. Al resolverse la ronda se
+ * atenúa y queda de fondo; al pasar a la siguiente, sale hacia abajo y se desvanece: es el panal que se deshace.
+ * Con «reducir movimiento» solo cambia la opacidad.
+ */
+export const ContornoHex = memo(function ContornoHex({ x, y, ancho, alto, atenuado, saliendo, retrasoSalida }: ContornoProps) {
+  const reducido = useMovimientoReducido();
+  const tenue = useSharedValue(0);
+  const salida = useSharedValue(0);
+
+  useEffect(() => {
+    tenue.value = withTiming(atenuado ? 1 : 0, {
+      duration: reducido ? motionDuration.rapido : motionDuration.base,
+      easing: motionEasing.entrar,
+    });
+  }, [atenuado, reducido, tenue]);
+
+  useEffect(() => {
+    if (!saliendo) return;
+    const ir = withTiming(1, {
+      duration: reducido ? motionDuration.rapido : motionColmena.salida / 2,
+      easing: motionEasing.salir,
+    });
+    salida.value = reducido || retrasoSalida <= 0 ? ir : withDelay(retrasoSalida, ir);
+  }, [saliendo, reducido, retrasoSalida, salida]);
+
+  const estilo = useAnimatedStyle(() => ({
+    opacity: (1 - (1 - OPACIDAD_TENUE) * tenue.value) * (1 - salida.value),
+    transform: [{ translateY: reducido ? 0 : salida.value * motionColmena.caeDp * 1.5 }],
+  }));
+
   return (
-    <View
+    <Animated.View
       pointerEvents="none"
       importantForAccessibility="no-hide-descendants"
       accessibilityElementsHidden
-      style={[styles.abs, { left: x, top: y, width: ancho, height: alto }]}
+      style={[styles.abs, { left: x, top: y, width: ancho, height: alto }, estilo]}
     >
       <Svg width={ancho} height={alto}>
         <Polygon points={puntosHexagono(ancho, alto, 0.5)} fill="none" stroke={color.border} strokeWidth={1} strokeLinejoin="round" />
       </Svg>
-    </View>
+    </Animated.View>
   );
 });
 
@@ -113,6 +150,9 @@ interface Props {
   entrada: number;
   vuelo: Vuelo | null;
   rechazo: Rechazo | null;
+  /** La ronda se resolvió: si esta ficha no se usó (es un señuelo), cae y se desvanece. */
+  cae: boolean;
+  retrasoCae: number;
   onTocar: (indice: number) => void;
 }
 
@@ -124,7 +164,7 @@ interface Props {
  * el estado de la pantalla solo dice qué ficha vuela y hacia dónde. Con «reducir movimiento» no hay vuelo ni
  * rebote: la ficha se desvanece y la letra aparece en su ranura.
  */
-export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alto, toque, entrada, vuelo, rechazo, onTocar }: Props) {
+export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alto, toque, entrada, vuelo, rechazo, cae, retrasoCae, onTocar }: Props) {
   const reducido = useMovimientoReducido();
   const avance = useSharedValue(0);
   const vx = useSharedValue(0);
@@ -137,6 +177,7 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   const entra = useSharedValue(reducido ? 1 : ENTRA_DESDE);
   const brillo = useSharedValue(0);
   const destello = useSharedValue(0);
+  const caida = useSharedValue(0);
   const [sacude, setSacude] = useState(false);
 
   // Al armarse el panal: cada ficha crece y se aclara con el escalón de su distancia al centro.
@@ -150,6 +191,16 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
     // Solo cuenta la entrada del montaje.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Un señuelo, con la ronda ya resuelta: cae y se desvanece. Las fichas que se usaron ya se fueron volando.
+  useEffect(() => {
+    if (!cae || vuelo) return;
+    const caer = withTiming(1, {
+      duration: reducido ? motionDuration.rapido : motionColmena.cae,
+      easing: motionEasing.salir,
+    });
+    caida.value = reducido || retrasoCae <= 0 ? caer : withDelay(retrasoCae, caer);
+  }, [cae, vuelo, reducido, retrasoCae, caida]);
 
   // Vuela a su ranura.
   useEffect(() => {
@@ -212,11 +263,11 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   const lugar = useAnimatedStyle(() => {
     const p = avance.value;
     return {
-      opacity: opacidad.value,
+      opacity: opacidad.value * (1 - caida.value),
       zIndex: p > 0 ? 10 : 0,
       transform: [
         { translateX: vx.value * p },
-        { translateY: vy.value * p - ARCO * Math.sin(Math.PI * p) },
+        { translateY: vy.value * p - ARCO * Math.sin(Math.PI * p) + (reducido ? 0 : caida.value * motionColmena.caeDp) },
         { scale: entra.value },
       ],
     };

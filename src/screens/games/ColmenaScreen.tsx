@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AccessibilityInfo, AppState, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { BloqueEscuchar } from '@/components/juegos/colmena/BloqueEscuchar';
+import { FraseResuelta } from '@/components/juegos/colmena/FraseResuelta';
 import { disposicionPanal, distribuirRanuras, fichasParaCompletar, retrasoVuelo } from '@/components/juegos/colmena/geometria';
 import { DURACION_VUELO, type Vuelo } from '@/components/juegos/colmena/Hexagono';
 import { Panal, type Colocada, type RechazoFicha } from '@/components/juegos/colmena/Panal';
@@ -18,11 +18,12 @@ import { applyGameGrade } from '@/db/games';
 import { getRandomSpellable } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
+import { useMovimientoReducido } from '@/utils';
 import { formaPalabras } from '@/utils/text';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, layout, radius, space, aparecer, motionDuration } from '@/theme';
+import { color, font, layout, radius, space, motionColmena, motionDuration } from '@/theme';
 import type { ColmenaRound, NivelColmena } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -86,6 +87,7 @@ export function ColmenaScreen() {
       sub.remove();
       audio.stop();
       if (avanzandoTimer.current) clearTimeout(avanzandoTimer.current);
+      if (salidaTimer.current) clearTimeout(salidaTimer.current);
     };
   }, []);
 
@@ -106,6 +108,12 @@ export function ColmenaScreen() {
   // Evita doble toque en "Siguiente": se levanta solo a los 400ms.
   const [avanzando, setAvanzando] = useState(false);
   const avanzandoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Al pasar de ronda el panal se deshace primero; este es el reloj que espera a que salga.
+  const [saliendo, setSaliendo] = useState(false);
+  const salidaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reducido = useMovimientoReducido();
+  // La ronda terminó porque se acabó el tiempo (y no porque quien juega se rindió).
+  const [seAcabo, setSeAcabo] = useState(false);
 
   const empezoEn = useRef(Date.now());
   // Lo que solo se dibuja: qué fichas vuelan y hacia dónde, y la última letra que no iba.
@@ -164,6 +172,19 @@ export function ColmenaScreen() {
     return r;
   }, [colocadas]);
 
+  const aterrizaMs = useMemo(() => retrasos.reduce((m, r) => Math.max(m, r ?? 0), 0), [retrasos]);
+
+  // El lector de pantalla oye la frase completa cuando se resuelve la ronda.
+  useEffect(() => {
+    if (!resuelta || !round) return;
+    const frase = round.entry.phrase;
+    AccessibilityInfo.announceForAccessibility(
+      ayudaDesde === null ? `Frase completa: ${frase}` : `${seAcabo ? 'Se acabó el tiempo. ' : ''}La frase era: ${frase}`
+    );
+    // Solo cuenta el momento de resolverse.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resuelta]);
+
   /** El vuelo de una ficha del panal a una ranura, del centro de una al centro de la otra. */
   const vueloA = useCallback(
     (ficha: number, ranura: number, tipo: Vuelo['tipo'], retraso: number): Vuelo | null => {
@@ -206,6 +227,8 @@ export function ColmenaScreen() {
     setUsadas([]);
     setResuelta(false);
     setAyudaDesde(null);
+    setSeAcabo(false);
+    setSaliendo(false);
     setEscuchas(ESCUCHAS_POR_RONDA);
     setSonandoEscuchar(false);
   }, [idx]);
@@ -298,6 +321,19 @@ export function ColmenaScreen() {
     setSonandoEscuchar(false);
   }, [round, resuelta, sonandoEscuchar, escuchas]);
 
+  /** Pasa a la ronda que sigue. Lo de la ronda que se deja se limpia junto con el cambio: la nueva no pinta ni un cuadro con ello. */
+  const avanzarRonda = useCallback(() => {
+    setColocadas([]);
+    setRechazo(null);
+    setArmado('');
+    setUsadas([]);
+    setResuelta(false);
+    setAyudaDesde(null);
+    setSeAcabo(false);
+    setSaliendo(false);
+    setIdx((i) => i + 1);
+  }, []);
+
   const siguiente = useCallback(() => {
     // Bloquea el botón ~400ms: sin esto, dos toques rápidos podían
     // procesar dos avances y disparar dos veces la lógica de abajo.
@@ -318,15 +354,15 @@ export function ColmenaScreen() {
       });
       return;
     }
-    // Lo de la ronda que se deja se limpia junto con el cambio: la nueva no pinta ni un cuadro con lo de la anterior.
-    setColocadas([]);
-    setRechazo(null);
-    setArmado('');
-    setUsadas([]);
-    setResuelta(false);
-    setAyudaDesde(null);
-    setIdx((i) => i + 1);
-  }, [avanzando, idx, rounds.length, aciertos, nav, nivel]);
+    // El panal se deshace hacia abajo y, cuando sale, entra la ronda que sigue. Con «reducir movimiento» no se espera.
+    if (reducido) {
+      avanzarRonda();
+      return;
+    }
+    setSaliendo(true);
+    if (salidaTimer.current) clearTimeout(salidaTimer.current);
+    salidaTimer.current = setTimeout(avanzarRonda, motionColmena.salida);
+  }, [avanzando, idx, rounds.length, aciertos, nav, nivel, reducido, avanzarRonda]);
 
   /**
    * Se acabó el tiempo.
@@ -338,6 +374,7 @@ export function ColmenaScreen() {
   const seAcaboElTiempo = useCallback(async () => {
     if (!user || !round || resuelta) return;
     setResuelta(true);
+    setSeAcabo(true);
     setAyudaDesde(armado.length);
     volarFaltantes();
     setArmado(round.objetivo);
@@ -422,10 +459,9 @@ export function ColmenaScreen() {
         <View style={styles.pie}>
           {resuelta ? (
             <Button
+              label={idx + 1 >= rounds.length ? 'Terminar' : 'Siguiente'}
               icon={idx + 1 >= rounds.length ? 'check' : 'arrow-right'}
-              accessibilityLabel={
-                idx + 1 >= rounds.length ? 'Terminar' : 'Siguiente'
-              }
+              iconAlFinal={idx + 1 < rounds.length}
               onPress={siguiente}
               disabled={avanzando}
               full
@@ -519,26 +555,36 @@ export function ColmenaScreen() {
         <View style={styles.espacio} />
 
         <View
+          style={{ width: disposicion.ancho, minHeight: disposicion.alto }}
           onLayout={(e) => {
             origenPanal.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y };
           }}
         >
-          <Panal
-            key={idx}
-            letras={round.letras}
-            disposicion={disposicion}
-            colocadas={colocadas}
-            rechazo={rechazo}
-            onTocar={alTocarFicha}
-          />
+          <View style={styles.panalCapa}>
+            <Panal
+              key={idx}
+              letras={round.letras}
+              disposicion={disposicion}
+              colocadas={colocadas}
+              rechazo={rechazo}
+              resuelta={resuelta}
+              saliendo={saliendo}
+              onTocar={alTocarFicha}
+            />
+          </View>
+          {resuelta && analisis ? (
+            <FraseResuelta
+              key={idx}
+              entry={round.entry}
+              palabras={analisis.palabras}
+              voz={voz}
+              seAcabo={seAcabo}
+              retraso={aterrizaMs}
+              saliendo={saliendo}
+              alto={disposicion.alto}
+            />
+          ) : null}
         </View>
-
-        {resuelta ? (
-          <Animated.View entering={aparecer()} style={styles.revelado}>
-            <Text style={styles.frase}>{round.entry.phrase}</Text>
-            <Text style={styles.fraseEs}>{round.entry.spanish_main}</Text>
-          </Animated.View>
-        ) : null}
       </ScrollView>
     </Screen>
   );
@@ -550,6 +596,8 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   // Con poco contenido el panal queda pegado abajo (zona del pulgar); con mucho, todo hace scroll.
   espacio: { flex: 1 },
+  // El panal va en el lugar del wrapper sin darle altura: si la frase resuelta es más alta, el wrapper crece con ella.
+  panalCapa: { position: 'absolute', left: 0, top: 0 },
   bodyContenido: {
     flexGrow: 1,
     paddingHorizontal: space.lg,
@@ -573,20 +621,6 @@ const styles = StyleSheet.create({
     letterSpacing: font.size.xxl * -0.015,
     fontFamily: font.family.display,
     color: color.text,
-    textAlign: 'center',
-  },
-  revelado: { alignItems: 'center', gap: space.xs },
-  frase: {
-    fontSize: font.size.lg,
-    color: color.correct,
-    fontFamily: font.family.heading,
-    textAlign: 'center',
-  },
-  fraseEs: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    lineHeight: font.size.md * 1.5,
-    color: color.textMuted,
     textAlign: 'center',
   },
   // El footer de Screen ya pone el padding horizontal y el de abajo

@@ -116,6 +116,20 @@ export const motionDulces = {
   chip: 700,
 } as const;
 
+/**
+ * Colmena: lo que no cabe en la escala general. La onda de luz de una frase resuelta pasa de una ranura a la
+ * siguiente en `ondaPaso` ms (sin pasar de `ondaTope` en total); los señuelos caen y se desvanecen en `cae` bajando
+ * `caeDp`; al cambiar de ronda el panal sale en `salida` ms, cada contorno `salidaPaso` después del anterior.
+ */
+export const motionColmena = {
+  ondaPaso: 30,
+  ondaTope: 450,
+  cae: 260,
+  caeDp: 28,
+  salida: 300,
+  salidaPaso: 20,
+} as const;
+
 /** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 
