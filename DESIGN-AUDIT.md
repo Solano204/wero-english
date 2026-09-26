@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 323 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 325 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -79,6 +79,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/fx/BarraSesion.tsx:126`
 - `src/components/fx/BarraSesion.tsx:129`
 - `src/components/fx/BotonSenal.tsx:84`
+- `src/components/fx/CableTrazo.tsx:80`
 - `src/components/fx/HojaVeredicto.tsx:171`
 - `src/components/fx/MedidorVU.tsx:99`
 - `src/components/fx/OndaSenal.tsx:53`
@@ -92,7 +93,6 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/juegos/colmena/Hexagono.tsx:354`
 - `src/components/juegos/dulces/HojaPregunta.tsx:161`
 - `src/components/juegos/dulces/SimboloPieza.tsx:52`
-- `src/components/juegos/pares/CableSenal.tsx:388`
 - `src/components/lectura/TarjetaLectura.tsx:90`
 - `src/components/niveles/CeldaNivel.tsx:130`
 - `src/components/phrasal/RenglonVerbo.tsx:75`
@@ -262,10 +262,10 @@ Otros 2 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
 - `src/components/fx/PuntosRepeticion.tsx:54` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:104` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:107` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:113` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:116` — key por índice
+- `src/components/gramatica/CorreccionFrase.tsx:102` — key por índice
+- `src/components/gramatica/CorreccionFrase.tsx:105` — key por índice
+- `src/components/gramatica/CorreccionFrase.tsx:111` — key por índice
+- `src/components/gramatica/CorreccionFrase.tsx:114` — key por índice
 - `src/components/gramatica/FormulaFichas.tsx:52` — key por índice
 - `src/components/gramatica/MedidorNivel.tsx:35` — key por índice
 - `src/components/juegos/caida/IndicadorRitmo.tsx:49` — key por índice

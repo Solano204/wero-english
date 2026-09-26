@@ -1,20 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Canvas, Circle, LinearGradient, Path, Skia, vec } from '@shopify/react-native-skia';
+import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   cancelAnimation,
-  interpolateColor,
   runOnJS,
   runOnUI,
-  useDerivedValue,
   useSharedValue,
   withDelay,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { FxSeguro } from '@/components/fx/FxSeguro';
-import { color, motionDuration, motionEasing, senal } from '@/theme';
+import { CableTrazo } from '@/components/fx/CableTrazo';
+import { motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { centroDe, fichaEn, type Rect } from './geometria';
 
@@ -33,20 +30,6 @@ const IMAN = 0.6;
 const TENSION_ARRASTRE = 0.8;
 const TENSION_INICIO = 0.5;
 const TENSION_FLOJA = 0.15;
-/** Lo que cuelga un cable flojo, en fracción de su largo y con tope. */
-const HOLGURA_FRAC = 0.35;
-const HOLGURA_MAX = 56;
-const GROSOR = 3;
-const GROSOR_BRILLO = 10;
-const GROSOR_PULSO = 5;
-const OPACIDAD_BRILLO = 0.2;
-const LARGO_PULSO = 0.22;
-const RADIO_ANCLA = 5;
-const RADIO_PUNTA = 4;
-// Copias locales: un worklet captura estos colores, no el objeto de tema entero.
-const ACENTO = color.accent;
-const AMBAR = color.wrong;
-const LUZ = color.accent100;
 
 interface Punto {
   x: number;
@@ -358,57 +341,13 @@ export function CableSenal({
     );
   }, [habilitado, rectas, libresSv, bloqueadoSv, anclaSv, desde, inicioX, inicioY, estado, vis, ax, ay, ex, ey, tension, ambar, brillo, pulso, alIniciar, alSoltar, alCancelar, recoger]);
 
-  const trazo = useDerivedValue(() => {
-    const p = Skia.Path.Make();
-    const largo = Math.hypot(ex.value - ax.value, ey.value - ay.value);
-    if (largo < 0.5) return p;
-    const holgura = (1 - tension.value) * Math.min(largo * HOLGURA_FRAC, HOLGURA_MAX);
-    p.moveTo(ax.value, ay.value);
-    p.quadTo((ax.value + ex.value) / 2, (ay.value + ey.value) / 2 + holgura, ex.value, ey.value);
-    return p;
-  });
-  const inicio = useDerivedValue(() => vec(ax.value, ay.value));
-  const fin = useDerivedValue(() => vec(ex.value, ey.value));
-  const opacidadBrillo = useDerivedValue(() => brillo.value * OPACIDAD_BRILLO * vis.value * (1 - ambar.value));
-  const opacidadSenal = useDerivedValue(() => vis.value * (1 - ambar.value));
-  const opacidadAmbar = useDerivedValue(() => vis.value * ambar.value);
-  const opacidadPulso = useDerivedValue(() => (pulso.value > 0.001 ? vis.value : 0));
-  const pulsoInicio = useDerivedValue(() => Math.max(0, pulso.value - LARGO_PULSO));
-  const colorPunto = useDerivedValue(() => interpolateColor(ambar.value, [0, 1], [ACENTO, AMBAR]));
-
   return (
     <GestureDetector gesture={gesto}>
       <View style={{ width: ancho, height: alto }}>
         {children}
-        {reducido ? null : (
-          <FxSeguro>
-            <Canvas style={styles.lienzo} pointerEvents="none" accessible={false}>
-              <Path path={trazo} style="stroke" strokeWidth={GROSOR_BRILLO} strokeCap="round" color={ACENTO} opacity={opacidadBrillo} />
-              <Path path={trazo} style="stroke" strokeWidth={GROSOR} strokeCap="round" opacity={opacidadSenal}>
-                <LinearGradient start={inicio} end={fin} colors={senal} />
-              </Path>
-              <Path path={trazo} style="stroke" strokeWidth={GROSOR} strokeCap="round" color={AMBAR} opacity={opacidadAmbar} />
-              <Path
-                path={trazo}
-                style="stroke"
-                strokeWidth={GROSOR_PULSO}
-                strokeCap="round"
-                color={LUZ}
-                start={pulsoInicio}
-                end={pulso}
-                opacity={opacidadPulso}
-              />
-              <Circle cx={ax} cy={ay} r={RADIO_ANCLA} color={colorPunto} opacity={vis} />
-              <Circle cx={ex} cy={ey} r={RADIO_PUNTA} color={colorPunto} opacity={vis} />
-            </Canvas>
-          </FxSeguro>
-        )}
+        <CableTrazo ax={ax} ay={ay} ex={ex} ey={ey} tension={tension} vis={vis} brillo={brillo} ambar={ambar} pulso={pulso} />
       </View>
     </GestureDetector>
   );
 }
 
-const styles = StyleSheet.create({
-  // Por encima de la ficha elevada (zIndex 1): el cable sale de su centro.
-  lienzo: { ...StyleSheet.absoluteFill, zIndex: 2 },
-});
