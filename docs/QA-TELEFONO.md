@@ -114,7 +114,7 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 
 Activar en Android: Ajustes > Accesibilidad > Quitar animaciones.
 
-- [ ] Repetir las secciones a) a g), j) y k) con la opción activa; nada debe romperse ni quedar sin mostrar
+- [ ] Repetir las secciones a) a g), j), k) y l) con la opción activa; nada debe romperse ni quedar sin mostrar
 - [ ] Botones, tarjetas, filas y pestañas: al tocar no escalan, solo bajan a 70 % de opacidad
 - [ ] Acierto: sin pulso ni cubitos; el verde sí aparece y siguen el háptico y el sonido
 - [ ] Fallo: sin temblor; el ámbar sí aparece y siguen el háptico y el sonido
@@ -169,6 +169,26 @@ Marcas de oración de Polly: sin ellas el seguimiento del audio es una estimaci�
 - [ ] TalkBack: la frase con su IPA ofrece las acciones «Siguiente» y «Guardar» («Quitar de Mi mazo» si ya está guardada); las cartas de atrás no se leen; los grupos de audio y los botones del pie se pueden enfocar
 - [ ] 360 px de ancho y fuente grande: la carta cabe sin scroll, se ven los dos botones del pie y los grupos de audio no se salen de la carta
 - [ ] Consola: entrar, deslizar y guardar sin ningún aviso de Reanimated ni de Gesture Handler
+
+## l) Errores que te delatan
+
+- [ ] Lista sin filtro: arriba «194 errores» con el número rodando; los chips dicen su cuenta («Calcos 40» y así) y scrollean con un desvanecido a la derecha; el chip activo en `accentSoft` con borde cian
+- [ ] Lista con filtro: al tocar «Calcos» el número pasa a «N de 194» rodando, la lista sale junta y entran las primeras 8 tarjetas escalonadas; el resto aparece directo; cambiar de filtro rápido varias veces no deja la lista a medias
+- [ ] Orden: «Más graves primero» deja arriba los de «Cambia el significado»; «En orden» los pone como vienen; cambia el orden, sal de la app y vuelve: el orden se conserva; el orden nunca cambia cuántos hay
+- [ ] Tarjeta: ✕ y lo dicho tachado, lo que entienden en ámbar cursiva con el ícono de señal rota, ✓ y lo correcto, «Para contar» en los que se pueden contar y a la derecha el medidor de 3 barras con su etiqueta en texto (sin rojo en ninguna parte)
+- [ ] Detalle de un falso amigo (por ejemplo «I am constipated»): entra «Lo que dices» normal, baja el cable, a medio camino vibra y se pone ámbar y «Estoy estreñido» llega con glitch y se asienta; después se tacha «Lo que dices» y en «Lo correcto» la frase se transforma en «I have a cold»; todo en ~1.5 s
+- [ ] Detalle de un error de gramática: la transformación deja lo igual en su lugar y solo se mueven las palabras distintas; con una frase muy distinta (por ejemplo «In this moment I'm busy») se ven las dos con un fundido
+- [ ] Detalle de un error de pronunciación (por ejemplo «soap» / «soup»): aparece el duelo «Así suena mal» (ámbar) y «Así suena bien» (verde), cada mitad suena al tocarla y se enciende mientras suena
+- [ ] «Ver otra vez» repite toda la secuencia sin dejar restos (cable, glitch o tachado a medias); pulsarlo a mitad de la secuencia también la reinicia limpia
+- [ ] Karaoke: al terminar la secuencia, tocar «Escuchar» ilumina la frase de «Lo correcto» palabra por palabra; «Lento» también
+- [ ] Compartir: solo sale en los que tienen «Para contar»; abre el menú del sistema con «Decía «…» y lo que entienden es «…». Se dice «…». Lo aprendí con Wero.»; cancelar el menú no muestra ningún aviso
+- [ ] Error sin imagen: «Lo que entienden» no reserva hueco; con imagen, ocupa todo el ancho de la tarjeta (no una píldora angosta)
+- [ ] Salir del detalle, o abrir «Ver la frase completa», con la voz sonando la corta al instante
+- [ ] Reducir movimiento: en la lista el número y las tarjetas cambian sin rodar ni entrar; en el detalle no hay cable, glitch, tachado animado ni transformación: las tres tarjetas aparecen completas con un fundido y no hay «Ver otra vez»
+- [ ] Lector de pantalla (TalkBack): la tarjeta de la lista se oye como un botón con el malentendido y su gravedad; el detalle dice «Lo que dices: … Lo que entienden: … Lo correcto: …» como un solo elemento y los botones Escuchar y Lento se enfocan aparte; el medidor dice «Gravedad: Te delata, 2 de 3»
+- [ ] Ningún rojo salvo lenguaje explícito: el error de un campo (contraseña mal escrita), «Borrar mi cuenta», los mensajes de error de arranque y descargas y el chequeo fallido de Diagnóstico se ven en ámbar, y el texto del botón «Borrar mi cuenta» se lee sobre el ámbar
+- [ ] 360 px y fuente grande: las tarjetas de la lista no se cortan (el medidor baja su etiqueta a dos líneas), los chips se pueden tocar y el duelo apila su texto sin encimarse
+- [ ] Consola: entrar a la lista, cambiar filtros, abrir varios detalles y usar «Ver otra vez» sin ningún aviso de Reanimated ni de Skia
 
 ## Cómo reportar
 

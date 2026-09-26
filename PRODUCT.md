@@ -114,6 +114,13 @@ La misma acción se llama igual en toda la app.
 | Guardar desde Frases sueltas | «Guardar» y «Guardada» (el mismo botón de Detalle); también deslizar la carta hacia arriba; el lector oye «Guardar» o «Quitar de Mi mazo» | guardar en minúscula, Favorito, Marcar |
 | Oír la frase y luego su traducción | «Inglés y español», junto a «Español» | Ambos, Los dos, Reproducir todo |
 | Cuando se acaba la baraja de Frases sueltas | «Barajando…» sobre el mazo vacío | Cargando, Fin, Sin más frases |
+| Los filtros de Errores que te delatan | Todos, Falsos amigos, Calcos, Gramática, Preposiciones, Pronunciación, Tono, Escritura, cada uno con su cuenta («Calcos 40») | Categorías, Tipos, Etiquetas |
+| Cuántos errores hay | «194 errores» sin filtro y «32 de 194» con filtro | resultados, coincidencias |
+| Cómo se ordenan los errores | «Ordenar»: «Más graves primero» y «En orden» | Relevancia, Por gravedad, Ordenar por |
+| La gravedad de un error | «Suena raro», «Te delata», «Cambia el significado»; el lector oye «Gravedad: Te delata, 2 de 3» | Leve, Grave, Crítico, Peligro |
+| Los tres pasos de un error | «Lo que dices», «Lo que entienden», «Lo correcto»; «Ver otra vez»; «Por qué pasa» | Incorrecto, Interpretación, Solución, Repetir |
+| El duelo de un error de pronunciación | «Así suena mal» y «Así suena bien» | Incorrecto, Correcto, Versus |
+| Sacar un error de la app | «Compartir» (menú del sistema); la etiqueta «Para contar» | Enviar, Publicar, Viral |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
