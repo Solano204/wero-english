@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { isBundled } from '@/assets/bundled';
-import { Badge, Button } from '@/components/base';
+import Animated from 'react-native-reanimated';
+import { Badge, Button, Icon } from '@/components/base';
 import { SceneImage } from '@/components/card';
 import { OndaVoz, useVozEnVivo, type Rect } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
 import { posicionVocal, sinBarras } from '@/domain/vocales';
 import * as audio from '@/services/audio';
-import { color, font, layout, space } from '@/theme';
+import { color, entraSube, font, layout, motionDuration, radius, space } from '@/theme';
 import type { Fonema } from '@/types';
 import { MapaBoca } from './MapaBoca';
+import { RenglonPalabra } from './RenglonPalabra';
 import { SIMBOLO_GRANDE } from './ViajeSimbolo';
 
 /** Cuántos cuadros se espera a que la página termine de acomodarse antes de dar por perdido el símbolo. */
@@ -27,6 +29,28 @@ const MODO_CONSONANTE: Record<string, string> = {
   nasal: 'nasal',
   aproximante: 'aproximante',
 };
+
+interface BloqueProps {
+  titulo: string;
+  cuerpo: string;
+  /** `accent` (cómo se hace) o `aviso` (qué sale mal: el ámbar sí aplica, es el error típico). */
+  tono: 'accent' | 'aviso';
+  retraso: number;
+}
+
+/** Un bloque de texto con filo izquierdo de 3 px que entra con un fundido subiendo 8 dp. */
+function Bloque({ titulo, cuerpo, tono, retraso }: BloqueProps) {
+  const aviso = tono === 'aviso';
+  return (
+    <Animated.View entering={entraSube(retraso)} style={[styles.bloque, aviso ? styles.bloqueAviso : styles.bloqueAccent]}>
+      <View style={styles.bloqueTitulo}>
+        {aviso ? <Icon name="warning" size="sm" color={color.riskWarn} /> : null}
+        <Text style={styles.subtitulo}>{titulo}</Text>
+      </View>
+      <Text style={styles.cuerpo}>{cuerpo}</Text>
+    </Animated.View>
+  );
+}
 
 interface Props {
   fonema: Fonema;
@@ -148,6 +172,26 @@ export function PaginaFonema({ fonema, esActual, simboloOculto, alSimboloMedido,
 
       {/* Sin imagen no se reserva lugar. */}
       {fonema.imagen ? <SceneImage path={fonema.imagen} size={160} ancha /> : null}
+
+      {fonema.como_producirlo ? (
+        <Bloque titulo="Cómo se hace" cuerpo={fonema.como_producirlo} tono="accent" retraso={motionDuration.rapido} />
+      ) : null}
+      {fonema.el_error_tipico ? (
+        <Bloque titulo="Qué sale mal" cuerpo={fonema.el_error_tipico} tono="aviso" retraso={motionDuration.rapido * 2} />
+      ) : null}
+
+      {fonema.ejemplos.length > 0 ? (
+        <View style={styles.seccion}>
+          <Text style={styles.tituloSeccion} accessibilityRole="header">
+            Palabras
+          </Text>
+          <View style={styles.lista}>
+            {fonema.ejemplos.map((e) => (
+              <RenglonPalabra key={e.palabra} ejemplo={e} esActual={esActual} />
+            ))}
+          </View>
+        </View>
+      ) : null}
     </ScrollView>
   );
 }
@@ -171,4 +215,19 @@ const styles = StyleSheet.create({
   botones: { flexDirection: 'row', gap: space.sm },
   boton: { flex: 1 },
   enPreparacion: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textFaint },
+  bloque: { gap: space.xs, padding: space.md, borderLeftWidth: 3, borderRadius: radius.sm },
+  bloqueAccent: { backgroundColor: color.surface, borderLeftColor: color.accent },
+  bloqueAviso: { backgroundColor: color.riskWarnSoft, borderLeftColor: color.riskWarn },
+  bloqueTitulo: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  subtitulo: {
+    fontFamily: font.family.bodyStrong,
+    fontSize: font.size.xs,
+    color: color.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  cuerpo: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.text },
+  seccion: { gap: space.md },
+  tituloSeccion: { fontFamily: font.family.heading, fontSize: font.size.lg, color: color.text },
+  lista: { gap: space.sm },
 });
