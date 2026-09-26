@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -18,6 +18,7 @@ import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/bas
 import { Marcador } from '@/components/fx';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { FichaCaida, type EstadoFicha } from '@/components/juegos/caida/FichaCaida';
+import { FinCaida, PieFinCaida } from '@/components/juegos/caida/FinCaida';
 import { FraseRonda } from '@/components/juegos/caida/FraseRonda';
 import { HojaPausa } from '@/components/juegos/caida/HojaPausa';
 import { IndicadorRitmo } from '@/components/juegos/caida/IndicadorRitmo';
@@ -26,6 +27,7 @@ import { MARGEN_ARRIBA, chevronsPara, largoEstela } from '@/components/juegos/ca
 import { CAIDA_INICIAL_MS, CAIDA_MINIMA_MS, buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
+import { getNiveles } from '@/db/levels';
 import { getRandomEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
@@ -43,7 +45,7 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { plural, useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils';
 import type { CaidaRound, Entry, NivelCaida } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -145,6 +147,12 @@ export function CaidaScreen() {
   // momento en que se acertó ya puede estar viejo. El ref siempre trae
   // el valor real.
   const aciertosRef = useRef(0);
+  // El récord del nivel: el que ya estaba en `nivel_juego` y el mejor de esta sesión (la base solo se
+  // actualiza al pasar por «Ver cómo me fue»). `recordAntes` es lo que había que superar en la partida que
+  // acaba de terminar.
+  const mejorGuardado = useRef(0);
+  const mejorSesion = useRef(0);
+  const [recordAntes, setRecordAntes] = useState(0);
   // Qué hacer cuando la pausa termina (ronda siguiente, o pasar al
   // resultado si se perdió), fuera de React: lo lee tanto el fin
   // natural de la voz como "Siguiente".
@@ -155,6 +163,29 @@ export function CaidaScreen() {
   const limiteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avanzarDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const montado = useRef(true);
+
+  useEffect(() => {
+    if (!user || !nivel) return undefined;
+    let vivo = true;
+    getNiveles(user.id, 'caida')
+      .then((estados) => {
+        if (vivo) mejorGuardado.current = estados.get(nivel)?.mejor ?? 0;
+      })
+      .catch((err: unknown) => {
+        // Sin el récord la pantalla final solo no lo muestra: la partida no depende de él.
+        if (__DEV__) console.warn('[caida] no se pudo leer el récord del nivel', err);
+      });
+    return () => {
+      vivo = false;
+    };
+  }, [user, nivel]);
+
+  /** Se acabó la partida: se guarda contra qué récord se jugó y pasa la pantalla final. */
+  const terminarPartida = useCallback(() => {
+    setRecordAntes(Math.max(mejorGuardado.current, mejorSesion.current));
+    mejorSesion.current = Math.max(mejorSesion.current, aciertosRef.current);
+    setPerdio(true);
+  }, []);
 
   useEffect(() => {
     montado.current = true;
@@ -305,8 +336,8 @@ export function CaidaScreen() {
     setAnimandoFin(!reducido);
     haptics.failure();
     estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
-    void pausarConVoz(round.entry, false, () => setPerdio(true));
-  }, [round, enPausa, pausarConVoz, estela, reducido]);
+    void pausarConVoz(round.entry, false, terminarPartida);
+  }, [round, enPausa, pausarConVoz, terminarPartida, estela, reducido]);
 
   // Arranca la caída de cada ronda.
   useEffect(() => {
@@ -398,7 +429,7 @@ export function CaidaScreen() {
         setFallada(texto);
         setFinRonda('fallo');
         setAnimandoFin(!reducido);
-        void pausarConVoz(round.entry, false, () => setPerdio(true));
+        void pausarConVoz(round.entry, false, terminarPartida);
         return;
       }
 
@@ -430,7 +461,7 @@ export function CaidaScreen() {
       // reemplace (stop() del combo corta el que ya estaba sonando).
       if (totalAciertos % 3 === 0) void audio.playCombo();
     },
-    [round, perdio, enPausa, y, estela, user, idx, rounds.length, nav, nivel, pausarConVoz]
+    [round, perdio, enPausa, y, estela, user, idx, rounds.length, nav, nivel, pausarConVoz, terminarPartida]
   );
 
   if (carga.estado === 'error') {
@@ -471,69 +502,36 @@ export function CaidaScreen() {
     return (
       <Screen
         footer={
-          // Fijo abajo: una frase larga en finCard (o un "Elegiste: ..."
-          // largo) no debe poder empujar estos dos botones fuera de la
-          // pantalla en un equipo chico.
-          <View style={styles.finBotones}>
-            <Button
-              icon="repeat"
-              accessibilityLabel="Otra partida"
-              onPress={() => {
-                setIdx(0);
-                setAciertos(0);
-                setFallada(null);
-                setAcertada(null);
-                setFinRonda(null);
-                setAnimandoFin(false);
-                setPerdio(false);
-              }}
-              full
-              size="lg"
-            />
-            <Button
-              label="Ver cómo me fue"
-              variant="secondary"
-              onPress={() =>
-                nav.replace('GameEnd', {
-                  juego: 'caida',
-                  rondas: rounds.length,
-                  aciertos,
-                  nivel: nivel ?? undefined,
-                })
-              }
-              full
-            />
-          </View>
+          // Fijo abajo: una frase larga en la tarjeta (o un "Elegiste: ..." largo) no debe poder empujar
+          // estos dos botones fuera de la pantalla en un equipo chico.
+          <PieFinCaida
+            onOtraVez={() => {
+              // El contador de aciertos vive también en un ref (la pausa lo lee sin esperar al render):
+              // empezar de nuevo lo reinicia igual que el estado.
+              aciertosRef.current = 0;
+              setIdx(0);
+              setAciertos(0);
+              setFallada(null);
+              setAcertada(null);
+              setFinRonda(null);
+              setAnimandoFin(false);
+              setPerdio(false);
+            }}
+            onVerResultado={() =>
+              nav.replace('GameEnd', {
+                juego: 'caida',
+                rondas: rounds.length,
+                aciertos,
+                nivel: nivel ?? undefined,
+              })
+            }
+          />
         }
       >
-        <Header onBack={() => nav.goBack()} title="Caída" />
-        <ScrollView
-          style={styles.finWrap}
-          contentContainerStyle={styles.finWrapContenido}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={styles.finNum} maxFontSizeMultiplier={1.2}>{aciertos}</Text>
-          <Text style={styles.finLabel}>
-            {plural(aciertos, 'frase seguida', 'frases seguidas')}
-          </Text>
-
-          {round ? (
-            <View style={styles.finCard}>
-              <Text style={styles.finFrase}>{round.entry.phrase}</Text>
-              <Text style={styles.finBien}>{round.correcta}</Text>
-              {fallada ? (
-                <Text style={styles.finMal}>Elegiste: {fallada}</Text>
-              ) : (
-                <Text style={styles.finMal}>Se te fue el tiempo</Text>
-              )}
-            </View>
-          ) : null}
-
-          <Text style={styles.finNota}>
-            Aquí sí se pierde la partida, pero nada más. Tu racha y tu avance
-            siguen igual.
-          </Text>
-        </ScrollView>
+        <Header onBack={() => nav.goBack()} title={nivel ? `Nivel ${nivel}` : undefined} />
+        {round ? (
+          <FinCaida aciertos={aciertos} entry={round.entry} correcta={round.correcta} fallada={fallada} record={recordAntes} />
+        ) : null}
       </Screen>
     );
   }
@@ -662,48 +660,6 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: space.lg,
   },
-  finWrap: { flex: 1 },
-  finWrapContenido: {
-    alignItems: 'center',
-    gap: space.sm,
-    paddingTop: space.xl,
-    paddingBottom: space.sm,
-  },
-  finNum: {
-    fontSize: 64,
-    letterSpacing: 64 * -0.015,
-    fontFamily: font.family.display,
-    color: color.accent,
-  },
-  finLabel: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
-  finCard: {
-    alignSelf: 'stretch',
-    backgroundColor: color.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: color.border,
-    padding: space.lg,
-    gap: 4,
-    marginTop: space.lg,
-    ...shadow.card,
-  },
-  finFrase: {
-    fontSize: font.size.lg,
-    fontFamily: font.family.heading,
-    color: color.text,
-  },
-  finBien: { fontFamily: font.family.body, fontSize: font.size.md, color: color.correct },
-  finMal: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.wrong },
-  finNota: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    textAlign: 'center',
-    marginTop: space.md,
-  },
-  // El footer de Screen ya pone el padding y separa del contenido de
-  // arriba: aquí solo el espacio entre los dos botones.
-  finBotones: { gap: space.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });
