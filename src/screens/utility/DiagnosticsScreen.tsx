@@ -51,7 +51,7 @@ export function DiagnosticsScreen() {
       <View style={styles.list}>
         {health.map((h) => (
           <Card key={h.name} style={styles.row}>
-            <Icon name={h.ok ? 'check' : 'warning'} size="md" color={h.ok ? color.correct : color.riskStrong} />
+            <Icon name={h.ok ? 'check' : 'warning'} size="md" color={h.ok ? color.correct : color.wrong} />
             <Text style={styles.name}>{h.name}</Text>
             <Text style={styles.count}>{h.count}</Text>
           </Card>

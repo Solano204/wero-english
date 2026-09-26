@@ -75,7 +75,7 @@ export function ErrorDetailScreen() {
 
       <View style={styles.tags}>
         {err.gravedad === 3 ? (
-          <Badge label="Cambia el significado" tone="strong" small />
+          <Badge label="Cambia el significado" tone="warn" small />
         ) : err.gravedad === 2 ? (
           <Badge label="Te delata" tone="warn" small />
         ) : (
@@ -99,7 +99,7 @@ export function ErrorDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  bad: { gap: space.sm, borderLeftWidth: 3, borderLeftColor: color.riskStrong },
+  bad: { gap: space.sm, borderLeftWidth: 3, borderLeftColor: color.wrong },
   understood: {
     gap: space.xs,
     marginTop: space.sm,
@@ -137,7 +137,8 @@ const styles = StyleSheet.create({
     fontFamily: font.family.heading,
     lineHeight: font.size.xl * 1.3,
   },
-  errImg: { alignSelf: 'center', marginTop: space.sm },
+  // Sin `alignSelf`: `ancha` la estira a todo el ancho de la tarjeta, y centrarla la dejaba como una píldora angosta.
+  errImg: { marginTop: space.sm },
   ipa: { fontFamily: font.family.ipa, fontSize: font.size.sm, color: color.textMuted },
   why: { marginTop: space.xl, gap: space.sm },
   whyHead: {

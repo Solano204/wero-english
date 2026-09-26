@@ -20,6 +20,22 @@ const MAX_DIF_TONO = 8;
 
 const esColor = (l) => COLOR.test(l) || COLOR_SKSL.test(l);
 
+/**
+ * COLOR-3: `riskStrong` (el único rojo) y el tono `strong` del Badge son solo para lenguaje explícito. Un fallo, un
+ * error o una gravedad van en `wrong` (ámbar, nunca rojo). Solo estos archivos pueden usarlos.
+ */
+const EXPLICITO = new Set([
+  // Define el tono `strong` y RiskBadge («Solo con amigos»).
+  'src/components/base/Badge.tsx',
+  // El paso explícito de la escala de registro.
+  'src/components/detalle/EscalaRegistro.tsx',
+  // El aviso «Fuerte» de una frase con vulgaridad 2.
+  'src/components/mazo/CartaFrase.tsx',
+  'src/components/phrasal/DetalleForma.tsx',
+]);
+const ROJO = /\briskStrong(?:Soft)?\b|['"]strong['"]/;
+const rojoFueraDeLugar = (rel, src) => (EXPLICITO.has(rel) ? [] : sinComentarios(src).split('\n').flatMap((l, i) => (ROJO.test(l) ? [i + 1] : [])));
+
 /** Tono (0 a 360) de un #rrggbb. */
 export function tono(hex) {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
@@ -101,6 +117,22 @@ function autoprueba() {
     if (real !== esperado) throw new Error(`autoprueba: ${JSON.stringify(src)} dio ${real}, esperaba ${esperado}`);
   }
   console.log(`autoprueba: ${casos.length} casos ok`);
+  const rojo = [
+    ['src/screens/x.tsx', 'const c = color.riskStrong;', 1],
+    ['src/screens/x.tsx', 'const c = color.riskStrongSoft;', 1],
+    ['src/screens/x.tsx', '<Badge label="Cambia" tone="strong" />', 1],
+    ['src/screens/x.tsx', "tone: 'strong',", 1],
+    ['src/screens/x.tsx', '// color.riskStrong', 0],
+    ['src/screens/x.tsx', '/* tone="strong" */ const a = 1;', 0],
+    ['src/screens/x.tsx', 'fontFamily: font.family.bodyStrong,', 0],
+    ['src/components/detalle/EscalaRegistro.tsx', 'const c = color.riskStrong;', 0],
+    ['src/components/base/Badge.tsx', "tone={v === 2 ? 'strong' : 'warn'}", 0],
+  ];
+  for (const [rel, src, esperado] of rojo) {
+    const real = rojoFueraDeLugar(rel, src).length;
+    if (real !== esperado) throw new Error(`autoprueba COLOR-3: ${rel} ${JSON.stringify(src)} dio ${real}, esperaba ${esperado}`);
+  }
+  console.log(`autoprueba COLOR-3: ${rojo.length} casos ok`);
   const hue = Math.round(tono('#45D9FF'));
   if (hue < 190 || hue > 192) throw new Error(`autoprueba: el tono de #45D9FF dio ${hue}, esperaba 191`);
   if (difTono(350, 10) !== 20) throw new Error('autoprueba: la diferencia de tono no es circular');
@@ -121,8 +153,12 @@ if (process.argv.includes('--test')) {
 } else {
   const lista = archivos(path.join(ROOT, 'src')).concat(path.join(ROOT, 'App.tsx'));
   const hallazgos = [];
+  const rojos = [];
   for (const f of lista) {
-    const original = fs.readFileSync(f, 'utf8').split('\n');
+    const rel = path.relative(ROOT, f).split(path.sep).join('/');
+    const fuente = fs.readFileSync(f, 'utf8');
+    for (const n of rojoFueraDeLugar(rel, fuente)) rojos.push(`${rel}:${n}  ${fuente.split('\n')[n - 1].trim().slice(0, 90)}`);
+    const original = fuente.split('\n');
     sinComentarios(original.join('\n'))
       .split('\n')
       .forEach((l, i) => {
@@ -132,7 +168,9 @@ if (process.argv.includes('--test')) {
   console.log(`archivos revisados: ${lista.length}`);
   console.log(`colores fuera de src/theme/: ${hallazgos.length}`);
   for (const h of hallazgos) console.log(`  ${h}`);
+  console.log(`rojo fuera de lenguaje explícito (COLOR-3): ${rojos.length}`);
+  for (const r of rojos) console.log(`  ${r}`);
   const errores = revisaSenal();
   for (const e of errores) console.log(`  ${e}`);
-  if (hallazgos.length || errores.length) process.exit(1);
+  if (hallazgos.length || rojos.length || errores.length) process.exit(1);
 }

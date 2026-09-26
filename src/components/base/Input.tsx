@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   focused: { borderColor: color.accent },
-  errored: { borderColor: color.riskStrong },
+  errored: { borderColor: color.wrong },
   input: {
     flex: 1,
     color: color.text,
@@ -96,6 +96,6 @@ const styles = StyleSheet.create({
     fontSize: font.size.sm,
     fontFamily: font.family.bodyStrong,
   },
-  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.riskStrong, marginLeft: space.xs },
+  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.wrong, marginLeft: space.xs },
   hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint, marginLeft: space.xs },
 });

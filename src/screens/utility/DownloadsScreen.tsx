@@ -178,5 +178,5 @@ const styles = StyleSheet.create({
   included: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.correct },
   progress: { gap: space.xs },
   progressText: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
-  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.riskStrong },
+  error: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.wrong },
 });

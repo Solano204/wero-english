@@ -120,7 +120,7 @@ const FilaError = memo(function FilaError({ error: e, onAbrir }: FilaProps) {
   return (
     <Card style={styles.item} onPress={() => onAbrir(e.id)}>
       <View style={styles.row}>
-        <Icon name="close" size="md" color={color.riskStrong} />
+        <Icon name="close" size="md" color={color.wrong} />
         <Text style={styles.bad} numberOfLines={2}>
           {e.lo_que_dices}
         </Text>
@@ -132,7 +132,7 @@ const FilaError = memo(function FilaError({ error: e, onAbrir }: FilaProps) {
           {e.lo_correcto}
         </Text>
       </View>
-      {e.gravedad === 3 ? <Badge label="Cambia el significado" tone="strong" small /> : null}
+      {e.gravedad === 3 ? <Badge label="Cambia el significado" tone="warn" small /> : null}
     </Card>
   );
 });

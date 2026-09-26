@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   error: {
     fontFamily: font.family.body,
     fontSize: font.size.sm,
-    color: color.riskStrong,
+    color: color.wrong,
     textAlign: 'center',
   },
   switch: {

@@ -161,7 +161,7 @@ const variants: Record<Variant, ViewStyle> = {
     ...shadow.soft,
   },
   ghost: { backgroundColor: 'transparent' },
-  danger: { backgroundColor: color.riskStrong, ...shadow.soft },
+  danger: { backgroundColor: color.wrong, ...shadow.soft },
 };
 
 const sizes: Record<Size, ViewStyle> = {

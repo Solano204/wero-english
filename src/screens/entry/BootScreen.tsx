@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   error: {
     fontFamily: font.family.body,
     fontSize: font.size.md,
-    color: color.riskStrong,
+    color: color.wrong,
     textAlign: 'center',
     paddingHorizontal: space.xl,
   },
