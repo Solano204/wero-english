@@ -3,12 +3,12 @@ import { conteo } from '@/utils/text';
 import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated from 'react-native-reanimated';
-import { Button, Card, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
-import { AudioButton } from '@/components/card';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { TableroDulces, type Jugada, type TableroDulcesRef } from '@/components/juegos/dulces/TableroDulces';
 import { TROZOS_RETRASO_MS, azarFijo, trozosDelPaso, trozosPorPieza } from '@/components/juegos/dulces/tablero';
 import { Estallidos, type EstallidosRef, type Trozo } from '@/components/juegos/dulces/Estallidos';
+import { FraseVoladora } from '@/components/juegos/dulces/FraseVoladora';
+import { HojaPregunta, type DestinoTitulo, type PreguntaDulces } from '@/components/juegos/dulces/HojaPregunta';
 import { TarjetaMetas } from '@/components/juegos/dulces/MetaFrase';
 import { Trozos, useReaccion } from '@/components/feedback';
 import {
@@ -28,7 +28,8 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, depth, font, motionDulces, radius, shadow, space, aparecer } from '@/theme';
+import { color, font, motionDulces, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -45,6 +46,8 @@ const META_DEF = 9;
 
 const ANCHO = Dimensions.get('window').width;
 
+/** Tope del vuelo de la frase hasta el título de la pregunta (unos 320 ms): si no llega a medirse, se suelta igual. */
+const VUELO_MAXIMO_MS = 1200;
 /** Tope duro de la secuencia de la pregunta: si el audio no carga, se suelta igual. */
 const RESPUESTA_MAXIMA_MS = 6000;
 /** Pausa entre el inglés y el español al acertar. */
@@ -111,10 +114,7 @@ export function DulcesScreen() {
   const reaccion = useReaccion();
   const [jugadas, setJugadas] = useState(JUGADAS_DEF);
   const [resueltas, setResueltas] = useState(0);
-  const [pregunta, setPregunta] = useState<{
-    objetivo: DulceObjetivo;
-    opciones: string[];
-  } | null>(null);
+  const [pregunta, setPregunta] = useState<PreguntaDulces | null>(null);
   // Bloquea las opciones mientras suena la secuencia de la respuesta.
   const [respondiendo, setRespondiendo] = useState(false);
   const [elegidaOpcion, setElegidaOpcion] = useState<string | null>(null);
@@ -125,16 +125,24 @@ export function DulcesScreen() {
   const [animando, setAnimando] = useState(false);
   // Cambia con cada tablero nuevo: el tablero animado reparte piezas nuevas.
   const [llave, setLlave] = useState(0);
+  const reducido = useMovimientoReducido();
+  // La frase de la meta que se llenó vuela al título de la pregunta: `vuelo` es de dónde sale, `destinoTitulo`
+  // a dónde llega (lo mide la hoja) y `capaAlto` sirve para saber dónde queda esa hoja.
+  const [capaAlto, setCapaAlto] = useState(0);
+  const [destinoTitulo, setDestinoTitulo] = useState<DestinoTitulo | null>(null);
+  const [vuelo, setVuelo] = useState<{ desde: DestinoTitulo; texto: string } | null>(null);
   // Los trozos de las piezas vuelan a las barras: hace falta saber dónde están el tablero y cada barra, en la
   // misma capa. Se miden al empezar cada jugada (el scroll pudo cambiarlas).
   const capaRef = useRef<View>(null);
   const tableroCajaRef = useRef<View>(null);
   const estallidosRef = useRef<EstallidosRef>(null);
   const barras = useRef(new Map<number, View>());
+  const frases = useRef(new Map<number, View>());
   const posiciones = useRef<{
     tablero: { x: number; y: number } | null;
     barras: Map<number, { x: number; y: number; w: number; h: number }>;
-  }>({ tablero: null, barras: new Map() });
+    frases: Map<number, { x: number; y: number; w: number; h: number }>;
+  }>({ tablero: null, barras: new Map(), frases: new Map() });
   // Si el tablero no cabe la pantalla scrollea, y entonces solo los deslizamientos horizontales intercambian.
   const [vistaAlto, setVistaAlto] = useState(0);
   const [contenidoAlto, setContenidoAlto] = useState(0);
@@ -250,6 +258,11 @@ export function DulcesScreen() {
     else barras.current.delete(colorPieza);
   }, []);
 
+  const registrarFrase = useCallback((colorPieza: number, vista: View | null) => {
+    if (vista) frases.current.set(colorPieza, vista);
+    else frases.current.delete(colorPieza);
+  }, []);
+
   const medirPosiciones = useCallback(() => {
     const capa = capaRef.current;
     if (!capa) return;
@@ -269,7 +282,35 @@ export function DulcesScreen() {
         () => undefined
       );
     });
+    frases.current.forEach((vista, colorPieza) => {
+      vista.measureLayout(
+        capa,
+        (x, y, w, h) => {
+          posiciones.current.frases.set(colorPieza, { x, y, w, h });
+        },
+        () => undefined
+      );
+    });
   }, []);
+
+  useEffect(() => {
+    if (!vuelo) return undefined;
+    const t = setTimeout(() => setVuelo(null), VUELO_MAXIMO_MS);
+    return () => clearTimeout(t);
+  }, [vuelo]);
+
+  /** Sale la pregunta: la meta destella y su frase vuela al título de la hoja (si se pudo medir y hay movimiento). */
+  const abrirPregunta = useCallback(
+    (nueva: PreguntaDulces) => {
+      const donde = posiciones.current.frases.get(nueva.objetivo.color);
+      setDestinoTitulo(null);
+      setVuelo(
+        donde && !reducido ? { desde: { x: donde.x, y: donde.y, ancho: donde.w }, texto: nueva.objetivo.entry.phrase } : null
+      );
+      setPregunta(nueva);
+    },
+    [reducido]
+  );
 
   /** Las piezas de un paso estallan: de cada una salen trozos de su color que vuelan al frente de la barra de su meta. */
   const alEstallar = useCallback(
@@ -375,7 +416,7 @@ export function DulcesScreen() {
       // Se reparte lo quitado entre las frases de cada color.
       const sig = objetivos.map((o) => ({ ...o, llevas: o.llevas + (res.porColor[o.color] ?? 0) }));
       const llena = sig.find((o) => o.llevas >= o.meta);
-      let pendiente: { objetivo: DulceObjetivo; opciones: string[] } | null = null;
+      let pendiente: PreguntaDulces | null = null;
       if (llena) {
         // Si esta jugada llena una barra, la voz del match se salta:
         // pasa directo a la pregunta (cuando termine la animación).
@@ -408,11 +449,11 @@ export function DulcesScreen() {
           onLlegan: sumarAMetas,
         },
         () => {
-          if (pendiente) setPregunta(pendiente);
+          if (pendiente) abrirPregunta(pendiente);
         }
       );
     },
-    [board, objetivos, pool, COLORES, reproducirVozMatch, animar, alEstallar, sumarAMetas]
+    [board, objetivos, pool, COLORES, reproducirVozMatch, animar, alEstallar, sumarAMetas, abrirPregunta]
   );
 
   const tocar = useCallback(
@@ -489,6 +530,8 @@ export function DulcesScreen() {
           .filter((o) => o.entry.id !== objetivo.entry.id || nueva)
       );
       setPregunta(null);
+      setVuelo(null);
+      setDestinoTitulo(null);
       setRespondiendo(false);
       setElegidaOpcion(null);
       empezoEn.current = Date.now();
@@ -632,18 +675,8 @@ export function DulcesScreen() {
   }
 
   return (
-    <Screen
-      padded={false}
-      footer={
-        // Fijo abajo solo mientras se juega el tablero: durante la
-        // pregunta, "Dejarlo aquí" no aplica (esa tarjeta ya tiene su
-        // propia acción con "Seguir").
-        !pregunta ? (
-          <Button label="Dejarlo aquí" variant="ghost" onPress={terminar} full />
-        ) : undefined
-      }
-    >
-      <View ref={capaRef} style={styles.capa}>
+    <Screen padded={false} style={styles.sinHueco}>
+      <View ref={capaRef} style={styles.capa} onLayout={(e) => setCapaAlto(e.nativeEvent.layout.height)}>
         <Trozos disparo={reaccion.trozos} tinte={color.world.cultura} />
         <View style={styles.top}>
           <Header
@@ -657,98 +690,79 @@ export function DulcesScreen() {
           />
         </View>
 
-        {pregunta ? (
-          <Animated.View entering={aparecer()} style={styles.preguntaWrap}>
-            <Card style={styles.preguntaCard}>
-              <Text style={styles.preguntaEtiqueta}>Llenaste esta</Text>
-              <Text style={styles.preguntaFrase}>
-                {pregunta.objetivo.entry.phrase}
-              </Text>
-              <Text style={styles.preguntaAyuda}>¿Qué significa?</Text>
-              {pregunta.opciones.map((o) => {
-                const esCorrecta = o === pregunta.objetivo.entry.spanish_main;
-                const marcar = respondiendo && (esCorrecta || o === elegidaOpcion);
-                return (
-                  <Presionable
-                    key={o}
-                    onPress={() => responder(o)}
-                    disabled={respondiendo}
-                    accessibilityRole="button"
-                    accessibilityLabel={o}
-                    resultado={respondiendo && o === elegidaOpcion ? (esCorrecta ? 'acierto' : 'fallo') : null}
-                    style={[styles.opcion, marcar && esCorrecta && styles.opcionCorrecta, marcar && !esCorrecta && styles.opcionFallada]}
-                  >
-                    <Text style={styles.opcionTexto}>{o}</Text>
-                  </Presionable>
-                );
-              })}
+        {/* Scroll interno: en niveles con más filas/columnas el tablero
+            puede pasar de la altura disponible en pantallas chicas y, sin
+            esto, se cortaría contra "Dejarlo aquí" en vez de dejarse ver
+            completo con scroll. */}
+        <ScrollView
+          style={styles.medio}
+          contentContainerStyle={styles.medioContenido}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={pregunta === null}
+          onLayout={(e) => setVistaAlto(e.nativeEvent.layout.height)}
+          onContentSizeChange={(_, alto) => setContenidoAlto(alto)}
+        >
+          <View style={styles.metas}>
+            <TarjetaMetas
+              objetivos={objetivos}
+              registrarBarra={registrarBarra}
+              registrarFrase={registrarFrase}
+              llenaColor={pregunta?.objetivo.color ?? null}
+            />
+          </View>
 
-              {respondiendo ? (
-                <Presionable
-                  onPress={seguirAhora}
-                  disabled={avanzando}
-                  accessibilityRole="button"
-                  accessibilityLabel="Siguiente"
-                  hitSlop={8}
-                  style={styles.seguir}
-                >
-                  <Text style={styles.seguirTexto}>Siguiente</Text>
-                  <Icon name="chevron-right" size="sm" color={color.textFaint} />
-                </Presionable>
-              ) : (
-                <AudioButton
-                  path={pregunta.objetivo.entry.audio_en}
-                  size="sm"
-                  label="Escuchar"
-                />
-              )}
-            </Card>
-          </Animated.View>
-        ) : (
-          // Scroll interno: en niveles con más filas/columnas el tablero
-          // puede pasar de la altura disponible en pantallas chicas, y sin
-          // esto "Dejarlo aquí" (ahora fijo en el footer) quedaba bien,
-          // pero el tablero se cortaba contra él en vez de dejarse ver
-          // completo con scroll.
-          <ScrollView
-            style={styles.medio}
-            contentContainerStyle={styles.medioContenido}
-            showsVerticalScrollIndicator={false}
-            onLayout={(e) => setVistaAlto(e.nativeEvent.layout.height)}
-            onContentSizeChange={(_, alto) => setContenidoAlto(alto)}
+          <View
+            ref={tableroCajaRef}
+            collapsable={false}
+            style={{ width: ANCHO_TABLERO, height: ALTO_TABLERO, alignSelf: 'center' }}
           >
-            <View style={styles.metas}>
-              <TarjetaMetas objetivos={objetivos} registrarBarra={registrarBarra} />
-            </View>
+            <TableroDulces
+              ref={tableroRef}
+              celdas={board.cells}
+              cols={COLS}
+              rows={ROWS}
+              lado={LADO}
+              hueco={space.xs}
+              llave={llave}
+              elegida={elegida}
+              bloqueado={animando || jugadas <= 0 || pregunta !== null}
+              soloHorizontal={puedeScroll}
+              onTocar={tocar}
+              onDeslizar={deslizar}
+            />
+          </View>
 
-            <View
-              ref={tableroCajaRef}
-              collapsable={false}
-              style={{ width: ANCHO_TABLERO, height: ALTO_TABLERO, alignSelf: 'center' }}
-            >
-              <TableroDulces
-                ref={tableroRef}
-                celdas={board.cells}
-                cols={COLS}
-                rows={ROWS}
-                lado={LADO}
-                hueco={space.xs}
-                llave={llave}
-                elegida={elegida}
-                bloqueado={animando || jugadas <= 0}
-                soloHorizontal={puedeScroll}
-                onTocar={tocar}
-                onDeslizar={deslizar}
-              />
-            </View>
+          <Text style={styles.pieNota}>
+            {resueltas > 0
+              ? conteo(resueltas, 'frase resuelta', 'frases resueltas')
+              : 'Junta tres del mismo color para llenar su barra'}
+          </Text>
+        </ScrollView>
 
-            <Text style={styles.pieNota}>
-              {resueltas > 0
-                ? conteo(resueltas, 'frase resuelta', 'frases resueltas')
-                : 'Junta tres del mismo color para llenar su barra'}
-            </Text>
-          </ScrollView>
-        )}
+        <View style={styles.pie}>
+          <Button label="Dejarlo aquí" variant="ghost" onPress={terminar} full />
+        </View>
+
+        <HojaPregunta
+          pregunta={pregunta}
+          respondiendo={respondiendo}
+          elegidaOpcion={elegidaOpcion}
+          avanzando={avanzando}
+          tituloListo={vuelo === null}
+          capaAlto={capaAlto}
+          onDestinoTitulo={setDestinoTitulo}
+          onResponder={responder}
+          onSeguir={seguirAhora}
+        />
+        {vuelo && destinoTitulo ? (
+          <FraseVoladora
+            key={vuelo.texto}
+            texto={vuelo.texto}
+            desde={vuelo.desde}
+            hasta={destinoTitulo}
+            onFin={() => setVuelo(null)}
+          />
+        ) : null}
         <Estallidos ref={estallidosRef} />
       </View>
     </Screen>
@@ -797,6 +811,8 @@ function mejorColor(
 }
 
 const styles = StyleSheet.create({
+  // `Screen` suma un colchón abajo cuando no hay footer: aquí el contenido llega hasta el borde seguro.
+  sinHueco: { paddingBottom: 0 },
   capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   jugadas: {
@@ -814,48 +830,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: space.md,
   },
-  preguntaWrap: { flex: 1, justifyContent: 'center', paddingHorizontal: space.lg },
-  preguntaCard: { gap: space.sm },
-  preguntaEtiqueta: {
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    textTransform: 'uppercase',
-    letterSpacing: 0.9,
-    fontFamily: font.family.bodyStrong,
-  },
-  preguntaFrase: {
-    fontSize: font.size.xxl,
-    letterSpacing: font.size.xxl * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-  },
-  preguntaAyuda: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  opcion: {
-    minHeight: 52,
-    justifyContent: 'center',
-    paddingHorizontal: space.lg,
-    borderRadius: radius.md,
-    backgroundColor: color.surfaceAlt,
-    borderWidth: 1,
-    borderColor: color.border,
-    borderBottomWidth: depth.md,
-    borderBottomColor: color.borderStrong,
-  },
-  opcionCorrecta: {
-    borderColor: color.correct,
-    backgroundColor: color.correctSoft,
-  },
-  opcionFallada: {
-    borderColor: color.wrong,
-    backgroundColor: color.wrongSoft,
-  },
-  opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
-  seguir: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'center', marginTop: space.sm, padding: space.sm },
-  seguirTexto: {
-    fontSize: font.size.sm,
-    color: color.textFaint,
-    fontFamily: font.family.bodyStrong,
-  },
+  pie: { paddingHorizontal: space.lg, paddingBottom: space.lg, paddingTop: space.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });

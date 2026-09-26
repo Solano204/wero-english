@@ -1,6 +1,13 @@
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 import { color, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { DulceObjetivo } from '@/types';
@@ -17,10 +24,12 @@ interface BarraProps {
   tinte: string;
   /** Para saber dónde está la barra (a dónde vuelan los trozos). */
   barraRef?: (vista: View | null) => void;
+  /** 0 a 1: el destello de la barra al llenarse. */
+  brillo: SharedValue<number>;
 }
 
 /** La barra de la meta: se llena con resorte cuando llegan los trozos; con «reducir movimiento» salta al valor. */
-function BarraMeta({ llevas, meta, tinte, barraRef }: BarraProps) {
+function BarraMeta({ llevas, meta, tinte, barraRef, brillo }: BarraProps) {
   const reducido = useMovimientoReducido();
   const pct = meta > 0 ? Math.min(1, llevas / meta) : 0;
   const progreso = useSharedValue(pct);
@@ -31,10 +40,12 @@ function BarraMeta({ llevas, meta, tinte, barraRef }: BarraProps) {
 
   // Solo transform: animar `width` fuerza layout nativo en cada cuadro.
   const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.min(1, Math.max(0, progreso.value)) }] }));
+  const destello = useAnimatedStyle(() => ({ opacity: brillo.value * 0.6 }));
 
   return (
     <View ref={barraRef} collapsable={false} style={styles.pista}>
       <Animated.View style={[styles.relleno, { backgroundColor: tinte }, relleno]} />
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: color.text }, destello]} />
     </View>
   );
 }
@@ -45,6 +56,10 @@ interface Props {
   cercana: boolean;
   /** Avisa de la vista de la barra al montar y al desmontar, para medirla. */
   registrarBarra?: (color: number, vista: View | null) => void;
+  /** Lo mismo con la frase: de ahí despega cuando se llena la meta. */
+  registrarFrase?: (color: number, vista: View | null) => void;
+  /** La barra se llenó y sale la pregunta: destella. */
+  llena?: boolean;
 }
 
 /**
@@ -52,7 +67,7 @@ interface Props {
  * la pieza con «7 de 10». Para el lector de pantalla es una sola cosa: la frase, el color y la forma, y el
  * avance como barra de progreso.
  */
-export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarBarra }: Props) {
+export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarBarra, registrarFrase, llena = false }: Props) {
   const reducido = useMovimientoReducido();
   const filo = useSharedValue(cercana ? 1 : 0);
   const tinte = tinteDe(objetivo.color);
@@ -63,9 +78,37 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
     filo.value = reducido ? meta : withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.entrar });
   }, [cercana, reducido, filo]);
 
-  const luz = useAnimatedStyle(() => ({ opacity: filo.value }));
+  const destello = useSharedValue(0);
+  const fundido = useSharedValue(1);
+  const idFrase = useRef(objetivo.entry.id);
   const colorDeMeta = objetivo.color;
   const alRegistrar = useCallback((vista: View | null) => registrarBarra?.(colorDeMeta, vista), [registrarBarra, colorDeMeta]);
+  const alRegistrarFrase = useCallback((vista: View | null) => registrarFrase?.(colorDeMeta, vista), [registrarFrase, colorDeMeta]);
+
+  // La barra se llena y sale la pregunta: destella una vez (con «reducir movimiento» queda encendida mientras dura).
+  useEffect(() => {
+    if (!llena) {
+      destello.value = 0;
+      return;
+    }
+    destello.value = reducido
+      ? 1
+      : withSequence(
+          withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
+          withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir })
+        );
+  }, [llena, reducido, destello]);
+
+  // Al cerrar la pregunta la meta se reinicia con la frase nueva, que entra con un fundido.
+  useEffect(() => {
+    if (idFrase.current === objetivo.entry.id) return;
+    idFrase.current = objetivo.entry.id;
+    fundido.value = 0;
+    fundido.value = reducido ? 1 : withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
+  }, [objetivo.entry.id, reducido, fundido]);
+
+  const luz = useAnimatedStyle(() => ({ opacity: Math.max(filo.value, destello.value) }));
+  const fraseAnim = useAnimatedStyle(() => ({ opacity: fundido.value }));
 
   return (
     <View
@@ -80,11 +123,15 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
         <CaraPieza color={objetivo.color} lado={LADO_SIMBOLO} />
       </View>
       <View style={styles.cuerpo}>
-        <Text style={styles.frase} numberOfLines={2} maxFontSizeMultiplier={1.3}>
-          {objetivo.entry.phrase}
-        </Text>
+        <View ref={alRegistrarFrase} collapsable={false}>
+          <Animated.View style={fraseAnim}>
+            <Text style={styles.frase} numberOfLines={2} maxFontSizeMultiplier={1.3}>
+              {objetivo.entry.phrase}
+            </Text>
+          </Animated.View>
+        </View>
         <View style={styles.progreso}>
-          <BarraMeta llevas={llevas} meta={objetivo.meta} tinte={tinte.medio} barraRef={alRegistrar} />
+          <BarraMeta llevas={llevas} meta={objetivo.meta} tinte={tinte.medio} barraRef={alRegistrar} brillo={destello} />
           <Text style={styles.cuenta} maxFontSizeMultiplier={1.2}>
             {llevas} de {objetivo.meta}
           </Text>
@@ -97,15 +144,25 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
 interface TarjetaProps {
   objetivos: DulceObjetivo[];
   registrarBarra?: (color: number, vista: View | null) => void;
+  registrarFrase?: (color: number, vista: View | null) => void;
+  /** El color de la meta que se acaba de llenar (mientras su pregunta está abierta), o `null`. */
+  llenaColor?: number | null;
 }
 
 /** Las metas del nivel en una sola tarjeta. */
-export function TarjetaMetas({ objetivos, registrarBarra }: TarjetaProps) {
+export function TarjetaMetas({ objetivos, registrarBarra, registrarFrase, llenaColor = null }: TarjetaProps) {
   const cercana = indiceMasCercana(objetivos);
   return (
     <View style={styles.tarjeta}>
       {objetivos.map((o, i) => (
-        <MetaFrase key={o.color} objetivo={o} cercana={i === cercana} registrarBarra={registrarBarra} />
+        <MetaFrase
+          key={o.color}
+          objetivo={o}
+          cercana={i === cercana}
+          registrarBarra={registrarBarra}
+          registrarFrase={registrarFrase}
+          llena={o.color === llenaColor}
+        />
       ))}
     </View>
   );
