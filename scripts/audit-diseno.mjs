@@ -497,6 +497,62 @@ function auditaSenal(archivos) {
   return S;
 }
 
+/** Todas las etiquetas JSX de apertura `<Tag ...>` con sus atributos completos (respeta llaves anidadas). */
+function etiquetasJsx(src) {
+  const res = []; const re = /<([A-Za-z][\w.]*)(?=[\s>/])/g; let m;
+  while ((m = re.exec(src))) {
+    let i = m.index + m[0].length, depth = 0;
+    for (; i < src.length; i++) {
+      const c = src[i];
+      if (c === '{') depth++; else if (c === '}') depth--;
+      else if (c === '>' && depth === 0 && src[i - 1] !== '=') break;
+    }
+    res.push({ nombre: m[1], pos: m.index, linea: lineaDe(src, m.index), texto: src.slice(m.index, i + 1) });
+  }
+  return res;
+}
+
+/** El texto entre el paréntesis que abre en `desde` y el que lo cierra. */
+function entreParentesis(src, desde) {
+  let d = 0;
+  for (let i = desde; i < src.length; i++) {
+    if (src[i] === '(') d++;
+    else if (src[i] === ')' && --d === 0) return src.slice(desde + 1, i);
+  }
+  return src.slice(desde);
+}
+
+/**
+ * MOT-6: ningún nodo mezcla una animación de layout (`entering`, `exiting`, `layout`) con un `transform` (animado o
+ * estático). Reanimated pisa el transform con la animación y avisa `[Reanimated] Property "transform" … may be
+ * overwritten by a layout animation`. Se separa en un `Animated.View` exterior con la animación de layout y el
+ * componente con el transform adentro. `Presionable` anima su escala en su propio nodo, así que no puede llevarlas.
+ * Un estilo animado se busca por su declaración más cercana antes de la etiqueta (varias funciones usan el mismo nombre).
+ */
+function auditaLayoutTransform(archivos) {
+  const res = [];
+  for (const { r, src } of archivos) {
+    if (!/\b(entering|exiting|layout)=\{/.test(src)) continue;
+    const conTransform = new Set([...src.matchAll(/^ {2}(\w+):\s*\{[^}]*\btransform\s*:/gm)].map((m) => m[1]));
+    for (const t of etiquetasJsx(src)) {
+      if (!/\b(entering|exiting|layout)=\{/.test(t.texto)) continue;
+      const motivos = [];
+      if (t.nombre === 'Presionable') motivos.push('`Presionable` anima su escala (transform) en su propio nodo');
+      const estilo = atributo(t.texto, 'style') ?? '';
+      if (/\btransform\s*:/.test(estilo)) motivos.push('transform en línea');
+      for (const m of estilo.matchAll(/\bstyles\.(\w+)/g)) if (conTransform.has(m[1])) motivos.push(`estilo estático con transform: \`styles.${m[1]}\``);
+      for (const nombre of new Set(estilo.match(/\b[a-z]\w*\b/g) ?? [])) {
+        const decl = [...src.slice(0, t.pos).matchAll(new RegExp(`const\\s+${nombre}\\s*=\\s*useAnimatedStyle\\(`, 'g'))].pop();
+        if (decl && /\btransform\s*:/.test(entreParentesis(src, decl.index + decl[0].length - 1))) {
+          motivos.push(`estilo animado con transform: \`${nombre}\``);
+        }
+      }
+      if (motivos.length) res.push({ r, linea: t.linea, txt: `<${t.nombre}> con animación de layout y ${motivos.join('; ')}` });
+    }
+  }
+  return res;
+}
+
 /** b) Texto cortado con numberOfLines={1} donde el contenido importa. */
 function auditaTextoCortado(archivos) {
   const importa = [], otros = [];
@@ -689,6 +745,7 @@ function conteoPorRegla(ctx) {
     ['MOT-3', 'más de un momento héroe animado por pantalla, o más de 3 canvases de Skia en bucle', S.mot3.length],
     ['MOT-4', 'bucles de la señal que no se pausan fuera de pantalla, sin foco o en segundo plano', S.mot4.length],
     ['MOT-5', 'efectos de la señal que no respetan reducir movimiento', S.mot5.length],
+    ['MOT-6', 'nodos con animación de layout (`entering`, `exiting`, `layout`) y un transform en el mismo nodo', ctx.LT.length],
   ];
 }
 
@@ -856,6 +913,9 @@ ${L(c.S.mot5)}
 **Excepciones revisadas a mano (no cuentan):**
 ${L(c.S.mot5Exentos)}
 
+**MOT-6 · Ningún nodo mezcla una animación de layout (\`entering\`, \`exiting\`, \`layout\`) con un transform, animado o estático.** Reanimated pisa el transform y avisa \`[Reanimated] Property "transform" … may be overwritten by a layout animation\`. Se separa: un \`Animated.View\` exterior con la animación de layout y, adentro, el componente que anima su transform. \`Presionable\` anima su escala en su propio nodo y por eso su tipo ya no acepta esas tres props. Hallazgos en todo \`src/\`:
+${L(c.LT)}
+
 ## Notas
 
 - Los íconos salen de \`Icon\` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en \`catalogo.json\`, \`gramatica.json\` y \`medios.json\`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
@@ -878,6 +938,7 @@ function main() {
   const coloreadas = (tokens.match(/shadowColor:\s*'#[0-9A-Fa-f]{6}'/g) || []).filter((s) => !/#000000/i.test(s)).length;
   const ctx = {
     H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos), S,
+    LT: auditaLayoutTransform(archivos),
     A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),

@@ -57,6 +57,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | MOT-3 | más de un momento héroe animado por pantalla, o más de 3 canvases de Skia en bucle | 0 |
 | MOT-4 | bucles de la señal que no se pausan fuera de pantalla, sin foco o en segundo plano | 0 |
 | MOT-5 | efectos de la señal que no respetan reducir movimiento | 0 |
+| MOT-6 | nodos con animación de layout (`entering`, `exiting`, `layout`) y un transform en el mismo nodo | 0 |
 
 # Auditoría estática
 
@@ -124,7 +125,7 @@ Se quedan en 12–13 px, revisados a mano (17):
 - `src/components/gramatica/RenglonTema.tsx:126` — gancho: fontSize sm = 13 — una o dos líneas que apoyan al título del renglón, como `FilaModo.corta` de Practicar; el gancho del tema se lee en 16 px en su pantalla
 - `src/components/juegos/caida/FinCaida.tsx:191` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/components/juegos/dulces/PieDulces.tsx:118` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/components/list/EntryRow.tsx:145` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/components/list/EntryRow.tsx:149` — verTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/entry/OnboardingScreen.tsx:470` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/screens/extras/LecturaScreen.tsx:310` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
@@ -261,10 +262,10 @@ Otros 2 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
 - `src/components/fx/PuntosRepeticion.tsx:52` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:98` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:101` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:104` — key por índice
 - `src/components/gramatica/ErrorQueSeCorrige.tsx:107` — key por índice
-- `src/components/gramatica/ErrorQueSeCorrige.tsx:110` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:113` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:116` — key por índice
 - `src/components/gramatica/FormulaFichas.tsx:52` — key por índice
 - `src/components/gramatica/MedidorNivel.tsx:35` — key por índice
 - `src/components/juegos/caida/IndicadorRitmo.tsx:49` — key por índice
@@ -332,6 +333,9 @@ Archivos que pintan `<AudioButton>`: `components/list/EntryRow.tsx` 4, `componen
 - `src/components/fx/TransicionHoy.tsx:40` — solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento
 - `src/screens/extras/practicar/Destacados.tsx:63` — `entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)
 
+**MOT-6 · Ningún nodo mezcla una animación de layout (`entering`, `exiting`, `layout`) con un transform, animado o estático.** Reanimated pisa el transform y avisa `[Reanimated] Property "transform" … may be overwritten by a layout animation`. Se separa: un `Animated.View` exterior con la animación de layout y, adentro, el componente que anima su transform. `Presionable` anima su escala en su propio nodo y por eso su tipo ya no acepta esas tres props. Hallazgos en todo `src/`:
+- (ninguno)
+
 ## Notas
 
 - Los íconos salen de `Icon` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en `catalogo.json`, `gramatica.json` y `medios.json`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
@@ -340,4 +344,4 @@ Archivos que pintan `<AudioButton>`: `components/list/EntryRow.tsx` 4, `componen
 - Los bucles anteriores a la v5.0 (`Skeleton` mientras carga) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (`src/components/fx/`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->

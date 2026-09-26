@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, type ComponentProps } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { motionDuration, motionEasing, motionPresion } from '@/theme';
@@ -53,14 +53,18 @@ export function usePresion(resultado?: Resultado | null) {
   return { estilo, alPresionar, alSoltar };
 }
 
-type Props = Omit<PressableProps, 'style'> &
-  Pick<ComponentProps<typeof Animated.View>, 'entering' | 'exiting' | 'layout'> & {
-    style?: StyleProp<ViewStyle>;
-    /** Acierto: pulso. Fallo: sacudida. El color lo pone quien la usa. */
-    resultado?: Resultado | null;
-  };
+/**
+ * Sin `entering`, `exiting` ni `layout`: la escala de `Presionable` es un `transform` animado en su propio nodo y una
+ * animación de layout en ese mismo nodo lo pisa (Reanimated avisa «Property "transform" … may be overwritten»). Quien
+ * necesite entrar, salir o reacomodarse envuelve el `Presionable` en un `Animated.View` con esa animación.
+ */
+type Props = Omit<PressableProps, 'style'> & {
+  style?: StyleProp<ViewStyle>;
+  /** Acierto: pulso. Fallo: sacudida. El color lo pone quien la usa. */
+  resultado?: Resultado | null;
+};
 
-/** `Pressable` con el feedback unificado. Acepta también `entering`, `exiting` y `layout`. */
+/** `Pressable` con el feedback unificado. */
 export function Presionable({ style, resultado, onPressIn, onPressOut, ...resto }: Props) {
   const { estilo, alPresionar, alSoltar } = usePresion(resultado);
   return (

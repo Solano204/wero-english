@@ -52,7 +52,13 @@ function Tacha({ indice, tacha, total }: TachaProps) {
   const estilo = useAnimatedStyle(() => ({
     transform: [{ scaleX: Math.min(1, Math.max(0, (tacha.value * total - inicio) / duracion)) }],
   }));
-  return <Animated.View exiting={desaparecer(motionDuration.rapido)} pointerEvents="none" style={[styles.tacha, estilo]} />;
+  // El fundido de salida va en el nodo exterior y la escala en el interior: una animación de layout y un transform
+  // animado en el mismo nodo se pisan.
+  return (
+    <Animated.View exiting={desaparecer(motionDuration.rapido)} pointerEvents="none" style={styles.tachaCaja}>
+      <Animated.View style={[styles.tacha, estilo]} />
+    </Animated.View>
+  );
 }
 
 /** Texto que se queda: pasa de ámbar al color de la frase correcta cuando se resuelve. */
@@ -296,15 +302,8 @@ const styles = StyleSheet.create({
   entra: { color: color.correct },
   correcta: { color: color.text },
   tachada: { textDecorationLine: 'line-through' },
-  tacha: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: '55%',
-    height: 2,
-    backgroundColor: color.text,
-    transformOrigin: 'left',
-  },
+  tachaCaja: { position: 'absolute', left: 0, right: 0, top: '55%', height: 2 },
+  tacha: { flex: 1, backgroundColor: color.text, transformOrigin: 'left' },
   porQue: {
     fontFamily: font.family.body,
     fontSize: font.size.md,

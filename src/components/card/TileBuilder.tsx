@@ -91,9 +91,10 @@ function FichaPuesta({ texto, pos, veredicto, onQuitar }: FichaPuestaProps) {
   const tinta = useAnimatedStyle(() => ({ color: interpolateColor(luz.value, [0, 1], [ACENTO, borde]) }));
 
   return (
+    // El reacomodo y la entrada van en un `Animated.View` aparte: `Presionable` anima su propio transform (la escala)
+    // y una animación de layout en ese mismo nodo lo pisaría.
+    <Animated.View layout={fichaLayout} entering={fichaEntra}>
     <Presionable
-      layout={fichaLayout}
-      entering={fichaEntra}
       onPress={onQuitar}
       disabled={veredicto !== null}
       accessibilityRole="button"
@@ -108,6 +109,7 @@ function FichaPuesta({ texto, pos, veredicto, onQuitar }: FichaPuestaProps) {
         </Animated.Text>
       </Animated.View>
     </Presionable>
+    </Animated.View>
   );
 }
 

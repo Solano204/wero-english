@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { AudioButton } from '@/components/card';
 import { Icon, RiskBadge, Presionable } from '@/components/base';
 import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
@@ -82,8 +83,10 @@ export const EntryRow = memo(function EntryRow({
 }: Props) {
   const esMazo = variant === 'mazo';
   return (
+    // La entrada va en un `Animated.View` aparte: `Presionable` anima su propio transform (la escala) y una
+    // animación de layout en ese mismo nodo lo pisaría.
+    <Animated.View entering={aparecerSubiendo(escalon(index))}>
     <Presionable
-      entering={aparecerSubiendo(escalon(index))}
       onPress={() => onPress(entry)}
       accessibilityRole="button"
       accessibilityLabel={`${entry.phrase}. ${entry.spanish_main}`}
@@ -119,6 +122,7 @@ export const EntryRow = memo(function EntryRow({
         </>
       )}
     </Presionable>
+    </Animated.View>
   );
 });
 
