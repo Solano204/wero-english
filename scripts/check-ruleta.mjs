@@ -182,4 +182,42 @@ prueba('un toque lleva a la partícula tocada: la de arriba, la de abajo o la mi
   assert.equal(R.destinoToque(centro + R.ALTO_ITEM, alto, 4.6, 14), 6);
 });
 
+/* ---------- lo que las pantallas dibujan ---------- */
+
+prueba('la ruta PhrasalVerbo existe y la lista ya no reacomoda tarjetas (era el bug de las tarjetas encimadas)', () => {
+  assert.match(leer('src/navigation/routes.ts'), /PhrasalVerbo:\s*\{\s*verbo: string/);
+  assert.match(leer('src/navigation/RootNavigator.tsx'), /name="PhrasalVerbo"/);
+  const lista = leer('src/screens/extras/PhrasalScreen.tsx');
+  assert.match(lista, /<FlatList/);
+  assert.match(lista, /Busca un verbo o una partícula/);
+  assert.ok(!/reacomodar|layout=\{/.test(lista), 'la lista no debe tener layout transitions');
+  assert.ok(!/<ScrollView|Screen scroll/.test(lista), 'la lista no debe ir dentro de un scroll');
+});
+
+prueba('la ruleta es un control ajustable, solo renderiza las partículas cercanas y se asienta con háptico', () => {
+  const r = leer('src/components/phrasal/RuletaParticulas.tsx');
+  assert.match(r, /accessibilityRole="adjustable"/);
+  assert.match(r, /name: 'increment'/);
+  assert.match(r, /name: 'decrement'/);
+  assert.match(r, /haptics\.selection\(\)/);
+  assert.match(r, /Gesture\.Race\(arrastre, toque\)/);
+  assert.match(r, /Math\.min\(n - 1, centro \+ VISIBLES \+ MARGEN_RENDER\)/);
+  assert.ok(!/useFrameCallback|withRepeat/.test(r), 'la ruleta no corre bucles');
+});
+
+prueba('la página del verbo: «N de M», chips como control principal con reducir movimiento y deslizar de lado', () => {
+  const p = leer('src/screens/extras/PhrasalVerboScreen.tsx');
+  assert.match(p, /`\$\{cambio\.indice \+ 1\} de \$\{n\}`/);
+  assert.match(p, /const conRuleta = n > 1 && !reducido/);
+  assert.match(p, /n > 1 && reducido \? chips : null/);
+  assert.match(p, /activeOffsetX\(\[-20, 20\]\)/);
+  const d = leer('src/components/phrasal/DetalleForma.tsx');
+  assert.match(d, /label="Fuerte"/);
+  assert.match(d, /label="Cuidado"/);
+  assert.match(d, /Separable:/);
+  const c = leer('src/components/phrasal/ChipsFormas.tsx');
+  assert.match(c, /minHeight: layout\.tapMin/);
+  assert.match(c, /accessibilityRole="radiogroup"/);
+});
+
 console.log(`\ncheck:ruleta ${total} pruebas ok\n`);
