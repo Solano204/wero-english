@@ -13,6 +13,8 @@ interface Props {
   size?: 'sm' | 'md' | 'lg';
   slow?: boolean;
   label?: string;
+  /** Lo que lee el lector de pantalla cuando el botón no lleva `label` visible («Escuchar el significado»). */
+  descripcion?: string;
   /** Corre justo antes de pedir el audio, sin detener nada por su cuenta. */
   onBeforePlay?: () => void;
 }
@@ -33,7 +35,7 @@ export function hayAudio(path: string | null): boolean {
  * desaparecer: así el usuario sabe que la frase tiene audio pendiente
  * de descargar, en vez de creer que no lo tiene.
  */
-export function AudioButton({ path, size = 'md', slow = false, label, onBeforePlay }: Props) {
+export function AudioButton({ path, size = 'md', slow = false, label, descripcion, onBeforePlay }: Props) {
   const [missing, setMissing] = useState(false);
   // Sin memo a propósito: un pack que se descarga con la pantalla abierta
   // tiene que reactivar el botón en el siguiente render.
@@ -53,7 +55,7 @@ export function AudioButton({ path, size = 'md', slow = false, label, onBeforePl
       onPress={onPress}
       disabled={sinAudio}
       accessibilityRole="button"
-      accessibilityLabel={label ?? (slow ? 'Escuchar lento' : 'Escuchar')}
+      accessibilityLabel={label ?? descripcion ?? (slow ? 'Escuchar lento' : 'Escuchar')}
       accessibilityState={sinAudio ? { disabled: true } : undefined}
       accessibilityHint={
         apagado

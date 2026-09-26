@@ -1,14 +1,12 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Card, Icon, Presionable, type IconName } from '@/components/base';
-import { hayAudio } from '@/components/card/AudioButton';
-import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
-import { analizar } from '@/domain/marcas';
+import { Card, Presionable } from '@/components/base';
+import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
+import { FraseKaraoke, useVozEnVivo, useVozFrase } from '@/components/fx';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { marcasDe } from '@/services/marcas';
-import { color, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
+import { color, font, layout, motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { GramaticaTema } from '@/types';
 
@@ -24,16 +22,6 @@ interface Props {
   alActivarse: (vista: View | null) => void;
 }
 
-interface Control {
-  clave: string;
-  etiqueta: string;
-  descripcion: string;
-  icono: IconName;
-  ruta: string;
-  lento: boolean;
-  suena: boolean;
-}
-
 /**
  * Un ejemplo de «Así se dice» como tarjeta: la frase en inglés con karaoke (tocarla la reproduce), su traducción y un
  * grupo segmentado de tres controles del mismo alto (Inglés, Lento, Español). Mientras suena algo de este ejemplo, o
@@ -44,20 +32,10 @@ interface Control {
 export function EjemploFrase({ ejemplo, activo, antes, alActivarse }: Props) {
   const reducido = useMovimientoReducido();
   const vista = useRef<View>(null);
-  const vozEn = useVozEnVivo(ejemplo.audio);
-  const vozLenta = useVozEnVivo(ejemplo.audio_lento);
+  const { voz, palabras, sonandoNormal, sonandoLenta } = useVozFrase(ejemplo.en, ejemplo.audio, ejemplo.audio_lento);
   const vozEs = useVozEnVivo(ejemplo.audio_es || null);
-  const analisisEn = useMemo(
-    () => analizar(ejemplo.en, ejemplo.en, marcasDe(ejemplo.audio), vozEn.duracion),
-    [ejemplo.en, ejemplo.audio, vozEn.duracion]
-  );
-  const analisisLento = useMemo(
-    () => analizar(ejemplo.en, ejemplo.en, marcasDe(ejemplo.audio_lento), vozLenta.duracion),
-    [ejemplo.en, ejemplo.audio_lento, vozLenta.duracion]
-  );
-  const conVozLenta = vozLenta.sonando;
 
-  const suena = activo || vozEn.sonando || vozLenta.sonando || vozEs.sonando;
+  const suena = activo || sonandoNormal || sonandoLenta || vozEs.sonando;
   const luz = useSharedValue(0);
   useEffect(() => {
     const destino = suena ? 1 : 0;
@@ -82,9 +60,9 @@ export function EjemploFrase({ ejemplo, activo, antes, alActivarse }: Props) {
     void (lento ? audio.playSlow(ruta) : audio.play(ruta));
   };
 
-  const controles: Control[] = [
-    { clave: 'en', etiqueta: 'Inglés', descripcion: 'Escuchar en inglés', icono: 'play', ruta: ejemplo.audio, lento: false, suena: vozEn.sonando },
-    { clave: 'lento', etiqueta: 'Lento', descripcion: 'Escuchar lento', icono: 'slow', ruta: ejemplo.audio_lento, lento: true, suena: vozLenta.sonando },
+  const controles: ControlAudio[] = [
+    { clave: 'en', etiqueta: 'Inglés', descripcion: 'Escuchar en inglés', icono: 'play', ruta: ejemplo.audio, lento: false, suena: sonandoNormal },
+    { clave: 'lento', etiqueta: 'Lento', descripcion: 'Escuchar lento', icono: 'slow', ruta: ejemplo.audio_lento, lento: true, suena: sonandoLenta },
   ];
   if (ejemplo.audio_es) {
     controles.push({ clave: 'es', etiqueta: 'Español', descripcion: 'Escuchar en español', icono: 'play', ruta: ejemplo.audio_es, lento: false, suena: vozEs.sonando });
@@ -101,35 +79,10 @@ export function EjemploFrase({ ejemplo, activo, antes, alActivarse }: Props) {
           accessibilityHint="Escuchar la frase en inglés"
           style={styles.frase}
         >
-          <FraseKaraoke
-            palabras={conVozLenta ? analisisLento.palabras : analisisEn.palabras}
-            voz={conVozLenta ? vozLenta : vozEn}
-            tamano="h3"
-            alinear="inicio"
-            apagada={vozEs.sonando}
-          />
+          <FraseKaraoke palabras={palabras} voz={voz} tamano="h3" alinear="inicio" apagada={vozEs.sonando} />
         </Presionable>
         <Text style={[styles.traduccion, vozEs.sonando && styles.traduccionSuena]}>{ejemplo.es}</Text>
-        <View style={styles.grupo}>
-          {controles.map((c, i) => {
-            const sinAudio = !hayAudio(c.ruta);
-            return (
-              <Presionable
-                key={c.clave}
-                onPress={() => sonar(c.ruta, c.lento)}
-                disabled={sinAudio}
-                accessibilityRole="button"
-                accessibilityLabel={c.descripcion}
-                accessibilityState={{ disabled: sinAudio, selected: c.suena }}
-                style={[styles.control, c.suena && styles.controlSuena, sinAudio && styles.sinAudio]}
-              >
-                {i === 0 ? null : <View style={styles.division} />}
-                <Icon name={c.icono} size="sm" color={sinAudio ? color.textFaint : color.accent} />
-                <Text style={styles.etiqueta}>{c.etiqueta}</Text>
-              </Presionable>
-            );
-          })}
-        </View>
+        <GrupoAudio controles={controles} alSonar={sonar} />
       </Card>
     </View>
   );
@@ -140,25 +93,4 @@ const styles = StyleSheet.create({
   frase: { minHeight: layout.tapMin, justifyContent: 'center' },
   traduccion: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   traduccionSuena: { color: color.text },
-  grupo: {
-    flexDirection: 'row',
-    alignSelf: 'flex-start',
-    backgroundColor: color.surfaceAlt,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: color.borderStrong,
-    overflow: 'hidden',
-  },
-  control: {
-    minHeight: layout.tapMin,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.xs,
-    paddingHorizontal: space.md,
-  },
-  controlSuena: { backgroundColor: color.accentSoft },
-  sinAudio: { opacity: 0.4 },
-  division: { position: 'absolute', left: 0, top: space.sm, bottom: space.sm, width: 1, backgroundColor: color.border },
-  etiqueta: { fontFamily: font.family.bodyStrong, fontSize: font.size.sm, color: color.accent },
 });

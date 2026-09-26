@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { EmptyState, Header, Screen } from '@/components/base';
+import { DetalleForma } from '@/components/phrasal/DetalleForma';
 import { RuletaParticulas } from '@/components/phrasal/RuletaParticulas';
 import { ViajeVerbo, type Viaje } from '@/components/phrasal/ViajeVerbo';
 import { anunciarForma, etiquetasParticulas } from '@/domain/phrasal';
@@ -18,6 +19,13 @@ type R = RouteProp<RootStackParams, 'PhrasalVerbo'>;
 /** Si el verbo no llega a su título en este tiempo (ms), se muestra igual: el vuelo nunca deja la página sin título. */
 const VIAJE_MAX_MS = 1350;
 
+/** La forma que se ve y cómo se llegó a ella: hacia dónde y en qué eje se desplaza el contenido al cambiar. */
+interface Cambio {
+  indice: number;
+  direccion: 1 | -1;
+  eje: 'x' | 'y';
+}
+
 /**
  * La página de un verbo: el verbo grande, fijo, y a su derecha la ruleta de partículas. El verbo no se mueve y la
  * partícula cambia todo el significado. Llega desde la lista con el verbo volando de su renglón a su lugar aquí
@@ -29,7 +37,7 @@ export function PhrasalVerboScreen() {
   const content = useMemo(loadContent, []);
   const modoLimpio = useSettingsStore((s) => s.modoLimpio);
   const verboRef = useRef<View>(null);
-  const [indice, setIndice] = useState(0);
+  const [cambio, setCambio] = useState<Cambio>({ indice: 0, direccion: 1, eje: 'y' });
   const [viaje, setViaje] = useState<Viaje | null>(() =>
     params.origen ? { verbo: params.verbo, desde: params.origen, hasta: null } : null
   );
@@ -52,7 +60,12 @@ export function PhrasalVerboScreen() {
     );
   }, []);
   const finViaje = useCallback(() => setViaje(null), []);
-  const elegir = useCallback((i: number) => setIndice(i), []);
+  const elegir = useCallback(
+    (indice: number, eje: 'x' | 'y') =>
+      setCambio((c) => (indice === c.indice ? c : { indice, direccion: indice > c.indice ? 1 : -1, eje })),
+    []
+  );
+  const elegirConRuleta = useCallback((indice: number) => elegir(indice, 'y'), [elegir]);
 
   useEffect(() => {
     if (!volando) return;
@@ -60,7 +73,7 @@ export function PhrasalVerboScreen() {
     return () => clearTimeout(t);
   }, [volando]);
 
-  const forma = formas[indice];
+  const forma = formas[cambio.indice];
   if (!forma) {
     return (
       <Screen>
@@ -80,7 +93,9 @@ export function PhrasalVerboScreen() {
       <Screen style={styles.pantalla}>
         <Header
           onBack={() => nav.goBack()}
-          right={formas.length > 1 ? <Text style={styles.contador}>{`${indice + 1} de ${formas.length}`}</Text> : undefined}
+          right={
+            formas.length > 1 ? <Text style={styles.contador}>{`${cambio.indice + 1} de ${formas.length}`}</Text> : undefined
+          }
         />
         <View style={styles.heroe}>
           <View ref={verboRef} collapsable={false} onLayout={medirVerbo} style={volando ? styles.oculto : null}>
@@ -92,9 +107,9 @@ export function PhrasalVerboScreen() {
             <RuletaParticulas
               verbo={params.verbo}
               etiquetas={etiquetas}
-              indice={indice}
-              anuncio={anunciarForma(forma, indice, formas.length)}
-              onElegir={elegir}
+              indice={cambio.indice}
+              anuncio={anunciarForma(forma, cambio.indice, formas.length)}
+              onElegir={elegirConRuleta}
             />
           ) : (
             <Text style={styles.particula}>{forma.particula}</Text>
@@ -105,7 +120,7 @@ export function PhrasalVerboScreen() {
           contentContainerStyle={styles.detalleContenido}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.significado}>{forma.significado}</Text>
+          <DetalleForma forma={forma} direccion={cambio.direccion} eje={cambio.eje} />
         </ScrollView>
       </Screen>
       {viaje ? <ViajeVerbo viaje={viaje} onFin={finViaje} /> : null}
@@ -123,10 +138,4 @@ const styles = StyleSheet.create({
   particula: { ...text.display, color: color.accent },
   detalle: { flex: 1 },
   detalleContenido: { paddingTop: space.lg, paddingBottom: space.xxxl, gap: space.lg },
-  significado: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xl,
-    lineHeight: font.size.xl * 1.4,
-    color: color.text,
-  },
 });

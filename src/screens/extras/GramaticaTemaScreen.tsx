@@ -11,7 +11,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
+import { Button, Card, EmptyState, Header, NotaInfo, Screen } from '@/components/base';
 import { EjemploFrase } from '@/components/gramatica/EjemploFrase';
 import { ErrorQueSeCorrige } from '@/components/gramatica/ErrorQueSeCorrige';
 import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
@@ -267,11 +267,9 @@ export function GramaticaTemaScreen() {
 
       {tema.ojo ? (
         <Bloque titulo="Ojo" retraso={escalon(7)}>
-          <View style={styles.ojo}>
-            <View style={styles.ojoBorde} />
-            <Icon name="info" size="md" color={color.accent} />
+          <NotaInfo>
             <Negrita texto={tema.ojo} estilo={styles.ojoTexto} />
-          </View>
+          </NotaInfo>
         </Bloque>
       ) : null}
     </Screen>
@@ -323,8 +321,6 @@ function Negrita({ texto, estilo }: { texto: string; estilo: object }) {
   );
 }
 
-const ANCHO_BORDE_OJO = 3;
-
 const styles = StyleSheet.create({
   gancho: {
     fontFamily: font.family.body,
@@ -357,20 +353,7 @@ const styles = StyleSheet.create({
     color: color.text,
     lineHeight: font.size.md * 1.6,
   },
-  ojo: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: space.md,
-    backgroundColor: color.surfaceAlt,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-    paddingVertical: space.lg,
-    paddingRight: space.lg,
-    paddingLeft: space.lg + ANCHO_BORDE_OJO,
-  },
-  ojoBorde: { position: 'absolute', top: 0, bottom: 0, left: 0, width: ANCHO_BORDE_OJO, backgroundColor: color.accent },
   ojoTexto: {
-    flex: 1,
     fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.text,

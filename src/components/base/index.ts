@@ -4,6 +4,7 @@ export { Card } from './Card';
 export { Badge, RiskBadge, RegistroBadge, LevelBadge } from './Badge';
 export { ProgressBar } from './ProgressBar';
 export { Input } from './Input';
+export { NotaInfo } from './NotaInfo';
 export { EmptyState } from './EmptyState';
 export { Header } from './Header';
 export { ErrorBoundary } from './ErrorBoundary';

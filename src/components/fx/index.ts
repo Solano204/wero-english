@@ -24,3 +24,4 @@ export { useBolsillo } from './useBolsillo';
 export { useDesfaseVentana, type Rect } from './useDesfaseVentana';
 export { useReloj, useSenalActiva } from './useSenalActiva';
 export { useVozEnVivo, type VozEnVivo } from './useVozEnVivo';
+export { useVozFrase, type VozFrase } from './useVozFrase';
