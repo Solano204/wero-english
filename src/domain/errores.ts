@@ -97,3 +97,37 @@ export function textoParaCompartir(e: Malentendido): string {
     `Se dice «${e.lo_correcto.trim()}».\nLo aprendí con Wero.`
   );
 }
+
+/** Los tiempos de la secuencia del detalle (ms). Los pone `motion.ts`; aquí llegan por parámetro para poder probarlos. */
+export interface TiemposMalentendido {
+  /** Duración total máxima de los tres pasos. */
+  tope: number;
+  /** Lo más pronto y lo más tarde que puede arrancar el paso c. */
+  cMin: number;
+  cMax: number;
+  /** Lo que tarda en tacharse una palabra, la pausa entre tachar y resolver, y el retraso con que entra lo nuevo. */
+  tacha: number;
+  pausa: number;
+  entra: number;
+  /** Lo que dura la llegada de una palabra nueva y la del ícono ✓. */
+  entraSube: number;
+  icono: number;
+  /** Sin morph: cuánto se espera antes de mostrar la correcta y lo que tarda en aparecer. */
+  escena: number;
+  aparecerSubiendo: number;
+  /** El retraso escalonado del lugar `i` entre las palabras que se tachan o que entran. */
+  escalon: (i: number) => number;
+}
+
+/** Cuánto dura la corrección de «Lo correcto», de que empieza a tacharse a que termina de llegar la frase correcta. */
+export function duracionCorreccion(modo: 'morph' | 'fundido', tachas: number, entradas: number, t: TiemposMalentendido): number {
+  if (modo === 'fundido') return t.escena + t.aparecerSubiendo;
+  const tachado = tachas === 0 ? 0 : t.tacha + t.escalon(tachas - 1);
+  const llegada = entradas === 0 ? t.entra + t.icono : t.entra + t.escalon(entradas - 1) + t.entraSube;
+  return tachado + t.pausa + llegada;
+}
+
+/** Cuándo arranca el paso c: lo más tarde que deje la corrección terminar dentro del tope, entre `cMin` y `cMax`. */
+export function inicioDeCorreccion(duracion: number, t: TiemposMalentendido): number {
+  return Math.min(t.cMax, Math.max(t.cMin, t.tope - duracion));
+}

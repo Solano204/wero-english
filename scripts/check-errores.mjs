@@ -30,15 +30,15 @@ const datos = JSON.parse(leer('assets/data/errores.json'));
 const errores = datos.errores;
 
 let total = 0;
-const prueba = (nombre, fn) => {
-  fn();
+const prueba = async (nombre, fn) => {
+  await fn();
   total++;
   console.log(`  ok  ${nombre}`);
 };
 
 /* ---------- filtros, cuenta y orden ---------- */
 
-prueba('los 194 errores: cada chip lleva su cuenta y todas suman el total', () => {
+await prueba('los 194 errores: cada chip lleva su cuenta y todas suman el total', () => {
   assert.equal(errores.length, 194);
   assert.equal(datos.total, 194);
   const cuenta = E.conteoPorCategoria(errores);
@@ -53,7 +53,7 @@ prueba('los 194 errores: cada chip lleva su cuenta y todas suman el total', () =
   assert.deepEqual(E.CATEGORIAS_ERRORES.map((c) => c.label), ['Todos', 'Falsos amigos', 'Calcos', 'Gramática', 'Preposiciones', 'Pronunciación', 'Tono', 'Escritura']);
 });
 
-prueba('filtrar: cada chip deja solo su categoría; «Todos» deja los 194; el orden no cambia lo que queda', () => {
+await prueba('filtrar: cada chip deja solo su categoría; «Todos» deja los 194; el orden no cambia lo que queda', () => {
   for (const c of E.CATEGORIAS_ERRORES) {
     const g = E.filtrarYOrdenar(errores, c.id, 'graves');
     const o = E.filtrarYOrdenar(errores, c.id, 'orden');
@@ -63,7 +63,7 @@ prueba('filtrar: cada chip deja solo su categoría; «Todos» deja los 194; el o
   }
 });
 
-prueba('«Más graves primero»: la gravedad baja de 3 a 1 y, a igual gravedad, se respeta el orden del contenido', () => {
+await prueba('«Más graves primero»: la gravedad baja de 3 a 1 y, a igual gravedad, se respeta el orden del contenido', () => {
   const l = E.filtrarYOrdenar(errores, 'todos', 'graves');
   for (let i = 1; i < l.length; i++) {
     assert.ok(l[i - 1].gravedad >= l[i].gravedad, `#${i}: la gravedad no sube`);
@@ -73,12 +73,12 @@ prueba('«Más graves primero»: la gravedad baja de 3 a 1 y, a igual gravedad, 
   assert.equal(l.filter((e) => e.gravedad === 3).length, 16);
 });
 
-prueba('«En orden»: sale por el campo `orden`, sin importar la gravedad', () => {
+await prueba('«En orden»: sale por el campo `orden`, sin importar la gravedad', () => {
   const l = E.filtrarYOrdenar(errores, 'todos', 'orden');
   for (let i = 1; i < l.length; i++) assert.ok(l[i - 1].orden < l[i].orden, `#${i}`);
 });
 
-prueba('ordenar no modifica la lista de entrada y el ajuste guardado se normaliza', () => {
+await prueba('ordenar no modifica la lista de entrada y el ajuste guardado se normaliza', () => {
   const copia = errores.map((e) => e.id);
   E.filtrarYOrdenar(errores, 'todos', 'graves');
   E.filtrarYOrdenar(errores, 'calco', 'orden');
@@ -92,13 +92,13 @@ prueba('ordenar no modifica la lista de entrada y el ajuste guardado se normaliz
 
 /* ---------- encabezado, gravedad, anuncio y compartir ---------- */
 
-prueba('el encabezado: «194 errores» sin filtro y «32 de 194» con filtro', () => {
+await prueba('el encabezado: «194 errores» sin filtro y «32 de 194» con filtro', () => {
   assert.deepEqual(E.encabezadoErrores('todos', 194, 194), { numero: 194, resto: 'errores', anuncio: '194 errores' });
   assert.deepEqual(E.encabezadoErrores('calco', 40, 194), { numero: 40, resto: 'de 194', anuncio: '40 de 194 errores' });
   assert.deepEqual(E.encabezadoErrores('registro', 32, 194), { numero: 32, resto: 'de 194', anuncio: '32 de 194 errores' });
 });
 
-prueba('la gravedad se dice con texto: Suena raro, Te delata, Cambia el significado', () => {
+await prueba('la gravedad se dice con texto: Suena raro, Te delata, Cambia el significado', () => {
   assert.equal(E.etiquetaGravedad(1), 'Suena raro');
   assert.equal(E.etiquetaGravedad(2), 'Te delata');
   assert.equal(E.etiquetaGravedad(3), 'Cambia el significado');
@@ -106,7 +106,7 @@ prueba('la gravedad se dice con texto: Suena raro, Te delata, Cambia el signific
   for (const e of errores) assert.ok([1, 2, 3].includes(e.gravedad), `${e.id}: gravedad ${e.gravedad}`);
 });
 
-prueba('el detalle se anuncia en orden y sin doble punto; el texto de compartir trae los tres y la app', () => {
+await prueba('el detalle se anuncia en orden y sin doble punto; el texto de compartir trae los tres y la app', () => {
   const e = errores.find((x) => x.id === 'err_001');
   assert.equal(
     E.anuncioDeError(e),
@@ -125,9 +125,59 @@ prueba('el detalle se anuncia en orden y sin doble punto; el texto de compartir 
   }
 });
 
+await prueba('la secuencia del detalle: los tres pasos caben en 1.6 s en los 194 pares y el glitch termina cuando arranca «Lo correcto»', async () => {
+  const D = await cargar('src/utils/diff.ts');
+  const motion = leer('src/theme/motion.ts');
+  const num = (patron, nombre) => {
+    const m = motion.match(patron);
+    assert.ok(m, `no encontré ${nombre} en motion.ts`);
+    return Number(m[1]);
+  };
+  const dur = { rapido: num(/rapido: (\d+),/, 'rapido'), base: num(/base: (\d+),/, 'base'), lento: num(/lento: (\d+),/, 'lento'), escena: num(/escena: (\d+),/, 'escena') };
+  const escalonMs = num(/motionEscalon = \{\s*ms: (\d+),/, 'motionEscalon.ms');
+  const escalonMax = num(/max: (\d+),\s*\} as const;\s*export function escalon/, 'motionEscalon.max');
+  assert.match(motion, /motionError = \{ tacha: motionDuration\.base, pausa: 120, entra: 80 \}/);
+  assert.match(motion, /export const entraSube[\s\S]*?\.duration\(motionDuration\.lento\)/, 'la llegada de una palabra dura `lento`');
+  const bloque = motion.slice(motion.indexOf('export const motionMalentendido'));
+  const cableInicio = Number(bloque.match(/cableInicio: (\d+),/)[1]);
+  assert.match(bloque, /cable: motionDuration\.lento,/);
+  assert.match(bloque, /interferencia: motionDuration\.rapido,/);
+  const glitch = Number(bloque.match(/glitch: (\d+),/)[1]);
+  const [cMin, cMax, tope] = [/cMin: (\d+),/, /cMax: (\d+),/, /tope: (\d+),/].map((patron) => Number(bloque.match(patron)[1]));
+  assert.equal(tope, 1600);
+  const t = {
+    tope, cMin, cMax,
+    tacha: dur.base, pausa: 120, entra: 80, entraSube: dur.lento, icono: dur.base,
+    escena: dur.escena, aparecerSubiendo: dur.lento,
+    escalon: (i) => Math.min(i, escalonMax - 1) * escalonMs,
+  };
+  let morph = 0;
+  let masLarga = 0;
+  let ultima = 0;
+  for (const e of errores) {
+    const d = D.diffFrase(e.lo_que_dices, e.lo_correcto);
+    const { tachas, entradas } = D.numerarCambios(d.piezas);
+    const modo = d.claro ? 'morph' : 'fundido';
+    if (d.claro) morph++;
+    const duracion = E.duracionCorreccion(modo, tachas, entradas, t);
+    const inicio = E.inicioDeCorreccion(duracion, t);
+    assert.ok(inicio >= cMin && inicio <= cMax, `${e.id}: el paso c arranca en ${inicio}`);
+    assert.ok(inicio + duracion <= tope, `${e.id}: ${inicio} + ${duracion} pasa de ${tope} ms`);
+    masLarga = Math.max(masLarga, duracion);
+    ultima = Math.max(ultima, inicio + duracion);
+  }
+  assert.equal(morph + (errores.length - morph), 194);
+  // El glitch empieza a medio cable y termina antes de que arranque el paso c en el caso normal.
+  const interferencia = cableInicio + dur.lento / 2;
+  assert.ok(interferencia + glitch <= cMax, `el glitch termina en ${interferencia + glitch} ms, después de ${cMax}`);
+  assert.equal(E.inicioDeCorreccion(0, t), cMax);
+  assert.equal(E.inicioDeCorreccion(5000, t), cMin);
+  console.log(`        ${morph} pares con morph y ${errores.length - morph} con fundido; la corrección más larga dura ${masLarga} ms y todo termina a los ${ultima} ms`);
+});
+
 /* ---------- lo que se puede revisar sin teléfono ---------- */
 
-prueba('la lista y el detalle no usan rojo ni el badge de gravedad: la gravedad es un medidor con texto, en ámbar', () => {
+await prueba('la lista y el detalle no usan rojo ni el badge de gravedad: la gravedad es un medidor con texto, en ámbar', () => {
   for (const rel of ['src/screens/extras/ErrorsScreen.tsx', 'src/screens/extras/ErrorDetailScreen.tsx']) {
     const codigo = sinComentarios(leer(rel));
     assert.ok(!/riskStrong|tone="strong"/.test(codigo), `${rel}: sin rojo`);
@@ -137,7 +187,7 @@ prueba('la lista y el detalle no usan rojo ni el badge de gravedad: la gravedad 
   assert.doesNotMatch(detalle, /errImg: \{[^}]*alignSelf/, 'la imagen no se centra encogida: `ancha` la estira');
 });
 
-prueba('la lista: encabezado con marcador, chips con cuenta y orden guardado en ajustes', () => {
+await prueba('la lista: encabezado con marcador, chips con cuenta y orden guardado en ajustes', () => {
   const p = sinComentarios(leer('src/screens/extras/ErrorsScreen.tsx'));
   assert.match(p, /<Marcador\b/, 'el número rueda con el Marcador');
   assert.match(p, /encabezadoErrores\(/);
@@ -158,6 +208,44 @@ prueba('la lista: encabezado con marcador, chips con cuenta y orden guardado en 
   const medidor = sinComentarios(leer('src/components/errores/MedidorGravedad.tsx'));
   assert.match(medidor, /anuncioGravedad\(/);
   assert.match(medidor, /etiquetaGravedad\(/);
+});
+
+await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la corrección de Gramática y reducir movimiento sin nada de eso', () => {
+  const sec = sinComentarios(leer('src/components/errores/SecuenciaMalentendido.tsx'));
+  assert.match(sec, /<CableTrazo\b/, 'el cable es el de Pares');
+  assert.match(sec, /desvio=\{desvio\}/, 'el cable vibra');
+  assert.match(sec, /useCorreccion\(e\.lo_que_dices, e\.lo_correcto\)/, 'el diff es el de Gramática');
+  assert.match(sec, /<VistaCorreccion\b/);
+  assert.match(sec, /<SenalRota\b/);
+  assert.match(sec, /duracionCorreccion\(modo, correccion\.tachas, correccion\.entradas, TIEMPOS\)/, 'el paso c sale de la línea de tiempo probada');
+  assert.match(sec, /inicioDeCorreccion\(duracion, TIEMPOS\)/);
+  assert.match(sec, /accessibilityLabel=\{anuncioDeError\(e\)\}/, 'el lector oye el malentendido completo, en orden');
+  assert.match(sec, /Ver otra vez/);
+  assert.match(sec, /\{reducido \? null : \(\s*<View style=\{styles\.otraVez\}>/, 'sin animación no hay «Ver otra vez»');
+  const reducido = sec.slice(sec.indexOf('if (reducido) {'), sec.indexOf('v1.value = 0;'));
+  assert.ok(/setFinal\(true\)/.test(reducido) && !/soltarCable|jugarCorreccion|setGlitch|programar/.test(reducido), 'con reducir movimiento: los tres pasos con fundido, sin cable, glitch ni morph');
+  assert.ok(!/riskStrong|tone="strong"/.test(sec));
+  const rota = sinComentarios(leer('src/components/errores/SenalRota.tsx'));
+  assert.ok(!/skia|Shader|RuntimeEffect|withRepeat/i.test(rota), 'sin shaders ni bucles: dura una sola vez');
+  assert.equal((rota.match(/withTiming\(/g) ?? []).length, 1);
+  assert.match(rota, /duration: motionMalentendido\.glitch/);
+  for (const bloque of rota.match(/useAnimatedStyle\(\(\) => \{[\s\S]*?\n  \}\);/g) ?? []) {
+    const claves = [...bloque.matchAll(/^\s{4,6}(\w+):/gm)].map((m) => m[1]);
+    for (const k of claves) assert.ok(['opacity', 'transform', 'color', 'translateX'].includes(k), `el glitch solo mueve transform y opacity (color en la base), no ${k}`);
+  }
+  assert.match(rota, /if \(reducido\) return <Text/, 'con reducir movimiento es solo el texto');
+  const trazo = leer('src/components/fx/CableTrazo.tsx');
+  assert.match(trazo, /desvio\?: SharedValue<number>;/);
+  assert.match(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx')), /<CableTrazo\b/, 'Pares usa el mismo dibujo');
+  assert.ok(!/Canvas/.test(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx'))));
+  const gram = sinComentarios(leer('src/components/gramatica/ErrorQueSeCorrige.tsx'));
+  assert.match(gram, /useCorreccion\(mal, bien\)/, 'Gramática usa el mismo núcleo');
+  assert.ok(!/function Tacha|function FraseTransformada/.test(gram));
+  assert.match(sinComentarios(leer('src/components/gramatica/CorreccionFrase.tsx')), /export function useCorreccion\(/);
+  const detalle = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
+  assert.match(detalle, /<SecuenciaMalentendido key=\{err\.id\} error=\{err\} \/>/);
+  assert.match(detalle, /useFocusEffect\(/);
+  assert.match(detalle, /audio\.stop\(\)/, 'salir corta la voz');
 });
 
 console.log(`\ncheck:errores ${total} pruebas ok\n`);

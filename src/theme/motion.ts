@@ -174,6 +174,28 @@ export const motionMazo = {
   separa: 12,
 } as const;
 
+/**
+ * La señal que se rompe (detalle de Errores que te delatan). «Lo que dices» entra en `base`; el cable sale `cableInicio` ms
+ * después y tarda `cable` en llegar a «Lo que entienden». A medio cable la señal hace interferencia: el cable vibra y se
+ * pone ámbar en `interferencia`, y el texto que llega hace glitch durante `glitch` ms (cambia de posición a saltos, con
+ * `glitchPasos` cuadros y hasta `glitchDesplazo` dp, y se asienta). El paso c («Lo correcto») arranca lo más tarde que
+ * deje terminar todo dentro de `tope`, pero entre `cMin` y `cMax`.
+ */
+export const motionMalentendido = {
+  cableInicio: 160,
+  cable: motionDuration.lento,
+  interferencia: motionDuration.rapido,
+  glitch: 300,
+  glitchPasos: 8,
+  glitchDesplazo: 8,
+  /** Cuánto vibra el cable: oscilaciones completas y su amplitud, en dp. */
+  oscilaciones: 4,
+  amplitud: 7,
+  cMin: 480,
+  cMax: 640,
+  tope: 1600,
+} as const;
+
 /** Bucles largos. */
 export const motionCiclo = {
   esqueleto: 700,

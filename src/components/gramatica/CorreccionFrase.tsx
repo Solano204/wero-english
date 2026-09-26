@@ -175,8 +175,9 @@ export interface Correccion {
   totalTachas: number;
   tacha: SharedValue<number>;
   resuelto: SharedValue<number>;
-  /** Cuántas palabras se tachan (0 si la frase no se transforma). */
+  /** Cuántas palabras se tachan (0 si la frase no se transforma) y cuántos trozos llegan. */
   tachas: number;
+  entradas: number;
   /** Empieza la corrección desde la frase incorrecta. */
   jugar: () => void;
   /** Suelta los temporizadores y las animaciones. */
@@ -191,7 +192,7 @@ export interface Correccion {
 export function useCorreccion(mal: string, bien: string): Correccion {
   const reducido = useMovimientoReducido();
   const diff = useMemo(() => diffFrase(mal, bien), [mal, bien]);
-  const { plan, tachas } = useMemo(() => numerarCambios(diff.piezas), [diff]);
+  const { plan, tachas, entradas } = useMemo(() => numerarCambios(diff.piezas), [diff]);
   const modo: ModoCorreccion = reducido ? 'estatico' : diff.claro ? 'morph' : 'fundido';
   const totalTachas = tachas === 0 ? 0 : motionError.tacha + escalon(tachas - 1);
   const retrasoCambio = modo === 'morph' ? totalTachas + motionError.pausa : motionDuration.escena;
@@ -233,6 +234,7 @@ export function useCorreccion(mal: string, bien: string): Correccion {
     tacha,
     resuelto,
     tachas,
+    entradas,
     jugar,
     detener,
   };

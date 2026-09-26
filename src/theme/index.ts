@@ -42,6 +42,7 @@ export {
   motionPulso,
   motionSacudida,
   motionMazo,
+  motionMalentendido,
   motionLogro,
   motionDulces,
   motionColmena,

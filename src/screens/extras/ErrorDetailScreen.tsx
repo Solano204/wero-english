@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
+  useFocusEffect,
   useNavigation,
   useRoute,
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Badge, Button, Card, Header, Screen } from '@/components/base';
-import { AudioButton, SceneImage } from '@/components/card';
+import { Badge, Button, Header, Screen } from '@/components/base';
 import { MedidorGravedad } from '@/components/errores/MedidorGravedad';
+import { SecuenciaMalentendido } from '@/components/errores/SecuenciaMalentendido';
+import * as audio from '@/services/audio';
 import { loadContent } from '@/store/content';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
@@ -16,11 +18,24 @@ import type { RootStackParams } from '@/navigation/routes';
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'ErrorDetail'>;
 
-/** Ficha de un error. Las de pronunciación traen el par de contraste. */
+/**
+ * Ficha de un error. Arriba, la señal que se rompe: lo que dices, lo que entienden y lo correcto en tres pasos. Las de
+ * pronunciación traen el par de contraste.
+ */
 export function ErrorDetailScreen() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
   const content = useMemo(loadContent, []);
+
+  // Perder el foco (salir, abrir la frase completa) corta la voz: el reproductor de frases es uno solo y compartido.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        audio.stop();
+      },
+      []
+    )
+  );
 
   const err = content.errores.errores.find((e) => e.id === params.errorId);
   if (!err) {
@@ -31,43 +46,11 @@ export function ErrorDetailScreen() {
     );
   }
 
-  const esPronunciacion = err.categoria === 'pronunciacion';
-
   return (
     <Screen scroll>
       <Header onBack={() => nav.goBack()} />
 
-      <Card style={styles.bad}>
-        <Text style={styles.label}>Lo que dices</Text>
-        <Text style={styles.badText}>{err.lo_que_dices}</Text>
-        {esPronunciacion && err.audio_contraste_archivo ? (
-          <AudioButton
-            path={err.audio_contraste_archivo}
-            size="sm"
-            label="Así suena"
-          />
-        ) : null}
-      </Card>
-
-      <Card style={styles.understood}>
-        <Text style={styles.label}>Lo que entienden</Text>
-        <Text style={styles.understoodText}>{err.lo_que_entienden}</Text>
-        {err.imagen ? (
-          <SceneImage
-            path={err.imagen}
-            size={180}
-            ancha
-            style={styles.errImg}
-          />
-        ) : null}
-      </Card>
-
-      <Card style={styles.good}>
-        <Text style={styles.label}>Lo correcto</Text>
-        <Text style={styles.goodText}>{err.lo_correcto}</Text>
-        <Text style={styles.ipa}>{err.ipa_correcto}</Text>
-        <AudioButton path={err.audio} size="md" label="Escuchar" />
-      </Card>
+      <SecuenciaMalentendido key={err.id} error={err} />
 
       <View style={styles.why}>
         <Text style={styles.whyHead}>Por qué pasa</Text>
@@ -94,47 +77,6 @@ export function ErrorDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  bad: { gap: space.sm, borderLeftWidth: 3, borderLeftColor: color.wrong },
-  understood: {
-    gap: space.xs,
-    marginTop: space.sm,
-    backgroundColor: color.riskWarnSoft,
-  },
-  good: {
-    gap: space.sm,
-    marginTop: space.sm,
-    borderLeftWidth: 3,
-    borderLeftColor: color.correct,
-  },
-  label: {
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    fontFamily: font.family.bodyStrong,
-  },
-  badText: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xl,
-    color: color.text,
-    textDecorationLine: 'line-through',
-    lineHeight: font.size.xl * 1.3,
-  },
-  understoodText: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.riskWarn,
-    fontStyle: 'italic',
-  },
-  goodText: {
-    fontSize: font.size.xl,
-    color: color.text,
-    fontFamily: font.family.heading,
-    lineHeight: font.size.xl * 1.3,
-  },
-  // Sin `alignSelf`: `ancha` la estira a todo el ancho de la tarjeta, y centrarla la dejaba como una píldora angosta.
-  errImg: { marginTop: space.sm },
-  ipa: { fontFamily: font.family.ipa, fontSize: font.size.sm, color: color.textMuted },
   why: { marginTop: space.xl, gap: space.sm },
   whyHead: {
     fontSize: font.size.xs,
