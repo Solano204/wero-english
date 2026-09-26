@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
+import React, { useCallback, useMemo, useState, type ReactNode, type Ref } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { Canvas, Group, LinearGradient, Path, Rect, Skia, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
@@ -68,6 +68,8 @@ function Carriles({ ancho, alto, y, largoEstela, estela }: CarrilesProps) {
 }
 
 interface Props {
+  /** Para medir dónde está la pista respecto de otras piezas (a dónde vuela la ficha acertada). */
+  pistaRef?: Ref<View>;
   /** La posición de la fila de fichas: el valor compartido que la mueve. */
   y: SharedValue<number>;
   /** Cuánto baja la fila hasta tocar el piso, cada vez que la pista se mide. */
@@ -85,7 +87,7 @@ interface Props {
  * sobre él, `distanciaCaida`) y la fila de fichas encima. Con «reducir movimiento» no hay
  * carriles con perspectiva ni estela.
  */
-export function PistaCaida({ y, onDistancia, largoEstela, estela, children }: Props) {
+export function PistaCaida({ pistaRef, y, onDistancia, largoEstela, estela, children }: Props) {
   const reducido = useMovimientoReducido();
   const [medida, setMedida] = useState({ ancho: 0, alto: 0 });
 
@@ -99,7 +101,7 @@ export function PistaCaida({ y, onDistancia, largoEstela, estela, children }: Pr
   );
 
   return (
-    <View style={styles.pista} onLayout={alMedir}>
+    <View ref={pistaRef} style={styles.pista} onLayout={alMedir}>
       {!reducido && medida.ancho > 0 ? (
         <Carriles ancho={medida.ancho} alto={medida.alto} y={y} largoEstela={largoEstela} estela={estela} />
       ) : null}

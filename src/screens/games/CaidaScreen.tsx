@@ -9,12 +9,14 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion, type Resultado } from '@/components/feedback';
-import { FichaCaida } from '@/components/juegos/caida/FichaCaida';
+import { Marcador } from '@/components/fx';
+import { Trozos, useReaccion } from '@/components/feedback';
+import { FichaCaida, type EstadoFicha } from '@/components/juegos/caida/FichaCaida';
 import { FraseRonda } from '@/components/juegos/caida/FraseRonda';
 import { IndicadorRitmo } from '@/components/juegos/caida/IndicadorRitmo';
 import { PistaCaida } from '@/components/juegos/caida/PistaCaida';
@@ -33,6 +35,7 @@ import {
   font,
   motionDuration,
   motionEasing,
+  motionLogro,
   motionSpring,
   radius,
   shadow,
@@ -53,6 +56,8 @@ type Ruta = RouteProp<RootStackParams, 'Caida'>;
 const PAUSA_MAXIMA_MS = 10000;
 /** Respiro tras la voz antes de seguir (próxima ronda o resultado). */
 const RESPIRO_MS = 300;
+/** Tope del vuelo de la ficha acertada hasta el marcador (unos 470 ms): pasado esto el marcador se actualiza igual. */
+const VUELO_MAXIMO_MS = 1200;
 /** Bloqueo de "Siguiente" en la pausa contra doble toque. */
 const AVANZAR_DEBOUNCE_MS = 400;
 
@@ -104,8 +109,16 @@ export function CaidaScreen() {
     null
   );
   const [avanzando, setAvanzando] = useState(false);
+  // La ficha acertada vuela al marcador: mientras tanto el marcador muestra el número de antes y la
+  // pausa espera. `destino` es el centro del marcador en el espacio de la pista.
+  const [volando, setVolando] = useState(false);
+  const [destino, setDestino] = useState<{ x: number; y: number } | null>(null);
+  const capaRef = useRef<View>(null);
+  const pistaRef = useRef<View>(null);
+  const marcadorRef = useRef<View>(null);
 
   const y = useSharedValue(0);
+  const pulsoMarcador = useSharedValue(0);
   // La estela de las fichas: 1 mientras caen, 0 al contestar o al llegar al piso.
   const estela = useSharedValue(0);
   const overlayOpacity = useSharedValue(0);
@@ -187,6 +200,7 @@ export function CaidaScreen() {
     if (!montado.current) return;
     setEnPausa(false);
     setPausaInfo(null);
+    setVolando(false);
     continuar?.();
   }, []);
 
@@ -217,6 +231,50 @@ export function CaidaScreen() {
     },
     [avanzarTrasPausa]
   );
+
+  /** El centro del marcador respecto de la pista: a donde vuela la ficha acertada. Se mide contra la capa común. */
+  const medirDestino = useCallback(() => {
+    const capa = capaRef.current;
+    const marcador = marcadorRef.current;
+    const pista = pistaRef.current;
+    if (!capa || !marcador || !pista) return;
+    marcador.measureLayout(
+      capa,
+      (mx, my, mw, mh) =>
+        pista.measureLayout(
+          capa,
+          (px, py) =>
+            setDestino((d) => {
+              const x = mx + mw / 2 - px;
+              const yc = my + mh / 2 - py;
+              return d && d.x === x && d.y === yc ? d : { x, y: yc };
+            }),
+          () => undefined
+        ),
+      () => undefined
+    );
+  }, []);
+
+  /** La ficha acertada llegó: el marcador rueda al número nuevo y pulsa 1 → 1.06 → 1. */
+  const alLlegarFicha = useCallback(() => {
+    setVolando(false);
+    if (reducido) return;
+    pulsoMarcador.value = withSequence(
+      withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
+      withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
+    );
+  }, [reducido, pulsoMarcador]);
+
+  // Si la ficha no avisa que llegó (app en segundo plano a mitad del vuelo), el marcador se actualiza igual.
+  useEffect(() => {
+    if (!volando) return undefined;
+    const t = setTimeout(() => setVolando(false), VUELO_MAXIMO_MS);
+    return () => clearTimeout(t);
+  }, [volando]);
+
+  useEffect(() => {
+    medirDestino();
+  }, [medirDestino, altoPista]);
 
   /**
    * Se acabó el tiempo: las tarjetas tocaron el piso.
@@ -262,6 +320,11 @@ export function CaidaScreen() {
 
   const anim = useAnimatedStyle(() => ({
     transform: [{ translateY: y.value }],
+  }));
+
+  // 1 → `motionLogro.escala` → 1: la misma escala con la que pulsa un logro en Niveles.
+  const pulsoAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + (motionLogro.escala - 1) * pulsoMarcador.value }],
   }));
 
   const overlayAnim = useAnimatedStyle(() => ({
@@ -314,6 +377,7 @@ export function CaidaScreen() {
       }
 
       setAcertada(`${idx}|${texto}`);
+      setVolando(true);
       haptics.success();
       reaccion.celebra();
       const totalAciertos = aciertosRef.current + 1;
@@ -459,82 +523,103 @@ export function CaidaScreen() {
 
   return (
     <Screen padded={false}>
-      <Trozos disparo={reaccion.trozos} tinte={color.correct} x="50%" y="62%" />
-      <View style={styles.top}>
-        <Header
-          onBack={() => nav.goBack()}
-          title={nivel ? `Nivel ${nivel}` : undefined}
-          right={
-            <View style={styles.derecha}>
-              <IndicadorRitmo nivel={chevrons} />
-              <Text style={styles.marcador} maxFontSizeMultiplier={1.2}>{aciertos}</Text>
-            </View>
-          }
-        />
-        <FraseRonda key={idx} texto={round.entry.phrase} />
-        <Text style={styles.instruccion}>
-          Toca el significado antes de que lleguen abajo
-        </Text>
-      </View>
-
-      <PistaCaida y={y} onDistancia={setAltoPista} largoEstela={largoEstela(altoPista, round.duracionMs)} estela={estela}>
-        <Animated.View style={[styles.fila, anim]}>
-          <FichaCaida
-            key={`${idx}-a`}
-            texto={izquierda}
-            resultado={resultadoFicha(izquierda, fallada, acertada, idx)}
-            onPress={() => void responder(izquierda)}
+      <View ref={capaRef} style={styles.capa}>
+        <Trozos disparo={reaccion.trozos} tinte={color.correct} x="50%" y="62%" />
+        <View style={styles.top}>
+          <Header
+            onBack={() => nav.goBack()}
+            title={nivel ? `Nivel ${nivel}` : undefined}
+            right={
+              <View style={styles.derecha}>
+                <IndicadorRitmo nivel={chevrons} />
+                <View ref={marcadorRef} collapsable={false} onLayout={medirDestino}>
+                  <Animated.View style={pulsoAnim}>
+                    <Marcador
+                      valor={aciertos - (volando ? 1 : 0)}
+                      tamano={font.size.xl}
+                      color={color.accent}
+                      etiqueta={`${aciertos} ${aciertos === 1 ? 'acierto' : 'aciertos'}`}
+                    />
+                  </Animated.View>
+                </View>
+              </View>
+            }
           />
-          <FichaCaida
-            key={`${idx}-b`}
-            texto={derecha}
-            resultado={resultadoFicha(derecha, fallada, acertada, idx)}
-            onPress={() => void responder(derecha)}
-          />
-        </Animated.View>
-      </PistaCaida>
-
-      {enPausa && pausaInfo ? (
-        <View style={styles.overlay} pointerEvents="box-none">
-          <Animated.View style={[styles.overlayCard, overlayAnim]}>
-            <Text style={styles.overlayEn}>{pausaInfo.en}</Text>
-            <Text style={styles.overlayEs}>{pausaInfo.es}</Text>
-            <Presionable
-              onPress={tocarSiguienteEnPausa}
-              disabled={avanzando}
-              accessibilityRole="button"
-              accessibilityLabel="Siguiente"
-              hitSlop={8}
-              style={styles.siguiente}
-            >
-              <Text style={styles.siguienteTexto}>Siguiente</Text>
-              <Icon name="chevron-right" size="sm" color={color.textFaint} />
-            </Presionable>
-          </Animated.View>
+          <FraseRonda key={idx} texto={round.entry.phrase} />
+          <Text style={styles.instruccion}>
+            Toca el significado antes de que lleguen abajo
+          </Text>
         </View>
-      ) : null}
+
+        <PistaCaida
+          pistaRef={pistaRef}
+          y={y}
+          onDistancia={setAltoPista}
+          largoEstela={largoEstela(altoPista, round.duracionMs)}
+          estela={estela}
+        >
+          <Animated.View style={[styles.fila, anim]}>
+            <FichaCaida
+              key={`${idx}-a`}
+              texto={izquierda}
+              estado={estadoFicha(izquierda, fallada, acertada, idx)}
+              y={y}
+              destino={destino}
+              onLlego={alLlegarFicha}
+              onPress={() => void responder(izquierda)}
+            />
+            <FichaCaida
+              key={`${idx}-b`}
+              texto={derecha}
+              estado={estadoFicha(derecha, fallada, acertada, idx)}
+              y={y}
+              destino={destino}
+              onLlego={alLlegarFicha}
+              onPress={() => void responder(derecha)}
+            />
+          </Animated.View>
+        </PistaCaida>
+
+        {enPausa && pausaInfo && !volando ? (
+          <View style={styles.overlay} pointerEvents="box-none">
+            <Animated.View style={[styles.overlayCard, overlayAnim]}>
+              <Text style={styles.overlayEn}>{pausaInfo.en}</Text>
+              <Text style={styles.overlayEs}>{pausaInfo.es}</Text>
+              <Presionable
+                onPress={tocarSiguienteEnPausa}
+                disabled={avanzando}
+                accessibilityRole="button"
+                accessibilityLabel="Siguiente"
+                hitSlop={8}
+                style={styles.siguiente}
+              >
+                <Text style={styles.siguienteTexto}>Siguiente</Text>
+                <Icon name="chevron-right" size="sm" color={color.textFaint} />
+              </Presionable>
+            </Animated.View>
+          </View>
+        ) : null}
+      </View>
     </Screen>
   );
 }
 
-function resultadoFicha(
+/** Qué le pasó a una ficha esta ronda: la acertada, la equivocada (`fallada`) o la que sobra tras un acierto. */
+function estadoFicha(
   texto: string,
   fallada: string | null,
   acertada: string | null,
   ronda: number
-): Resultado | null {
+): EstadoFicha {
   if (fallada === texto) return 'fallo';
-  return acertada === `${ronda}|${texto}` ? 'acierto' : null;
+  if (acertada === `${ronda}|${texto}`) return 'acierto';
+  return acertada?.startsWith(`${ronda}|`) ? 'descartada' : 'normal';
 }
 
 const styles = StyleSheet.create({
+  capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   derecha: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  marcador: {
-    fontSize: font.size.xl,
-    fontFamily: font.family.display,
-    color: color.accent,
-  },
   instruccion: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
