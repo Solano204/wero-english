@@ -1,16 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
-import { Button, Card, EmptyState, ErrorCarga, Header, IconButton, Screen } from '@/components/base';
-import { BarraSesion } from '@/components/fx';
+import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { Button, EmptyState, ErrorCarga, Header, IconButton, Screen } from '@/components/base';
+import { AnilloRadio, BarraSesion, FraseKaraoke, PuntosRepeticion, useVozEnVivo } from '@/components/fx';
 import { getRandomEntries } from '@/db/queries';
+import { analizar } from '@/domain/marcas';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
-import { color, font, layout, space } from '@/theme';
+import { marcasDe } from '@/services/marcas';
+import { color, desaparecer, font, fraseEntra, fraseSale, layout, motionDuration, motionEasing, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -20,6 +24,15 @@ const PAUSA_ENTRE_IDIOMAS_MS = 800;
 // Pausa al FINAL de cada ronda (1, 2 y 3). La última es más larga: da
 // tiempo a leer la frase que sigue antes de que empiece a sonar.
 const PAUSA_RONDA_MS: readonly [number, number, number] = [1500, 1500, 2500];
+
+/** Diámetro del anillo: con poco alto (menos de 700 dp) baja para que todo quepa sin scroll. */
+const ANILLO = 176;
+const ANILLO_COMPACTO = 144;
+const ALTO_COMPACTO = 700;
+
+// Copias locales: un worklet captura un texto, no el objeto de tema entero.
+const APAGADA = color.textMuted;
+const ENCENDIDA = color.text;
 
 /**
  * Arma los pasos de una frase: inglés, pausa corta, español, pausa de
@@ -57,6 +70,20 @@ function interpretaPaso(
   };
 }
 
+/** La traducción: en `textMuted` y se enciende cuando suena el español. Con «reducir movimiento» solo cambia el color. */
+function Traduccion({ texto, luz }: { texto: string; luz: boolean }) {
+  const reducido = useMovimientoReducido();
+  const encendida = useSharedValue(luz ? 1 : 0);
+
+  useEffect(() => {
+    const destino = luz ? 1 : 0;
+    encendida.value = reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+  }, [luz, reducido, encendida]);
+
+  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(encendida.value, [0, 1], [APAGADA, ENCENDIDA]) }));
+  return <Animated.Text style={[styles.spanish, estilo]}>{texto}</Animated.Text>;
+}
+
 /**
  * P-09, el Modo Oído.
  *
@@ -69,6 +96,7 @@ export function EarModeScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
+  const { height: altoVentana } = useWindowDimensions();
   useMusicaPantalla('silencio');
 
   const [queue, setQueue] = useState<Entry[]>([]);
@@ -98,6 +126,24 @@ export function EarModeScreen() {
     [user, filter]
   );
   const loading = carga.estado === 'cargando';
+
+  // Las dos voces de la frase actual (son audios distintos) y sus tiempos de palabra: el karaoke del inglés y la onda
+  // de cualquiera de las dos. Lo que se dice puede diferir de lo que se ve: los tiempos se calculan sobre lo dicho.
+  const actual = queue[idx];
+  const vozEn = useVozEnVivo(actual?.audio_en ?? null);
+  const vozEs = useVozEnVivo(actual?.audio_es ?? null);
+  const analisisEn = useMemo(
+    () =>
+      actual ? analizar(actual.phrase, actual.phrase_tts || actual.phrase, marcasDe(actual.audio_en), vozEn.duracion) : null,
+    [actual, vozEn.duracion]
+  );
+  const analisisEs = useMemo(
+    () =>
+      actual?.audio_es
+        ? analizar(actual.spanish_main, actual.spanish_main, marcasDe(actual.audio_es), vozEs.duracion)
+        : null,
+    [actual, vozEs.duracion]
+  );
 
   const detener = useCallback(() => {
     cicloRef.current++;
@@ -202,7 +248,7 @@ export function EarModeScreen() {
     );
   }
 
-  if (queue.length === 0) {
+  if (queue.length === 0 || !actual) {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Modo oído" />
@@ -217,13 +263,13 @@ export function EarModeScreen() {
     );
   }
 
-  const actual = queue[idx];
-  const tieneEs = Boolean(actual?.audio_es);
+  const tieneEs = Boolean(actual.audio_es);
   const { ronda, idioma } = interpretaPaso(tieneEs, pasoIdx);
   // Solo resalta mientras de verdad está sonando: pasoIdx se queda
   // congelado en el paso a retomar cuando está en pausa.
-  const sonandoEn = playing && idioma === 'en';
   const sonandoEs = playing && idioma === 'es';
+  const suena = sonandoEs ? vozEs : vozEn;
+  const envolvente = (sonandoEs ? analisisEs : analisisEn)?.envolvente ?? [];
 
   return (
     <Screen padded={false}>
@@ -234,19 +280,28 @@ export function EarModeScreen() {
         </View>
       </View>
 
-      <View style={styles.body}>
-        <Card style={styles.card}>
-          <Text style={styles.repeticion}>Repetición {ronda}/3</Text>
-          <Text style={[styles.phrase, sonandoEn && styles.sonando]}>{actual?.phrase ?? ''}</Text>
-          <Text style={[styles.spanish, sonandoEs && styles.sonando]}>{actual?.spanish_main ?? ''}</Text>
-        </Card>
+      <ScrollView style={styles.flex} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <AnilloRadio
+          voz={suena}
+          envolvente={envolvente}
+          diametro={altoVentana < ALTO_COMPACTO ? ANILLO_COMPACTO : ANILLO}
+          idioma={idioma}
+          activo={playing}
+          bolsillo={false}
+        />
+
+        <Animated.View key={actual.id} entering={fraseEntra()} exiting={fraseSale()} style={styles.frase}>
+          {analisisEn ? <FraseKaraoke palabras={analisisEn.palabras} voz={vozEn} tamano="display" apagada={sonandoEs} /> : null}
+          <Traduccion texto={actual.spanish_main} luz={sonandoEs} />
+          <PuntosRepeticion ronda={ronda} />
+        </Animated.View>
 
         {empezo ? null : (
-          <Text style={styles.hint}>
+          <Animated.Text exiting={desaparecer()} style={styles.hint}>
             Guarda el teléfono. Cada frase suena en inglés y en español, tres veces, para que la repitas en voz alta.
-          </Text>
+          </Animated.Text>
         )}
-      </View>
+      </ScrollView>
 
       <View style={styles.controles}>
         <IconButton icono="previous" etiqueta="Anterior" tamano="lg" onPress={() => saltar(-1)} disabled={idx === 0} />
@@ -270,34 +325,26 @@ export function EarModeScreen() {
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   cabeza: { paddingHorizontal: space.lg, paddingTop: space.sm },
   // El halo de la barra ocupa 24 dp; se le devuelve lo que sobra para que no separe el contenido.
   barra: { marginTop: -space.sm, marginBottom: -space.sm },
-  body: { flex: 1, justifyContent: 'center', gap: space.xl, paddingHorizontal: layout.screenPad },
-  card: { alignItems: 'center', gap: space.md, paddingVertical: space.xxxl },
-  repeticion: {
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    fontFamily: font.family.bodyStrong,
+  // El contenido se centra entre el encabezado y los controles; si una frase larga no cabe, la zona hace scroll.
+  body: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: space.lg,
+    paddingHorizontal: layout.screenPad,
+    paddingVertical: space.md,
   },
-  phrase: {
-    fontSize: font.size.display,
-    letterSpacing: font.size.display * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-    textAlign: 'center',
-    lineHeight: font.size.display * 1.2,
-  },
+  frase: { alignSelf: 'stretch', alignItems: 'center', gap: space.md },
   spanish: {
     fontFamily: font.family.body,
-    fontSize: font.size.lg,
-    color: color.textMuted,
+    fontSize: font.size.xl,
+    lineHeight: font.size.xl * 1.3,
     textAlign: 'center',
   },
-  // El idioma que está sonando ahorita, resaltado sobre el otro.
-  sonando: { color: color.accent },
   hint: {
     fontFamily: font.family.body,
     fontSize: font.size.md,

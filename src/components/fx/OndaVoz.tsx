@@ -60,7 +60,7 @@ function trazarVoz(p: ParametrosVoz): SkPath {
 }
 
 /** Energía de la voz en `pos` segundos, interpolada entre dos muestras de la envolvente. */
-function energiaEn(envolvente: number[], pos: number): number {
+export function energiaEn(envolvente: number[], pos: number): number {
   'worklet';
   const x = Math.max(0, pos) * MUESTRAS_POR_SEGUNDO;
   const i = Math.floor(x);

@@ -1,4 +1,5 @@
 export { AnilloMeta } from './AnilloMeta';
+export { AnilloRadio } from './AnilloRadio';
 export { BarraSesion } from './BarraSesion';
 export { BordePunteado } from './BordePunteado';
 export { BotonSenal } from './BotonSenal';
@@ -15,6 +16,7 @@ export { OndaSenal } from './OndaSenal';
 export { OndaVoz } from './OndaVoz';
 export { PildoraLiquida } from './PildoraLiquida';
 export { PortadaJuego } from './PortadaJuego';
+export { PuntosRepeticion } from './PuntosRepeticion';
 export { TarjetaTilt } from './TarjetaTilt';
 export { TransicionHoy } from './TransicionHoy';
 export { iniciarTransicionHoy, publicarBarraEstudio } from './estadoTransicion';

@@ -24,16 +24,19 @@ interface PalabraProps {
   tamano: Tamano;
   /** Va en `accent` y subrayada, sin cambiar de color con la voz (solo se levanta al decirse). */
   destacada: boolean;
+  /** En reposo la frase va en `textMuted` en vez de `text` (cuando suena la otra lengua). */
+  apagada: boolean;
 }
 
-function PalabraKaraoke({ palabra, voz, tamano, destacada }: PalabraProps) {
+function PalabraKaraoke({ palabra, voz, tamano, destacada, apagada }: PalabraProps) {
   const { pos, activa, reducido } = voz;
   const { inicio, sig, hablada } = palabra;
+  const reposo = apagada ? DICHA : ACTUAL;
 
   const estilo = useAnimatedStyle(() => {
     const k = activa.value;
     // En reposo la frase se lee entera en su color de siempre.
-    if (k === 0) return destacada ? { transform: [{ translateY: 0 }] } : { color: ACTUAL, transform: [{ translateY: 0 }] };
+    if (k === 0) return destacada ? { transform: [{ translateY: 0 }] } : { color: reposo, transform: [{ translateY: 0 }] };
     const p = pos.value;
     let base: string;
     if (!hablada) base = DICHA;
@@ -51,11 +54,13 @@ function PalabraKaraoke({ palabra, voz, tamano, destacada }: PalabraProps) {
         : 0;
     const transform = [{ translateY: levante * k }];
     if (destacada) return { transform };
-    return { color: k === 1 ? base : interpolateColor(k, [0, 1], [ACTUAL, base]), transform };
+    return { color: k === 1 ? base : interpolateColor(k, [0, 1], [reposo, base]), transform };
   });
 
   return (
-    <Animated.Text style={[ESTILO_PALABRA[tamano], destacada && styles.destacada, estilo]}>{palabra.texto}</Animated.Text>
+    <Animated.Text style={[ESTILO_PALABRA[tamano], apagada && styles.apagada, destacada && styles.destacada, estilo]}>
+      {palabra.texto}
+    </Animated.Text>
   );
 }
 
@@ -66,6 +71,8 @@ interface Props {
   tamano?: Tamano;
   /** Índices de las palabras que van resaltadas en `accent` y subrayadas (las reducciones de Cázala). */
   destacadas?: ReadonlySet<number>;
+  /** En reposo (sin sonar) la frase va en `textMuted`: la lengua que no está sonando (Modo oído). */
+  apagada?: boolean;
 }
 
 /**
@@ -75,7 +82,7 @@ interface Props {
  * el hilo de UI, sin re-render de React. Para el lector de pantalla es una sola
  * frase; las palabras sueltas no se anuncian.
  */
-export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas }: Props) {
+export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas, apagada = false }: Props) {
   const frase = palabras.map((p) => p.texto).join(' ');
   return (
     <View style={styles.fila} accessible accessibilityRole="text" accessibilityLabel={frase}>
@@ -86,6 +93,7 @@ export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas }: Props
           voz={voz}
           tamano={tamano}
           destacada={destacadas?.has(i) ?? false}
+          apagada={apagada}
         />
       ))}
     </View>
@@ -122,6 +130,7 @@ const styles = StyleSheet.create({
     color: ACTUAL,
   },
   destacada: { color: color.accent, textDecorationLine: 'underline' },
+  apagada: { color: DICHA },
 });
 
 const ESTILO_PALABRA = {
