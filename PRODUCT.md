@@ -92,6 +92,7 @@ La misma acción se llama igual en toda la app.
 | Pedir ayuda en una ronda de Colmena | Pista N; No me sale | Rendirse, Revelar, Skip |
 | Cuando se acaba el reloj de una ronda de Colmena | Se acabó el tiempo | ¡Tiempo!, Perdiste, Fallaste |
 | Pasar a la ronda que sigue | Siguiente; Terminar (en la última) | Continuar, Next |
+| Los botones del laboratorio de sonidos | «Solo el sonido» (repite hasta tocarlo otra vez; mientras tanto dice «Repitiendo…»), «Lento», «Escuchar las dos», «Practicar estos pares»; el índice marca «No existe en español» | Reproducir, Repetir, Practicar pares |
 | Los controles de Modo oído | «Empezar» (la primera vez), «Pausar», «Reanudar»; «Anterior» y «Siguiente» para cambiar de frase; «Repetición N de 3» (solo para el lector de pantalla) | Play, Parar, Atrás, Saltar |
 | Lo que dice el pie de Cázala | «N de 3 marcadas» y «Revisar»; ya revisada, «Siguiente» (en la ronda 20, «Terminar») | Comprobar, Enviar, Corregir |
 | El resultado de una ronda de Cázala | «Las tres» o «N de 3»; cada reducción: «La cazaste», «Esta sí iba», «No iba» | Correcto, Incorrecto, Fallaste |
