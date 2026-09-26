@@ -1,33 +1,33 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AccessibilityInfo, AppState, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import {
-  Button,
-  Card,
-  Carga,
-  EmptyState,
-  Header,
-  ProgressBar,
-  Screen,
-  SkeletonLista,
-} from '@/components/base';
+import Animated from 'react-native-reanimated';
+import { EmptyState, Header, Screen } from '@/components/base';
 import { AudioButton, OptionButton, type OptionState } from '@/components/card';
-import { getEntriesByIds } from '@/db/queries';
+import { BarraSesion } from '@/components/fx';
+import { BloqueEscucha } from '@/components/juegos/cazala/BloqueEscucha';
+import { PieCaza } from '@/components/juegos/cazala/PieCaza';
+import { useVozCaza } from '@/components/juegos/cazala/useVozCaza';
 import { applyGameGrade } from '@/db/games';
 import { itemsCazalaValidos } from '@/domain/cazala';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { shuffle } from '@/utils/array';
-import { useCarga } from '@/hooks/useCarga';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, space, aparecerSubiendo } from '@/theme';
+import { color, font, reacomodar, space, aparecerSubiendo } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+
+/** Por debajo de este alto (dp) todo se aprieta: la onda va junto a los botones, filas de 52 y huecos de 4. */
+const ALTO_COMPACTO = 700;
+/** Cuánto se bloquea «Siguiente» tras tocarlo, para no procesar dos toques. */
+const AVANZAR_DEBOUNCE_MS = 400;
+/** Cuántas reducciones hay que marcar para poder revisar. */
+const MARCAS = 3;
 
 /**
  * El ejercicio "Cázala": suena una frase a velocidad natural y hay que
@@ -39,62 +39,59 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function CazalaScreen() {
   const nav = useNavigation<Nav>();
   const content = useMemo(loadContent, []);
+  const porId = useMemo(() => new Map(content.catalog.entries.map((e) => [e.id, e])), [content]);
   // Un dato roto (reducción que no suena en la frase, o regla gramatical
   // que no se puede "cazar") nunca debe llegar a una ronda jugable.
-  const items = useMemo(() => {
-    const porId = new Map(content.catalog.entries.map((e) => [e.id, e]));
-    return itemsCazalaValidos(content.contracciones.cazala, porId, (item, errores) => {
-      console.warn(`[Cázala] ronda "${item.id}" descartada: ${errores.join('; ')}`);
-    });
-  }, [content]);
+  const items = useMemo(
+    () =>
+      itemsCazalaValidos(content.contracciones.cazala, porId, (item, errores) => {
+        console.warn(`[Cázala] ronda "${item.id}" descartada: ${errores.join('; ')}`);
+      }),
+    [content, porId]
+  );
 
   const [idx, setIdx] = useState(0);
   const user = useAuthStore((st) => st.user);
   const [picked, setPicked] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
-  const [order, setOrder] = useState<number[]>([]);
+  const [esperando, setEsperando] = useState(false);
+  const esperaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoAudio = useSettingsStore((s) => s.autoAudio);
+  const { height: alto } = useWindowDimensions();
+  const compacta = alto < ALTO_COMPACTO;
   useMusicaPantalla('juegos');
 
   const item = items[idx];
+  // Las seis opciones ya barajadas: una sola vez por ronda.
+  const order = useMemo(() => (item ? shuffle(item.opciones) : []), [item]);
+  const { voz, vozLenta, analisis, analisisLento } = useVozCaza(item);
 
   useEffect(() => {
-    return () => audio.stop();
+    // Al salir de la pantalla o ir a segundo plano se corta la voz.
+    const sub = AppState.addEventListener('change', (estado) => {
+      if (estado !== 'active') audio.stop();
+    });
+    return () => {
+      sub.remove();
+      audio.stop();
+      if (esperaTimer.current) clearTimeout(esperaTimer.current);
+    };
   }, []);
-
-  useEffect(() => {
-    if (!item) return;
-    setPicked([]);
-    setChecked(false);
-    setOrder(shuffle(item.opciones));
-  }, [item]);
-
-  const carga = useCarga(
-    async () => {
-      const map = new Map<number, string>();
-      if (!item) return map;
-      for (const e of await getEntriesByIds(item.opciones)) {
-        // phrase_tts trae la forma reducida y audible: "chillin'", no "chilling".
-        map.set(e.id, e.phrase_tts);
-      }
-      return map;
-    },
-    [item]
-  );
 
   const toggle = useCallback(
     (id: number) => {
       if (checked) return;
+      const next = picked.includes(id) ? picked.filter((x) => x !== id) : picked.length < MARCAS ? [...picked, id] : picked;
+      if (next === picked) return;
       haptics.selection();
-      setPicked((p) =>
-        p.includes(id) ? p.filter((x) => x !== id) : p.length < 3 ? [...p, id] : p
-      );
+      setPicked(next);
+      AccessibilityInfo.announceForAccessibility(`${next.length} de ${MARCAS} marcadas`);
     },
-    [checked]
+    [checked, picked]
   );
 
   const revisar = useCallback(() => {
-    if (!item || picked.length !== 3) return;
+    if (!item || picked.length !== MARCAS) return;
     setChecked(true);
     const bien = picked.filter((p) => item.reducciones.includes(p)).length;
     const gano = bien === 3;
@@ -130,13 +127,19 @@ export function CazalaScreen() {
   }, [item, picked, user, autoAudio]);
 
   const siguiente = useCallback(() => {
+    if (esperando) return;
+    setEsperando(true);
+    if (esperaTimer.current) clearTimeout(esperaTimer.current);
+    esperaTimer.current = setTimeout(() => setEsperando(false), AVANZAR_DEBOUNCE_MS);
     audio.stop();
     if (idx + 1 >= items.length) {
       nav.goBack();
       return;
     }
+    setPicked([]);
+    setChecked(false);
     setIdx((i) => i + 1);
-  }, [idx, items.length, nav]);
+  }, [esperando, idx, items.length, nav]);
 
   if (items.length === 0) {
     return (
@@ -163,91 +166,82 @@ export function CazalaScreen() {
   const aciertos = picked.filter((p) => item.reducciones.includes(p)).length;
 
   return (
-    <Screen scroll>
-      <Header
-        onBack={() => nav.goBack()}
-        title="Cázala"
-        subtitle={`${idx + 1} de ${items.length}`}
-      />
-      <ProgressBar value={idx} total={items.length} />
-
-      <Card style={styles.player}>
-        <Text style={styles.instruction}>
-          Escucha y marca las TRES reducciones que oíste
-        </Text>
-        <View style={styles.audioRow}>
-          <AudioButton path={item.audio} size="lg" label="Escuchar" />
-          <AudioButton path={item.audio_lento} size="md" slow label="Lento" />
+    <Screen
+      padded={false}
+      footer={
+        <PieCaza
+          marcadas={picked.length}
+          revisada={checked}
+          ultima={idx + 1 >= items.length}
+          compacta={compacta}
+          esperando={esperando}
+          onRevisar={revisar}
+          onSiguiente={siguiente}
+        />
+      }
+    >
+      <View style={styles.cabeza}>
+        <Header onBack={() => nav.goBack()} title="Cázala" subtitle={`${idx + 1} de ${items.length}`} />
+        <View style={styles.barra}>
+          <BarraSesion hecho={idx + (checked ? 1 : 0)} meta={items.length} />
         </View>
-      </Card>
+      </View>
 
-      <View style={styles.options}>
-        <Carga carga={carga} esqueleto={<SkeletonLista filas={6} alto={56} />}>
-          {(labels) =>
-            order.map((id, i) => (
+      <View style={[styles.cuerpo, compacta && styles.cuerpoCompacto]}>
+        <BloqueEscucha
+          audio={item.audio}
+          audioLento={item.audio_lento}
+          voz={voz}
+          vozLenta={vozLenta}
+          envolvente={analisis?.envolvente ?? []}
+          envolventeLenta={analisisLento?.envolvente ?? []}
+          compacta={compacta}
+          conInstruccion={!checked}
+        />
+
+        <Animated.View layout={reacomodar()} style={styles.lista}>
+          <ScrollView
+            contentContainerStyle={[styles.filas, compacta && styles.filasCompactas]}
+            showsVerticalScrollIndicator={false}
+          >
+            {order.map((id, i) => (
               <OptionButton
-                key={id}
+                key={`${item.id}-${id}`}
                 index={i}
-                label={labels.get(id) ?? `#${id}`}
+                compacta={compacta}
+                label={porId.get(id)?.phrase_tts ?? `#${id}`}
                 state={stateFor(id)}
                 disabled={checked}
                 onPress={() => toggle(id)}
               />
-            ))
-          }
-        </Carga>
+            ))}
+            {checked ? (
+              <Animated.View entering={aparecerSubiendo()} style={styles.result}>
+                <Text style={styles.resultHead}>{aciertos === 3 ? 'Las tres' : `${aciertos} de 3`}</Text>
+                <Text style={styles.real}>{item.frase_real}</Text>
+                <Text style={styles.formal}>{item.frase_formal}</Text>
+                <View style={styles.spanishRow}>
+                  <Text style={styles.spanish}>{item.frase_es}</Text>
+                  <AudioButton path={item.audio_es} size="sm" />
+                </View>
+              </Animated.View>
+            ) : null}
+          </ScrollView>
+        </Animated.View>
       </View>
-
-      {checked ? (
-        <Animated.View entering={aparecerSubiendo()} style={styles.result}>
-          <Text style={styles.resultHead}>
-            {aciertos === 3 ? 'Las tres' : `${aciertos} de 3`}
-          </Text>
-          <Text style={styles.real}>{item.frase_real}</Text>
-          <Text style={styles.formal}>{item.frase_formal}</Text>
-          <View style={styles.spanishRow}>
-            <Text style={styles.spanish}>{item.frase_es}</Text>
-            <AudioButton path={item.audio_es} size="sm" />
-          </View>
-          <Button
-            icon="arrow-right"
-            accessibilityLabel="Siguiente"
-            onPress={siguiente}
-            full
-          />
-        </Animated.View>
-      ) : (
-        <Animated.View entering={FadeIn} style={styles.footer}>
-          <Text style={styles.picked}>{picked.length} de 3 marcadas</Text>
-          <Button
-            label="Revisar"
-            onPress={revisar}
-            disabled={picked.length !== 3}
-            full
-          />
-        </Animated.View>
-      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  player: {
-    marginTop: space.lg,
-    alignItems: 'center',
-    gap: space.md,
-    paddingVertical: space.xl,
-  },
-  instruction: {
-    fontFamily: font.family.body,
-    fontSize: font.size.sm,
-    color: color.textMuted,
-    textAlign: 'center',
-  },
-  audioRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  options: { gap: space.md, marginTop: space.lg },
-  footer: { marginTop: space.lg, gap: space.sm, alignItems: 'center' },
-  picked: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  cabeza: { paddingHorizontal: space.lg, paddingTop: space.sm },
+  // El halo de la barra ocupa 24 dp; se le devuelve lo que sobra para que no separe la tarjeta.
+  barra: { marginTop: -space.sm, marginBottom: -space.sm },
+  cuerpo: { flex: 1, paddingHorizontal: space.lg, gap: space.md },
+  cuerpoCompacto: { gap: space.sm },
+  lista: { flex: 1 },
+  filas: { gap: space.sm, paddingBottom: space.sm },
+  filasCompactas: { gap: space.xs },
   result: { marginTop: space.lg, gap: space.sm },
   resultHead: {
     fontSize: font.size.sm,

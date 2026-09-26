@@ -38,6 +38,8 @@ interface Props {
   imagen?: string | null;
   /** Lo que lee el lector de pantalla cuando la tarjeta es tocable: sin él lee su contenido. */
   accessibilityLabel?: string;
+  /** Menos aire por dentro (`md` de padding y `sm` de gap), para teléfonos donde cada dp cuenta. */
+  compacta?: boolean;
 }
 
 /**
@@ -67,6 +69,7 @@ export function Card({
   imagen,
   altoPortada,
   accessibilityLabel,
+  compacta = false,
 }: Props) {
   const [imagenFallo, setImagenFallo] = React.useState(false);
 
@@ -134,7 +137,7 @@ export function Card({
 
       {altoPortada ? <View style={{ height: altoPortada }} /> : null}
 
-      <View style={styles.contenido}>{children}</View>
+      <View style={compacta ? styles.contenidoCompacto : styles.contenido}>{children}</View>
     </View>
   );
 
@@ -204,4 +207,5 @@ const styles = StyleSheet.create({
    * el estilo propio se aplica después.
    */
   contenido: { padding: space.lg, gap: space.md },
+  contenidoCompacto: { padding: space.md, gap: space.sm },
 });
