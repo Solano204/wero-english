@@ -407,6 +407,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
   r.startsWith('src/components/niveles/') || r === 'src/screens/games/NivelesScreen.tsx' ||
   r.startsWith('src/components/juegos/pares/') || r === 'src/screens/games/ParesScreen.tsx' ||
+  r.startsWith('src/components/juegos/caida/') || r === 'src/screens/games/CaidaScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -425,6 +426,8 @@ const LOOPS_POR_PANTALLA = {
   Niveles: [],
   // Pares: el cable (Skia) solo se dibuja mientras hay un arrastre o una unión, y el latido del reloj (`RelojRonda`) no es un canvas; ningún bucle de Skia.
   Pares: [],
+  // Caída: la capa de Skia (carriles y estela) se dibuja desde el valor `y` que mueve las fichas y no corre un bucle propio; el piso y su resplandor son vistas.
+  Caida: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

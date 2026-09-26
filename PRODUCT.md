@@ -81,6 +81,9 @@ La misma acción se llama igual en toda la app.
 | Jugar el nivel que sigue | Jugar nivel N (con el número real) | Empezar nivel, Continuar |
 | Los tres tramos del mapa de niveles | «Niveles 1–70»; bloqueado: «Se abre al terminar el nivel N» | Fase, Mundo, Etapa |
 | Lo que queda de un tablero de Pares | «Te quedan N jugadas», «Dejarlo aquí», «Saltar»; las fichas llevan «EN» y «ES»; el progreso, solo para el lector de pantalla: «N de M pares» | Vidas, intentos, Skip |
+| Volver a jugar una partida perdida de Caída | Otra vez | Reintentar, Otra partida |
+| El mejor puntaje de un nivel | Récord: N; Récord nuevo | Highscore, Mejor marca |
+| Qué tan rápido va la ronda de Caída | Ritmo N de 5 (solo para el lector de pantalla) | Nivel de dificultad, Velocidad |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
