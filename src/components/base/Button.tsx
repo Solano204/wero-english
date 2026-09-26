@@ -86,6 +86,11 @@ export function Button({
 
   return (
     <Presionable
+      // Al cambiar de variante con el botón ya en pantalla (Escuchar todos / Detener, Guardar / Guardada) el
+      // contenido tomaba los colores de la nueva y el fondo se quedaba con los de la anterior: texto e ícono claros
+      // sobre cian, a 1.47:1, es decir invisibles. Con la variante en la `key` el botón se monta de nuevo y las dos
+      // cosas salen siempre de la misma.
+      key={variant}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}

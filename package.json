@@ -31,6 +31,7 @@
     "check:colmena": "node scripts/check-colmena.mjs",
     "check:sonidos": "node scripts/check-sonidos.mjs",
     "check:distractores": "node scripts/check-distractores.mjs",
+    "check:gramatica": "node scripts/check-gramatica.mjs",
     "check:srs": "node scripts/check-srs.mjs",
     "reinstala": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps"
   },
