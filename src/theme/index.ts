@@ -43,6 +43,7 @@ export {
   motionSacudida,
   motionMazo,
   motionAviso,
+  motionDesatorar,
   motionMalentendido,
   motionLogro,
   motionDulces,

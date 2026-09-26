@@ -214,7 +214,7 @@ await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio 
   const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
   assert.match(p, /keyExtractor=\{claveAtorada\}/);
   assert.match(p, /Sin cronómetro ni calificación\. Léelas, escúchalas y ya\./, 'la nota se queda');
-  assert.match(p, /ordenarAtoradas\(carga\.datos \?\? \[\]\)/);
+  assert.match(p, /ordenarAtoradas\(carga\.datos\?\.atoradas \?\? \[\]\)/);
   assert.match(p, /iconColor=\{color\.correct\}/, 'el vacío lleva el check en correct');
   assert.match(p, /body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma\."/, 'el texto vacío de siempre');
   assert.match(p, /useFocusEffect\(/);
@@ -228,6 +228,80 @@ await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio 
   assert.match(m, /accessibilityLabel=\{etiquetaFallos\(fallos\)\}/, 'anuncia «4 fallos»');
   assert.match(m, /encendido: \{ backgroundColor: color\.wrong \}/);
   assert.ok(!/riskStrong|tone="strong"/.test(m + t + p));
+});
+
+/* ---------- Se me atoran: las que se desatoraron ---------- */
+
+await prueba('lo guardado en ajustes se normaliza: lo que no sirve se descarta y no hay repetidas', () => {
+  assert.deepEqual(A.normalizarVistas(undefined), []);
+  assert.deepEqual(A.normalizarVistas('x'), []);
+  assert.deepEqual(A.normalizarVistas([{ id: 4, fallos: 3 }, null, 7, { id: 'a', fallos: 2 }, { id: 4, fallos: 9 }, { id: 5, fallos: -1 }, { id: 0, fallos: 3 }, { id: 6, fallos: 2.5 }, { id: 8, fallos: 5 }]), [{ id: 4, fallos: 3 }, { id: 8, fallos: 5 }]);
+  assert.match(leer('src/db/settings.ts'), /atoradasVistas: \[\],/, 'sin visita previa no hay nada que comparar');
+  assert.deepEqual(A.vistasDe([{ entry: { id: 3 }, fallos: 4 }]), [{ id: 3, fallos: 4 }]);
+  assert.equal(A.mismasVistas([{ id: 1, fallos: 3 }, { id: 2, fallos: 4 }], [{ id: 2, fallos: 4 }, { id: 1, fallos: 3 }]), true, 'sin importar el orden');
+  assert.equal(A.mismasVistas([{ id: 1, fallos: 3 }], [{ id: 1, fallos: 4 }]), false, 'un fallo más ya es un cambio');
+  assert.equal(A.mismasVistas([], []), true);
+});
+
+await prueba('desatoradas: solo las que la base dice que ya no lo están, las de más fallos primero y hasta 3', () => {
+  const previas = [
+    { id: 1, fallos: 3 },
+    { id: 2, fallos: 6 },
+    { id: 3, fallos: 4 },
+    { id: 4, fallos: 5 },
+    { id: 5, fallos: 3 },
+  ];
+  // Ahora solo la 5 sigue en la lista de atoradas; las otras cuatro salieron de ella.
+  const candidatas = A.candidatasDestrabadas(previas, [5, 9]);
+  assert.deepEqual(candidatas.map((c) => c.id), [1, 2, 3, 4]);
+  const estados = new Map([
+    [1, { fallos: 3, dominada: 1 }],
+    [2, { fallos: 6, dominada: 1 }],
+    [3, { fallos: 4, dominada: 0 }], // sigue atorada: solo salió por el tope de 30
+    [4, { fallos: 5, dominada: 1 }],
+  ]);
+  assert.deepEqual(A.destrabadas(candidatas, estados).map((d) => d.id), [2, 4, 1], 'más fallos primero y sin la que sigue atorada');
+  const muchas = Array.from({ length: 6 }, (_, i) => ({ id: 20 + i, fallos: 3 + (i % 3) }));
+  const todasDominadas = new Map(muchas.map((m) => [m.id, { fallos: m.fallos, dominada: 1 }]));
+  assert.equal(A.destrabadas(muchas, todasDominadas).length, 3, 'hasta 3 a la vez');
+  assert.equal(A.MAX_DESATORADAS, 3);
+  assert.deepEqual(A.destrabadas([], new Map()), []);
+  assert.deepEqual(A.destrabadas([{ id: 1, fallos: 3 }], new Map()), [], 'sin estado en la base no se muestra');
+  assert.deepEqual(A.candidatasDestrabadas([], [1, 2]), [], 'primera visita: nada que comparar');
+  assert.deepEqual(A.candidatasDestrabadas(previas, previas.map((p) => p.id)), [], 'si siguen todas, ninguna');
+  assert.equal(A.sigueAtorada({ fallos: 3, dominada: 0 }), true);
+  assert.equal(A.sigueAtorada({ fallos: 2, dominada: 0 }), false);
+  assert.equal(A.sigueAtorada({ fallos: 9, dominada: 1 }), false);
+  assert.equal(A.MIN_FALLOS, 3);
+});
+
+await prueba('desatorar dura poco y una sola vez: una tarjeta ≤ 2.5 s, tres escalonadas ≤ 4 s, sin bucles ni nada fuera de transform, opacity y su alto final', () => {
+  const motion = leer('src/theme/motion.ts');
+  const num = (patron) => Number(motion.match(patron)[1]);
+  const dur = { rapido: num(/rapido: (\d+),/), base: num(/base: (\d+),/), lento: num(/lento: (\d+),/) };
+  const bloque = motion.slice(motion.indexOf('export const motionDesatorar'));
+  assert.match(bloque, /entra: motionDuration\.base,\s*punto: motionDuration\.rapido,\s*destello: motionDuration\.lento,\s*pausa: 900,\s*sale: motionDuration\.lento,\s*escalon: 600,\s*mantenerReducido: 2500,/);
+  const t = { entra: dur.base, punto: dur.rapido, pausa: 900, sale: dur.lento };
+  assert.equal(A.duracionDesatorar(5, t), 220 + 5 * 150 + 900 + 320);
+  assert.equal(A.duracionDesatorar(9, t), A.duracionDesatorar(5, t), 'el tope de puntos es cinco');
+  for (let p = 0; p <= 5; p++) assert.ok(A.duracionDesatorar(p, t) <= 2500, `${p} puntos`);
+  assert.ok(2 * 600 + A.duracionDesatorar(5, t) <= 4000, 'las tres escalonadas');
+  const d = sinComentarios(leer('src/components/atoradas/Desatorar.tsx'));
+  assert.ok(!/withRepeat|skia|Shader/i.test(d), 'una sola vez, sin bucles ni shaders');
+  assert.match(d, /if \(reducido\) \{\s*entra\.value = 1;\s*apagado\.value = encendidos;/, 'con reducir movimiento los puntos ya están apagados');
+  assert.match(d, /etiqueta\.value = withTiming\(1, \{ duration: motionDuration\.base/, 'la etiqueta aparece con fade');
+  assert.match(d, /setTimeout\(terminar, t\.mantenerReducido\)/);
+  assert.match(d, /Ya no se te atora/);
+  assert.match(d, /height: altoMedido\.value \* \(1 - sale\.value\)/, 'al irse el hueco se cierra: la lista no salta');
+  assert.match(d, /color: color\.correct|backgroundColor: color\.correct/, 'el destello y la etiqueta en correct');
+  assert.match(d, /accessibilityLabel=\{`\$\{entry\.phrase\}\. Ya no se te atora`\}/);
+  assert.ok(!/riskStrong|tone="strong"/.test(d));
+  const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  assert.match(p, /guardarAjuste\(user\.id, 'atoradasVistas', actuales\)/, 'guarda la lista de esta visita');
+  assert.match(p, /normalizarVistas\(useSettingsStore\.getState\(\)\.atoradasVistas\)/, 'compara con la última visita');
+  assert.match(p, /getCardStates\(user\.id, candidatas\.map/, 'le pregunta a la base si de verdad se destrabó');
+  assert.match(p, /yaMostradas\.current\.add\(d\.entry\.id\)/, 'se muestran una sola vez');
+  assert.match(p, /<Desatorar key=\{d\.entry\.id\}/);
 });
 
 console.log(`\ncheck:atoradas ${total} pruebas ok\n`);

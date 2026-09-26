@@ -174,6 +174,22 @@ export const motionMazo = {
   separa: 12,
 } as const;
 
+/**
+ * «Desatorar» una frase en Se me atoran: la tarjeta entra arriba en `entra`, sus puntos se apagan uno por uno (`punto` cada
+ * uno), un destello `correct` y la etiqueta «Ya no se te atora» se quedan `pausa` ms y la tarjeta se va hacia arriba en `sale`.
+ * Con varias, cada una arranca `escalon` ms después de la anterior. Con «reducir movimiento» solo aparece la etiqueta, con un
+ * fundido, y se queda `mantenerReducido` ms.
+ */
+export const motionDesatorar = {
+  entra: motionDuration.base,
+  punto: motionDuration.rapido,
+  destello: motionDuration.lento,
+  pausa: 900,
+  sale: motionDuration.lento,
+  escalon: 600,
+  mantenerReducido: 2500,
+} as const;
+
 /** Cuánto dura en pantalla el aviso «Quitada de tu mazo · Deshacer» (ms): lo que se tiene para arrepentirse. */
 export const motionAviso = { duracion: 5000 } as const;
 

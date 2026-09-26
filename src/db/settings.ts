@@ -1,4 +1,5 @@
 import { getDb } from './client';
+import type { AtoradaVista } from '@/domain/atoradas';
 import type { OrdenErrores } from '@/domain/errores';
 import type { Nivel } from '@/types';
 
@@ -48,6 +49,9 @@ export interface Settings {
 
   /** Cómo se ordena la lista de Errores que te delatan: los más graves primero, o en el orden del contenido. */
   ordenErrores: OrdenErrores;
+
+  /** Las frases que estaban atoradas en la última visita a Se me atoran (id y fallos): así se sabe cuáles ya no lo están. */
+  atoradasVistas: AtoradaVista[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -77,6 +81,7 @@ export const DEFAULT_SETTINGS: Settings = {
   practicarGruposAbiertos: [],
   leyendaLecturaVista: false,
   ordenErrores: 'graves',
+  atoradasVistas: [],
 };
 
 /** Tope de notificaciones diarias. Más allá el sistema las agrupa igual. */
