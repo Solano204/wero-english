@@ -56,7 +56,7 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 - [ ] Dulces, pregunta: la opción elegida pulsa o tiembla y se marca la correcta; en el tablero solo salen cubitos (sin estrellas) y las 5 piezas son de colores distintos
 - [ ] Cázala: elegir 3 y "Revisar"; las opciones correctas pulsan y las incorrectas tiemblan; suena la frase
 - [ ] Di la palabra: pide micrófono; la tarjeta de veredicto pulsa si aciertas y tiembla si confundes; si no te entiende, solo el mensaje
-- [ ] Preguntas de Lectura: la opción elegida pulsa en verde o tiembla en ámbar y se marca la correcta; sin partículas ni puntaje
+- [ ] Preguntas de Lectura: ver la sección j) (una a la vez, con veredicto como en Estudio y cierre sin puntaje)
 
 ## e) Audio
 
@@ -114,7 +114,7 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 
 Activar en Android: Ajustes > Accesibilidad > Quitar animaciones.
 
-- [ ] Repetir las secciones a) a g) con la opción activa; nada debe romperse ni quedar sin mostrar
+- [ ] Repetir las secciones a) a g) y j) con la opción activa; nada debe romperse ni quedar sin mostrar
 - [ ] Botones, tarjetas, filas y pestañas: al tocar no escalan, solo bajan a 70 % de opacidad
 - [ ] Acierto: sin pulso ni cubitos; el verde sí aparece y siguen el háptico y el sonido
 - [ ] Fallo: sin temblor; el ámbar sí aparece y siguen el háptico y el sonido
@@ -130,6 +130,26 @@ Ajustes del teléfono > Pantalla > Tamaño de fuente en grande o el máximo.
 - [ ] Estudiar: frase y opciones legibles; se llega a la cuarta opción con scroll y ningún botón queda fuera de pantalla
 - [ ] Colmena, Dulces y Pares: tablero y fichas no se desbordan y los botones siguen cómodos de tocar
 - [ ] Badges, filas de frases, pestañas, Errores y Sonidos con texto largo: nada se corta ni se encima
+
+## j) Lecturas
+
+Marcas de oración de Polly: sin ellas el seguimiento del audio es una estimación por caracteres (funciona, pero una oración puede adelantarse o atrasarse un poco). Para generarlas: `node scripts/polly.mjs --marcas-oraciones --plan` muestra qué haría y, sin `--plan`, las pide a Polly (necesita tus credenciales de AWS) y las guarda en `assets/data/marcas_oraciones.json`. Repetir este apartado con y sin marcas.
+
+- [ ] Lista: Para niños y Para todos; la primera de cada una es más grande; cada tarjeta dice «Te sabes N de M frases» y Fácil, Media o Difícil, sin número de 0 a 100; las cerradas dicen «te faltan N»; entran escalonadas sin saltos
+- [ ] Lista con TalkBack: cada tarjeta se lee una sola vez y completa («…, te sabes 3 de 9 frases, dificultad 40 de 100, te va a costar tantito»)
+- [ ] Lector con audio, seguir: «Escuchar el capítulo»; la oración que suena se resalta y el texto baja solo dejándola en el tercio de arriba, sin saltos bruscos entre oraciones
+- [ ] Lector, scroll manual: con el audio sonando, arrastrar el texto con el dedo; el seguimiento se detiene y aparece «Volver a donde va el audio»; tocarlo devuelve el texto a la oración que suena y el botón se va
+- [ ] Lector, atrás: con el audio sonando, la flecha y el botón atrás del sistema cortan la voz al instante; al volver a entrar el capítulo empieza arriba
+- [ ] Lector, tocar una oración: con el audio sonando o en pausa, salta a ella y sigue desde ahí (en pausa, se reanuda); sin haber empezado el audio no hace nada
+- [ ] Frase vista y frase nueva: «ya la viste» (gris, subrayada) y «nueva» (cian, más peso; en Android el subrayado no es punteado); tocar una frase hace pulsar su oración un instante y abre su ficha; la leyenda sale abierta la primera vez y plegada las siguientes
+- [ ] Capítulo 2 antes de que cargue el audio: en una historia de varios capítulos, pasar al 2 y tocar «Escuchar» enseguida; no suena el capítulo 1, el tiempo dice «—:—» hasta conocer la duración (nunca «0:00 / 0:00») y el texto empieza arriba
+- [ ] Al final del capítulo: al terminar el audio, o al llegar al final del texto, aparece «Capítulo N» o «Ver las preguntas» y el botón circular queda en secundario (nunca dos principales)
+- [ ] Preguntas: una a la vez, con tres puntos arriba y la nota «No se guarda calificación…»; al responder, la correcta se enciende en verde con palomita, la elegida mal queda en ámbar con equis, las otras bajan y la explicación entra con fade; «Siguiente» (en la tercera, «Terminar») aparece en el pie; «Salir sin contestar» lleva al cierre
+- [ ] Cierre: «Terminaste la historia» y «Tenía N frases nuevas para ti» (N igual a las frases en cian que había en el texto); contestando las tres, un solo destello suave; «Volver a las lecturas» regresa a la lista
+- [ ] Reducir movimiento: el resaltado cambia de oración sin deslizarse, el scroll salta, no hay pulso al tocar una frase, la explicación aparece sin fade y el cierre no da destello
+- [ ] TalkBack en el lector: cada frase dice «ya la viste» o «nueva, abre su ficha»; las acciones personalizadas de cada oración son «Abrir la ficha de …» y «Escuchar desde aquí»; en las preguntas se oye «Pregunta 2 de 3», la correcta dice «Correcta», la mal elegida «No era esta» y la explicación se anuncia sola
+- [ ] 360 px de ancho y fuente grande: el pie no tapa el texto, las cuatro opciones caben o scrollean y «Siguiente» queda a la vista en el pie
+- [ ] Consola: entrar al lector, seguir el audio y hacer las preguntas sin ningún aviso de Reanimated. Si sale uno, copiar el texto completo del aviso (el aviso original no se pudo rastrear sin teléfono)
 
 ## Cómo reportar
 

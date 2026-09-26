@@ -104,6 +104,12 @@ La misma acción se llama igual en toda la app.
 | Cuántas frases tiene un verbo | «14 formas» (con una sola, «1 forma») | 14 frases, 14 usos, 14 variantes |
 | Elegir la partícula de un verbo | La ruleta («Partícula de get»), los chips «Todas las formas de get» y «N de 14» arriba; una partícula repetida va «out (1)» y «out (2)» | Carrusel, Selector, Página 1 de 14 |
 | Los botones de audio de una forma de Phrasal verbs | «Escuchar» y «Lento» en la frase; «Inglés», «Lento» y «Español» en el ejemplo; en el significado, el lector oye «Escuchar el significado en español» | Reproducir, Play |
+| Los controles de audio de una lectura | «Escuchar el capítulo», «Pausar», «Reanudar» y «Detener»; si el usuario suelta el audio con el dedo, «Volver a donde va el audio» | Play, Parar, Sincronizar, Volver al audio |
+| Lo que sabes de una historia, en la lista de Lecturas | «Te sabes 3 de 9 frases»; la dificultad en una palabra: Fácil, Media o Difícil (el lector oye «fácil para ti», «te va a costar tantito» o «todavía pesada») | Progreso, Completada, Nivel 2, Dificultad 40 |
+| Las frases subrayadas de una lectura | «ya la viste» y «nueva» (el lector oye «nueva, abre su ficha»); en cada oración, «Abrir la ficha de …» y «Escuchar desde aquí» | Vista, Sin ver, Pendiente, Desconocida |
+| Pasar de la historia a las preguntas | «Ver las preguntas»; entre capítulos, «Capítulo 2» | Continuar, Quiz, Examen, Test |
+| El avance de las tres preguntas | «Pregunta 2 de 3» (solo para el lector), «Siguiente» y, en la última, «Terminar»; para irse, «Salir sin contestar» | Enviar, Calificar, Comprobar, Listo |
+| El cierre de una historia | «Terminaste la historia», «Tenía 3 frases nuevas para ti» (con cero, «Ya conocías todas las frases de esta historia») y «Volver a las lecturas» | Felicidades, Puntaje, Calificación, Completada |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 

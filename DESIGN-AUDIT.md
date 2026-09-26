@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 314 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 316 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -221,7 +221,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/AzarScreen.tsx` | ✓ `:73` | ✓ `:206` | ✓ `:197` |
 | `extras/ContractionsScreen.tsx` | ✓ `:34` | ✓ `:45` | ✓ `:92` |
 | `extras/EarModeScreen.tsx` | ✓ `:120` | ✓ `:255` | ✓ `:238` |
-| `extras/LecturaScreen.tsx` | ✓ `:87` | ✓ `:313` | ✓ `:327` |
+| `extras/LecturaScreen.tsx` | ✓ `:91` | ✓ `:317` | ✓ `:331` |
 | `extras/LecturasScreen.tsx` | ✓ `:39` | ✓ `:65` | ✓ `:104` |
 | `extras/PracticeScreen.tsx` | ✓ `:98` | ✗ | ✓ `:167` |
 | `games/CaidaScreen.tsx` | ✓ `:211` | ✓ `:487` | ✓ `:174` |
@@ -260,7 +260,7 @@ Otros 2 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
-- `src/components/fx/PuntosRepeticion.tsx:52` — key por índice
+- `src/components/fx/PuntosRepeticion.tsx:54` — key por índice
 - `src/components/gramatica/ErrorQueSeCorrige.tsx:104` — key por índice
 - `src/components/gramatica/ErrorQueSeCorrige.tsx:107` — key por índice
 - `src/components/gramatica/ErrorQueSeCorrige.tsx:113` — key por índice
