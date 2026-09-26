@@ -545,6 +545,21 @@ async function esperarFinReanudado(miId: number): Promise<void> {
   if (reproduccionId === miId) await waitUntilDone();
 }
 
+/**
+ * Lleva la frase que suena (o está en pausa) a `seg` segundos, sin cambiar si suena o no. No toca `reproduccionId`: es
+ * el mismo audio, solo que desde otro punto. La usa la lectura acompañada al tocar una oración. Devuelve false si no hay
+ * nada cargado o el dispositivo no puede moverse.
+ */
+export async function saltarFrase(seg: number): Promise<boolean> {
+  if (!player) return false;
+  try {
+    await player.seekTo(Math.max(0, seg));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Posición y duración de la frase actual, en segundos. */
 export function progresoFrase(): { pos: number; dur: number } {
   try {

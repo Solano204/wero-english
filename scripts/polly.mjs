@@ -13,6 +13,12 @@
  *   node scripts/polly.mjs --marcas               genera las marcas que falten (Catálogo EN)
  *   node scripts/polly.mjs --consolida            rehace assets/data/marcas.json sin llamar a Polly
  *
+ *   node scripts/polly.mjs --marcas-oraciones --plan             marcas de oración de los capítulos de las lecturas
+ *   node scripts/polly.mjs --marcas-oraciones --solo lec_ninos_01_1   prueba con un capítulo
+ *   node scripts/polly.mjs --marcas-oraciones                    genera las que falten (lee lecturas.json, no el manifiesto)
+ *   node scripts/polly.mjs --consolida-oraciones                 rehace assets/data/marcas_oraciones.json sin llamar a Polly
+ *   (SpeechMarkTypes ["sentence"]; las usa la lectura acompañada. Sin ellas la app estima por caracteres.)
+ *
  * Las marcas (SpeechMarkTypes ["word"], OutputFormat json) son las horas de cada
  * palabra que usa el karaoke de Estudio. Sale un JSON por audio en
  * assets/data/marcas/ y uno consolidado en assets/data/marcas.json, que es el que
@@ -229,6 +235,81 @@ async function consolidaMarcas() {
   console.log(`assets/data/marcas.json: ${Object.keys(indice).length} audios con marcas`);
 }
 
+// ── marcas de oración de las lecturas ────────────────────────────────────
+// La lectura acompañada resalta la oración que suena. Las marcas salen del texto de cada capítulo de lecturas.json
+// (no del manifiesto): así los desplazamientos son los del texto que dibuja la app. Un capítulo de más de MAX_CHARS
+// caracteres se narró en varias llamadas y sus marcas no se pueden juntar sin la duración de cada trozo: se salta y la
+// app lo estima.
+const LECTURAS = path.join(RAIZ, "assets", "data", "lecturas.json");
+const DIR_MARCAS_ORACIONES = path.join(RAIZ, "assets", "data", "marcas_oraciones");
+const INDICE_MARCAS_ORACIONES = path.join(RAIZ, "assets", "data", "marcas_oraciones.json");
+
+async function filasLecturas() {
+  const doc = JSON.parse(await readFile(LECTURAS, "utf8"));
+  return doc.lecturas.flatMap((l) =>
+    l.capitulos.filter((c) => c.audio).map((c) => ({
+      recurso: `${l.id}_${c.n}`,
+      archivo: c.audio,
+      texto: c.texto,
+      grupo: "Lecturas",
+      voz: "narracion",
+    }))
+  );
+}
+
+async function yaEstanMarcasOraciones(fila) {
+  const destino = path.join(DIR_MARCAS_ORACIONES, nombreMarcas(fila));
+  if (!existsSync(destino)) return false;
+  try {
+    const j = JSON.parse(await readFile(destino, "utf8"));
+    return j.n === fila.texto.length && Array.isArray(j.s) && j.s.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Pide las marcas de oración de un capítulo y las guarda: { archivo, n, s: [[ms, inicio, fin], ...] } con `inicio` y
+ * `fin` en caracteres del texto. Polly los da en bytes de UTF-8: se convierten.
+ */
+async function generaMarcasOraciones(fila) {
+  if (fila.texto.length > MAX_CHARS) throw new Error(`capítulo de ${fila.texto.length} caracteres: se narró en varias llamadas, se estima`);
+  const crudo = await sintetiza(fila.texto, idioma(fila), false, {
+    OutputFormat: "json",
+    SpeechMarkTypes: ["sentence"],
+    SampleRate: undefined,
+  });
+  const bytes = Buffer.from(fila.texto, "utf8");
+  const aCaracter = (b) => bytes.subarray(0, b).toString("utf8").length;
+  const s = crudo.toString("utf8").split("\n").filter(Boolean)
+    .map((linea) => JSON.parse(linea))
+    .filter((x) => x.type === "sentence")
+    .map((x) => [x.time, aCaracter(x.start), aCaracter(x.end)]);
+  if (s.length === 0) throw new Error("Polly no devolvió marcas de oración");
+  await mkdir(DIR_MARCAS_ORACIONES, { recursive: true });
+  await writeFile(path.join(DIR_MARCAS_ORACIONES, nombreMarcas(fila)),
+    JSON.stringify({ archivo: fila.archivo, n: fila.texto.length, s }) + "\n");
+  return { chars: fila.texto.length };
+}
+
+/** Junta los JSON de assets/data/marcas_oraciones/ en el índice que empaqueta la app: { ruta: { n, s } }. */
+async function consolidaMarcasOraciones() {
+  const indice = {};
+  if (existsSync(DIR_MARCAS_ORACIONES)) {
+    for (const nombre of (await readdir(DIR_MARCAS_ORACIONES)).sort()) {
+      if (!nombre.endsWith(".json")) continue;
+      try {
+        const j = JSON.parse(await readFile(path.join(DIR_MARCAS_ORACIONES, nombre), "utf8"));
+        if (j.archivo && Number.isFinite(j.n) && Array.isArray(j.s) && j.s.length > 0) indice[j.archivo] = { n: j.n, s: j.s };
+      } catch {
+        console.error(`  saltado ${nombre}: JSON inválido`);
+      }
+    }
+  }
+  await writeFile(INDICE_MARCAS_ORACIONES, JSON.stringify(indice) + "\n");
+  console.log(`assets/data/marcas_oraciones.json: ${Object.keys(indice).length} capítulos con marcas de oración`);
+}
+
 // ── entrada ──────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const bandera = (n) => args.includes(n);
@@ -237,6 +318,48 @@ const valor = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : 
 // No necesita el manifiesto ni a Polly: solo junta lo que ya está en assets/data/marcas/.
 if (bandera("--consolida")) {
   await consolidaMarcas();
+  process.exit(0);
+}
+if (bandera("--consolida-oraciones")) {
+  await consolidaMarcasOraciones();
+  process.exit(0);
+}
+
+// Marcas de oración de los capítulos de las lecturas: no usa el manifiesto, lee lecturas.json.
+if (bandera("--marcas-oraciones")) {
+  const solo = valor("--solo");
+  const todas = (await filasLecturas()).filter((f) => !solo || f.recurso === solo);
+  const faltan = [];
+  for (const f of todas) if (!(await yaEstanMarcasOraciones(f))) faltan.push(f);
+  const pedibles = faltan.filter((f) => f.texto.length <= MAX_CHARS);
+  const chars = pedibles.reduce((t, f) => t + f.texto.length, 0);
+  const costo = pedibles.reduce((t, f) => t + f.texto.length * precioPorCaracter(f), 0);
+
+  if (bandera("--plan")) {
+    console.log(`\nregión ${REGION}` + (REGIONES_GENERATIVE.has(REGION) ? "" : "   ← SIN motor generativo, cámbiala"));
+    console.log(`faltan marcas de oración de ${faltan.length} de ${todas.length} capítulos (${faltan.length - pedibles.length} son demasiado largos y se estiman)`);
+    console.log(`  ${String(chars).padStart(6)}  caracteres facturables`);
+    console.log(`  costo estimado: ${money(costo)}  (tarifa de este script)`);
+    console.log(`\n  Antes de gastar todo: node scripts/polly.mjs --marcas-oraciones --solo ${pedibles[0]?.recurso ?? "lec_ninos_01_1"}`);
+    process.exit(0);
+  }
+  if (!REGIONES_GENERATIVE.has(REGION)) {
+    console.error(`La región ${REGION} no tiene motor generativo. Usa us-east-1.`);
+    process.exit(1);
+  }
+  let hechas = 0, gastados = 0, gasto = 0;
+  for (const [i, f] of pedibles.entries()) {
+    try {
+      const r = await generaMarcasOraciones(f);
+      hechas++; gastados += r.chars; gasto += r.chars * precioPorCaracter(f);
+      process.stdout.write(`\r  ${((i + 1) / pedibles.length * 100).toFixed(1)}%  ${hechas}/${pedibles.length}  ${money(gasto)}  ${f.recurso.padEnd(24)}`);
+    } catch (e) {
+      console.error(`\n  FALLÓ ${f.recurso}: ${e.message || e}`);
+    }
+    await dormir(PAUSA_MS);
+  }
+  console.log(`\n\nmarcas de oración listas ${hechas} · ${gastados} caracteres · ${money(gasto)}`);
+  await consolidaMarcasOraciones();
   process.exit(0);
 }
 

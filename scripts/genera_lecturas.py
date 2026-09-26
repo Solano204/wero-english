@@ -24,6 +24,41 @@ RAIZ = Path(__file__).resolve().parent.parent
 CATALOGO = RAIZ / "assets" / "data" / "catalogo.json"
 SALIDA = RAIZ / "assets" / "data" / "lecturas.json"
 
+# Ids de frases del catálogo que a media oración llevan mayúscula porque son nombres propios. Todas las demás se
+# escriben como las pide la oración: una frase del catálogo puede empezar con mayúscula ("Large soda") y a media
+# oración va en minúscula ("a large soda"); el lector la busca sin distinguir mayúsculas.
+MAYUSCULA_A_MEDIA_ORACION_OK: set[int] = set()
+
+_FIN_DE_ORACION = re.compile(r"[.?!…][\"'”’)]*$")
+
+
+def abre_oracion(texto: str, en: int) -> bool:
+    """¿La posición `en` abre una oración? Al inicio, tras un salto de línea, tras una comilla que abre o tras . ? !"""
+    antes = texto[:en].rstrip(" ")
+    if antes == "" or antes.endswith("\n") or antes[-1] in "\"“":
+        return True
+    return bool(_FIN_DE_ORACION.search(antes))
+
+
+def audio_previo() -> tuple[dict[tuple[str, int], str], str | None]:
+    """
+    Los audios ya asignados a cada capítulo y la nota que los acompaña, leídos de la salida anterior. Regenerar el
+    JSON no debe borrarlos: el texto de las historias vive aquí, pero los mp3 los pone la pasada de Polly.
+    """
+    if not SALIDA.exists():
+        return {}, None
+    try:
+        previo = json.loads(SALIDA.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}, None
+    audios = {
+        (lec["id"], cap["n"]): cap["audio"]
+        for lec in previo.get("lecturas", [])
+        for cap in lec.get("capitulos", [])
+        if cap.get("audio")
+    }
+    return audios, previo.get("nota_audio")
+
 # --------------------------------------------------------------------
 # Las historias. El texto se escribe alrededor de los ids, no al revés.
 # --------------------------------------------------------------------
@@ -46,7 +81,7 @@ LECTURAS = [
                     "stand and waits.\n\n"
                     "\"How's it going?\" says Don Beto, the man who makes the tacos.\n\n"
                     "Wero moves his tail. He cannot talk, but he can wait. He waits and "
-                    "waits. A boy walks by with a taco in one hand and a Large soda in "
+                    "waits. A boy walks by with a taco in one hand and a large soda in "
                     "the other. The taco smells like heaven.\n\n"
                     "The boy drops the taco. It falls on the floor. Wero looks at it. He "
                     "looks at the boy. He looks at the taco again.\n\n"
@@ -523,6 +558,7 @@ def main() -> int:
 
     errores: list[str] = []
     salida = []
+    audios, nota_audio_previa = audio_previo()
 
     for lec in LECTURAS:
         texto_completo = "\n\n".join(c["texto"] for c in lec["capitulos"])
@@ -540,6 +576,21 @@ def main() -> int:
                 errores.append(
                     f"{lec['id']}: la frase {eid} \"{frase}\" no aparece literal en el texto"
                 )
+                continue
+            # A media oración la frase se escribe como la oración la pide: con mayúscula solo si abre una oración
+            # (o si es un nombre propio y está en MAYUSCULA_A_MEDIA_ORACION_OK). El match sigue siendo exacto.
+            for m in re.finditer(re.escape(frase), texto_completo, re.IGNORECASE):
+                pegada = m.group(0)
+                if (
+                    pegada[:1].isupper()
+                    and not re.match(r"I\b", pegada)
+                    and eid not in MAYUSCULA_A_MEDIA_ORACION_OK
+                    and not abre_oracion(texto_completo, m.start())
+                ):
+                    errores.append(
+                        f"{lec['id']}: la frase {eid} va como \"{pegada}\" a media oración; "
+                        f"escríbela \"{pegada[:1].lower()}{pegada[1:]}\""
+                    )
 
         if not 120 <= palabras <= 520:
             errores.append(
@@ -566,7 +617,7 @@ def main() -> int:
                         "n": c["n"],
                         "titulo": c["titulo"],
                         "texto": c["texto"],
-                        "audio": None,
+                        "audio": audios.get((lec["id"], c["n"])),
                     }
                     for c in lec["capitulos"]
                 ],
@@ -589,15 +640,18 @@ def main() -> int:
             "busca en tiempo de ejecución y las subraya; no hay posiciones "
             "guardadas, así que corregir una errata en el texto no rompe nada."
         ),
-        "nota_audio": (
+        "nota_audio": nota_audio_previa
+        or (
             "audio en null: falta la pasada de TTS por capítulo. La pantalla "
             "esconde el botón de escuchar mientras sea null."
         ),
         "lecturas": salida,
     }
 
+    # Sangría de 2 y salto de línea al final, con \n aunque sea Windows (write_text escribiría \r\n): el mismo formato del
+    # archivo guardado, para que el diff de una corrección sea solo la corrección.
     SALIDA.write_text(
-        json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8"
+        json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
 
     print(f"ok: {len(salida)} lecturas escritas en {SALIDA.name}")
