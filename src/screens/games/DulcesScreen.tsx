@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { conteo } from '@/utils/text';
 import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +9,7 @@ import { Estallidos, type EstallidosRef, type Trozo } from '@/components/juegos/
 import { FraseVoladora } from '@/components/juegos/dulces/FraseVoladora';
 import { HojaPregunta, type DestinoTitulo, type PreguntaDulces } from '@/components/juegos/dulces/HojaPregunta';
 import { TarjetaMetas } from '@/components/juegos/dulces/MetaFrase';
+import { NotaInicial, PieDulces } from '@/components/juegos/dulces/PieDulces';
 import { Trozos, useReaccion } from '@/components/feedback';
 import {
   clone,
@@ -125,6 +125,8 @@ export function DulcesScreen() {
   const [animando, setAnimando] = useState(false);
   // Cambia con cada tablero nuevo: el tablero animado reparte piezas nuevas.
   const [llave, setLlave] = useState(0);
+  // La nota del inicio se va tras la primera línea y no vuelve.
+  const [huboLinea, setHuboLinea] = useState(false);
   const reducido = useMovimientoReducido();
   // La frase de la meta que se llenó vuela al título de la pregunta: `vuelo` es de dónde sale, `destinoTitulo`
   // a dónde llega (lo mide la hoja) y `capaAlto` sirve para saber dónde queda esa hoja.
@@ -208,6 +210,7 @@ export function DulcesScreen() {
       setJugadas(nv.jugadas);
       setBoard(createBoard(nv.cols, nv.rows, nv.colores));
       setLlave((l) => l + 1);
+      setHuboLinea(false);
       empezoEn.current = Date.now();
     },
     [user, filter, nv, filtrar]
@@ -394,6 +397,7 @@ export function DulcesScreen() {
       swap(nuevo, a, c);
 
       const arma = findMatches(nuevo).length > 0;
+      if (arma) setHuboLinea(true);
       setElegida(null);
       setJugadas((j) => j - 1);
 
@@ -682,11 +686,6 @@ export function DulcesScreen() {
           <Header
             onBack={() => nav.goBack()}
             title={nivel ? `Nivel ${nivel}` : undefined}
-            right={
-              <Text style={styles.jugadas}>
-                {conteo(jugadas, 'jugada')}
-              </Text>
-            }
           />
         </View>
 
@@ -732,16 +731,10 @@ export function DulcesScreen() {
             />
           </View>
 
-          <Text style={styles.pieNota}>
-            {resueltas > 0
-              ? conteo(resueltas, 'frase resuelta', 'frases resueltas')
-              : 'Junta tres del mismo color para llenar su barra'}
-          </Text>
+          <NotaInicial visible={!huboLinea} texto="Junta tres del mismo color para llenar su barra" />
         </ScrollView>
 
-        <View style={styles.pie}>
-          <Button label="Dejarlo aquí" variant="ghost" onPress={terminar} full />
-        </View>
+        <PieDulces jugadas={jugadas} total={nv?.jugadas ?? JUGADAS_DEF} onDejar={terminar} />
 
         <HojaPregunta
           pregunta={pregunta}
@@ -815,22 +808,9 @@ const styles = StyleSheet.create({
   sinHueco: { paddingBottom: 0 },
   capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
-  jugadas: {
-    fontSize: font.size.sm,
-    fontFamily: font.family.bodyStrong,
-    color: color.accent,
-  },
   medio: { flex: 1 },
   medioContenido: { paddingBottom: space.sm },
   metas: { paddingHorizontal: space.lg, marginBottom: space.md },
-  pieNota: {
-    fontFamily: font.family.body,
-    fontSize: font.size.xs,
-    color: color.textFaint,
-    textAlign: 'center',
-    marginTop: space.md,
-  },
-  pie: { paddingHorizontal: space.lg, paddingBottom: space.lg, paddingTop: space.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });
