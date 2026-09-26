@@ -108,6 +108,20 @@ export function conteo(n: number, singular: string, formaPlural?: string): strin
   return `${n} ${plural(n, singular, formaPlural)}`;
 }
 
+/**
+ * Cuántas letras tiene cada palabra de un texto, contadas como las arma Colmena: solo a-z y apóstrofo, en
+ * minúsculas. Los espacios separan palabras pero no cuentan, y un trozo sin letras («2020», «&») no es palabra.
+ * La suma da lo mismo que el objetivo de la ronda. Solo sirve para dibujar: la comparación no la usa.
+ */
+export function formaPalabras(texto: string): number[] {
+  const largos: number[] = [];
+  for (const trozo of texto.toLowerCase().split(/\s+/)) {
+    const n = trozo.replace(/[^a-z']/g, '').length;
+    if (n > 0) largos.push(n);
+  }
+  return largos;
+}
+
 /** Miles con coma, como se escribe en México: `miles(1436)` da '1,436'. */
 export function miles(n: number): string {
   return String(Math.trunc(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');

@@ -80,7 +80,7 @@ function senuelosPara(objetivo: string, cuantos: number): string[] {
  * de espacio: la frase se arma pegada y la pantalla la muestra separada
  * por palabras cuando ya está completa.
  */
-function normaliza(texto: string): string {
+export function normaliza(texto: string): string {
   return texto.trim().toLowerCase().replace(/[^a-z']/g, '');
 }
 
