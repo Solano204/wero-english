@@ -10,14 +10,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { Marcador } from '@/components/fx';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { FichaCaida, type EstadoFicha } from '@/components/juegos/caida/FichaCaida';
 import { FraseRonda } from '@/components/juegos/caida/FraseRonda';
+import { HojaPausa } from '@/components/juegos/caida/HojaPausa';
 import { IndicadorRitmo } from '@/components/juegos/caida/IndicadorRitmo';
 import { PistaCaida } from '@/components/juegos/caida/PistaCaida';
 import { MARGEN_ARRIBA, chevronsPara, largoEstela } from '@/components/juegos/caida/medidas';
@@ -36,7 +36,6 @@ import {
   motionDuration,
   motionEasing,
   motionLogro,
-  motionSpring,
   radius,
   shadow,
   space,
@@ -105,7 +104,7 @@ export function CaidaScreen() {
   // Pausa al acertar: congela la caída y bloquea las fichas mientras se
   // oye la frase en inglés y su traducción.
   const [enPausa, setEnPausa] = useState(false);
-  const [pausaInfo, setPausaInfo] = useState<{ en: string; es: string } | null>(
+  const [pausaInfo, setPausaInfo] = useState<{ entry: Entry; correct: boolean } | null>(
     null
   );
   const [avanzando, setAvanzando] = useState(false);
@@ -121,8 +120,6 @@ export function CaidaScreen() {
   const pulsoMarcador = useSharedValue(0);
   // La estela de las fichas: 1 mientras caen, 0 al contestar o al llegar al piso.
   const estela = useSharedValue(0);
-  const overlayOpacity = useSharedValue(0);
-  const overlayScale = useSharedValue(0.92);
   // Cuánto baja la fila hasta tocar el piso, según el alto real de la
   // pista, medido en pantalla: depende del encabezado, de la frase (que a
   // veces son dos renglones) y de la barra de gestos del teléfono.
@@ -215,7 +212,7 @@ export function CaidaScreen() {
     async (entry: Entry, correct: boolean, continuar: () => void) => {
       const miToken = ++pausaToken.current;
       pausaCtx.current = continuar;
-      setPausaInfo({ en: entry.phrase, es: entry.spanish_main });
+      setPausaInfo({ entry, correct });
       setEnPausa(true);
 
       limiteTimer.current = setTimeout(
@@ -326,23 +323,6 @@ export function CaidaScreen() {
   const pulsoAnim = useAnimatedStyle(() => ({
     transform: [{ scale: 1 + (motionLogro.escala - 1) * pulsoMarcador.value }],
   }));
-
-  const overlayAnim = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value,
-    transform: [{ scale: overlayScale.value }],
-  }));
-
-  useEffect(() => {
-    if (enPausa) {
-      overlayOpacity.value = reducido
-        ? 1
-        : withTiming(1, { duration: motionDuration.rapido });
-      overlayScale.value = reducido ? 1 : withSpring(1, motionSpring.rebote);
-    } else {
-      overlayOpacity.value = reducido ? 0 : withTiming(0, { duration: motionDuration.rapido });
-      overlayScale.value = 0.92;
-    }
-  }, [enPausa, reducido, overlayOpacity, overlayScale]);
 
   /** Botón "Siguiente ›" de la pausa: corta la voz y avanza ya. */
   const tocarSiguienteEnPausa = useCallback(() => {
@@ -580,25 +560,13 @@ export function CaidaScreen() {
           </Animated.View>
         </PistaCaida>
 
-        {enPausa && pausaInfo && !volando ? (
-          <View style={styles.overlay} pointerEvents="box-none">
-            <Animated.View style={[styles.overlayCard, overlayAnim]}>
-              <Text style={styles.overlayEn}>{pausaInfo.en}</Text>
-              <Text style={styles.overlayEs}>{pausaInfo.es}</Text>
-              <Presionable
-                onPress={tocarSiguienteEnPausa}
-                disabled={avanzando}
-                accessibilityRole="button"
-                accessibilityLabel="Siguiente"
-                hitSlop={8}
-                style={styles.siguiente}
-              >
-                <Text style={styles.siguienteTexto}>Siguiente</Text>
-                <Icon name="chevron-right" size="sm" color={color.textFaint} />
-              </Presionable>
-            </Animated.View>
-          </View>
-        ) : null}
+        <HojaPausa
+          entry={pausaInfo?.entry ?? null}
+          correct={pausaInfo?.correct ?? false}
+          visible={enPausa && !volando}
+          avanzando={avanzando}
+          onContinuar={tocarSiguienteEnPausa}
+        />
       </View>
     </Screen>
   );
@@ -681,44 +649,4 @@ const styles = StyleSheet.create({
   finBotones: { gap: space.sm },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
-  overlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: space.xl,
-    backgroundColor: color.velo,
-  },
-  overlayCard: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    gap: space.sm,
-    padding: space.xl,
-    borderRadius: radius.lg,
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.border,
-    ...shadow.card,
-  },
-  overlayEn: {
-    fontSize: font.size.xl,
-    fontFamily: font.family.display,
-    color: color.text,
-    textAlign: 'center',
-  },
-  overlayEs: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.textMuted,
-    textAlign: 'center',
-  },
-  siguiente: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm, padding: space.sm },
-  siguienteTexto: {
-    fontSize: font.size.sm,
-    color: color.textFaint,
-    fontFamily: font.family.bodyStrong,
-  },
 });
