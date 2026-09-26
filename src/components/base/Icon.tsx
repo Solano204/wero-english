@@ -20,6 +20,8 @@ import { LockSimpleIcon } from 'phosphor-react-native/src/icons/LockSimple';
 import { MicrophoneSlashIcon } from 'phosphor-react-native/src/icons/MicrophoneSlash';
 import { PauseIcon } from 'phosphor-react-native/src/icons/Pause';
 import { PlayIcon } from 'phosphor-react-native/src/icons/Play';
+import { SkipBackIcon } from 'phosphor-react-native/src/icons/SkipBack';
+import { SkipForwardIcon } from 'phosphor-react-native/src/icons/SkipForward';
 import { SpeakerHighIcon } from 'phosphor-react-native/src/icons/SpeakerHigh';
 import { SpeakerSlashIcon } from 'phosphor-react-native/src/icons/SpeakerSlash';
 import { StarIcon } from 'phosphor-react-native/src/icons/Star';
@@ -67,6 +69,8 @@ const ICONOS = {
   play: { Componente: PlayIcon },
   pause: { Componente: PauseIcon },
   stop: { Componente: StopIcon },
+  previous: { Componente: SkipBackIcon },
+  next: { Componente: SkipForwardIcon },
   // Phosphor no trae tortuga: el reloj de arena es lo más cercano a "lento",
   // y por sí solo no dice "lento". Regla: SIEMPRE con el texto "Lento" a la
   // vista (o accessibilityLabel "Lento" si el botón es solo ícono y tiene

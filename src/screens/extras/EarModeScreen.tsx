@@ -3,20 +3,14 @@ import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  cancelAnimation,
-} from 'react-native-reanimated';
-import { Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, IconButton, Screen } from '@/components/base';
+import { BarraSesion } from '@/components/fx';
 import { getRandomEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
-import { color, font, space, motionCiclo, motionEasing } from '@/theme';
+import { color, font, layout, space } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -68,7 +62,7 @@ function interpretaPaso(
  *
  * Reproduce frase, pausa y sigue, sin que el usuario toque nada. Es para
  * el camión y para lavar trastes. Por eso la pantalla es enorme y solo
- * tiene un botón: no se mira, se escucha.
+ * tiene un botón principal: no se mira, se escucha.
  */
 export function EarModeScreen() {
   useKeepAwake();
@@ -80,6 +74,8 @@ export function EarModeScreen() {
   const [queue, setQueue] = useState<Entry[]>([]);
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
+  // Ya se le dio a «Empezar» alguna vez: antes de eso el botón no puede decir «Reanudar».
+  const [empezo, setEmpezo] = useState(false);
   // Paso (0-based) dentro de pasosFrase() de la frase actual. Sirve
   // para mostrar "Repetición X/3" y para que "reanudar" retome ESE
   // paso en vez de reiniciar la frase desde la ronda 1.
@@ -88,7 +84,10 @@ export function EarModeScreen() {
   // Refs además del state: el bucle asíncrono no ve el state nuevo.
   const playingRef = useRef(false);
   const pasoIdxRef = useRef(0);
-  const pulse = useSharedValue(1);
+  const idxRef = useRef(0);
+  // Cada vez que se pausa o se salta de frase el ciclo sube: un bucle viejo que sigue esperando su audio o su
+  // pausa ya no es el vigente y termina sin tocar nada, aunque `playingRef` haya vuelto a ser true.
+  const cicloRef = useRef(0);
 
   const carga = useCarga(
     async () => {
@@ -101,12 +100,11 @@ export function EarModeScreen() {
   const loading = carga.estado === 'cargando';
 
   const detener = useCallback(() => {
+    cicloRef.current++;
     playingRef.current = false;
     setPlaying(false);
     audio.stop();
-    cancelAnimation(pulse);
-    pulse.value = withTiming(1);
-  }, [pulse]);
+  }, []);
 
   useEffect(() => {
     // Al salir de la pantalla o ir a background: corta la voz y el
@@ -116,53 +114,45 @@ export function EarModeScreen() {
     });
     return () => {
       sub.remove();
+      cicloRef.current++;
       playingRef.current = false;
       audio.stop();
-      cancelAnimation(pulse);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pulse]);
-
-  const anim = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-  }));
+  }, [detener]);
 
   /** Reproduce una frase completa (o desde el paso `desde`, al reanudar). */
-  const reproduceFrase = useCallback(async (entry: Entry, desde: number) => {
+  const reproduceFrase = useCallback(async (entry: Entry, desde: number, vigente: () => boolean) => {
     const pasos = pasosFrase(entry.audio_en, entry.audio_es);
-    await audio.playSequence(
-      pasos.slice(desde),
-      () => playingRef.current,
-      (i) => {
-        pasoIdxRef.current = desde + i;
-        setPasoIdx(desde + i);
-      }
-    );
+    await audio.playSequence(pasos.slice(desde), vigente, (i) => {
+      pasoIdxRef.current = desde + i;
+      setPasoIdx(desde + i);
+    });
   }, []);
 
   const loop = useCallback(
-    async (desdePaso: number) => {
-      let i = idx;
+    async (desdeIdx: number, desdePaso: number) => {
+      const ciclo = ++cicloRef.current;
+      const vigente = () => playingRef.current && cicloRef.current === ciclo;
+      let i = desdeIdx;
       let desde = desdePaso;
-      while (playingRef.current && i < queue.length) {
+      while (vigente() && i < queue.length) {
         const e = queue[i];
         if (!e) break;
+        idxRef.current = i;
         setIdx(i);
 
-        await reproduceFrase(e, desde);
+        await reproduceFrase(e, desde, vigente);
         desde = 0; // solo la frase reanudada arranca a media secuencia
 
-        if (!playingRef.current) return; // se pausó a media frase
+        if (!vigente()) return; // se pausó a media frase, o se saltó a otra
         i++;
       }
-      if (playingRef.current) {
+      if (vigente()) {
         playingRef.current = false;
         setPlaying(false);
-        cancelAnimation(pulse);
-        pulse.value = withTiming(1);
       }
     },
-    [idx, queue, pulse, reproduceFrase]
+    [queue, reproduceFrase]
   );
 
   const alternar = useCallback(() => {
@@ -174,13 +164,26 @@ export function EarModeScreen() {
     }
     playingRef.current = true;
     setPlaying(true);
-    pulse.value = withRepeat(
-      withTiming(1.08, { duration: motionCiclo.respiro, easing: motionEasing.ciclo }),
-      -1,
-      true
-    );
-    void loop(pasoIdxRef.current);
-  }, [loop, pulse, detener]);
+    setEmpezo(true);
+    void loop(idxRef.current, pasoIdxRef.current);
+  }, [loop, detener]);
+
+  /** Anterior (-1) y siguiente (+1): la frase de destino empieza desde su primera repetición. */
+  const saltar = useCallback(
+    (delta: 1 | -1) => {
+      const destino = idxRef.current + delta;
+      if (destino < 0 || destino >= queue.length) return;
+      cicloRef.current++;
+      audio.stop();
+      idxRef.current = destino;
+      setIdx(destino);
+      pasoIdxRef.current = 0;
+      setPasoIdx(0);
+      // Si estaba sonando, la frase nueva sigue sonando; si estaba en pausa, queda lista y en pausa.
+      if (playingRef.current) void loop(destino, 0);
+    },
+    [queue.length, loop]
+  );
 
   if (carga.estado === 'error') {
     return (
@@ -223,44 +226,54 @@ export function EarModeScreen() {
   const sonandoEs = playing && idioma === 'es';
 
   return (
-    <Screen edges={['top', 'bottom']}>
-      <Header
-        onBack={() => nav.goBack()}
-        title="Modo oído"
-        subtitle={`${idx + 1} de ${queue.length}`}
-      />
-
-      <View style={styles.body}>
-        <Animated.View style={anim}>
-          <Card style={styles.card}>
-            <Text style={styles.repeticion}>Repetición {ronda}/3</Text>
-            <Text style={[styles.phrase, sonandoEn && styles.sonando]}>
-              {actual?.phrase ?? ''}
-            </Text>
-            <Text style={[styles.spanish, sonandoEs && styles.sonando]}>
-              {actual?.spanish_main ?? ''}
-            </Text>
-          </Card>
-        </Animated.View>
-
-        <Text style={styles.hint}>
-          Guarda el teléfono. Cada frase suena en inglés y en español,
-          tres veces, para que la repitas en voz alta.
-        </Text>
+    <Screen padded={false}>
+      <View style={styles.cabeza}>
+        <Header onBack={() => nav.goBack()} title="Modo oído" subtitle={`${idx + 1} de ${queue.length}`} />
+        <View style={styles.barra}>
+          <BarraSesion hecho={idx} meta={queue.length} />
+        </View>
       </View>
 
-      <Button
-        label={playing ? 'Pausar' : 'Reanudar'}
-        onPress={alternar}
-        size="lg"
-        full
-      />
+      <View style={styles.body}>
+        <Card style={styles.card}>
+          <Text style={styles.repeticion}>Repetición {ronda}/3</Text>
+          <Text style={[styles.phrase, sonandoEn && styles.sonando]}>{actual?.phrase ?? ''}</Text>
+          <Text style={[styles.spanish, sonandoEs && styles.sonando]}>{actual?.spanish_main ?? ''}</Text>
+        </Card>
+
+        {empezo ? null : (
+          <Text style={styles.hint}>
+            Guarda el teléfono. Cada frase suena en inglés y en español, tres veces, para que la repitas en voz alta.
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.controles}>
+        <IconButton icono="previous" etiqueta="Anterior" tamano="lg" onPress={() => saltar(-1)} disabled={idx === 0} />
+        <Button
+          label={playing ? 'Pausar' : empezo ? 'Reanudar' : 'Empezar'}
+          icon={playing ? 'pause' : 'play'}
+          onPress={alternar}
+          size="lg"
+          style={styles.principal}
+        />
+        <IconButton
+          icono="next"
+          etiqueta="Siguiente"
+          tamano="lg"
+          onPress={() => saltar(1)}
+          disabled={idx >= queue.length - 1}
+        />
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { flex: 1, justifyContent: 'center', gap: space.xl },
+  cabeza: { paddingHorizontal: space.lg, paddingTop: space.sm },
+  // El halo de la barra ocupa 24 dp; se le devuelve lo que sobra para que no separe el contenido.
+  barra: { marginTop: -space.sm, marginBottom: -space.sm },
+  body: { flex: 1, justifyContent: 'center', gap: space.xl, paddingHorizontal: layout.screenPad },
   card: { alignItems: 'center', gap: space.md, paddingVertical: space.xxxl },
   repeticion: {
     fontSize: font.size.xs,
@@ -287,10 +300,23 @@ const styles = StyleSheet.create({
   sonando: { color: color.accent },
   hint: {
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.textFaint,
     textAlign: 'center',
-    lineHeight: font.size.sm * 1.6,
+    lineHeight: font.size.md * 1.5,
     paddingHorizontal: space.lg,
   },
+  // Los controles van fijos abajo, con el aspecto del footer de `Screen`, en la zona del pulgar.
+  controles: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingHorizontal: layout.screenPad,
+    paddingTop: space.md,
+    paddingBottom: space.lg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.borderStrong,
+    backgroundColor: color.bgFin,
+  },
+  principal: { flex: 1 },
 });

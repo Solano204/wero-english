@@ -137,6 +137,13 @@ export const motionColmena = {
  */
 export const motionCaza = { casilla: 1.1, reticulo: 8, letra: 260 } as const;
 
+/**
+ * Modo oído: tras `bolsillo` ms sin tocar la pantalla baja el brillo de todo menos el anillo y la frase (el velo
+ * oscurece `velo`, para OLED). El anillo se redibuja a lo sumo cada `cuadro` ms (60 fps) o cada `cuadroBolsillo` ms
+ * (30 fps) en bolsillo.
+ */
+export const motionRadio = { bolsillo: 15000, velo: 0.6, cuadro: 16, cuadroBolsillo: 33 } as const;
+
 /** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 
@@ -238,6 +245,25 @@ export const tarjetaSale = () =>
   new Keyframe({
     from: { opacity: 1, transform: [{ translateX: 0 }] },
     to: { opacity: 0, transform: [{ translateX: -DESPLAZA_TARJETA }], easing: motionEasing.salir },
+  }).duration(motionDuration.base);
+
+/** Cuánto viaja la frase de Modo oído al entrar y al salir (dp). */
+const DESPLAZA_FRASE = 32;
+
+/** La frase nueva entra desde abajo con un fundido, en `lento`, cuando la anterior ya va saliendo. */
+export const fraseEntra = () =>
+  new Keyframe({
+    from: { opacity: 0, transform: [{ translateY: DESPLAZA_FRASE }] },
+    to: { opacity: 1, transform: [{ translateY: 0 }], easing: motionEasing.entrar },
+  })
+    .duration(motionDuration.lento)
+    .delay(motionDuration.rapido);
+
+/** La frase que se va sale hacia arriba con un fundido, en `base`. */
+export const fraseSale = () =>
+  new Keyframe({
+    from: { opacity: 1, transform: [{ translateY: 0 }] },
+    to: { opacity: 0, transform: [{ translateY: -DESPLAZA_FRASE }], easing: motionEasing.salir },
   }).duration(motionDuration.base);
 
 /** Aparecer creciendo: fichas y tarjetas de resultado. */
