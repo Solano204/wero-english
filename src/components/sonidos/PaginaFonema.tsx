@@ -5,15 +5,28 @@ import { Badge, Button } from '@/components/base';
 import { SceneImage } from '@/components/card';
 import { OndaVoz, useVozEnVivo, type Rect } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
-import { sinBarras } from '@/domain/vocales';
+import { posicionVocal, sinBarras } from '@/domain/vocales';
 import * as audio from '@/services/audio';
 import { color, font, layout, space } from '@/theme';
 import type { Fonema } from '@/types';
+import { MapaBoca } from './MapaBoca';
 import { SIMBOLO_GRANDE } from './ViajeSimbolo';
 
 /** Cuántos cuadros se espera a que la página termine de acomodarse antes de dar por perdido el símbolo. */
 const INTENTOS_MEDIR = 10;
 const ALTO_ONDA = 32;
+
+/**
+ * El modo de articulación de una consonante: sale de `tipo`, que sí está en los datos. El punto de articulación
+ * no está, y no se inventa.
+ */
+const MODO_CONSONANTE: Record<string, string> = {
+  oclusiva: 'oclusiva',
+  fricativa: 'fricativa',
+  africada: 'africada',
+  nasal: 'nasal',
+  aproximante: 'aproximante',
+};
 
 interface Props {
   fonema: Fonema;
@@ -123,6 +136,15 @@ export function PaginaFonema({ fonema, esActual, simboloOculto, alSimboloMedido,
           Sonido aislado en preparación. Escúchalo en las palabras de ejemplo.
         </Text>
       )}
+
+      {/* El mapa de la boca solo existe para las vocales que están en la tabla del IPA; una consonante dice su modo. */}
+      {posicionVocal(fonema.ipa) ? (
+        <MapaBoca ipa={fonema.ipa} esActual={esActual} voz={vozSolo} />
+      ) : MODO_CONSONANTE[fonema.tipo] ? (
+        <View style={styles.badge}>
+          <Badge label={`Consonante · ${MODO_CONSONANTE[fonema.tipo]}`} tone="neutral" small />
+        </View>
+      ) : null}
 
       {/* Sin imagen no se reserva lugar. */}
       {fonema.imagen ? <SceneImage path={fonema.imagen} size={160} ancha /> : null}
