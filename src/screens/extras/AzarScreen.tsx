@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { BotonGuardar } from '@/components/detalle';
-import { CartaFrase, type Modo, type Sonando } from '@/components/mazo/CartaFrase';
-import { MAZO } from '@/domain/mazo';
+import type { Modo, Sonando } from '@/components/mazo/CartaFrase';
+import { MazoCartas, type ManejadorMazo } from '@/components/mazo/MazoCartas';
 import { getRandomEntries, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
@@ -24,8 +24,6 @@ const PAUSA_EN_ES_MS = 700;
 const RETRASO_AUTO_MS = 250;
 /** Velocidad de "Lento", igual que playSlow() por defecto. */
 const VELOCIDAD_LENTA = 0.7;
-/** Lo que le quita al ancho de la zona el filo de la carta (1 dp a cada lado) y su padding de `lg`. */
-const RESTA_ANCHO_TEXTO = 2 + space.lg * 2;
 
 /** Pasos de la secuencia EN → ES de una frase. Sin ES, solo suena el inglés. */
 function pasosSecuencia(entry: Entry): { path: string | null; pauseMs: number }[] {
@@ -65,7 +63,9 @@ export function AzarScreen() {
   /** Sube en 1 cada vez que la frase de arriba pasa a guardada: dispara el anillo dorado del botón. */
   const [pulso, setPulso] = useState(0);
   const [sonando, setSonando] = useState<Sonando | null>(null);
-  const [zona, setZona] = useState({ ancho: 0, alto: 0 });
+  /** Cambia con cada baraja nueva: el mazo se arma de cero (sus valores compartidos nunca retroceden dentro de una tanda). */
+  const [tanda, setTanda] = useState(0);
+  const mazo = useRef<ManejadorMazo>(null);
 
   // Token de la reproducción de frase vigente (automática o manual). Cada
   // intento nuevo saca el suyo; el que ya no coincide con el vigente sabe
@@ -83,6 +83,7 @@ export function AzarScreen() {
       const list = await getRandomEntries(filter(), 60);
       setPool(list);
       setI(0);
+      setTanda((t) => t + 1);
       setBarajando(false);
     },
     [filter]
@@ -91,6 +92,11 @@ export function AzarScreen() {
   const cargar = carga.reintentar;
 
   const entry = pool[i];
+  // Lo que el mazo avisa al terminar una salida puede llegar antes de que React pinte: la cuenta va también en una referencia.
+  const iRef = useRef(0);
+  iRef.current = i;
+  const largoRef = useRef(0);
+  largoRef.current = pool.length;
   const arribaRef = useRef<number | null>(null);
   arribaRef.current = entry?.id ?? null;
 
@@ -175,22 +181,28 @@ export function AzarScreen() {
     [entry, reproduceSecuencia, reproduceUna]
   );
 
-  const siguiente = useCallback(() => {
-    // Se corta la voz ANTES de cambiar de frase: sin esto, un salto
-    // rápido deja sonando la frase que ya no se ve.
+  /** La carta de arriba empieza a irse: se corta la voz ANTES de cambiar de frase (un salto rápido dejaría sonando la que ya no se ve). */
+  const alLanzar = useCallback(() => {
+    haptics.tapLight();
     vozToken.current++;
     audio.stop();
     setSonando(null);
-    // Al acabarse la baraja el mazo queda vacío y se pide otra. Nunca se
-    // repite dentro de la misma tanda, que es lo que haría sentir la pantalla corta.
-    if (i + 1 >= pool.length) {
+  }, []);
+
+  /** La carta ya salió. Al acabarse la baraja el mazo queda vacío y se pide otra: nunca se repite dentro de la misma tanda. */
+  const alAvanzar = useCallback(() => {
+    const siguiente = iRef.current + 1;
+    iRef.current = siguiente;
+    if (siguiente >= largoRef.current) {
       setBarajando(true);
       setPool([]);
       void cargar();
       return;
     }
-    setI((n) => n + 1);
-  }, [i, pool.length, cargar]);
+    setI(siguiente);
+  }, [cargar]);
+
+  const pedirSiguiente = useCallback(() => mazo.current?.siguiente(), []);
 
   const alternarGuardada = useCallback(async () => {
     if (!user || !entry) return;
@@ -203,6 +215,12 @@ export function AzarScreen() {
       setPulso((p) => p + 1);
     }
   }, [user, entry]);
+
+  /** Deslizar hacia arriba solo guarda: quitar una frase de Mi mazo se hace con el botón. */
+  const guardarDeslizando = useCallback(() => {
+    if (guardada) haptics.tapLight();
+    else void alternarGuardada();
+  }, [guardada, alternarGuardada]);
 
   if (carga.estado === 'error') {
     return (
@@ -242,29 +260,25 @@ export function AzarScreen() {
     <Screen>
       <Header onBack={() => nav.goBack()} title="Frases sueltas" />
 
-      <View
-        style={styles.zona}
-        onLayout={(e) => setZona({ ancho: e.nativeEvent.layout.width, alto: e.nativeEvent.layout.height })}
-      >
-        {zona.alto > 0 ? (
-          <CartaFrase
-            key={entry.id}
-            entry={entry}
-            activa
-            alto={zona.alto - MAZO.asoma * 2}
-            ancho={zona.ancho - RESTA_ANCHO_TEXTO}
-            sonando={sonando}
-            onSonar={sonar}
-            guardada={guardada}
-            onSiguiente={siguiente}
-            onGuardar={alternarGuardada}
-          />
-        ) : null}
+      <View style={styles.zona}>
+        <MazoCartas
+          key={tanda}
+          ref={mazo}
+          entradas={pool}
+          actual={i}
+          sonando={sonando}
+          onSonar={sonar}
+          guardada={guardada}
+          onGuardar={alternarGuardada}
+          onGuardarDeslizando={guardarDeslizando}
+          alLanzar={alLanzar}
+          alAvanzar={alAvanzar}
+        />
       </View>
 
       <View style={styles.pie}>
         <View style={styles.boton}>
-          <Button label="Siguiente" icon="arrow-right" iconAlFinal onPress={siguiente} size="lg" full />
+          <Button label="Siguiente" icon="arrow-right" iconAlFinal onPress={pedirSiguiente} size="lg" full />
         </View>
         <View style={styles.boton}>
           <BotonGuardar variante="secondary" guardada={guardada} pulso={pulso} onPress={alternarGuardada} />
@@ -277,7 +291,7 @@ export function AzarScreen() {
 }
 
 const styles = StyleSheet.create({
-  zona: { flex: 1, justifyContent: 'center' },
+  zona: { flex: 1 },
   pie: { flexDirection: 'row', gap: space.sm, marginTop: space.lg },
   boton: { flex: 1 },
   aviso: {

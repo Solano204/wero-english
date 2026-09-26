@@ -158,6 +158,22 @@ export const motionRadio = { bolsillo: 15000, velo: 0.6, cuadro: 16, cuadroBolsi
 /** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 
+/**
+ * El mazo de Frases sueltas. El abanico de entrada abre las cartas de atrás (`abre`) y las junta (`junta`), con
+ * `escalon` ms entre carta y carta: con tres cartas dura 220 + 320 + 2 × 60 = 660 ms, dentro de los 700. Una carta
+ * lanzada sale en `lanzar`; el botón «Siguiente» la lanza como un deslizamiento de `velocidadBoton` dp/s.
+ */
+export const motionMazo = {
+  abre: motionDuration.base,
+  junta: motionDuration.lento,
+  escalon: 60,
+  lanzar: motionDuration.base,
+  velocidadBoton: 1200,
+  /** Grados que se abre cada carta de atrás en el abanico, y cuánto se separa hacia los lados (dp). */
+  abanico: 9,
+  separa: 28,
+} as const;
+
 /** Bucles largos. */
 export const motionCiclo = {
   esqueleto: 700,
@@ -229,6 +245,9 @@ export const motionEntrada = {
 /** Aparecer sin desplazarse: cambios de estado. */
 export const aparecer = (retraso = 0) =>
   FadeIn.delay(retraso).duration(motionDuration.base).easing(motionEasing.entrar);
+
+/** Aparecer en `rapido`: el cambio de carta de Frases sueltas con reducir movimiento. */
+export const aparecerRapido = () => FadeIn.duration(motionDuration.rapido).easing(motionEasing.entrar);
 
 /** Aparecer subiendo: secciones y transiciones. */
 export const aparecerSubiendo = (retraso = 0) =>
