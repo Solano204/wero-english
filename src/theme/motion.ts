@@ -165,6 +165,8 @@ export const motionSenal = {
   ondaNivel: 2400,
   /** El reloj de Pares late suave en `accent` durante su último 20 %. */
   latido: 1200,
+  /** El cursor de la ranura que sigue, en Colmena, respira una vez. */
+  cursor: 1600,
 } as const;
 
 /**

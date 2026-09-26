@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, useEfectoResultado } from '@/components/feedback';
+import { BloqueEscuchar } from '@/components/juegos/colmena/BloqueEscuchar';
+import { distribuirRanuras } from '@/components/juegos/colmena/geometria';
 import { ProgresoHex } from '@/components/juegos/colmena/ProgresoHex';
+import { RanurasPalabra } from '@/components/juegos/colmena/RanurasPalabra';
+import { useVozRonda } from '@/components/juegos/colmena/useVozRonda';
 import { RelojRonda } from '@/components/juegos/pares/RelojRonda';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
 import { useNivel } from './useNivel';
@@ -13,6 +17,7 @@ import { applyGameGrade } from '@/db/games';
 import { getRandomSpellable } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
+import { formaPalabras } from '@/utils/text';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
@@ -25,6 +30,16 @@ type Ruta = RouteProp<RootStackParams, 'Colmena'>;
 
 /** Cuántas veces se puede escuchar la palabra completa por ronda. */
 const ESCUCHAS_POR_RONDA = 2;
+
+/** Las ranuras de la frase: 32 × 40, con los espacios de la escala (letras, palabras y líneas). */
+const RANURAS = {
+  hueco: space.xs,
+  entrePalabras: space.lg,
+  entreLineas: space.sm,
+  anchoBase: 32,
+  altoBase: 40,
+  anchoMin: 12,
+};
 
 /** Cuánto se bloquea "Siguiente" tras tocarlo, para no procesar dos toques. */
 const AVANZAR_DEBOUNCE_MS = 400;
@@ -92,6 +107,8 @@ export function ColmenaScreen() {
   const [usadas, setUsadas] = useState<number[]>([]);
   const [aciertos, setAciertos] = useState(0);
   const [resuelta, setResuelta] = useState(false);
+  // Desde qué ranura completó la ayuda («No me sale» o el tiempo); null si la ronda la armó quien juega.
+  const [ayudaDesde, setAyudaDesde] = useState<number | null>(null);
   // Las pistas ya no se compran: el nivel trae las que trae.
   const [pistas, setPistas] = useState(0);
   // Escuchas de la PALABRA completa (independientes de las pistas de
@@ -129,11 +146,26 @@ export function ColmenaScreen() {
 
   const round = rounds[idx];
 
+  const { voz, analisis } = useVozRonda(round?.entry ?? null);
+  const { width: anchoVentana } = useWindowDimensions();
+  // La forma de las palabras solo dibuja: la comparación sigue siendo sobre `objetivo`, sin espacios.
+  const forma = useMemo(() => {
+    if (!round) return [];
+    const largos = formaPalabras(round.entry.phrase_tts);
+    // Por si algún día la forma no suma lo que hay que armar: una sola palabra, sin perder ninguna letra.
+    return largos.reduce((a, n) => a + n, 0) === round.objetivo.length ? largos : [round.objetivo.length];
+  }, [round]);
+  const distribucion = useMemo(
+    () => distribuirRanuras(forma, anchoVentana - space.lg * 2, RANURAS),
+    [forma, anchoVentana]
+  );
+
   useEffect(() => {
     empezoEn.current = Date.now();
     setArmado('');
     setUsadas([]);
     setResuelta(false);
+    setAyudaDesde(null);
     setEscuchas(ESCUCHAS_POR_RONDA);
     setSonandoEscuchar(false);
   }, [idx]);
@@ -252,6 +284,7 @@ export function ColmenaScreen() {
   const seAcaboElTiempo = useCallback(async () => {
     if (!user || !round || resuelta) return;
     setResuelta(true);
+    setAyudaDesde(armado.length);
     setArmado(round.objetivo);
     haptics.failure();
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
@@ -262,11 +295,12 @@ export function ColmenaScreen() {
       Date.now() - empezoEn.current,
       'producir'
     );
-  }, [user, round, resuelta]);
+  }, [user, round, resuelta, armado]);
 
   const rendirse = useCallback(async () => {
     if (!user || !round || resuelta) return;
     setResuelta(true);
+    setAyudaDesde(armado.length);
     setArmado(round.objetivo);
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
     await applyGameGrade(
@@ -276,7 +310,7 @@ export function ColmenaScreen() {
       Date.now() - empezoEn.current,
       'producir'
     );
-  }, [user, round, resuelta]);
+  }, [user, round, resuelta, armado]);
 
   if (carga.estado === 'error') {
     return (
@@ -404,49 +438,26 @@ export function ColmenaScreen() {
         <Text style={styles.pista}>{round.pista}</Text>
 
         {!resuelta ? (
-          <Presionable
-            onPress={() => void escucharPalabra()}
-            disabled={escuchas <= 0 || sonandoEscuchar}
-            accessibilityRole="button"
-            accessibilityLabel="Escuchar la palabra"
-            accessibilityState={{ disabled: escuchas <= 0 || sonandoEscuchar }}
-            hitSlop={8}
-            style={[styles.escuchar, (escuchas <= 0 || sonandoEscuchar) && styles.escucharApagado]}
-          >
-            <View style={styles.escucharFila}>
-              <Icon
-                name="volume"
-                size="md"
-                color={escuchas <= 0 || sonandoEscuchar ? color.textFaint : color.accent}
-              />
-              <Text
-                style={[
-                  styles.escucharTexto,
-                  (escuchas <= 0 || sonandoEscuchar) && styles.escucharTextoApagado,
-                ]}
-              >
-                {escuchas}
-              </Text>
-            </View>
-          </Presionable>
+          <BloqueEscuchar
+            escuchas={escuchas}
+            sonando={sonandoEscuchar}
+            voz={voz}
+            envolvente={analisis?.envolvente ?? []}
+            onEscuchar={() => void escucharPalabra()}
+          />
         ) : null}
 
-        <Animated.View style={[styles.huecos, estiloHuecos]}>
-          {round.objetivo.split('').map((c, i) => (
-            <View
-              key={`hueco-${i}`}
-              style={[
-                styles.hueco,
-                i < armado.length && styles.huecoLleno,
-                resuelta && styles.huecoOk,
-                falloLetra && styles.huecoMal,
-              ]}
-            >
-              <Text style={styles.huecoTexto}>
-                {i < armado.length ? armado[i] : ' '}
-              </Text>
-            </View>
-          ))}
+        <Animated.View style={estiloHuecos}>
+          <RanurasPalabra
+            key={idx}
+            distribucion={distribucion}
+            palabras={forma}
+            objetivo={round.objetivo}
+            armado={armado}
+            resolucion={resuelta ? (ayudaDesde === null ? 'acierto' : 'ayuda') : null}
+            desdeAyuda={ayudaDesde ?? round.objetivo.length}
+            fallo={falloLetra}
+          />
         </Animated.View>
 
         {resuelta ? (
@@ -510,55 +521,6 @@ const styles = StyleSheet.create({
     fontFamily: font.family.display,
     color: color.text,
     textAlign: 'center',
-  },
-  escuchar: {
-    minHeight: 40,
-    paddingHorizontal: space.lg,
-    borderRadius: radius.pill,
-    backgroundColor: color.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-  },
-  escucharApagado: { backgroundColor: color.surfaceHigh },
-  escucharFila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  escucharTexto: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.accent,
-  },
-  escucharTextoApagado: { color: color.textFaint },
-  huecos: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: space.xs,
-  },
-  hueco: {
-    minWidth: 30,
-    height: 40,
-    borderRadius: radius.sm,
-    borderBottomWidth: 2,
-    borderBottomColor: color.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  huecoLleno: {
-    backgroundColor: color.accentSoft,
-    borderBottomColor: color.accent,
-  },
-  huecoOk: {
-    backgroundColor: color.correctSoft,
-    borderBottomColor: color.correct,
-  },
-  huecoMal: {
-    backgroundColor: color.wrongSoft,
-    borderBottomColor: color.wrong,
-  },
-  huecoTexto: {
-    fontSize: font.size.xl,
-    color: color.text,
-    fontFamily: font.family.heading,
   },
   letras: {
     flexDirection: 'row',
