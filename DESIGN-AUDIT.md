@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 328 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 329 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -231,7 +231,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/DulcesScreen.tsx` | ✓ `:189` | ✓ `:667` | ✓ `:647` |
 | `games/NivelesScreen.tsx` | ✓ `:84` | ✗ | ✓ `:300` |
 | `games/ParesScreen.tsx` | ✓ `:193` | ✓ `:384` | ✓ `:360` |
-| `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
+| `utility/DeckScreen.tsx` | ✓ `:30` | ✓ `:33` | ✓ `:53` |
 | `utility/DiagnosticsScreen.tsx` | ✓ `:31` | ✗ | ✓ `:61` |
 | `utility/ProgressScreen.tsx` | ✓ `:71` | ✓ `:96` | ✓ `:113` |
 | `utility/StuckScreen.tsx` | ✓ `:26` | ✓ `:29` | ✓ `:37` |
