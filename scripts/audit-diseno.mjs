@@ -442,6 +442,8 @@ const LOOPS_POR_PANTALLA = {
   ModoOido: ['AnilloRadio.tsx'],
   // Sonidos: el héroe es el mapa de la boca (un punto que viaja una vez, con resorte, y late con la voz mientras suena); SVG y vistas, ningún canvas de Skia ni bucle.
   Sonidos: [],
+  // Gramática: el héroe es «El error que se corrige» (la frase incorrecta se tacha y se transforma en la correcta, una vez al llegar a la vista); vistas y layout de Reanimated, ningún canvas de Skia ni bucle.
+  Gramatica: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

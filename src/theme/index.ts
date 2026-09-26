@@ -44,6 +44,7 @@ export {
   motionDulces,
   motionColmena,
   motionCaza,
+  motionError,
   motionRadio,
   motionVeredicto,
   escalon,
@@ -57,6 +58,7 @@ export {
   fraseEntra,
   fraseSale,
   entraSube,
+  saleArriba,
   reacomodar,
 } from './motion';
 export { text } from './typography';

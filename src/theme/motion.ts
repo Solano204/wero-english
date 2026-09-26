@@ -140,6 +140,13 @@ export const motionColmena = {
 export const motionCaza = { casilla: 1.1, reticulo: 8, letra: 260 } as const;
 
 /**
+ * Gramática, «El error que se corrige»: cada palabra que cambia se tacha de izquierda a derecha en `tacha` ms (la
+ * siguiente arranca con el escalón de las listas); tras la `pausa` la frase se transforma: lo que sobra sale y lo que
+ * entra llega `entra` ms después, con el escalón entre una y otra.
+ */
+export const motionError = { tacha: motionDuration.base, pausa: 120, entra: 80 } as const;
+
+/**
  * Modo oído: tras `bolsillo` ms sin tocar la pantalla baja el brillo de todo menos el anillo y la frase (el velo
  * oscurece `velo`, para OLED). El anillo se redibuja a lo sumo cada `cuadro` ms (60 fps) o cada `cuadroBolsillo` ms
  * (30 fps) en bolsillo.
@@ -275,6 +282,13 @@ export const fraseSale = () =>
   new Keyframe({
     from: { opacity: 1, transform: [{ translateY: 0 }] },
     to: { opacity: 0, transform: [{ translateY: -DESPLAZA_FRASE }], easing: motionEasing.salir },
+  }).duration(motionDuration.base);
+
+/** Lo que sobra de la frase incorrecta sale subiendo 6 dp con un fundido, en `base`. */
+export const saleArriba = () =>
+  new Keyframe({
+    from: { opacity: 1, transform: [{ translateY: 0 }] },
+    to: { opacity: 0, transform: [{ translateY: -6 }], easing: motionEasing.salir },
   }).duration(motionDuration.base);
 
 /** Aparecer creciendo: fichas y tarjetas de resultado. */

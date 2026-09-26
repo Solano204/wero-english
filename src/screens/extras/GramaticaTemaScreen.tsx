@@ -12,8 +12,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
-import { AudioButton } from '@/components/card';
 import { EjemploFrase } from '@/components/gramatica/EjemploFrase';
+import { ErrorQueSeCorrige } from '@/components/gramatica/ErrorQueSeCorrige';
 import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
 import { MuroDesbloqueo } from '@/components/unlock';
 import { segmentos } from '@/domain/gramatica';
@@ -254,33 +254,15 @@ export function GramaticaTemaScreen() {
         </Bloque>
       ) : null}
 
-      <Bloque titulo="En qué te vas a equivocar" retraso={escalon(6)}>
-        <Card style={styles.error}>
-          <View style={styles.linea}>
-            <Icon name="close" size="md" color={color.wrong} />
-            <Text style={styles.malTxt}>{tema.error_tipico.mal}</Text>
-          </View>
-          <View style={styles.linea}>
-            <Icon name="check" size="md" color={color.correct} />
-            <Text style={styles.bienTxt}>{tema.error_tipico.bien}</Text>
-          </View>
-          <View style={styles.audioRow}>
-            <AudioButton
-              path={tema.error_tipico.audio_bien}
-              size="sm"
-              label="Escuchar"
-              onBeforePlay={soltarSecuencia}
-            />
-            <AudioButton
-              path={tema.error_tipico.audio_bien}
-              size="sm"
-              slow
-              label="Lento"
-              onBeforePlay={soltarSecuencia}
-            />
-          </View>
-          <Text style={styles.porQue}>{tema.error_tipico.por_que}</Text>
-        </Card>
+      <Bloque titulo="El error que se corrige" retraso={escalon(6)}>
+        <ErrorQueSeCorrige
+          mal={tema.error_tipico.mal}
+          bien={tema.error_tipico.bien}
+          porQue={tema.error_tipico.por_que}
+          audioBien={tema.error_tipico.audio_bien}
+          scrollY={scrollY}
+          antes={soltarSecuencia}
+        />
       </Bloque>
 
       {tema.ojo ? (
@@ -368,35 +350,12 @@ const styles = StyleSheet.create({
   },
   escucharTodos: { alignSelf: 'flex-start', marginBottom: space.md },
   ejemplos: { gap: space.md },
-  audioRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
   contraste: { backgroundColor: color.surfaceAlt },
   contrasteTxt: {
     fontFamily: font.family.body,
     fontSize: font.size.md,
     color: color.text,
     lineHeight: font.size.md * 1.6,
-  },
-  error: { gap: space.sm },
-  linea: { flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' },
-  malTxt: {
-    flex: 1,
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.textMuted,
-    textDecorationLine: 'line-through',
-  },
-  bienTxt: {
-    flex: 1,
-    fontSize: font.size.md,
-    color: color.text,
-    fontFamily: font.family.bodyStrong,
-  },
-  porQue: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.textMuted,
-    lineHeight: font.size.md * 1.55,
-    marginTop: space.xs,
   },
   ojo: {
     flexDirection: 'row',

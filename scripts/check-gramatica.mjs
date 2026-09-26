@@ -25,7 +25,7 @@ const cargar = async (rel) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 
-const { diffFrase, MIN_COMPARTIDAS, MAX_TRAMOS } = await cargar('src/utils/diff.ts');
+const { diffFrase, numerarCambios, MIN_COMPARTIDAS, MAX_TRAMOS } = await cargar('src/utils/diff.ts');
 const { partirFormula, segmentos, nivelMaximo } = await cargar('src/domain/gramatica.ts');
 const temas = JSON.parse(leer('assets/data/gramatica.json')).temas;
 
@@ -178,6 +178,49 @@ prueba('diff: en los 80 errores reales la incorrecta y la correcta se reconstruy
   assert.ok(claros >= 40, 'se esperaba que la mayoría se transforme');
 });
 
+prueba('diff: los índices de tacha y de entrada van de izquierda a derecha, sin huecos, y la transformación cabe en 1.5 s', () => {
+  const motion = leer('src/theme/motion.ts');
+  const numero = (re, nombre) => {
+    const m = motion.match(re);
+    assert.ok(m, `no encontré ${nombre} en motion.ts`);
+    return Number(m[1]);
+  };
+  const BASE = numero(/base:\s*(\d+)/, 'motionDuration.base');
+  const LENTO = numero(/lento:\s*(\d+)/, 'motionDuration.lento');
+  const PAUSA = numero(/motionError = \{[^}]*pausa:\s*(\d+)/, 'motionError.pausa');
+  const ENTRA = numero(/motionError = \{[^}]*entra:\s*(\d+)/, 'motionError.entra');
+  const PASO = numero(/motionEscalon = \{\s*ms:\s*(\d+)/, 'motionEscalon.ms');
+  const TOPE = numero(/max:\s*(\d+)/, 'motionEscalon.max');
+  const escalon = (i) => Math.min(i, TOPE - 1) * PASO;
+
+  let peor = 0;
+  for (const t of temas) {
+    const d = diffFrase(t.error_tipico.mal, t.error_tipico.bien);
+    const { plan, tachas, entradas } = numerarCambios(d.piezas);
+    assert.equal(plan.length, d.piezas.length);
+    assert.equal(tachas, d.piezas.filter((p) => p.tipo === 'sale' || p.tipo === 'letras').length, `${t.id}: tachas`);
+    assert.deepEqual(
+      plan.filter((n) => n.tacha >= 0).map((n) => n.tacha),
+      Array.from({ length: tachas }, (_, i) => i),
+      `${t.id}: las tachas no van en orden`
+    );
+    const conEntrada = d.piezas.reduce((n, p) => n + (p.tipo === 'entra' ? 1 : p.tipo === 'letras' ? p.partes.filter((x) => x.tipo === 'entra').length : 0), 0);
+    assert.equal(entradas, conEntrada, `${t.id}: entradas`);
+    let esperado = 0;
+    for (const n of plan) {
+      const cuantas = n.pieza.tipo === 'entra' ? 1 : n.pieza.tipo === 'letras' ? n.pieza.partes.filter((x) => x.tipo === 'entra').length : 0;
+      assert.equal(n.entra, cuantas > 0 ? esperado : -1, `${t.id}: lugar de entrada`);
+      esperado += cuantas;
+    }
+    if (!d.claro) continue;
+    const tacha = tachas === 0 ? 0 : BASE + escalon(tachas - 1);
+    const fin = tacha + PAUSA + ENTRA + (entradas === 0 ? 0 : escalon(entradas - 1)) + LENTO;
+    peor = Math.max(peor, fin);
+  }
+  console.log(`      la transformación más larga dura ${peor} ms`);
+  assert.ok(peor <= 1500, `la transformación más larga tarda ${peor} ms`);
+});
+
 /* ---------- lo que las pantallas dibujan ---------- */
 
 prueba('cada tema trae tres ejemplos con audio y su error con audio', () => {
@@ -203,6 +246,16 @@ prueba('la regla de temas abiertos no cambió: 3 por bloque, y un tema con clave
   for (const t of temas) porBloque.set(t.bloque, [...(porBloque.get(t.bloque) ?? []), t]);
   assert.equal(porBloque.size, 9);
   for (const lista of porBloque.values()) assert.ok(lista.length > 3, 'cada bloque tiene temas cerrados y abiertos');
+});
+
+prueba('el error que se corrige: se anuncia completo, se puede repetir y la pantalla ya no trae la sección vieja', () => {
+  const heroe = leer('src/components/gramatica/ErrorQueSeCorrige.tsx');
+  assert.match(heroe, /`Incorrecta: \$\{mal\}\. Correcta: \$\{bien\}\.`/);
+  assert.match(heroe, /label="Ver otra vez"/);
+  assert.match(heroe, /modo === 'estatico' \? null/);
+  const pantalla = leer('src/screens/extras/GramaticaTemaScreen.tsx');
+  assert.match(pantalla, /titulo="El error que se corrige"/);
+  assert.ok(!pantalla.includes('En qué te vas a equivocar'));
 });
 
 console.log(`\ncheck:gramatica ${total} pruebas ok\n`);

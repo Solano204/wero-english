@@ -160,3 +160,26 @@ export function diffFrase(mal: string, bien: string): DiffFrase {
   const compartidas = mayor === 0 ? 1 : conservadas / mayor;
   return { piezas, compartidas, tramos, claro: compartidas >= MIN_COMPARTIDAS && tramos <= MAX_TRAMOS };
 }
+
+/** Una pieza con su lugar entre las que se tachan y entre las que entran, para escalonarlas de izquierda a derecha. */
+export interface PiezaNumerada {
+  pieza: Pieza;
+  /** Lugar de su tacha entre las palabras que se tachan (`sale` y `letras`), o -1. */
+  tacha: number;
+  /** Lugar de su primera parte que entra entre las que entran (una palabra `entra` o cada trozo `entra` de una `letras`), o -1. */
+  entra: number;
+}
+
+/** Numera, de izquierda a derecha, las palabras que se tachan y los trozos que entran. `entradas` cuenta estos últimos. */
+export function numerarCambios(piezas: Pieza[]): { plan: PiezaNumerada[]; tachas: number; entradas: number } {
+  let tachas = 0;
+  let entradas = 0;
+  const plan = piezas.map((pieza): PiezaNumerada => {
+    const tacha = pieza.tipo === 'sale' || pieza.tipo === 'letras' ? tachas++ : -1;
+    const primera = entradas;
+    if (pieza.tipo === 'entra') entradas++;
+    if (pieza.tipo === 'letras') entradas += pieza.partes.filter((p) => p.tipo === 'entra').length;
+    return { pieza, tacha, entra: entradas > primera ? primera : -1 };
+  });
+  return { plan, tachas, entradas };
+}

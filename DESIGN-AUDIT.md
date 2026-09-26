@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 295 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 296 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -260,6 +260,10 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
 - `src/components/fx/PuntosRepeticion.tsx:52` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:98` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:101` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:107` — key por índice
+- `src/components/gramatica/ErrorQueSeCorrige.tsx:110` — key por índice
 - `src/components/gramatica/FormulaFichas.tsx:52` — key por índice
 - `src/components/gramatica/MedidorNivel.tsx:35` — key por índice
 - `src/components/juegos/caida/IndicadorRitmo.tsx:49` — key por índice
@@ -271,7 +275,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/sonidos/MapaBoca.tsx:185` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:291` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:239` — key por índice
-- `src/screens/extras/GramaticaTemaScreen.tsx:336` — key por índice
+- `src/screens/extras/GramaticaTemaScreen.tsx:318` — key por índice
 - `src/screens/games/CaidaScreen.tsx:574` — key por índice
 - `src/screens/games/ColmenaScreen.tsx:548` — key por índice
 - `src/screens/games/ColmenaScreen.tsx:570` — key por índice
@@ -298,7 +302,7 @@ Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pi
 **Audios vacíos** (empaquetados, pero de menos de 1000 bytes: `isBundled` dice que existen, así que su botón se pinta **activo** y falla en silencio):
 - (ninguno)
 
-Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `components/list/EntryRow.tsx` 4, `components/card/BloqueVoz.tsx` 3, `components/card/PhraseBlock.tsx` 3, `components/detalle/HeroeFrase.tsx` 3, `components/juegos/cazala/BloqueEscucha.tsx` 2, `screens/extras/ContractionsScreen.tsx` 2, `screens/extras/ErrorDetailScreen.tsx` 2, `screens/extras/GramaticaTemaScreen.tsx` 2, `components/juegos/caida/FinCaida.tsx` 1, `components/juegos/cazala/ResultadoCaza.tsx` 1, `components/juegos/dulces/HojaPregunta.tsx` 1, `screens/extras/MinimalPairsScreen.tsx` 1.
+Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `components/list/EntryRow.tsx` 4, `components/card/BloqueVoz.tsx` 3, `components/card/PhraseBlock.tsx` 3, `components/detalle/HeroeFrase.tsx` 3, `components/gramatica/ErrorQueSeCorrige.tsx` 2, `components/juegos/cazala/BloqueEscucha.tsx` 2, `screens/extras/ContractionsScreen.tsx` 2, `screens/extras/ErrorDetailScreen.tsx` 2, `components/juegos/caida/FinCaida.tsx` 1, `components/juegos/cazala/ResultadoCaza.tsx` 1, `components/juegos/dulces/HojaPregunta.tsx` 1, `screens/extras/MinimalPairsScreen.tsx` 1.
 
 ## e) Movimiento
 
