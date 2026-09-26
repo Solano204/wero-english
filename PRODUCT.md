@@ -88,6 +88,10 @@ La misma acción se llama igual en toda la app.
 | Cuando un tablero de Dulces no tiene jugadas posibles | Rebarajando el tablero | Sin movimientos, Mezclando |
 | Lo que queda de un tablero de Dulces | «N jugadas» (1: «1 jugada»), «Dejarlo aquí»; la pieza se lee «Pieza naranja, círculo, fila 2 columna 3» | Movimientos, Turnos, Vidas |
 | La pregunta que sale al llenar una meta de Dulces | Llenaste esta, ¿Qué significa?, Siguiente | Bonus, Reto, Desafío |
+| Oír la frase de una ronda de Colmena | Escuchar · quedan N; Sin escuchas | Reproducir, Te quedan N usos |
+| Pedir ayuda en una ronda de Colmena | Pista N; No me sale | Rendirse, Revelar, Skip |
+| Cuando se acaba el reloj de una ronda de Colmena | Se acabó el tiempo | ¡Tiempo!, Perdiste, Fallaste |
+| Pasar a la ronda que sigue | Siguiente; Terminar (en la última) | Continuar, Next |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
