@@ -1,13 +1,19 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import type { Rect } from '@/components/fx';
+import { isBundled } from '@/assets/bundled';
+import { Badge, Button } from '@/components/base';
+import { SceneImage } from '@/components/card';
+import { OndaVoz, useVozEnVivo, type Rect } from '@/components/fx';
+import { analizar } from '@/domain/marcas';
 import { sinBarras } from '@/domain/vocales';
+import * as audio from '@/services/audio';
 import { color, font, layout, space } from '@/theme';
 import type { Fonema } from '@/types';
 import { SIMBOLO_GRANDE } from './ViajeSimbolo';
 
 /** Cuántos cuadros se espera a que la página termine de acomodarse antes de dar por perdido el símbolo. */
 const INTENTOS_MEDIR = 10;
+const ALTO_ONDA = 32;
 
 interface Props {
   fonema: Fonema;
@@ -17,10 +23,14 @@ interface Props {
   simboloOculto: boolean;
   /** Si viene, la página mide su símbolo grande y avisa dónde quedó (para el viaje desde el chip del índice). */
   alSimboloMedido?: (rect: Rect) => void;
+  /** Este fonema está en «Solo el sonido» (repitiéndose hasta que se vuelva a tocar). */
+  repitiendo: boolean;
+  /** Empieza o detiene «Solo el sonido». */
+  alRepetir: (fonema: Fonema) => void;
 }
 
 /** Una página del laboratorio: todo lo de un fonema. */
-export function PaginaFonema({ fonema, simboloOculto, alSimboloMedido }: Props) {
+export function PaginaFonema({ fonema, esActual, simboloOculto, alSimboloMedido, repitiendo, alRepetir }: Props) {
   const { width: anchoVentana } = useWindowDimensions();
   const simbolo = useRef<View>(null);
 
@@ -40,19 +50,82 @@ export function PaginaFonema({ fonema, simboloOculto, alSimboloMedido }: Props) 
     if (alSimboloMedido) medir(0);
   }, [alSimboloMedido, medir]);
 
+  // audio_manual: true = todavía no hay sonido aislado (pendiente de grabación humana). Tampoco hay botón si el
+  // mp3 no está en el bundle: mejor ocultarlos que fingir uno que no suena.
+  const hayAislado = !fonema.audio_manual && isBundled(fonema.audio);
+  const hayLento = hayAislado && isBundled(fonema.audio_lento);
+
+  // Solo la página que se ve escucha: las vecinas no gastan nada.
+  const vozSolo = useVozEnVivo(esActual && hayAislado ? fonema.audio : null);
+  const vozLento = useVozEnVivo(esActual && hayLento ? fonema.audio_lento : null);
+  // El sonido aislado no tiene palabras: su energía es una sola campana sobre la duración real del audio.
+  const simboloIpa = sinBarras(fonema.ipa);
+  const envolvente = useMemo(
+    () => analizar(simboloIpa, simboloIpa, undefined, vozSolo.duracion).envolvente,
+    [simboloIpa, vozSolo.duracion]
+  );
+  const envolventeLenta = useMemo(
+    () => analizar(simboloIpa, simboloIpa, undefined, vozLento.duracion).envolvente,
+    [simboloIpa, vozLento.duracion]
+  );
+  const lenta = vozLento.sonando;
+
+  const oirLento = () => {
+    // Si estaba repitiendo, primero se corta: el lento toma su lugar.
+    if (repitiendo) alRepetir(fonema);
+    void audio.playSlow(fonema.audio_lento);
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.contenido} showsVerticalScrollIndicator={false}>
       <View style={styles.cabeza}>
         <View ref={simbolo} collapsable={false} style={simboloOculto ? styles.oculto : undefined}>
           <Text style={styles.simbolo} accessibilityLabel={fonema.nombre}>
-            {sinBarras(fonema.ipa)}
+            {simboloIpa}
           </Text>
         </View>
         <View style={styles.textos}>
           <Text style={styles.nombre}>{fonema.nombre}</Text>
           <Text style={styles.ancla}>como en {fonema.palabra_ancla}</Text>
+          <View style={styles.badge}>
+            {fonema.existe_en_espanol ? (
+              <Badge label="También en español" tone="neutral" small />
+            ) : (
+              <Badge label="No existe en español" tone="accent" small />
+            )}
+          </View>
         </View>
       </View>
+
+      {hayAislado ? (
+        <View style={styles.onda} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+          <OndaVoz
+            voz={lenta ? vozLento : vozSolo}
+            envolvente={lenta ? envolventeLenta : envolvente}
+            alto={ALTO_ONDA}
+          />
+        </View>
+      ) : null}
+
+      {hayAislado ? (
+        <View style={styles.botones}>
+          {/* Un solo botón: tocarlo repite el sonido hasta que se vuelva a tocar. */}
+          <Button
+            icon={repitiendo ? 'stop' : 'volume'}
+            label={repitiendo ? 'Repitiendo…' : 'Solo el sonido'}
+            onPress={() => alRepetir(fonema)}
+            style={styles.boton}
+          />
+          {hayLento ? <Button icon="slow" label="Lento" variant="secondary" onPress={oirLento} style={styles.boton} /> : null}
+        </View>
+      ) : (
+        <Text style={styles.enPreparacion}>
+          Sonido aislado en preparación. Escúchalo en las palabras de ejemplo.
+        </Text>
+      )}
+
+      {/* Sin imagen no se reserva lugar. */}
+      {fonema.imagen ? <SceneImage path={fonema.imagen} size={160} ancha /> : null}
     </ScrollView>
   );
 }
@@ -71,4 +144,9 @@ const styles = StyleSheet.create({
   textos: { flex: 1, gap: space.xs },
   nombre: { fontFamily: font.family.heading, fontSize: font.size.xl, color: color.text },
   ancla: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
+  badge: { flexDirection: 'row', marginTop: space.xs },
+  onda: { alignSelf: 'stretch', height: ALTO_ONDA },
+  botones: { flexDirection: 'row', gap: space.sm },
+  boton: { flex: 1 },
+  enPreparacion: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textFaint },
 });

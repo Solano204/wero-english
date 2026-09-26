@@ -283,6 +283,8 @@ export function PronunciationScreen() {
                   esActual={enPagina && i === vista}
                   simboloOculto={viaje !== null && i === vista}
                   alSimboloMedido={viaje && !viaje.hasta && i === vista ? simboloMedido : undefined}
+                  repitiendo={repitiendo === f.id}
+                  alRepetir={alternarRepetir}
                 />
               )}
             />
