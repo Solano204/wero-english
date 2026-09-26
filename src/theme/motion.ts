@@ -174,6 +174,9 @@ export const motionMazo = {
   separa: 12,
 } as const;
 
+/** Cuánto dura en pantalla el aviso «Quitada de tu mazo · Deshacer» (ms): lo que se tiene para arrepentirse. */
+export const motionAviso = { duracion: 5000 } as const;
+
 /**
  * La señal que se rompe (detalle de Errores que te delatan). «Lo que dices» entra en `base`; el cable sale `cableInicio` ms
  * después y tarda `cable` en llegar a «Lo que entienden». A medio cable la señal hace interferencia: el cable vibra y se
@@ -345,3 +348,10 @@ export const desaparecer = (duracion: number = motionDuration.base) =>
 /** Reacomodo de elementos que cambian de lugar. */
 export const reacomodar = () =>
   LinearTransition.duration(motionDuration.base).easing(motionEasing.entrar);
+
+/** Las filas de una lista que suben a llenar el hueco de la que se fue, con el resorte de `rebote` (Mi mazo). */
+export const reacomodarResorte = () =>
+  LinearTransition.springify()
+    .damping(motionSpring.rebote.damping)
+    .stiffness(motionSpring.rebote.stiffness)
+    .mass(motionSpring.rebote.mass);

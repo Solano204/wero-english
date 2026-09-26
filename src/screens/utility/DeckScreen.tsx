@@ -1,14 +1,20 @@
-import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated from 'react-native-reanimated';
 import { Carga, EmptyState, Header, Screen } from '@/components/base';
 import { Marcador } from '@/components/fx';
+import { AvisoDeshacer } from '@/components/mazo/AvisoDeshacer';
 import { TarjetaGuardada } from '@/components/mazo/TarjetaGuardada';
-import { getFavorites } from '@/db/queries';
+import { getFavorites, toggleFavorite } from '@/db/queries';
+import { quitarDeLista, reinsertar } from '@/domain/guardadas';
 import { useCarga } from '@/hooks/useCarga';
+import * as audio from '@/services/audio';
+import * as haptics from '@/services/haptics';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { color, font, space } from '@/theme';
+import { color, font, motionAviso, reacomodarResorte, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { conteo, plural } from '@/utils/text';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -17,14 +23,27 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 
 /** Cuántas tarjetas entran animadas al abrir la pantalla; el resto aparece directo. */
 const ANIMADAS = 8;
+/** Cuánto dura marcada la tarjeta que regresa con «Deshacer» como recién llegada, en ms. */
+const REGRESO_MS = 600;
+const REACOMODO = reacomodarResorte();
+
+/** Lo que se acaba de quitar (con su lugar, para regresarla) o el fallo al guardar el cambio. */
+type AvisoSinId = { tipo: 'quitada'; entry: Entry; indice: number } | { tipo: 'fallo' };
+type Aviso = AvisoSinId & { id: number };
 
 /**
  * P-17, mi mazo: las guardadas con estrella, cada una como una tarjeta con su karaoke y su grupo Inglés · Español. Arriba,
- * cuántas hay con el `Marcador`. El orden es el de siempre (lo último que repasaste primero): no se guarda la fecha en
- * que se guardó una frase. Aquí no hay «Repasar»: la sesión de estudio no recibe listas sin tocar SM-2 ni la cola del día.
+ * cuántas hay con el `Marcador`, que baja al quitar. El orden es el de siempre (lo último que repasaste primero): no se
+ * guarda la fecha en que se guardó una frase. Aquí no hay «Repasar»: la sesión de estudio no recibe listas sin tocar SM-2
+ * ni la cola del día.
+ *
+ * Quitar: deslizar la tarjeta, mantenerla presionada o la acción del lector de pantalla. La tarjeta se va, las de abajo
+ * suben con resorte y un aviso («Quitada de tu mazo · Deshacer») dura 5 s; «Deshacer» la regresa a su lugar. Hay un solo
+ * pendiente: quitar otra confirma la anterior. La base se actualiza al quitar, no al vencer el aviso.
  */
 export function DeckScreen() {
   const nav = useNavigation<Nav>();
+  const reducido = useMovimientoReducido();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
   const carga = useCarga(
@@ -33,35 +52,118 @@ export function DeckScreen() {
     { alEnfocar: true, esVacio: (d) => d.length === 0 }
   );
 
+  // La lista que se ve: sale de la base, pero al quitar una frase se recorta al momento (y se regresa al deshacer).
+  const [lista, setLista] = useState<Entry[] | null>(null);
+  const items = lista ?? carga.datos ?? [];
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  useEffect(() => {
+    if (carga.datos) setLista(carga.datos);
+  }, [carga.datos]);
+
+  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const avisoRef = useRef(aviso);
+  avisoRef.current = aviso;
+  const [reinsertada, setReinsertada] = useState<number | null>(null);
+  const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const regreso = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cuenta = useRef(0);
+
+  const soltarTemporizadores = useCallback(() => {
+    if (temporizador.current) clearTimeout(temporizador.current);
+    if (regreso.current) clearTimeout(regreso.current);
+    temporizador.current = null;
+    regreso.current = null;
+  }, []);
+  useEffect(() => soltarTemporizadores, [soltarTemporizadores]);
+
+  // Perder el foco (abrir el Detalle) corta la voz: el reproductor de frases es uno solo y compartido.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        audio.stop();
+      },
+      []
+    )
+  );
+
+  const mostrar = useCallback(
+    (nuevo: AvisoSinId) => {
+      cuenta.current += 1;
+      setAviso({ ...nuevo, id: cuenta.current });
+      if (temporizador.current) clearTimeout(temporizador.current);
+      temporizador.current = setTimeout(() => setAviso(null), motionAviso.duracion);
+    },
+    []
+  );
+
+  const quitar = useCallback(
+    async (entry: Entry) => {
+      if (!user) return;
+      const r = quitarDeLista(itemsRef.current, entry.id);
+      if (r.indice < 0) return;
+      haptics.tapLight();
+      setLista(r.lista);
+      mostrar({ tipo: 'quitada', entry, indice: r.indice });
+      try {
+        await toggleFavorite(user.id, entry.id);
+      } catch {
+        // La base no guardó el cambio: la frase vuelve a su lugar y se avisa.
+        setLista((l) => reinsertar(l ?? [], entry, r.indice));
+        mostrar({ tipo: 'fallo' });
+      }
+    },
+    [user, mostrar]
+  );
+
+  const deshacer = useCallback(async () => {
+    const a = avisoRef.current;
+    if (!user || !a || a.tipo !== 'quitada') return;
+    soltarTemporizadores();
+    setAviso(null);
+    setReinsertada(a.entry.id);
+    regreso.current = setTimeout(() => setReinsertada(null), REGRESO_MS);
+    setLista((l) => reinsertar(l ?? [], a.entry, a.indice));
+    try {
+      await toggleFavorite(user.id, a.entry.id);
+    } catch {
+      setLista((l) => quitarDeLista(l ?? [], a.entry.id).lista);
+      mostrar({ tipo: 'fallo' });
+    }
+  }, [user, soltarTemporizadores, mostrar]);
+
   const abrir = useCallback(
     (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
     [nav]
   );
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<Entry>) => (
-      <TarjetaGuardada entry={item} indice={index} animar={index < ANIMADAS} onAbrir={abrir} />
+      <TarjetaGuardada
+        entry={item}
+        indice={item.id === reinsertada ? 0 : index}
+        animar={index < ANIMADAS || item.id === reinsertada}
+        onAbrir={abrir}
+        onQuitar={quitar}
+      />
     ),
-    [abrir]
+    [abrir, quitar, reinsertada]
   );
 
-  const items = carga.datos ?? [];
+  const vacio = (
+    <EmptyState
+      icon="star"
+      title="Tu mazo está vacío"
+      body="Toca la estrella en cualquier frase para guardarla aquí."
+      actionLabel="Ir a Frases sueltas"
+      onAction={() => nav.navigate('Azar')}
+    />
+  );
 
   if (carga.estado !== 'listo') {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Mi mazo" />
-        <Carga
-          carga={carga}
-          vacio={
-            <EmptyState
-              icon="star"
-              title="Tu mazo está vacío"
-              body="Toca la estrella en cualquier frase para guardarla aquí."
-              actionLabel="Ir a Frases sueltas"
-              onAction={() => nav.navigate('Azar')}
-            />
-          }
-        >
+        <Carga carga={carga} vacio={vacio}>
           {() => null}
         </Carga>
       </Screen>
@@ -79,16 +181,27 @@ export function DeckScreen() {
           </View>
         </View>
       </View>
-      <FlatList
-        data={items}
-        keyExtractor={claveEntrada}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={Separador}
-        initialNumToRender={ANIMADAS}
-        windowSize={7}
-        removeClippedSubviews
-      />
+      {items.length === 0 ? (
+        <View style={styles.vacio}>{vacio}</View>
+      ) : (
+        <Animated.FlatList
+          data={items}
+          keyExtractor={claveEntrada}
+          renderItem={renderItem}
+          itemLayoutAnimation={reducido ? undefined : REACOMODO}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={Separador}
+          initialNumToRender={ANIMADAS}
+          windowSize={7}
+        />
+      )}
+      {aviso ? (
+        <AvisoDeshacer
+          key={aviso.id}
+          texto={aviso.tipo === 'quitada' ? 'Quitada de tu mazo' : 'No se pudo actualizar tu mazo. Intenta otra vez.'}
+          onDeshacer={aviso.tipo === 'quitada' ? deshacer : undefined}
+        />
+      ) : null}
     </Screen>
   );
 }
@@ -104,6 +217,7 @@ const styles = StyleSheet.create({
   conteo: { marginBottom: space.sm },
   conteoVista: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   conteoResto: { fontFamily: font.family.display, fontSize: font.size.xl, color: color.textMuted },
+  vacio: { flex: 1, paddingHorizontal: space.lg },
   list: { padding: space.lg, paddingBottom: space.xxxl },
   sep: { height: space.md },
 });
