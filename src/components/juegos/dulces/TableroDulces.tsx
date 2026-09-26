@@ -7,7 +7,16 @@ import { motionDuration, motionDulces } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { ChipCascada } from './ChipCascada';
 import { Pieza, type Entrada, type Movimiento } from './Pieza';
-import { TROZOS_RETRASO_MS, celdaEn, esperaDeCaida, retrasoDeColumna, umbralDeslizar, vecinaHacia } from './tablero';
+import {
+  REBOTE_MS,
+  TROZOS_RETRASO_MS,
+  celdaEn,
+  duracionCaida,
+  esperaDeCaida,
+  retrasoDeColumna,
+  umbralDeslizar,
+  vecinaHacia,
+} from './tablero';
 
 /** Lo que una jugada le pide al tablero que anime. */
 export interface Jugada {
@@ -63,16 +72,31 @@ interface Props {
   onDeslizar: (origen: number, destino: number) => void;
 }
 
-function vistaInicial(celdas: readonly number[], cols: number, nuevoId: () => number): PiezaVista[] {
-  return celdas.map((color, i) => ({
-    id: nuevoId(),
-    color,
-    fila: Math.floor(i / cols),
-    col: i % cols,
-    explota: false,
-    mov: null,
-    rechazo: 0,
-  }));
+/**
+ * Las piezas de un tablero recién repartido. Con `conEntrada` cada una cae desde arriba del tablero (un tablero
+ * entero más arriba de su celda), columna por columna: la de la izquierda primero, con el escalón de su columna.
+ */
+function vistaInicial(
+  celdas: readonly number[],
+  cols: number,
+  rows: number,
+  nuevoId: () => number,
+  conEntrada: boolean
+): PiezaVista[] {
+  return celdas.map((color, i) => {
+    const fila = Math.floor(i / cols);
+    const col = i % cols;
+    return {
+      id: nuevoId(),
+      color,
+      fila,
+      col,
+      explota: false,
+      mov: null,
+      entrada: conEntrada ? { desde: fila - rows, retraso: retrasoDeColumna(col) } : undefined,
+      rechazo: 0,
+    };
+  });
 }
 
 /**
@@ -104,7 +128,7 @@ export function TableroDulces({
 
   const siguienteId = useRef(0);
   const nuevoId = useCallback(() => siguienteId.current++, []);
-  const [piezas, setPiezas] = useState<PiezaVista[]>(() => vistaInicial(celdas, cols, () => siguienteId.current++));
+  const [piezas, setPiezas] = useState<PiezaVista[]>(() => vistaInicial(celdas, cols, rows, () => siguienteId.current++, true));
   // Qué pieza hay en cada celda y de qué color, por índice: lo que ve el jugador en este momento de la animación.
   const idsRef = useRef<number[]>(piezas.map((p) => p.id));
   const celdasRef = useRef<number[]>([...celdas]);
@@ -117,8 +141,8 @@ export function TableroDulces({
   const chipId = useRef(0);
 
   // Lo último que trae la pantalla, para que ni el gesto ni la jugada en curso usen valores viejos.
-  const datos = useRef({ cols, reducido, onTocar, onDeslizar });
-  datos.current = { cols, reducido, onTocar, onDeslizar };
+  const datos = useRef({ cols, rows, reducido, onTocar, onDeslizar });
+  datos.current = { cols, rows, reducido, onTocar, onDeslizar };
 
   useEffect(() => {
     montado.current = true;
@@ -132,8 +156,8 @@ export function TableroDulces({
   }, []);
 
   const reiniciar = useCallback(
-    (nuevas: readonly number[], columnas: number) => {
-      const vista = vistaInicial(nuevas, columnas, nuevoId);
+    (nuevas: readonly number[], columnas: number, filas: number, conEntrada: boolean) => {
+      const vista = vistaInicial(nuevas, columnas, filas, nuevoId, conEntrada);
       idsRef.current = vista.map((p) => p.id);
       celdasRef.current = [...nuevas];
       setPiezas(vista);
@@ -148,8 +172,17 @@ export function TableroDulces({
     if (llaveAnterior.current === llave) return;
     llaveAnterior.current = llave;
     jugadaToken.current++;
-    reiniciar(celdas, cols);
-  }, [llave, celdas, cols, reiniciar]);
+    reiniciar(celdas, cols, rows, true);
+  }, [llave, celdas, cols, rows, reiniciar]);
+
+  // Mientras cae el reparto no se aceptan toques: el tablero está en el aire.
+  const [entrando, setEntrando] = useState(true);
+  useEffect(() => {
+    setEntrando(true);
+    const espera = reducido ? motionDuration.rapido : retrasoDeColumna(cols - 1) + duracionCaida(rows) + REBOTE_MS;
+    const t = setTimeout(() => setEntrando(false), espera);
+    return () => clearTimeout(t);
+  }, [llave, cols, rows, reducido]);
 
   const dormir = useCallback(
     (ms: number) =>
@@ -321,7 +354,7 @@ export function TableroDulces({
 
         if (!celdasRef.current.every((v, i) => v === j.final[i])) {
           if (__DEV__) console.warn('[dulces] el tablero animado no coincide con el del dominio: se corrige');
-          reiniciar(j.final, columnas);
+          reiniciar(j.final, columnas, datos.current.rows, false);
         }
         j.onFin();
       })();
@@ -345,7 +378,7 @@ export function TableroDulces({
   const hecho = useSharedValue(0);
   const gesto = useMemo(() => {
     const umbral = umbralDeslizar(lado);
-    const base = Gesture.Pan().enabled(!bloqueado).minDistance(6).activeOffsetX([-8, 8]);
+    const base = Gesture.Pan().enabled(!bloqueado && !entrando).minDistance(6).activeOffsetX([-8, 8]);
     // Si el tablero scrollea, un movimiento vertical es del scroll: el gesto se rinde y no roba el dedo.
     const conEje = soloHorizontal ? base.failOffsetY([-10, 10]) : base.activeOffsetY([-8, 8]);
     return conEje
@@ -365,43 +398,58 @@ export function TableroDulces({
       .onFinalize(() => {
         origen.value = -1;
       });
-  }, [bloqueado, soloHorizontal, lado, paso, cols, rows, origen, hecho, alDeslizar, alBorde]);
+  }, [bloqueado, entrando, soloHorizontal, lado, paso, cols, rows, origen, hecho, alDeslizar, alBorde]);
 
   // En orden de lectura (de izquierda a derecha y de arriba abajo): así lo recorre el lector de pantalla.
   const enOrden = useMemo(() => [...piezas].sort((a, b) => a.fila - b.fila || a.col - b.col), [piezas]);
 
   return (
-    <GestureDetector gesture={gesto}>
-      <View style={[styles.tablero, { width: ancho, height: alto }]} pointerEvents={bloqueado ? 'none' : 'auto'}>
-        {enOrden.map((p) => (
-          <Pieza
-            key={p.id}
-            color={p.color}
-            celda={p.fila * cols + p.col}
-            fila={p.fila}
-            col={p.col}
-            paso={paso}
-            lado={lado}
-            elegida={elegida === p.fila * cols + p.col}
-            explota={p.explota}
-            mov={p.mov}
-            entrada={p.entrada}
-            rechazo={p.rechazo}
-            onTocar={alTocar}
-          />
-        ))}
-        {chip ? (
-          <ChipCascada
-            key={chip.id}
-            texto={chip.texto}
-            onFin={() => setChip((actual) => (actual?.id === chip.id ? null : actual))}
-          />
-        ) : null}
-      </View>
-    </GestureDetector>
+    <View style={styles.recorte}>
+      <GestureDetector gesture={gesto}>
+        <View style={[styles.tablero, { width: ancho, height: alto }]} pointerEvents={bloqueado || entrando ? 'none' : 'auto'}>
+          {enOrden.map((p) => (
+            <Pieza
+              key={p.id}
+              color={p.color}
+              celda={p.fila * cols + p.col}
+              fila={p.fila}
+              col={p.col}
+              paso={paso}
+              lado={lado}
+              elegida={elegida === p.fila * cols + p.col}
+              explota={p.explota}
+              mov={p.mov}
+              entrada={p.entrada}
+              rechazo={p.rechazo}
+              onTocar={alTocar}
+            />
+          ))}
+          {chip ? (
+            <ChipCascada
+              key={chip.id}
+              texto={chip.texto}
+              onFin={() => setChip((actual) => (actual?.id === chip.id ? null : actual))}
+            />
+          ) : null}
+        </View>
+      </GestureDetector>
+    </View>
   );
 }
 
+/** Lo que crece una pieza al pulsar o elevarse: el recorte le deja este margen a los lados y abajo. */
+const MARGEN_RECORTE = 6;
+
 const styles = StyleSheet.create({
-  tablero: { alignSelf: 'center' },
+  // Recorta por arriba: el reparto y las piezas nuevas de cada paso entran por el borde de arriba del tablero.
+  // A los lados y abajo deja un margen, con el que el pulso y el realce de las piezas de la orilla no se cortan.
+  recorte: {
+    alignSelf: 'center',
+    overflow: 'hidden',
+    marginHorizontal: -MARGEN_RECORTE,
+    marginBottom: -MARGEN_RECORTE,
+    paddingHorizontal: MARGEN_RECORTE,
+    paddingBottom: MARGEN_RECORTE,
+  },
+  tablero: {},
 });

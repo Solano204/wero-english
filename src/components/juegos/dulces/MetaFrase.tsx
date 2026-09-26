@@ -3,12 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSequence,
   withSpring,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { color, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
+import { color, escalon, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { DulceObjetivo } from '@/types';
 import { CaraPieza, tinteDe } from './SimboloPieza';
@@ -17,6 +18,8 @@ import { NOMBRE_FORMA, formaDe, indiceMasCercana, nombreColor } from './piezas';
 /** El lado de la pieza pequeña que marca a qué color pertenece la meta. */
 const LADO_SIMBOLO = 28;
 const ALTO_BARRA = 8;
+/** Cuánto suben las metas al entrar. */
+const ENTRADA_SUBE = 12;
 
 interface BarraProps {
   llevas: number;
@@ -60,6 +63,8 @@ interface Props {
   registrarFrase?: (color: number, vista: View | null) => void;
   /** La barra se llenó y sale la pregunta: destella. */
   llena?: boolean;
+  /** Su lugar en la tarjeta: entra escalonada, con `escalon(orden)`. */
+  orden?: number;
 }
 
 /**
@@ -67,7 +72,7 @@ interface Props {
  * la pieza con «7 de 10». Para el lector de pantalla es una sola cosa: la frase, el color y la forma, y el
  * avance como barra de progreso.
  */
-export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarBarra, registrarFrase, llena = false }: Props) {
+export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarBarra, registrarFrase, llena = false, orden = 0 }: Props) {
   const reducido = useMovimientoReducido();
   const filo = useSharedValue(cercana ? 1 : 0);
   const tinte = tinteDe(objetivo.color);
@@ -80,10 +85,18 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
 
   const destello = useSharedValue(0);
   const fundido = useSharedValue(1);
+  const entrada = useSharedValue(reducido ? 1 : 0);
   const idFrase = useRef(objetivo.entry.id);
   const colorDeMeta = objetivo.color;
   const alRegistrar = useCallback((vista: View | null) => registrarBarra?.(colorDeMeta, vista), [registrarBarra, colorDeMeta]);
   const alRegistrarFrase = useCallback((vista: View | null) => registrarFrase?.(colorDeMeta, vista), [registrarFrase, colorDeMeta]);
+
+  // Al empezar, las metas entran una tras otra: suben un poco mientras se aclaran.
+  useEffect(() => {
+    entrada.value = reducido ? 1 : withDelay(escalon(orden), withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
+    // Solo cuenta la entrada del montaje.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // La barra se llena y sale la pregunta: destella una vez (con «reducir movimiento» queda encendida mientras dura).
   useEffect(() => {
@@ -109,10 +122,14 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
 
   const luz = useAnimatedStyle(() => ({ opacity: Math.max(filo.value, destello.value) }));
   const fraseAnim = useAnimatedStyle(() => ({ opacity: fundido.value }));
+  const entra = useAnimatedStyle(() => ({
+    opacity: entrada.value,
+    transform: [{ translateY: (1 - entrada.value) * ENTRADA_SUBE }],
+  }));
 
   return (
-    <View
-      style={styles.fila}
+    <Animated.View
+      style={[styles.fila, entra]}
       accessible
       accessibilityRole="progressbar"
       accessibilityLabel={`${objetivo.entry.phrase}. ${nombreColor(objetivo.color)}, ${NOMBRE_FORMA[formaDe(objetivo.color)]}: ${llevas} de ${objetivo.meta}`}
@@ -137,7 +154,7 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
           </Text>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 });
 
@@ -162,6 +179,7 @@ export function TarjetaMetas({ objetivos, registrarBarra, registrarFrase, llenaC
           registrarBarra={registrarBarra}
           registrarFrase={registrarFrase}
           llena={o.color === llenaColor}
+          orden={i}
         />
       ))}
     </View>

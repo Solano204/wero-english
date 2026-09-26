@@ -703,6 +703,7 @@ export function DulcesScreen() {
         >
           <View style={styles.metas}>
             <TarjetaMetas
+              key={llave}
               objetivos={objetivos}
               registrarBarra={registrarBarra}
               registrarFrase={registrarFrase}
