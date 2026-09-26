@@ -36,7 +36,7 @@ const CONTENIDO = /(phrase|spanish|frase|traduc|titulo|title|nombre|palabra|ganc
  */
 const ACC1_NO_CONVIVEN = {
   'src/screens/extras/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
-  'src/screens/games/CazalaScreen.tsx': '`checked ? Siguiente : Revisar`',
+  'src/components/juegos/cazala/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
   'src/screens/games/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
   'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
   'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
@@ -406,6 +406,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/caida/') || r === 'src/screens/games/CaidaScreen.tsx' ||
   r.startsWith('src/components/juegos/dulces/') || r === 'src/screens/games/DulcesScreen.tsx' ||
   r.startsWith('src/components/juegos/colmena/') || r === 'src/screens/games/ColmenaScreen.tsx' ||
+  r.startsWith('src/components/juegos/cazala/') || r === 'src/screens/games/CazalaScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -430,6 +431,8 @@ const LOOPS_POR_PANTALLA = {
   Dulces: [],
   // Colmena: el héroe es el panal (fichas SVG movidas por valores compartidos) y la onda de la voz (`OndaVoz`) la mueve el audio; ningún bucle de Skia.
   Colmena: [],
+  // Cázala: el héroe es la cacería en el audio (karaoke, pulsos y transformación movidos por la posición de la voz, que solo corre mientras suena); ningún bucle.
+  Cazala: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

@@ -16,22 +16,24 @@ const LEVANTE = 2;
 const ENTRADA_S = 0.08;
 const SALIDA_S = 0.12;
 
-type Tamano = 'display' | 'lg' | 'md';
+type Tamano = 'display' | 'lg' | 'md' | 'h3';
 
 interface PalabraProps {
   palabra: Palabra;
   voz: VozEnVivo;
   tamano: Tamano;
+  /** Va en `accent` y subrayada, sin cambiar de color con la voz (solo se levanta al decirse). */
+  destacada: boolean;
 }
 
-function PalabraKaraoke({ palabra, voz, tamano }: PalabraProps) {
+function PalabraKaraoke({ palabra, voz, tamano, destacada }: PalabraProps) {
   const { pos, activa, reducido } = voz;
   const { inicio, sig, hablada } = palabra;
 
   const estilo = useAnimatedStyle(() => {
     const k = activa.value;
     // En reposo la frase se lee entera en su color de siempre.
-    if (k === 0) return { color: ACTUAL, transform: [{ translateY: 0 }] };
+    if (k === 0) return destacada ? { transform: [{ translateY: 0 }] } : { color: ACTUAL, transform: [{ translateY: 0 }] };
     const p = pos.value;
     let base: string;
     if (!hablada) base = DICHA;
@@ -47,20 +49,23 @@ function PalabraKaraoke({ palabra, voz, tamano }: PalabraProps) {
       hablada && !reducido
         ? interpolate(p, [inicio - ENTRADA_S, inicio, sig, sig + SALIDA_S], [0, -LEVANTE, -LEVANTE, 0], Extrapolation.CLAMP)
         : 0;
-    return {
-      color: k === 1 ? base : interpolateColor(k, [0, 1], [ACTUAL, base]),
-      transform: [{ translateY: levante * k }],
-    };
+    const transform = [{ translateY: levante * k }];
+    if (destacada) return { transform };
+    return { color: k === 1 ? base : interpolateColor(k, [0, 1], [ACTUAL, base]), transform };
   });
 
-  return <Animated.Text style={[ESTILO_PALABRA[tamano], estilo]}>{palabra.texto}</Animated.Text>;
+  return (
+    <Animated.Text style={[ESTILO_PALABRA[tamano], destacada && styles.destacada, estilo]}>{palabra.texto}</Animated.Text>
+  );
 }
 
 interface Props {
   palabras: Palabra[];
   voz: VozEnVivo;
-  /** `display` (34, la frase héroe de Detalle), `lg` (28, Estudio) o `md` (22). */
+  /** `display` (34, la frase héroe de Detalle), `lg` (28, Estudio), `md` (22) o `h3` (18, la frase de Cázala). */
   tamano?: Tamano;
+  /** Índices de las palabras que van resaltadas en `accent` y subrayadas (las reducciones de Cázala). */
+  destacadas?: ReadonlySet<number>;
 }
 
 /**
@@ -70,12 +75,18 @@ interface Props {
  * el hilo de UI, sin re-render de React. Para el lector de pantalla es una sola
  * frase; las palabras sueltas no se anuncian.
  */
-export function FraseKaraoke({ palabras, voz, tamano = 'lg' }: Props) {
+export function FraseKaraoke({ palabras, voz, tamano = 'lg', destacadas }: Props) {
   const frase = palabras.map((p) => p.texto).join(' ');
   return (
     <View style={styles.fila} accessible accessibilityRole="text" accessibilityLabel={frase}>
       {palabras.map((p, i) => (
-        <PalabraKaraoke key={`${i}-${p.texto}`} palabra={p} voz={voz} tamano={tamano} />
+        <PalabraKaraoke
+          key={`${i}-${p.texto}`}
+          palabra={p}
+          voz={voz}
+          tamano={tamano}
+          destacada={destacadas?.has(i) ?? false}
+        />
       ))}
     </View>
   );
@@ -104,6 +115,18 @@ const styles = StyleSheet.create({
     lineHeight: font.size.xl * 1.3,
     color: ACTUAL,
   },
+  palabraH3: {
+    fontFamily: font.family.heading,
+    fontSize: font.size.lg,
+    lineHeight: font.size.lg * 1.4,
+    color: ACTUAL,
+  },
+  destacada: { color: color.accent, textDecorationLine: 'underline' },
 });
 
-const ESTILO_PALABRA = { display: styles.palabraDisplay, lg: styles.palabraLg, md: styles.palabraMd } as const;
+const ESTILO_PALABRA = {
+  display: styles.palabraDisplay,
+  lg: styles.palabraLg,
+  md: styles.palabraMd,
+  h3: styles.palabraH3,
+} as const;

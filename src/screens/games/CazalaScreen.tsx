@@ -1,29 +1,30 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, AppState, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AccessibilityInfo, AppState, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { EmptyState, Header, Screen } from '@/components/base';
-import { AudioButton } from '@/components/card';
 import { BarraSesion } from '@/components/fx';
 import { BloqueEscucha } from '@/components/juegos/cazala/BloqueEscucha';
+import type { ItemMorph } from '@/components/juegos/cazala/FraseMorph';
 import { PieCaza } from '@/components/juegos/cazala/PieCaza';
 import { RenglonCaza, type EstadoRenglon } from '@/components/juegos/cazala/RenglonCaza';
+import { ResultadoCaza } from '@/components/juegos/cazala/ResultadoCaza';
 import { useVozCaza } from '@/components/juegos/cazala/useVozCaza';
 import { applyGameGrade } from '@/db/games';
-import { itemsCazalaValidos } from '@/domain/cazala';
+import { itemsCazalaValidos, reduccionesDe } from '@/domain/cazala';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { shuffle } from '@/utils/array';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, reacomodar, space, aparecerSubiendo } from '@/theme';
+import { reacomodar, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
-/** Por debajo de este alto (dp) todo se aprieta: la onda va junto a los botones, filas de 52 y huecos de 4. */
+/** Por debajo de este alto (dp) todo se aprieta: la onda va junto a los botones, filas de 48 y huecos de 4. */
 const ALTO_COMPACTO = 700;
 /** Cuánto se bloquea «Siguiente» tras tocarlo, para no procesar dos toques. */
 const AVANZAR_DEBOUNCE_MS = 400;
@@ -56,6 +57,7 @@ export function CazalaScreen() {
   const [picked, setPicked] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
   const [esperando, setEsperando] = useState(false);
+  const [alturaHoja, setAlturaHoja] = useState(0);
   const esperaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoAudio = useSettingsStore((s) => s.autoAudio);
   const { height: alto } = useWindowDimensions();
@@ -65,7 +67,28 @@ export function CazalaScreen() {
   const item = items[idx];
   // Las seis opciones ya barajadas: una sola vez por ronda.
   const order = useMemo(() => (item ? shuffle(item.opciones) : []), [item]);
-  const { voz, vozLenta, analisis, analisisLento } = useVozCaza(item);
+  const { voz, vozLenta, analisis, analisisLento, posRevision } = useVozCaza(item, checked, autoAudio);
+
+  // Las tres reducciones en el orden en que suenan, las palabras de la frase que ocupan y el segundo en que suena cada una.
+  const reducciones = useMemo(() => (item ? reduccionesDe(item, porId) : []), [item, porId]);
+  const destacadas = useMemo(() => {
+    const palabras = new Set<number>();
+    for (const r of reducciones) {
+      if (r.rango) for (let i = r.rango[0]; i <= r.rango[1]; i++) palabras.add(i);
+    }
+    return palabras;
+  }, [reducciones]);
+  const tiempos = useMemo(
+    () => reducciones.map((r) => (r.rango ? (analisis?.palabras[r.rango[0]]?.inicio ?? 0) : 0)),
+    [reducciones, analisis]
+  );
+  const morphs = useMemo<ItemMorph[]>(
+    () =>
+      reducciones
+        .map((r, i) => ({ reducida: r.reducida, completa: r.completa, suena: r.suena, t: tiempos[i] ?? 0 }))
+        .filter((m) => m.completa !== null || m.suena !== null),
+    [reducciones, tiempos]
+  );
 
   useEffect(() => {
     // Al salir de la pantalla o ir a segundo plano se corta la voz.
@@ -165,6 +188,7 @@ export function CazalaScreen() {
   };
 
   const aciertos = picked.filter((p) => item.reducciones.includes(p)).length;
+  const tiempoDe = (id: number) => tiempos[reducciones.findIndex((r) => r.id === id)] ?? 0;
 
   return (
     <Screen
@@ -198,11 +222,17 @@ export function CazalaScreen() {
           envolventeLenta={analisisLento?.envolvente ?? []}
           compacta={compacta}
           conInstruccion={!checked}
+          caceria={checked ? { pos: posRevision, tiempos } : null}
         />
 
         <Animated.View layout={reacomodar()} style={styles.lista}>
           <ScrollView
-            contentContainerStyle={[styles.filas, compacta && styles.filasCompactas]}
+            contentContainerStyle={[
+              styles.filas,
+              compacta && styles.filasCompactas,
+              // La hoja del resultado tapa la parte baja: la lista deja ese espacio libre para llegar a todas sus filas.
+              checked && { paddingBottom: alturaHoja + space.sm },
+            ]}
             showsVerticalScrollIndicator={false}
           >
             {order.map((id, i) => (
@@ -213,23 +243,29 @@ export function CazalaScreen() {
                 label={porId.get(id)?.phrase_tts ?? `#${id}`}
                 estado={estadoDe(id)}
                 bajada={picked.length === MARCAS && !picked.includes(id)}
-                caceria={null}
+                caceria={checked && item.reducciones.includes(id) ? { pos: posRevision, t: tiempoDe(id) } : null}
                 onPress={() => toggle(id)}
               />
             ))}
-            {checked ? (
-              <Animated.View entering={aparecerSubiendo()} style={styles.result}>
-                <Text style={styles.resultHead}>{aciertos === 3 ? 'Las tres' : `${aciertos} de 3`}</Text>
-                <Text style={styles.real}>{item.frase_real}</Text>
-                <Text style={styles.formal}>{item.frase_formal}</Text>
-                <View style={styles.spanishRow}>
-                  <Text style={styles.spanish}>{item.frase_es}</Text>
-                  <AudioButton path={item.audio_es} size="sm" />
-                </View>
-              </Animated.View>
-            ) : null}
           </ScrollView>
         </Animated.View>
+
+        {checked && analisis ? (
+          <ResultadoCaza
+            key={item.id}
+            aciertos={aciertos}
+            fraseReal={item.frase_real}
+            fraseFormal={item.frase_formal}
+            fraseEs={item.frase_es}
+            audioEs={item.audio_es}
+            palabras={analisis.palabras}
+            destacadas={destacadas}
+            voz={voz}
+            morphs={morphs}
+            pos={posRevision}
+            alAlto={setAlturaHoja}
+          />
+        ) : null}
       </View>
     </Screen>
   );
@@ -245,25 +281,4 @@ const styles = StyleSheet.create({
   lista: { flex: 1, marginHorizontal: -space.sm },
   filas: { gap: space.sm, paddingHorizontal: space.sm, paddingTop: space.xs, paddingBottom: space.sm },
   filasCompactas: { gap: space.xs },
-  result: { marginTop: space.lg, gap: space.sm },
-  resultHead: {
-    fontSize: font.size.sm,
-    fontFamily: font.family.bodyStrong,
-    color: color.correct,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  real: {
-    fontSize: font.size.lg,
-    color: color.text,
-    fontFamily: font.family.heading,
-  },
-  formal: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  spanishRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    marginTop: space.xs,
-  },
-  spanish: { flex: 1, fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
 });

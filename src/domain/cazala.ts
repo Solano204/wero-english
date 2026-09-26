@@ -96,6 +96,9 @@ export interface ReduccionCaza {
   rango: [number, number] | null;
 }
 
+/** La flecha con que el catálogo marca las reducciones que no tienen forma completa, sino que «suenan» distinto. */
+const FLECHA_SUENA = String.fromCharCode(0x2192);
+
 /** La palabra como la compara Cázala: minúsculas, apóstrofo recto y sin la puntuación de los bordes. */
 function limpia(palabra: string): string {
   return palabra
@@ -142,7 +145,7 @@ export function reduccionesDe(item: CazalaItem, porId: Map<number, Entry>): Redu
   const lista = item.reducciones.flatMap((id): ReduccionCaza[] => {
     const e = porId.get(id);
     if (!e) return [];
-    const suena = e.phrase.includes('→') ? e.phrase_alt : null;
+    const suena = e.phrase.includes(FLECHA_SUENA) ? e.phrase_alt : null;
     return [
       {
         id,
