@@ -56,6 +56,7 @@ export {
   tarjetaSale,
   fraseEntra,
   fraseSale,
+  entraSube,
   reacomodar,
 } from './motion';
 export { text } from './typography';

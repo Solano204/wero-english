@@ -53,6 +53,8 @@ export const motionSpring = {
   liquido: { damping: 16, stiffness: 190, mass: 1.1 } satisfies WithSpringConfig,
   /** La aguja del medidor se asienta en `duration` ms, con rebote: por eso el total de su entrada es fijo. */
   aguja: { duration: 550, dampingRatio: 0.55 } satisfies WithSpringConfig,
+  /** El punto del mapa de la boca viaja despacio de la vocal española a la inglesa y se asienta sin rebote de más. */
+  viaje: { duration: 900, dampingRatio: 0.75 } satisfies WithSpringConfig,
 };
 
 /**
@@ -249,6 +251,15 @@ export const tarjetaSale = () =>
 
 /** Cuánto viaja la frase de Modo oído al entrar y al salir (dp). */
 const DESPLAZA_FRASE = 32;
+
+/** Un bloque entra con un fundido subiendo 8 dp, en `lento` (los textos de una página que se abre). */
+export const entraSube = (retraso = 0) =>
+  new Keyframe({
+    from: { opacity: 0, transform: [{ translateY: 8 }] },
+    to: { opacity: 1, transform: [{ translateY: 0 }], easing: motionEasing.entrar },
+  })
+    .duration(motionDuration.lento)
+    .delay(retraso);
 
 /** La frase nueva entra desde abajo con un fundido, en `lento`, cuando la anterior ya va saliendo. */
 export const fraseEntra = () =>
