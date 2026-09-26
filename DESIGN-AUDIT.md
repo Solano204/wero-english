@@ -221,7 +221,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/AzarScreen.tsx` | ✓ `:73` | ✓ `:206` | ✓ `:197` |
 | `extras/ContractionsScreen.tsx` | ✓ `:34` | ✓ `:45` | ✓ `:92` |
 | `extras/EarModeScreen.tsx` | ✓ `:120` | ✓ `:255` | ✓ `:238` |
-| `extras/LecturaScreen.tsx` | ✓ `:80` | ✓ `:225` | ✓ `:239` |
+| `extras/LecturaScreen.tsx` | ✓ `:87` | ✓ `:313` | ✓ `:327` |
 | `extras/LecturasScreen.tsx` | ✓ `:39` | ✓ `:65` | ✓ `:104` |
 | `extras/PracticeScreen.tsx` | ✓ `:98` | ✗ | ✓ `:167` |
 | `games/CaidaScreen.tsx` | ✓ `:211` | ✓ `:487` | ✓ `:174` |

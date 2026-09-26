@@ -236,6 +236,22 @@ prueba('reproductor: fijo abajo, sin «0:00 / 0:00» antes de conocer la duraci�
   }
 });
 
+prueba('lectura acompañada: sigue al audio en el tercio de arriba, se suelta con el dedo, ofrece volver y con reducir movimiento salta', () => {
+  const p = leer('src/screens/extras/LecturaScreen.tsx');
+  const linea = Number(p.match(/const LINEA_LECTURA = ([\d.]+);/)?.[1]);
+  assert.ok(linea > 0 && linea <= 1 / 3, `la oración queda a ${linea} del alto visible: debe estar en el tercio de arriba`);
+  assert.match(p, /soltarScroll=\{siguiendo\}/, 'el dedo suelta el seguimiento');
+  assert.match(p, /label="Volver a donde va el audio"/);
+  assert.match(p, /if \(reducido\) \{\s*animandoScroll\.value = 0;\s*scrollTo\(scrollRef, 0, objetivo, false\);/, 'con reducir movimiento el scroll salta');
+  assert.match(p, /<Animated\.View\s+entering=\{reducido \? undefined : aparecer\(\)\}\s+exiting=\{reducido \? undefined : desaparecer\(motionDuration\.rapido\)\}\s+style=\{styles\.volver\}\s*>\s*<Button/, 'el botón entra en su propio Animated.View');
+  const texto = leer('src/components/lectura/TextoAcompanado.tsx');
+  assert.match(texto, /useAnimatedReaction\(/);
+  assert.match(texto, /if \(reducido \|\| pulso\.value > 0/, 'con reducir movimiento no hay pulso');
+  assert.match(texto, /duration: motionDuration\.rapido/, 'el pulso dura 150 ms (rapido)');
+  const hook = leer('src/components/lectura/useReproductorCapitulo.ts');
+  assert.match(hook, /AppState\.addEventListener/, 'pausa al irse a segundo plano');
+});
+
 /* ---------- generador y datos ---------- */
 
 prueba('generador: ninguna frase del catálogo va con mayúscula a media oración (salvo «I»)', () => {

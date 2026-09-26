@@ -448,6 +448,8 @@ const LOOPS_POR_PANTALLA = {
   Gramatica: [],
   // Phrasal: el héroe es la ruleta de partículas (una rueda de textos movida por un gesto y un resorte en el hilo de UI); vistas, ningún canvas de Skia ni bucle.
   Phrasal: [],
+  // Lectura: el héroe es la lectura acompañada (un resaltado que se desliza a la oración que suena y un scroll que la sigue, movidos por la posición del audio); vistas, y la onda mini del pie solo dibuja mientras suena la voz; ningún bucle de Skia.
+  Lectura: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

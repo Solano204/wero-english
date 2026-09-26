@@ -9,12 +9,15 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
+  cancelAnimation,
   runOnJS,
   runOnUI,
   scrollTo,
   useAnimatedReaction,
   useAnimatedRef,
+  useDerivedValue,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { Button, Card, Carga, EmptyState, Header, Screen, Presionable } from '@/components/base';
 import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
@@ -30,7 +33,7 @@ import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { marcasOracionesDe } from '@/services/marcas';
-import { aparecer, color, font, layout, radius, space } from '@/theme';
+import { aparecer, color, desaparecer, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -44,6 +47,10 @@ const SIN_ESTADOS = new Map<number, CardState>();
 const RESERVA_ENCABEZADO = layout.tapMin + space.md;
 /** Cuánto antes del final del texto se da por llegado, en dp. */
 const MARGEN_FIN = space.xxxl;
+/** Dónde queda la oración que suena al seguir el audio: a esta fracción del alto visible, desde arriba (el tercio de arriba). */
+const LINEA_LECTURA = 0.28;
+/** Si la oración ya está a menos de esto (dp) de su lugar, el scroll no se mueve. */
+const UMBRAL_SCROLL = space.lg;
 
 /**
  * El lector.
@@ -160,19 +167,98 @@ export function LecturaScreen() {
     [altoVentana, insetArriba, insetAbajo]
   );
 
-  // Cada capítulo empieza arriba.
+  // Seguir el audio: mientras suena, el scroll mantiene la oración que se escucha en el tercio de arriba. Si el usuario
+  // toma el scroll con el dedo (`Screen` pone `siguiendo` en 0) se deja de seguir y aparece «Volver a donde va el audio».
+  const siguiendo = useSharedValue(1);
+  const animandoScroll = useSharedValue(0);
+  const destinoScroll = useSharedValue(0);
+  const inicioTexto = useSharedValue(0);
+  const ysTexto = useSharedValue<number[]>([]);
+  const [mostrarVolver, setMostrarVolver] = useState(false);
+
+  useDerivedValue(() => {
+    if (animandoScroll.value === 0) return;
+    scrollTo(scrollRef, 0, destinoScroll.value, false);
+  });
+
+  /** Lleva la oración `indice` a su lugar en la pantalla; con `forzar` aunque ya esté cerca. Con reducir movimiento salta. */
+  const llevarA = useCallback(
+    (indice: number, forzar: boolean) => {
+      'worklet';
+      const y = ysTexto.value[indice];
+      if (y === undefined || y < 0) return;
+      const visible = altoVentana - insetArriba - insetAbajo - altoPie.value - RESERVA_ENCABEZADO;
+      const objetivo = Math.max(0, inicioTexto.value + y - visible * LINEA_LECTURA);
+      if (!forzar && Math.abs(objetivo - scrollY.value) < UMBRAL_SCROLL) return;
+      if (reducido) {
+        animandoScroll.value = 0;
+        scrollTo(scrollRef, 0, objetivo, false);
+        return;
+      }
+      animandoScroll.value = 1;
+      destinoScroll.value = scrollY.value;
+      destinoScroll.value = withTiming(objetivo, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
+        animandoScroll.value = 0;
+      });
+    },
+    [altoVentana, insetArriba, insetAbajo, reducido, ysTexto, inicioTexto, altoPie, scrollY, scrollRef, animandoScroll, destinoScroll]
+  );
+
+  useAnimatedReaction(
+    () => actual.value,
+    (i, antes) => {
+      if (i < 0 || i === antes || siguiendo.value === 0) return;
+      llevarA(i, false);
+    },
+    [llevarA]
+  );
+  // El dedo toma el scroll: se suelta la animación que llevaba el texto.
+  useAnimatedReaction(
+    () => siguiendo.value,
+    (s) => {
+      if (s !== 0) return;
+      cancelAnimation(destinoScroll);
+      animandoScroll.value = 0;
+    }
+  );
+  // Al empezar el audio se vuelve a seguir.
+  useAnimatedReaction(
+    () => rep.enCurso.value,
+    (ahora, antes) => {
+      if (ahora === 1 && antes !== 1) siguiendo.value = 1;
+    }
+  );
+  useAnimatedReaction(
+    () => (rep.enCurso.value === 1 && siguiendo.value === 0 ? 1 : 0),
+    (ahora, antes) => {
+      if (ahora !== antes) runOnJS(setMostrarVolver)(ahora === 1);
+    }
+  );
+
+  const volverAlAudio = useCallback(() => {
+    runOnUI(() => {
+      'worklet';
+      siguiendo.value = 1;
+      if (actual.value >= 0) llevarA(actual.value, true);
+    })();
+  }, [siguiendo, actual, llevarA]);
+
+  // Cada capítulo empieza arriba y siguiendo.
   useEffect(() => {
+    siguiendo.value = 1;
     runOnUI(() => {
       'worklet';
       scrollTo(scrollRef, 0, 0, false);
     })();
-  }, [cap, scrollRef]);
+  }, [cap, scrollRef, siguiendo]);
 
   const alMedirTexto = useCallback(
     (m: MedidasTexto) => {
       finTexto.value = m.base + m.alto;
+      inicioTexto.value = m.base;
+      ysTexto.value = m.ys;
     },
-    [finTexto]
+    [finTexto, inicioTexto, ysTexto]
   );
 
   const marcarLeyenda = useCallback(() => {
@@ -186,11 +272,13 @@ export function LecturaScreen() {
     const r = repRef.current;
     if (r.estado !== 'sonando' && r.estado !== 'pausado') return;
     haptics.tapLight();
+    // Quien toca una oración quiere seguir el audio desde ahí.
+    siguiendo.value = 1;
     const enPausa = r.estado === 'pausado';
     void r.saltar(iniciosRef.current[indice] ?? 0).then(() => {
       if (enPausa) repRef.current.reanudar();
     });
-  }, []);
+  }, [siguiendo]);
 
   const siguiente = useCallback(() => {
     if (!lectura) return;
@@ -304,6 +392,16 @@ export function LecturaScreen() {
   const ultimo = cap + 1 >= lectura.capitulos.length;
   const pie = (
     <View onLayout={(e) => (altoPie.value = e.nativeEvent.layout.height)}>
+      {mostrarVolver ? (
+        // El botón entra y sale en su propio `Animated.View`: `Button` anima su escala en su propio nodo.
+        <Animated.View
+          entering={reducido ? undefined : aparecer()}
+          exiting={reducido ? undefined : desaparecer(motionDuration.rapido)}
+          style={styles.volver}
+        >
+          <Button label="Volver a donde va el audio" icon="chevron-down" variant="secondary" onPress={volverAlAudio} />
+        </Animated.View>
+      ) : null}
       <PieReproductor
         rep={rep}
         texto={capitulo?.texto ?? ''}
@@ -317,7 +415,13 @@ export function LecturaScreen() {
   );
 
   return (
-    <Screen scroll scrollY={scrollY} scrollRef={scrollRef} footer={capitulo?.audio ? pie : undefined}>
+    <Screen
+      scroll
+      scrollY={scrollY}
+      scrollRef={scrollRef}
+      soltarScroll={siguiendo}
+      footer={capitulo?.audio ? pie : undefined}
+    >
       <Header
         onBack={() => nav.goBack()}
         title={lectura.titulo}
@@ -372,6 +476,7 @@ const styles = StyleSheet.create({
     color: color.text,
     marginBottom: space.sm,
   },
+  volver: { alignSelf: 'center', marginBottom: space.sm },
   introPreguntas: {
     fontFamily: font.family.body,
     fontSize: font.size.md,
