@@ -306,4 +306,122 @@ prueba('las piezas que bajan conservan su id y solo las nuevas estrenan uno', ()
   }
 });
 
+prueba('rebarajar: cada celda queda con una pieza de su color, sin repetir ni perder ninguna', () => {
+  for (let s = 1; s <= 300; s++) {
+    const [cols, rows, colores] = TAMANOS[s % TAMANOS.length];
+    const azar = semilla(s);
+    const b = M3.createBoard(cols, rows, colores, azar);
+    const antes = [...b.cells];
+    const ids = antes.map((_, i) => i);
+    M3.rebarajar(b, colores, semilla(s * 31));
+    const despues = [...b.cells];
+    let siguiente = antes.length;
+    const r = PS.idsTrasRebaraje(antes, ids, despues, () => siguiente++);
+    assert.equal(r.ids.length, despues.length);
+    assert.equal(new Set(r.ids).size, r.ids.length, `semilla ${s}: ids únicos`);
+    assert.ok(r.ids.every((v) => v !== PS.SIN_ID));
+    // La pieza que queda en cada celda tenía el color que ahora le toca (las nuevas nacen con él).
+    r.ids.forEach((id, i) => {
+      if (id < antes.length) assert.equal(antes[id], despues[i], `semilla ${s}: la pieza ${id} conserva su color`);
+    });
+    assert.equal(r.nuevas.length, r.sobran.length, 'las que se crean son tantas como las que se van');
+    for (const i of r.nuevas) assert.ok(r.ids[i] >= antes.length);
+    for (const id of r.sobran) assert.ok(!r.ids.includes(id));
+    // Lo que no cambió de color no se mueve.
+    antes.forEach((c, i) => {
+      if (c === despues[i]) assert.equal(r.ids[i], ids[i], `semilla ${s}: la celda ${i} no cambió`);
+    });
+  }
+});
+
+prueba('rebarajar con la misma mezcla de colores nunca crea ni descarta piezas', () => {
+  for (let s = 1; s <= 200; s++) {
+    const b = M3.createBoard(7, 8, 5, semilla(s));
+    const antes = [...b.cells];
+    const copia = M3.clone(b);
+    // Un barajado a mano, que conserva las piezas (no el tablero nuevo de rebarajar tras 30 fallos).
+    const azar = semilla(s + 1000);
+    for (let i = copia.cells.length - 1; i > 0; i--) {
+      const j = Math.floor(azar() * (i + 1));
+      [copia.cells[i], copia.cells[j]] = [copia.cells[j], copia.cells[i]];
+    }
+    let siguiente = antes.length;
+    const r = PS.idsTrasRebaraje(antes, antes.map((_, i) => i), copia.cells, () => siguiente++);
+    assert.deepEqual(r.nuevas, []);
+    assert.deepEqual(r.sobran, []);
+  }
+});
+
+// ── la geometría del tablero ─────────────────────────────────────────────
+const T = await importar('src/components/juegos/dulces/tablero.ts');
+const motion = fs.readFileSync(path.join(ROOT, 'src/theme/motion.ts'), 'utf8');
+
+prueba('los números de tablero.ts son los de motionDulces y escalon (no se desfasan)', () => {
+  const de = (clave) => Number(motion.match(new RegExp(`${clave}: (\\d+)`))[1]);
+  assert.equal(T.CAIDA_BASE_MS, de('caidaBase'));
+  assert.equal(T.CAIDA_POR_FILA_MS, de('caidaPorFila'));
+  assert.equal(T.REBOTE_MS, de('reboteMs'));
+  assert.equal(T.REBOTE_DP, de('reboteDp'));
+  const escalon = motion.match(/export const motionEscalon = \{\s*ms: (\d+),[\s\S]*?max: (\d+),/);
+  for (let col = 0; col < 10; col++) {
+    assert.equal(T.retrasoDeColumna(col), Math.min(col, Number(escalon[2]) - 1) * Number(escalon[1]), `columna ${col}`);
+  }
+});
+
+prueba('qué celda hay bajo un punto del tablero', () => {
+  const paso = 50;
+  assert.equal(T.celdaEn(10, 10, paso, 6, 7), 0);
+  assert.equal(T.celdaEn(60, 10, paso, 6, 7), 1);
+  assert.equal(T.celdaEn(10, 60, paso, 6, 7), 6);
+  assert.equal(T.celdaEn(299, 349, paso, 6, 7), 41, 'la última celda');
+  assert.equal(T.celdaEn(-1, 10, paso, 6, 7), -1);
+  assert.equal(T.celdaEn(300, 10, paso, 6, 7), -1);
+  assert.equal(T.celdaEn(10, 350, paso, 6, 7), -1);
+  assert.equal(T.celdaEn(10, 10, 0, 6, 7), -1);
+  assert.deepEqual(T.posicionDe(2, 3, 50), { x: 150, y: 100 });
+});
+
+prueba('un deslizamiento apunta a la vecina del eje que más recorrió, y hacia fuera del tablero no hay celda', () => {
+  const v = (origen, dx, dy, solo = false) => T.vecinaHacia(origen, dx, dy, 6, 7, solo);
+  assert.equal(v(8, 30, 5).celda, 9, 'a la derecha');
+  assert.equal(v(8, -30, 5).celda, 7, 'a la izquierda');
+  assert.equal(v(8, 4, 30).celda, 14, 'hacia abajo');
+  assert.equal(v(8, 4, -30).celda, 2, 'hacia arriba');
+  assert.equal(v(0, -30, 0).celda, -1, 'hacia fuera por la izquierda');
+  assert.equal(v(0, 0, -30).celda, -1, 'hacia fuera por arriba');
+  assert.equal(v(5, 30, 0).celda, -1, 'la última columna no tiene derecha');
+  assert.equal(v(41, 0, 30).celda, -1, 'la última fila no tiene abajo');
+  assert.equal(v(8, 4, 30, true), null, 'si el tablero scrollea, lo vertical no es un intercambio');
+  assert.equal(v(8, 30, 4, true).celda, 9, 'y lo horizontal sí');
+  assert.equal(v(8, 30, 30).celda, 9, 'con empate manda lo horizontal');
+});
+
+prueba('la caída acelera con la distancia y el paso espera a la pieza que más tarda', () => {
+  assert.equal(T.duracionCaida(1), 160);
+  assert.equal(T.duracionCaida(3), 240);
+  assert.ok(T.duracionCaida(5) > T.duracionCaida(2));
+  const paso = {
+    caidas: [{ desde: 0, hasta: 12 }, { desde: 1, hasta: 7 }], // 2 filas y 1 fila (6 columnas)
+    nuevas: [{ indice: 0, color: 1, desde: -2 }, { indice: 5, color: 2, desde: -1 }],
+  };
+  // La nueva de la columna 5 entra con su escalón (5 * 40) y cae 1 fila: 200 + 160; la de la columna 0 cae 2 filas.
+  assert.equal(T.esperaDeCaida(paso, 6), Math.max(T.duracionCaida(2), T.duracionCaida(2), 200 + T.duracionCaida(1)) + T.REBOTE_MS);
+  assert.equal(T.esperaDeCaida({ caidas: [], nuevas: [] }, 6), T.REBOTE_MS);
+  assert.equal(T.umbralDeslizar(20), 12, 'un mínimo');
+  assert.equal(T.umbralDeslizar(60), 24);
+});
+
+prueba('nunca hay más de 60 trozos vivos: cada paso suelta a lo más 30', () => {
+  assert.equal(T.MAX_VIVAS, 60);
+  assert.equal(T.MAX_POR_PASO * 2, T.MAX_VIVAS);
+  assert.equal(T.trozosPorPieza(0), 0);
+  assert.equal(T.trozosPorPieza(3), 3, 'una línea de tres suelta 9');
+  assert.equal(T.trozosDelPaso(3), 9);
+  for (let piezas = 0; piezas <= 72; piezas++) {
+    assert.ok(T.trozosDelPaso(piezas) <= T.MAX_POR_PASO, `${piezas} piezas`);
+    if (piezas > 0) assert.ok(T.trozosPorPieza(piezas) >= 1, 'cada pieza suelta al menos uno (hasta el tope)');
+  }
+  assert.equal(T.trozosDelPaso(72), T.MAX_POR_PASO);
+});
+
 console.log(`\ncheck:dulces ${total} pruebas ok`);

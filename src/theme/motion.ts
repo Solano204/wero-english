@@ -98,6 +98,24 @@ export const motionPulso = { escala: 1.04 } as const;
  */
 export const motionLogro = { escala: 1.06, entreEstrellas: 160, cascada: 60 } as const;
 
+/**
+ * El ritmo de una jugada de Dulces, paso a paso: las piezas que forman línea pulsan (`pulso`) y se van
+ * (`estallido`) mientras sus trozos vuelan a la barra de su meta (`vuelo`); las de arriba caen con
+ * aceleración (`caidaBase` más `caidaPorFila` por cada fila que bajan) y rebotan un poco al aterrizar
+ * (`reboteDp` de alto, `reboteMs` de duración); cada paso extra de la cascada muestra su chip (`chip`).
+ * El intercambio usa `motionDuration.base` y el rebarajado `lento`.
+ */
+export const motionDulces = {
+  pulso: 120,
+  estallido: 140,
+  vuelo: 320,
+  caidaBase: 120,
+  caidaPorFila: 40,
+  reboteDp: 4,
+  reboteMs: 100,
+  chip: 700,
+} as const;
+
 /** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 

@@ -129,3 +129,56 @@ export function idsTrasPaso(ids: readonly number[], paso: Paso, nuevoId: () => n
   for (const n of paso.nuevas) sig[n.indice] = nuevoId();
   return sig;
 }
+
+export interface ReparteRebaraje {
+  /** El id de la pieza que queda en cada celda. */
+  ids: number[];
+  /** Las celdas que estrenan pieza (solo si se armó un tablero nuevo con otra mezcla de colores). */
+  nuevas: number[];
+  /** Los ids que ya no tienen celda: esas piezas se van. */
+  sobran: number[];
+}
+
+/**
+ * Después de rebarajar: qué pieza queda en cada celda. `rebarajar` solo devuelve los colores de cada celda, no
+ * a dónde fue cada pieza, y las piezas de un mismo color son idénticas, así que sirve cualquier reparto: las
+ * piezas que ya tenían el color que les toca no se mueven y el resto se reparte por color, en orden. Si el
+ * tablero salió de cero (treinta intentos sin suerte) y pide más piezas de un color que las que había, las que
+ * faltan se crean con `nuevoId` y las que sobran se van.
+ */
+export function idsTrasRebaraje(
+  antes: readonly number[],
+  ids: readonly number[],
+  despues: readonly number[],
+  nuevoId: () => number
+): ReparteRebaraje {
+  const sig: number[] = new Array<number>(despues.length).fill(SIN_ID);
+  const fijas = new Set<number>();
+  for (let i = 0; i < despues.length; i++) {
+    if (antes[i] === despues[i]) {
+      sig[i] = ids[i] ?? SIN_ID;
+      fijas.add(i);
+    }
+  }
+  const libres = new Map<number, number[]>();
+  for (let i = 0; i < antes.length; i++) {
+    if (fijas.has(i)) continue;
+    const color = antes[i] as number;
+    const lista = libres.get(color) ?? [];
+    lista.push(ids[i] ?? SIN_ID);
+    libres.set(color, lista);
+  }
+  const nuevas: number[] = [];
+  for (let i = 0; i < despues.length; i++) {
+    if (sig[i] !== SIN_ID) continue;
+    const pieza = libres.get(despues[i] as number)?.shift();
+    if (pieza !== undefined) {
+      sig[i] = pieza;
+    } else {
+      sig[i] = nuevoId();
+      nuevas.push(i);
+    }
+  }
+  const sobran = [...libres.values()].flat();
+  return { ids: sig, nuevas, sobran };
+}

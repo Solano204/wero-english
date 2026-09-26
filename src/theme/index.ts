@@ -41,6 +41,7 @@ export {
   motionPulso,
   motionSacudida,
   motionLogro,
+  motionDulces,
   motionVeredicto,
   escalon,
   aparecer,

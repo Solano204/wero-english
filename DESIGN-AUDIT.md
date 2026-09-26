@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 254 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 258 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -122,8 +122,8 @@ Se quedan en 12–13 px, revisados a mano (16):
 - `src/screens/extras/LecturaScreen.tsx:310` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/extras/LecturasScreen.tsx:236` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
 - `src/screens/games/ColmenaScreen.tsx:610` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:669` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/DulcesScreen.tsx:712` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/DulcesScreen.tsx:722` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/DulcesScreen.tsx:765` — seguirTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/GameEndScreen.tsx:249` — estrellasNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/GameEndScreen.tsx:255` — repasoNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/utility/SettingsScreen.tsx:426` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
@@ -220,7 +220,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `games/CaidaScreen.tsx` | ✓ `:211` | ✓ `:487` | ✓ `:174` |
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
-| `games/DulcesScreen.tsx` | ✓ `:152` | ✓ `:477` | ✓ `:457` |
+| `games/DulcesScreen.tsx` | ✓ `:162` | ✓ `:540` | ✓ `:520` |
 | `games/NivelesScreen.tsx` | ✓ `:84` | ✗ | ✓ `:300` |
 | `games/ParesScreen.tsx` | ✓ `:193` | ✓ `:384` | ✓ `:360` |
 | `utility/DeckScreen.tsx` | ✓ `:22` | ✓ `:25` | ✓ `:39` |
@@ -264,7 +264,7 @@ Otros 3 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/screens/extras/GramaticaTemaScreen.tsx:292` — key por índice
 - `src/screens/games/CaidaScreen.tsx:574` — key por índice
 
-Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 16, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 11, `games/ParesScreen.tsx` 14.
+Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): `games/CaidaScreen.tsx` 16, `games/ColmenaScreen.tsx` 12, `games/DulcesScreen.tsx` 15, `games/ParesScreen.tsx` 14.
 
 ## d) Audio
 

@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { Button, Card, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
-import { Pieza } from '@/components/juegos/dulces/Pieza';
+import { TableroDulces, type Jugada, type TableroDulcesRef } from '@/components/juegos/dulces/TableroDulces';
 import { TarjetaMetas } from '@/components/juegos/dulces/MetaFrase';
 import { Trozos, useReaccion } from '@/components/feedback';
 import {
@@ -15,9 +15,9 @@ import {
   findMatches,
   hayMovimiento,
   rebarajar,
-  resolve,
   swap,
   type Board } from '@/domain/match3';
+import { resolverPorPasos, type Paso } from '@/domain/match3Pasos';
 import { applyGameGrade } from '@/db/games';
 import { getRandomEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
@@ -26,7 +26,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, depth, font, radius, shadow, space, aparecer, aparecerZoom, escalon, reacomodar } from '@/theme';
+import { color, depth, font, radius, shadow, space, aparecer } from '@/theme';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -112,6 +112,16 @@ export function DulcesScreen() {
   const [respondiendo, setRespondiendo] = useState(false);
   const [elegidaOpcion, setElegidaOpcion] = useState<string | null>(null);
   const [avanzando, setAvanzando] = useState(false);
+  // El tablero anima cada jugada (intercambio, cascada, rebarajado): mientras dura no se aceptan toques.
+  const tableroRef = useRef<TableroDulcesRef>(null);
+  const animandoRef = useRef(false);
+  const [animando, setAnimando] = useState(false);
+  // Cambia con cada tablero nuevo: el tablero animado reparte piezas nuevas.
+  const [llave, setLlave] = useState(0);
+  // Si el tablero no cabe la pantalla scrollea, y entonces solo los deslizamientos horizontales intercambian.
+  const [vistaAlto, setVistaAlto] = useState(0);
+  const [contenidoAlto, setContenidoAlto] = useState(0);
+  const puedeScroll = vistaAlto > 0 && contenidoAlto > vistaAlto + 1;
 
   const siguienteFrase = useRef(0);
   const empezoEn = useRef(Date.now());
@@ -172,6 +182,7 @@ export function DulcesScreen() {
       siguienteFrase.current = nv.frases;
       setJugadas(nv.jugadas);
       setBoard(createBoard(nv.cols, nv.rows, nv.colores));
+      setLlave((l) => l + 1);
       empezoEn.current = Date.now();
     },
     [user, filter, nv, filtrar]
@@ -217,37 +228,49 @@ export function DulcesScreen() {
     [autoAudio]
   );
 
-  const tocar = useCallback(
-    (i: number) => {
-      if (!board || pregunta || jugadas <= 0) return;
+  /** Le pide al tablero que anime la jugada y no acepta toques hasta que termine. */
+  const animar = useCallback((jugada: Omit<Jugada, 'onFin'>, alTerminar?: () => void) => {
+    animandoRef.current = true;
+    setAnimando(true);
+    tableroRef.current?.jugar({
+      ...jugada,
+      onFin: () => {
+        animandoRef.current = false;
+        setAnimando(false);
+        alTerminar?.();
+      },
+    });
+  }, []);
 
-      if (elegida === null) {
-        haptics.tapLight();
-        void audio.playTap();
-        setElegida(i);
-        return;
-      }
-      if (elegida === i) {
-        setElegida(null);
-        return;
-      }
+  /** Lo que llegó a las barras de las metas: los trozos de un paso de la cascada. */
+  const sumarAMetas = useCallback((paso: Paso) => {
+    setObjetivos((prev) => prev.map((o) => ({ ...o, llevas: o.llevas + (paso.porColor[o.color] ?? 0) })));
+  }, []);
 
-      /*
-       * Intercambio libre, y libre de verdad.
-       *
-       * Antes la ficha solo se movía si el movimiento armaba línea, y
-       * solo entre vecinas. Eso convertía el juego en un buscaminas: la
-       * app ya sabía la respuesta y solo te dejaba acertar.
-       *
-       * Ahora se puede cambiar CUALQUIER par de fichas, vecinas o no, y
-       * el cambio se queda aunque no arme nada. Lo que hace que siga
-       * siendo un juego y no un lienzo es el presupuesto de jugadas:
-       * cada intercambio cuesta una, armes o no. Así el jugador decide
-       * si explora o si va al grano, que es justo la decisión
-       * interesante.
-       */
+  /*
+   * Intercambio libre, y libre de verdad.
+   *
+   * Antes la ficha solo se movía si el movimiento armaba línea, y
+   * solo entre vecinas. Eso convertía el juego en un buscaminas: la
+   * app ya sabía la respuesta y solo te dejaba acertar.
+   *
+   * Ahora se puede cambiar CUALQUIER par de fichas, vecinas o no, y
+   * el cambio se queda aunque no arme nada. Lo que hace que siga
+   * siendo un juego y no un lienzo es el presupuesto de jugadas:
+   * cada intercambio cuesta una, armes o no. Así el jugador decide
+   * si explora o si va al grano, que es justo la decisión
+   * interesante.
+   *
+   * La lógica se decide aquí y de golpe (mismo azar, mismo orden); lo que
+   * cambia es que el tablero la ANIMA paso a paso y las metas se llenan
+   * cuando llegan los trozos. La pregunta, si esta jugada llenó una barra,
+   * sale cuando termina la animación.
+   */
+  const intercambiar = useCallback(
+    (a: number, c: number) => {
+      if (!board) return;
       const nuevo = clone(board);
-      swap(nuevo, elegida, i);
+      swap(nuevo, a, c);
 
       const arma = findMatches(nuevo).length > 0;
       setElegida(null);
@@ -259,10 +282,11 @@ export function DulcesScreen() {
         haptics.tapLight();
         void audio.playTap();
         setBoard(nuevo);
+        animar({ a, c, pasos: [], rebarajado: null, final: nuevo.cells });
         return;
       }
 
-      const res = resolve(nuevo, COLORES);
+      const res = resolverPorPasos(nuevo, COLORES);
 
       haptics.success();
       void audio.playSuccess();
@@ -270,34 +294,73 @@ export function DulcesScreen() {
       setBoard(nuevo);
 
       // Se reparte lo quitado entre las frases de cada color.
-      setObjetivos((prev) => {
-        const sig = prev.map((o) => ({
-          ...o,
-          llevas: o.llevas + (res.porColor[o.color] ?? 0),
-        }));
-        const llena = sig.find((o) => o.llevas >= o.meta);
-        if (llena) {
-          // Si esta jugada llena una barra, la voz del match se salta:
-          // pasa directo a la pregunta.
-          setPregunta({ objetivo: llena, opciones: opcionesPara(llena, pool) });
-        } else {
-          // El color con más piezas quitadas en esta jugada (una cascada
-          // cuenta como una sola jugada, resolve() ya la resolvió
-          // entera). En empate, el que esté más cerca de llenar su barra.
-          const colorGanador = mejorColor(res.porColor, sig);
-          const objetivo = sig.find((o) => o.color === colorGanador);
-          if (objetivo) reproducirVozMatch(objetivo.entry);
-        }
-        return sig;
-      });
-
-      if (!hayMovimiento(nuevo)) {
-        const rebarajado = clone(nuevo);
-        rebarajar(rebarajado, COLORES);
-        setBoard(rebarajado);
+      const sig = objetivos.map((o) => ({ ...o, llevas: o.llevas + (res.porColor[o.color] ?? 0) }));
+      const llena = sig.find((o) => o.llevas >= o.meta);
+      let pendiente: { objetivo: DulceObjetivo; opciones: string[] } | null = null;
+      if (llena) {
+        // Si esta jugada llena una barra, la voz del match se salta:
+        // pasa directo a la pregunta (cuando termine la animación).
+        pendiente = { objetivo: llena, opciones: opcionesPara(llena, pool) };
+      } else {
+        // El color con más piezas quitadas en esta jugada (una cascada
+        // cuenta como una sola jugada, resolve() ya la resolvió
+        // entera). En empate, el que esté más cerca de llenar su barra.
+        const colorGanador = mejorColor(res.porColor, sig);
+        const objetivo = sig.find((o) => o.color === colorGanador);
+        if (objetivo) reproducirVozMatch(objetivo.entry);
       }
+
+      let rebarajado: number[] | null = null;
+      if (!hayMovimiento(nuevo)) {
+        const otro = clone(nuevo);
+        rebarajar(otro, COLORES);
+        setBoard(otro);
+        rebarajado = otro.cells;
+      }
+
+      animar(
+        {
+          a,
+          c,
+          pasos: res.pasos,
+          rebarajado,
+          final: rebarajado ?? nuevo.cells,
+          onLlegan: sumarAMetas,
+        },
+        () => {
+          if (pendiente) setPregunta(pendiente);
+        }
+      );
     },
-    [board, elegida, pregunta, jugadas, pool, COLORES, reproducirVozMatch]
+    [board, objetivos, pool, COLORES, reaccion, reproducirVozMatch, animar, sumarAMetas]
+  );
+
+  const tocar = useCallback(
+    (i: number) => {
+      if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
+
+      if (elegida === null) {
+        haptics.tapLight();
+        void audio.playTap();
+        setElegida(i);
+        return;
+      }
+      if (elegida === i) {
+        setElegida(null);
+        return;
+      }
+      intercambiar(elegida, i);
+    },
+    [board, elegida, pregunta, jugadas, intercambiar]
+  );
+
+  /** Deslizar una pieza hacia su vecina las intercambia, como en cualquier tres en línea. */
+  const deslizar = useCallback(
+    (origen: number, destino: number) => {
+      if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
+      intercambiar(origen, destino);
+    },
+    [board, pregunta, jugadas, intercambiar]
   );
 
   // Al mostrarse la pregunta: corta lo que sonaba (incluida una voz de
@@ -447,12 +510,12 @@ export function DulcesScreen() {
   }, [avanzando, pregunta, avanzarTrasRespuesta]);
 
   useEffect(() => {
-    if (jugadas <= 0 && !pregunta) {
+    if (jugadas <= 0 && !pregunta && !animando) {
       const t = setTimeout(terminar, 900);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [jugadas, pregunta, terminar]);
+  }, [jugadas, pregunta, animando, terminar]);
 
   if (carga.estado === 'error') {
     return (
@@ -570,30 +633,27 @@ export function DulcesScreen() {
           style={styles.medio}
           contentContainerStyle={styles.medioContenido}
           showsVerticalScrollIndicator={false}
+          onLayout={(e) => setVistaAlto(e.nativeEvent.layout.height)}
+          onContentSizeChange={(_, alto) => setContenidoAlto(alto)}
         >
           <View style={styles.metas}>
             <TarjetaMetas objetivos={objetivos} />
           </View>
 
-          <View style={styles.tablero}>
-            {board.cells.map((c, i) => (
-              <Pieza
-                // La clave incluye el color: cuando una pieza cambia de
-                // color tras una cascada, React la trata como pieza
-                // nueva y reanimated le corre la entrada. Sin eso el
-                // tablero se recolorea de golpe y no se ve caer nada.
-                key={`c-${i}-${c}`}
-                color={c}
-                fila={Math.floor(i / COLS)}
-                col={i % COLS}
-                lado={LADO}
-                elegida={elegida === i}
-                entering={aparecerZoom(escalon(i % COLS))}
-                layout={reacomodar()}
-                onPress={() => tocar(i)}
-              />
-            ))}
-          </View>
+          <TableroDulces
+            ref={tableroRef}
+            celdas={board.cells}
+            cols={COLS}
+            rows={ROWS}
+            lado={LADO}
+            hueco={space.xs}
+            llave={llave}
+            elegida={elegida}
+            bloqueado={animando || jugadas <= 0}
+            soloHorizontal={puedeScroll}
+            onTocar={tocar}
+            onDeslizar={deslizar}
+          />
 
           <Text style={styles.pieNota}>
             {resueltas > 0
@@ -657,13 +717,6 @@ const styles = StyleSheet.create({
   medio: { flex: 1 },
   medioContenido: { paddingBottom: space.sm },
   metas: { paddingHorizontal: space.lg, marginBottom: space.md },
-  tablero: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: space.xs,
-    paddingHorizontal: space.xs,
-    justifyContent: 'center',
-  },
   pieNota: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,
