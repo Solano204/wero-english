@@ -37,6 +37,7 @@ const prueba = (nombre, fn) => {
   total++;
   console.log(`  ok  ${nombre}`);
 };
+const sinComentarios = (codigo) => codigo.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 const textos = (t) => O.dividirOraciones(t).map((o) => o.texto);
 
 /* ---------- oraciones ---------- */
@@ -250,6 +251,38 @@ prueba('lectura acompañada: sigue al audio en el tercio de arriba, se suelta co
   assert.match(texto, /duration: motionDuration\.rapido/, 'el pulso dura 150 ms (rapido)');
   const hook = leer('src/components/lectura/useReproductorCapitulo.ts');
   assert.match(hook, /AppState\.addEventListener/, 'pausa al irse a segundo plano');
+});
+
+prueba('preguntas: tres por historia, una a la vez, marcadas como en Estudio, sin puntaje, y un cierre con destello único', () => {
+  for (const l of lecturas) {
+    assert.equal(l.preguntas.length, 3, `${l.id}: son tres preguntas (los tres puntos de arriba)`);
+    for (const p of l.preguntas) assert.ok(p.correcta >= 0 && p.correcta < p.opciones.length && p.porque.length > 0, `${l.id}: pregunta mal formada`);
+  }
+  const una = leer('src/components/lectura/PreguntaUnaAUna.tsx');
+  assert.match(una, /export const TOTAL_PREGUNTAS = 3;/);
+  assert.match(una, /<PuntosRepeticion\s+ronda=\{\(indice \+ 1\) as 1 \| 2 \| 3\}/, 'los tres puntos de avance son los de Estudio');
+  assert.match(una, /No se guarda calificación\./, 'la nota se queda');
+  assert.match(una, /<OptionButton/, 'la elegida y la correcta se marcan como en Estudio');
+  assert.match(una, /if \(k === correcta\) return 'correct';\s*return k === respuesta \? 'wrong' : 'dimmed';/);
+  assert.match(una, /entering=\{reducido \? undefined : aparecer\(\)\}\s+accessibilityLiveRegion="polite"/, 'la explicación entra con fade y se anuncia');
+  assert.ok(!/puntaje|score|confeti|confetti/i.test(sinComentarios(una)), 'nada de puntaje ni confeti');
+  const puntos = leer('src/components/fx/PuntosRepeticion.tsx');
+  assert.match(puntos, /accessibilityLabel=\{etiqueta \?\? `Repetición \$\{ronda\} de \$\{REPETICIONES\}`\}/, 'Estudio conserva su etiqueta');
+
+  const cierre = leer('src/components/lectura/CierreLectura.tsx');
+  assert.match(cierre, /Terminaste la historia/);
+  assert.match(cierre, /if \(!todas \|\| reducido\) return;/, 'sin las tres respuestas o con reducir movimiento no hay destello');
+  assert.equal((cierre.match(/withTiming\(/g) ?? []).length, 1, 'un solo destello, sin bucles');
+  assert.ok(!/withRepeat|confeti|confetti|puntaje|score/i.test(sinComentarios(cierre)));
+  assert.ok(!/\bexiting=|\blayout=/.test(cierre) && !/style=\{\[styles\.destello, estiloDestello\]\}[^>]*entering/.test(cierre), 'el destello lleva transform: no comparte nodo con entering');
+
+  const p = leer('src/screens/extras/LecturaScreen.tsx');
+  assert.match(p, /<Button label="Salir sin contestar" variant="ghost"/, '«Salir sin contestar» es ghost');
+  assert.match(p, /pregunta \+ 1 >= total \? 'Terminar' : 'Siguiente'/);
+  assert.match(p, /todas=\{Object\.keys\(respuestas\)\.length === total\}/);
+  assert.match(p, /lectura\.frases\.filter\(\(id\) => !estados\.has\(id\)\)\.length/, 'las nuevas son las que aún no tenía');
+  assert.match(p, /label="Volver a las lecturas"/);
+  assert.ok(!/label=\{?\s*contestadas/.test(p), 'ya no hay botón «Listo»');
 });
 
 /* ---------- generador y datos ---------- */

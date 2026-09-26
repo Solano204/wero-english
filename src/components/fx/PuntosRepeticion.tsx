@@ -31,6 +31,8 @@ function Punto({ estado }: { estado: Estado }) {
 interface Props {
   /** La repetición en curso, de 1 a 3. */
   ronda: 1 | 2 | 3;
+  /** Lo que lee el lector de pantalla cuando no son repeticiones de una frase (las tres preguntas de una lectura). */
+  etiqueta?: string;
 }
 
 /**
@@ -38,13 +40,13 @@ interface Props {
  * pendiente hueca (se distinguen por forma, no solo por color). Para el lector de pantalla es una sola cosa:
  * «Repetición 2 de 3».
  */
-export function PuntosRepeticion({ ronda }: Props) {
+export function PuntosRepeticion({ ronda, etiqueta }: Props) {
   return (
     <View
       style={styles.fila}
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel={`Repetición ${ronda} de ${REPETICIONES}`}
+      accessibilityLabel={etiqueta ?? `Repetición ${ronda} de ${REPETICIONES}`}
       accessibilityValue={{ min: 1, max: REPETICIONES, now: ronda }}
     >
       {Array.from({ length: REPETICIONES }, (_, i) => {

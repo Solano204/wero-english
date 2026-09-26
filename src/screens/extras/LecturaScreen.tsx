@@ -19,9 +19,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, Card, Carga, EmptyState, Header, Screen, Presionable } from '@/components/base';
+import { Button, Carga, EmptyState, Header, Screen } from '@/components/base';
+import { CierreLectura } from '@/components/lectura/CierreLectura';
 import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
 import { PieReproductor } from '@/components/lectura/PieReproductor';
+import { PreguntaUnaAUna } from '@/components/lectura/PreguntaUnaAUna';
 import { TextoAcompanado, useOracionActual, type MedidasTexto } from '@/components/lectura/TextoAcompanado';
 import { useReproductorCapitulo } from '@/components/lectura/useReproductorCapitulo';
 import { partirTexto, type Trozo } from '@/domain/lectura';
@@ -33,7 +35,7 @@ import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { marcasOracionesDe } from '@/services/marcas';
-import { aparecer, color, desaparecer, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
+import { aparecer, color, desaparecer, font, layout, motionDuration, motionEasing, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -82,6 +84,8 @@ export function LecturaScreen() {
 
   const [cap, setCap] = useState(0);
   const [enPreguntas, setEnPreguntas] = useState(false);
+  /** La pregunta en pantalla; al llegar a `preguntas.length` toca el cierre. */
+  const [pregunta, setPregunta] = useState(0);
   const [respuestas, setRespuestas] = useState<Record<number, number>>({});
 
   const carga = useCarga(
@@ -330,61 +334,37 @@ export function LecturaScreen() {
   }
 
   if (enPreguntas) {
-    const contestadas = Object.keys(respuestas).length;
+    const total = lectura.preguntas.length;
+    const preguntaActual = lectura.preguntas[pregunta];
+    const cerrada = preguntaActual === undefined;
+    const dada = respuestas[pregunta];
+    const nuevas = lectura.frases.filter((id) => !estados.has(id)).length;
+    // Cada botón va en el mismo lugar: «Siguiente» (o «Terminar») entra en el suyo, y el ghost sale con el cierre.
+    const pieBoton = cerrada ? (
+      <Button label="Volver a las lecturas" onPress={() => nav.goBack()} full size="lg" />
+    ) : dada !== undefined ? (
+      <Animated.View entering={reducido ? undefined : aparecer()}>
+        <Button label={pregunta + 1 >= total ? 'Terminar' : 'Siguiente'} onPress={() => setPregunta((p) => p + 1)} full size="lg" />
+      </Animated.View>
+    ) : (
+      <Button label="Salir sin contestar" variant="ghost" onPress={() => setPregunta(total)} full size="lg" />
+    );
     return (
-      <Screen scroll>
-        <Header onBack={() => setEnPreguntas(false)} title="Tres preguntas" />
-        <Text style={styles.introPreguntas}>
-          No se guarda calificación. Es para ver si se entendió, no para
-          calificarte.
-        </Text>
-
-        {lectura.preguntas.map((p, i) => {
-          const dada = respuestas[i];
-          return (
-            <Card key={p.pregunta} style={styles.pregunta}>
-              <Text style={styles.preguntaTexto}>{p.pregunta}</Text>
-              {p.opciones.map((o, k) => {
-                const elegida = dada === k;
-                const esCorrecta = k === p.correcta;
-                const revelada = dada !== undefined;
-                return (
-                  <Presionable
-                    key={o}
-                    onPress={() => responder(i, k)}
-                    disabled={revelada}
-                    accessibilityRole="button"
-                    accessibilityLabel={o}
-                    resultado={revelada && elegida ? (esCorrecta ? 'acierto' : 'fallo') : null}
-                    style={[
-                      styles.opcion,
-                      revelada && esCorrecta && styles.opcionBien,
-                      revelada && elegida && !esCorrecta && styles.opcionMal,
-                    ]}
-                  >
-                    <Text style={styles.opcionTexto}>{o}</Text>
-                  </Presionable>
-                );
-              })}
-              {dada !== undefined ? (
-                <Animated.Text entering={reducido ? undefined : aparecer()} style={styles.porque}>
-                  {p.porque}
-                </Animated.Text>
-              ) : null}
-            </Card>
-          );
-        })}
-
-        <Button
-          label={
-            contestadas === lectura.preguntas.length
-              ? 'Listo'
-              : 'Salir sin contestar'
-          }
-          onPress={() => nav.goBack()}
-          full
-          size="lg"
+      <Screen scroll footer={pieBoton}>
+        <Header
+          onBack={cerrada ? () => nav.goBack() : () => setEnPreguntas(false)}
+          title={cerrada ? lectura.titulo : 'Tres preguntas'}
         />
+        {cerrada ? (
+          <CierreLectura nuevas={nuevas} todas={Object.keys(respuestas).length === total} />
+        ) : (
+          <PreguntaUnaAUna
+            pregunta={preguntaActual}
+            indice={pregunta}
+            respuesta={dada}
+            onResponder={(opcion) => responder(pregunta, opcion)}
+          />
+        )}
       </Screen>
     );
   }
@@ -477,33 +457,4 @@ const styles = StyleSheet.create({
     marginBottom: space.sm,
   },
   volver: { alignSelf: 'center', marginBottom: space.sm },
-  introPreguntas: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    lineHeight: font.size.md * 1.5,
-    color: color.textMuted,
-    marginBottom: space.md,
-  },
-  pregunta: { gap: space.sm, marginBottom: space.md },
-  preguntaTexto: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.text,
-  },
-  opcion: {
-    minHeight: layout.tapMin,
-    justifyContent: 'center',
-    paddingHorizontal: space.md,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: color.border,
-    backgroundColor: color.surfaceAlt,
-  },
-  opcionBien: {
-    borderColor: color.correct,
-    backgroundColor: color.correctSoft,
-  },
-  opcionMal: { borderColor: color.wrong, backgroundColor: color.wrongSoft },
-  opcionTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
-  porque: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
 });
