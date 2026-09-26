@@ -13,10 +13,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion, estiloResultado, type Resultado } from '@/components/feedback';
+import { Trozos, useReaccion, type Resultado } from '@/components/feedback';
+import { FichaCaida } from '@/components/juegos/caida/FichaCaida';
+import { FraseRonda } from '@/components/juegos/caida/FraseRonda';
+import { IndicadorRitmo } from '@/components/juegos/caida/IndicadorRitmo';
 import { PistaCaida } from '@/components/juegos/caida/PistaCaida';
-import { ALTO_FICHA, MARGEN_ARRIBA } from '@/components/juegos/caida/medidas';
-import { buildRounds } from '@/domain/caida';
+import { MARGEN_ARRIBA, chevronsPara, largoEstela } from '@/components/juegos/caida/medidas';
+import { CAIDA_INICIAL_MS, CAIDA_MINIMA_MS, buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
 import { getRandomEntries } from '@/db/queries';
@@ -27,9 +30,9 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import {
   color,
-  depth,
   font,
   motionDuration,
+  motionEasing,
   motionSpring,
   radius,
   shadow,
@@ -103,6 +106,8 @@ export function CaidaScreen() {
   const [avanzando, setAvanzando] = useState(false);
 
   const y = useSharedValue(0);
+  // La estela de las fichas: 1 mientras caen, 0 al contestar o al llegar al piso.
+  const estela = useSharedValue(0);
   const overlayOpacity = useSharedValue(0);
   const overlayScale = useSharedValue(0.92);
   // Cuánto baja la fila hasta tocar el piso, según el alto real de la
@@ -226,8 +231,9 @@ export function CaidaScreen() {
     setFallada(null);
     setAcertada(null);
     haptics.failure();
+    estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
     void pausarConVoz(round.entry, false, () => setPerdio(true));
-  }, [round, enPausa, pausarConVoz]);
+  }, [round, enPausa, pausarConVoz, estela]);
 
   // Arranca la caída de cada ronda.
   useEffect(() => {
@@ -235,8 +241,10 @@ export function CaidaScreen() {
 
     empezoEn.current = Date.now();
     y.value = 0;
+    estela.value = 0;
     if (altoPista <= 0) return;
 
+    estela.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
     y.value = withTiming(
       altoPista,
       { duration: round.duracionMs, easing: Easing.linear },
@@ -250,7 +258,7 @@ export function CaidaScreen() {
     if (autoAudio) void audio.play(round.entry.audio_en);
 
     return () => cancelAnimation(y);
-  }, [round, perdio, enPausa, y, autoAudio, seCayo, altoPista]);
+  }, [round, perdio, enPausa, y, estela, autoAudio, seCayo, altoPista]);
 
   const anim = useAnimatedStyle(() => ({
     transform: [{ translateY: y.value }],
@@ -289,6 +297,7 @@ export function CaidaScreen() {
     (texto: string) => {
       if (!round || perdio || enPausa) return;
       cancelAnimation(y);
+      estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
 
       const bien = texto === round.correcta;
       const ms = Date.now() - empezoEn.current;
@@ -331,7 +340,7 @@ export function CaidaScreen() {
       // reemplace (stop() del combo corta el que ya estaba sonando).
       if (totalAciertos % 3 === 0) void audio.playCombo();
     },
-    [round, perdio, enPausa, y, user, idx, rounds.length, nav, nivel, pausarConVoz]
+    [round, perdio, enPausa, y, estela, user, idx, rounds.length, nav, nivel, pausarConVoz]
   );
 
   if (carga.estado === 'error') {
@@ -441,6 +450,12 @@ export function CaidaScreen() {
 
   const izquierda = round.correctaIzquierda ? round.correcta : round.falsa;
   const derecha = round.correctaIzquierda ? round.falsa : round.correcta;
+  // El ritmo es el del nivel: cada uno trae su duración inicial y su mínima. Las constantes son el respaldo.
+  const chevrons = chevronsPara(
+    round.duracionMs,
+    nv?.caidaInicialMs ?? CAIDA_INICIAL_MS,
+    nv?.caidaMinimaMs ?? CAIDA_MINIMA_MS
+  );
 
   return (
     <Screen padded={false}>
@@ -449,22 +464,29 @@ export function CaidaScreen() {
         <Header
           onBack={() => nav.goBack()}
           title={nivel ? `Nivel ${nivel}` : undefined}
-          right={<Text style={styles.marcador} maxFontSizeMultiplier={1.2}>{aciertos}</Text>}
+          right={
+            <View style={styles.derecha}>
+              <IndicadorRitmo nivel={chevrons} />
+              <Text style={styles.marcador} maxFontSizeMultiplier={1.2}>{aciertos}</Text>
+            </View>
+          }
         />
-        <Text style={styles.frase}>{round.entry.phrase}</Text>
+        <FraseRonda key={idx} texto={round.entry.phrase} />
         <Text style={styles.instruccion}>
           Toca el significado antes de que lleguen abajo
         </Text>
       </View>
 
-      <PistaCaida y={y} onDistancia={setAltoPista}>
+      <PistaCaida y={y} onDistancia={setAltoPista} largoEstela={largoEstela(altoPista, round.duracionMs)} estela={estela}>
         <Animated.View style={[styles.fila, anim]}>
-          <Ficha
+          <FichaCaida
+            key={`${idx}-a`}
             texto={izquierda}
             resultado={resultadoFicha(izquierda, fallada, acertada, idx)}
             onPress={() => void responder(izquierda)}
           />
-          <Ficha
+          <FichaCaida
+            key={`${idx}-b`}
             texto={derecha}
             resultado={resultadoFicha(derecha, fallada, acertada, idx)}
             onPress={() => void responder(derecha)}
@@ -505,43 +527,13 @@ function resultadoFicha(
   return acertada === `${ronda}|${texto}` ? 'acierto' : null;
 }
 
-function Ficha({
-  texto,
-  onPress,
-  resultado,
-}: {
-  texto: string;
-  onPress: () => void;
-  resultado: Resultado | null;
-}) {
-  return (
-    <Presionable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={texto}
-      resultado={resultado}
-      style={[styles.ficha, resultado && estiloResultado[resultado]]}
-    >
-      <Text style={styles.fichaTexto} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.8} maxFontSizeMultiplier={1.3}>
-        {texto}
-      </Text>
-    </Presionable>
-  );
-}
-
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
+  derecha: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   marcador: {
     fontSize: font.size.xl,
     fontFamily: font.family.display,
     color: color.accent,
-  },
-  frase: {
-    fontSize: font.size.xxl,
-    letterSpacing: font.size.xxl * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-    textAlign: 'center',
   },
   instruccion: {
     fontFamily: font.family.body,
@@ -559,26 +551,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: space.md,
     paddingHorizontal: space.lg,
-  },
-  ficha: {
-    flex: 1,
-    height: ALTO_FICHA,
-    borderRadius: radius.lg,
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.border,
-    borderBottomWidth: depth.sm,
-    borderBottomColor: color.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: space.md,
-    ...shadow.card,
-  },
-  fichaTexto: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    color: color.text,
-    textAlign: 'center',
   },
   finWrap: { flex: 1 },
   finWrapContenido: {

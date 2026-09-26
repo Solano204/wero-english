@@ -1,26 +1,37 @@
 import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import { Canvas, Path, Skia } from '@shopify/react-native-skia';
-import type { SharedValue } from 'react-native-reanimated';
+import { Canvas, Group, LinearGradient, Path, Rect, Skia, vec } from '@shopify/react-native-skia';
+import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 import { FxSeguro } from '@/components/fx/FxSeguro';
-import { color, space } from '@/theme';
+import { color, resplandorPiso, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
-import { ALTO_PISO, MARGEN_PISO, distanciaCaida } from './medidas';
+import { ALTO_PISO, MARGEN_ARRIBA, MARGEN_PISO, distanciaCaida } from './medidas';
 import { PisoResplandor } from './PisoResplandor';
 
 /** Cuánto se acercan al centro las líneas de los carriles en el borde de arriba, en fracción del ancho. */
 const CONVERGENCIA = 0.07;
 
+/** Hueco entre las dos fichas de la fila (`space.md`): las estelas van justo sobre cada una. */
+const HUECO_FICHAS = space.md;
+
 interface CarrilesProps {
   ancho: number;
   alto: number;
+  y: SharedValue<number>;
+  /** El largo de la estela de esta ronda (`largoEstela`). */
+  largoEstela: number;
+  /** 0 a 1: la estela se enciende al empezar la caída y se apaga al contestar o al llegar al piso. */
+  estela: SharedValue<number>;
 }
 
 /**
- * Los dos carriles por donde cae cada ficha: tres líneas de 1 px en `border` que se acercan un poco
- * hacia arriba, como una perspectiva. Es un dibujo fijo (no se mueve nada): se traza una vez por medida.
+ * Los dos carriles por donde cae cada ficha y la estela de cada una. Los carriles son tres líneas de
+ * 1 px en `border` que se acercan un poco hacia arriba, como una perspectiva: un dibujo fijo que se
+ * traza una vez por medida. La estela es un degradado corto en `accentSoft` sobre cada ficha que baja
+ * con ella: en un solo grupo cuya posición sale de `y`, el mismo valor que mueve las fichas, sin
+ * setState por cuadro.
  */
-function Carriles({ ancho, alto }: CarrilesProps) {
+function Carriles({ ancho, alto, y, largoEstela, estela }: CarrilesProps) {
   const trazo = useMemo(() => {
     const p = Skia.Path.Make();
     const izquierda = space.lg;
@@ -37,10 +48,20 @@ function Carriles({ ancho, alto }: CarrilesProps) {
     return p;
   }, [ancho, alto]);
 
+  const columna = (ancho - space.lg * 2 - HUECO_FICHAS) / 2;
+  const posicion = useDerivedValue(() => [{ translateY: MARGEN_ARRIBA + y.value }]);
+
   return (
     <FxSeguro>
       <Canvas style={StyleSheet.absoluteFill} pointerEvents="none" accessible={false}>
         <Path path={trazo} style="stroke" strokeWidth={1} color={color.border} />
+        <Group transform={posicion} opacity={estela}>
+          {[space.lg, space.lg + columna + HUECO_FICHAS].map((x) => (
+            <Rect key={x} x={x} y={-largoEstela} width={columna} height={largoEstela}>
+              <LinearGradient start={vec(0, -largoEstela)} end={vec(0, 0)} colors={[resplandorPiso[0], color.accentSoft]} />
+            </Rect>
+          ))}
+        </Group>
       </Canvas>
     </FxSeguro>
   );
@@ -51,17 +72,20 @@ interface Props {
   y: SharedValue<number>;
   /** Cuánto baja la fila hasta tocar el piso, cada vez que la pista se mide. */
   onDistancia: (distancia: number) => void;
+  /** El largo de la estela de la ronda (`largoEstela`) y su intensidad de 0 a 1. */
+  largoEstela: number;
+  estela: SharedValue<number>;
   /** La fila de fichas, ya colocada con `top: MARGEN_ARRIBA` y su `translateY`. */
   children: ReactNode;
 }
 
 /**
  * La pista de Caída: ocupa todo el espacio entre la instrucción y el borde de abajo. Trae los
- * carriles, el piso con su resplandor (en posición absoluta al fondo: la ficha se detiene exacto
+ * carriles con la estela de las fichas, el piso con su resplandor (en posición absoluta al fondo: la ficha se detiene exacto
  * sobre él, `distanciaCaida`) y la fila de fichas encima. Con «reducir movimiento» no hay
- * carriles con perspectiva.
+ * carriles con perspectiva ni estela.
  */
-export function PistaCaida({ y, onDistancia, children }: Props) {
+export function PistaCaida({ y, onDistancia, largoEstela, estela, children }: Props) {
   const reducido = useMovimientoReducido();
   const [medida, setMedida] = useState({ ancho: 0, alto: 0 });
 
@@ -76,7 +100,9 @@ export function PistaCaida({ y, onDistancia, children }: Props) {
 
   return (
     <View style={styles.pista} onLayout={alMedir}>
-      {!reducido && medida.ancho > 0 ? <Carriles ancho={medida.ancho} alto={medida.alto} /> : null}
+      {!reducido && medida.ancho > 0 ? (
+        <Carriles ancho={medida.ancho} alto={medida.alto} y={y} largoEstela={largoEstela} estela={estela} />
+      ) : null}
       {medida.alto > 0 ? <PisoResplandor y={y} distancia={distanciaCaida(medida.alto)} /> : null}
       {children}
     </View>

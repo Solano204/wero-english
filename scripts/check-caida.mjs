@@ -18,7 +18,7 @@ const cargar = async (rel) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 const M = await cargar('src/components/juegos/caida/medidas.ts');
-const { distanciaCaida, avance, resplandor, ALTO_FICHA, ALTO_PISO, MARGEN_ARRIBA, MARGEN_PISO, CAIDA_MINIMA, AVISO_EN, RESPLANDOR_DESDE } = M;
+const { distanciaCaida, avance, resplandor, largoEstela, chevronsPara, CHEVRONS, ESTELA_MIN, ESTELA_MAX, ALTO_FICHA, ALTO_PISO, MARGEN_ARRIBA, MARGEN_PISO, CAIDA_MINIMA, AVISO_EN, RESPLANDOR_DESDE } = M;
 
 let total = 0;
 const prueba = (nombre, fn) => {
@@ -89,6 +89,46 @@ prueba('los niveles de Caída traen su propio ritmo y ninguno cae más lento que
     assert.ok(n.caidaInicialMs >= n.caidaMinimaMs, `nivel ${n.n}`);
     assert.ok(Number.isInteger(n.rondas) && n.rondas >= 1);
   }
+});
+
+prueba('la estela se alarga con la velocidad de la ronda y respeta sus topes', () => {
+  const d = 500;
+  assert.ok(largoEstela(d, 7000) < largoEstela(d, 4000), 'más rápido, más larga');
+  assert.ok(largoEstela(d, 4000) < largoEstela(d, 2800));
+  assert.equal(largoEstela(d, 1), ESTELA_MAX, 'un tope arriba');
+  assert.equal(largoEstela(d, 1e9), ESTELA_MIN, 'y uno abajo');
+  for (const raro of [0, -1, Number.NaN]) {
+    assert.equal(largoEstela(raro, 3000), ESTELA_MIN);
+    assert.equal(largoEstela(d, raro), ESTELA_MIN);
+  }
+});
+
+prueba('los chevrons van de 1 a 5 según dónde queda la ronda entre la inicial y la mínima del nivel', () => {
+  assert.equal(chevronsPara(7000, 7000, 4200), 1, 'la primera ronda: 1');
+  assert.equal(chevronsPara(4200, 7000, 4200), CHEVRONS, 'en la mínima: todos');
+  assert.equal(chevronsPara(3000, 7000, 4200), CHEVRONS, 'más rápido que la mínima no se sale');
+  assert.equal(chevronsPara(9000, 7000, 4200), 1, 'ni más lento que la inicial');
+  assert.equal(chevronsPara(5600, 7000, 4200), 3, 'a la mitad: 3');
+  assert.equal(chevronsPara(5000, 5000, 5000), 1, 'un nivel sin rango no tiene ritmo que mostrar');
+  assert.equal(chevronsPara(Number.NaN, 7000, 4200), 1);
+});
+
+prueba('en los niveles reales el ritmo sube de la ronda 1 a la última sin pasarse de 5', () => {
+  const niveles = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/data/niveles.json'), 'utf8')).juegos.caida.niveles;
+  const duracion = (n, r) => Math.max(n.caidaMinimaMs, n.caidaInicialMs - r * n.aceleraMs);
+  let algunoLlegaA5 = false;
+  for (const n of niveles) {
+    let antes = 0;
+    for (let r = 0; r < n.rondas; r++) {
+      const c = chevronsPara(duracion(n, r), n.caidaInicialMs, n.caidaMinimaMs);
+      assert.ok(c >= 1 && c <= CHEVRONS, `nivel ${n.n} ronda ${r + 1}`);
+      assert.ok(c >= antes, `nivel ${n.n}: el ritmo no baja de una ronda a la siguiente`);
+      antes = c;
+      if (c === CHEVRONS) algunoLlegaA5 = true;
+    }
+    assert.equal(chevronsPara(duracion(n, 0), n.caidaInicialMs, n.caidaMinimaMs), 1, `nivel ${n.n} empieza en 1`);
+  }
+  console.log(`      (algún nivel llega a 5 chevrons: ${algunoLlegaA5})`);
 });
 
 console.log(`\ncheck:caida ${total} pruebas ok`);
