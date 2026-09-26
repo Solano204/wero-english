@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 301 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 302 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -273,6 +273,7 @@ Otros 2 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/juegos/pares/FichasJugadas.tsx:39` — key por índice
 - `src/components/juegos/pares/SegmentosPares.tsx:94` — key por índice
 - `src/components/niveles/EstrellasCelda.tsx:79` — key por índice
+- `src/components/phrasal/RuletaParticulas.tsx:163` — key por índice
 - `src/components/sonidos/MapaBoca.tsx:185` — key por índice
 - `src/screens/entry/OnboardingScreen.tsx:291` — key por índice
 - `src/screens/extras/GramaticaTemaScreen.tsx:239` — key por índice

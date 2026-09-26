@@ -55,6 +55,8 @@ export const motionSpring = {
   aguja: { duration: 550, dampingRatio: 0.55 } satisfies WithSpringConfig,
   /** El punto del mapa de la boca viaja despacio de la vocal española a la inglesa y se asienta sin rebote de más. */
   viaje: { duration: 900, dampingRatio: 0.75 } satisfies WithSpringConfig,
+  /** La ruleta de partículas se asienta en la que queda al centro: rápida, con un asomo de rebote. */
+  ruleta: { damping: 22, stiffness: 260, mass: 1 } satisfies WithSpringConfig,
 };
 
 /**

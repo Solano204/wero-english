@@ -445,6 +445,8 @@ const LOOPS_POR_PANTALLA = {
   Sonidos: [],
   // Gramática: el héroe es «El error que se corrige» (la frase incorrecta se tacha y se transforma en la correcta, una vez al llegar a la vista); vistas y layout de Reanimated, ningún canvas de Skia ni bucle.
   Gramatica: [],
+  // Phrasal: el héroe es la ruleta de partículas (una rueda de textos movida por un gesto y un resorte en el hilo de UI); vistas, ningún canvas de Skia ni bucle.
+  Phrasal: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
