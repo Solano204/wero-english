@@ -2,16 +2,17 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated from 'react-native-reanimated';
-import { Badge, Button, Card, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
-import { SceneImage } from '@/components/card';
-import { getRandomEntries, toggleFavorite } from '@/db/queries';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { BotonGuardar } from '@/components/detalle';
+import { CartaFrase, type Modo, type Sonando } from '@/components/mazo/CartaFrase';
+import { MAZO } from '@/domain/mazo';
+import { getRandomEntries, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';
+import { color, font, space } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -21,10 +22,10 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 const PAUSA_EN_ES_MS = 700;
 /** Retraso antes de que arranque el audio solo, al mostrarse la tarjeta. */
 const RETRASO_AUTO_MS = 250;
-/** Bloqueo de "→" contra doble toque. */
-const AVANZAR_DEBOUNCE_MS = 400;
 /** Velocidad de "Lento", igual que playSlow() por defecto. */
 const VELOCIDAD_LENTA = 0.7;
+/** Lo que le quita al ancho de la zona el filo de la carta (1 dp a cada lado) y su padding de `lg`. */
+const RESTA_ANCHO_TEXTO = 2 + space.lg * 2;
 
 /** Pasos de la secuencia EN → ES de una frase. Sin ES, solo suena el inglés. */
 function pasosSecuencia(entry: Entry): { path: string | null; pauseMs: number }[] {
@@ -47,6 +48,7 @@ function pasosSecuencia(entry: Entry): { path: string | null; pauseMs: number }[
  * No escribe calificaciones SM-2. Pasar frases sin responder nada no es
  * un repaso y contarlo como tal ensuciaría la cola de mañana. Lo único
  * que sí hace es dejar guardar con estrella lo que llame la atención.
+ * No lleva cuenta de nada: por eso no hay contador de frases vistas.
  */
 export function AzarScreen() {
   const nav = useNavigation<Nav>();
@@ -58,17 +60,17 @@ export function AzarScreen() {
 
   const [pool, setPool] = useState<Entry[]>([]);
   const [i, setI] = useState(0);
-  const [vistas, setVistas] = useState(0);
+  const [barajando, setBarajando] = useState(false);
   const [guardada, setGuardada] = useState(false);
-  const [bloqueado, setBloqueado] = useState(false);
-  // Qué texto está sonando ahorita: la frase EN o el significado ES.
-  const [sonando, setSonando] = useState<'en' | 'es' | null>(null);
+  /** Sube en 1 cada vez que la frase de arriba pasa a guardada: dispara el anillo dorado del botón. */
+  const [pulso, setPulso] = useState(0);
+  const [sonando, setSonando] = useState<Sonando | null>(null);
+  const [zona, setZona] = useState({ ancho: 0, alto: 0 });
 
   // Token de la reproducción de frase vigente (automática o manual). Cada
   // intento nuevo saca el suyo; el que ya no coincide con el vigente sabe
   // que otro le ganó el turno y se calla sin tocar el audio ni el state.
   const vozToken = useRef(0);
-  const avanzarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const carga = useCarga(
     async () => {
@@ -81,6 +83,7 @@ export function AzarScreen() {
       const list = await getRandomEntries(filter(), 60);
       setPool(list);
       setI(0);
+      setBarajando(false);
     },
     [filter]
   );
@@ -88,6 +91,8 @@ export function AzarScreen() {
   const cargar = carga.reintentar;
 
   const entry = pool[i];
+  const arribaRef = useRef<number | null>(null);
+  arribaRef.current = entry?.id ?? null;
 
   // Corta la voz al salir de la pantalla o al ir a background, e
   // igual al desmontar (recarga en caliente, navegación hacia atrás).
@@ -103,9 +108,22 @@ export function AzarScreen() {
       sub.remove();
       vozToken.current++;
       audio.stop();
-      if (avanzarTimer.current) clearTimeout(avanzarTimer.current);
     };
   }, []);
+
+  // El estado real de la frase de arriba: sin esto, «Guardar» quitaría de Mi mazo una que ya estaba guardada.
+  const entryId = entry?.id;
+  useEffect(() => {
+    if (!user || entryId === undefined) return;
+    let vigente = true;
+    setGuardada(false);
+    void isFavorite(user.id, entryId).then((v) => {
+      if (vigente) setGuardada(v);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [user, entryId]);
 
   /** Reproduce EN, pausa, ES (si hay), resaltando el texto que suena. */
   const reproduceSecuencia = useCallback(async (e: Entry) => {
@@ -113,7 +131,7 @@ export function AzarScreen() {
     await audio.playSequence(
       pasosSecuencia(e),
       () => vozToken.current === miToken,
-      (idx) => setSonando(idx === 0 ? 'en' : 'es')
+      (idx) => setSonando({ modo: 'ambos', lengua: idx === 0 ? 'en' : 'es' })
     );
     if (vozToken.current === miToken) setSonando(null);
   }, []);
@@ -136,63 +154,55 @@ export function AzarScreen() {
   }, [entry?.id, autoAudio]);
 
   /** Toque manual de un solo idioma: cancela lo que suene y reproduce solo eso. */
-  const reproduceUna = useCallback(async (lang: 'en' | 'es', lento: boolean) => {
-    const path = lang === 'en' ? entry?.audio_en ?? null : entry?.audio_es ?? null;
-    const miToken = ++vozToken.current;
-    setSonando(lang);
-    await audio.playAndWait(path, lento ? { rate: VELOCIDAD_LENTA } : undefined);
-    if (vozToken.current === miToken) setSonando(null);
-  }, [entry]);
+  const reproduceUna = useCallback(
+    async (lang: 'en' | 'es', lento: boolean) => {
+      const path = lang === 'en' ? entry?.audio_en ?? null : entry?.audio_es ?? null;
+      const miToken = ++vozToken.current;
+      setSonando({ modo: lang === 'es' ? 'es' : lento ? 'lento' : 'en', lengua: lang });
+      await audio.playAndWait(path, lento ? { rate: VELOCIDAD_LENTA } : undefined);
+      if (vozToken.current === miToken) setSonando(null);
+    },
+    [entry]
+  );
 
-  const tocarEn = useCallback(() => {
-    haptics.tapLight();
-    void reproduceUna('en', false);
-  }, [reproduceUna]);
-
-  const tocarLento = useCallback(() => {
-    haptics.tapLight();
-    void reproduceUna('en', true);
-  }, [reproduceUna]);
-
-  const tocarEs = useCallback(() => {
-    haptics.tapLight();
-    void reproduceUna('es', false);
-  }, [reproduceUna]);
-
-  const tocarAmbos = useCallback(() => {
-    if (!entry) return;
-    haptics.tapLight();
-    void reproduceSecuencia(entry);
-  }, [entry, reproduceSecuencia]);
+  const sonar = useCallback(
+    (modo: Modo) => {
+      if (!entry) return;
+      haptics.tapLight();
+      if (modo === 'ambos') void reproduceSecuencia(entry);
+      else void reproduceUna(modo === 'es' ? 'es' : 'en', modo === 'lento');
+    },
+    [entry, reproduceSecuencia, reproduceUna]
+  );
 
   const siguiente = useCallback(() => {
-    if (bloqueado) return;
-    haptics.tapLight();
     // Se corta la voz ANTES de cambiar de frase: sin esto, un salto
     // rápido deja sonando la frase que ya no se ve.
     vozToken.current++;
     audio.stop();
     setSonando(null);
-    setGuardada(false);
-    setVistas((v) => v + 1);
-    setBloqueado(true);
-    if (avanzarTimer.current) clearTimeout(avanzarTimer.current);
-    avanzarTimer.current = setTimeout(() => setBloqueado(false), AVANZAR_DEBOUNCE_MS);
-    // Al acabarse la baraja se pide otra. Nunca se repite dentro de la
-    // misma tanda, que es lo que haría sentir la pantalla corta.
+    // Al acabarse la baraja el mazo queda vacío y se pide otra. Nunca se
+    // repite dentro de la misma tanda, que es lo que haría sentir la pantalla corta.
     if (i + 1 >= pool.length) {
+      setBarajando(true);
+      setPool([]);
       void cargar();
       return;
     }
     setI((n) => n + 1);
-  }, [bloqueado, i, pool.length, cargar]);
+  }, [i, pool.length, cargar]);
 
-  const guardar = useCallback(async () => {
-    if (!user || !entry || guardada) return;
-    await toggleFavorite(user.id, entry.id);
-    setGuardada(true);
-    haptics.success();
-  }, [user, entry, guardada]);
+  const alternarGuardada = useCallback(async () => {
+    if (!user || !entry) return;
+    const ahora = await toggleFavorite(user.id, entry.id);
+    // La frase de arriba pudo cambiar mientras se guardaba: el botón habla de la de ahora.
+    if (arribaRef.current !== entry.id) return;
+    setGuardada(ahora);
+    if (ahora) {
+      haptics.success();
+      setPulso((p) => p + 1);
+    }
+  }, [user, entry]);
 
   if (carga.estado === 'error') {
     return (
@@ -203,7 +213,7 @@ export function AzarScreen() {
     );
   }
 
-  if (loading && pool.length === 0) {
+  if ((loading || barajando) && pool.length === 0) {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Frases sueltas" />
@@ -230,138 +240,46 @@ export function AzarScreen() {
 
   return (
     <Screen>
-      <Header
-        onBack={() => nav.goBack()}
-        title="Frases sueltas"
-        right={<Text style={styles.contador}>{vistas}</Text>}
-      />
+      <Header onBack={() => nav.goBack()} title="Frases sueltas" />
 
-      <View style={styles.cuerpo}>
-        <Animated.View
-          key={entry.id}
-          entering={aparecer()}
-          exiting={desaparecer(motionDuration.rapido)}
-          style={styles.tarjetaWrap}
-        >
-          <Card style={styles.tarjeta}>
-            <View style={styles.hueco}>
-              <SceneImage path={entry.imagen} size={180} ancha />
-            </View>
-
-            <Text style={[styles.frase, sonando === 'en' && styles.sonando]}>
-              {entry.phrase}
-            </Text>
-            {entry.ipa ? <Text style={styles.ipa}>{entry.ipa}</Text> : null}
-
-            <View style={styles.filaAudio}>
-              <Button icon="volume" label="Escuchar" variant="ghost" onPress={tocarEn} />
-              <Button icon="slow" label="Lento" variant="ghost" onPress={tocarLento} />
-            </View>
-
-            <Text style={[styles.significado, sonando === 'es' && styles.sonando]}>
-              {entry.spanish_main}
-            </Text>
-
-            <View style={styles.filaAudio}>
-              {entry.audio_es ? (
-                <Button icon="volume" label="Escuchar" variant="ghost" onPress={tocarEs} />
-              ) : null}
-              <Button icon="play" label="Ambos" variant="ghost" onPress={tocarAmbos} />
-            </View>
-
-            {entry.vulgaridad === 2 ? (
-              <Badge label="Fuerte" tone="strong" />
-            ) : entry.vulgaridad === 1 ? (
-              <Badge label="Cuidado" tone="warn" />
-            ) : null}
-
-            {entry.note ? <Text style={styles.nota}>{entry.note}</Text> : null}
-          </Card>
-        </Animated.View>
+      <View
+        style={styles.zona}
+        onLayout={(e) => setZona({ ancho: e.nativeEvent.layout.width, alto: e.nativeEvent.layout.height })}
+      >
+        {zona.alto > 0 ? (
+          <CartaFrase
+            key={entry.id}
+            entry={entry}
+            activa
+            alto={zona.alto - MAZO.asoma * 2}
+            ancho={zona.ancho - RESTA_ANCHO_TEXTO}
+            sonando={sonando}
+            onSonar={sonar}
+            guardada={guardada}
+            onSiguiente={siguiente}
+            onGuardar={alternarGuardada}
+          />
+        ) : null}
       </View>
 
       <View style={styles.pie}>
-        <Button
-          icon="arrow-right"
-          accessibilityLabel="Otra frase"
-          onPress={siguiente}
-          disabled={bloqueado}
-          size="lg"
-          full
-        />
-        <Button
-          icon={guardada ? 'star-filled' : 'star'}
-          label={guardada ? 'guardada' : 'guardar'}
-          accessibilityLabel="Guardar en mi mazo"
-          variant="ghost"
-          onPress={guardar}
-          disabled={guardada}
-          full
-        />
+        <View style={styles.boton}>
+          <Button label="Siguiente" icon="arrow-right" iconAlFinal onPress={siguiente} size="lg" full />
+        </View>
+        <View style={styles.boton}>
+          <BotonGuardar variante="secondary" guardada={guardada} pulso={pulso} onPress={alternarGuardada} />
+        </View>
       </View>
 
-      <Text style={styles.aviso}>
-        Aquí no se lleva cuenta de nada. Solo pasa frases.
-      </Text>
+      <Text style={styles.aviso}>Aquí no se lleva cuenta de nada. Solo pasa frases.</Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  contador: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textFaint },
-  cuerpo: { flex: 1, justifyContent: 'center' },
-  tarjetaWrap: { width: '100%' },
-  tarjeta: { gap: space.md, alignItems: 'center' },
-  /**
-   * El hueco de la imagen se reserva siempre, exista el archivo o no.
-   * Si el alto cambia según haya imagen, la tarjeta salta cada vez que
-   * pasas de frase y el ojo pierde dónde estaba el texto.
-   */
-  hueco: { width: '100%', alignItems: 'center' },
-  frase: {
-    fontSize: font.size.xxl,
-    letterSpacing: font.size.xxl * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-    textAlign: 'center',
-  },
-  ipa: {
-    fontSize: font.size.sm,
-    color: color.textFaint,
-    fontFamily: font.family.ipa,
-  },
-  significado: {
-    fontFamily: font.family.body,
-    fontSize: font.size.lg,
-    color: color.textMuted,
-    textAlign: 'center',
-  },
-  // El idioma que está sonando ahorita, resaltado sobre el otro.
-  sonando: { color: color.accent },
-  filaAudio: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: space.sm,
-  },
-  nota: {
-    fontFamily: font.family.body,
-    fontSize: font.size.md,
-    lineHeight: font.size.md * 1.5,
-    color: color.textMuted,
-    textAlign: 'center',
-  },
-  /*
-   * Apilado, no en fila.
-   *
-   * En fila, el botón fantasma mide 44 de alto y el grande 58: no había
-   * forma de alinearlos sin que uno flotara. Apilados comparten eje y la
-   * acción principal queda clarísima.
-   */
-  pie: {
-    gap: space.sm,
-    marginTop: space.lg,
-  },
+  zona: { flex: 1, justifyContent: 'center' },
+  pie: { flexDirection: 'row', gap: space.sm, marginTop: space.lg },
+  boton: { flex: 1 },
   aviso: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

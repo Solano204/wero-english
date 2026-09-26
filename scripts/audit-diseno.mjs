@@ -414,6 +414,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/gramatica/') || r === 'src/screens/extras/GramaticaScreen.tsx' || r === 'src/screens/extras/GramaticaTemaScreen.tsx' ||
   r.startsWith('src/components/phrasal/') || r === 'src/screens/extras/PhrasalScreen.tsx' || r === 'src/screens/extras/PhrasalVerboScreen.tsx' ||
   r.startsWith('src/components/lectura/') || r === 'src/screens/extras/LecturasScreen.tsx' || r === 'src/screens/extras/LecturaScreen.tsx' ||
+  r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -450,6 +451,8 @@ const LOOPS_POR_PANTALLA = {
   Phrasal: [],
   // Lectura: el héroe es la lectura acompañada (un resaltado que se desliza a la oración que suena y un scroll que la sigue, movidos por la posición del audio); vistas, y la onda mini del pie solo dibuja mientras suena la voz; ningún bucle de Skia.
   Lectura: [],
+  // Azar: el héroe es el mazo de cartas (transformaciones movidas por un gesto y resortes en el hilo de UI); vistas, ningún canvas de Skia ni bucle.
+  Azar: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

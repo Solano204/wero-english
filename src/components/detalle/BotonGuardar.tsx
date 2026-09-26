@@ -24,6 +24,8 @@ interface Props {
   /** Sube en 1 cada vez que la frase pasa a guardada: dispara la fiesta. Quitarla no la dispara. */
   pulso: number;
   onPress: () => void;
+  /** Cómo se ve sin guardar: `primary` en Detalle, donde es la acción principal; `secondary` donde ya hay otra (Frases sueltas). Guardada siempre es `secondary`. */
+  variante?: 'primary' | 'secondary';
 }
 
 /**
@@ -33,7 +35,7 @@ interface Props {
  * un anillo dorado se expande una sola vez desde el ícono; al quitarla solo cambia el
  * estado, sin fiesta. Con reducir movimiento no hay estrella que salte ni anillo.
  */
-export function BotonGuardar({ guardada, pulso, onPress }: Props) {
+export function BotonGuardar({ guardada, pulso, onPress, variante = 'primary' }: Props) {
   const reducido = useMovimientoReducido();
   const escala = useSharedValue(1);
   // 1 = el anillo ya terminó (invisible): en reposo no se ve nada.
@@ -56,7 +58,11 @@ export function BotonGuardar({ guardada, pulso, onPress }: Props) {
     <View style={styles.icono}>
       <Animated.View style={[styles.anillo, halo]} pointerEvents="none" />
       <Animated.View style={estrella}>
-        <Icon name={guardada ? 'star-filled' : 'star'} size="lg" color={guardada ? color.star : color.onAccent} />
+        <Icon
+          name={guardada ? 'star-filled' : 'star'}
+          size="lg"
+          color={guardada ? color.star : variante === 'primary' ? color.onAccent : color.text}
+        />
       </Animated.View>
     </View>
   );
@@ -65,7 +71,7 @@ export function BotonGuardar({ guardada, pulso, onPress }: Props) {
     <Button
       label={guardada ? 'Guardada' : 'Guardar'}
       accessibilityLabel={guardada ? 'Guardada en Mi mazo. Toca para quitarla' : 'Guardar en Mi mazo'}
-      variant={guardada ? 'secondary' : 'primary'}
+      variant={guardada ? 'secondary' : variante}
       size="lg"
       full
       iconNode={icono}

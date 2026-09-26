@@ -173,17 +173,41 @@ prueba('la imagen solo va si sobran 96 dp más el aire; una carta más alta la a
 
 /* ---------- lo que se puede revisar sin teléfono ---------- */
 
-prueba('el mazo existe y sigue las reglas: 3 cartas, el gesto solo con movimiento, botones que hacen lo mismo y sin contador', () => {
+const sinComentarios = (codigo) => codigo.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+prueba('la pantalla: sin contador, con la nota, con el mismo pedido de 60 y guardar como Detalle (estado real, botón secondary)', () => {
+  const pantalla = sinComentarios(leer('src/screens/extras/AzarScreen.tsx'));
+  assert.ok(!/contador|setVistas|vistas/.test(pantalla), 'el contador de arriba se fue');
+  assert.match(pantalla, /Aquí no se lleva cuenta de nada\. Solo pasa frases\./, 'la nota se queda');
+  assert.match(pantalla, /getRandomEntries\(filter\(\), 60\)/, 'la baraja se pide igual');
+  assert.match(pantalla, /toggleFavorite\(user\.id, entry\.id\)/, 'guardar sigue usando toggleFavorite');
+  assert.match(pantalla, /isFavorite\(user\.id, entryId\)/, 'lee el estado real como Detalle');
+  assert.match(pantalla, /<BotonGuardar variante="secondary"/, 'el botón de guardar no compite con «Siguiente»');
+  assert.match(pantalla, /<Button label="Siguiente" icon="arrow-right" iconAlFinal/, '«Siguiente» lleva texto y la flecha al final');
+  assert.ok(!/'guardar'|'guardada'/.test(pantalla), 'sin «guardar» en minúscula');
+  assert.ok(!/saveCardState|recordReview|calificar/i.test(pantalla), 'aquí no se guarda progreso');
+});
+
+prueba('la carta: frase en text con karaoke (no en accent), IPA centrado, grupos segmentados y acciones del lector', () => {
+  const carta = sinComentarios(leer('src/components/mazo/CartaFrase.tsx'));
+  assert.match(carta, /<FraseKaraoke palabras=\{palabras\} voz=\{voz\}/);
+  assert.ok(!/color\.accent/.test(carta), 'el accent queda para lo que se toca');
+  assert.match(carta, /ipa: \{[^}]*textAlign: 'center'/, 'el IPA lleva su textAlign');
+  for (const e of ['Escuchar', 'Lento', 'Español', 'Inglés y español']) assert.match(carta, new RegExp(`etiqueta: '${e}'`));
+  assert.ok(!/Ambos/.test(carta), '«Ambos» ya no existe');
+  assert.match(carta, /accessibilityActions=\{acciones\}/);
+  assert.match(carta, /name: 'siguiente', label: 'Siguiente'/);
+  assert.match(carta, /name: 'guardar'/);
+  assert.match(carta, /useVozEnVivo\(activa \? entry\.audio_en : null\)/, 'solo la carta de arriba escucha voces');
+  assert.ok(!/iniciales/i.test(carta), 'sin iniciales');
+});
+
+prueba('el mazo (si ya existe): solo tres cartas, el umbral sale de mazo.ts y hay modo sin movimiento', () => {
   if (!existe('src/components/mazo/MazoCartas.tsx')) return;
   const mazo = leer('src/components/mazo/MazoCartas.tsx');
   assert.match(mazo, /indicesVisibles\(/, 'solo se montan las cartas de indicesVisibles');
   assert.match(mazo, /decidirGesto\(/, 'el umbral sale de mazo.ts');
   assert.match(mazo, /useMovimientoReducido/);
-  const pantalla = leer('src/screens/extras/AzarScreen.tsx');
-  assert.ok(!/contador|setVistas|vistas/.test(pantalla), 'el contador de arriba se fue');
-  assert.match(pantalla, /Aquí no se lleva cuenta de nada\. Solo pasa frases\./, 'la nota se queda');
-  assert.match(pantalla, /toggleFavorite/, 'guardar sigue usando toggleFavorite');
-  assert.match(pantalla, /getRandomEntries\(filter\(\), 60\)/, 'la baraja se pide igual');
 });
 
 console.log(`\ncheck:mazo ${total} pruebas ok\n`);

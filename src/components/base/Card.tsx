@@ -40,6 +40,8 @@ interface Props {
   accessibilityLabel?: string;
   /** Menos aire por dentro (`md` de padding y `sm` de gap), para teléfonos donde cada dp cuenta. */
   compacta?: boolean;
+  /** El cuerpo y su contenido llenan el alto que se le dé con `style.height`: una carta de mazo mide siempre lo mismo. */
+  llena?: boolean;
 }
 
 /**
@@ -70,6 +72,7 @@ export function Card({
   altoPortada,
   accessibilityLabel,
   compacta = false,
+  llena = false,
 }: Props) {
   const [imagenFallo, setImagenFallo] = React.useState(false);
 
@@ -100,6 +103,7 @@ export function Card({
   const fuente = imagen && !imagenFallo ? imageSource(imagen) : null;
   const marco: ViewStyle[] = [
     styles.card,
+    llena && styles.llena,
     // El acento ya no pinta borde. Queda como línea fina abajo, que
     // marca la categoría sin encerrar la tarjeta.
   ].filter(Boolean) as ViewStyle[];
@@ -137,7 +141,7 @@ export function Card({
 
       {altoPortada ? <View style={{ height: altoPortada }} /> : null}
 
-      <View style={compacta ? styles.contenidoCompacto : styles.contenido}>{children}</View>
+      <View style={[compacta ? styles.contenidoCompacto : styles.contenido, llena && styles.llena]}>{children}</View>
     </View>
   );
 
@@ -206,6 +210,7 @@ const styles = StyleSheet.create({
    * Una pantalla que necesite otro aire lo pasa en `style` y gana, porque
    * el estilo propio se aplica después.
    */
+  llena: { flex: 1 },
   contenido: { padding: space.lg, gap: space.md },
   contenidoCompacto: { padding: space.md, gap: space.sm },
 });

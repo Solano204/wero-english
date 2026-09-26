@@ -19,6 +19,8 @@ export interface ControlAudio {
 interface Props {
   controles: ControlAudio[];
   alSonar: (ruta: string, lento: boolean) => void;
+  /** `centro` pone el grupo en medio de una columna centrada (la carta de Frases sueltas); por omisión va a la izquierda. */
+  alinear?: 'inicio' | 'centro';
 }
 
 /**
@@ -26,9 +28,9 @@ interface Props {
  * una píldora con segmentos del mismo alto de 48 dp, separados por una línea fina. El que suena se enciende con
  * `accentSoft`; uno sin archivo se ve apagado y no se toca. `alSonar` corre al tocar, y quien lo usa reproduce.
  */
-export function GrupoAudio({ controles, alSonar }: Props) {
+export function GrupoAudio({ controles, alSonar, alinear = 'inicio' }: Props) {
   return (
-    <View style={styles.grupo}>
+    <View style={[styles.grupo, alinear === 'centro' && styles.centro]}>
       {controles.map((c, i) => {
         const sinAudio = !hayAudio(c.ruta);
         return (
@@ -61,6 +63,7 @@ const styles = StyleSheet.create({
     borderColor: color.borderStrong,
     overflow: 'hidden',
   },
+  centro: { alignSelf: 'center' },
   control: {
     minHeight: layout.tapMin,
     flexDirection: 'row',
