@@ -3,12 +3,13 @@ import { AppState, ScrollView, StyleSheet, Text, View, useWindowDimensions } fro
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
-import { Trozos, useReaccion, useEfectoResultado } from '@/components/feedback';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { BloqueEscuchar } from '@/components/juegos/colmena/BloqueEscuchar';
-import { distribuirRanuras } from '@/components/juegos/colmena/geometria';
+import { disposicionPanal, distribuirRanuras, fichasParaCompletar, retrasoVuelo } from '@/components/juegos/colmena/geometria';
+import { DURACION_VUELO, type Vuelo } from '@/components/juegos/colmena/Hexagono';
+import { Panal, type Colocada, type RechazoFicha } from '@/components/juegos/colmena/Panal';
 import { ProgresoHex } from '@/components/juegos/colmena/ProgresoHex';
-import { RanurasPalabra } from '@/components/juegos/colmena/RanurasPalabra';
+import { RanurasPalabra, fuenteDeRanura } from '@/components/juegos/colmena/RanurasPalabra';
 import { useVozRonda } from '@/components/juegos/colmena/useVozRonda';
 import { RelojRonda } from '@/components/juegos/pares/RelojRonda';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
@@ -41,27 +42,17 @@ const RANURAS = {
   anchoMin: 12,
 };
 
+/**
+ * El panal: cada fila mide `layout.tapMin` de alto (esa es el área táctil de cada ficha). El hueco es de 5 y no de 4
+ * para que la sexta columna quepa en los 328 dp de un teléfono de 360.
+ */
+const PANAL = { toqueMin: layout.tapMin, hueco: 5 };
+
+/** La pista enciende su ficha en `senal` este rato antes de que salga sola. */
+const PISTA_BRILLO_MS = motionDuration.base;
+
 /** Cuánto se bloquea "Siguiente" tras tocarlo, para no procesar dos toques. */
 const AVANZAR_DEBOUNCE_MS = 400;
-
-/**
- * A partir de cuántas fichas el teclado empieza a apretar. Con señuelos,
- * una palabra larga puede traer hasta ~26 fichas (tope de 22 letras en
- * esUsable + 4 señuelos como máximo en los niveles); de ahí para arriba
- * conviene encoger antes de que el teclado se desborde.
- */
-const MUCHAS_LETRAS = 16;
-
-/** Lado de cada ficha de letra: se encoge con muchas fichas, nunca por
- * debajo del mínimo táctil de la app (layout.tapMin, ya arriba de 44px). */
-function ladoLetra(cantidad: number): number {
-  return cantidad > MUCHAS_LETRAS ? layout.tapMin : 54;
-}
-
-/** Espacio entre fichas: igual que el lado, se aprieta con muchas letras. */
-function huecoLetras(cantidad: number): number {
-  return cantidad > MUCHAS_LETRAS ? space.xs : space.sm;
-}
 
 /**
  * P-24, Colmena.
@@ -99,9 +90,6 @@ export function ColmenaScreen() {
   }, []);
 
   const [rounds, setRounds] = useState<ColmenaRound[]>([]);
-  // Cara y cubitos. El numero se relanza en cada respuesta;
-  // no hace falta apagarlo con un temporizador.
-  const reaccion = useReaccion();
   const [idx, setIdx] = useState(0);
   const [armado, setArmado] = useState('');
   const [usadas, setUsadas] = useState<number[]>([]);
@@ -120,7 +108,13 @@ export function ColmenaScreen() {
   const avanzandoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const empezoEn = useRef(Date.now());
-  const { estilo: estiloHuecos, fallo: sacudirHuecos, acierto: pulsarHuecos } = useEfectoResultado();
+  // Lo que solo se dibuja: qué fichas vuelan y hacia dónde, y la última letra que no iba.
+  const [colocadas, setColocadas] = useState<Colocada[]>([]);
+  const [rechazo, setRechazo] = useState<RechazoFicha | null>(null);
+  const rechazoId = useRef(0);
+  // Dónde queda cada caja en el contenido del scroll: los vuelos se calculan contra estas dos.
+  const origenRanuras = useRef({ x: 0, y: 0 });
+  const origenPanal = useRef({ x: 0, y: 0 });
   // El color de error dura lo que el efecto (`base`) y se apaga solo.
   const [falloLetra, setFalloLetra] = useState(false);
   useEffect(() => {
@@ -159,6 +153,52 @@ export function ColmenaScreen() {
     () => distribuirRanuras(forma, anchoVentana - space.lg * 2, RANURAS),
     [forma, anchoVentana]
   );
+  const disposicion = useMemo(
+    () => disposicionPanal(round?.letras.length ?? 0, anchoVentana - space.lg * 2, PANAL),
+    [round, anchoVentana]
+  );
+  // Cada letra aparece en su ranura cuando llega la ficha que vuela hasta ella.
+  const retrasos = useMemo(() => {
+    const r: number[] = [];
+    for (const c of colocadas) r[c.ranura] = c.retraso + DURACION_VUELO;
+    return r;
+  }, [colocadas]);
+
+  /** El vuelo de una ficha del panal a una ranura, del centro de una al centro de la otra. */
+  const vueloA = useCallback(
+    (ficha: number, ranura: number, tipo: Vuelo['tipo'], retraso: number): Vuelo | null => {
+      const h = disposicion.hexagonos[ficha];
+      const r = distribucion.ranuras[ranura];
+      if (!h || !r) return null;
+      const centroFichaX = origenPanal.current.x + h.x + disposicion.hexAncho / 2;
+      const centroFichaY = origenPanal.current.y + h.y + disposicion.hexAlto / 2;
+      const centroRanuraX = origenRanuras.current.x + r.x + distribucion.ranuraAncho / 2;
+      const centroRanuraY = origenRanuras.current.y + r.y + distribucion.ranuraAlto / 2;
+      return {
+        dx: centroRanuraX - centroFichaX,
+        dy: centroRanuraY - centroFichaY,
+        ranuraAncho: distribucion.ranuraAncho,
+        ranuraAlto: distribucion.ranuraAlto,
+        fuente: fuenteDeRanura(distribucion.ranuraAncho),
+        retraso,
+        tipo,
+      };
+    },
+    [disposicion, distribucion]
+  );
+
+  /** Las fichas que faltan vuelan una por una a su ranura («No me sale» y el tiempo). Solo dibuja. */
+  const volarFaltantes = useCallback(() => {
+    if (!round) return;
+    const fichas = fichasParaCompletar(round.letras, usadas, round.objetivo, armado.length);
+    const nuevas: Colocada[] = [];
+    fichas.forEach((ficha, j) => {
+      const ranura = armado.length + j;
+      const vuelo = vueloA(ficha, ranura, 'ayuda', retrasoVuelo(j, fichas.length));
+      if (vuelo) nuevas.push({ ...vuelo, ficha, ranura });
+    });
+    setColocadas((prev) => [...prev, ...nuevas]);
+  }, [round, usadas, armado, vueloA]);
 
   useEffect(() => {
     empezoEn.current = Date.now();
@@ -182,8 +222,10 @@ export function ColmenaScreen() {
         // mismo "fail" suave del resto de la app: ni esto es un regaño.
         haptics.failure();
         void audio.playFail();
-        sacudirHuecos();
         setFalloLetra(true);
+        // La ficha se asoma hacia la ranura que sigue y regresa; ahí no hay nada que descontar.
+        const hacia = vueloA(i, armado.length, 'toque', 0);
+        if (hacia) setRechazo({ id: ++rechazoId.current, ficha: i, dx: hacia.dx, dy: hacia.dy });
         return;
       }
 
@@ -193,13 +235,13 @@ export function ColmenaScreen() {
       if (!viaPista) void audio.playTap();
       setArmado(siguiente);
       setUsadas((prev) => [...prev, i]);
+      const vuelo = vueloA(i, armado.length, viaPista ? 'pista' : 'toque', viaPista ? PISTA_BRILLO_MS : 0);
+      if (vuelo) setColocadas((prev) => [...prev, { ...vuelo, ficha: i, ranura: armado.length }]);
 
       if (estaCompleta(round.objetivo, siguiente)) {
         setResuelta(true);
         setAciertos((a) => a + 1);
         haptics.success();
-        reaccion.celebra();
-        pulsarHuecos();
         void audio.playRoundResultBilingue(true, round.entry.audio_en, round.entry.audio_es);
         if (user) {
           void applyGameGrade(
@@ -212,8 +254,13 @@ export function ColmenaScreen() {
         }
       }
     },
-    [round, resuelta, usadas, armado, sacudirHuecos, pulsarHuecos, user]
+    [round, resuelta, usadas, armado, vueloA, user]
   );
+
+  // El panal no se vuelve a pintar entero con cada letra: las fichas reciben siempre la misma función.
+  const tocarRef = useRef(tocarLetra);
+  tocarRef.current = tocarLetra;
+  const alTocarFicha = useCallback((ficha: number) => tocarRef.current(ficha), []);
 
   const usarPista = useCallback(() => {
     if (!round || resuelta || pistas <= 0) return;
@@ -271,6 +318,13 @@ export function ColmenaScreen() {
       });
       return;
     }
+    // Lo de la ronda que se deja se limpia junto con el cambio: la nueva no pinta ni un cuadro con lo de la anterior.
+    setColocadas([]);
+    setRechazo(null);
+    setArmado('');
+    setUsadas([]);
+    setResuelta(false);
+    setAyudaDesde(null);
     setIdx((i) => i + 1);
   }, [avanzando, idx, rounds.length, aciertos, nav, nivel]);
 
@@ -285,6 +339,7 @@ export function ColmenaScreen() {
     if (!user || !round || resuelta) return;
     setResuelta(true);
     setAyudaDesde(armado.length);
+    volarFaltantes();
     setArmado(round.objetivo);
     haptics.failure();
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
@@ -295,12 +350,13 @@ export function ColmenaScreen() {
       Date.now() - empezoEn.current,
       'producir'
     );
-  }, [user, round, resuelta, armado]);
+  }, [user, round, resuelta, armado, volarFaltantes]);
 
   const rendirse = useCallback(async () => {
     if (!user || !round || resuelta) return;
     setResuelta(true);
     setAyudaDesde(armado.length);
+    volarFaltantes();
     setArmado(round.objetivo);
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
     await applyGameGrade(
@@ -310,7 +366,7 @@ export function ColmenaScreen() {
       Date.now() - empezoEn.current,
       'producir'
     );
-  }, [user, round, resuelta, armado]);
+  }, [user, round, resuelta, armado, volarFaltantes]);
 
   if (carga.estado === 'error') {
     return (
@@ -354,9 +410,6 @@ export function ColmenaScreen() {
 
   const puedePista =
     !resuelta && pistas > 0 && armado.length < round.objetivo.length;
-
-  const tamLetra = ladoLetra(round.letras.length);
-  const gapLetras = huecoLetras(round.letras.length);
 
   return (
     <Screen
@@ -403,7 +456,6 @@ export function ColmenaScreen() {
         </View>
       }
     >
-      <Trozos disparo={reaccion.trozos} tinte={color.world.fonetica} x="50%" y="50%" />
       <View style={styles.top}>
         <Header onBack={() => nav.goBack()} title={nivel ? `Nivel ${nivel}` : undefined} />
         <ProgresoHex total={rounds.length} actual={idx} resuelta={resuelta} />
@@ -437,17 +489,20 @@ export function ColmenaScreen() {
         <Text style={styles.instruccion}>¿Cómo se dice?</Text>
         <Text style={styles.pista}>{round.pista}</Text>
 
-        {!resuelta ? (
-          <BloqueEscuchar
-            escuchas={escuchas}
-            sonando={sonandoEscuchar}
-            voz={voz}
-            envolvente={analisis?.envolvente ?? []}
-            onEscuchar={() => void escucharPalabra()}
-          />
-        ) : null}
+        <BloqueEscuchar
+          escuchas={escuchas}
+          sonando={sonandoEscuchar}
+          voz={voz}
+          envolvente={analisis?.envolvente ?? []}
+          onEscuchar={() => void escucharPalabra()}
+          visible={!resuelta}
+        />
 
-        <Animated.View style={estiloHuecos}>
+        <View
+          onLayout={(e) => {
+            origenRanuras.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y };
+          }}
+        >
           <RanurasPalabra
             key={idx}
             distribucion={distribucion}
@@ -457,38 +512,33 @@ export function ColmenaScreen() {
             resolucion={resuelta ? (ayudaDesde === null ? 'acierto' : 'ayuda') : null}
             desdeAyuda={ayudaDesde ?? round.objetivo.length}
             fallo={falloLetra}
+            retrasos={retrasos}
           />
-        </Animated.View>
+        </View>
+
+        <View style={styles.espacio} />
+
+        <View
+          onLayout={(e) => {
+            origenPanal.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y };
+          }}
+        >
+          <Panal
+            key={idx}
+            letras={round.letras}
+            disposicion={disposicion}
+            colocadas={colocadas}
+            rechazo={rechazo}
+            onTocar={alTocarFicha}
+          />
+        </View>
 
         {resuelta ? (
           <Animated.View entering={aparecer()} style={styles.revelado}>
             <Text style={styles.frase}>{round.entry.phrase}</Text>
             <Text style={styles.fraseEs}>{round.entry.spanish_main}</Text>
           </Animated.View>
-        ) : (
-          <View style={[styles.letras, { gap: gapLetras }]}>
-            {round.letras.map((l, i) => {
-              const gastada = usadas.includes(i);
-              return (
-                <Presionable
-                  key={`letra-${i}`}
-                  onPress={() => tocarLetra(i)}
-                  disabled={gastada}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Letra ${l}`}
-                  hitSlop={4}
-                  style={[styles.letra, { width: tamLetra, height: tamLetra }, gastada && styles.letraGastada]}
-                >
-                  <Text
-                    style={[styles.letraTexto, gastada && styles.letraTextoOff]}
-                  >
-                    {l}
-                  </Text>
-                </Presionable>
-              );
-            })}
-          </View>
-        )}
+        ) : null}
       </ScrollView>
     </Screen>
   );
@@ -498,7 +548,10 @@ const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   reloj: { marginTop: space.sm },
   body: { flex: 1 },
+  // Con poco contenido el panal queda pegado abajo (zona del pulgar); con mucho, todo hace scroll.
+  espacio: { flex: 1 },
   bodyContenido: {
+    flexGrow: 1,
     paddingHorizontal: space.lg,
     alignItems: 'center',
     gap: space.lg,
@@ -522,28 +575,6 @@ const styles = StyleSheet.create({
     color: color.text,
     textAlign: 'center',
   },
-  letras: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    flexShrink: 1,
-  },
-  letra: {
-    // Lado fijado en el render según ladoLetra(): aquí solo el resto.
-    borderRadius: radius.md,
-    backgroundColor: color.surfaceAlt,
-    borderWidth: 1,
-    borderColor: color.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  letraGastada: { backgroundColor: color.surface, borderColor: color.surface },
-  letraTexto: {
-    fontSize: font.size.xl,
-    color: color.text,
-    fontFamily: font.family.heading,
-  },
-  letraTextoOff: { color: 'transparent' },
   revelado: { alignItems: 'center', gap: space.xs },
   frase: {
     fontSize: font.size.lg,

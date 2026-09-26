@@ -26,6 +26,11 @@ const RELLENO: Record<Exclude<Estado, 'vacia'>, { fondo: string; linea: string; 
   fallo: { fondo: color.wrongSoft, linea: color.wrong, letra: color.text },
 };
 
+/** El tamaño de la letra en una ranura de ese ancho: 22 con la ranura completa, y proporcional si se encogió. */
+export function fuenteDeRanura(ancho: number): number {
+  return Math.max(LETRA_MIN, Math.round((LETRA_COMPLETA * ancho) / ANCHO_COMPLETA));
+}
+
 function estadoDe(k: number, armado: number, resolucion: Resolucion | null, desdeAyuda: number, fallo: boolean): Estado {
   if (resolucion === 'acierto') return 'acierto';
   if (resolucion === 'ayuda') return k >= desdeAyuda ? 'ayuda' : 'llena';
@@ -161,7 +166,7 @@ interface Props {
 export function RanurasPalabra({ distribucion, palabras, objetivo, armado, resolucion, desdeAyuda, fallo, retrasos }: Props) {
   const total = objetivo.length;
   const siguiente = resolucion === null && armado.length < total;
-  const fuente = Math.max(LETRA_MIN, Math.round((LETRA_COMPLETA * distribucion.ranuraAncho) / ANCHO_COMPLETA));
+  const fuente = fuenteDeRanura(distribucion.ranuraAncho);
   const foco = distribucion.ranuras[Math.min(armado.length, total - 1)];
 
   return (
