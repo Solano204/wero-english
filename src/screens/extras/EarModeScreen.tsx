@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, IconButton, Screen } from '@/components/base';
-import { AnilloRadio, BarraSesion, FraseKaraoke, PuntosRepeticion, useVozEnVivo } from '@/components/fx';
+import { AnilloRadio, BarraSesion, FraseKaraoke, PuntosRepeticion, useBolsillo, useVozEnVivo } from '@/components/fx';
 import { getRandomEntries } from '@/db/queries';
 import { analizar } from '@/domain/marcas';
 import { useCarga } from '@/hooks/useCarga';
@@ -145,6 +145,10 @@ export function EarModeScreen() {
     [actual, vozEs.duracion]
   );
 
+  // Modo bolsillo: sin tocar la pantalla mientras suena, baja el brillo de todo menos el anillo y la frase.
+  const { bolsillo, brillo, despertar } = useBolsillo(playing);
+  const estiloBrillo = useAnimatedStyle(() => ({ opacity: brillo.value }));
+
   const detener = useCallback(() => {
     cicloRef.current++;
     playingRef.current = false;
@@ -273,12 +277,20 @@ export function EarModeScreen() {
 
   return (
     <Screen padded={false}>
-      <View style={styles.cabeza}>
+      {/* Cualquier toque despierta la pantalla, sin quitárselo a quien lo recibe (devuelve false). */}
+      <View
+        style={styles.flex}
+        onStartShouldSetResponderCapture={() => {
+          despertar();
+          return false;
+        }}
+      >
+      <Animated.View style={[styles.cabeza, estiloBrillo]}>
         <Header onBack={() => nav.goBack()} title="Modo oído" subtitle={`${idx + 1} de ${queue.length}`} />
         <View style={styles.barra}>
           <BarraSesion hecho={idx} meta={queue.length} />
         </View>
-      </View>
+      </Animated.View>
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <AnilloRadio
@@ -287,23 +299,25 @@ export function EarModeScreen() {
           diametro={altoVentana < ALTO_COMPACTO ? ANILLO_COMPACTO : ANILLO}
           idioma={idioma}
           activo={playing}
-          bolsillo={false}
+          bolsillo={bolsillo}
         />
 
         <Animated.View key={actual.id} entering={fraseEntra()} exiting={fraseSale()} style={styles.frase}>
           {analisisEn ? <FraseKaraoke palabras={analisisEn.palabras} voz={vozEn} tamano="display" apagada={sonandoEs} /> : null}
           <Traduccion texto={actual.spanish_main} luz={sonandoEs} />
-          <PuntosRepeticion ronda={ronda} />
+          <Animated.View style={estiloBrillo}>
+            <PuntosRepeticion ronda={ronda} />
+          </Animated.View>
         </Animated.View>
 
         {empezo ? null : (
-          <Animated.Text exiting={desaparecer()} style={styles.hint}>
+          <Animated.Text exiting={desaparecer()} style={[styles.hint, estiloBrillo]}>
             Guarda el teléfono. Cada frase suena en inglés y en español, tres veces, para que la repitas en voz alta.
           </Animated.Text>
         )}
       </ScrollView>
 
-      <View style={styles.controles}>
+      <Animated.View style={[styles.controles, estiloBrillo]}>
         <IconButton icono="previous" etiqueta="Anterior" tamano="lg" onPress={() => saltar(-1)} disabled={idx === 0} />
         <Button
           label={playing ? 'Pausar' : empezo ? 'Reanudar' : 'Empezar'}
@@ -319,6 +333,7 @@ export function EarModeScreen() {
           onPress={() => saltar(1)}
           disabled={idx >= queue.length - 1}
         />
+      </Animated.View>
       </View>
     </Screen>
   );

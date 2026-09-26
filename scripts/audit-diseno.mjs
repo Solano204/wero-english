@@ -385,7 +385,7 @@ function auditaMovimiento(archivos) {
 
 /**
  * La señal en vivo (v5.0). Alcance: los efectos de `src/components/fx/`, Practicar y la barra de pestañas.
- * Los bucles anteriores a la v5.0 (Skeleton, respiro de EarModeScreen) no entran: viven donde ya se veían.
+ * Los bucles anteriores a la v5.0 (Skeleton) no entran: viven donde ya se veían. Modo oído ya es de la señal.
  */
 /** Estudio 5.0: las piezas de la tarjeta y la pantalla que animan (el resto de `card/` es anterior a la señal). */
 const ESTUDIO_SENAL = new Set([
@@ -407,6 +407,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/dulces/') || r === 'src/screens/games/DulcesScreen.tsx' ||
   r.startsWith('src/components/juegos/colmena/') || r === 'src/screens/games/ColmenaScreen.tsx' ||
   r.startsWith('src/components/juegos/cazala/') || r === 'src/screens/games/CazalaScreen.tsx' ||
+  r === 'src/screens/extras/EarModeScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -433,6 +434,8 @@ const LOOPS_POR_PANTALLA = {
   Colmena: [],
   // Cázala: el héroe es la cacería en el audio (karaoke, pulsos y transformación movidos por la posición de la voz, que solo corre mientras suena); ningún bucle.
   Cazala: [],
+  // Modo oído: el héroe es la radio (`AnilloRadio`), un canvas de Skia que solo dibuja mientras suena la voz (un `useFrameCallback` apagado en pausa, sin foco y en segundo plano); es el único de la pantalla.
+  ModoOido: ['AnilloRadio.tsx'],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
@@ -847,7 +850,7 @@ ${L(c.S.mot5Exentos)}
 - Los íconos salen de \`Icon\` (Phosphor). Quedan flechas y marcas (← → ✓ ✗) como contenido en \`catalogo.json\`, \`gramatica.json\` y \`medios.json\`: son notación de las lecciones, no íconos de interfaz, y el audit no las cuenta.
 - \`padding: 1\` (Card, FeedbackBand, MuroDesbloqueo, TabNavigator) es la técnica del filo de luz y no se cuenta en ESP-1.
 - \`impeccable detect src\` devolvió 0 hallazgos; sus patrones son de HTML y CSS, así que ese 0 no dice nada de esta app.
-- Los bucles anteriores a la v5.0 (\`Skeleton\` mientras carga, el respiro de \`EarModeScreen\`) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (\`src/components/fx/\`, Practicar y la barra de pestañas).
+- Los bucles anteriores a la v5.0 (\`Skeleton\` mientras carga) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (\`src/components/fx/\`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens \`space\` y \`font.size\`, no valores calculados en ejecución.
 `;
 };

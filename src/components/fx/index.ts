@@ -20,6 +20,7 @@ export { PuntosRepeticion } from './PuntosRepeticion';
 export { TarjetaTilt } from './TarjetaTilt';
 export { TransicionHoy } from './TransicionHoy';
 export { iniciarTransicionHoy, publicarBarraEstudio } from './estadoTransicion';
+export { useBolsillo } from './useBolsillo';
 export { useDesfaseVentana, type Rect } from './useDesfaseVentana';
 export { useReloj, useSenalActiva } from './useSenalActiva';
 export { useVozEnVivo, type VozEnVivo } from './useVozEnVivo';
