@@ -202,12 +202,41 @@ prueba('la carta: frase en text con karaoke (no en accent), IPA centrado, grupos
   assert.ok(!/iniciales/i.test(carta), 'sin iniciales');
 });
 
-prueba('el mazo (si ya existe): solo tres cartas, el umbral sale de mazo.ts y hay modo sin movimiento', () => {
-  if (!existe('src/components/mazo/MazoCartas.tsx')) return;
+prueba('el mazo: solo tres cartas, el umbral sale de mazo.ts, se asoman detrás, la que sube y la que sale cambian en el mismo cuadro y no hay abanico ni gesto con reducir movimiento', () => {
+  const mazo = sinComentarios(leer('src/components/mazo/MazoCartas.tsx'));
+  assert.match(mazo, /indicesVisibles\(actual, entradas\.length\)/, 'solo se montan las cartas de indicesVisibles');
+  assert.match(mazo, /decidirGesto\(tx\.value, ty\.value, e\.velocityX, e\.velocityY\)/, 'el umbral sale de mazo.ts');
+  assert.match(mazo, /transformOrigin: '50% 100%'/, 'las de atrás conservan el borde de abajo: por eso se asoman');
+  assert.match(mazo, /topIdx\.value = n \+ 1;\s*tx\.value = 0;\s*ty\.value = 0;\s*rot\.value = 0;/, 'la de atrás pasa a ser la de arriba y el dedo vuelve a cero a la vez');
+  assert.match(mazo, /regresar\(\);/, 'si no pasa el umbral regresa con resorte');
+  assert.match(mazo, /withSpring\(0, motionSpring\.rebote\)/);
+  assert.match(mazo, /if \(g === 'guardar'\) runOnJS\(guardado\)\(\);\s*regresar\(\);/, 'guardar no pasa a la siguiente: la carta regresa');
+  assert.match(mazo, /cancelAnimation\(pos\);/, 'al desmontar se sueltan las animaciones');
+  const fin = mazo.indexOf('const pila = ');
+  const reducido = mazo.slice(mazo.lastIndexOf('if (reducido) {', fin), fin);
+  assert.ok(reducido.length > 100 && !/GestureDetector|IndicadorArrastre|abre/.test(reducido), 'con reducir movimiento no hay gesto, indicador ni abanico');
+  assert.match(reducido, /aparecerRapido\(\)/, 'la carta cambia con un fundido de 150 ms');
+  const motion = leer('src/theme/motion.ts');
+  const dur = (nombre) => Number(motion.match(new RegExp(`${nombre}: (\\d+),`))?.[1]);
+  assert.match(motion, /export const aparecerRapido = \(\) => FadeIn\.duration\(motionDuration\.rapido\)/);
+  assert.equal(dur('rapido'), 150);
+  const bloque = motion.slice(motion.indexOf('export const motionMazo'));
+  assert.match(bloque, /abre: motionDuration\.base,\s*junta: motionDuration\.lento,\s*escalon: 60,/);
+  const abanico = dur('base') + dur('lento') + 60 * (M.MAZO.cartas - 1);
+  assert.ok(abanico <= 700, `el abanico dura ${abanico} ms y no debe pasar de 700`);
+});
+
+prueba('el mazo vacío y el foco: al acabarse las 60 se ve vacío y se pide otra baraja; perder el foco corta la voz', () => {
   const mazo = leer('src/components/mazo/MazoCartas.tsx');
-  assert.match(mazo, /indicesVisibles\(/, 'solo se montan las cartas de indicesVisibles');
-  assert.match(mazo, /decidirGesto\(/, 'el umbral sale de mazo.ts');
-  assert.match(mazo, /useMovimientoReducido/);
+  assert.match(mazo, /export function MazoVacio\(\)/);
+  assert.match(mazo, /<BordePunteado/);
+  assert.match(mazo, /Barajando…/);
+  const pantalla = sinComentarios(leer('src/screens/extras/AzarScreen.tsx'));
+  assert.match(pantalla, /setBarajando\(true\);\s*setPool\(\[\]\);\s*void cargar\(\);/, 'la baraja nueva se pide con la misma carga');
+  assert.match(pantalla, /<MazoVacio \/>/);
+  assert.match(pantalla, /useFocusEffect\(/);
+  assert.match(pantalla, /key=\{tanda\}/, 'cada baraja arma un mazo nuevo');
+  assert.match(pantalla, /if \(guardada\) haptics\.tapLight\(\);\s*else void alternarGuardada\(\);/, 'deslizar arriba nunca quita una frase guardada');
 });
 
 console.log(`\ncheck:mazo ${total} pruebas ok\n`);

@@ -170,8 +170,8 @@ export const motionMazo = {
   lanzar: motionDuration.base,
   velocidadBoton: 1200,
   /** Grados que se abre cada carta de atrás en el abanico, y cuánto se separa hacia los lados (dp). */
-  abanico: 9,
-  separa: 28,
+  abanico: 6,
+  separa: 12,
 } as const;
 
 /** Bucles largos. */

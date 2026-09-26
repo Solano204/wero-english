@@ -218,7 +218,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `discover/PackDetailScreen.tsx` | ✓ `:35` | ✗ | ✓ `:61` |
 | `discover/WorldDetailScreen.tsx` | ✓ `:29` | ✗ | ✓ `:52` |
 | `entry/BootScreen.tsx` | ✓ `:88` | ✓ `:37` | ✓ `:25` |
-| `extras/AzarScreen.tsx` | ✓ `:75` | ✓ `:234` | ✓ `:225` |
+| `extras/AzarScreen.tsx` | ✓ `:75` | ✓ `:247` | ✓ `:237` |
 | `extras/ContractionsScreen.tsx` | ✓ `:34` | ✓ `:45` | ✓ `:92` |
 | `extras/EarModeScreen.tsx` | ✓ `:120` | ✓ `:255` | ✓ `:238` |
 | `extras/LecturaScreen.tsx` | ✓ `:91` | ✓ `:317` | ✓ `:331` |

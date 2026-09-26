@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { BotonGuardar } from '@/components/detalle';
 import type { Modo, Sonando } from '@/components/mazo/CartaFrase';
-import { MazoCartas, type ManejadorMazo } from '@/components/mazo/MazoCartas';
+import { MazoCartas, MazoVacio, type ManejadorMazo } from '@/components/mazo/MazoCartas';
 import { getRandomEntries, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
@@ -116,6 +116,18 @@ export function AzarScreen() {
       audio.stop();
     };
   }, []);
+
+  // Perder el foco también corta la voz: el reproductor de frases es uno solo y compartido.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        vozToken.current++;
+        audio.stop();
+        setSonando(null);
+      },
+      []
+    )
+  );
 
   // El estado real de la frase de arriba: sin esto, «Guardar» quitaría de Mi mazo una que ya estaba guardada.
   const entryId = entry?.id;
@@ -231,18 +243,10 @@ export function AzarScreen() {
     );
   }
 
-  if ((loading || barajando) && pool.length === 0) {
-    return (
-      <Screen>
-        <Header onBack={() => nav.goBack()} title="Frases sueltas" />
-        <View style={styles.centro}>
-          <Text style={styles.cargando}>Barajando…</Text>
-        </View>
-      </Screen>
-    );
-  }
+  // Mientras llega la baraja, o al acabarse las 60, el mazo se ve vacío en su mismo lugar: la pantalla no salta.
+  const mazoVacio = (loading || barajando) && pool.length === 0;
 
-  if (!entry) {
+  if (!entry && !mazoVacio) {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Frases sueltas" />
@@ -261,22 +265,26 @@ export function AzarScreen() {
       <Header onBack={() => nav.goBack()} title="Frases sueltas" />
 
       <View style={styles.zona}>
-        <MazoCartas
-          key={tanda}
-          ref={mazo}
-          entradas={pool}
-          actual={i}
-          sonando={sonando}
-          onSonar={sonar}
-          guardada={guardada}
-          onGuardar={alternarGuardada}
-          onGuardarDeslizando={guardarDeslizando}
-          alLanzar={alLanzar}
-          alAvanzar={alAvanzar}
-        />
+        {entry ? (
+          <MazoCartas
+            key={tanda}
+            ref={mazo}
+            entradas={pool}
+            actual={i}
+            sonando={sonando}
+            onSonar={sonar}
+            guardada={guardada}
+            onGuardar={alternarGuardada}
+            onGuardarDeslizando={guardarDeslizando}
+            alLanzar={alLanzar}
+            alAvanzar={alAvanzar}
+          />
+        ) : (
+          <MazoVacio />
+        )}
       </View>
 
-      <View style={styles.pie}>
+      <View style={[styles.pie, !entry && styles.pieApagado]} pointerEvents={entry ? 'auto' : 'none'}>
         <View style={styles.boton}>
           <Button label="Siguiente" icon="arrow-right" iconAlFinal onPress={pedirSiguiente} size="lg" full />
         </View>
@@ -293,6 +301,7 @@ export function AzarScreen() {
 const styles = StyleSheet.create({
   zona: { flex: 1 },
   pie: { flexDirection: 'row', gap: space.sm, marginTop: space.lg },
+  pieApagado: { opacity: 0.45 },
   boton: { flex: 1 },
   aviso: {
     fontFamily: font.family.body,
@@ -301,6 +310,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: space.sm,
   },
-  centro: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  cargando: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
 });
