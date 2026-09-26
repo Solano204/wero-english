@@ -2,14 +2,17 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated from 'react-native-reanimated';
+import Animated, { useSharedValue } from 'react-native-reanimated';
 import { Button, Card, EmptyState, Header, Icon, Screen } from '@/components/base';
 import { AudioButton } from '@/components/card';
+import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
 import { MuroDesbloqueo } from '@/components/unlock';
+import { segmentos } from '@/domain/gramatica';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
-import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
+import { color, font, radius, space, text, aparecerSubiendo, escalon } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
 import type { GramaticaTema } from '@/types';
 import { GRATIS_POR_BLOQUE } from './GramaticaScreen';
@@ -64,6 +67,8 @@ export function GramaticaTemaScreen() {
   // música de fondo solo estorba, a diferencia de Estudio donde queda
   // más baja de fondo.
   useMusicaPantalla('silencio');
+  const reducido = useMovimientoReducido();
+  const scrollY = useSharedValue(0);
 
   const tema = useMemo(
     () => gramatica.temas.find((t) => t.id === params.temaId) ?? null,
@@ -139,14 +144,16 @@ export function GramaticaTemaScreen() {
   }
 
   const cuerpo = (
-    <Screen scroll>
+    <Screen scroll scrollY={scrollY}>
       <Header
         onBack={() => nav.goBack()}
         title={gramatica.bloques[tema.bloque]?.nombre ?? 'Gramática'}
       />
 
-      <Animated.View entering={aparecerSubiendo()}>
-        <Text style={styles.titulo}>{tema.titulo}</Text>
+      <Animated.View entering={reducido ? undefined : aparecerSubiendo()}>
+        <Text style={text.h1} accessibilityRole="header">
+          {tema.titulo}
+        </Text>
         <Text style={styles.gancho}>{tema.gancho}</Text>
       </Animated.View>
 
@@ -159,9 +166,7 @@ export function GramaticaTemaScreen() {
       </Bloque>
 
       <Bloque titulo="Cómo se arma" retraso={escalon(3)}>
-        <Card style={styles.formulaCard}>
-          <Negrita texto={tema.formula} estilo={styles.formula} />
-        </Card>
+        <FormulaFichas formula={tema.formula} scrollY={scrollY} />
       </Bloque>
 
       <Bloque titulo="Así se dice" retraso={escalon(4)}>
@@ -240,9 +245,11 @@ export function GramaticaTemaScreen() {
 
       {tema.ojo ? (
         <Bloque titulo="Ojo" retraso={escalon(7)}>
-          <Card style={styles.ojo}>
-            <Negrita texto={tema.ojo} estilo={styles.ojoTxt} />
-          </Card>
+          <View style={styles.ojo}>
+            <View style={styles.ojoBorde} />
+            <Icon name="info" size="md" color={color.accent} />
+            <Negrita texto={tema.ojo} estilo={styles.ojoTexto} />
+          </View>
         </Bloque>
       ) : null}
     </Screen>
@@ -269,8 +276,9 @@ export function GramaticaTemaScreen() {
 function Bloque({ titulo, retraso, children }: {
   titulo: string; retraso: number; children: React.ReactNode;
 }) {
+  const reducido = useMovimientoReducido();
   return (
-    <Animated.View entering={aparecerSubiendo(retraso)} style={styles.seccion}>
+    <Animated.View entering={reducido ? undefined : aparecerSubiendo(retraso)} style={styles.seccion}>
       <Text style={styles.seccionTitulo}>{titulo}</Text>
       {children}
     </Animated.View>
@@ -282,32 +290,24 @@ function Bloque({ titulo, retraso, children }: {
  * Son cuatro líneas y evita 40 KB de dependencia para un solo símbolo.
  */
 function Negrita({ texto, estilo }: { texto: string; estilo: object }) {
-  const partes = texto.split(/\*\*(.+?)\*\*/g);
   return (
     <Text style={estilo}>
-      {partes.map((p, i) =>
-        i % 2 === 1 ? (
-          <Text key={i} style={styles.fuerte}>{p}</Text>
-        ) : (
-          <Text key={i}>{p}</Text>
-        )
-      )}
+      {segmentos(texto).map((s, i) => (
+        <Text key={i} style={s.fuerte ? styles.fuerte : undefined}>
+          {s.texto}
+        </Text>
+      ))}
     </Text>
   );
 }
 
+const ANCHO_BORDE_OJO = 3;
+
 const styles = StyleSheet.create({
-  titulo: {
-    fontSize: font.size.xxl,
-    letterSpacing: font.size.xxl * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-    lineHeight: font.size.xxl * 1.2,
-  },
   gancho: {
     fontFamily: font.family.body,
     fontSize: font.size.md,
-    color: color.accent,
+    color: color.textMuted,
     marginTop: space.xs,
     lineHeight: font.size.md * 1.5,
   },
@@ -325,14 +325,6 @@ const styles = StyleSheet.create({
     fontSize: font.size.md,
     color: color.text,
     lineHeight: font.size.md * 1.6,
-  },
-  formulaCard: { paddingVertical: space.lg },
-  formula: {
-    fontFamily: font.family.body,
-    fontSize: font.size.lg,
-    color: color.accent,
-    textAlign: 'center',
-    lineHeight: font.size.lg * 1.5,
   },
   escucharTodos: { alignSelf: 'flex-start', marginBottom: space.sm },
   ejemplo: { gap: 4 },
@@ -374,12 +366,24 @@ const styles = StyleSheet.create({
     lineHeight: font.size.md * 1.55,
     marginTop: space.xs,
   },
-  ojo: { backgroundColor: color.accentSoft, borderRadius: radius.lg },
-  ojoTxt: {
+  ojo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: space.md,
+    backgroundColor: color.surfaceAlt,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    paddingVertical: space.lg,
+    paddingRight: space.lg,
+    paddingLeft: space.lg + ANCHO_BORDE_OJO,
+  },
+  ojoBorde: { position: 'absolute', top: 0, bottom: 0, left: 0, width: ANCHO_BORDE_OJO, backgroundColor: color.accent },
+  ojoTexto: {
+    flex: 1,
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.text,
-    lineHeight: font.size.sm * 1.6,
+    lineHeight: font.size.md * 1.5,
   },
   fuerte: { fontFamily: font.family.bodyStrong, color: color.text },
 });
