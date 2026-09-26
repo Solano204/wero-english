@@ -10,6 +10,7 @@ import { CaretRightIcon } from 'phosphor-react-native/src/icons/CaretRight';
 import { CaretUpIcon } from 'phosphor-react-native/src/icons/CaretUp';
 import { ChartLineUpIcon } from 'phosphor-react-native/src/icons/ChartLineUp';
 import { CheckIcon } from 'phosphor-react-native/src/icons/Check';
+import { CellSignalSlashIcon } from 'phosphor-react-native/src/icons/CellSignalSlash';
 import { ClockIcon } from 'phosphor-react-native/src/icons/Clock';
 import { CompassIcon } from 'phosphor-react-native/src/icons/Compass';
 import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
@@ -40,6 +41,7 @@ import { HeadphonesIcon } from 'phosphor-react-native/src/icons/Headphones';
 import { HexagonIcon } from 'phosphor-react-native/src/icons/Hexagon';
 import { MicrophoneIcon } from 'phosphor-react-native/src/icons/Microphone';
 import { PuzzlePieceIcon } from 'phosphor-react-native/src/icons/PuzzlePiece';
+import { ShareNetworkIcon } from 'phosphor-react-native/src/icons/ShareNetwork';
 import { ShuffleIcon } from 'phosphor-react-native/src/icons/Shuffle';
 import { TargetIcon } from 'phosphor-react-native/src/icons/Target';
 import { WaveformIcon } from 'phosphor-react-native/src/icons/Waveform';
@@ -119,6 +121,9 @@ const ICONOS = {
   link: { Componente: LinkIcon },
   // El reloj de ronda de los juegos (Pares): el ícono dice que la barra es tiempo.
   clock: { Componente: ClockIcon },
+  // La señal que se rompe de Errores que te delatan: lo que entienden no es lo que dijiste.
+  'signal-broken': { Componente: CellSignalSlashIcon },
+  share: { Componente: ShareNetworkIcon },
 } satisfies Record<string, Definicion>;
 
 export type IconName = keyof typeof ICONOS;

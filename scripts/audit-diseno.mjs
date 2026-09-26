@@ -415,6 +415,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/phrasal/') || r === 'src/screens/extras/PhrasalScreen.tsx' || r === 'src/screens/extras/PhrasalVerboScreen.tsx' ||
   r.startsWith('src/components/lectura/') || r === 'src/screens/extras/LecturasScreen.tsx' || r === 'src/screens/extras/LecturaScreen.tsx' ||
   r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
+  r.startsWith('src/components/errores/') || r === 'src/screens/extras/ErrorsScreen.tsx' || r === 'src/screens/extras/ErrorDetailScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -453,6 +454,8 @@ const LOOPS_POR_PANTALLA = {
   Lectura: [],
   // Azar: el héroe es el mazo de cartas (transformaciones movidas por un gesto y resortes en el hilo de UI); vistas, ningún canvas de Skia ni bucle.
   Azar: [],
+  // Errores: el héroe del detalle es la señal que se rompe (un cable y un glitch de una sola vez, sin bucles); vistas y un lienzo de Skia que solo dibuja mientras corre la secuencia.
+  Errores: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

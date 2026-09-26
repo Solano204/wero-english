@@ -1,5 +1,6 @@
 export {
   FONDO,
+  desvaneceDerecha,
   sol,
   filoLuz,
   filoOk,

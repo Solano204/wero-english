@@ -196,6 +196,9 @@ export const color = {
  */
 export const FONDO: [string, string] = ['#0E1620', color.bgFin];
 
+/** El desvanecido del borde derecho de una fila que scrollea sobre el fondo de `Screen`: su tono de arriba, de transparente a sólido. */
+export const desvaneceDerecha: [string, string] = ['rgba(14, 22, 32, 0)', '#0E1620'];
+
 /** Dirección del sol. Se pasa como start/end en cada LinearGradient. */
 export const sol = {
   start: { x: 0, y: 0 },

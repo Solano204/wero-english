@@ -8,6 +8,7 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Badge, Button, Card, Header, Screen } from '@/components/base';
 import { AudioButton, SceneImage } from '@/components/card';
+import { MedidorGravedad } from '@/components/errores/MedidorGravedad';
 import { loadContent } from '@/store/content';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
@@ -74,13 +75,7 @@ export function ErrorDetailScreen() {
       </View>
 
       <View style={styles.tags}>
-        {err.gravedad === 3 ? (
-          <Badge label="Cambia el significado" tone="warn" small />
-        ) : err.gravedad === 2 ? (
-          <Badge label="Te delata" tone="warn" small />
-        ) : (
-          <Badge label="Suena raro" tone="neutral" small />
-        )}
+        <MedidorGravedad gravedad={err.gravedad} disposicion="fila" />
         {err.compartible ? <Badge label="Para contar" tone="accent" small /> : null}
       </View>
 
@@ -154,6 +149,6 @@ const styles = StyleSheet.create({
     color: color.text,
     lineHeight: font.size.md * 1.6,
   },
-  tags: { flexDirection: 'row', gap: space.xs, marginTop: space.lg },
+  tags: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.md, marginTop: space.lg },
   link: { marginTop: space.xl },
 });

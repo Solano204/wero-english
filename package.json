@@ -23,6 +23,7 @@
     "check:ruleta": "node scripts/check-ruleta.mjs",
     "check:lecturas": "node scripts/check-lecturas.mjs",
     "check:mazo": "node scripts/check-mazo.mjs",
+    "check:errores": "node scripts/check-errores.mjs",
     "check:color": "node scripts/check-color.mjs",
     "check:practicar": "node scripts/check-practicar.mjs",
     "check:marcas": "node scripts/check-marcas.mjs",

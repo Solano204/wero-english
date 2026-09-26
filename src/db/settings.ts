@@ -1,4 +1,5 @@
 import { getDb } from './client';
+import type { OrdenErrores } from '@/domain/errores';
 import type { Nivel } from '@/types';
 
 /** Ajustes por usuario. Se guardan como texto y se parsean al leer. */
@@ -44,6 +45,9 @@ export interface Settings {
 
   /** El lector ya mostró la leyenda de las frases subrayadas: desde entonces arranca plegada. */
   leyendaLecturaVista: boolean;
+
+  /** Cómo se ordena la lista de Errores que te delatan: los más graves primero, o en el orden del contenido. */
+  ordenErrores: OrdenErrores;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -72,6 +76,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dondeSeTraba: null,
   practicarGruposAbiertos: [],
   leyendaLecturaVista: false,
+  ordenErrores: 'graves',
 };
 
 /** Tope de notificaciones diarias. Más allá el sistema las agrupa igual. */
