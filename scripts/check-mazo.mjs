@@ -182,8 +182,8 @@ prueba('la pantalla: sin contador, con la nota, con el mismo pedido de 60 y guar
   assert.match(pantalla, /getRandomEntries\(filter\(\), 60\)/, 'la baraja se pide igual');
   assert.match(pantalla, /toggleFavorite\(user\.id, entry\.id\)/, 'guardar sigue usando toggleFavorite');
   assert.match(pantalla, /isFavorite\(user\.id, entryId\)/, 'lee el estado real como Detalle');
-  assert.match(pantalla, /<BotonGuardar variante="secondary"/, 'el botón de guardar no compite con «Siguiente»');
-  assert.match(pantalla, /<Button label="Siguiente" icon="arrow-right" iconAlFinal/, '«Siguiente» lleva texto y la flecha al final');
+  assert.match(pantalla, /<BotonGuardar\s+variante="secondary"/, 'el botón de guardar no compite con «Siguiente»');
+  assert.match(pantalla, /<Button\s+label="Siguiente"\s+icon="arrow-right"\s+iconAlFinal/, '«Siguiente» lleva texto y la flecha al final');
   assert.ok(!/'guardar'|'guardada'/.test(pantalla), 'sin «guardar» en minúscula');
   assert.ok(!/saveCardState|recordReview|calificar/i.test(pantalla), 'aquí no se guarda progreso');
 });

@@ -110,6 +110,10 @@ La misma acción se llama igual en toda la app.
 | Pasar de la historia a las preguntas | «Ver las preguntas»; entre capítulos, «Capítulo 2» | Continuar, Quiz, Examen, Test |
 | El avance de las tres preguntas | «Pregunta 2 de 3» (solo para el lector), «Siguiente» y, en la última, «Terminar»; para irse, «Salir sin contestar» | Enviar, Calificar, Comprobar, Listo |
 | El cierre de una historia | «Terminaste la historia», «Tenía 3 frases nuevas para ti» (con cero, «Ya conocías todas las frases de esta historia») y «Volver a las lecturas» | Felicidades, Puntaje, Calificación, Completada |
+| Pasar a otra frase en Frases sueltas | «Siguiente» (botón con la flecha al final); también deslizar la carta a la izquierda; el lector oye la acción «Siguiente» | Otra frase, Siguiente frase, Saltar |
+| Guardar desde Frases sueltas | «Guardar» y «Guardada» (el mismo botón de Detalle); también deslizar la carta hacia arriba; el lector oye «Guardar» o «Quitar de Mi mazo» | guardar en minúscula, Favorito, Marcar |
+| Oír la frase y luego su traducción | «Inglés y español», junto a «Español» | Ambos, Los dos, Reproducir todo |
+| Cuando se acaba la baraja de Frases sueltas | «Barajando…» sobre el mazo vacío | Cargando, Fin, Sin más frases |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 

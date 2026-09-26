@@ -286,10 +286,24 @@ export function AzarScreen() {
 
       <View style={[styles.pie, !entry && styles.pieApagado]} pointerEvents={entry ? 'auto' : 'none'}>
         <View style={styles.boton}>
-          <Button label="Siguiente" icon="arrow-right" iconAlFinal onPress={pedirSiguiente} size="lg" full />
+          <Button
+            label="Siguiente"
+            icon="arrow-right"
+            iconAlFinal
+            onPress={pedirSiguiente}
+            size="lg"
+            full
+            style={styles.botonPie}
+          />
         </View>
         <View style={styles.boton}>
-          <BotonGuardar variante="secondary" guardada={guardada} pulso={pulso} onPress={alternarGuardada} />
+          <BotonGuardar
+            variante="secondary"
+            guardada={guardada}
+            pulso={pulso}
+            onPress={alternarGuardada}
+            style={styles.botonPie}
+          />
         </View>
       </View>
 
@@ -303,6 +317,8 @@ const styles = StyleSheet.create({
   pie: { flexDirection: 'row', gap: space.sm, marginTop: space.lg },
   pieApagado: { opacity: 0.45 },
   boton: { flex: 1 },
+  // Dos botones de `lg` en 360 dp: con el padding de `xl` «Siguiente» y su flecha no caben; con `md` sí.
+  botonPie: { paddingHorizontal: space.md },
   aviso: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

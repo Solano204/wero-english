@@ -114,7 +114,7 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 
 Activar en Android: Ajustes > Accesibilidad > Quitar animaciones.
 
-- [ ] Repetir las secciones a) a g) y j) con la opción activa; nada debe romperse ni quedar sin mostrar
+- [ ] Repetir las secciones a) a g), j) y k) con la opción activa; nada debe romperse ni quedar sin mostrar
 - [ ] Botones, tarjetas, filas y pestañas: al tocar no escalan, solo bajan a 70 % de opacidad
 - [ ] Acierto: sin pulso ni cubitos; el verde sí aparece y siguen el háptico y el sonido
 - [ ] Fallo: sin temblor; el ámbar sí aparece y siguen el háptico y el sonido
@@ -150,6 +150,25 @@ Marcas de oración de Polly: sin ellas el seguimiento del audio es una estimaci�
 - [ ] TalkBack en el lector: cada frase dice «ya la viste» o «nueva, abre su ficha»; las acciones personalizadas de cada oración son «Abrir la ficha de …» y «Escuchar desde aquí»; en las preguntas se oye «Pregunta 2 de 3», la correcta dice «Correcta», la mal elegida «No era esta» y la explicación se anuncia sola
 - [ ] 360 px de ancho y fuente grande: el pie no tapa el texto, las cuatro opciones caben o scrollean y «Siguiente» queda a la vista en el pie
 - [ ] Consola: entrar al lector, seguir el audio y hacer las preguntas sin ningún aviso de Reanimated. Si sale uno, copiar el texto completo del aviso (el aviso original no se pudo rastrear sin teléfono)
+
+## k) Frases sueltas
+
+- [ ] Entrar: el mazo se baraja (la segunda y la tercera carta se abren en abanico y se juntan en menos de 0.7 s), la primera queda arriba y se asoman dos cartas detrás
+- [ ] Deslizar rápido a la izquierda con un golpe corto: la carta sale con un giro leve, la de atrás sube sin parpadear y aparece una nueva al fondo
+- [ ] Deslizar lento a la izquierda pasando ~1.5 cm (96 dp): sale al soltar; con menos, regresa con resorte
+- [ ] Arrastre corto que regresa, en cualquier dirección; a la derecha y hacia abajo la carta apenas cede
+- [ ] Deslizar hacia arriba: aparece «Guardar» arriba, al soltar la carta regresa sin cambiar de frase, el botón pasa a «Guardada» con el anillo dorado y un háptico; hacerlo en una frase que ya estaba guardada no la quita
+- [ ] Indicadores: «Siguiente» a la izquierda y «Guardar» arriba aparecen con el arrastre, se iluminan al llegar al umbral y nunca salen los dos a la vez
+- [ ] Botones: «Siguiente» hace lo mismo que deslizar a la izquierda; «Guardar» y «Guardada» alternan y arrancan con el estado real (una frase ya guardada en Mi mazo entra como «Guardada»)
+- [ ] Audio: Escuchar, Lento, Español e «Inglés y español» suenan y el que suena se enciende; tocar la frase la reproduce con karaoke; al pasar de carta se corta la voz; con «Voz automática» suena sola
+- [ ] Frase con y sin imagen: sin imagen no hay hueco ni iniciales; con imagen y si sobra alto, una franja de 96 dp arriba; una frase muy larga se ve completa (más apretada) y solo el IPA o la nota se cortan con «…»
+- [ ] Sin contador arriba, IPA centrado, «Guardar» con mayúscula y la nota «Aquí no se lleva cuenta de nada. Solo pasa frases.» abajo
+- [ ] Fin de las 60 frases (pasarlas con «Siguiente»): el mazo queda vacío con «Barajando…» y llega uno nuevo con su abanico; el filtro de contenido sigue aplicado
+- [ ] Salir con la voz sonando (atrás o cambiar de pestaña) la corta al instante
+- [ ] Reducir movimiento: sin abanico, sin arrastre ni indicadores, una sola carta que cambia con un fundido de 150 ms; los botones funcionan
+- [ ] TalkBack: la frase con su IPA ofrece las acciones «Siguiente» y «Guardar» («Quitar de Mi mazo» si ya está guardada); las cartas de atrás no se leen; los grupos de audio y los botones del pie se pueden enfocar
+- [ ] 360 px de ancho y fuente grande: la carta cabe sin scroll, se ven los dos botones del pie y los grupos de audio no se salen de la carta
+- [ ] Consola: entrar, deslizar y guardar sin ningún aviso de Reanimated ni de Gesture Handler
 
 ## Cómo reportar
 

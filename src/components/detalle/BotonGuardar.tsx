@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -26,6 +26,8 @@ interface Props {
   onPress: () => void;
   /** Cómo se ve sin guardar: `primary` en Detalle, donde es la acción principal; `secondary` donde ya hay otra (Frases sueltas). Guardada siempre es `secondary`. */
   variante?: 'primary' | 'secondary';
+  /** Ajustes del botón (el padding de los costados cuando comparte fila con otro). */
+  style?: ViewStyle;
 }
 
 /**
@@ -35,7 +37,7 @@ interface Props {
  * un anillo dorado se expande una sola vez desde el ícono; al quitarla solo cambia el
  * estado, sin fiesta. Con reducir movimiento no hay estrella que salte ni anillo.
  */
-export function BotonGuardar({ guardada, pulso, onPress, variante = 'primary' }: Props) {
+export function BotonGuardar({ guardada, pulso, onPress, variante = 'primary', style }: Props) {
   const reducido = useMovimientoReducido();
   const escala = useSharedValue(1);
   // 1 = el anillo ya terminó (invisible): en reposo no se ve nada.
@@ -76,6 +78,7 @@ export function BotonGuardar({ guardada, pulso, onPress, variante = 'primary' }:
       full
       iconNode={icono}
       onPress={onPress}
+      style={style}
     />
   );
 }
