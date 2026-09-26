@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import {
   useFocusEffect,
   useNavigation,
@@ -7,17 +7,31 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  runOnJS,
+  runOnUI,
+  scrollTo,
+  useAnimatedReaction,
+  useAnimatedRef,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { Button, Card, Carga, EmptyState, Header, Screen, Presionable } from '@/components/base';
-import { ReproductorCapitulo } from '@/components/card';
+import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
+import { PieReproductor } from '@/components/lectura/PieReproductor';
+import { TextoAcompanado, useOracionActual, type MedidasTexto } from '@/components/lectura/TextoAcompanado';
+import { useReproductorCapitulo } from '@/components/lectura/useReproductorCapitulo';
 import { partirTexto, type Trozo } from '@/domain/lectura';
+import { dividirOraciones, inicioDeMarcas, inicioEstimado, trozosPorOracion } from '@/domain/oraciones';
 import { getCardStates, getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, layout, radius, space } from '@/theme';
+import { marcasOracionesDe } from '@/services/marcas';
+import { aparecer, color, font, layout, radius, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -26,12 +40,18 @@ type Ruta = RouteProp<RootStackParams, 'Lectura'>;
 
 const SIN_ENTRADAS = new Map<number, Entry>();
 const SIN_ESTADOS = new Map<number, CardState>();
+/** Lo que ocupa el encabezado arriba del texto, en dp: para saber cuánto del texto queda a la vista. */
+const RESERVA_ENCABEZADO = layout.tapMin + space.md;
+/** Cuánto antes del final del texto se da por llegado, en dp. */
+const MARGEN_FIN = space.xxxl;
 
 /**
  * El lector.
  *
- * Las frases del catálogo van subrayadas y se pueden tocar: azul si ya
- * las viste, ámbar si son nuevas. Tocar abre la ficha completa.
+ * Las frases del catálogo van subrayadas y se pueden tocar: subrayada en gris
+ * si ya las viste, punteada y en cian si son nuevas. Tocar abre la ficha
+ * completa. Mientras suena el capítulo, la oración que se escucha se
+ * ilumina; el reproductor va fijo abajo, en la zona del pulgar.
  *
  * Al final, tres preguntas. No se guarda calificación y no se puede
  * reprobar: son para confirmar que se entendió, no para evaluar. Poner
@@ -40,8 +60,13 @@ const SIN_ESTADOS = new Map<number, CardState>();
 export function LecturaScreen() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Ruta>();
+  const reducido = useMovimientoReducido();
   const user = useAuthStore((s) => s.user);
+  const leyendaVista = useSettingsStore((s) => s.leyendaLecturaVista);
+  const guardarAjuste = useSettingsStore((s) => s.set);
   const content = useMemo(loadContent, []);
+  const { height: altoVentana } = useWindowDimensions();
+  const { top: insetArriba, bottom: insetAbajo } = useSafeAreaInsets();
 
   const lectura = useMemo(
     () => content.lecturas.lecturas.find((l) => l.id === params.lecturaId),
@@ -97,6 +122,75 @@ export function LecturaScreen() {
       );
     return partirTexto(capitulo.texto, frases);
   }, [capitulo, lectura, entradas, estados]);
+
+  // Las oraciones del capítulo y cuándo empieza cada una: con las marcas de Polly si existen y, si no, por caracteres.
+  const oraciones = useMemo(() => (capitulo ? dividirOraciones(capitulo.texto) : []), [capitulo]);
+  const porOracion = useMemo(() => trozosPorOracion(oraciones, trozos), [oraciones, trozos]);
+
+  const rep = useReproductorCapitulo(capitulo?.audio ?? null);
+  const repRef = useRef(rep);
+  repRef.current = rep;
+  const duracion = rep.progreso.dur;
+  const inicios = useMemo(() => {
+    if (!capitulo) return [];
+    return (
+      inicioDeMarcas(oraciones, marcasOracionesDe(capitulo.audio), capitulo.texto.length, duracion) ??
+      inicioEstimado(oraciones, duracion)
+    );
+  }, [capitulo, oraciones, duracion]);
+  const iniciosRef = useRef(inicios);
+  iniciosRef.current = inicios;
+  const actual = useOracionActual(inicios, rep.pos, rep.enCurso);
+
+  // El scroll: se publica su desplazamiento para saber si se llegó al final del texto.
+  const scrollY = useSharedValue(0);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const finTexto = useSharedValue(0);
+  const altoPie = useSharedValue(0);
+  const [alFinal, setAlFinal] = useState(false);
+
+  useAnimatedReaction(
+    () => {
+      const visible = altoVentana - insetArriba - insetAbajo - altoPie.value - RESERVA_ENCABEZADO;
+      return finTexto.value > 0 && scrollY.value + visible >= finTexto.value - MARGEN_FIN ? 1 : 0;
+    },
+    (ahora, antes) => {
+      if (ahora !== antes) runOnJS(setAlFinal)(ahora === 1);
+    },
+    [altoVentana, insetArriba, insetAbajo]
+  );
+
+  // Cada capítulo empieza arriba.
+  useEffect(() => {
+    runOnUI(() => {
+      'worklet';
+      scrollTo(scrollRef, 0, 0, false);
+    })();
+  }, [cap, scrollRef]);
+
+  const alMedirTexto = useCallback(
+    (m: MedidasTexto) => {
+      finTexto.value = m.base + m.alto;
+    },
+    [finTexto]
+  );
+
+  const marcarLeyenda = useCallback(() => {
+    if (user) void guardarAjuste(user.id, 'leyendaLecturaVista', true);
+  }, [user, guardarAjuste]);
+
+  const abrirFrase = useCallback((entryId: number) => nav.navigate('Detail', { entryId }), [nav]);
+
+  /** Tocar una oración mientras suena (o en pausa) lleva el audio a ella. */
+  const irAOracion = useCallback((indice: number) => {
+    const r = repRef.current;
+    if (r.estado !== 'sonando' && r.estado !== 'pausado') return;
+    haptics.tapLight();
+    const enPausa = r.estado === 'pausado';
+    void r.saltar(iniciosRef.current[indice] ?? 0).then(() => {
+      if (enPausa) repRef.current.reanudar();
+    });
+  }, []);
 
   const siguiente = useCallback(() => {
     if (!lectura) return;
@@ -185,7 +279,7 @@ export function LecturaScreen() {
                 );
               })}
               {dada !== undefined ? (
-                <Animated.Text entering={FadeIn} style={styles.porque}>
+                <Animated.Text entering={reducido ? undefined : aparecer()} style={styles.porque}>
                   {p.porque}
                 </Animated.Text>
               ) : null}
@@ -207,8 +301,23 @@ export function LecturaScreen() {
     );
   }
 
+  const ultimo = cap + 1 >= lectura.capitulos.length;
+  const pie = (
+    <View onLayout={(e) => (altoPie.value = e.nativeEvent.layout.height)}>
+      <PieReproductor
+        rep={rep}
+        texto={capitulo?.texto ?? ''}
+        siguiente={
+          rep.terminado || alFinal
+            ? { etiqueta: ultimo ? 'Ver las preguntas' : `Capítulo ${cap + 2}`, onPress: siguiente }
+            : null
+        }
+      />
+    </View>
+  );
+
   return (
-    <Screen scroll>
+    <Screen scroll scrollY={scrollY} scrollRef={scrollRef} footer={capitulo?.audio ? pie : undefined}>
       <Header
         onBack={() => nav.goBack()}
         title={lectura.titulo}
@@ -221,54 +330,35 @@ export function LecturaScreen() {
 
       {capitulo ? (
         <>
-          <Text style={styles.capTitulo}>{capitulo.titulo}</Text>
-
-          {capitulo.audio ? (
-            <View style={styles.audioFila}>
-              <ReproductorCapitulo key={cap} path={capitulo.audio} />
-            </View>
-          ) : null}
-
-          <Text style={styles.cuerpo}>
-            {trozos.map((t, i) =>
-              t.entryId === null ? (
-                <Text key={`t-${i}`}>{t.texto}</Text>
-              ) : (
-                <Text
-                  key={`t-${i}`}
-                  style={t.nueva ? styles.fraseNueva : styles.fraseVista}
-                  onPress={() =>
-                    nav.navigate('Detail', { entryId: t.entryId as number })
-                  }
-                >
-                  {t.texto}
-                </Text>
-              )
-            )}
+          <Text style={styles.capTitulo} accessibilityRole="header">
+            {capitulo.titulo}
           </Text>
 
-          <View style={styles.leyenda}>
-            <Text style={styles.leyendaTexto}>
-              <Text style={styles.fraseVista}>Subrayado</Text> es lo que ya
-              viste. <Text style={styles.fraseNueva}>En ámbar</Text> es nuevo.
-              Toca cualquiera para abrir su ficha.
-            </Text>
-          </View>
+          <LeyendaFrases vista={leyendaVista} onVista={marcarLeyenda} />
 
-          {/* Aquí sí va texto: no es un botón que se toque cien veces,
-              y saber si vienen preguntas o capítulo cambia la decisión. */}
-          <Button
-            label={
-              cap + 1 < lectura.capitulos.length
-                ? `Capítulo ${cap + 2}`
-                : 'Tres preguntas'
-            }
-            icon="arrow-right"
-            iconAlFinal
-            onPress={siguiente}
-            full
-            size="lg"
+          <TextoAcompanado
+            key={cap}
+            oraciones={oraciones}
+            porOracion={porOracion}
+            actual={actual}
+            enCurso={rep.enCurso}
+            conAudio={Boolean(capitulo.audio) && !rep.apagado}
+            onFrase={abrirFrase}
+            onOracion={irAOracion}
+            alMedir={alMedirTexto}
           />
+
+          {/* Sin audio no hay pie: el botón de seguir va al final del texto. */}
+          {capitulo.audio ? null : (
+            <Button
+              label={ultimo ? 'Ver las preguntas' : `Capítulo ${cap + 2}`}
+              icon="arrow-right"
+              iconAlFinal
+              onPress={siguiente}
+              full
+              size="lg"
+            />
+          )}
         </>
       ) : null}
     </Screen>
@@ -280,34 +370,8 @@ const styles = StyleSheet.create({
     fontSize: font.size.xl,
     fontFamily: font.family.display,
     color: color.text,
-    marginBottom: space.md,
+    marginBottom: space.sm,
   },
-  audioFila: { marginBottom: space.md },
-  cuerpo: {
-    fontFamily: font.family.body,
-    fontSize: font.size.lg,
-    // Una lectura pide más aire que una tarjeta: 1.6 de interlineado es
-    // la diferencia entre leer y descifrar.
-    lineHeight: font.size.lg * 1.6,
-    color: color.text,
-    marginBottom: space.lg,
-  },
-  fraseVista: {
-    color: color.world.dia_a_dia,
-    textDecorationLine: 'underline',
-  },
-  fraseNueva: {
-    color: color.riskWarn,
-    fontFamily: font.family.bodyStrong,
-    textDecorationLine: 'underline',
-  },
-  leyenda: {
-    backgroundColor: color.surfaceAlt,
-    borderRadius: radius.md,
-    padding: space.md,
-    marginBottom: space.lg,
-  },
-  leyendaTexto: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
   introPreguntas: {
     fontFamily: font.family.body,
     fontSize: font.size.md,

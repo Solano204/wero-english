@@ -1,6 +1,5 @@
 export { AudioButton } from './AudioButton';
 export { GrupoAudio, type ControlAudio } from './GrupoAudio';
-export { ReproductorCapitulo } from './ReproductorCapitulo';
 export { PhraseBlock } from './PhraseBlock';
 export { OptionButton, type OptionState } from './OptionButton';
 export { DiffFrase } from './DiffFrase';

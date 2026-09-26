@@ -205,6 +205,37 @@ prueba('la lista: sin números de 0 a 100 a la vista, «Niños» con ícono neut
   assert.match(leer('src/screens/extras/LecturasScreen.tsx'), /destacarLectura\(filas\)/);
 });
 
+/* ---------- el lector ---------- */
+
+prueba('lector: la leyenda va arriba y se guarda en ajustes, y las frases dicen «ya la viste» o «nueva» sin depender del color', () => {
+  const pantalla = leer('src/screens/extras/LecturaScreen.tsx');
+  const iLeyenda = pantalla.indexOf('<LeyendaFrases');
+  assert.ok(iLeyenda > 0 && iLeyenda < pantalla.indexOf('<TextoAcompanado'), 'la leyenda va antes del texto');
+  assert.ok(!/Toca cualquiera para abrir su ficha/.test(pantalla), 'ya no hay leyenda al final');
+  assert.match(leer('src/db/settings.ts'), /leyendaLecturaVista: false/);
+  const oracion = leer('src/components/lectura/Oracion.tsx');
+  assert.match(oracion, /nueva, abre su ficha/);
+  assert.match(oracion, /ya la viste/);
+  assert.match(oracion, /textDecorationStyle: 'dotted'/);
+  assert.ok(!/riskWarn|wrong/.test(oracion), 'el ámbar (color del fallo) ya no marca las frases nuevas');
+  assert.match(oracion, /export const Oracion = memo\(/);
+  assert.match(leer('src/components/lectura/TextoAcompanado.tsx'), /export const TextoAcompanado = memo\(/);
+});
+
+prueba('reproductor: fijo abajo, sin «0:00 / 0:00» antes de conocer la duración, y el botón de seguir aparece con el pie', () => {
+  const pie = leer('src/components/lectura/PieReproductor.tsx');
+  assert.match(pie, /progreso\.dur > 0 \? mmss\(progreso\.dur\) : '—:—'/);
+  assert.match(pie, /variant="ghost"/, 'Detener es ghost');
+  assert.match(leer('src/screens/extras/LecturaScreen.tsx'), /footer=\{capitulo\?\.audio \? pie : undefined\}/);
+  const pantalla = leer('src/screens/extras/LecturaScreen.tsx');
+  assert.match(pantalla, /ultimo \? 'Ver las preguntas' : `Capítulo \$\{cap \+ 2\}`/);
+  assert.ok(!fs.existsSync(path.join(ROOT, 'src/components/card/ReproductorCapitulo.tsx')), 'el reproductor de arriba se retiró');
+  const hook = leer('src/components/lectura/useReproductorCapitulo.ts');
+  for (const llamada of ['audio.play(path)', 'audio.pauseFrase()', 'audio.resumeFrase()', 'audio.stop()', 'audio.generacionActual()']) {
+    assert.ok(hook.includes(llamada), `el reproductor sigue usando ${llamada}`);
+  }
+});
+
 /* ---------- generador y datos ---------- */
 
 prueba('generador: ninguna frase del catálogo va con mayúscula a media oración (salvo «I»)', () => {

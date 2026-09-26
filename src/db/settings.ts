@@ -41,6 +41,9 @@ export interface Settings {
 
   /** Grupos de Practicar que el usuario dejó desplegados (ids de `GRUPOS`). */
   practicarGruposAbiertos: string[];
+
+  /** El lector ya mostró la leyenda de las frases subrayadas: desde entonces arranca plegada. */
+  leyendaLecturaVista: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -68,6 +71,7 @@ export const DEFAULT_SETTINGS: Settings = {
   onboardingHecho: false,
   dondeSeTraba: null,
   practicarGruposAbiertos: [],
+  leyendaLecturaVista: false,
 };
 
 /** Tope de notificaciones diarias. Más allá el sistema las agrupa igual. */
