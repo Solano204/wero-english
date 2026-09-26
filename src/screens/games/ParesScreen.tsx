@@ -409,7 +409,7 @@ export function ParesScreen() {
     segmentos && meta ? { x: segmentos.x + meta.x, y: segmentos.y + meta.y } : { x: capa.ancho - space.xl, y: space.xl };
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} style={styles.sinHueco}>
       <View ref={capaRef} style={styles.capa} onLayout={alMedirCapa}>
         <Trozos disparo={reaccion.trozos} tinte={color.world.dia_a_dia} x="50%" y="50%" />
         <View style={styles.top}>
@@ -529,6 +529,8 @@ export function ParesScreen() {
 }
 
 const styles = StyleSheet.create({
+  // `Screen` suma un colchón abajo cuando no hay footer: aquí el contenido llega hasta el borde seguro.
+  sinHueco: { paddingBottom: 0 },
   capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   reloj: { marginTop: space.sm, marginBottom: space.md },

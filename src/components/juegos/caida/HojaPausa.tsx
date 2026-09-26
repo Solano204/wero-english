@@ -7,7 +7,6 @@ import Animated, {
   withTiming,
   withSpring,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/components/base/Button';
 import { Icon } from '@/components/base/Icon';
@@ -64,7 +63,6 @@ interface Props {
 export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: Props) {
   const reducido = useMovimientoReducido();
   const { height: alturaVentana } = useWindowDimensions();
-  const { bottom } = useSafeAreaInsets();
 
   // Al irse, la hoja se lleva su contenido: no se vacía a media salida.
   const ultimo = useRef<Contenido | null>(null);
@@ -121,7 +119,7 @@ export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: P
       <Animated.View style={[styles.hoja, hoja]}>
         <LinearGradient colors={ok ? filoOk : filoWrong} start={sol.start} end={sol.end} style={styles.filo}>
           <View
-            style={[styles.contenido, ok ? styles.ok : styles.mal, { paddingBottom: bottom + space.lg }]}
+            style={[styles.contenido, ok ? styles.ok : styles.mal, { paddingBottom: space.lg }]}
             accessibilityLiveRegion="polite"
           >
             <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.correct : color.wrong} />

@@ -83,7 +83,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/fx/OndaSenal.tsx:53`
 - `src/components/fx/OndaVoz.tsx:124`
 - `src/components/fx/PortadaJuego.tsx:93`
-- `src/components/juegos/caida/HojaPausa.tsx:122`
+- `src/components/juegos/caida/HojaPausa.tsx:120`
 - `src/components/juegos/caida/PisoResplandor.tsx:77`
 - `src/components/juegos/caida/PistaCaida.tsx:62`
 - `src/components/juegos/dulces/HojaPregunta.tsx:161`
@@ -145,7 +145,7 @@ Otros `fontSize` < 16 por archivo (etiquetas y secundarios; revisar cuáles son 
 **Excepciones revisadas (no cuentan):**
 - `src/components/base/Card.tsx:176` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/fx/HojaVeredicto.tsx:220` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
-- `src/components/juegos/caida/HojaPausa.tsx:150` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
+- `src/components/juegos/caida/HojaPausa.tsx:148` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/components/unlock/MuroDesbloqueo.tsx:126` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/navigation/TabNavigator.tsx:231` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)
 - `src/screens/extras/practicar/Destacados.tsx:169` — filo: padding 1, el filo de luz (una envoltura de 1 px que hace de borde)

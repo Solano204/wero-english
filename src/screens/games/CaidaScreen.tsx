@@ -548,7 +548,7 @@ export function CaidaScreen() {
   );
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} style={styles.sinHueco}>
       <View ref={capaRef} style={styles.capa}>
         <Trozos disparo={reaccion.trozos} tinte={color.correct} x="50%" y="62%" />
         <View style={styles.top}>
@@ -638,6 +638,8 @@ function estadoFicha(
 }
 
 const styles = StyleSheet.create({
+  // `Screen` suma un colchón abajo cuando no hay footer: aquí el contenido llega hasta el borde seguro.
+  sinHueco: { paddingBottom: 0 },
   capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   derecha: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
