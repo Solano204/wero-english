@@ -99,7 +99,9 @@ const styles = StyleSheet.create({
     gap: space.sm,
     marginTop: space.sm,
   },
+  // `flexShrink`: en una fila el texto no se encoge por omisión, y una traducción larga empujaba el audio fuera de la tarjeta.
   spanish: {
+    flexShrink: 1,
     fontFamily: font.family.body,
     fontSize: font.size.lg,
     color: color.textMuted,

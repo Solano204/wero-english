@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   },
   sinAudio: { opacity: 0.4 },
   encabezado: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
-  titulo: { fontFamily: font.family.bodyStrong, fontSize: font.size.sm },
+  titulo: { flexShrink: 1, fontFamily: font.family.bodyStrong, fontSize: font.size.sm },
   palabra: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, lineHeight: font.size.md * 1.4, color: color.text },
   ipa: { fontFamily: font.family.ipa, fontSize: font.size.sm, color: color.textMuted },
   escuchar: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xs },

@@ -48,6 +48,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | EST-vacio | pantallas que cargan datos sin estado vacío | 5 |
 | EST-error | pantallas que cargan datos sin estado de error | 0 |
 | TXT-1 | texto de contenido cortado con `numberOfLines={1}` | 1 |
+| TXT-2 | texto de contenido variable en una fila con ícono, botón o badge sin poder encogerse | 0 |
 | RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 0 |
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
@@ -244,6 +245,9 @@ Sin carga: 0 de 20 · sin vacío: 5 · sin error: 0.
 
 Otros 2 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 
+**TXT-2 · Un texto de contenido variable en una fila con un ícono, un botón o un badge tiene que poder encogerse** (`flex`, `flexShrink`, `flexGrow`, `width` o `maxWidth` en su estilo). En una fila de React Native el texto no se encoge por omisión: uno largo empuja a su hermano fuera de la tarjeta y su audio queda cortado (el bug de `PhraseBlock`). Hallazgos:
+- (ninguno)
+
 ## c) Rendimiento
 
 **Listas:** `FlatList` o `SectionList` sin `keyExtractor`, con clave por índice, con el ítem sin `memo` o con el separador creado en cada render, y colecciones grandes pintadas con `.map` dentro de un `ScrollView`:
@@ -348,4 +352,4 @@ Archivos que pintan `<AudioButton>`: `components/list/EntryRow.tsx` 4, `componen
 - Los bucles anteriores a la v5.0 (`Skeleton` mientras carga) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (`src/components/fx/`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":0,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"TXT-2":0,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->

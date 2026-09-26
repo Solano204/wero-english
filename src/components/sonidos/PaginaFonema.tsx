@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
   bloqueAviso: { backgroundColor: color.riskWarnSoft, borderLeftColor: color.riskWarn },
   bloqueTitulo: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   subtitulo: {
+    flexShrink: 1,
     fontFamily: font.family.bodyStrong,
     fontSize: font.size.xs,
     color: color.textMuted,

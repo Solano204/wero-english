@@ -181,6 +181,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingRight: space.md,
   },
-  pillText: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.text },
+  pillText: { flexShrink: 1, fontFamily: font.family.body, fontSize: font.size.sm, color: color.text },
   cta: { marginTop: space.xl },
 });

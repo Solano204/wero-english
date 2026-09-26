@@ -56,7 +56,7 @@ export const RenglonVerbo = memo(function RenglonVerbo({ verbo, formas, coincide
       style={styles.fila}
     >
       <View style={styles.cabeza}>
-        <Text ref={verboRef} style={text.h2}>
+        <Text ref={verboRef} style={[text.h2, styles.verbo]}>
           {verbo}
         </Text>
         <Badge label={conteo(formas.length, 'forma')} small />
@@ -96,6 +96,8 @@ const styles = StyleSheet.create({
     borderColor: color.border,
   },
   cabeza: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md },
+  // Un verbo largo cede ante la insignia «N formas» en vez de empujarla fuera de la tarjeta.
+  verbo: { flexShrink: 1 },
   previa: { overflow: 'hidden' },
   chips: { flexDirection: 'row', gap: space.xs },
   chip: {

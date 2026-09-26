@@ -579,6 +579,81 @@ function auditaTextoCortado(archivos) {
   return { importa, otros };
 }
 
+/** Todas las etiquetas JSX (de apertura y de cierre) con su posición, para saber quién es hijo directo de quién. */
+function etiquetasConCierre(src) {
+  const res = []; const re = /<(\/?)([A-Za-z][\w.]*)(?=[\s>/])/g; let m;
+  while ((m = re.exec(src))) {
+    let i = m.index + m[0].length, depth = 0;
+    for (; i < src.length; i++) {
+      const c = src[i];
+      if (c === '{') depth++; else if (c === '}') depth--;
+      else if (c === '>' && depth === 0 && src[i - 1] !== '=') break;
+    }
+    const texto = src.slice(m.index, i + 1);
+    res.push({ cierre: m[1] === '/', nombre: m[2], texto, auto: /\/>$/.test(texto), linea: lineaDe(src, m.index), fin: i + 1 });
+  }
+  return res;
+}
+
+/** Lo que TXT-2 cuenta como texto de contenido variable: lo de TXT-1 más el verbo, el nombre y la instrucción de una tarjeta. */
+const CONTENIDO_FILA = new RegExp(`${CONTENIDO.source}|verbo|name|instruction`, 'i');
+/** Lo que en una fila no se encoge: un ícono, un botón, un badge. */
+const HERMANOS_FILA = /^(AudioButton|Button|IconButton|Icon|Badge|GrupoAudio|LevelBadge|RiskBadge|RegistroBadge)$/;
+
+/**
+ * TXT-2: un texto de contenido variable (una frase, una traducción, un título) que comparte fila con un ícono, un botón
+ * o un badge tiene que poder encogerse (`flex`, `flexShrink`, `flexGrow`, `width` o `maxWidth` en su estilo). En una fila
+ * de React Native el texto no se encoge por omisión: uno largo empuja al hermano fuera de la tarjeta y su audio queda
+ * cortado (el bug de `PhraseBlock`). Un texto fijo y corto («Ver», «Lento») no cuenta: solo el que se pinta con una
+ * expresión de contenido. Los estilos se resuelven por nombre dentro del mismo archivo.
+ */
+function auditaFilaTexto(archivos) {
+  const res = [];
+  for (const { r, src } of archivos) {
+    if (!r.endsWith('.tsx')) continue;
+    const estilos = {};
+    for (const d of src.matchAll(/^ {2}(\w+):\s*\{([^\n]*)\},?$/gm)) estilos[d[1]] = d[2];
+    for (const d of src.matchAll(/^ {2}(\w+):\s*\{\n([\s\S]*?)\n {2}\},?$/gm)) estilos[d[1]] = d[2];
+    if (!Object.keys(estilos).length) continue;
+    const T = etiquetasConCierre(src);
+    const nombresDe = (t) => [...(atributo(t.texto, 'style') ?? '').matchAll(/\bstyles\.(\w+)/g)].map((x) => x[1]);
+    const elastico = (t) =>
+      /\b(?:flex|flexShrink|flexGrow|width|maxWidth)\s*:/.test(atributo(t.texto, 'style') ?? '') ||
+      nombresDe(t).some((n) => /\b(?:flex|flexShrink|flexGrow|width|maxWidth)\s*:/.test(estilos[n] ?? ''));
+    const esFila = (t) =>
+      /^(?:View|Animated\.View|Pressable|Presionable|Card)$/.test(t.nombre) &&
+      (/flexDirection:\s*'row'/.test(atributo(t.texto, 'style') ?? '') ||
+        nombresDe(t).some((n) => /flexDirection:\s*'row'/.test(estilos[n] ?? '')));
+    for (let i = 0; i < T.length; i++) {
+      const t = T[i];
+      if (t.cierre || t.auto || !esFila(t)) continue;
+      let prof = 0;
+      const hijos = [];
+      for (let j = i + 1; j < T.length; j++) {
+        const u = T[j];
+        if (u.cierre) {
+          if (prof === 0) break;
+          prof--;
+          continue;
+        }
+        if (prof === 0) hijos.push(u);
+        if (!u.auto) prof++;
+      }
+      const hermanos = hijos.filter((h) => HERMANOS_FILA.test(h.nombre));
+      if (!hermanos.length) continue;
+      for (const h of hijos) {
+        if (!/^(?:Text|Animated\.Text)$/.test(h.nombre) || h.auto || elastico(h)) continue;
+        const resto = src.slice(h.fin);
+        const cuerpo = resto.slice(0, Math.max(0, resto.search(/<\/(?:Animated\.)?Text>/)));
+        const expr = (cuerpo.match(/\{([^}]+)\}/) || [])[1];
+        if (!expr || !CONTENIDO_FILA.test(expr)) continue;
+        res.push({ r, linea: h.linea, txt: `\`{${limpia(expr).slice(0, 40)}}\` comparte fila con ${hermanos.map((x) => `<${x.nombre}>`).join(', ')} y no puede encogerse` });
+      }
+    }
+  }
+  return res;
+}
+
 /** c) Rendimiento: listas, dependencias inestables, estado por intervalo. */
 function auditaRendimiento(archivos) {
   const memo = new Set();
@@ -745,6 +820,7 @@ function conteoPorRegla(ctx) {
     ['EST-vacio', 'pantallas que cargan datos sin estado vacío', sinE('vacio')],
     ['EST-error', 'pantallas que cargan datos sin estado de error', sinE('error')],
     ['TXT-1', 'texto de contenido cortado con `numberOfLines={1}`', T.importa.length],
+    ['TXT-2', 'texto de contenido variable en una fila con ícono, botón o badge sin poder encogerse', ctx.FT.length],
     ['RND-1', 'listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline', R.listas.length],
     ['RND-2', 'hooks con dependencias que cambian en cada render', R.deps.length],
     ['RND-3', 'estado por intervalo, cuadro o scroll que repinta toda la pantalla', R.intervalos.filter((x) => x.txt.includes('pantalla')).length],
@@ -870,6 +946,9 @@ ${L(c.T.importa)}
 
 Otros ${c.T.otros.length} \`numberOfLines={1}\` en etiquetas, contadores y similares no se listan.
 
+**TXT-2 · Un texto de contenido variable en una fila con un ícono, un botón o un badge tiene que poder encogerse** (\`flex\`, \`flexShrink\`, \`flexGrow\`, \`width\` o \`maxWidth\` en su estilo). En una fila de React Native el texto no se encoge por omisión: uno largo empuja a su hermano fuera de la tarjeta y su audio queda cortado (el bug de \`PhraseBlock\`). Hallazgos:
+${L(c.FT)}
+
 ## c) Rendimiento
 
 **Listas:** \`FlatList\` o \`SectionList\` sin \`keyExtractor\`, con clave por índice, con el ítem sin \`memo\` o con el separador creado en cada render, y colecciones grandes pintadas con \`.map\` dentro de un \`ScrollView\`:
@@ -948,6 +1027,7 @@ function main() {
   const ctx = {
     H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos), S,
     LT: auditaLayoutTransform(archivos),
+    FT: auditaFilaTexto(archivos),
     A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),

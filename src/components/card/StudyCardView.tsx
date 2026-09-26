@@ -360,8 +360,11 @@ const styles = StyleSheet.create({
     minHeight: 26,
     flexShrink: 0,
     zIndex: 1,
+    gap: space.sm,
   },
+  // `flexShrink`: con una frase vulgar la insignia comparte la fila y la instrucción empujaba fuera a la insignia.
   instruction: {
+    flexShrink: 1,
     fontSize: font.size.xs,
     color: color.textFaint,
     letterSpacing: 0.9,

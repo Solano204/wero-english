@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: space.lg,
   },
-  identidad: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  titulo: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
+  identidad: { flexDirection: 'row', alignItems: 'center', gap: space.md, flexShrink: 1 },
+  titulo: { flexShrink: 1, fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
   cuerpo: { overflow: 'hidden' },
   medida: { position: 'absolute', left: 0, right: 0, top: 0 },
 });
