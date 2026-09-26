@@ -16,6 +16,15 @@ export const REBOTE_DP = 4;
 const ESCALON_MS = 40;
 const ESCALON_MAX = 8;
 
+/** Lo más que se retrasa un trozo al salir de su pieza (ms): los trozos de un paso no llegan todos a la vez. */
+export const TROZOS_RETRASO_MS = 60;
+
+/** Un número entre 0 y 1 que siempre sale igual para el mismo `i`: la dispersión de los trozos sin gastar `Math.random`. */
+export function azarFijo(i: number): number {
+  const x = Math.sin(i * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 /** Las piezas que se lanzan como trozos en un paso, a lo más: con dos pasos en el aire no pasan de `MAX_VIVAS`. */
 export const MAX_POR_PASO = 30;
 export const MAX_VIVAS = 60;

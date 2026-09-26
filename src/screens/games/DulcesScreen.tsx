@@ -7,6 +7,8 @@ import Animated from 'react-native-reanimated';
 import { Button, Card, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { TableroDulces, type Jugada, type TableroDulcesRef } from '@/components/juegos/dulces/TableroDulces';
+import { TROZOS_RETRASO_MS, azarFijo, trozosDelPaso, trozosPorPieza } from '@/components/juegos/dulces/tablero';
+import { Estallidos, type EstallidosRef, type Trozo } from '@/components/juegos/dulces/Estallidos';
 import { TarjetaMetas } from '@/components/juegos/dulces/MetaFrase';
 import { Trozos, useReaccion } from '@/components/feedback';
 import {
@@ -26,7 +28,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, depth, font, radius, shadow, space, aparecer } from '@/theme';
+import { color, depth, font, motionDulces, radius, shadow, space, aparecer } from '@/theme';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -95,10 +97,15 @@ export function DulcesScreen() {
   const FRASES = nv?.frases ?? COLORES_DEF;
   const META = nv?.metaPorFrase ?? META_DEF;
   const LADO = ladoPara(COLS);
+  const PASO_CELDA = LADO + space.xs;
+  const ANCHO_TABLERO = COLS * PASO_CELDA - space.xs;
+  const ALTO_TABLERO = ROWS * PASO_CELDA - space.xs;
 
   const [board, setBoard] = useState<Board | null>(null);
   const [pool, setPool] = useState<Entry[]>([]);
   const [objetivos, setObjetivos] = useState<DulceObjetivo[]>([]);
+  const objetivosRef = useRef(objetivos);
+  objetivosRef.current = objetivos;
   const [elegida, setElegida] = useState<number | null>(null);
   // Cubitos al acertar.
   const reaccion = useReaccion();
@@ -118,6 +125,16 @@ export function DulcesScreen() {
   const [animando, setAnimando] = useState(false);
   // Cambia con cada tablero nuevo: el tablero animado reparte piezas nuevas.
   const [llave, setLlave] = useState(0);
+  // Los trozos de las piezas vuelan a las barras: hace falta saber dónde están el tablero y cada barra, en la
+  // misma capa. Se miden al empezar cada jugada (el scroll pudo cambiarlas).
+  const capaRef = useRef<View>(null);
+  const tableroCajaRef = useRef<View>(null);
+  const estallidosRef = useRef<EstallidosRef>(null);
+  const barras = useRef(new Map<number, View>());
+  const posiciones = useRef<{
+    tablero: { x: number; y: number } | null;
+    barras: Map<number, { x: number; y: number; w: number; h: number }>;
+  }>({ tablero: null, barras: new Map() });
   // Si el tablero no cabe la pantalla scrollea, y entonces solo los deslizamientos horizontales intercambian.
   const [vistaAlto, setVistaAlto] = useState(0);
   const [contenidoAlto, setContenidoAlto] = useState(0);
@@ -228,10 +245,73 @@ export function DulcesScreen() {
     [autoAudio]
   );
 
+  const registrarBarra = useCallback((colorPieza: number, vista: View | null) => {
+    if (vista) barras.current.set(colorPieza, vista);
+    else barras.current.delete(colorPieza);
+  }, []);
+
+  const medirPosiciones = useCallback(() => {
+    const capa = capaRef.current;
+    if (!capa) return;
+    tableroCajaRef.current?.measureLayout(
+      capa,
+      (x, y) => {
+        posiciones.current.tablero = { x, y };
+      },
+      () => undefined
+    );
+    barras.current.forEach((vista, colorPieza) => {
+      vista.measureLayout(
+        capa,
+        (x, y, w, h) => {
+          posiciones.current.barras.set(colorPieza, { x, y, w, h });
+        },
+        () => undefined
+      );
+    });
+  }, []);
+
+  /** Las piezas de un paso estallan: de cada una salen trozos de su color que vuelan al frente de la barra de su meta. */
+  const alEstallar = useCallback(
+    (paso: Paso) => {
+      const origen = posiciones.current.tablero;
+      if (!origen) return;
+      const total = paso.quitar.length;
+      const porPieza = trozosPorPieza(total);
+      const limite = trozosDelPaso(total);
+      const trozos: Trozo[] = [];
+      paso.quitar.forEach((celda, k) => {
+        const c = paso.colores[k] as number;
+        const cx = origen.x + (celda % COLS) * PASO_CELDA + LADO / 2;
+        const cy = origen.y + Math.floor(celda / COLS) * PASO_CELDA + LADO / 2;
+        const barra = posiciones.current.barras.get(c);
+        const meta = objetivosRef.current.find((o) => o.color === c);
+        const frente = meta ? Math.min(1, (meta.llevas + (paso.porColor[c] ?? 0)) / meta.meta) : 1;
+        for (let m = 0; m < porPieza && trozos.length < limite; m++) {
+          const semilla = celda * 7 + m;
+          // Un color sin meta no tiene barra a la que ir: sus trozos se dispersan y caen.
+          const aLaBarra = barra !== undefined && meta !== undefined;
+          trozos.push({
+            x0: cx + (azarFijo(semilla) - 0.5) * LADO * 0.6,
+            y0: cy + (azarFijo(semilla + 101) - 0.5) * LADO * 0.6,
+            x1: aLaBarra ? barra.x + barra.w * frente : cx + (azarFijo(semilla + 33) - 0.5) * 70,
+            y1: aLaBarra ? barra.y + barra.h / 2 : cy + 46,
+            color: c,
+            // Salen cuando la pieza ya se está yendo, y no todos a la vez.
+            retraso: motionDulces.pulso + Math.round(azarFijo(semilla + 57) * TROZOS_RETRASO_MS),
+          });
+        }
+      });
+      estallidosRef.current?.lanzar(trozos);
+    },
+    [COLS, LADO, PASO_CELDA]
+  );
+
   /** Le pide al tablero que anime la jugada y no acepta toques hasta que termine. */
   const animar = useCallback((jugada: Omit<Jugada, 'onFin'>, alTerminar?: () => void) => {
     animandoRef.current = true;
     setAnimando(true);
+    medirPosiciones();
     tableroRef.current?.jugar({
       ...jugada,
       onFin: () => {
@@ -240,7 +320,7 @@ export function DulcesScreen() {
         alTerminar?.();
       },
     });
-  }, []);
+  }, [medirPosiciones]);
 
   /** Lo que llegó a las barras de las metas: los trozos de un paso de la cascada. */
   const sumarAMetas = useCallback((paso: Paso) => {
@@ -290,7 +370,6 @@ export function DulcesScreen() {
 
       haptics.success();
       void audio.playSuccess();
-      reaccion.celebra();
       setBoard(nuevo);
 
       // Se reparte lo quitado entre las frases de cada color.
@@ -325,6 +404,7 @@ export function DulcesScreen() {
           pasos: res.pasos,
           rebarajado,
           final: rebarajado ?? nuevo.cells,
+          onEstallido: alEstallar,
           onLlegan: sumarAMetas,
         },
         () => {
@@ -332,7 +412,7 @@ export function DulcesScreen() {
         }
       );
     },
-    [board, objetivos, pool, COLORES, reaccion, reproducirVozMatch, animar, sumarAMetas]
+    [board, objetivos, pool, COLORES, reproducirVozMatch, animar, alEstallar, sumarAMetas]
   );
 
   const tocar = useCallback(
@@ -563,105 +643,114 @@ export function DulcesScreen() {
         ) : undefined
       }
     >
-      <Trozos disparo={reaccion.trozos} tinte={color.world.cultura} />
-      <View style={styles.top}>
-        <Header
-          onBack={() => nav.goBack()}
-          title={nivel ? `Nivel ${nivel}` : undefined}
-          right={
-            <Text style={styles.jugadas}>
-              {conteo(jugadas, 'jugada')}
-            </Text>
-          }
-        />
-      </View>
-
-      {pregunta ? (
-        <Animated.View entering={aparecer()} style={styles.preguntaWrap}>
-          <Card style={styles.preguntaCard}>
-            <Text style={styles.preguntaEtiqueta}>Llenaste esta</Text>
-            <Text style={styles.preguntaFrase}>
-              {pregunta.objetivo.entry.phrase}
-            </Text>
-            <Text style={styles.preguntaAyuda}>¿Qué significa?</Text>
-            {pregunta.opciones.map((o) => {
-              const esCorrecta = o === pregunta.objetivo.entry.spanish_main;
-              const marcar = respondiendo && (esCorrecta || o === elegidaOpcion);
-              return (
-                <Presionable
-                  key={o}
-                  onPress={() => responder(o)}
-                  disabled={respondiendo}
-                  accessibilityRole="button"
-                  accessibilityLabel={o}
-                  resultado={respondiendo && o === elegidaOpcion ? (esCorrecta ? 'acierto' : 'fallo') : null}
-                  style={[styles.opcion, marcar && esCorrecta && styles.opcionCorrecta, marcar && !esCorrecta && styles.opcionFallada]}
-                >
-                  <Text style={styles.opcionTexto}>{o}</Text>
-                </Presionable>
-              );
-            })}
-
-            {respondiendo ? (
-              <Presionable
-                onPress={seguirAhora}
-                disabled={avanzando}
-                accessibilityRole="button"
-                accessibilityLabel="Siguiente"
-                hitSlop={8}
-                style={styles.seguir}
-              >
-                <Text style={styles.seguirTexto}>Siguiente</Text>
-                <Icon name="chevron-right" size="sm" color={color.textFaint} />
-              </Presionable>
-            ) : (
-              <AudioButton
-                path={pregunta.objetivo.entry.audio_en}
-                size="sm"
-                label="Escuchar"
-              />
-            )}
-          </Card>
-        </Animated.View>
-      ) : (
-        // Scroll interno: en niveles con más filas/columnas el tablero
-        // puede pasar de la altura disponible en pantallas chicas, y sin
-        // esto "Dejarlo aquí" (ahora fijo en el footer) quedaba bien,
-        // pero el tablero se cortaba contra él en vez de dejarse ver
-        // completo con scroll.
-        <ScrollView
-          style={styles.medio}
-          contentContainerStyle={styles.medioContenido}
-          showsVerticalScrollIndicator={false}
-          onLayout={(e) => setVistaAlto(e.nativeEvent.layout.height)}
-          onContentSizeChange={(_, alto) => setContenidoAlto(alto)}
-        >
-          <View style={styles.metas}>
-            <TarjetaMetas objetivos={objetivos} />
-          </View>
-
-          <TableroDulces
-            ref={tableroRef}
-            celdas={board.cells}
-            cols={COLS}
-            rows={ROWS}
-            lado={LADO}
-            hueco={space.xs}
-            llave={llave}
-            elegida={elegida}
-            bloqueado={animando || jugadas <= 0}
-            soloHorizontal={puedeScroll}
-            onTocar={tocar}
-            onDeslizar={deslizar}
+      <View ref={capaRef} style={styles.capa}>
+        <Trozos disparo={reaccion.trozos} tinte={color.world.cultura} />
+        <View style={styles.top}>
+          <Header
+            onBack={() => nav.goBack()}
+            title={nivel ? `Nivel ${nivel}` : undefined}
+            right={
+              <Text style={styles.jugadas}>
+                {conteo(jugadas, 'jugada')}
+              </Text>
+            }
           />
+        </View>
 
-          <Text style={styles.pieNota}>
-            {resueltas > 0
-              ? conteo(resueltas, 'frase resuelta', 'frases resueltas')
-              : 'Junta tres del mismo color para llenar su barra'}
-          </Text>
-        </ScrollView>
-      )}
+        {pregunta ? (
+          <Animated.View entering={aparecer()} style={styles.preguntaWrap}>
+            <Card style={styles.preguntaCard}>
+              <Text style={styles.preguntaEtiqueta}>Llenaste esta</Text>
+              <Text style={styles.preguntaFrase}>
+                {pregunta.objetivo.entry.phrase}
+              </Text>
+              <Text style={styles.preguntaAyuda}>¿Qué significa?</Text>
+              {pregunta.opciones.map((o) => {
+                const esCorrecta = o === pregunta.objetivo.entry.spanish_main;
+                const marcar = respondiendo && (esCorrecta || o === elegidaOpcion);
+                return (
+                  <Presionable
+                    key={o}
+                    onPress={() => responder(o)}
+                    disabled={respondiendo}
+                    accessibilityRole="button"
+                    accessibilityLabel={o}
+                    resultado={respondiendo && o === elegidaOpcion ? (esCorrecta ? 'acierto' : 'fallo') : null}
+                    style={[styles.opcion, marcar && esCorrecta && styles.opcionCorrecta, marcar && !esCorrecta && styles.opcionFallada]}
+                  >
+                    <Text style={styles.opcionTexto}>{o}</Text>
+                  </Presionable>
+                );
+              })}
+
+              {respondiendo ? (
+                <Presionable
+                  onPress={seguirAhora}
+                  disabled={avanzando}
+                  accessibilityRole="button"
+                  accessibilityLabel="Siguiente"
+                  hitSlop={8}
+                  style={styles.seguir}
+                >
+                  <Text style={styles.seguirTexto}>Siguiente</Text>
+                  <Icon name="chevron-right" size="sm" color={color.textFaint} />
+                </Presionable>
+              ) : (
+                <AudioButton
+                  path={pregunta.objetivo.entry.audio_en}
+                  size="sm"
+                  label="Escuchar"
+                />
+              )}
+            </Card>
+          </Animated.View>
+        ) : (
+          // Scroll interno: en niveles con más filas/columnas el tablero
+          // puede pasar de la altura disponible en pantallas chicas, y sin
+          // esto "Dejarlo aquí" (ahora fijo en el footer) quedaba bien,
+          // pero el tablero se cortaba contra él en vez de dejarse ver
+          // completo con scroll.
+          <ScrollView
+            style={styles.medio}
+            contentContainerStyle={styles.medioContenido}
+            showsVerticalScrollIndicator={false}
+            onLayout={(e) => setVistaAlto(e.nativeEvent.layout.height)}
+            onContentSizeChange={(_, alto) => setContenidoAlto(alto)}
+          >
+            <View style={styles.metas}>
+              <TarjetaMetas objetivos={objetivos} registrarBarra={registrarBarra} />
+            </View>
+
+            <View
+              ref={tableroCajaRef}
+              collapsable={false}
+              style={{ width: ANCHO_TABLERO, height: ALTO_TABLERO, alignSelf: 'center' }}
+            >
+              <TableroDulces
+                ref={tableroRef}
+                celdas={board.cells}
+                cols={COLS}
+                rows={ROWS}
+                lado={LADO}
+                hueco={space.xs}
+                llave={llave}
+                elegida={elegida}
+                bloqueado={animando || jugadas <= 0}
+                soloHorizontal={puedeScroll}
+                onTocar={tocar}
+                onDeslizar={deslizar}
+              />
+            </View>
+
+            <Text style={styles.pieNota}>
+              {resueltas > 0
+                ? conteo(resueltas, 'frase resuelta', 'frases resueltas')
+                : 'Junta tres del mismo color para llenar su barra'}
+            </Text>
+          </ScrollView>
+        )}
+        <Estallidos ref={estallidosRef} />
+      </View>
     </Screen>
   );
 }
@@ -708,6 +797,7 @@ function mejorColor(
 }
 
 const styles = StyleSheet.create({
+  capa: { flex: 1 },
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   jugadas: {
     fontSize: font.size.sm,

@@ -424,4 +424,25 @@ prueba('nunca hay más de 60 trozos vivos: cada paso suelta a lo más 30', () =>
   assert.equal(T.trozosDelPaso(72), T.MAX_POR_PASO);
 });
 
+prueba('la dispersión de los trozos es la misma cada vez y no gasta Math.random', () => {
+  const antes = Math.random;
+  let llamadas = 0;
+  Math.random = () => {
+    llamadas++;
+    return antes();
+  };
+  try {
+    for (let i = 0; i < 500; i++) {
+      const v = T.azarFijo(i);
+      assert.ok(v >= 0 && v < 1, `azarFijo(${i}) = ${v}`);
+      assert.equal(T.azarFijo(i), v, 'siempre igual para el mismo número');
+    }
+    assert.notEqual(T.azarFijo(1), T.azarFijo(2));
+    assert.equal(llamadas, 0, 'no toca Math.random: el azar del juego queda como estaba');
+  } finally {
+    Math.random = antes;
+  }
+  assert.equal(T.TROZOS_RETRASO_MS, 60);
+});
+
 console.log(`\ncheck:dulces ${total} pruebas ok`);

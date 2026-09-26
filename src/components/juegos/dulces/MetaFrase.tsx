@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { color, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
@@ -15,10 +15,12 @@ interface BarraProps {
   llevas: number;
   meta: number;
   tinte: string;
+  /** Para saber dónde está la barra (a dónde vuelan los trozos). */
+  barraRef?: (vista: View | null) => void;
 }
 
 /** La barra de la meta: se llena con resorte cuando llegan los trozos; con «reducir movimiento» salta al valor. */
-function BarraMeta({ llevas, meta, tinte }: BarraProps) {
+function BarraMeta({ llevas, meta, tinte, barraRef }: BarraProps) {
   const reducido = useMovimientoReducido();
   const pct = meta > 0 ? Math.min(1, llevas / meta) : 0;
   const progreso = useSharedValue(pct);
@@ -31,7 +33,7 @@ function BarraMeta({ llevas, meta, tinte }: BarraProps) {
   const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.min(1, Math.max(0, progreso.value)) }] }));
 
   return (
-    <View style={styles.pista}>
+    <View ref={barraRef} collapsable={false} style={styles.pista}>
       <Animated.View style={[styles.relleno, { backgroundColor: tinte }, relleno]} />
     </View>
   );
@@ -41,6 +43,8 @@ interface Props {
   objetivo: DulceObjetivo;
   /** Es la que está más cerca de llenarse: lleva un filo de luz de su color. */
   cercana: boolean;
+  /** Avisa de la vista de la barra al montar y al desmontar, para medirla. */
+  registrarBarra?: (color: number, vista: View | null) => void;
 }
 
 /**
@@ -48,7 +52,7 @@ interface Props {
  * la pieza con «7 de 10». Para el lector de pantalla es una sola cosa: la frase, el color y la forma, y el
  * avance como barra de progreso.
  */
-export const MetaFrase = memo(function MetaFrase({ objetivo, cercana }: Props) {
+export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarBarra }: Props) {
   const reducido = useMovimientoReducido();
   const filo = useSharedValue(cercana ? 1 : 0);
   const tinte = tinteDe(objetivo.color);
@@ -60,6 +64,8 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana }: Props) {
   }, [cercana, reducido, filo]);
 
   const luz = useAnimatedStyle(() => ({ opacity: filo.value }));
+  const colorDeMeta = objetivo.color;
+  const alRegistrar = useCallback((vista: View | null) => registrarBarra?.(colorDeMeta, vista), [registrarBarra, colorDeMeta]);
 
   return (
     <View
@@ -78,7 +84,7 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana }: Props) {
           {objetivo.entry.phrase}
         </Text>
         <View style={styles.progreso}>
-          <BarraMeta llevas={llevas} meta={objetivo.meta} tinte={tinte.medio} />
+          <BarraMeta llevas={llevas} meta={objetivo.meta} tinte={tinte.medio} barraRef={alRegistrar} />
           <Text style={styles.cuenta} maxFontSizeMultiplier={1.2}>
             {llevas} de {objetivo.meta}
           </Text>
@@ -90,15 +96,16 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana }: Props) {
 
 interface TarjetaProps {
   objetivos: DulceObjetivo[];
+  registrarBarra?: (color: number, vista: View | null) => void;
 }
 
 /** Las metas del nivel en una sola tarjeta. */
-export function TarjetaMetas({ objetivos }: TarjetaProps) {
+export function TarjetaMetas({ objetivos, registrarBarra }: TarjetaProps) {
   const cercana = indiceMasCercana(objetivos);
   return (
     <View style={styles.tarjeta}>
       {objetivos.map((o, i) => (
-        <MetaFrase key={o.color} objetivo={o} cercana={i === cercana} />
+        <MetaFrase key={o.color} objetivo={o} cercana={i === cercana} registrarBarra={registrarBarra} />
       ))}
     </View>
   );

@@ -7,7 +7,7 @@ import { motionDuration, motionDulces } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { ChipCascada } from './ChipCascada';
 import { Pieza, type Entrada, type Movimiento } from './Pieza';
-import { celdaEn, esperaDeCaida, retrasoDeColumna, umbralDeslizar, vecinaHacia } from './tablero';
+import { TROZOS_RETRASO_MS, celdaEn, esperaDeCaida, retrasoDeColumna, umbralDeslizar, vecinaHacia } from './tablero';
 
 /** Lo que una jugada le pide al tablero que anime. */
 export interface Jugada {
@@ -289,7 +289,7 @@ export function TableroDulces({
           if (sinMovimiento) {
             j.onLlegan?.(p, k);
           } else {
-            const llegada = motionDulces.pulso + motionDulces.vuelo;
+            const llegada = motionDulces.pulso + TROZOS_RETRASO_MS + motionDulces.vuelo;
             ultimaLlegada = Math.max(ultimaLlegada, Date.now() + llegada);
             const t = setTimeout(() => {
               timers.current.delete(t);
