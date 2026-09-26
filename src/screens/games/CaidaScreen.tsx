@@ -9,7 +9,9 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSequence,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
@@ -36,6 +38,7 @@ import {
   motionDuration,
   motionEasing,
   motionLogro,
+  motionSpring,
   radius,
   shadow,
   space,
@@ -53,8 +56,12 @@ type Ruta = RouteProp<RootStackParams, 'Caida'>;
  * para oír la frase completa en inglés y en español.
  */
 const PAUSA_MAXIMA_MS = 10000;
-/** Respiro tras la voz antes de seguir (próxima ronda o resultado). */
+/** Respiro tras la voz antes de seguir a la ronda siguiente. */
 const RESPIRO_MS = 300;
+/** Respiro tras la voz de una ronda perdida, antes de la pantalla final. */
+const RESPIRO_PERDIDA_MS = 500;
+/** Cuánto se aplastan las fichas al chocar con el piso (scaleY): vuelven a 1 con rebote. */
+const APLASTE = 0.92;
 /** Tope del vuelo de la ficha acertada hasta el marcador (unos 470 ms): pasado esto el marcador se actualiza igual. */
 const VUELO_MAXIMO_MS = 1200;
 /** Bloqueo de "Siguiente" en la pausa contra doble toque. */
@@ -99,6 +106,10 @@ export function CaidaScreen() {
   const [aciertos, setAciertos] = useState(0);
   const [perdio, setPerdio] = useState(false);
   const [fallada, setFallada] = useState<string | null>(null);
+  // Cómo terminó la ronda perdida: ficha equivocada o fichas contra el piso. Mientras se ve ese final
+  // (`animandoFin`) la hoja de la pausa espera.
+  const [finRonda, setFinRonda] = useState<'fallo' | 'piso' | null>(null);
+  const [animandoFin, setAnimandoFin] = useState(false);
   // Ronda y texto de la ficha acertada: la ronda evita que un texto repetido marque la siguiente.
   const [acertada, setAcertada] = useState<string | null>(null);
   // Pausa al acertar: congela la caída y bloquea las fichas mientras se
@@ -118,6 +129,9 @@ export function CaidaScreen() {
 
   const y = useSharedValue(0);
   const pulsoMarcador = useSharedValue(0);
+  // El choque contra el piso: el aplastamiento de las fichas y el destello del piso.
+  const aplasta = useSharedValue(1);
+  const golpe = useSharedValue(0);
   // La estela de las fichas: 1 mientras caen, 0 al contestar o al llegar al piso.
   const estela = useSharedValue(0);
   // Cuánto baja la fila hasta tocar el piso, según el alto real de la
@@ -198,6 +212,8 @@ export function CaidaScreen() {
     setEnPausa(false);
     setPausaInfo(null);
     setVolando(false);
+    setFinRonda(null);
+    setAnimandoFin(false);
     continuar?.();
   }, []);
 
@@ -223,7 +239,7 @@ export function CaidaScreen() {
       await audio.playRoundResultBilingue(correct, entry.audio_en, entry.audio_es);
       if (pausaToken.current !== miToken) return; // ya lo cerró otra vía
 
-      await new Promise((r) => setTimeout(r, RESPIRO_MS));
+      await new Promise((r) => setTimeout(r, correct ? RESPIRO_MS : RESPIRO_PERDIDA_MS));
       avanzarTrasPausa(miToken);
     },
     [avanzarTrasPausa]
@@ -285,10 +301,12 @@ export function CaidaScreen() {
     if (enPausa || !round) return;
     setFallada(null);
     setAcertada(null);
+    setFinRonda('piso');
+    setAnimandoFin(!reducido);
     haptics.failure();
     estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
     void pausarConVoz(round.entry, false, () => setPerdio(true));
-  }, [round, enPausa, pausarConVoz, estela]);
+  }, [round, enPausa, pausarConVoz, estela, reducido]);
 
   // Arranca la caída de cada ronda.
   useEffect(() => {
@@ -315,8 +333,34 @@ export function CaidaScreen() {
     return () => cancelAnimation(y);
   }, [round, perdio, enPausa, y, estela, autoAudio, seCayo, altoPista]);
 
+  // Fin de una ronda perdida. Ficha equivocada: primero se ve el veredicto (`lento`) y luego las dos caen
+  // suavemente al piso. Piso: las fichas ya llegaron y se aplastan un poco con rebote mientras el piso
+  // destella. Va después del arranque de la caída para correr tras su limpieza, que cancela `y`. Con
+  // «reducir movimiento» solo cambian los colores.
+  useEffect(() => {
+    if (!finRonda || reducido) return undefined;
+    let duracion = motionDuration.lento;
+    if (finRonda === 'fallo') {
+      y.value = withDelay(
+        motionDuration.lento,
+        withTiming(altoPista, { duration: motionDuration.escena, easing: motionEasing.salir })
+      );
+      duracion += motionDuration.escena;
+    } else {
+      aplasta.value = APLASTE;
+      aplasta.value = withSpring(1, motionSpring.rebote);
+      golpe.value = withSequence(
+        withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
+        withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
+      );
+    }
+    const t = setTimeout(() => setAnimandoFin(false), duracion);
+    return () => clearTimeout(t);
+  }, [finRonda, reducido, altoPista, y, aplasta, golpe]);
+
+  // Con «reducir movimiento» las fichas no caen: se quedan arriba y una barra cuenta el tiempo.
   const anim = useAnimatedStyle(() => ({
-    transform: [{ translateY: y.value }],
+    transform: reducido ? [] : [{ translateY: y.value }, { scaleY: aplasta.value }],
   }));
 
   // 1 → `motionLogro.escala` → 1: la misma escala con la que pulsa un logro en Niveles.
@@ -352,6 +396,8 @@ export function CaidaScreen() {
       if (!bien) {
         haptics.failure();
         setFallada(texto);
+        setFinRonda('fallo');
+        setAnimandoFin(!reducido);
         void pausarConVoz(round.entry, false, () => setPerdio(true));
         return;
       }
@@ -437,6 +483,8 @@ export function CaidaScreen() {
                 setAciertos(0);
                 setFallada(null);
                 setAcertada(null);
+                setFinRonda(null);
+                setAnimandoFin(false);
                 setPerdio(false);
               }}
               full
@@ -537,12 +585,14 @@ export function CaidaScreen() {
           onDistancia={setAltoPista}
           largoEstela={largoEstela(altoPista, round.duracionMs)}
           estela={estela}
+          armado={!enPausa}
+          golpe={golpe}
         >
           <Animated.View style={[styles.fila, anim]}>
             <FichaCaida
               key={`${idx}-a`}
               texto={izquierda}
-              estado={estadoFicha(izquierda, fallada, acertada, idx)}
+              estado={estadoFicha(izquierda, round.correcta, fallada, acertada, idx)}
               y={y}
               destino={destino}
               onLlego={alLlegarFicha}
@@ -551,7 +601,7 @@ export function CaidaScreen() {
             <FichaCaida
               key={`${idx}-b`}
               texto={derecha}
-              estado={estadoFicha(derecha, fallada, acertada, idx)}
+              estado={estadoFicha(derecha, round.correcta, fallada, acertada, idx)}
               y={y}
               destino={destino}
               onLlego={alLlegarFicha}
@@ -563,7 +613,7 @@ export function CaidaScreen() {
         <HojaPausa
           entry={pausaInfo?.entry ?? null}
           correct={pausaInfo?.correct ?? false}
-          visible={enPausa && !volando}
+          visible={enPausa && !volando && !animandoFin}
           avanzando={avanzando}
           onContinuar={tocarSiguienteEnPausa}
         />
@@ -572,14 +622,19 @@ export function CaidaScreen() {
   );
 }
 
-/** Qué le pasó a una ficha esta ronda: la acertada, la equivocada (`fallada`) o la que sobra tras un acierto. */
+/**
+ * Qué le pasó a una ficha esta ronda: la acertada, la equivocada (`fallada`), la que era tras un fallo
+ * (`correcta`) o la que sobra tras un acierto.
+ */
 function estadoFicha(
   texto: string,
+  correcta: string,
   fallada: string | null,
   acertada: string | null,
   ronda: number
 ): EstadoFicha {
   if (fallada === texto) return 'fallo';
+  if (fallada !== null && texto === correcta) return 'correcta';
   if (acertada === `${ronda}|${texto}`) return 'acierto';
   return acertada?.startsWith(`${ronda}|`) ? 'descartada' : 'normal';
 }
@@ -598,6 +653,8 @@ const styles = StyleSheet.create({
   // La fila va absoluta arriba de la pista y baja con `translateY`: el piso es de la pista, no de esta fila.
   fila: {
     position: 'absolute',
+    // El aplastamiento contra el piso (`scaleY`) sale de abajo, donde las fichas tocan.
+    transformOrigin: 'bottom',
     top: MARGEN_ARRIBA,
     left: 0,
     right: 0,

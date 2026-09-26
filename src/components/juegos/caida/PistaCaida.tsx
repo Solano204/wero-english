@@ -5,6 +5,7 @@ import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 import { FxSeguro } from '@/components/fx/FxSeguro';
 import { color, resplandorPiso, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
+import { BarraTiempo } from './BarraTiempo';
 import { ALTO_PISO, MARGEN_ARRIBA, MARGEN_PISO, distanciaCaida } from './medidas';
 import { PisoResplandor } from './PisoResplandor';
 
@@ -77,6 +78,10 @@ interface Props {
   /** El largo de la estela de la ronda (`largoEstela`) y su intensidad de 0 a 1. */
   largoEstela: number;
   estela: SharedValue<number>;
+  /** El aviso del piso solo suena con la ronda corriendo. */
+  armado: boolean;
+  /** El choque de las fichas contra el piso al agotarse el tiempo (0 a 1). */
+  golpe: SharedValue<number>;
   /** La fila de fichas, ya colocada con `top: MARGEN_ARRIBA` y su `translateY`. */
   children: ReactNode;
 }
@@ -85,9 +90,9 @@ interface Props {
  * La pista de Caída: ocupa todo el espacio entre la instrucción y el borde de abajo. Trae los
  * carriles con la estela de las fichas, el piso con su resplandor (en posición absoluta al fondo: la ficha se detiene exacto
  * sobre él, `distanciaCaida`) y la fila de fichas encima. Con «reducir movimiento» no hay
- * carriles con perspectiva ni estela.
+ * carriles con perspectiva ni estela, y el tiempo es una barra que se vacía.
  */
-export function PistaCaida({ pistaRef, y, onDistancia, largoEstela, estela, children }: Props) {
+export function PistaCaida({ pistaRef, y, onDistancia, largoEstela, estela, armado, golpe, children }: Props) {
   const reducido = useMovimientoReducido();
   const [medida, setMedida] = useState({ ancho: 0, alto: 0 });
 
@@ -105,7 +110,8 @@ export function PistaCaida({ pistaRef, y, onDistancia, largoEstela, estela, chil
       {!reducido && medida.ancho > 0 ? (
         <Carriles ancho={medida.ancho} alto={medida.alto} y={y} largoEstela={largoEstela} estela={estela} />
       ) : null}
-      {medida.alto > 0 ? <PisoResplandor y={y} distancia={distanciaCaida(medida.alto)} /> : null}
+      {medida.alto > 0 ? <PisoResplandor y={y} distancia={distanciaCaida(medida.alto)} armado={armado} golpe={golpe} /> : null}
+      {reducido && medida.alto > 0 ? <BarraTiempo y={y} distancia={distanciaCaida(medida.alto)} /> : null}
       {children}
     </View>
   );

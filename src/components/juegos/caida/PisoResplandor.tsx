@@ -23,11 +23,16 @@ const PULSO_BRILLO = 0.5;
 // Copias locales: un worklet captura estos colores, no el objeto de tema entero.
 const APAGADO = color.textFaint;
 const ACENTO = color.accent;
+const DESTELLO = color.textMuted;
 
 interface Props {
   /** La posición de la fila (0 arriba, `distancia` al tocar el piso): el mismo valor que la mueve. */
   y: SharedValue<number>;
   distancia: number;
+  /** El aviso del 75 % solo suena mientras la ronda corre: no tras contestar, cuando las fichas caen solas. */
+  armado: boolean;
+  /** 0 a 1: el choque de las fichas contra el piso al agotarse el tiempo. El piso destella una vez, en `textMuted`. */
+  golpe: SharedValue<number>;
 }
 
 /**
@@ -36,8 +41,9 @@ interface Props {
  * Al 75 % da el aviso: un háptico ligero y un solo pulso del piso. Es el aviso, no un castigo:
  * nunca rojo ni ámbar. Todo sale del mismo valor `y` que mueve las fichas, en el hilo de UI y sin
  * setState por cuadro. Con «reducir movimiento» no hay pulso; el resplandor y el háptico se quedan.
+ * Si las fichas llegan al piso, este destella una vez en `textMuted` (`golpe`).
  */
-export function PisoResplandor({ y, distancia }: Props) {
+export function PisoResplandor({ y, distancia, armado, golpe }: Props) {
   const reducido = useMovimientoReducido();
   const pulso = useSharedValue(0);
   const avisar = useCallback(() => haptics.tapLight(), []);
@@ -46,7 +52,7 @@ export function PisoResplandor({ y, distancia }: Props) {
   useAnimatedReaction(
     () => avance(y.value, distancia) >= AVISO_EN,
     (llego, antes) => {
-      if (!llego || antes) return;
+      if (!llego || antes || !armado) return;
       runOnJS(avisar)();
       if (reducido) return;
       pulso.value = withSequence(
@@ -54,15 +60,15 @@ export function PisoResplandor({ y, distancia }: Props) {
         withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
       );
     },
-    [distancia, reducido]
+    [distancia, reducido, armado]
   );
 
   const brillo = useAnimatedStyle(() => ({
     opacity: Math.min(1, resplandor(avance(y.value, distancia)) + PULSO_BRILLO * pulso.value),
   }));
   const linea = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(pulso.value, [0, 1], [APAGADO, ACENTO]),
-    transform: [{ scaleY: 1 + pulso.value }],
+    backgroundColor: interpolateColor(golpe.value, [0, 1], [interpolateColor(pulso.value, [0, 1], [APAGADO, ACENTO]), DESTELLO]),
+    transform: [{ scaleY: 1 + pulso.value + golpe.value }],
   }));
 
   return (

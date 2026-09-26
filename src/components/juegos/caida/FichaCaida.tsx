@@ -26,8 +26,12 @@ const acotar = (v: number) => {
   return Math.min(1, Math.max(0, v));
 };
 
-/** Lo que le pasó a esta ficha en la ronda. */
-export type EstadoFicha = 'normal' | 'acierto' | 'descartada' | 'fallo';
+/**
+ * Lo que le pasó a esta ficha en la ronda: `acierto` (la que se tocó bien, vuela al marcador),
+ * `descartada` (la que sobra tras un acierto), `fallo` (la que se tocó mal) y `correcta` (la que
+ * era, señalada tras un fallo).
+ */
+export type EstadoFicha = 'normal' | 'acierto' | 'correcta' | 'descartada' | 'fallo';
 
 interface Props {
   texto: string;
@@ -48,14 +52,17 @@ interface Props {
  * `key` de la ronda para que se repita.
  *
  * Acierto: se detiene en seco, se llena de `correctFondo` con `check` y sale disparada hacia el
- * marcador, donde se disuelve. La otra ficha se desvanece cayendo. Con «reducir movimiento» no hay
- * destello, escala, vuelo ni caída: la acertada se llena y la otra se apaga, y el marcador se entera igual.
+ * marcador, donde se disuelve. La otra ficha se desvanece cayendo. Fallo: la equivocada se sacude y se
+ * pone ámbar con `close` (nunca rojo, y siempre con ícono además del color) y la que era se enciende en
+ * verde con `check`. Con «reducir movimiento» no hay destello, escala, sacudida, vuelo ni caída: solo
+ * cambian los colores, y el marcador se entera igual.
  */
 export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Props) {
   const reducido = useMovimientoReducido();
   const entrada = useSharedValue(0);
   const destello = useSharedValue(reducido ? 0 : 1);
   const llenado = useSharedValue(0);
+  const fallado = useSharedValue(0);
   const vuelo = useSharedValue(0);
   const descarte = useSharedValue(0);
   const centro = useSharedValue(0);
@@ -69,8 +76,11 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
   }, [reducido, entrada, destello]);
 
   useEffect(() => {
-    if (estado === 'acierto') {
+    if (estado === 'fallo') {
+      fallado.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+    } else if (estado === 'acierto' || estado === 'correcta') {
       llenado.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      if (estado === 'correcta') return undefined;
       if (reducido) {
         const t = setTimeout(llegar, motionDuration.base);
         return () => clearTimeout(t);
@@ -86,7 +96,7 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
       descarte.value = withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.salir });
     }
     return undefined;
-  }, [estado, reducido, llenado, vuelo, descarte, llegar]);
+  }, [estado, reducido, llenado, fallado, vuelo, descarte, llegar]);
 
   const alMedir = useCallback(
     (e: LayoutChangeEvent) => {
@@ -111,6 +121,7 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
   });
   const luz = useAnimatedStyle(() => ({ opacity: destello.value }));
   const lleno = useAnimatedStyle(() => ({ opacity: llenado.value }));
+  const roto = useAnimatedStyle(() => ({ opacity: fallado.value }));
 
   return (
     <Animated.View style={[styles.lugar, lugar]} onLayout={alMedir}>
@@ -118,7 +129,7 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={texto}
-        accessibilityState={{ selected: estado === 'acierto' }}
+        accessibilityState={{ selected: estado === 'acierto' || estado === 'correcta' }}
         resultado={estado === 'fallo' ? 'fallo' : null}
         style={[styles.ficha, estado === 'fallo' && styles.fallo]}
       >
@@ -128,6 +139,9 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
         </Text>
         <Animated.View pointerEvents="none" style={[styles.marca, lleno]}>
           <Icon name="check" size="md" color={color.correct} />
+        </Animated.View>
+        <Animated.View pointerEvents="none" style={[styles.marca, roto]}>
+          <Icon name="close" size="md" color={color.wrong} />
         </Animated.View>
         <Animated.View pointerEvents="none" style={[styles.destello, luz]} />
       </Presionable>
@@ -150,7 +164,7 @@ const styles = StyleSheet.create({
     padding: space.md,
     ...shadow.card,
   },
-  fallo: { backgroundColor: color.wrongSoft, borderColor: color.wrong },
+  fallo: { backgroundColor: color.wrongFondo, borderColor: color.wrong },
   texto: {
     fontFamily: font.family.body,
     fontSize: font.size.md,
