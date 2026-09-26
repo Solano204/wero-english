@@ -11,7 +11,7 @@ import Animated, {
 import { Card } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { OndaVoz, type VozEnVivo } from '@/components/fx';
-import { color, desaparecer, font, motionDuration, motionEasing, reacomodar, space } from '@/theme';
+import { aparecer, color, desaparecer, font, motionDuration, motionEasing, reacomodar, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const ALTO_ONDA = 32;
@@ -95,7 +95,7 @@ export function BloqueEscucha({
     <Animated.View layout={reacomodar()}>
       <Card compacta>
         {conInstruccion ? (
-          <Animated.Text exiting={desaparecer(motionDuration.rapido)} style={styles.instruccion}>
+          <Animated.Text entering={aparecer()} exiting={desaparecer(motionDuration.rapido)} style={styles.instruccion}>
             Escucha y marca las tres reducciones que oíste
           </Animated.Text>
         ) : null}

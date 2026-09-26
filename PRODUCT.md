@@ -92,6 +92,8 @@ La misma acción se llama igual en toda la app.
 | Pedir ayuda en una ronda de Colmena | Pista N; No me sale | Rendirse, Revelar, Skip |
 | Cuando se acaba el reloj de una ronda de Colmena | Se acabó el tiempo | ¡Tiempo!, Perdiste, Fallaste |
 | Pasar a la ronda que sigue | Siguiente; Terminar (en la última) | Continuar, Next |
+| Lo que dice el pie de Cázala | «N de 3 marcadas» y «Revisar»; ya revisada, «Siguiente» (en la ronda 20, «Terminar») | Comprobar, Enviar, Corregir |
+| El resultado de una ronda de Cázala | «Las tres» o «N de 3»; cada reducción: «La cazaste», «Esta sí iba», «No iba» | Correcto, Incorrecto, Fallaste |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
