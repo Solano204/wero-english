@@ -14,6 +14,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { Trozos, useReaccion, estiloResultado, type Resultado } from '@/components/feedback';
+import { PistaCaida } from '@/components/juegos/caida/PistaCaida';
+import { ALTO_FICHA, MARGEN_ARRIBA } from '@/components/juegos/caida/medidas';
 import { buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/db/games';
@@ -50,16 +52,6 @@ const PAUSA_MAXIMA_MS = 10000;
 const RESPIRO_MS = 300;
 /** Bloqueo de "Siguiente" en la pausa contra doble toque. */
 const AVANZAR_DEBOUNCE_MS = 400;
-
-/**
- * Cuánto baja la tarjeta antes de tocar el piso.
- *
- * Antes era un 42% de la pantalla con tope de 380, y en teléfonos altos
- * eso dejaba a la tarjeta parándose a media pantalla mientras la línea
- * roja seguía mucho más abajo: parecía que perdías sin que nada te
- * tocara. Ahora se mide de verdad la pista, así que la tarjeta aterriza
- * exactamente sobre la línea.
- */
 
 /**
  * P-26, Caída.
@@ -113,9 +105,9 @@ export function CaidaScreen() {
   const y = useSharedValue(0);
   const overlayOpacity = useSharedValue(0);
   const overlayScale = useSharedValue(0.92);
-  // Alto real de la pista, medido en pantalla. No se puede calcular:
-  // depende del alto del encabezado, de la frase (que a veces son dos
-  // renglones) y de la barra de gestos del teléfono.
+  // Cuánto baja la fila hasta tocar el piso, según el alto real de la
+  // pista, medido en pantalla: depende del encabezado, de la frase (que a
+  // veces son dos renglones) y de la barra de gestos del teléfono.
   const [altoPista, setAltoPista] = useState(0);
   const empezoEn = useRef(Date.now());
   const round = rounds[idx];
@@ -465,15 +457,7 @@ export function CaidaScreen() {
         </Text>
       </View>
 
-      <View
-        style={styles.pista}
-        onLayout={(e) => {
-          // Se resta el alto de la ficha y el del piso para que la
-          // tarjeta se detenga tocándolo, no atravesándolo.
-          const alto = e.nativeEvent.layout.height - ALTO_FICHA - ALTO_PISO;
-          setAltoPista(Math.max(80, alto));
-        }}
-      >
+      <PistaCaida y={y} onDistancia={setAltoPista}>
         <Animated.View style={[styles.fila, anim]}>
           <Ficha
             texto={izquierda}
@@ -486,8 +470,7 @@ export function CaidaScreen() {
             onPress={() => void responder(derecha)}
           />
         </Animated.View>
-        <View style={styles.piso} />
-      </View>
+      </PistaCaida>
 
       {enPausa && pausaInfo ? (
         <View style={styles.overlay} pointerEvents="box-none">
@@ -539,16 +522,12 @@ function Ficha({
       resultado={resultado}
       style={[styles.ficha, resultado && estiloResultado[resultado]]}
     >
-      <Text style={styles.fichaTexto} numberOfLines={4}>
+      <Text style={styles.fichaTexto} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.8} maxFontSizeMultiplier={1.3}>
         {texto}
       </Text>
     </Presionable>
   );
 }
-
-/** Deben coincidir con los estilos de abajo. */
-const ALTO_FICHA = 96;
-const ALTO_PISO = 24;
 
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
@@ -571,15 +550,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: space.xs,
   },
-  pista: { flex: 1, justifyContent: 'flex-start', paddingTop: space.lg },
+  // La fila va absoluta arriba de la pista y baja con `translateY`: el piso es de la pista, no de esta fila.
   fila: {
+    position: 'absolute',
+    top: MARGEN_ARRIBA,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     gap: space.md,
     paddingHorizontal: space.lg,
   },
   ficha: {
     flex: 1,
-    minHeight: 96,
+    height: ALTO_FICHA,
     borderRadius: radius.lg,
     backgroundColor: color.surface,
     borderWidth: 1,
@@ -596,14 +579,6 @@ const styles = StyleSheet.create({
     fontSize: font.size.md,
     color: color.text,
     textAlign: 'center',
-  },
-  piso: {
-    height: 4,
-    marginBottom: space.md,
-    backgroundColor: color.riskStrong,
-    marginTop: space.lg,
-    marginHorizontal: space.lg,
-    borderRadius: radius.pill,
   },
   finWrap: { flex: 1 },
   finWrapContenido: {

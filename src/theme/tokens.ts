@@ -226,6 +226,9 @@ export const filoWrong: [string, string, string] = [
   'rgba(242, 179, 61, 0.30)',
 ];
 
+/** El resplandor del piso de Caída: del aire (arriba) al `accent` al 40 % (abajo). Nunca rojo ni ámbar: todavía no ha pasado nada. */
+export const resplandorPiso: [string, string] = ['rgba(69, 217, 255, 0)', 'rgba(69, 217, 255, 0.4)'];
+
 /** El sol del sistema, hecho visible como resplandor en `Screen`. */
 export const resplandorSol: [string, string, string] = [
   'rgba(69, 217, 255, 0.16)',

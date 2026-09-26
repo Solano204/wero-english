@@ -5,6 +5,7 @@ export {
   filoOk,
   filoWrong,
   resplandorSol,
+  resplandorPiso,
   color,
   gradiente,
   iconoRedondo,

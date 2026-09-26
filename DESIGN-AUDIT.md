@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 241 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 244 archivos de `src/` y `App.tsx`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -87,6 +87,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/fx/OndaSenal.tsx:53`
 - `src/components/fx/OndaVoz.tsx:124`
 - `src/components/fx/PortadaJuego.tsx:93`
+- `src/components/juegos/caida/PisoResplandor.tsx:71`
 - `src/components/juegos/pares/CableSenal.tsx:388`
 - `src/components/niveles/CeldaNivel.tsx:130`
 - `src/components/unlock/MuroDesbloqueo.tsx:76`
@@ -120,8 +121,8 @@ Se quedan en 12–13 px, revisados a mano (18):
 - `src/screens/entry/OnboardingScreen.tsx:492` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/screens/extras/LecturaScreen.tsx:310` — leyendaTexto: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/extras/LecturasScreen.tsx:236` — difTexto: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
-- `src/screens/games/CaidaScreen.tsx:642` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/screens/games/CaidaScreen.tsx:688` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
+- `src/screens/games/CaidaScreen.tsx:617` — finNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
+- `src/screens/games/CaidaScreen.tsx:663` — siguienteTexto: fontSize sm = 13 — etiqueta de un botón de texto: lo que se toca es el contenedor
 - `src/screens/games/ColmenaScreen.tsx:610` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/screens/games/DulcesScreen.tsx:688` — metaFrase: fontSize xs = 12 — etiqueta de una línea (metadato o chip)
 - `src/screens/games/DulcesScreen.tsx:711` — pieNota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
@@ -218,7 +219,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 | `extras/LecturaScreen.tsx` | ✓ `:55` | ✓ `:131` | ✓ `:145` |
 | `extras/LecturasScreen.tsx` | ✓ `:49` | ✓ `:75` | ✓ `:94` |
 | `extras/PracticeScreen.tsx` | ✓ `:98` | ✗ | ✓ `:167` |
-| `games/CaidaScreen.tsx` | ✓ `:159` | ✓ `:365` | ✓ `:345` |
+| `games/CaidaScreen.tsx` | ✓ `:151` | ✓ `:357` | ✓ `:337` |
 | `games/CazalaScreen.tsx` | ✓ `:72` | ✓ `:141` | ✓ `:185` |
 | `games/ColmenaScreen.tsx` | ✓ `:113` | ✓ `:299` | ✓ `:279` |
 | `games/DulcesScreen.tsx` | ✓ `:146` | ✓ `:471` | ✓ `:451` |
@@ -293,7 +294,7 @@ Archivos que pintan `<AudioButton>`: `screens/extras/PhrasalScreen.tsx` 6, `scre
 
 **Excepciones revisadas a mano (no cuentan):**
 - `src/components/base/RoundTimer.tsx:67` — reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda
-- `src/screens/games/CaidaScreen.tsx:250` — reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda
+- `src/screens/games/CaidaScreen.tsx:242` — reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda
 
 **MOT-2 · Todo tocable pasa por `Presionable`** (escala 0.97 en `rapido`; con Reduce Motion baja la opacidad). Cuenta `Pressable`, `AnimatedPressable` y `Touchable*` sueltos:
 - (ninguno)
