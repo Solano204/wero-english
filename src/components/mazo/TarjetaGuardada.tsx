@@ -1,13 +1,11 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Icon, Presionable } from '@/components/base';
-import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
-import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
-import { analizar } from '@/domain/marcas';
-import * as audio from '@/services/audio';
+import { GrupoAudio } from '@/components/card/GrupoAudio';
+import { useAudioFrase } from '@/components/card/useAudioFrase';
+import { FraseKaraoke } from '@/components/fx';
 import * as haptics from '@/services/haptics';
-import { marcasDe } from '@/services/marcas';
 import { aparecer, aparecerSubiendo, color, escalon, font, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { Entry } from '@/types';
@@ -34,42 +32,19 @@ interface Props {
  */
 export const TarjetaGuardada = memo(function TarjetaGuardada({ entry, indice, animar, onAbrir, onQuitar }: Props) {
   const reducido = useMovimientoReducido();
-  const vozEn = useVozEnVivo(entry.audio_en);
-  const vozEs = useVozEnVivo(entry.audio_es);
+  const { vozEn, palabras, controles, sonar, acciones, atender } = useAudioFrase(entry);
   const [verQuitar, setVerQuitar] = useState(false);
-  const hablado = entry.phrase_tts || entry.phrase;
-  const { palabras } = useMemo(
-    () => analizar(entry.phrase, hablado, marcasDe(entry.audio_en), vozEn.duracion),
-    [entry.phrase, hablado, entry.audio_en, vozEn.duracion]
-  );
 
   const abrir = useCallback(() => onAbrir(entry), [onAbrir, entry]);
   const quitar = useCallback(() => onQuitar(entry), [onQuitar, entry]);
-  const sonar = useCallback((ruta: string) => {
-    haptics.tapLight();
-    void audio.play(ruta);
-  }, []);
   const alMantener = useCallback(() => {
     haptics.tapMedium();
     setVerQuitar((v) => !v);
   }, []);
-
-  const controles: ControlAudio[] = [
-    { clave: 'en', etiqueta: 'Inglés', descripcion: 'Escuchar en inglés', icono: 'play', ruta: entry.audio_en, lento: false, suena: vozEn.sonando },
-    ...(entry.audio_es
-      ? [{ clave: 'es', etiqueta: 'Español', descripcion: 'Escuchar en español', icono: 'play' as const, ruta: entry.audio_es, lento: false, suena: vozEs.sonando }]
-      : []),
-  ];
-  const acciones = [
-    { name: 'quitar', label: 'Quitar de mi mazo' },
-    { name: 'ingles', label: 'Escuchar en inglés' },
-    ...(entry.audio_es ? [{ name: 'espanol', label: 'Escuchar en español' }] : []),
-  ];
   const alAccion = (e: AccessibilityActionEvent) => {
     const nombre = e.nativeEvent.actionName;
     if (nombre === 'quitar') quitar();
-    else if (nombre === 'ingles') sonar(entry.audio_en);
-    else if (nombre === 'espanol' && entry.audio_es) sonar(entry.audio_es);
+    else atender(nombre);
   };
 
   return (
@@ -81,7 +56,7 @@ export const TarjetaGuardada = memo(function TarjetaGuardada({ entry, indice, an
           accessibilityRole="button"
           accessibilityLabel={`${entry.phrase}. ${entry.spanish_main}`}
           accessibilityHint="Abre la frase"
-          accessibilityActions={acciones}
+          accessibilityActions={[{ name: 'quitar', label: 'Quitar de mi mazo' }, ...acciones]}
           onAccessibilityAction={alAccion}
         >
           <Card>

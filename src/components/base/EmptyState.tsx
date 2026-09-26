@@ -10,16 +10,18 @@ interface Props {
   actionLabel?: string;
   onAction?: () => void;
   icon?: IconName;
+  /** El color del ícono; por omisión `textMuted`. Un vacío que es una buena noticia (nada se atora) lo pone en `correct`. */
+  iconColor?: string;
 }
 
 /**
  * Estado vacío. Nunca se deja una pantalla en blanco: si no hay nada,
  * hay que decir por qué y qué hacer en su lugar.
  */
-export function EmptyState({ title, body, actionLabel, onAction, icon }: Props) {
+export function EmptyState({ title, body, actionLabel, onAction, icon, iconColor }: Props) {
   return (
     <View style={styles.wrap}>
-      {icon ? <Icon name={icon} size="xl" color={color.textMuted} /> : null}
+      {icon ? <Icon name={icon} size="xl" color={iconColor ?? color.textMuted} /> : null}
       <Text style={styles.title}>{title}</Text>
       {body ? <Text style={styles.body}>{body}</Text> : null}
       {actionLabel && onAction ? (

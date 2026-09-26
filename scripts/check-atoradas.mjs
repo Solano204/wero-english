@@ -137,11 +137,14 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
 await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Español, chevron, botón al mantener presionado y deslizar sin rojo', () => {
   const t = sinComentarios(leer('src/components/mazo/TarjetaGuardada.tsx'));
   assert.match(t, /export const TarjetaGuardada = memo\(/);
-  for (const etiqueta of ['Quitar de mi mazo', 'Escuchar en inglés', 'Escuchar en español']) assert.ok(t.includes(`label: '${etiqueta}'`), etiqueta);
+  assert.ok(t.includes("label: 'Quitar de mi mazo'"), 'acción «Quitar de mi mazo»');
+  const hook = sinComentarios(leer('src/components/card/useAudioFrase.ts'));
+  for (const etiqueta of ['Escuchar en inglés', 'Escuchar en español']) assert.ok(hook.includes(`label: '${etiqueta}'`), etiqueta);
+  assert.match(hook, /etiqueta: 'Inglés'/);
+  assert.match(hook, /etiqueta: 'Español'/);
+  assert.match(t, /useAudioFrase\(entry\)/, 'comparte el audio con Se me atoran');
   assert.match(t, /onAccessibilityAction=\{alAccion\}/);
   assert.match(t, /<FraseKaraoke palabras=\{palabras\} voz=\{vozEn\} tamano="h3"/);
-  assert.match(t, /etiqueta: 'Inglés'/);
-  assert.match(t, /etiqueta: 'Español'/);
   assert.match(t, /name="chevron-right"/);
   assert.match(t, /onLongPress=\{alMantener\}/, 'mantener presionado muestra el botón');
   assert.match(t, /<Button variant="ghost" icon="star" label="Quitar de mi mazo"/);
@@ -154,6 +157,77 @@ await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Españo
   assert.match(d, /name="star"/, 'la estrella en contorno');
   assert.match(d, /color\.wrongSoft/);
   assert.ok(!/riskStrong|tone="strong"/.test(d));
+});
+
+/* ---------- Se me atoran ---------- */
+
+const A = await cargar('src/domain/atoradas.ts');
+
+await prueba('el medidor: cinco puntos, tantos encendidos como fallos con tope en cinco, y el número real debajo', () => {
+  assert.equal(A.PUNTOS_ATASCO, 5);
+  assert.deepEqual([0, 1, 3, 4, 5, 6, 12].map(A.puntosEncendidos), [0, 1, 3, 4, 5, 5, 5]);
+  assert.equal(A.puntosEncendidos(-2), 0);
+  assert.equal(A.etiquetaFallos(1), '1 fallo');
+  assert.equal(A.etiquetaFallos(4), '4 fallos');
+  assert.equal(A.etiquetaFallos(7), '7 fallos', 'pasa del tope de puntos, pero el texto dice el número real');
+  assert.equal(A.etiquetaFallos(3), '3 fallos');
+});
+
+await prueba('las más atoradas van arriba y más grandes; a igual número, por id; sin modificar la lista', () => {
+  assert.equal(A.tamanoAtorada(4), 'normal');
+  assert.equal(A.tamanoAtorada(5), 'grande');
+  assert.equal(A.tamanoAtorada(9), 'grande');
+  const lista = [
+    { entry: { id: 9 }, fallos: 3 },
+    { entry: { id: 4 }, fallos: 6 },
+    { entry: { id: 2 }, fallos: 3 },
+    { entry: { id: 7 }, fallos: 5 },
+    { entry: { id: 1 }, fallos: 4 },
+  ];
+  const copia = lista.map((x) => x.entry.id);
+  const ordenada = A.ordenarAtoradas(lista);
+  assert.deepEqual(ordenada.map((x) => x.entry.id), [4, 7, 1, 2, 9]);
+  assert.deepEqual(lista.map((x) => x.entry.id), copia, 'la lista original queda igual');
+  for (let i = 1; i < ordenada.length; i++) assert.ok(ordenada[i - 1].fallos >= ordenada[i].fallos);
+  assert.deepEqual(A.ordenarAtoradas([]), []);
+  assert.deepEqual(A.ordenarAtoradas([lista[0]]).length, 1, 'con una sola');
+  const seis = Array.from({ length: 6 }, (_, i) => ({ entry: { id: 10 + i }, fallos: 3 + (i % 4) }));
+  const o6 = A.ordenarAtoradas(seis);
+  assert.equal(o6.length, 6);
+  assert.ok(o6.every((x, i) => i === 0 || o6[i - 1].fallos >= x.fallos), 'con seis');
+});
+
+await prueba('qué cuenta como atorada no cambió (fallos >= 3 y no dominada) y la pantalla no toca SM-2', () => {
+  const q = leer('src/db/queries.ts');
+  assert.match(q, /WHERE t\.fallos >= \? AND t\.dominada = 0\s*ORDER BY t\.fallos DESC LIMIT \?;/);
+  assert.match(sinComentarios(leer('src/screens/utility/StuckScreen.tsx')), /getStuckEntries\(user\.id, 3, 30\)/, 'el mismo umbral de siempre');
+  const pantalla = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  assert.ok(!/upsertCardState|useSessionStore|calificar/.test(pantalla), 'Se me atoran no toca SM-2');
+  assert.ok(!/<Button\b[^>]*variant="primary"|Corregir/.test(pantalla), 'sin botón principal: «Corregir N errores» lleva a esta misma pantalla');
+  const hoy = leer('src/screens/extras/practicar/hoy.ts');
+  assert.match(hoy, /if \(atoradas > 0\) return \{ modo: 'atoran', motivo: 'atoradas' \};/, 'hoy.ts manda a esta pantalla');
+  assert.match(leer('src/screens/extras/practicar/modos.ts'), /ir: \(nav\) => nav\.navigate\('Stuck'\),/);
+  assert.match(leer('src/screens/extras/practicar/consola.ts'), /return `Corregir \$\{conteo\(atoradas, 'error', 'errores'\)\}`;/, 'el verbo de Hoy es el de siempre');
+});
+
+await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio con texto, medidor que anuncia y vacío en correct', () => {
+  const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  assert.match(p, /keyExtractor=\{claveAtorada\}/);
+  assert.match(p, /Sin cronómetro ni calificación\. Léelas, escúchalas y ya\./, 'la nota se queda');
+  assert.match(p, /ordenarAtoradas\(carga\.datos \?\? \[\]\)/);
+  assert.match(p, /iconColor=\{color\.correct\}/, 'el vacío lleva el check en correct');
+  assert.match(p, /body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma\."/, 'el texto vacío de siempre');
+  assert.match(p, /useFocusEffect\(/);
+  const t = sinComentarios(leer('src/components/atoradas/TarjetaAtorada.tsx'));
+  assert.match(t, /export const TarjetaAtorada = memo\(/);
+  assert.match(t, /<GrupoAudio controles=\{controles\}/, 'el grupo Inglés · Español en lugar de los dos plays');
+  assert.match(t, /<MedidorAtasco fallos=\{fallos\} tamano=\{tamano\} \/>/, 'el medidor va dentro de la misma tarjeta');
+  assert.match(t, /\$\{etiquetaFallos\(fallos\)\}/, 'el lector oye los fallos');
+  assert.match(t, /tamano=\{tamano === 'grande' \? 'md' : 'h3'\}/, 'las más atoradas, más grandes');
+  const m = sinComentarios(leer('src/components/atoradas/MedidorAtasco.tsx'));
+  assert.match(m, /accessibilityLabel=\{etiquetaFallos\(fallos\)\}/, 'anuncia «4 fallos»');
+  assert.match(m, /encendido: \{ backgroundColor: color\.wrong \}/);
+  assert.ok(!/riskStrong|tone="strong"/.test(m + t + p));
 });
 
 console.log(`\ncheck:atoradas ${total} pruebas ok\n`);
