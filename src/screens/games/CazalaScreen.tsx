@@ -4,10 +4,11 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { EmptyState, Header, Screen } from '@/components/base';
-import { AudioButton, OptionButton, type OptionState } from '@/components/card';
+import { AudioButton } from '@/components/card';
 import { BarraSesion } from '@/components/fx';
 import { BloqueEscucha } from '@/components/juegos/cazala/BloqueEscucha';
 import { PieCaza } from '@/components/juegos/cazala/PieCaza';
+import { RenglonCaza, type EstadoRenglon } from '@/components/juegos/cazala/RenglonCaza';
 import { useVozCaza } from '@/components/juegos/cazala/useVozCaza';
 import { applyGameGrade } from '@/db/games';
 import { itemsCazalaValidos } from '@/domain/cazala';
@@ -156,11 +157,11 @@ export function CazalaScreen() {
 
   if (!item) return null;
 
-  const stateFor = (id: number): OptionState => {
-    if (!checked) return picked.includes(id) ? 'chosen' : 'idle';
-    if (item.reducciones.includes(id)) return 'correct';
-    if (picked.includes(id)) return 'wrong';
-    return 'dimmed';
+  const estadoDe = (id: number): EstadoRenglon => {
+    const marcada = picked.includes(id);
+    if (!checked) return marcada ? 'marcada' : 'libre';
+    if (item.reducciones.includes(id)) return marcada ? 'cazada' : 'perdida';
+    return marcada ? 'noIba' : 'atenuada';
   };
 
   const aciertos = picked.filter((p) => item.reducciones.includes(p)).length;
@@ -205,13 +206,14 @@ export function CazalaScreen() {
             showsVerticalScrollIndicator={false}
           >
             {order.map((id, i) => (
-              <OptionButton
+              <RenglonCaza
                 key={`${item.id}-${id}`}
-                index={i}
+                indice={i}
                 compacta={compacta}
                 label={porId.get(id)?.phrase_tts ?? `#${id}`}
-                state={stateFor(id)}
-                disabled={checked}
+                estado={estadoDe(id)}
+                bajada={picked.length === MARCAS && !picked.includes(id)}
+                caceria={null}
                 onPress={() => toggle(id)}
               />
             ))}
@@ -239,8 +241,9 @@ const styles = StyleSheet.create({
   barra: { marginTop: -space.sm, marginBottom: -space.sm },
   cuerpo: { flex: 1, paddingHorizontal: space.lg, gap: space.md },
   cuerpoCompacto: { gap: space.sm },
-  lista: { flex: 1 },
-  filas: { gap: space.sm, paddingBottom: space.sm },
+  // La lista sale 8 dp a cada lado y sus filas entran 8: las esquinas del retículo asoman fuera del renglón sin recortarse.
+  lista: { flex: 1, marginHorizontal: -space.sm },
+  filas: { gap: space.sm, paddingHorizontal: space.sm, paddingTop: space.xs, paddingBottom: space.sm },
   filasCompactas: { gap: space.xs },
   result: { marginTop: space.lg, gap: space.sm },
   resultHead: {
