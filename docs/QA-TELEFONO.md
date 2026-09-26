@@ -62,6 +62,8 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 
 - [ ] Gramática, un tema: "Escuchar todos los ejemplos" suena EN y ES en orden y "Detener" corta todo al instante
 - [ ] Gramática: Inglés, Lento y Español de cada ejemplo suenan; tocar otro corta el que sonaba
+- [ ] Gramática, «Escuchar todos los ejemplos»: al tocarlo el botón dice «Detener» con su ícono y el texto se lee (no una píldora cian vacía); al terminar o al tocar «Detener» vuelve a «Escuchar todos los ejemplos». Es el fallo reportado y la causa no se pudo reproducir sin teléfono: confirmar aquí y, si sigue vacío, mandar captura
+- [ ] Gramática, «Escuchar todos»: cada ejemplo enciende su tarjeta (filo cian) y su karaoke, y la pantalla baja sola para mantenerlo a la vista; tocar la pantalla con el dedo suelta ese scroll
 - [ ] Phrasal verbs: Escuchar y Lento de frase y ejemplo suenan; el ejemplo lento del verbo 5 suena si ya lo regeneraste, o el botón se ve apagado sin fallar
 - [ ] Cázala con audio automático: tras revisar suena la frase en inglés y luego en español
 - [ ] Pares: al acertar un par suenan las dos frases aunque "Audio automático" esté apagado
@@ -77,6 +79,11 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 - [ ] Explorar: 8 mundos con punto de color, barra fina y portada neutra; el buscador con 2 o más letras muestra resultados
 - [ ] Mundo: cada pack con el punto del mundo y su barra; tocar un pack abre su lista
 - [ ] Pack: lista con "N frases" y "Estudiar este pack"; el scroll de 100 o más filas es fluido
+- [ ] Gramática, lista: 9 bloques como tarjetas (solo uno abierto a la vez), los renglones entran escalonados; cada uno con su medidor de barras y, del cuarto de cada bloque en adelante, con candado y «Anuncio»; el lector dice «Nivel 2 de 5»
+- [ ] Gramática, tema cerrado: ver el anuncio (o que falle) y volver a la lista; con éxito el candado gira y se desvanece y el renglón queda como los demás; con fallo sigue cerrado
+- [ ] Gramática, tema: título grande y gancho en gris; «Cómo se arma» en fichas (una fila por cada «·») y la de «adjetivos» como texto; «Ojo» con ícono y filo cian
+- [ ] Gramática, «El error que se corrige»: al llegar a la vista la frase incorrecta se tacha de izquierda a derecha y se transforma en la correcta (probar «He work in a bank» y «There is three options»); «Ver otra vez» y «Escuchar» la repiten; con frases muy distintas («I come for tourism») se ve un fundido; el lector dice «Incorrecta: … Correcta: …»
+- [ ] Gramática con Reducir movimiento: las fichas aparecen ya en su lugar, el candado no gira, el karaoke solo cambia de color y el error muestra las dos frases a la vez, sin «Ver otra vez»
 - [ ] Detail: riesgo, variantes, audio y estrella funcionan; una frase inexistente dice "No se encontró la frase."
 - [ ] Errores que te delatan: los chips de categoría filtran, las 194 tarjetas se mueven sin tirones y tocar una abre su ficha
 - [ ] Se me atoran: lista de frases falladas 3 veces; sin ninguna dice "Ninguna por ahora"

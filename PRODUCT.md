@@ -96,6 +96,10 @@ La misma acción se llama igual en toda la app.
 | Los controles de Modo oído | «Empezar» (la primera vez), «Pausar», «Reanudar»; «Anterior» y «Siguiente» para cambiar de frase; «Repetición N de 3» (solo para el lector de pantalla) | Play, Parar, Atrás, Saltar |
 | Lo que dice el pie de Cázala | «N de 3 marcadas» y «Revisar»; ya revisada, «Siguiente» (en la ronda 20, «Terminar») | Comprobar, Enviar, Corregir |
 | El resultado de una ronda de Cázala | «Las tres» o «N de 3»; cada reducción: «La cazaste», «Esta sí iba», «No iba» | Correcto, Incorrecto, Fallaste |
+| Oír los tres ejemplos de un tema de Gramática seguidos | «Escuchar todos los ejemplos»; mientras suenan, «Detener»; cada ejemplo trae «Inglés», «Lento» y «Español» | Reproducir, Play, Parar |
+| Un tema de Gramática que abre con un anuncio | «Anuncio» (con el candado, en la lista); dentro del tema, «Ver anuncio y abrir» | Premium, Bloqueado, Con anuncio |
+| El nivel de un tema de Gramática | Las barras del medidor; para el lector «Nivel 2 de 5»; la leyenda «Más barras, más avanzado» | N2, Dificultad, Básico/Avanzado |
+| Repetir la corrección de una frase de Gramática | «Ver otra vez»; la sección se llama «El error que se corrige»; el lector oye «Incorrecta: … Correcta: …» | Repetir, Reproducir otra vez, Error típico |
 
 **Idioma:** la interfaz va en español; el contenido de aprendizaje va en inglés con su traducción al español.
 
