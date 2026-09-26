@@ -20,6 +20,7 @@
     "check:imports": "node scripts/check-imports.mjs",
     "check:cazala": "node scripts/valida-cazala.mjs",
     "check:phrasal": "node scripts/valida-phrasal.mjs",
+    "check:ruleta": "node scripts/check-ruleta.mjs",
     "check:color": "node scripts/check-color.mjs",
     "check:practicar": "node scripts/check-practicar.mjs",
     "check:marcas": "node scripts/check-marcas.mjs",
