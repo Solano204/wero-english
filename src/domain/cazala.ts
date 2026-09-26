@@ -83,6 +83,79 @@ export function erroresCazalaItem(
   return errores;
 }
 
+/** Una reducción de la ronda, lista para señalarla en la frase y transformarla en su forma completa. */
+export interface ReduccionCaza {
+  id: number;
+  /** Como suena en la frase: «chillin'». */
+  reducida: string;
+  /** Su forma completa tal como está en `frase_formal` («chilling»); null si no se puede señalar ahí. */
+  completa: string | null;
+  /** Cómo suena, en las que no tienen forma completa (little → «lirol»); null en las demás. */
+  suena: string | null;
+  /** Primera y última palabra de `frase_real` que ocupa (índices de `trocear`); null si no se encuentra. */
+  rango: [number, number] | null;
+}
+
+/** La palabra como la compara Cázala: minúsculas, apóstrofo recto y sin la puntuación de los bordes. */
+function limpia(palabra: string): string {
+  return palabra
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, '');
+}
+
+/** Palabras sueltas y rodeadas de espacios, para buscar una frase entera sin partir palabras. */
+function rodeada(texto: string): string {
+  return ` ${texto.toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9']+/g, ' ').trim()} `;
+}
+
+/** Dónde está la reducción dentro de la frase que suena: de la primera a la última palabra que ocupa. */
+export function rangoEnFrase(frase: string, reducida: string): [number, number] | null {
+  const tokens = frase.trim().split(/\s+/).map(limpia);
+  const buscada = reducida.trim().split(/\s+/).map(limpia).filter(Boolean);
+  if (buscada.length === 0) return null;
+  for (let i = 0; i + buscada.length <= tokens.length; i++) {
+    if (buscada.every((b, k) => tokens[i + k] === b)) return [i, i + buscada.length - 1];
+  }
+  return null;
+}
+
+/**
+ * La forma completa que de verdad aparece en `frase_formal`. `phrase_alt` puede traer varias opciones
+ * («got to / have got to»): se toma la más larga que está en la frase; si ninguna, null.
+ */
+export function formaCompleta(fraseFormal: string, phraseAlt: string | null): string | null {
+  if (!phraseAlt) return null;
+  const formal = rodeada(fraseFormal);
+  const dentro = phraseAlt
+    .split('/')
+    .map((o) => o.trim())
+    .filter((o) => o !== '' && formal.includes(rodeada(o)));
+  return dentro.sort((a, b) => b.length - a.length)[0] ?? null;
+}
+
+/**
+ * Las tres reducciones de una ronda, en el orden en que suenan. Las de «suena» (`phrase` con →) no tienen
+ * forma completa: su `phrase_alt` es cómo se oyen, no algo a lo que se transformen.
+ */
+export function reduccionesDe(item: CazalaItem, porId: Map<number, Entry>): ReduccionCaza[] {
+  const lista = item.reducciones.flatMap((id): ReduccionCaza[] => {
+    const e = porId.get(id);
+    if (!e) return [];
+    const suena = e.phrase.includes('→') ? e.phrase_alt : null;
+    return [
+      {
+        id,
+        reducida: e.phrase_tts,
+        completa: suena ? null : formaCompleta(item.frase_formal, e.phrase_alt),
+        suena,
+        rango: rangoEnFrase(item.frase_real, e.phrase_tts),
+      },
+    ];
+  });
+  return lista.sort((a, b) => (a.rango?.[0] ?? Infinity) - (b.rango?.[0] ?? Infinity));
+}
+
 /** Atajo para filtrar una lista completa, descartando los que fallen. */
 export function itemsCazalaValidos(
   items: CazalaItem[],

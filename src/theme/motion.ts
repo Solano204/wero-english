@@ -130,6 +130,13 @@ export const motionColmena = {
   salidaPaso: 20,
 } as const;
 
+/**
+ * Cázala: la casilla que se marca pulsa 1 → `casilla` → 1 y el retículo se cierra sobre el renglón desde
+ * `reticulo` dp más afuera, en `rapido`. Las letras de una reducción que se transforma en su forma completa
+ * cambian una tras otra con el escalón de las listas; el tramo de cada una dura `letra`.
+ */
+export const motionCaza = { casilla: 1.1, reticulo: 8, letra: 260 } as const;
+
 /** Fallo: sacudida horizontal de la pieza, entera dentro de `base`. */
 export const motionSacudida = { oscilaciones: 3, amplitud: 6 } as const;
 
