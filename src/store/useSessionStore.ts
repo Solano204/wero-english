@@ -163,16 +163,30 @@ export const useSessionStore = create<SessionState>((set, get) => {
     const all = [...due, ...fresh];
     const distractorMap = new Map<number, string[]>();
     const wordMap = new Map<number, string[]>();
+
+    // Se eligen una tarjeta tras otra con la lista de los que ya salieron en
+    // esta sesión: dos tarjetas no comparten opciones falsas mientras haya
+    // otras disponibles. Cada elección es barata (el catálogo va en memoria),
+    // pero cada 8 se cede el hilo para que la pantalla de carga siga fluida.
+    const distractoresUsados = new Set<string>();
+    for (let i = 0; i < all.length; i++) {
+      const c = all[i];
+      if (!c) continue;
+      const falsos = await getDistractors(c.entry, 3, distractoresUsados);
+      distractorMap.set(c.entry.id, falsos);
+      for (const f of falsos) distractoresUsados.add(f);
+      if (i % 8 === 7) await new Promise((r) => setTimeout(r, 0));
+    }
+
+    // Los señuelos de palabra solo hacen falta si la frase es lo bastante
+    // larga para que Construir aparezca. Pedirlos para todas duplicaría las
+    // consultas del arranque sin necesidad.
     await Promise.all(
-      all.map(async (c) => {
-        distractorMap.set(c.entry.id, await getDistractors(c.entry, 3));
-        // Los señuelos de palabra solo hacen falta si la frase es lo
-        // bastante larga para que Construir aparezca. Pedirlos para
-        // todas duplicaría las consultas del arranque sin necesidad.
-        if (c.entry.word_count >= 3) {
+      all
+        .filter((c) => c.entry.word_count >= 3)
+        .map(async (c) => {
           wordMap.set(c.entry.id, await getWordDecoys(c.entry, 3));
-        }
-      })
+        })
     );
 
     engine = new StudySession({

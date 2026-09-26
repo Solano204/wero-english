@@ -11,6 +11,7 @@ import {
   type ContentFilter,
 } from './cola';
 import { toEntry, type EntryRow } from './rows';
+import { elegirDistractores, prepararPool, type Candidato } from '@/domain/distractores';
 import type { CardState, Entry, Nivel, Registro, Vulgaridad } from '@/types';
 
 /* ============================================================
@@ -113,40 +114,75 @@ export async function getDiagnosticoCola(
 /* ============================================================
    Distractores del ejercicio Reconocer
 
-   Se calculan en tiempo real. El filtro por word_count es lo que evita
-   el problema clásico: si la correcta es larga y las tres falsas cortas,
-   el usuario acierta sin leer.
+   La elección vive en domain/distractores.ts. Ahí se cuida que la
+   larga no se distinga de las cortas (el problema clásico: si la
+   correcta es larga y las tres falsas cortas, se acierta sin leer), que
+   un número, un nombre propio o un cognado no delate la correcta, que
+   ninguna falsa sea la misma traducción y que no se repitan en la
+   sesión. Aquí solo se lee el catálogo, una vez por arranque de la app:
+   son ~1,500 filas de texto y elegir sobre ellas en memoria es más
+   barato que una consulta con ORDER BY RANDOM() por tarjeta.
    ============================================================ */
 
+let poolDistractores: Promise<Candidato[]> | null = null;
+
+function cargarPoolDistractores(): Promise<Candidato[]> {
+  if (!poolDistractores) {
+    poolDistractores = (async () => {
+      const db = await getDb();
+      const filas = await db.getAllAsync<{
+        id: number;
+        phrase: string;
+        spanish_main: string;
+        word_count: number;
+        pack_final: string;
+        mundo: string;
+      }>(
+        `SELECT id, phrase, spanish_main, word_count, pack_final, mundo FROM entrada
+          WHERE is_canonical = 1 AND revisar = 0;`
+      );
+      return prepararPool(
+        filas.map((f) => ({
+          id: f.id,
+          phrase: f.phrase,
+          spanish: f.spanish_main,
+          wordCount: f.word_count,
+          pack: f.pack_final,
+          mundo: f.mundo,
+        }))
+      );
+    })().catch((err) => {
+      // Si la lectura falla, la próxima tarjeta vuelve a intentarlo en vez de quedarse con el fallo.
+      poolDistractores = null;
+      throw err;
+    });
+  }
+  return poolDistractores;
+}
+
+/**
+ * Las opciones falsas de una tarjeta. `usados` son las que ya salieron en tarjetas anteriores de la sesión: no se
+ * repiten mientras haya otras disponibles.
+ */
 export async function getDistractors(
   entry: Entry,
-  count = 3
+  count = 3,
+  usados: ReadonlySet<string> = new Set()
 ): Promise<string[]> {
-  const db = await getDb();
-
-  const near = await db.getAllAsync<{ spanish_main: string }>(
-    `SELECT spanish_main FROM entrada
-      WHERE pack_final = ? AND id != ?
-        AND is_canonical = 1 AND revisar = 0
-        AND ABS(word_count - ?) <= 3
-      ORDER BY RANDOM() LIMIT ?;`,
-    [entry.pack_final, entry.id, entry.word_count, count]
+  const pool = await cargarPoolDistractores();
+  return elegirDistractores(
+    {
+      id: entry.id,
+      phrase: entry.phrase,
+      spanish: entry.spanish_main,
+      wordCount: entry.word_count,
+      pack: entry.pack_final,
+      mundo: entry.mundo,
+    },
+    pool,
+    count,
+    usados
   );
-
-  const out = near.map((r) => r.spanish_main);
-  if (out.length >= count) return out;
-
-  // El pack no dio suficientes: se amplía al mundo antes de rendirse.
-  const wide = await db.getAllAsync<{ spanish_main: string }>(
-    `SELECT spanish_main FROM entrada
-      WHERE mundo = ? AND id != ?
-        AND is_canonical = 1 AND revisar = 0
-        AND spanish_main NOT IN (${out.map(() => '?').join(',') || "''"})
-      ORDER BY RANDOM() LIMIT ?;`,
-    [entry.mundo, entry.id, ...out, count - out.length]
-  );
-
-  return [...out, ...wide.map((r) => r.spanish_main)];
 }
 
 /* ============================================================

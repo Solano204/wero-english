@@ -221,7 +221,9 @@ export function StudyCardView({
       style={[styles.wrap, compacto && styles.wrapCompacto]}
     >
       <View style={styles.top}>
-        <Text style={styles.instruction}>{instructionFor(card.kind)}</Text>
+        <Text style={styles.instruction} accessibilityRole="header">
+          {instructionFor(card.kind)}
+        </Text>
         <RiskBadge vulgaridad={card.entry.vulgaridad} />
       </View>
 
@@ -350,11 +352,14 @@ function firstWords(answer: string): string {
 const styles = StyleSheet.create({
   wrap: { flex: 1, gap: space.md },
   wrapCompacto: { gap: space.sm },
+  // La instrucción nunca cede: ni encoge ni la tapa la frase cuando esta es alta (imagen, IPA y tres líneas).
   top: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 26,
+    flexShrink: 0,
+    zIndex: 1,
   },
   instruction: {
     fontSize: font.size.xs,
