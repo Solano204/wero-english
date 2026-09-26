@@ -17,7 +17,7 @@ const cargar = async (rel) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 const P = await cargar('src/components/juegos/dulces/piezas.ts');
-const { FORMAS, COLORES_MAX, NOMBRE_FORMA, NOMBRE_COLOR, TRAZOS, formaDe, nombreColor, etiquetaPieza } = P;
+const { FORMAS, COLORES_MAX, NOMBRE_FORMA, NOMBRE_COLOR, TRAZOS, formaDe, nombreColor, etiquetaPieza, indiceMasCercana } = P;
 
 let total = 0;
 const prueba = (nombre, fn) => {
@@ -73,6 +73,17 @@ prueba('los trazos son bien formados y distintos', () => {
     if (f !== 'circulo') assert.ok(numeros.every((v) => v >= 0 && v <= P.CAJA), `${f} cabe en la caja`);
   }
   assert.equal(new Set(formas.map((f) => TRAZOS[f])).size, COLORES_MAX, 'ningún trazo se repite');
+});
+
+prueba('la meta más cerca de llenarse: la que ya avanzó y aún no se llena', () => {
+  const m = (llevas, meta) => ({ llevas, meta });
+  assert.equal(indiceMasCercana([]), -1);
+  assert.equal(indiceMasCercana([m(0, 7), m(0, 7), m(0, 7)]), -1, 'nadie avanzó: ninguna lleva filo');
+  assert.equal(indiceMasCercana([m(2, 7), m(5, 7), m(3, 7)]), 1);
+  assert.equal(indiceMasCercana([m(7, 7), m(4, 7), m(0, 7)]), 1, 'una llena ya no cuenta: pasó a la pregunta');
+  assert.equal(indiceMasCercana([m(3, 7), m(3, 7)]), 0, 'en un empate gana la primera');
+  assert.equal(indiceMasCercana([m(2, 7), m(4, 9), m(3, 11)]), 1, 'se compara el avance, no las piezas');
+  assert.equal(indiceMasCercana([m(1, 0)]), -1, 'una meta de 0 no rompe la cuenta');
 });
 
 // --- el símbolo blanco al 70 % contra el tono medio de cada tinte (WCAG 1.4.11: 3:1 para gráficos)

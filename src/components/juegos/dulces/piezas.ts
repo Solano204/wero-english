@@ -64,6 +64,23 @@ export const TRAZOS: Record<Forma, string> = {
   hexagono: poligono(6, 9, 0),
 };
 
+/**
+ * De todas las metas, la más cerca de llenarse: la que ya lleva algo y aún no se llena. Devuelve su lugar en la
+ * lista, o `-1` si ninguna avanzó todavía. En un empate gana la primera.
+ */
+export function indiceMasCercana(metas: readonly { llevas: number; meta: number }[]): number {
+  let mejor = -1;
+  let mejorAvance = 0;
+  metas.forEach((o, i) => {
+    const avance = o.meta > 0 ? o.llevas / o.meta : 0;
+    if (avance > mejorAvance && avance < 1) {
+      mejor = i;
+      mejorAvance = avance;
+    }
+  });
+  return mejor;
+}
+
 /** La forma que lleva un color (un color fuera de rango da la vuelta: nunca queda una pieza sin forma). */
 export function formaDe(color: number): Forma {
   const i = ((Math.trunc(color) % COLORES_MAX) + COLORES_MAX) % COLORES_MAX;

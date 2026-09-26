@@ -4,10 +4,10 @@ import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { Button, Card, EmptyState, ErrorCarga, Header, Icon, ProgressBar, Screen, Presionable } from '@/components/base';
+import { Button, Card, EmptyState, ErrorCarga, Header, Icon, Screen, Presionable } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { Pieza } from '@/components/juegos/dulces/Pieza';
-import { CaraPieza, tinteDe } from '@/components/juegos/dulces/SimboloPieza';
+import { TarjetaMetas } from '@/components/juegos/dulces/MetaFrase';
 import { Trozos, useReaccion } from '@/components/feedback';
 import {
   clone,
@@ -572,27 +572,7 @@ export function DulcesScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.metas}>
-            {objetivos.map((o) => (
-              <View key={o.color} style={styles.meta}>
-                {/* La pieza pequeña es la MISMA de ese color en el tablero, con su
-                    forma: si no coinciden, el usuario no puede saber qué barra
-                    está llenando (y sin distinguir colores, menos aún). */}
-                <View style={styles.simbolo}>
-                  <CaraPieza color={o.color} lado={LADO_SIMBOLO} />
-                </View>
-                <View style={styles.metaCuerpo}>
-                  <Text style={styles.metaFrase} numberOfLines={2}>
-                    {o.entry.phrase}
-                  </Text>
-                  <ProgressBar
-                    value={Math.min(o.llevas, o.meta)}
-                    total={o.meta}
-                    tint={tinteDe(o.color).medio}
-                    height={4}
-                  />
-                </View>
-              </View>
-            ))}
+            <TarjetaMetas objetivos={objetivos} />
           </View>
 
           <View style={styles.tablero}>
@@ -667,9 +647,6 @@ function mejorColor(
   return mejor;
 }
 
-/** El lado de la pieza pequeña que va junto a cada meta. */
-const LADO_SIMBOLO = 28;
-
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   jugadas: {
@@ -679,11 +656,7 @@ const styles = StyleSheet.create({
   },
   medio: { flex: 1 },
   medioContenido: { paddingBottom: space.sm },
-  metas: { paddingHorizontal: space.lg, gap: space.sm, marginBottom: space.md },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  simbolo: { width: LADO_SIMBOLO, height: LADO_SIMBOLO },
-  metaCuerpo: { flex: 1, gap: space.xs },
-  metaFrase: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted },
+  metas: { paddingHorizontal: space.lg, marginBottom: space.md },
   tablero: {
     flexDirection: 'row',
     flexWrap: 'wrap',
