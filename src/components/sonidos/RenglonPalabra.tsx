@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     maxWidth: '40%',
     textAlign: 'right',
     fontFamily: font.family.body,
-    fontSize: font.size.sm,
+    fontSize: font.size.md,
     color: color.textMuted,
   },
 });

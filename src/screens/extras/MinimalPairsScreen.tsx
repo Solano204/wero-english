@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import {
@@ -25,6 +25,7 @@ import type { RootStackParams } from '@/navigation/routes';
 import { useEfectoResultado } from '@/components/feedback';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+type Ruta = RouteProp<RootStackParams, 'MinimalPairs'>;
 
 /**
  * P-10b, "Di la palabra".
@@ -40,6 +41,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
  */
 export function MinimalPairsScreen() {
   const nav = useNavigation<Nav>();
+  const { params } = useRoute<Ruta>();
   const user = useAuthStore((s) => s.user);
   const micHabilitado = useSettingsStore((s) => s.micHabilitado);
   const setSetting = useSettingsStore((s) => s.set);
@@ -47,9 +49,14 @@ export function MinimalPairsScreen() {
   const content = useMemo(loadContent, []);
   const estado = useMemo(() => speech.isAvailable(), []);
 
-  const [rounds] = useState<ParMinimoRound[]>(() =>
-    buildRounds(content.fonemas.fonemas)
-  );
+  // Si llega `fonemaId` (desde el laboratorio de sonidos), las rondas salen de los pares de ese fonema; si no
+  // tiene pares, o no se abrió desde ahí, salen de todos como siempre.
+  const [rounds] = useState<ParMinimoRound[]>(() => {
+    const propios = params?.fonemaId
+      ? buildRounds(content.fonemas.fonemas.filter((f) => f.id === params.fonemaId))
+      : [];
+    return propios.length > 0 ? propios : buildRounds(content.fonemas.fonemas);
+  });
   const [idx, setIdx] = useState(0);
   const [escuchando, setEscuchando] = useState(false);
   const [veredicto, setVeredicto] = useState<HablaVeredicto | null>(null);

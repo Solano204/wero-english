@@ -9,7 +9,9 @@ import { analizar } from '@/domain/marcas';
 import { posicionVocal, sinBarras } from '@/domain/vocales';
 import * as audio from '@/services/audio';
 import { color, entraSube, font, layout, motionDuration, radius, space } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import type { Fonema } from '@/types';
+import { DueloPar } from './DueloPar';
 import { MapaBoca } from './MapaBoca';
 import { RenglonPalabra } from './RenglonPalabra';
 import { SIMBOLO_GRANDE } from './ViajeSimbolo';
@@ -40,9 +42,13 @@ interface BloqueProps {
 
 /** Un bloque de texto con filo izquierdo de 3 px que entra con un fundido subiendo 8 dp. */
 function Bloque({ titulo, cuerpo, tono, retraso }: BloqueProps) {
+  const reducido = useMovimientoReducido();
   const aviso = tono === 'aviso';
   return (
-    <Animated.View entering={entraSube(retraso)} style={[styles.bloque, aviso ? styles.bloqueAviso : styles.bloqueAccent]}>
+    <Animated.View
+      entering={reducido ? undefined : entraSube(retraso)}
+      style={[styles.bloque, aviso ? styles.bloqueAviso : styles.bloqueAccent]}
+    >
       <View style={styles.bloqueTitulo}>
         {aviso ? <Icon name="warning" size="sm" color={color.riskWarn} /> : null}
         <Text style={styles.subtitulo}>{titulo}</Text>
@@ -64,10 +70,20 @@ interface Props {
   repitiendo: boolean;
   /** Empieza o detiene «Solo el sonido». */
   alRepetir: (fonema: Fonema) => void;
+  /** Abre «Di la palabra» con los pares de este fonema. */
+  alPracticar: (fonema: Fonema) => void;
 }
 
 /** Una página del laboratorio: todo lo de un fonema. */
-export function PaginaFonema({ fonema, esActual, simboloOculto, alSimboloMedido, repitiendo, alRepetir }: Props) {
+export function PaginaFonema({
+  fonema,
+  esActual,
+  simboloOculto,
+  alSimboloMedido,
+  repitiendo,
+  alRepetir,
+  alPracticar,
+}: Props) {
   const { width: anchoVentana } = useWindowDimensions();
   const simbolo = useRef<View>(null);
 
@@ -190,6 +206,20 @@ export function PaginaFonema({ fonema, esActual, simboloOculto, alSimboloMedido,
               <RenglonPalabra key={e.palabra} ejemplo={e} esActual={esActual} />
             ))}
           </View>
+        </View>
+      ) : null}
+
+      {fonema.pares_minimos.length > 0 ? (
+        <View style={styles.seccion}>
+          <Text style={styles.tituloSeccion} accessibilityRole="header">
+            Pares que cambian de significado
+          </Text>
+          <View style={styles.lista}>
+            {fonema.pares_minimos.map((p, i) => (
+              <DueloPar key={`${p.a}-${i}`} par={p} esActual={esActual} />
+            ))}
+          </View>
+          <Button label="Practicar estos pares" icon="microphone" variant="secondary" onPress={() => alPracticar(fonema)} />
         </View>
       ) : null}
     </ScrollView>

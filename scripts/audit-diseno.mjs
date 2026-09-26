@@ -408,6 +408,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/colmena/') || r === 'src/screens/games/ColmenaScreen.tsx' ||
   r.startsWith('src/components/juegos/cazala/') || r === 'src/screens/games/CazalaScreen.tsx' ||
   r === 'src/screens/extras/EarModeScreen.tsx' ||
+  r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
   r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
@@ -436,6 +437,8 @@ const LOOPS_POR_PANTALLA = {
   Cazala: [],
   // Modo oído: el héroe es la radio (`AnilloRadio`), un canvas de Skia que solo dibuja mientras suena la voz (un `useFrameCallback` apagado en pausa, sin foco y en segundo plano); es el único de la pantalla.
   ModoOido: ['AnilloRadio.tsx'],
+  // Sonidos: el héroe es el mapa de la boca (un punto que viaja una vez, con resorte, y late con la voz mientras suena); SVG y vistas, ningún canvas de Skia ni bucle.
+  Sonidos: [],
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [

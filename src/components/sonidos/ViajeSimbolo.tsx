@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import type { Rect } from '@/components/fx';
 import { color, font, motionDuration, motionEasing } from '@/theme';
+import { useMovimientoReducido } from '@/utils';
 import { SIMBOLO_CHIP } from './IndiceFonemas';
 
 /** El símbolo grande de la página, en dp. */
@@ -31,17 +32,23 @@ interface Props {
  * medidas son de la ventana: se restan del lugar de esta capa para no depender de la barra de estado.
  */
 export function ViajeSimbolo({ viaje, onFin }: Props) {
+  const reducido = useMovimientoReducido();
   const p = useSharedValue(0);
   const raiz = useRef<View>(null);
   const [origen, setOrigen] = useState<{ x: number; y: number } | null>(null);
   const { desde, hasta } = viaje;
 
   useEffect(() => {
+    // Con «reducir movimiento» no hay viaje: el símbolo de la página aparece ya en su lugar.
+    if (reducido) {
+      onFin();
+      return;
+    }
     if (!hasta || !origen) return;
     p.value = withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }, (fin) => {
       if (fin) runOnJS(onFin)();
     });
-  }, [hasta, origen, p, onFin]);
+  }, [reducido, hasta, origen, p, onFin]);
 
   const listo = hasta !== null && origen !== null;
   const ox = origen?.x ?? 0;

@@ -97,7 +97,7 @@ export function IndiceFonemas({ fonemas, onAbrir, onAtras }: Props) {
 const styles = StyleSheet.create({
   contenido: { padding: layout.screenPad, paddingBottom: space.xxxl, gap: space.lg },
   leyenda: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  leyendaTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  leyendaTexto: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
   punto2: { width: PUNTO, height: PUNTO, borderRadius: PUNTO / 2, backgroundColor: color.accent },
   grupo: { gap: space.md },
   titulo: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },

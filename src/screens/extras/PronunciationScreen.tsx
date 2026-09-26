@@ -19,6 +19,8 @@ import type { RootStackParams } from '@/navigation/routes';
 
 /** Pausa entre vueltas del modo "Repetir". */
 const PAUSA_REPETIR_MS = 700;
+/** Lo más que puede durar el viaje del símbolo (esperar a que la página se mida y volar) antes de darlo por terminado. */
+const VIAJE_TOPE_MS = motionDuration.coreografia + motionDuration.escena;
 
 /**
  * Reproduce `path` en bucle hasta que `activo()` deje de dar true.
@@ -211,6 +213,20 @@ export function PronunciationScreen() {
   }, []);
   const finViaje = useCallback(() => setViaje(null), []);
 
+  // Red de seguridad: si la página nunca dice dónde está su símbolo, el viaje se da por terminado y el símbolo
+  // de la página se ve (no puede quedarse oculto).
+  useEffect(() => {
+    if (!viaje) return undefined;
+    const t = setTimeout(() => setViaje(null), VIAJE_TOPE_MS);
+    return () => clearTimeout(t);
+  }, [viaje]);
+
+  // «Practicar estos pares»: «Di la palabra» con los pares de este fonema.
+  const practicarPares = useCallback(
+    (fonema: Fonema) => nav.navigate('MinimalPairs', { fonemaId: fonema.id }),
+    [nav]
+  );
+
   // Con una página abierta, «atrás» del sistema vuelve al índice y no sale de la pantalla.
   useEffect(() => {
     if (!enPagina) return undefined;
@@ -285,6 +301,7 @@ export function PronunciationScreen() {
                   alSimboloMedido={viaje && !viaje.hasta && i === vista ? simboloMedido : undefined}
                   repitiendo={repitiendo === f.id}
                   alRepetir={alternarRepetir}
+                  alPracticar={practicarPares}
                 />
               )}
             />
@@ -309,6 +326,11 @@ const styles = StyleSheet.create({
   lado: { width: 56, justifyContent: 'center' },
   centro: { flex: 1, alignItems: 'center' },
   // Charis SIL solo trae Regular: se compensa con tamaño, no con peso.
-  barraSimbolo: { fontFamily: font.family.ipa, fontSize: font.size.xxl, color: color.accent },
+  barraSimbolo: {
+    fontFamily: font.family.ipa,
+    fontSize: font.size.xxl,
+    letterSpacing: font.size.xxl * -0.015,
+    color: color.accent,
+  },
   cuenta: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
 });
