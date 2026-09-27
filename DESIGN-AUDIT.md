@@ -93,7 +93,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipograf√≠a, jerarqu√
 - `src/components/juegos/cazala/ResultadoCaza.tsx:95`
 - `src/components/juegos/colmena/Hexagono.tsx:354`
 - `src/components/juegos/dulces/HojaPregunta.tsx:161`
-- `src/components/juegos/dulces/SimboloPieza.tsx:52`
+- `src/components/juegos/dulces/SimboloPieza.tsx:56`
 - `src/components/lectura/TarjetaLectura.tsx:90`
 - `src/components/niveles/CeldaNivel.tsx:130`
 - `src/components/phrasal/RenglonVerbo.tsx:75`

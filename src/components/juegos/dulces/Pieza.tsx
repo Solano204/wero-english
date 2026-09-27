@@ -73,7 +73,7 @@ interface Props {
  * caída la acelera y le da un rebote pequeño al aterrizar; el rebarajado la desliza girando (`lento`). Con
  * «reducir movimiento» no se desliza, gira ni rebota: salta a su celda y cambia con un fundido de 150 ms.
  *
- * Lleva su forma además del color y una etiqueta que las dice («Pieza naranja, círculo, fila 2 columna 3»). Si
+ * Lleva su forma además del color y una etiqueta que las dice («Amarillo, círculo, fila 2, columna 3»). Si
  * mide menos de 48 dp (8 columnas en un teléfono angosto) el área táctil se completa con `hitSlop`.
  */
 export const Pieza = memo(function Pieza({

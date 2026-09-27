@@ -37,17 +37,17 @@ prueba('cada color lleva su propia forma y su propio nombre', () => {
   for (let c = 0; c < COLORES_MAX; c++) assert.equal(formaDe(c), FORMAS[c]);
 });
 
-prueba('el ejemplo del prompt: «Pieza naranja, círculo, fila 2 columna 3»', () => {
-  assert.equal(etiquetaPieza(0, 1, 2), 'Pieza naranja, círculo, fila 2 columna 3');
-  assert.equal(etiquetaPieza(4, 0, 0), 'Pieza lima, estrella, fila 1 columna 1');
-  assert.equal(etiquetaPieza(5, 8, 7), 'Pieza turquesa, hexágono, fila 9 columna 8');
+prueba('el ejemplo del prompt: «Amarillo, círculo, fila 2, columna 3»', () => {
+  assert.equal(etiquetaPieza(0, 1, 2), 'Amarillo, círculo, fila 2, columna 3');
+  assert.equal(etiquetaPieza(4, 0, 0), 'Rosa, estrella, fila 1, columna 1');
+  assert.equal(etiquetaPieza(5, 8, 7), 'Azul, hexágono, fila 9, columna 8');
 });
 
 prueba('un color fuera de rango da la vuelta: nunca hay una pieza sin forma ni nombre', () => {
   assert.equal(formaDe(6), formaDe(0));
   assert.equal(formaDe(-1), formaDe(5));
   assert.equal(nombreColor(7), nombreColor(1));
-  assert.ok(etiquetaPieza(99, 0, 0).startsWith('Pieza '));
+  assert.ok(/^[A-ZÁÉÍÓÚ]/.test(etiquetaPieza(99, 0, 0)), 'empieza con el nombre del color, con mayúscula');
 });
 
 prueba('los niveles reales piden a lo más los colores que hay (antes el sexto salía gris y sin forma)', () => {
@@ -97,12 +97,11 @@ const contraste = (a, b) => {
   const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p);
   return (x + 0.05) / (y + 0.05);
 };
-const tintes = [...tokens.matchAll(/\{ claro: '(#[0-9A-Fa-f]{6})', medio: '(#[0-9A-Fa-f]{6})', oscuro: '(#[0-9A-Fa-f]{6})' \}/g)].map((m) => ({
-  claro: m[1],
-  medio: m[2],
-  oscuro: m[3],
-}));
-const simbolo = tokens.match(/simbolo: 'rgba\(255, 255, 255, ([0-9.]+)\)'/);
+const tintes = [
+  ...tokens.matchAll(
+    /\{ claro: '(#[0-9A-Fa-f]{6})', medio: '(#[0-9A-Fa-f]{6})', oscuro: '(#[0-9A-Fa-f]{6})', simbolo: '(#[0-9A-Fa-f]{6})' \}/g
+  ),
+].map((m) => ({ claro: m[1], medio: m[2], oscuro: m[3], simbolo: m[4] }));
 
 prueba('hay un tinte por color y cada uno es un degradado del mismo tono, del claro al oscuro', () => {
   assert.equal(tintes.length, COLORES_MAX);
@@ -112,14 +111,19 @@ prueba('hay un tinte por color y cada uno es un degradado del mismo tono, del cl
   }
 });
 
-prueba('el símbolo blanco al 70 % se distingue (3:1) de la cara en el tono medio de cada tinte', () => {
-  assert.ok(simbolo, 'el token del símbolo existe');
-  const alfa = Number(simbolo[1]);
-  assert.equal(alfa, 0.7);
+prueba('el símbolo (un tono más oscuro del mismo color, no blanco) se distingue (3:1) de la cara', () => {
   for (const t of tintes) {
-    const fondo = hex(t.medio);
-    const visto = [255, 255, 255].map((v, i) => v * alfa + fondo[i] * (1 - alfa));
-    assert.ok(contraste(visto, fondo) >= 3, `${t.medio}: ${contraste(visto, fondo).toFixed(2)}:1`);
+    const c = contraste(hex(t.simbolo), hex(t.medio));
+    assert.ok(c >= 3, `${t.medio} / ${t.simbolo}: ${c.toFixed(2)}:1`);
+  }
+});
+
+prueba('los seis colores se distinguen incluso en escala de grises (0.08 mínimo de luminancia entre cada par)', () => {
+  for (let i = 0; i < tintes.length; i++) {
+    for (let j = i + 1; j < tintes.length; j++) {
+      const d = Math.abs(luminancia(hex(tintes[i].medio)) - luminancia(hex(tintes[j].medio)));
+      assert.ok(d >= 0.08, `${tintes[i].medio} / ${tintes[j].medio}: ${d.toFixed(3)}`);
+    }
   }
 });
 

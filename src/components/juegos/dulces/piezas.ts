@@ -22,8 +22,8 @@ export const NOMBRE_FORMA: Record<Forma, string> = {
   hexagono: 'hexágono',
 };
 
-/** Cómo se dice cada color en voz alta, en el orden de los tintes de `theme.pieza`. */
-export const NOMBRE_COLOR: readonly string[] = ['naranja', 'azul', 'verde', 'lila', 'lima', 'turquesa'];
+/** Cómo se dice cada color en voz alta, en el orden de los tintes de `theme.pieza` (y de `color.dulce`). */
+export const NOMBRE_COLOR: readonly string[] = ['amarillo', 'naranja', 'celeste', 'verde', 'rosa', 'azul'];
 
 /** El lado del recuadro en el que están dibujados los trazos de `TRAZOS`. */
 export const CAJA = 24;
@@ -93,9 +93,11 @@ export function nombreColor(color: number): string {
 }
 
 /**
- * Lo que oye el lector de pantalla de una pieza: «Pieza naranja, círculo, fila 2 columna 3». `fila` y
+ * Lo que oye el lector de pantalla de una pieza: «Amarillo, círculo, fila 2, columna 3». `fila` y
  * `col` vienen de cero (como en el tablero) y se dicen de uno.
  */
 export function etiquetaPieza(color: number, fila: number, col: number): string {
-  return `Pieza ${nombreColor(color)}, ${NOMBRE_FORMA[formaDe(color)]}, fila ${fila + 1} columna ${col + 1}`;
+  const nombre = nombreColor(color);
+  const capitalizado = nombre.charAt(0).toUpperCase() + nombre.slice(1);
+  return `${capitalizado}, ${NOMBRE_FORMA[formaDe(color)]}, fila ${fila + 1}, columna ${col + 1}`;
 }

@@ -141,9 +141,9 @@ export const color = {
   // Colores de mundo (COLOR-1). Una familia: misma luminosidad (OKLCH L 0.73) y
   // misma saturación (C 0.12); solo cambia el tono. Ninguno queda a menos de
   // 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan
-  // 4.5:1 sobre las ocho superficies. Van en chico: un punto, una etiqueta, una
-  // barra fina y el tinte de los cubitos; nunca en fondos grandes ni en botones
-  // (salvo las piezas de Dulces, que son contenido de juego).
+  // 4.5:1 sobre las ocho superficies. Van en chico: un punto, una etiqueta y
+  // una barra fina; nunca en fondos grandes ni en botones. Las piezas de
+  // Dulces no llevan estos tintes: usan `dulce` (ver más abajo).
   world: {
     dia_a_dia: '#71ABF2',
     calle: '#E1925A',
@@ -153,6 +153,25 @@ export const color = {
     tech: '#21BFBB',
     legal: '#C78FD9',
     fonetica: '#AAAF4F',
+  },
+
+  /**
+   * Colores de Dulces (COLOR-1, excepción): paleta Okabe-Ito, pensada para distinguirse
+   * también con daltonismo. Es contenido de juego, no de marca: nunca cambia con la paleta
+   * de la app. `celeste`, `naranja`, `verde` y `rosa` se afinaron de brillo (mismo matiz)
+   * para que ningún par de los seis quede a menos de 0.08 de luminancia en gris; `azul` es
+   * el sexto color de Okabe-Ito, agregado porque hay niveles que piden 6 colores (con solo
+   * 5, el sexto se repetiría con el primero). Los tonos de cara/canto/símbolo de cada uno
+   * viven en `pieza.tintes`, más abajo, y se repiten literales por cómo los lee
+   * `check-dulces.mjs`; si cambias uno, cambia el otro.
+   */
+  dulce: {
+    amarillo: '#F0E442',
+    naranja: '#F5A900',
+    celeste: '#50B2E9',
+    verde: '#00956D',
+    rosa: '#CE7DA9',
+    azul: '#006EAC',
   },
 
   /** Velo de la respuesta. Opaco de verdad: tapa lo de atrás. */
@@ -232,26 +251,27 @@ export const filoWrong: [string, string, string] = [
 ];
 
 /**
- * Las piezas de Dulces: contenido de juego, no marca (la excepción de `TINTES` del audit). Seis tintes, los
- * cinco de siempre (`calle`, `dia_a_dia`, `dinero`, `cultura`, `fonetica`) y `tech` para los niveles de seis
- * colores. Cada pieza es un degradado del MISMO tono (COLOR-2): el claro donde da el sol (arriba a la
- * izquierda), el medio y el oscuro. La luminosidad del medio (OKLCH ~0.55) es la que deja el símbolo blanco al
- * 70 % a 3.2:1 de contraste, para poder jugar solo con las formas (daltonismo); el croma y el tono son los de
- * `color.world`. Se calcularon en OKLCH con `luminosidad -0.07 / +0.06` alrededor del medio.
+ * Las piezas de Dulces: contenido de juego, no marca. Un tinte por color de `color.dulce`
+ * (amarillo, naranja, celeste, verde, rosa, azul, en ese orden: el mismo de `piezas.ts#FORMAS`
+ * — círculo, triángulo, cuadrado, rombo, estrella, hexágono). Cada pieza es un degradado del
+ * MISMO tono (COLOR-2): el claro donde da el sol (arriba a la izquierda), el medio (el color
+ * de `color.dulce`) y el oscuro, para el canto hundido. `simbolo` es la forma al centro, un
+ * tono del mismo matiz un 70 % más oscuro que el medio (no blanco: sobre `amarillo` o
+ * `celeste`, claros, un símbolo blanco casi no se vería), a 3:1 de contraste como mínimo.
+ * `check-dulces.mjs` lee este bloque con una expresión regular literal: no lo vuelvas una
+ * referencia a `color.dulce` ni le cambies el formato de una línea por tinte.
  */
 export const pieza = {
-  /** El símbolo de cada pieza: blanco al 70 %. */
-  simbolo: 'rgba(255, 255, 255, 0.7)',
   /** El brillo del sol arriba a la izquierda: blanco que se apaga. */
   brillo: 'rgba(255, 255, 255, 0.26)',
   brilloFin: 'rgba(255, 255, 255, 0)',
   tintes: [
-    { claro: '#BC7037', medio: '#A95E23', oscuro: '#924A03' },
-    { claro: '#4D86CA', medio: '#3B73B6', oscuro: '#265EA0' },
-    { claro: '#5F9043', medio: '#4E7E30', oscuro: '#3A691A' },
-    { claro: '#887ACA', medio: '#7768B6', oscuro: '#6353A0' },
-    { claro: '#848823', medio: '#737601', oscuro: '#5E6102' },
-    { claro: '#00918E', medio: '#007E7B', oscuro: '#006765' },
+    { claro: '#F2EB87', medio: '#F0E442', oscuro: '#D9CC11', simbolo: '#555007' },
+    { claro: '#FAC142', medio: '#F5A900', oscuro: '#AE7800', simbolo: '#4A3300' },
+    { claro: '#93CDEE', medio: '#50B2E9', oscuro: '#1B93D7', simbolo: '#0A3953' },
+    { claro: '#06D79F', medio: '#00956D', oscuro: '#004E39', simbolo: '#002D21' },
+    { claro: '#DFB4CB', medio: '#CE7DA9', oscuro: '#BA4987', simbolo: '#481B34' },
+    { claro: '#069AED', medio: '#006EAC', oscuro: '#004065', simbolo: '#002134' },
   ],
 } as const;
 

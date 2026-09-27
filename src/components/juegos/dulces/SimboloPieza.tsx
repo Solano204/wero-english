@@ -3,14 +3,14 @@ import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'rea
 import { color as tinta, depth, pieza, radius } from '@/theme';
 import { CAJA, TRAZOS, formaDe } from './piezas';
 
-/** Los tres tonos (claro, medio y oscuro) del tinte de un color: con el medio se pintan las barras de las metas. */
+/** Los cuatro tonos (claro, medio, oscuro y símbolo) del tinte de un color: con el medio se pintan las barras de las metas. */
 export function tinteDe(color: number): (typeof pieza.tintes)[number] {
   const indice = ((Math.trunc(color) % pieza.tintes.length) + pieza.tintes.length) % pieza.tintes.length;
   return pieza.tintes[indice] ?? pieza.tintes[0];
 }
 
 /** Qué tanto de la cara ocupa el símbolo. */
-const PROPORCION_SIMBOLO = 0.52;
+const PROPORCION_SIMBOLO = 0.45;
 
 interface SimboloProps {
   color: number;
@@ -20,10 +20,14 @@ interface SimboloProps {
   y: number;
 }
 
-/** El símbolo de un color, blanco al 70 %: círculo, triángulo, cuadrado, rombo, estrella o hexágono. Va dentro de un `Svg`. */
+/**
+ * El símbolo de un color, en un tono del mismo matiz un 70 % más oscuro que la cara (no
+ * blanco: se perdería sobre los colores claros como `amarillo`): círculo, triángulo,
+ * cuadrado, rombo, estrella o hexágono. Va dentro de un `Svg`.
+ */
 export function SimboloPieza({ color, tam, x, y }: SimboloProps) {
   const escala = tam / CAJA;
-  return <Path d={TRAZOS[formaDe(color)]} fill={pieza.simbolo} transform={`translate(${x} ${y}) scale(${escala})`} />;
+  return <Path d={TRAZOS[formaDe(color)]} fill={tinteDe(color).simbolo} transform={`translate(${x} ${y}) scale(${escala})`} />;
 }
 
 interface Props {
