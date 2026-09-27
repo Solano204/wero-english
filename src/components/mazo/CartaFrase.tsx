@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { Badge, Card, Presionable } from '@/components/base';
-import { SceneImage, hayImagen } from '@/components/card';
+import { MarcoImagen } from '@/components/card';
 import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
 import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
-import { ALTO_IMAGEN, DENSIDAD, alturaEstimada, cabeImagen, elegirDensidad, tamanoFrase } from '@/domain/mazo';
+import { DENSIDAD, alturaEstimada, alturaImagen, desborda, elegirDensidad, tamanoFrase } from '@/domain/mazo';
 import { marcasDe } from '@/services/marcas';
-import { color, font, space } from '@/theme';
+import { color, font, space, type WorldId } from '@/theme';
 import type { Entry } from '@/types';
 
 /** Qué botón sonó: el inglés, el inglés lento, el español, o el inglés y luego el español. */
@@ -51,10 +52,15 @@ export function CartaFrase({ entry, activa, alto, ancho, sonando, onSonar, guard
 
   const densidad = useMemo(() => elegirDensidad(entry, ancho, alto), [entry, ancho, alto]);
   const d = DENSIDAD[densidad];
-  const conImagen = useMemo(
-    () => hayImagen(entry.imagen) && cabeImagen(alto, alturaEstimada(entry, ancho, densidad), densidad),
+  // El marco de imagen (16:9 al ancho de la carta) siempre se reserva, con imagen o sin ella. Si aun en la
+  // densidad más apretada el contenido no cabe (frase muy larga, con nota), la carta deja hacer scroll: es la
+  // excepción, no la norma, así que no compite con el deslizamiento de "Siguiente"/"Guardar" casi nunca.
+  const altoImagen = alturaImagen(ancho);
+  const seDesborda = useMemo(
+    () => desborda(alto, alturaEstimada(entry, ancho, densidad)),
     [entry, ancho, alto, densidad]
   );
+  const tinte = color.world[entry.mundo as WorldId];
 
   const grupoFrase: ControlAudio[] = [
     { clave: 'en', etiqueta: 'Escuchar', descripcion: 'Escuchar la frase en inglés', icono: 'volume', ruta: entry.audio_en, lento: false, suena: sonando?.modo === 'en' },
@@ -76,9 +82,17 @@ export function CartaFrase({ entry, activa, alto, ancho, sonando, onSonar, guard
 
   return (
     <Card llena compacta={densidad !== 'normal'} style={{ height: alto }}>
-      <View style={[styles.cuerpo, { gap: d.aire }]}>
-        {conImagen ? <SceneImage path={entry.imagen} size={ALTO_IMAGEN} ancha /> : null}
+      <View style={styles.marcoZona}>
+        <MarcoImagen path={entry.imagen} tinte={tinte} ancho={ancho} alto={altoImagen} />
+      </View>
 
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.cuerpo, { gap: d.aire }]}
+        scrollEnabled={seDesborda}
+        bounces={seDesborda}
+        showsVerticalScrollIndicator={false}
+      >
         <Presionable
           onPress={() => onSonar('en')}
           disabled={!activa}
@@ -120,13 +134,15 @@ export function CartaFrase({ entry, activa, alto, ancho, sonando, onSonar, guard
             {entry.note}
           </Text>
         ) : null}
-      </View>
+      </ScrollView>
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  cuerpo: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  marcoZona: { marginBottom: space.sm },
+  scroll: { flex: 1 },
+  cuerpo: { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
   frase: { alignItems: 'center', gap: space.sm },
   // El IPA va centrado aquí y no en la tarjeta: `Card` no aplica a su contenido el `alignItems` que se le pase.
   ipa: {

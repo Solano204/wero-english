@@ -18,7 +18,6 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { Button, Card } from '@/components/base';
-import { SceneImage, hayImagen } from '@/components/card';
 import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
 import { CableTrazo } from '@/components/fx/CableTrazo';
 import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
@@ -47,8 +46,6 @@ const RETRASO_ENTRADA = motionDuration.base;
 const MARGEN_FINAL = 60;
 /** Lo que baja cada tarjeta al entrar, en dp. */
 const SUBE = 8;
-/** El alto de la franja de imagen de «Lo que entienden», en dp. */
-const ALTO_IMAGEN = 160;
 /** Ancho del filo lateral de una tarjeta, en dp. */
 const FILO = 3;
 
@@ -289,7 +286,6 @@ export function SecuenciaMalentendido({ error: e }: Props) {
               <View style={[StyleSheet.absoluteFill, styles.velo]} pointerEvents="none" />
               <Text style={styles.rotulo}>Lo que entienden</Text>
               <SenalRota texto={e.lo_que_entienden} estilo={styles.textoEntienden} disparo={glitch} />
-              {hayImagen(e.imagen) ? <SceneImage path={e.imagen} size={ALTO_IMAGEN} ancha /> : null}
             </Card>
           </Animated.View>
 

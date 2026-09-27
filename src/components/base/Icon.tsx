@@ -49,6 +49,7 @@ import { ArrowDownIcon } from 'phosphor-react-native/src/icons/ArrowDown';
 import { CubeIcon } from 'phosphor-react-native/src/icons/Cube';
 import { GameControllerIcon } from 'phosphor-react-native/src/icons/GameController';
 import { LinkIcon } from 'phosphor-react-native/src/icons/Link';
+import { ImageSquareIcon } from 'phosphor-react-native/src/icons/ImageSquare';
 import { color } from '@/theme';
 
 /**
@@ -110,6 +111,7 @@ const ICONOS = {
   fire: { Componente: FlameIcon },
   headphones: { Componente: HeadphonesIcon },
   hexagon: { Componente: HexagonIcon },
+  image: { Componente: ImageSquareIcon },
   microphone: { Componente: MicrophoneIcon },
   puzzle: { Componente: PuzzlePieceIcon },
   shuffle: { Componente: ShuffleIcon },

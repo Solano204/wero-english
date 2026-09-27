@@ -138,37 +138,44 @@ prueba('la frase: lg hasta 40 caracteres, md hasta 80 y h3 el resto; en la densi
   assert.ok(cuenta.lg / entradas.length > 0.7, 'la mayoría va en el tamaño grande');
 });
 
-prueba('las 1,524 frases caben en una carta de un teléfono de 640 dp (380 dp de alto, 294 de ancho): ninguna se sale', () => {
+prueba('las 1,524 frases con el marco de imagen obligatorio (16:9): a 640 dp todas necesitan scroll, a ~800 dp ninguna', () => {
   assert.equal(entradas.length, 1524);
   const ANCHO = 294;
-  const ALTO = 380;
-  const porDensidad = { normal: 0, compacta: 0, minima: 0 };
-  let conImagen = 0;
-  for (const e of entradas) {
-    const d = M.elegirDensidad(e, ANCHO, ALTO);
-    porDensidad[d]++;
-    const alto = M.alturaEstimada(e, ANCHO, d);
-    assert.ok(alto <= ALTO, `#${e.id} «${e.phrase}» mide ${alto.toFixed(0)} dp aun en la densidad ${d}`);
-    if (M.cabeImagen(ALTO, alto, d)) conImagen++;
+  const casos = [
+    { alto: 380, etiqueta: '640 dp (chico)' },
+    { alto: 460, etiqueta: '~700 dp' },
+    { alto: 540, etiqueta: '~800 dp' },
+  ];
+  const desbordanA = (alto) =>
+    entradas.filter((e) => {
+      const d = M.elegirDensidad(e, ANCHO, alto);
+      return M.desborda(alto, M.alturaEstimada(e, ANCHO, d));
+    }).length;
+  for (const { alto, etiqueta } of casos) {
+    const porDensidad = { normal: 0, compacta: 0, minima: 0 };
+    for (const e of entradas) porDensidad[M.elegirDensidad(e, ANCHO, alto)]++;
+    const desb = desbordanA(alto);
+    console.log(
+      `        a ${ANCHO}×${alto} (${etiqueta}): normal ${porDensidad.normal}, compacta ${porDensidad.compacta}, ` +
+        `mínima ${porDensidad.minima}; con scroll ${Math.round((desb / entradas.length) * 100)} %`
+    );
   }
-  assert.ok(porDensidad.normal / entradas.length > 0.8, 'la mayoría cabe con el aire de siempre');
-  console.log(
-    `        a ${ANCHO}×${ALTO}: normal ${porDensidad.normal}, compacta ${porDensidad.compacta}, mínima ${porDensidad.minima}; ` +
-      `con imagen ${Math.round((conImagen / entradas.length) * 100)} %`
-  );
+  // El marco de 16:9 al ancho de la carta no cabe junto al resto en un teléfono chico: la carta pasa a
+  // permitir scroll ahí (decisión explícita, no un bug). En uno grande no hace falta ninguna vez.
+  assert.equal(desbordanA(380), entradas.length, 'a 380 dp el marco obligatorio hace que todas necesiten scroll');
+  assert.equal(desbordanA(540), 0, 'a 540 dp ninguna necesita scroll');
 });
 
-prueba('la imagen solo va si sobran 96 dp más el aire; una carta más alta la admite más veces', () => {
+prueba('el marco de imagen mide 16:9 al ancho de la carta, con imagen o sin ella', () => {
+  assert.ok(Math.abs(M.alturaImagen(294) / 294 - 9 / 16) < 1e-9);
+  assert.ok(Math.abs(M.alturaImagen(320) / 320 - 9 / 16) < 1e-9);
+});
+
+prueba('desborda: cabe justo al límite, se pasa un dp más', () => {
   const e = entradas.find((x) => x.phrase.length < 20 && !x.note && x.vulgaridad === 0);
   const h = M.alturaEstimada(e, 294);
-  assert.equal(M.cabeImagen(h + 96 + 12 - 1, h), false);
-  assert.equal(M.cabeImagen(h + 96 + 12, h), true);
-  const cuantas = (alto) =>
-    entradas.filter((x) => {
-      const d = M.elegirDensidad(x, 294, alto);
-      return M.cabeImagen(alto, M.alturaEstimada(x, 294, d), d);
-    }).length;
-  assert.ok(cuantas(460) > cuantas(400) && cuantas(400) > cuantas(380));
+  assert.equal(M.desborda(h, h), false);
+  assert.equal(M.desborda(h - 1, h), true);
 });
 
 /* ---------- lo que se puede revisar sin teléfono ---------- */

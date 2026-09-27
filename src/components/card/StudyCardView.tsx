@@ -3,14 +3,14 @@ import { Keyboard, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimen
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
 import { FraseHueco } from './FraseHueco';
+import { MarcoImagen } from './MarcoImagen';
 import { OptionButton, type OptionState } from './OptionButton';
 import { PalabraVoladora } from './PalabraVoladora';
-import { SceneImage } from './SceneImage';
 import { TileBuilder } from './TileBuilder';
 import { Button, RiskBadge } from '@/components/base';
-import { answerMode, instructionFor, promptFor } from '@/domain/exercise';
+import { answerMode, imagenRevelaSignificado, instructionFor, promptFor } from '@/domain/exercise';
 import { isCloseEnough } from '@/utils/text';
-import { color, font, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale } from '@/theme';
+import { color, font, layout, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
 import type { RellenoHueco } from './FraseHueco';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -32,11 +32,11 @@ const tarjetaSeVa = desaparecer(motionDuration.rapido);
 
 /**
  * Por debajo de esta altura de ventana (un teléfono de 640 dp) todo se aprieta:
- * huecos de 8, opciones de 52 y la imagen a 72. Por encima se queda holgado.
+ * huecos de 8 y opciones de 52. Por encima se queda holgado.
  */
 const ALTURA_COMPACTA = 700;
-const IMAGEN_COMPACTA = 72;
-const IMAGEN_HOLGADA = 150;
+/** Tope del marco de imagen: no más del 22 % de la pantalla, para que las 4 opciones sigan cabiendo. */
+const TOPE_ALTO_IMAGEN = 0.22;
 
 interface Props {
   card: StudyCard;
@@ -66,7 +66,13 @@ export function StudyCardView({
   onOrigenAcierto,
 }: Props) {
   const startedAt = useRef(Date.now());
-  const compacto = useWindowDimensions().height < ALTURA_COMPACTA;
+  const ventana = useWindowDimensions();
+  const compacto = ventana.height < ALTURA_COMPACTA;
+  // 16:9 al ancho del contenido, sin pasar del 22 % de la pantalla: si el tope manda,
+  // se angosta (centrada) en vez de recortar la proporción.
+  const anchoContenido = ventana.width - layout.screenPad * 2;
+  const altoImagen = Math.min(anchoContenido * (9 / 16), ventana.height * TOPE_ALTO_IMAGEN);
+  const anchoImagen = altoImagen * (16 / 9);
   const [typed, setTyped] = useState('');
   // Bloquea el paso mientras suena el audio. En Escuchar y Dictado el
   // audio ES el ejercicio: dejar avanzar a media reproducción es dejar
@@ -228,6 +234,15 @@ export function StudyCardView({
       </View>
 
       <View style={[styles.stage, compacto && styles.stageCompacto]}>
+        <MarcoImagen
+          path={card.entry.imagen}
+          tinte={color.world[card.entry.mundo as WorldId]}
+          ancho={anchoImagen}
+          alto={altoImagen}
+          desenfocada={!locked && imagenRevelaSignificado(card.kind)}
+          style={styles.marco}
+        />
+
         {card.kind === 'escuchar' || card.kind === 'dictado' ? (
           <BloqueVoz entry={card.entry} variante="oido" dictado={card.kind === 'dictado'} compacto={compacto} />
         ) : card.kind === 'construir' ? (
@@ -238,13 +253,6 @@ export function StudyCardView({
           <Text style={styles.spanishPrompt}>{prompt}</Text>
         ) : (
           <View style={[styles.reveal, compacto && styles.revealCompacto]}>
-            {card.entry.imagen ? (
-              <SceneImage
-                path={card.entry.imagen}
-                size={compacto ? IMAGEN_COMPACTA : IMAGEN_HOLGADA}
-                ancha
-              />
-            ) : null}
             <BloqueVoz entry={card.entry} variante="frase" compacto={compacto} />
           </View>
         )}
@@ -380,6 +388,7 @@ const styles = StyleSheet.create({
     paddingTop: space.lg,
   },
   stageCompacto: { paddingTop: space.xs },
+  marco: { marginBottom: space.md },
   // Lo que se toca: no crece, y si no cabe es lo único que se acorta (y scrollea).
   zona: { flexGrow: 0, flexShrink: 1, minHeight: 120 },
   spanishPrompt: {

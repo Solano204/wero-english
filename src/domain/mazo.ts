@@ -157,21 +157,28 @@ const ALTO_GRUPO_AUDIO = 48;
 const ALTO_ETIQUETA = 28;
 /** Renglones máximos de la frase: no se corta (se lee entera), pero un tope evita estimaciones absurdas. */
 const RENGLONES_FRASE = 8;
-/** Alto de la franja de imagen de una carta, en dp. */
-export const ALTO_IMAGEN = 96;
+/** Proporción fija del marco de imagen (MarcoImagen): 16:9. */
+const RAZON_IMAGEN = 9 / 16;
 
 function renglones(caracteres: number, caracter: number, ancho: number, tope: number): number {
   return Math.min(tope, Math.max(1, Math.ceil((caracteres * caracter * HOLGURA_RENGLON) / ancho)));
 }
 
+/** Alto del marco de imagen (MarcoImagen) al ancho de la carta: siempre 16:9, con imagen o sin ella. */
+export function alturaImagen(ancho: number): number {
+  return ancho * RAZON_IMAGEN;
+}
+
 /**
- * Cuánto mide el contenido de una carta (dp) con `ancho` para el texto, sin imagen. Son estimaciones: sirven para
- * elegir la densidad y para saber si sobra lugar para la imagen; el alto real lo da el teléfono.
+ * Cuánto mide el contenido de una carta (dp) con `ancho`, MarcoImagen incluido (siempre se reserva, con imagen
+ * o sin ella). Son estimaciones: sirven para elegir la densidad y para saber si hace falta scroll; el alto real
+ * lo da el teléfono.
  */
 export function alturaEstimada(c: ContenidoCarta, ancho: number, densidad: Densidad = 'normal'): number {
   const d = DENSIDAD[densidad];
   const tam = TEXTO[tamanoFrase(c.phrase.length, densidad)];
   const partes = [
+    alturaImagen(ancho),
     renglones(c.phrase.length, tam.caracter, ancho, RENGLONES_FRASE) * tam.renglon,
     ...(c.ipa ? [renglones(c.ipa.length, TEXTO.ipa.caracter, ancho, d.ipa) * TEXTO.ipa.renglon] : []),
     ALTO_GRUPO_AUDIO,
@@ -183,12 +190,12 @@ export function alturaEstimada(c: ContenidoCarta, ancho: number, densidad: Densi
   return partes.reduce((s, p) => s + p, 0) + d.aire * (partes.length - 1) + d.margen * 2;
 }
 
-/** La densidad más holgada en la que la carta cabe en `alto`; si ni la mínima cabe, la mínima. */
+/** La densidad más holgada en la que la carta cabe en `alto`; si ni la mínima cabe, la mínima (y `desborda` avisa). */
 export function elegirDensidad(c: ContenidoCarta, ancho: number, alto: number): Densidad {
   return ORDEN_DENSIDAD.find((d) => alturaEstimada(c, ancho, d) <= alto) ?? 'minima';
 }
 
-/** ¿Sobra alto en la carta para una franja de imagen arriba? */
-export function cabeImagen(altoCarta: number, altoContenido: number, densidad: Densidad = 'normal'): boolean {
-  return altoCarta - altoContenido >= ALTO_IMAGEN + DENSIDAD[densidad].aire;
+/** ¿El contenido (ya en su densidad más holgada posible) no cabe en la carta? Ahí la carta deja hacer scroll. */
+export function desborda(altoCarta: number, alturaContenido: number): boolean {
+  return alturaContenido > altoCarta;
 }

@@ -212,3 +212,16 @@ export function answerMode(kind: ExerciseKind): AnswerMode {
 export function isChoice(kind: ExerciseKind): boolean {
   return answerMode(kind) === 'choice';
 }
+
+/**
+ * ¿La imagen de la frase regala la respuesta si se ve completa antes de responder?
+ *
+ * Reconocer y Escuchar preguntan "¿qué significa?" entre cuatro traducciones: la imagen
+ * de la escena adelanta el significado. En Construir y Escribir el significado YA es el
+ * prompt visible (`promptFor` da `spanish_main`); en Completar y Dictado la incógnita es
+ * una palabra o una transcripción exacta, no el significado. En esos cuatro la imagen no
+ * adelanta nada, así que se ve normal desde el inicio.
+ */
+export function imagenRevelaSignificado(kind: ExerciseKind): boolean {
+  return kind === 'reconocer' || kind === 'escuchar';
+}

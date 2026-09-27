@@ -18,7 +18,7 @@ import {
   RiskBadge,
   Screen,
 } from '@/components/base';
-import { hayImagen } from '@/components/card';
+import { MarcoImagen } from '@/components/card';
 import {
   Aparece,
   BotonGuardar,
@@ -26,7 +26,6 @@ import {
   EscalaRegistro,
   FilaDondeVive,
   HeroeFrase,
-  ImagenSangre,
 } from '@/components/detalle';
 import { getEntry, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
@@ -63,7 +62,6 @@ export function DetailScreen() {
   const [fav, setFav] = useState(false);
   // Sube cada vez que la frase pasa a guardada (la fiesta); quitarla no lo sube.
   const [pulso, setPulso] = useState(0);
-  const [imagenFallo, setImagenFallo] = useState(false);
   // Si el usuario ya tocó el botón, la lectura inicial de la base no lo pisa.
   const tocado = useRef(false);
 
@@ -119,8 +117,6 @@ export function DetailScreen() {
     entry.vulgaridad > 0 && !mismoTexto(entry.es_neutro, entry.spanish_main);
   const mundo = loadContent().packs.mundos.find((m) => m.id === entry.mundo);
   const tinteMundo = color.world[entry.mundo as WorldId] ?? color.accent;
-  // Sin imagen no se reserva su lugar: la pantalla arranca con la frase.
-  const conImagen = hayImagen(entry.imagen) && !imagenFallo;
 
   return (
     // Al llegar (desde una lista o desde «Ver detalle») la ficha aparece con un fundido y una
@@ -141,11 +137,16 @@ export function DetailScreen() {
         // Guardar es la acción principal y vive en la zona del pulgar, no arriba.
         footer={<BotonGuardar guardada={fav} pulso={pulso} onPress={alternar} />}
       >
-        {conImagen ? (
-          <ImagenSangre path={entry.imagen} scrollY={scrollY} alFallar={() => setImagenFallo(true)} />
-        ) : (
-          <View style={{ height: top + layout.tapMin + space.sm }} />
-        )}
+        <View style={{ height: top + layout.tapMin + space.sm }} />
+
+        <View style={styles.marcoZona}>
+          <MarcoImagen
+            path={entry.imagen}
+            tinte={tinteMundo}
+            scrollY={scrollY}
+            zoomEntrada
+          />
+        </View>
 
         <View style={styles.cuerpo}>
           <HeroeFrase entry={entry} />
@@ -230,7 +231,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
   },
   raiz: { flex: 1 },
-  cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.xl },
+  marcoZona: { paddingHorizontal: layout.screenPad, paddingTop: space.md },
+  cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.lg },
   fila: { marginTop: space.xl },
   registro: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
   chips: { alignItems: 'flex-end', gap: space.xs },

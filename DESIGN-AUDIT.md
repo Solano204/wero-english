@@ -75,6 +75,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/components/base/Card.tsx:151`
 - `src/components/base/Screen.tsx:134`
 - `src/components/base/Screen.tsx:148`
+- `src/components/card/MarcoImagen.tsx:129`
 - `src/components/card/OptionButton.tsx:134`
 - `src/components/fx/BarraSesion.tsx:118`
 - `src/components/fx/BarraSesion.tsx:126`
@@ -215,7 +216,7 @@ Pantallas de `src/screens/` que leen de la base (`@/db/`). Cada celda apunta a l
 
 | pantalla (archivo) | carga | vacío | error |
 |---|---|---|---|
-| `discover/DetailScreen.tsx` | ✓ `:59` | ✓ `:108` | ✓ `:106` |
+| `discover/DetailScreen.tsx` | ✓ `:58` | ✓ `:106` | ✓ `:104` |
 | `discover/ExploreScreen.tsx` | ✓ `:27` | ✓ `:65` | ✓ `:79` |
 | `discover/PackDetailScreen.tsx` | ✓ `:35` | ✗ | ✓ `:61` |
 | `discover/WorldDetailScreen.tsx` | ✓ `:29` | ✗ | ✓ `:52` |
@@ -265,7 +266,7 @@ Otros 2 `numberOfLines={1}` en etiquetas, contadores y similares no se listan.
 - `src/components/atoradas/MedidorAtasco.tsx:53` — key por índice
 - `src/components/base/Skeleton.tsx:63` — key por índice
 - `src/components/card/FilaEstrellas.tsx:22` — key por índice
-- `src/components/errores/SecuenciaMalentendido.tsx:276` — key por índice
+- `src/components/errores/SecuenciaMalentendido.tsx:273` — key por índice
 - `src/components/feedback/Confetti.tsx:39` — key por índice
 - `src/components/fx/PortadaJuego.tsx:161` — key por índice
 - `src/components/fx/PuntosRepeticion.tsx:54` — key por índice
