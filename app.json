@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#FBF9F4"
+      "backgroundColor": "#0F0B14"
     },
     "assetBundlePatterns": [
       "assets/data/**/*",
@@ -31,7 +31,7 @@
       "package": "app.wero.mobile",
       "versionCode": 3,
       "adaptiveIcon": {
-        "backgroundColor": "#FBF9F4"
+        "backgroundColor": "#0F0B14"
       },
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",

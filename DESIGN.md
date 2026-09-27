@@ -14,9 +14,9 @@ Fuente de verdad de los valores: `src/theme/` (`tokens.ts`, `typography.ts`, `mo
 
 ## 1.1 Dirección visual
 
-"Neón nocturno" (v4.0): tinta azul profunda y un cian eléctrico. Una sola fuente de luz arriba a la izquierda (`sol`), tarjetas sin borde parejo (llevan un **filo de luz** de 1 px en degradado), fondo en degradado que se aclara arriba, y una única superficie de color (`contraste`). Un solo tema, oscuro.
+"Magenta nocturno" (v5.1): tinta magenta profunda y un rosa neón eléctrico, synthwave. Reemplaza a "Neón nocturno" (v4.0, tinta azul y cian): mismas cinco decisiones estructurales de `tokens.ts`, otro tono de acento. Una sola fuente de luz arriba a la izquierda (`sol`), tarjetas sin borde parejo (llevan un **filo de luz** de 1 px en degradado), fondo en degradado que se aclara arriba, y una única superficie de color (`contraste`). Un solo tema, oscuro.
 
-**Señal en vivo (v5.0).** Wero se aprende de oído, así que Practicar se comporta como una consola de audio encendida: ondas, medidores y luz cian que responden al progreso real. Solo la señal usa luz de color; todo lo demás sigue sobrio. La luz vive detrás del contenido (una aurora que nace del `sol`, un ecualizador que respira, un anillo que se llena) y se apaga cuando no se ve, no tiene foco o el sistema pide menos movimiento.
+**Señal en vivo (v5.0).** Wero se aprende de oído, así que Practicar se comporta como una consola de audio encendida: ondas, medidores y luz magenta que responden al progreso real. Solo la señal usa luz de color; todo lo demás sigue sobrio. La luz vive detrás del contenido (una aurora que nace del `sol`, un ecualizador que respira, un anillo que se llena) y se apaga cuando no se ve, no tiene foco o el sistema pide menos movimiento.
 
 ## 1.2 Color
 
@@ -26,50 +26,50 @@ Todo en `src/theme/tokens.ts`.
 
 | Token | Valor | Uso |
 |---|---|---|
-| `bg` | `#0A0F16` | Fondo base |
-| `bgFin` | `#06090D` | Final del degradado de fondo; footer |
-| `bgAlto` | `#101823` | Fondo elevado |
-| `surface` / `surfaceSolida` | `#141D28` | Tarjetas |
-| `surfaceAlt` | `#1A2532` | Superficie alta; botón `secondary`; fichas |
-| `surfaceHigh` | `#22303F` | Superficie máxima |
-| `contraste` | `#0B3A50` | La única superficie de color |
+| `bg` | `#0F0B14` | Fondo base |
+| `bgFin` | `#0A0710` | Final del degradado de fondo; footer |
+| `bgAlto` | `#181220` | Fondo elevado |
+| `surface` / `surfaceSolida` | `#1A1422` | Tarjetas |
+| `surfaceAlt` | `#231B2E` | Superficie alta; botón `secondary`; fichas |
+| `surfaceHigh` | `#2C2338` | Superficie máxima |
+| `contraste` | `#3A1640` | La única superficie de color |
 
 **Texto y bordes**
 
 | Token | Valor |
 |---|---|
-| `text` | `#EAF2F9` |
-| `textMuted` | `#B4C2CE` |
-| `textFaint` | `#90A2B4` |
-| `onContraste` | `#EAF7FD` |
-| `border` | `rgba(255,255,255,0.08)` |
-| `borderStrong` | `rgba(255,255,255,0.18)` |
+| `text` | `#F5EEF8` |
+| `textMuted` | `#C3B6CC` |
+| `textFaint` | `#968A9F` |
+| `onContraste` | `#F5EEF8` |
+| `border` | `#2E2438` |
+| `borderStrong` | `#523D67` |
 | `filo` | `rgba(255,255,255,0.16)` |
 
-**Acento (cian)**
+**Acento (magenta)**
 
 | Token | Valor |
 |---|---|
-| `accent` | `#45D9FF` |
-| `accentSoft` | `rgba(69,217,255,0.14)` |
-| `accentDeep` | `#17ABD8` |
-| `accent50`…`accent900` | Escala del acento; el `400` es `accent` (`#E7F9FE`, `#CDF3FF`, `#A9EAFE`, `#7FE1FE`, `#45D9FF`, `#2EC4E8`, `#19A2C2`, `#147E97`, `#15596A`, `#113B47`) |
-| `contraste50`…`contraste900` | Escala del primario; el `800` es `contraste` (`#0B3A50`) |
-| `neutral50`…`neutral900` | Escala de los neutros (tinta azulada); `50`, `200`, `300`, `700`, `800` y `900` son `text`, `textMuted`, `textFaint`, `surfaceHigh`, `surface` y `bg` |
-| `star` | `#E9C944`, dorado para estrellas y aciertos seguidos: a 16° del ámbar de fallo (`wrong`) y a 16° de `world.fonetica`; 7.4:1 sobre las superficies |
-| `accentBorde` | `rgba(69,217,255,0.32)` |
-| `onAccent` | `#04141C` (texto sobre el cian: nunca blanco) |
+| `accent` | `#FF3DAA` |
+| `accentSoft` | `rgba(255,61,170,0.14)` |
+| `accentDeep` | `#ED51A8` |
+| `accent50`…`accent900` | Escala del acento; el `400` es `accent` (`#FFE0F2`, `#FFB8E0`, `#FF8FCE`, `#FF66BC`, `#FF3DAA`, `#FF0E95`, `#DE007D`, `#AF0063`, `#800048`, `#52002E`) |
+| `contraste50`…`contraste900` | Escala del primario; el `800` es `contraste` (`#3A1640`) |
+| `neutral50`…`neutral900` | Escala de los neutros (tinta violeta); `50`, `200`, `300`, `700`, `800` y `900` son `text`, `textMuted`, `textFaint`, `surfaceHigh`, `surface` y `bg` |
+| `star` | `#FFD166`, dorado para estrellas y aciertos seguidos; 10.37:1 sobre las superficies |
+| `accentBorde` | `rgba(255,61,170,0.32)` |
+| `onAccent` | `#1A0612` (texto sobre el magenta: nunca blanco) |
 
 **Estado**
 
 | Token | Valor | Semántica |
 |---|---|---|
-| `correct` (+`Soft`, `Deep` `#22B87A`, `Fondo` `#10241B`) | `#4ADE9B` | Acierto |
-| `wrong` (+`Soft`, `Deep` `#CF9320`, `Fondo` `#241C0C`) | `#F2B33D` | Fallo: ámbar, nunca rojo |
-| `riskWarn` | `#F2B33D` | Advertencia de contenido |
-| `riskStrong` (+`Soft`) | `#FF7A66` | Único rojo: lenguaje explícito. Un fallo, un error o una gravedad van en `wrong`; `npm run check:color` (COLOR-3) falla si `riskStrong`, `riskStrongSoft` o el tono `strong` del `Badge` salen de `Badge`, `EscalaRegistro`, `CartaFrase` y `DetalleForma` |
+| `correct` (+`Soft`, `Deep` `#1FAC6F`, `Fondo` `#081610`) | `#3DDC97` | Acierto |
+| `wrong` (+`Soft`, `Deep` `#D99A1E`, `Fondo` `#181205`) | `#F5B942` | Fallo: ámbar, nunca rojo |
+| `riskWarn` | `#F5B942` | Advertencia de contenido |
+| `riskStrong` (+`Soft`) | `#F37B68` | Único rojo: lenguaje explícito. Un fallo, un error o una gravedad van en `wrong`; `npm run check:color` (COLOR-3) falla si `riskStrong`, `riskStrongSoft` o el tono `strong` del `Badge` salen de `Badge`, `EscalaRegistro`, `CartaFrase` y `DetalleForma` |
 
-**Mundos** (`color.world`, categorías de contenido): una familia con la misma luminosidad (OKLCH L 0.73) y saturación (C 0.12); solo cambia el tono. `dia_a_dia #71ABF2` (254°), `calle #E1925A` (55°), `dinero #86B96A` (135°), `gente #DD88B9` (345°), `cultura #A89AED` (291°), `tech #21BFBB` (192°), `legal #C78FD9` (318°), `fonetica #AAAF4F` (112°). Ninguno queda a menos de 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan 4.5:1 sobre las ocho superficies (el más bajo, `gente`, da 4.78). **Se usan en chico**: un punto junto al nombre (`PuntoMundo`), una etiqueta y una barra fina (`ProgressBar` de 4 a 5 px). Nunca en fondos grandes ni en botones.
+**Mundos** (`color.world`, categorías de contenido): una familia con la misma luminosidad (OKLCH L 0.73) y saturación (C 0.12); solo cambia el tono. `dia_a_dia #87ADDC` (213°), `calle #CAD368` (65°), `dinero #80CE55` (99°), `gente #88DD89` (121°), `cultura #AEA3E4` (250°), `tech #32AEAA` (178°), `legal #C98BDD` (285°), `fonetica #BEC539` (63°). Ninguno queda a menos de 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan 4.5:1 sobre las ocho superficies (el más bajo, `tech`, da 5.53). `calle` y `gente` se recalcularon de tono al pasar a esta paleta: la semilla de la lista original chocaba con el nuevo acento (a 1° y 24°) y, tras separarse de él, entre sí. **Se usan en chico**: un punto junto al nombre (`PuntoMundo`), una etiqueta y una barra fina (`ProgressBar` de 4 a 5 px). Nunca en fondos grandes ni en botones.
 
 **Dulces** (`color.dulce`, COLOR-1, excepción): las piezas del juego de tres en línea no usan `color.world` ni ninguna otra paleta de marca — son contenido de juego, no marca, y no cambian si cambia la paleta de la app. Seis colores de la paleta Okabe-Ito (pensada para distinguirse con daltonismo): `amarillo #F0E442`, `naranja #F5A900`, `celeste #50B2E9`, `verde #00956D`, `rosa #CE7DA9`, `azul #006EAC` (`naranja`, `celeste`, `verde` y `rosa` se afinaron de brillo, mismo matiz, para separarse en escala de grises; `azul` es el sexto de Okabe-Ito, para los niveles de 6 colores). Ninguno de los 15 pares queda a menos de 0.08 de luminancia relativa entre sí. `pieza.tintes` deriva de cada uno un degradado de cara (`claro`/`medio`/`oscuro`, COLOR-2) y un `simbolo` (la forma al centro, un 70 % más oscura que la cara, a 3:1 de contraste como mínimo: nunca blanco, se perdería sobre `amarillo` o `celeste`).
 
@@ -77,15 +77,15 @@ Todo en `src/theme/tokens.ts`.
 
 **Degradados**
 
-- `FONDO`: `#0E1620` → `bgFin`, de pantalla. Dirección `sol`: inicio `(0,0)`, fin `(0.9,1)`.
-- `gradiente`: un solo par neutro (`neutro: #1B242F → #111820`) para todas las tarjetas con portada, sea de mundo o de modo. **Si al verlo en el teléfono Practicar se ve plano, probar un tinte del mundo con croma ≤ 0.03.** No está aplicado.
-- `filoLuz`: blanco 0.28 → blanco 0.04 → cian 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
-- `resplandorSol`: cian 0.16 → 0.04 → 0, el halo de `Screen`.
-- `senal`: `accent900` → `accent400` → `accent100`. Un solo tono (cian, separación de 2°), sin hex nuevos. Pinta las barras de la onda de HOY y la luz de la señal.
+- `FONDO`: `bgAlto` → `bgFin`, de pantalla. Dirección `sol`: inicio `(0,0)`, fin `(0.9,1)`.
+- `gradiente`: un solo par neutro (`neutro: #1B242F → #111820`) para todas las tarjetas con portada, sea de mundo o de modo. Deliberadamente sin teñir (COLOR-1): no sale de `color.accent` ni cambia con la paleta. **Si al verlo en el teléfono Practicar se ve plano, probar un tinte del mundo con croma ≤ 0.03.** No está aplicado.
+- `filoLuz`: blanco 0.28 → blanco 0.04 → magenta 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
+- `resplandorSol`: magenta 0.16 → 0.04 → 0, el halo de `Screen`.
+- `senal`: `accent900` → `accent400` → `accent100`. Un solo tono (magenta, separación de 0.1°), sin hex nuevos. Pinta las barras de la onda de HOY y la luz de la señal.
 - `reflejo`: blanco 0 → 0.38 → 0, el reflejo metálico que cruza el botón principal de HOY.
 - `aurora`: `opacidadMax 0.18`, `paralaje 8` px y `resolucion 0.25` (el shader se pinta a un cuarto de resolución). `grano`: `opacidad 0.03`, estático.
 
-**Contraste medido** (WCAG, calculado de los tokens): `text` ≥ 10.7:1 sobre cualquier superficie; `textMuted` ≥ 6.66; `textFaint` ≥ 4.62; `accent` ≥ 7.27; `onAccent` sobre `accent` 11.25; `text` sobre `accent` 1.47. Todos los pares de texto pasan AA (mínimo 4.5:1) sobre las ocho superficies, `contraste` incluida. Para lograrlo se aclararon `accentDeep`, `wrongDeep` y cinco colores de mundo (`dia_a_dia`, `gente`, `cultura`, `tech`, `legal`), lo mínimo para cruzar el umbral. `accentDeep` solo se usa como borde inferior de fichas (no como texto) y `wrongDeep` no se usa fuera de los tokens.
+**Contraste medido** (WCAG, calculado de los tokens): `text` ≥ 13.15:1 sobre cualquier superficie; `textMuted` ≥ 7.75; `textFaint` ≥ 4.58; `accent` ≥ 4.63; `onAccent` sobre `accent` 6.03; `text` sobre `accent` 2.84. Todos los pares de texto pasan AA (mínimo 4.5:1) sobre las ocho superficies, `contraste` incluida. Para lograrlo se aclararon `textFaint` (de `#8C7F96`) y `accentDeep` (de `#D1167F`), lo mínimo para cruzar el umbral. `accentDeep` solo se usa como borde inferior de fichas (no como texto) y `wrongDeep` no se usa fuera de los tokens.
 
 ## 1.3 Tipografía
 
@@ -223,7 +223,7 @@ Serán la ley para todo cambio futuro. Donde una regla choque con `docs/DISENO.m
 
 ## COLOR
 
-- **COLOR-1.** Máximo 3 colores de marca: primario (`contraste`), acento (`accent`) y neutro. Los de estado (correcto, error, advertencia) aparte y solo para estado. Los colores de mundo son una familia que va en chico (punto, etiqueta, barra fina, cubitos), nunca en fondos grandes.
+- **COLOR-1.** Máximo 3 colores de marca: primario (`contraste`), acento (`accent`) y neutro. Los de estado (correcto, error, advertencia) aparte y solo para estado. Los colores de mundo son una familia que va en chico (punto, etiqueta, barra fina), nunca en fondos grandes. Las piezas de Dulces no son colores de mundo ni de marca: usan su propia paleta fija (`color.dulce`, ver 1.2), que no cambia si cambia la paleta de la app.
 - **COLOR-2.** Degradados, si existen, dentro de un mismo tono. Nunca entre colores no relacionados.
 - **COLOR-3.** Cada color de marca (acento, primario y neutro) con escala de tonos (50–900), en `tokens.ts`; el audit la exige.
 - **COLOR-4.** Contraste texto/fondo mínimo 4.5:1 (WCAG AA); texto grande 3:1.

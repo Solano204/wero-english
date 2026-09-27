@@ -63,7 +63,7 @@ export default function App() {
               rutaPrevia.current = actual;
             }}
           >
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
             <RootNavigator />
             <TransicionHoy />
           </NavigationContainer>
