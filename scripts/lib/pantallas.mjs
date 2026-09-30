@@ -52,24 +52,32 @@ function carpetaFeature(f, root) {
   return path.join(root, 'src', 'features', ...partes);
 }
 
-/** El texto de la pantalla más el de los hooks y la logic de su misma feature que importa (siguiendo sus imports). */
-export function fuenteDePantalla(f, root) {
+/**
+ * El texto de la pantalla más el de los hooks y la logic de su misma feature que importa (siguiendo sus
+ * imports). `profundidad` 1 = solo lo que la pantalla importa directo (lo que se sacó de ella a su hook).
+ */
+export function fuenteDePantalla(f, root, profundidad = Infinity) {
   const carpeta = carpetaFeature(f, root);
   const vistos = new Set([f]);
-  const pendientes = [f];
+  const pendientes = [[f, 0]];
   let texto = '';
   while (pendientes.length > 0) {
-    const actual = pendientes.shift();
+    const [actual, nivel] = pendientes.shift();
     const src = fs.readFileSync(actual, 'utf8');
     texto += `\n${src}`;
     if (!carpeta) continue;
-    for (const m of src.matchAll(/(?:from\s+|require\()\s*['"]([^'"]+)['"]/g)) {
-      const destino = resolver(m[1], actual, root);
+    for (const m of src.matchAll(/import\s+(?:type\s+)?([\s\S]*?)\s+from\s+['"]([^'"]+)['"]|require\(\s*['"]([^'"]+)['"]/g)) {
+      const destino = resolver(m[2] ?? m[3], actual, root);
+      // Desde la pantalla solo se sigue un hook que la pantalla LLAMA (no uno del que solo toma una constante).
+      if (actual === f && m[1] !== undefined) {
+        const nombres = (m[1].match(/\b[A-Za-z_$][\w$]*\b/g) ?? []).filter((n) => n !== 'type' && n !== 'as');
+        if (!nombres.some((n) => /^use[A-Z]/.test(n) && new RegExp(`\\b${n}\\s*\\(`).test(src))) continue;
+      }
       // Solo lo que se sacó de la pantalla: sus hooks y su lógica. Los componentes son de la vista.
       const esSuyo = destino && destino.startsWith(carpeta + path.sep) && /[\\/](hooks|logic)[\\/]/.test(destino);
-      if (destino && esSuyo && !vistos.has(destino)) {
+      if (destino && esSuyo && !vistos.has(destino) && nivel < profundidad) {
         vistos.add(destino);
-        pendientes.push(destino);
+        pendientes.push([destino, nivel + 1]);
       }
     }
   }

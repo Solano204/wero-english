@@ -13,6 +13,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SALIDA = path.join(ROOT, 'DESIGN-AUDIT.md');
@@ -352,11 +353,15 @@ function auditaEstados(archivos) {
     error: /\.catch\(|\bcatch\s*[({]|setError|useState<[^>]*rror|<Carga\b|<ErrorCarga|estado === 'error'/,
   };
   const filas = [];
-  for (const { r, lines, src } of archivos.filter((a) => esPantalla(a.r))) {
+  for (const { r, lines } of archivos.filter((a) => esPantalla(a.r))) {
+    // La pantalla con lo que es suyo (sus hooks y su logic): la carga suele vivir en el hook de la feature.
+    // Las líneas pasadas del final de la pantalla son de sus hooks.
+    const src = fuenteDePantalla(path.join(ROOT, r), ROOT, 1);
     // Carga datos = importa de la base y llama a alguna función de lectura.
     // Las pantallas que solo escriben (applyGameGrade…) no entran.
     if (!/from '@\/(db|data)\//.test(src) || !/\b(get|count|resumen|list|fetch)[A-Z]\w*\(/.test(src)) continue;
-    const ev = Object.fromEntries(Object.entries(RE).map(([k, re]) => [k, primeraLinea(lines, re)]));
+    const todas = src.split('\n').slice(1);
+    const ev = Object.fromEntries(Object.entries(RE).map(([k, re]) => [k, primeraLinea(lines, re) ?? primeraLinea(todas, re)]));
     filas.push({ r, ...ev });
   }
   return filas;
@@ -537,7 +542,9 @@ function auditaSenal(archivos) {
     if (bucle && r !== 'src/shared/ui/fx/useSenalActiva.ts' && !/\buseSenalActiva\b/.test(texto)) {
       S.mot4.push({ r, linea: primeraLinea(codigo, BUCLE) ?? 1, txt: 'bucle que no consulta `useSenalActiva` (foco, segundo plano, reducir movimiento)' });
     }
-    if (ANIMA.test(texto) && !/\b(useMovimientoReducido|useSenalActiva)\b/.test(texto)) {
+    // Una pantalla puede recibir `reducido` de su hook: se mira la pantalla junto con sus hooks.
+    const consulta = esPantalla(r) ? fuenteDePantalla(path.join(ROOT, r), ROOT, 1) : texto;
+    if (ANIMA.test(texto) && !/\b(useMovimientoReducido|useSenalActiva)\b/.test(consulta)) {
       const item = { r, linea: primeraLinea(codigo, ANIMA) ?? 1 };
       const ex = MOT5_EXCEPCIONES.find((e) => e.archivo === r);
       if (ex) S.mot5Exentos.push({ ...item, txt: ex.motivo });
