@@ -152,6 +152,7 @@ Quién lo revisa:
 | leer los JSON de contenido | `data/contenido.ts` (`loadContent`, perezoso por archivo); lo que se necesita al abrir, en `data/resumenContenido.ts` (generado) |
 | varias consultas en una | `data/repos/lote.ts` (`Parte`, `correrLote`; p. ej. `resumenPracticar.ts`) |
 | el reproductor y los efectos | `services/audio.ts` → `services/audio/*` |
+| cuántos players de audio viven | máximo 18: 1 de frases (también los capítulos de Lecturas), hasta 16 de efectos (2 por archivo, `MAX_SFX_VIVOS` en `audio/efectos.ts`) y 1 de música (2 durante el fundido de ~600 ms) |
 | notificaciones | `services/notificaciones.ts`, horarios en `domain/horarioNotificaciones.ts` |
 | cuenta, borrado y consentimientos | `services/cuenta/*`, `estado/useAuthStore.ts` |
 | colores, espacios, movimiento | `theme/` |

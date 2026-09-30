@@ -9,9 +9,10 @@ import { PAQUETES, type SfxKey, type SfxPackId } from './paquetesSfx';
    empaquetados. Mezclarlos en el mismo player forzaría un resolve()
    innecesario cada vez que pasa algo en un juego.
 
-   Cada efecto tiene SU PROPIO player, creado una sola vez y reutilizado
-   (máximo un player por efecto): así "tap" y "match" nunca se pisan
-   entre sí, y no hay que crear un player nativo en cada toque. */
+   Conjunto fijo de players, reutilizados: hasta POR_ARCHIVO por archivo
+   de sonido (así dos efectos seguidos se enciman como antes, en vez de
+   cortarse) y nunca más de MAX_SFX_VIVOS en total; pasado el tope se
+   suelta el que lleva más tiempo callado. Nunca uno por toque. */
 
 let paqueteActivo: SfxPackId = 'D';
 /** Solo __DEV__: el Muestrario de sonidos la usa para probar un paquete sin reiniciar la app. */
@@ -20,15 +21,7 @@ export function setPaqueteSfx(id: SfxPackId): void {
   paqueteActivo = id;
   // Los players ya creados apuntan a los archivos del paquete anterior: se sueltan para que el
   // próximo playSfx() los cree de nuevo con la fuente correcta.
-  for (const p of sfxPlayers.values()) {
-    soltar(p);
-    try {
-      p.remove();
-    } catch {
-      /* sin consecuencia */
-    }
-  }
-  sfxPlayers.clear();
+  liberarEfectos();
 }
 export function paqueteSfxActual(): SfxPackId {
   return paqueteActivo;
@@ -87,14 +80,14 @@ export function tasaDetune(): number {
   return 1 + (Math.random() * 2 - 1) * DETUNE_MAX;
 }
 
-function fuenteSfx(key: SfxKey): { modulo: number; v: number; escalon: number } {
+function fuenteSfx(key: SfxKey): { modulo: number } {
   const f = PAQUETES[paqueteActivo];
   if (key === 'success') {
     // Este acierto usa el escalón actual; el SIGUIENTE acierto seguido sube uno (tope en el 5.º).
     const escalon = escalonRacha;
     escalonRacha = Math.min(MAX_ESCALON_RACHA, escalonRacha + 1);
     const v = variante('success', 3);
-    return { modulo: f.success[escalon - 1]![v]!, v, escalon };
+    return { modulo: f.success[escalon - 1]![v]! };
   }
   if (key === 'fail' || key === 'tap' || key === 'match') {
     // Reiniciar aquí (no solo en playFail()) porque playRoundResult()/playRoundResultBilingue()
@@ -102,14 +95,54 @@ function fuenteSfx(key: SfxKey): { modulo: number; v: number; escalon: number } 
     if (key === 'fail') reiniciaRacha();
     const lista = f[key];
     const v = variante(key, lista.length);
-    return { modulo: lista[v]!, v, escalon: 0 };
+    return { modulo: lista[v]! };
   }
-  return { modulo: f[key] as number, v: 0, escalon: 0 };
+  return { modulo: f[key] as number };
 }
 
-// Un player por (clave, variante/escalón) posible, creado bajo demanda: como antes, máximo un
-// player nativo por sonido que de verdad se usó, nunca uno por reproducción.
-const sfxPlayers = new Map<string, AudioPlayer>();
+/**
+ * Players por archivo del paquete activo (`paquete:módulo`). Antes la llave era la combinación clave·escalón·variante:
+ * los 15 escalones y variantes de `success` apuntan al mismo archivo en el paquete por defecto, y podían vivir 15
+ * players con el mismo sonido (28 en total, para siempre).
+ */
+const sfxPlayers = new Map<string, AudioPlayer[]>();
+/** Players del mismo archivo a la vez: el segundo deja que dos efectos seguidos se enciman. */
+const POR_ARCHIVO = 2;
+/** Tope de players de efectos vivos. Con el de frase y el de música: máximo 18 en la app (19 durante el fundido de la música). */
+export const MAX_SFX_VIVOS = 16;
+
+function todosLosSfx(): AudioPlayer[] {
+  return [...sfxPlayers.values()].flat();
+}
+
+function quitar(p: AudioPlayer): void {
+  soltar(p);
+  try {
+    p.remove();
+  } catch {
+    /* sin consecuencia */
+  }
+  sfxTocadoEn.delete(p);
+  for (const [clave, player] of ultimoPlayerPorClave) if (player === p) ultimoPlayerPorClave.delete(clave);
+}
+
+/** Pasado el tope, suelta el player callado que lleva más tiempo sin sonar. */
+function hacerLugar(): void {
+  if (todosLosSfx().length < MAX_SFX_VIVOS) return;
+  let viejo: { llave: string; p: AudioPlayer; t: number } | null = null;
+  for (const [llave, lista] of sfxPlayers) {
+    for (const p of lista) {
+      if (suena(p) || estados.get(p)?.arrancando) continue;
+      const t = sfxTocadoEn.get(p) ?? 0;
+      if (!viejo || t < viejo.t) viejo = { llave, p, t };
+    }
+  }
+  if (!viejo) return;
+  quitar(viejo.p);
+  const resto = (sfxPlayers.get(viejo.llave) ?? []).filter((p) => p !== viejo.p);
+  if (resto.length) sfxPlayers.set(viejo.llave, resto);
+  else sfxPlayers.delete(viejo.llave);
+}
 const sfxUltimaVez = new Map<SfxKey, number>();
 
 /** Toques rápidos no saturan: por debajo de esto, el toque se ignora. */
@@ -120,15 +153,20 @@ export function setSfxEnabled(v: boolean): void {
   sfxEnabled = v;
 }
 
-function sfxPlayerPara(key: SfxKey, modulo: number, v: number, escalon: number): AudioPlayer {
-  const cacheKey = `${paqueteActivo}:${key}:${escalon}:${v}`;
-  let p = sfxPlayers.get(cacheKey);
-  if (!p) {
-    p = createAudioPlayer(modulo);
+function sfxPlayerPara(modulo: number): AudioPlayer {
+  const llave = `${paqueteActivo}:${modulo}`;
+  const lista = sfxPlayers.get(llave) ?? [];
+  // Uno callado del mismo archivo; si todos suenan y cabe otro, se crea; si no, el que sonó hace más tiempo.
+  const libre = lista.find((p) => !suena(p) && !estados.get(p)?.arrancando);
+  if (libre) return libre;
+  if (lista.length < POR_ARCHIVO) {
+    hacerLugar();
+    const p = createAudioPlayer(modulo);
     vigilar(p);
-    sfxPlayers.set(cacheKey, p);
+    sfxPlayers.set(llave, [...lista, p]);
+    return p;
   }
-  return p;
+  return lista.reduce((a, b) => ((sfxTocadoEn.get(a) ?? 0) <= (sfxTocadoEn.get(b) ?? 0) ? a : b));
 }
 
 /** Cuándo se le dio play() por última vez a cada player de efecto: stop() solo pausa los que pueden estar sonando. */
@@ -173,8 +211,8 @@ export function efectoPermitido(key: SfxKey): boolean {
 
 /** El player del efecto (variante y escalón de la racha incluidos), listo para rebobinar y sonar. */
 export function prepararEfecto(key: SfxKey): AudioPlayer {
-  const { modulo, v, escalon } = fuenteSfx(key);
-  const p = sfxPlayerPara(key, modulo, v, escalon);
+  const { modulo } = fuenteSfx(key);
+  const p = sfxPlayerPara(modulo);
   ultimoPlayerPorClave.set(key, p);
   return p;
 }
@@ -189,7 +227,7 @@ export function marcarEfectoTocado(p: AudioPlayer): void {
  */
 export function pausarEfectosVivos(): void {
   const ahora = Date.now();
-  for (const p of sfxPlayers.values()) {
+  for (const p of todosLosSfx()) {
     if (!suena(p) && ahora - (sfxTocadoEn.get(p) ?? 0) > SFX_VIVO_MS) continue;
     try {
       p.pause();
@@ -202,14 +240,7 @@ export function pausarEfectosVivos(): void {
 
 /** Suelta todos los players de efectos (al salir de la sesión de estudio). */
 export function liberarEfectos(): void {
-  for (const p of sfxPlayers.values()) {
-    soltar(p);
-    try {
-      p.remove();
-    } catch {
-      /* sin consecuencia */
-    }
-  }
+  for (const p of todosLosSfx()) quitar(p);
   sfxPlayers.clear();
   sfxTocadoEn.clear();
   ultimoPlayerPorClave.clear();

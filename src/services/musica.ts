@@ -42,6 +42,8 @@ let agachada = false;
 let pausadaExplicita = false;
 let pausadaPorBackground = false;
 let iniciada = false;
+/** Se le dio play() al player actual y no se ha pausado desde entonces. */
+let sonando = false;
 /** Token de fundido: uno nuevo invalida cualquiera en curso. */
 let fadeId = 0;
 
@@ -94,6 +96,7 @@ export async function setPista(pista: Pista): Promise<void> {
     if (!isPlaying() && !pausadaExplicita) {
       try {
         player.play();
+        sonando = true;
       } catch {
         /* sin consecuencia */
       }
@@ -117,6 +120,7 @@ export async function setPista(pista: Pista): Promise<void> {
   }
 
   player = nuevo;
+  sonando = nuevo !== null;
   pistaActual = pista;
   pausadaExplicita = false;
 
@@ -155,6 +159,7 @@ export async function pausar(): Promise<void> {
   await fundir(0, DUCK_FADE_MS);
   try {
     player?.pause();
+    sonando = false;
   } catch {
     /* sin consecuencia */
   }
@@ -166,6 +171,7 @@ export async function reanudar(): Promise<void> {
   if (!habilitada || !player) return;
   try {
     player.play();
+    sonando = true;
   } catch {
     /* sin consecuencia */
   }
@@ -215,6 +221,7 @@ export function setActiva(v: boolean): void {
       /* sin consecuencia */
     }
     player = null;
+    sonando = false;
     return;
   }
   if (pistaActual) void setPista(pistaActual);
@@ -230,16 +237,17 @@ export function liberar(): void {
     /* sin consecuencia */
   }
   player = null;
+  sonando = false;
   pistaActual = null;
   iniciada = false;
 }
 
+/**
+ * ¿Suena la música? Lo que se le pidió por última vez (play o pause), no `player.playing`: en Android esa lectura es
+ * síncrona contra el hilo de UI y detiene el hilo de JS (ver estadoReproductor.ts).
+ */
 export function isPlaying(): boolean {
-  try {
-    return Boolean(player?.playing);
-  } catch {
-    return false;
-  }
+  return player !== null && sonando;
 }
 
 /**
@@ -255,6 +263,7 @@ AppState.addEventListener('change', (estado) => {
       if (!pausadaExplicita && player) {
         try {
           player.play();
+          sonando = true;
         } catch {
           /* sin consecuencia */
         }
@@ -268,6 +277,7 @@ AppState.addEventListener('change', (estado) => {
     void fundir(0, DUCK_FADE_MS).then(() => {
       try {
         player?.pause();
+        sonando = false;
       } catch {
         /* sin consecuencia */
       }
