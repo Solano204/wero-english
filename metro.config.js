@@ -3,6 +3,18 @@ const { getDefaultConfig } = require('expo/metro-config');
 const config = getDefaultConfig(__dirname);
 config.resolver.assetExts.push('mp3', 'wav', 'webp', 'db');
 
+// Carpetas de trabajo que no son de la app: Metro no las vigila ni las resuelve.
+const path = require('path');
+const escapar = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Ruta absoluta con cualquier separador (Windows usa la barra invertida; Linux y macOS, «/»).
+const aRegex = (carpeta) =>
+  new RegExp(`^${path.join(__dirname, carpeta).split(/[\\/]/).map(escapar).join('[\\\\/]')}([\\\\/].*)?$`);
+config.resolver.blockList = [
+  ...[].concat(config.resolver.blockList ?? []),
+  ...['SOUNDS ENGLISH', '.agents', '.claude', 'docs', 'android/app/build', 'ios/build'].map(aRegex),
+  /[\\/]\.tmp-[^\\/]*$/,
+];
+
 // Node en Windows falla con EMFILE pasadas ~8190 aperturas simultáneas por
 // proceso, y no se puede subir. Metro (Assets.js) lee TODOS los assets a la
 // vez con fs.promises.readFile: con ~7.9k assets en bundled.ts eso es una
