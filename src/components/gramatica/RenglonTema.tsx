@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -31,7 +31,7 @@ interface Props {
   /** Posición en el bloque y avance de su despliegue: entra con `escalon(indice)` desde 8 dp más abajo. */
   indice: number;
   avance: Avance;
-  onPress: () => void;
+  onPress: (tema: GramaticaTema) => void;
 }
 
 /**
@@ -40,7 +40,7 @@ interface Props {
  * anuncio lo abre, el candado gira y se desvanece, «Anuncio» se apaga y el título toma su color: el renglón queda como
  * los demás. La animación espera a que termine la transición de volver a la lista, para que se vea.
  */
-export function RenglonTema({ tema, niveles, cerrado, primero, indice, avance, onPress }: Props) {
+export const RenglonTema = memo(function RenglonTema({ tema, niveles, cerrado, primero, indice, avance, onPress }: Props) {
   const reducido = useMovimientoReducido();
   const retraso = escalon(indice);
   // Un tema que nunca estuvo cerrado no reserva el hueco del candado.
@@ -85,7 +85,7 @@ export function RenglonTema({ tema, niveles, cerrado, primero, indice, avance, o
 
   return (
     <Animated.View style={entrada}>
-      <Presionable onPress={onPress} accessibilityRole="button" accessibilityLabel={etiqueta} style={styles.fila}>
+      <Presionable onPress={() => onPress(tema)} accessibilityRole="button" accessibilityLabel={etiqueta} style={styles.fila}>
         {primero ? null : <View style={styles.separador} />}
         <View style={styles.texto}>
           <Animated.Text style={[styles.titulo, estiloTitulo]}>{tema.titulo}</Animated.Text>
@@ -106,6 +106,23 @@ export function RenglonTema({ tema, niveles, cerrado, primero, indice, avance, o
         </View>
       </Presionable>
     </Animated.View>
+  );
+}, mismasProps);
+
+/**
+ * En `memo`: abrir o cerrar un bloque repinta la pantalla, y sin esto los ochenta renglones también. `avance` llega
+ * como objeto nuevo en cada render del bloque, pero sus valores compartidos son los mismos.
+ */
+function mismasProps(a: Props, b: Props): boolean {
+  return (
+    a.tema === b.tema &&
+    a.niveles === b.niveles &&
+    a.cerrado === b.cerrado &&
+    a.primero === b.primero &&
+    a.indice === b.indice &&
+    a.onPress === b.onPress &&
+    a.avance.progreso === b.avance.progreso &&
+    a.avance.abriendo === b.avance.abriendo
   );
 }
 

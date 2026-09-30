@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -65,6 +65,10 @@ export function GramaticaScreen() {
   const niveles = useMemo(() => nivelMaximo(gramatica.temas), [gramatica]);
 
   const bloques = Object.entries(gramatica.bloques);
+  const abrirTema = useCallback(
+    (tema: GramaticaTema) => nav.navigate('GramaticaTema', { temaId: tema.id }),
+    [nav]
+  );
 
   return (
     <Screen scroll>
@@ -101,7 +105,7 @@ export function GramaticaScreen() {
                       primero={n === 0}
                       indice={n}
                       avance={avance}
-                      onPress={() => nav.navigate('GramaticaTema', { temaId: tema.id })}
+                      onPress={abrirTema}
                     />
                   ))
                 }
