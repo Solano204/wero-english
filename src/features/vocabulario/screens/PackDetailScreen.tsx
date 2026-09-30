@@ -1,26 +1,13 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { conteo } from '@/domain/texto';
 import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
-import {
-  useNavigation,
-  useRoute,
-  type RouteProp,
-} from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Carga, Header, Screen } from '@/shared/ui';
 import { ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { EntryRow } from '@/features/vocabulario/components/EntryRow';
 import { EntryRowHueso } from '@/features/vocabulario/components/EntryRowHueso';
-import { getPackEntries } from '@/data/repos/frases';
-import { useCarga } from '@/shared/hooks/useCarga';
-import { useSettingsStore } from '@/estado/useSettingsStore';
-import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { Entry } from '@/types';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-type Rt = RouteProp<RootStackParams, 'PackDetail'>;
+import { useDetallePack } from '@/features/vocabulario/hooks/useDetallePack';
 
 /**
  * Las frases de un pack.
@@ -29,21 +16,8 @@ type Rt = RouteProp<RootStackParams, 'PackDetail'>;
  * renglones y renderizarlos todos de golpe se siente al abrir.
  */
 export function PackDetailScreen() {
-  const nav = useNavigation<Nav>();
-  const { params } = useRoute<Rt>();
-  const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(loadContent, []);
+  const { nav, params, carga, pack, abrir } = useDetallePack();
 
-  const carga = useCarga(() => getPackEntries(params.packId, filter()), [params.packId, filter], {
-    alEnfocar: true,
-  });
-
-  const pack = content.packs.packs.find((p) => p.id === params.packId);
-
-  const abrir = useCallback(
-    (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
-    [nav]
-  );
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<Entry>) => <EntryRow entry={item} index={index} onPress={abrir} />,
     [abrir]
