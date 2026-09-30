@@ -1,5 +1,6 @@
 import { AppState } from 'react-native';
 import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
+import { TOPE_NATIVO_MS, conTope, initAudio } from '@/services/audio/estado';
 
 /**
  * Música de fondo.
@@ -71,6 +72,9 @@ async function fundir(destino: number, ms: number): Promise<void> {
 export async function iniciar(): Promise<void> {
   if (iniciada) return;
   iniciada = true;
+  // El modo de audio (no mezclar con otras apps) va antes de que suene la música, como cuando Boot lo preparaba:
+  // si no, la música arrancaría con el modo por defecto. initAudio es idempotente y tiene tope.
+  await conTope(initAudio(), TOPE_NATIVO_MS, undefined);
   await setPista('app');
 }
 

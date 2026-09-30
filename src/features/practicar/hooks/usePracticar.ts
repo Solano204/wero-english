@@ -13,6 +13,7 @@ import { useSettingsStore } from '@/estado/useSettingsStore';
 import { PHRASAL_VERBOS } from '@/data/resumenContenido';
 import { dayKey } from '@/domain/fechas';
 import { marcar, marcarPracticarInteractivo } from '@/shared/utils/marcasArranque';
+import { listoParaDiferidos } from '@/services/trasArranque';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 import { metaDe, textoMeta, type FuentesMeta } from '@/features/practicar/logic/metadatos';
@@ -81,10 +82,14 @@ export function usePracticar() {
   const listo = carga.estado === 'listo';
   // Medición del arranque: el primer cuadro de Practicar, con o sin datos.
   useEffect(() => marcar('primerRender'), []);
-  // Medición del arranque (docs/RENDIMIENTO.md): el primer cuadro con los datos ya pintados.
+  // El primer cuadro con los datos ya pintados: la marca del arranque (docs/RENDIMIENTO.md) y, desde ahí, lo que se
+  // dejó para después (trasArranque: audio, canal de notificaciones, desbloqueos).
   useEffect(() => {
     if (!listo) return undefined;
-    const id = requestAnimationFrame(marcarPracticarInteractivo);
+    const id = requestAnimationFrame(() => {
+      marcarPracticarInteractivo();
+      listoParaDiferidos();
+    });
     return () => cancelAnimationFrame(id);
   }, [listo]);
 

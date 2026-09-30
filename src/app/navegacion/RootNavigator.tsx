@@ -13,6 +13,7 @@ import * as music from '@/services/musica';
 import { precargarDistractores } from '@/data/repos/distractores';
 import * as notifications from '@/services/notificaciones';
 import { color, motionDuration } from '@/theme';
+import { listoParaDiferidos } from '@/services/trasArranque';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 
@@ -31,6 +32,11 @@ export function RootNavigator() {
       navigate(target, undefined);
     });
   }, []);
+
+  // Si el arranque no termina en Practicar (la entrada o las preguntas de bienvenida), lo diferido corre ya.
+  useEffect(() => {
+    if (status === 'anon' || (status === 'signed' && settingsLoaded && !onboardingHecho)) listoParaDiferidos();
+  }, [status, settingsLoaded, onboardingHecho]);
 
   // Arranca UNA vez, en cuanto se sale de Boot. Cada pantalla declara
   // su propia pista con useMusicaPantalla; esto solo prende el motor.

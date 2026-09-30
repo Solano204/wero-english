@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initProgress } from '@/data/repos/progreso';
 import * as usuarios from '@/data/repos/usuarios';
+import * as consentimiento from './consentimiento';
 import { filaAUsuario } from '@/data/repos/usuarios';
 import type { AuthError, Credentials, PerfilGoogle, User } from '@/types';
 
@@ -98,8 +99,22 @@ export async function changePassword(
 }
 
 /** Recupera la sesión guardada. Se llama en el arranque. */
-export async function restoreSession(): Promise<User | null> {
-  const raw = await AsyncStorage.getItem(SESSION_KEY);
+/**
+ * Lo que el arranque lee de AsyncStorage, en una sola ida (multiGet): la sesión guardada y el consentimiento de
+ * Google (solo se usa si no hay sesión, para la entrada automática).
+ */
+export async function leerArranque(): Promise<{ sesion: string | null; googleVigente: boolean }> {
+  const pares = await AsyncStorage.multiGet([SESSION_KEY, consentimiento.clave('google')]);
+  const valor = (k: string) => pares.find(([llave]) => llave === k)?.[1] ?? null;
+  return {
+    sesion: valor(SESSION_KEY),
+    googleVigente: consentimiento.esVigente(consentimiento.desdeCrudo(valor(consentimiento.clave('google')))),
+  };
+}
+
+/** El usuario de la sesión guardada. `raw`: la sesión ya leída (leerArranque); sin ella, se lee aquí. */
+export async function restoreSession(raw?: string | null): Promise<User | null> {
+  if (raw === undefined) raw = await AsyncStorage.getItem(SESSION_KEY);
   if (!raw) return null;
 
   const id = Number(raw);

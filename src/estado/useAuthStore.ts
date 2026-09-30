@@ -3,7 +3,7 @@ import { useUnlockStore } from './useUnlockStore';
 import * as authService from '@/services/cuenta/auth';
 import { AuthFailure } from '@/services/cuenta/auth';
 import * as googleAuth from '@modules/wero-google-auth';
-import * as consentimiento from '@/services/cuenta/consentimiento';
+import { trasArranque } from '@/services/trasArranque';
 import * as audio from '@/services/audio';
 import * as music from '@/services/musica';
 import * as notifications from '@/services/notificaciones';
@@ -55,7 +55,8 @@ function messageFor(err: unknown): string {
 }
 
 async function alEntrar(user: User) {
-  void useUnlockStore.getState().cargar(user.id);
+  // Los desbloqueos no se pintan en Practicar: se cargan después de que es interactivo.
+  trasArranque(() => useUnlockStore.getState().cargar(user.id));
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -68,7 +69,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   restore: async () => {
     try {
-      const user = await authService.restoreSession();
+      // La sesión y el consentimiento de Google en una sola lectura de AsyncStorage.
+      const { sesion, googleVigente } = await authService.leerArranque();
+      const user = await authService.restoreSession(sesion);
       if (user) {
         set({ user, status: 'signed' });
         void alEntrar(user);
@@ -81,7 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // y la pantalla de entrada se ve normal.
       // Solo si en este teléfono ya se aceptó usar la cuenta de Google con la versión vigente del
       // aviso: sin eso, nada de Google corre al abrir la app.
-      const perfil = (await consentimiento.vigente('google')) ? await googleAuth.iniciarSesionAutomatica() : null;
+      const perfil = googleVigente ? await googleAuth.iniciarSesionAutomatica() : null;
       if (!perfil) {
         set({ user: null, status: 'anon' });
         return;

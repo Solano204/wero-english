@@ -23,11 +23,12 @@ export interface Consentimiento {
   fecha: string;
 }
 
-const clave = (tipo: TipoConsentimiento) => `wero:consentimiento:${tipo}`;
+/** La llave de AsyncStorage de cada consentimiento (el arranque la lee junto con la sesión, en un multiGet). */
+export const clave = (tipo: TipoConsentimiento) => `wero:consentimiento:${tipo}`;
 
-export async function leer(tipo: TipoConsentimiento): Promise<Consentimiento | null> {
+/** Un consentimiento tal como quedó guardado (texto de AsyncStorage), o null si no hay o no se entiende. */
+export function desdeCrudo(crudo: string | null): Consentimiento | null {
   try {
-    const crudo = await AsyncStorage.getItem(clave(tipo));
     if (!crudo) return null;
     const c = JSON.parse(crudo) as Consentimiento;
     return typeof c?.aceptado === 'boolean' && typeof c.version === 'number' ? c : null;
@@ -36,10 +37,22 @@ export async function leer(tipo: TipoConsentimiento): Promise<Consentimiento | n
   }
 }
 
+export async function leer(tipo: TipoConsentimiento): Promise<Consentimiento | null> {
+  try {
+    return desdeCrudo(await AsyncStorage.getItem(clave(tipo)));
+  } catch {
+    return null;
+  }
+}
+
+/** Aceptado con la versión vigente del aviso (de un consentimiento ya leído). */
+export function esVigente(c: Consentimiento | null): boolean {
+  return c !== null && c.aceptado && c.version === VERSION_AVISO;
+}
+
 /** Aceptado con la versión vigente del aviso. */
 export async function vigente(tipo: TipoConsentimiento): Promise<boolean> {
-  const c = await leer(tipo);
-  return c !== null && c.aceptado && c.version === VERSION_AVISO;
+  return esVigente(await leer(tipo));
 }
 
 /** «Ahora no» con la versión vigente: lo que se pide solo (sin que la persona toque nada) no vuelve a insistir. */

@@ -9,10 +9,11 @@ import * as audio from '@/services/audio';
 import * as notifications from '@/services/notificaciones';
 import { color, font, space } from '@/theme';
 import { marcar } from '@/shared/utils/marcasArranque';
+import { trasArranque } from '@/services/trasArranque';
 
 /**
- * Arranque. Hace el trabajo pesado una sola vez:
- * migraciones, sembrado del catálogo, modo de audio y canal de notificación.
+ * Arranque. Hace el trabajo pesado una sola vez: migraciones y sembrado del catálogo. El modo de
+ * audio y el canal de notificación quedan para después del primer cuadro interactivo (trasArranque).
  *
  * Se muestra una barra real, no un spinner indefinido: sembrar 1,524
  * entradas toma unos segundos en la primera instalación y sin progreso
@@ -49,9 +50,10 @@ export function BootScreen() {
         }
 
         marcar('catalogo');
-        setStep('Preparando el sonido');
-        await audio.initAudio();
-        await notifications.setupChannel();
+        // El modo de audio y el canal de notificaciones no hacen falta para ver Practicar: corren después de que
+        // es interactivo. El primer play() de una frase prepara el audio por su cuenta si todavía no está.
+        trasArranque(() => audio.initAudio());
+        trasArranque(() => notifications.setupChannel());
 
         setStep('Casi listo');
         await restore();
