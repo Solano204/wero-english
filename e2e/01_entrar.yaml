@@ -1,0 +1,7 @@
+# Abrir la app desde cero y entrar sin cuenta.
+appId: app.wero.mobile
+---
+- launchApp:
+    clearState: true
+- runFlow: comun/entrar.yaml
+- assertVisible: "Juegos"

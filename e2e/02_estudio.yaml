@@ -1,0 +1,24 @@
+# Cinco tarjetas de Estudio. Con avance en cero todas son nuevas y de «reconocer» (con opciones).
+appId: app.wero.mobile
+---
+- launchApp
+- runFlow: comun/entrar.yaml
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Leer y repasar"
+      MODO: "Estudiar"
+- repeat:
+    times: 5
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "opcion-0"
+          timeout: 20000
+      - tapOn:
+          id: "opcion-0"
+      - extendedWaitUntil:
+          visible: "Siguiente"
+          timeout: 15000
+      - tapOn: "Siguiente"
+- runFlow: comun/volver.yaml

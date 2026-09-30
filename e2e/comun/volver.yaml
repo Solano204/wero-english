@@ -1,0 +1,12 @@
+# Regresa a Practicar con el botón atrás (a lo más 4 veces) y confirma que la app sigue viva.
+appId: app.wero.mobile
+---
+- repeat:
+    while:
+      notVisible: "Juegos"
+    times: 4
+    commands:
+      - back
+      - waitForAnimationToEnd:
+          timeout: 3000
+- assertVisible: "Juegos"

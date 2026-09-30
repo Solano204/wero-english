@@ -117,6 +117,8 @@ export function OptionButton({
     <Presionable
       onPress={alTocar}
       disabled={disabled}
+      // Para las pruebas de humo (e2e/): no se ve ni lo anuncia el lector.
+      testID={`opcion-${index}`}
       accessibilityRole="button"
       accessibilityLabel={etiqueta}
       accessibilityState={{ disabled, selected: state === 'chosen' || state === 'wrong' }}

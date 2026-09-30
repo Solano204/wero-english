@@ -1,0 +1,27 @@
+# Entra sin cuenta y salta la bienvenida si hace falta; termina con Practicar a la vista.
+appId: app.wero.mobile
+---
+- runFlow:
+    when:
+      visible: "Entrar sin cuenta"
+    commands:
+      - tapOn: "Entrar sin cuenta"
+- repeat:
+    while:
+      visible: "Siguiente"
+    times: 6
+    commands:
+      - tapOn: "Siguiente"
+- runFlow:
+    when:
+      visible: "Empezar"
+    commands:
+      - tapOn: "Empezar"
+- runFlow:
+    when:
+      visible: "Saltar"
+    commands:
+      - tapOn: "Saltar"
+- extendedWaitUntil:
+    visible: "Juegos"
+    timeout: 30000

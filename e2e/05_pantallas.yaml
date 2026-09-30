@@ -1,0 +1,36 @@
+# Laboratorio de sonidos, Gramática, Phrasal y Errores: abrir, mover un poco y salir.
+appId: app.wero.mobile
+---
+- launchApp
+- runFlow: comun/entrar.yaml
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Oír y hablar"
+      MODO: "Laboratorio de sonidos"
+- swipe:
+    direction: LEFT
+- swipe:
+    direction: LEFT
+- runFlow: comun/volver.yaml
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Leer y repasar"
+      MODO: "Gramática"
+- scroll
+- runFlow: comun/volver.yaml
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Leer y repasar"
+      MODO: "Phrasal verbs"
+- scroll
+- runFlow: comun/volver.yaml
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Leer y repasar"
+      MODO: "Errores que te delatan"
+- scroll
+- runFlow: comun/volver.yaml
