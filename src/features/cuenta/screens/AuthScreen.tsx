@@ -1,18 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParams } from '@/types/rutas';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Input, Screen, Presionable } from '@/shared/ui';
 import { BotonGoogle } from '@/features/cuenta/components/BotonGoogle';
-import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
-import { useAuthStore } from '@/estado/useAuthStore';
 import { color, font, layout, space, aparecer, desaparecer, motionDuration } from '@/theme';
 import * as googleAuth from '@modules/wero-google-auth';
-
-type Vista = 'inicio' | 'usuario';
-type Accion = 'google' | 'sin' | 'usuario' | 'vincular' | 'nueva' | null;
+import { useEntrada } from '@/features/cuenta/hooks/useEntrada';
 
 /**
  * La entrada a Wero.
@@ -25,53 +18,7 @@ type Accion = 'google' | 'sin' | 'usuario' | 'vincular' | 'nueva' | null;
  * el aviso de abajo lo dice de frente, igual que antes.
  */
 export function AuthScreen() {
-  const nav = useNavigation<NativeStackNavigationProp<RootStackParams>>();
-  const [vista, setVista] = useState<Vista>('inicio');
-  const [accion, setAccion] = useState<Accion>(null);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const {
-    signIn,
-    continuarSinCuenta,
-    entrarConGoogle,
-    resolverVinculo,
-    cancelarVinculo,
-    vinculoPendiente,
-    aviso: avisoEntrada,
-    limpiarAviso,
-    busy,
-    error,
-    clearError,
-  } = useAuthStore();
-
-  useEffect(() => {
-    clearError();
-  }, [vista, clearError]);
-
-  // Cada botón muestra su propia carga: el resto solo se bloquea.
-  const correr = useCallback(async (quien: Accion, fn: () => Promise<unknown>) => {
-    limpiarAviso();
-    setAccion(quien);
-    try {
-      await fn();
-    } finally {
-      setAccion(null);
-    }
-  }, [limpiarAviso]);
-
-  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
-
-  // Primero la hoja que dice qué se toma de Google; «Ahora no» deja la entrada como estaba.
-  const conGoogle = useCallback(async () => {
-    if (!(await pedirConsentimiento('google'))) return;
-    await correr('google', entrarConGoogle);
-  }, [correr, entrarConGoogle, pedirConsentimiento]);
-  const sinCuenta = useCallback(() => correr('sin', continuarSinCuenta), [correr, continuarSinCuenta]);
-  const conUsuario = useCallback(
-    () => correr('usuario', () => signIn(username, password)),
-    [correr, signIn, username, password]
-  );
+  const { nav, vista, setVista, accion, username, setUsername, password, setPassword, resolverVinculo, cancelarVinculo, vinculoPendiente, avisoEntrada, busy, error, correr, hoja, conGoogle, sinCuenta, conUsuario } = useEntrada();
 
   const aviso = error ? (
     <Animated.Text
