@@ -14,6 +14,8 @@ import type {
   SituacionesFile,
 } from '@/types';
 
+import { ENTRADAS_CATALOGO } from '@/data/resumenContenido';
+
 /* Los JSON se importan con require para que Metro los inline en el
    bundle. Con import estático y resolveJsonModule el tipado es peor
    y los archivos vacíos rompen la compilación. */
@@ -21,7 +23,9 @@ import type {
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 export interface ContentBundle {
-  catalog: Catalog;
+  /** Solo las entradas que usan las rondas de Cázala (cazala_entradas.json, derivado del catálogo). El catálogo
+   *  completo vive en la base (se siembra desde catalogo.db) y ya no entra al bundle como JSON. */
+  cazalaEntradas: Catalog;
   packs: PacksFile;
   situaciones: SituacionesFile;
   contracciones: ContraccionesFile;
@@ -37,7 +41,7 @@ export interface ContentBundle {
 
 /** Estructura vacía por archivo, para que la app arranque sin datos. */
 const EMPTY: ContentBundle = {
-  catalog: { total: 0, schema_version: 0, entries: [] },
+  cazalaEntradas: { total: 0, schema_version: 0, entries: [] },
   packs: {
     version: 0,
     generado: '',
@@ -120,7 +124,7 @@ function safeLoad<T>(loader: () => unknown, fallback: T, name: string): T {
 
 /** Cómo se carga cada archivo. Metro inlinea el JSON; el require() lo evalúa. */
 const CARGADORES: { [K in keyof ContentBundle]: [() => unknown, string] } = {
-  catalog: [() => require('@data/catalogo.json'), 'catalogo.json'],
+  cazalaEntradas: [() => require('@data/cazala_entradas.json'), 'cazala_entradas.json'],
   packs: [() => require('@data/packs.json'), 'packs.json'],
   situaciones: [() => require('@data/situaciones.json'), 'situaciones.json'],
   contracciones: [() => require('@data/contracciones.json'), 'contracciones.json'],
@@ -170,7 +174,7 @@ export function loadContent(): ContentBundle {
 export function contentHealth(): { name: string; ok: boolean; count: number }[] {
   const c = loadContent();
   return [
-    { name: 'catalogo.json', ok: c.catalog.entries.length > 0, count: c.catalog.entries.length },
+    { name: 'catalogo.json', ok: ENTRADAS_CATALOGO > 0, count: ENTRADAS_CATALOGO },
     { name: 'packs.json', ok: c.packs.packs.length > 0, count: c.packs.packs.length },
     { name: 'situaciones.json', ok: c.situaciones.escenarios.length > 0, count: c.situaciones.escenarios.length },
     { name: 'contracciones.json', ok: c.contracciones.grupos.length > 0, count: c.contracciones.cazala.length },

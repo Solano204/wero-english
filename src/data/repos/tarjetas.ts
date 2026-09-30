@@ -1,4 +1,5 @@
 import { getDb } from '@/data/cliente';
+import { correr, type Parte } from './lote';
 import { consultaContarVencidas, consultaDiagnosticoCola, consultaNuevas, consultaContarNuevas, consultaProximoRepaso, semillaDeSesion, consultaVencidas, paramsUpsertTarjeta, SQL_UPSERT_TARJETA } from './cola';
 import { toEntry, type EntryRow } from '@/data/filas';
 import { semillaDe } from '@/data/semilla/semillaAleatoria';
@@ -75,11 +76,8 @@ export async function getNewCards(
 }
 
 /** Frases nuevas que quedan en el catálogo con este filtro. */
-export async function countNew(usuarioId: number, filter: ContentFilter): Promise<number> {
-  const db = await getDb();
-  const q = consultaContarNuevas(usuarioId, filter);
-  const row = await db.getFirstAsync<{ n: number }>(q.sql, q.params);
-  return row?.n ?? 0;
+export function countNew(usuarioId: number, filter: ContentFilter): Promise<number> {
+  return correr(parteContarNuevas(usuarioId, filter));
 }
 
 /** Cuándo vuelve el próximo repaso (ms epoch), o null si no hay ninguno programado. */
@@ -90,15 +88,21 @@ export async function getProximoRepaso(usuarioId: number, filter: ContentFilter,
   return row?.proximo ?? null;
 }
 
-export async function countDue(
-  usuarioId: number,
-  filter: ContentFilter,
-  now = Date.now()
-): Promise<number> {
-  const db = await getDb();
-  const q = consultaContarVencidas(usuarioId, filter, now);
-  const row = await db.getFirstAsync<{ n: number }>(q.sql, q.params);
-  return row?.n ?? 0;
+/** Un conteo (`SELECT COUNT(*) AS n …`) como parte: se corre solo o en lote. */
+function parteConteo(q: { sql: string; params: Parte<number>['params'] }): Parte<number> {
+  return { sql: q.sql, params: q.params, columnas: ['n'], leer: (filas) => (filas[0] as { n?: number } | undefined)?.n ?? 0 };
+}
+
+export function parteContarVencidas(usuarioId: number, filter: ContentFilter, now = Date.now()): Parte<number> {
+  return parteConteo(consultaContarVencidas(usuarioId, filter, now));
+}
+
+export function parteContarNuevas(usuarioId: number, filter: ContentFilter): Parte<number> {
+  return parteConteo(consultaContarNuevas(usuarioId, filter));
+}
+
+export function countDue(usuarioId: number, filter: ContentFilter, now = Date.now()): Promise<number> {
+  return correr(parteContarVencidas(usuarioId, filter, now));
 }
 
 /** Vencidas, de aprendizaje y fantasma, para la pantalla de Diagnóstico. */

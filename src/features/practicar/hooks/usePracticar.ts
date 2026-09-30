@@ -3,11 +3,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/data/repos/partidas';
-import { resumenTodos } from '@/data/repos/niveles';
-import { getRecentDays } from '@/data/repos/progreso';
-import { countDue, countNew } from '@/data/repos/tarjetas';
-import { getStats } from '@/data/repos/estadisticas';
+import { getResumenPracticar } from '@/data/repos/resumenPracticar';
+import type { getStats } from '@/data/repos/estadisticas';
 import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/shared/hooks/useCarga';
 import { useEntradaPantalla } from '@/shared/hooks/useEntradaPantalla';
@@ -68,17 +65,11 @@ export function usePracticar() {
   const carga = useCarga(
     async (): Promise<Datos> => {
       if (!user) return SIN_DATOS;
-      const [records, reto, habla, niveles, stats, uso, dias, vencidas, nuevas] = await Promise.all([
-        getGameRecords(user.id),
-        getRetoSemanal(user.id),
-        getHablaResumen(user.id),
-        resumenTodos(user.id),
-        getStats(user.id),
-        getUsoModos(user.id),
-        getRecentDays(user.id, 1),
-        countDue(user.id, filtroEstudio(filter())),
-        countNew(user.id, filtroEstudio(filter())),
-      ]);
+      // Una sola consulta con todo lo de la pantalla (antes, 12 viajes a SQLite).
+      const { records, reto, habla, niveles, stats, uso, dias, vencidas, nuevas } = await getResumenPracticar(
+        user.id,
+        filtroEstudio(filter())
+      );
       const hoyFrases = dias[0]?.dia === dayKey() ? dias[0].respuestas : 0;
       return { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas, nuevas };
     },

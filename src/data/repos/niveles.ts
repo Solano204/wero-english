@@ -1,4 +1,5 @@
 import { getDb } from '@/data/cliente';
+import { correr, type Parte } from './lote';
 import type { JuegoId } from '@/types';
 
 /**
@@ -139,26 +140,28 @@ export async function abrirConAnuncio(
  * renglones, más los otros cinco de la pantalla. Eso es lo que se
  * sentía al entrar.
  */
-export async function resumenTodos(
-  usuarioId: number
-): Promise<Record<string, { jugados: number; estrellas: number; siguiente: number }>> {
-  const db = await getDb();
-  const rows = await db.getAllAsync<{
-    juego: string;
-    jugados: number;
-    estrellas: number;
-    ultimo: number;
-  }>(
-    `SELECT juego,
+type ResumenNiveles = Record<string, { jugados: number; estrellas: number; siguiente: number }>;
+
+export function parteResumenNiveles(usuarioId: number): Parte<ResumenNiveles> {
+  return {
+    sql: `SELECT juego,
             SUM(CASE WHEN intentos > 0 THEN 1 ELSE 0 END) AS jugados,
             COALESCE(SUM(estrellas), 0) AS estrellas,
             COALESCE(MAX(CASE WHEN intentos > 0 THEN nivel END), 0) AS ultimo
        FROM nivel_juego
       WHERE usuario_id = ?
-      GROUP BY juego;`,
-    [usuarioId]
-  );
+      GROUP BY juego`,
+    params: [usuarioId],
+    columnas: ['juego', 'jugados', 'estrellas', 'ultimo'],
+    leer: (filas) => resumenDe(filas as { juego: string; jugados: number; estrellas: number; ultimo: number }[]),
+  };
+}
 
+export function resumenTodos(usuarioId: number): Promise<ResumenNiveles> {
+  return correr(parteResumenNiveles(usuarioId));
+}
+
+function resumenDe(rows: { juego: string; jugados: number; estrellas: number; ultimo: number }[]): ResumenNiveles {
   const out: Record<string, { jugados: number; estrellas: number; siguiente: number }> = {};
   for (const r of rows) {
     out[r.juego] = {

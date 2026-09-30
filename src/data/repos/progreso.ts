@@ -1,4 +1,5 @@
 import { getDb } from '@/data/cliente';
+import { correr, type Parte } from './lote';
 import { consultaNuevasHoy } from './cola';
 import { dayKey, daysBetween } from '@/domain/fechas';
 
@@ -108,17 +109,20 @@ export async function getNuevasHoy(usuarioId: number, now = Date.now()): Promise
 }
 
 /** Los últimos N días con actividad. Alimenta la gráfica de P-13. */
-export async function getRecentDays(
-  usuarioId: number,
-  days = 30
-): Promise<DayRecord[]> {
-  const db = await getDb();
-  return db.getAllAsync<DayRecord>(
-    `SELECT dia, SUM(respuestas) AS respuestas, SUM(aciertos) AS aciertos
+export function parteDiasRecientes(usuarioId: number, days = 30): Parte<DayRecord[]> {
+  return {
+    sql: `SELECT dia, SUM(respuestas) AS respuestas, SUM(aciertos) AS aciertos
        FROM sesion WHERE usuario_id = ?
-      GROUP BY dia ORDER BY dia DESC LIMIT ?;`,
-    [usuarioId, days]
-  );
+      GROUP BY dia ORDER BY dia DESC LIMIT ?`,
+    params: [usuarioId, days],
+    columnas: ['dia', 'respuestas', 'aciertos'],
+    // En lote, json_group_array no garantiza el orden de la subconsulta: se vuelve a ordenar igual (más reciente primero).
+    leer: (filas) => (filas as unknown as DayRecord[]).slice().sort((a, b) => (a.dia < b.dia ? 1 : a.dia > b.dia ? -1 : 0)),
+  };
+}
+
+export function getRecentDays(usuarioId: number, days = 30): Promise<DayRecord[]> {
+  return correr(parteDiasRecientes(usuarioId, days));
 }
 
 export async function getLastActive(

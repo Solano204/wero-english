@@ -1,12 +1,9 @@
+import { Asset } from 'expo-asset';
 import { getDb } from '@/data/cliente';
 import { getAppMeta, setAppMeta } from '@/data/repos/ajustes';
-import type { Catalog, Entry } from '@/types';
+import { ENTRADAS_CATALOGO, HUELLA_CATALOGO } from '@/data/resumenContenido';
 
 const CATALOG_VERSION_KEY = 'catalog_version';
-
-/** Cuántas filas por INSERT. Más de 200 y SQLite se queja del límite
- *  de variables enlazadas (999 por defecto, y aquí van 38 por fila). */
-const CHUNK = 20;
 
 export interface SeedProgress {
   done: number;
@@ -14,41 +11,28 @@ export interface SeedProgress {
 }
 
 /**
- * Huella del catálogo: versión de esquema + conteo + suma de longitudes
- * de audio_en/audio_es. No es criptográfico, solo detecta "el JSON
- * cambió" para decidir si hay que resembrar (p. ej. una migración que
- * llenó columnas nuevas pero dejó el conteo de filas intacto).
- */
-function catalogVersionOf(catalog: Catalog): string {
-  let audioLen = 0;
-  for (const e of catalog.entries) {
-    audioLen += (e.audio_en?.length ?? 0) + (e.audio_es?.length ?? 0);
-  }
-  return `${catalog.schema_version}:${catalog.entries.length}:${audioLen}`;
-}
-
-/**
- * Siembra el catálogo en SQLite. Idempotente: si el conteo, la versión
- * del catálogo y el audio ya están completos no hace nada, así que se
- * puede llamar en cada arranque sin costo.
+ * Siembra el catálogo en SQLite desde la base prearmada (assets/data/catalogo.db, la genera
+ * `npm run build:derivados` desde catalogo.json). Idempotente: si el conteo, la huella y el audio ya
+ * están, no hace nada, así que se llama en cada arranque sin costo y sin evaluar el JSON.
+ *
+ * Cuando sí hace falta (primera instalación o catálogo nuevo), adjunta catalogo.db y copia sus filas en
+ * una sola transacción. Es un upsert, nunca un DELETE de lo que ya estaba: `tarjeta` apunta a `entrada`
+ * con ON DELETE CASCADE, y borrar el catálogo para resembrarlo borraba también el avance de cada frase.
+ * Solo se borran las entradas que el catálogo nuevo ya no trae (y con ellas sus tarjetas, que ya no
+ * tienen frase).
  */
 export async function seedCatalog(
-  catalog: Catalog,
   onProgress?: (p: SeedProgress) => void
 ): Promise<{ inserted: number; skipped: boolean }> {
   const db = await getDb();
 
-  const row = await db.getFirstAsync<{ n: number }>(
-    'SELECT COUNT(*) AS n FROM entrada;'
-  );
+  const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM entrada;');
   const existing = row?.n ?? 0;
-
-  const version = catalogVersionOf(catalog);
   const storedVersion = await getAppMeta(CATALOG_VERSION_KEY);
-  const countMatches = existing === catalog.entries.length;
+  const countMatches = existing === ENTRADAS_CATALOGO;
 
-  // Solo se consulta si falta audio cuando el conteo ya coincide: si no
-  // coincide, de todas formas se resiembra completo más abajo.
+  // Solo se consulta si falta audio cuando el conteo ya coincide: si no coincide, de todas formas se
+  // resiembra completo más abajo.
   const missingAudio =
     countMatches && existing > 0
       ? ((await db.getFirstAsync<{ n: number }>(
@@ -56,75 +40,41 @@ export async function seedCatalog(
         ))?.n ?? 0) > 0
       : false;
 
-  if (countMatches && !missingAudio && storedVersion === version) {
+  if (countMatches && !missingAudio && storedVersion === HUELLA_CATALOGO) {
     return { inserted: 0, skipped: true };
   }
 
-  // El catálogo cambió (conteo, audio faltante o versión): se rehace
-  // completo. Las tablas de progreso no se tocan porque son otras tablas.
-  if (existing > 0) {
-    await db.execAsync('DELETE FROM entrada;');
+  const asset = await Asset.fromModule(require('@data/catalogo.db')).downloadAsync();
+  if (!asset.localUri) throw new Error('No se pudo abrir el catálogo.');
+  const ruta = decodeURI(asset.localUri.replace(/^file:\/\//, '')).replace(/'/g, "''");
+
+  // ATTACH no se puede dentro de una transacción: va antes, y el DETACH después.
+  await db.execAsync(`ATTACH DATABASE '${ruta}' AS semilla;`);
+  try {
+    const columnas = (await db.getAllAsync<{ name: string }>('PRAGMA semilla.table_info(entrada);')).map(
+      (c) => `"${c.name}"`
+    );
+    const actualizar = columnas.filter((c) => c !== '"id"').map((c) => `${c} = excluded.${c}`);
+    await db.withTransactionAsync(async () => {
+      await db.execAsync(
+        `INSERT INTO entrada (${columnas.join(',')})
+           SELECT ${columnas.join(',')} FROM semilla.entrada WHERE true
+           ON CONFLICT(id) DO UPDATE SET ${actualizar.join(', ')};`
+      );
+      await db.execAsync('DELETE FROM entrada WHERE id NOT IN (SELECT id FROM semilla.entrada);');
+      await setAppMeta(CATALOG_VERSION_KEY, HUELLA_CATALOGO);
+    });
+  } finally {
+    await db.execAsync('DETACH DATABASE semilla;');
   }
 
-  const cols = [
-    'id', 'phrase', 'phrase_tts', 'phrase_alt', 'ipa', 'ipa_note',
-    'spanish', 'spanish_main', 'es_neutro', 'note',
-    'topic', 'block', 'volume', 'tipo', 'nivel', 'vigencia', 'registro',
-    'tiempo_verbal', 'word_count',
-    'vulgaridad', 'vulgaridad_en', 'vulgaridad_es', 'vulgar_marks',
-    'no_usar_cuando',
-    'pack_id', 'mundo', 'pack_final',
-    'duplicate_of', 'is_canonical', 'revisar',
-    'escena_imagen', 'completar_palabra', 'completar_distractores',
-    'regla_grupo', 'palabras_practica', 'audio_en', 'audio_es', 'imagen',
-  ];
-  const placeholders = `(${cols.map(() => '?').join(',')})`;
-
-  let inserted = 0;
-  const total = catalog.entries.length;
-
-  await db.withTransactionAsync(async () => {
-    for (let i = 0; i < total; i += CHUNK) {
-      const slice = catalog.entries.slice(i, i + CHUNK);
-      const sql =
-        `INSERT INTO entrada (${cols.join(',')}) VALUES ` +
-        slice.map(() => placeholders).join(',') +
-        ';';
-      const args = slice.flatMap(flatten);
-      await db.runAsync(sql, args);
-      inserted += slice.length;
-      onProgress?.({ done: inserted, total });
-    }
-    await setAppMeta(CATALOG_VERSION_KEY, version);
-  });
-
-  return { inserted, skipped: false };
+  onProgress?.({ done: ENTRADAS_CATALOGO, total: ENTRADAS_CATALOGO });
+  return { inserted: ENTRADAS_CATALOGO, skipped: false };
 }
 
-function flatten(e: Entry): (string | number | null)[] {
-  return [
-    e.id, e.phrase, e.phrase_tts, e.phrase_alt, e.ipa, e.ipa_note,
-    e.spanish, e.spanish_main, e.es_neutro, e.note,
-    e.topic, e.block, e.volume, e.tipo, e.nivel, e.vigencia, e.registro,
-    e.tiempo_verbal, e.word_count,
-    e.vulgaridad, e.vulgaridad_en, e.vulgaridad_es,
-    JSON.stringify(e.vulgar_marks ?? []),
-    e.no_usar_cuando,
-    e.pack_id, e.mundo, e.pack_final,
-    e.duplicate_of, e.is_canonical ? 1 : 0, e.revisar ? 1 : 0,
-    e.escena_imagen, e.completar_palabra,
-    JSON.stringify(e.completar_distractores ?? []),
-    e.regla_grupo,
-    JSON.stringify(e.palabras_practica ?? []),
-    e.audio_en, e.audio_es, e.imagen,
-  ];
-}
-
-/** Cuántas entradas hay ya en la base. Lo usa la pantalla de arranque. */
+/** Cuántas entradas hay ya en la base. Lo usa la pantalla de diagnóstico. */
 export async function countEntries(): Promise<number> {
   const db = await getDb();
-  const row = await db.getFirstAsync<{ n: number }>(
-    'SELECT COUNT(*) AS n FROM entrada;'
-  );
+  const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM entrada;');
   return row?.n ?? 0;
 }

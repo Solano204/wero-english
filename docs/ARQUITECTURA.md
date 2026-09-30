@@ -148,8 +148,9 @@ Quién lo revisa:
 | la cola del día y el filtro de contenido | `data/repos/cola.ts` (`buildFilter`), `domain/cola.ts` |
 | el estado SM-2 de una tarjeta | `data/repos/tarjetas.ts` |
 | migraciones | `data/esquema.ts` |
-| sembrar el catálogo | `data/semilla/` |
-| leer los JSON del catálogo | `data/contenido.ts` (`loadContent`, perezoso por archivo) |
+| sembrar el catálogo | `data/semilla/sembrar.ts`, desde `assets/data/catalogo.db` (`npm run build:derivados`) |
+| leer los JSON de contenido | `data/contenido.ts` (`loadContent`, perezoso por archivo); lo que se necesita al abrir, en `data/resumenContenido.ts` (generado) |
+| varias consultas en una | `data/repos/lote.ts` (`Parte`, `correrLote`; p. ej. `resumenPracticar.ts`) |
 | el reproductor y los efectos | `services/audio.ts` → `services/audio/*` |
 | notificaciones | `services/notificaciones.ts`, horarios en `domain/horarioNotificaciones.ts` |
 | cuenta, borrado y consentimientos | `services/cuenta/*`, `estado/useAuthStore.ts` |

@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Screen, ProgressBar } from '@/shared/ui';
 import { seedCatalog } from '@/data/semilla/sembrar';
 import { getDb } from '@/data/cliente';
-import { loadContent } from '@/data/contenido';
+import { ENTRADAS_CATALOGO } from '@/data/resumenContenido';
 import { useAuthStore } from '@/estado/useAuthStore';
 import * as audio from '@/services/audio';
 import * as notifications from '@/services/notificaciones';
@@ -34,9 +34,7 @@ export function BootScreen() {
         await getDb();
         marcar('base');
 
-        const content = loadContent();
-
-        if (content.catalog.entries.length === 0) {
+        if (ENTRADAS_CATALOGO === 0) {
           // Sin datos la app arranca igual: la pantalla de diagnóstico
           // dice qué falta. Es preferible a una pantalla negra.
           if (__DEV__) console.warn('[boot] catalogo.json vacío');
@@ -44,8 +42,8 @@ export function BootScreen() {
           // seedCatalog decide si hace falta sembrar (conteo, audio
           // faltante o versión de catálogo); aquí solo se llama siempre.
           setStep('Instalando el catálogo');
-          setTotal(content.catalog.entries.length);
-          await seedCatalog(content.catalog, (p) => {
+          setTotal(ENTRADAS_CATALOGO);
+          await seedCatalog((p) => {
             if (alive) setDone(p.done);
           });
         }

@@ -1,4 +1,5 @@
 import { getDb } from '@/data/cliente';
+import { correr, type Parte } from './lote';
 import { buildFilter, consultaProgresoPorMundo } from './cola';
 import type { ContentFilter, Stats } from '@/types';
 
@@ -6,47 +7,52 @@ import type { ContentFilter, Stats } from '@/types';
    Progreso
    ============================================================ */
 
-export async function getStats(usuarioId: number): Promise<Stats> {
-  const db = await getDb();
-
-  const t = await db.getFirstAsync<{
-    vistas: number;
-    dominadas: number;
-    favoritas: number;
-    atoradas: number;
-  }>(
-    `SELECT COUNT(*) AS vistas,
-            SUM(dominada) AS dominadas,
-            SUM(favorito) AS favoritas,
-            SUM(CASE WHEN fallos >= 3 AND dominada = 0 THEN 1 ELSE 0 END)
-              AS atoradas
-       FROM tarjeta WHERE usuario_id = ?;`,
-    [usuarioId]
-  );
-
-  const total = await db.getFirstAsync<{ n: number }>(
-    `SELECT COUNT(*) AS n FROM entrada
-      WHERE is_canonical = 1 AND revisar = 0 AND tipo != 'regla_fonetica';`
-  );
-
-  const p = await db.getFirstAsync<{
-    racha: number;
-    racha_max: number;
-    total_respuestas: number;
-    total_aciertos: number;
-  }>('SELECT * FROM progreso WHERE usuario_id = ?;', [usuarioId]);
-
-  const respuestas = p?.total_respuestas ?? 0;
-
+/** Las estadísticas en una parte (tarjetas, total del catálogo y progreso en subconsultas). */
+export function parteStats(usuarioId: number): Parte<Stats> {
   return {
-    vistas: t?.vistas ?? 0,
-    dominadas: t?.dominadas ?? 0,
-    favoritas: t?.favoritas ?? 0,
-    atoradas: t?.atoradas ?? 0,
-    total: total?.n ?? 0,
-    racha: p?.racha ?? 0,
-    rachaMax: p?.racha_max ?? 0,
-    precision: respuestas > 0 ? (p?.total_aciertos ?? 0) / respuestas : 0,
+    sql: `SELECT t.vistas, t.dominadas, t.favoritas, t.atoradas,
+                 (SELECT COUNT(*) FROM entrada
+                   WHERE is_canonical = 1 AND revisar = 0 AND tipo != 'regla_fonetica') AS total,
+                 p.racha, p.racha_max, p.total_respuestas, p.total_aciertos
+            FROM (SELECT COUNT(*) AS vistas,
+                         SUM(dominada) AS dominadas,
+                         SUM(favorito) AS favoritas,
+                         SUM(CASE WHEN fallos >= 3 AND dominada = 0 THEN 1 ELSE 0 END) AS atoradas
+                    FROM tarjeta WHERE usuario_id = ?) AS t
+            LEFT JOIN progreso p ON p.usuario_id = ?`,
+    params: [usuarioId, usuarioId],
+    columnas: ['vistas', 'dominadas', 'favoritas', 'atoradas', 'total', 'racha', 'racha_max', 'total_respuestas', 'total_aciertos'],
+    leer: (filas) => statsDe(filas[0] as FilaStats | undefined),
+  };
+}
+
+export function getStats(usuarioId: number): Promise<Stats> {
+  return correr(parteStats(usuarioId));
+}
+
+interface FilaStats {
+  vistas: number | null;
+  dominadas: number | null;
+  favoritas: number | null;
+  atoradas: number | null;
+  total: number | null;
+  racha: number | null;
+  racha_max: number | null;
+  total_respuestas: number | null;
+  total_aciertos: number | null;
+}
+
+function statsDe(f: FilaStats | undefined): Stats {
+  const respuestas = f?.total_respuestas ?? 0;
+  return {
+    vistas: f?.vistas ?? 0,
+    dominadas: f?.dominadas ?? 0,
+    favoritas: f?.favoritas ?? 0,
+    atoradas: f?.atoradas ?? 0,
+    total: f?.total ?? 0,
+    racha: f?.racha ?? 0,
+    rachaMax: f?.racha_max ?? 0,
+    precision: respuestas > 0 ? (f?.total_aciertos ?? 0) / respuestas : 0,
   };
 }
 

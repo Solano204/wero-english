@@ -352,7 +352,8 @@ function primeraLinea(lines, re) {
 function auditaEstados(archivos) {
   const RE = {
     carga: /\b(setLoading|setCargando|isLoading|loading|cargando|Repartiendo|Cargando)\b|<ActivityIndicator|\buseCarga\(|<Carga\b/,
-    vacio: /<EmptyState|\.length === 0|\.length == 0|!\w+\.length\b/,
+    // `ENTRADAS_CATALOGO === 0`: un conteo generado al compilar (resumenContenido.ts) que hace lo mismo que `.length === 0`.
+    vacio: /<EmptyState|\.length === 0|\.length == 0|!\w+\.length\b|\b[A-Z][A-Z_]+ === 0\b/,
     error: /\.catch\(|\bcatch\s*[({]|setError|useState<[^>]*rror|<Carga\b|<ErrorCarga|estado === 'error'/,
   };
   const filas = [];

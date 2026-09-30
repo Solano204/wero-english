@@ -1,4 +1,5 @@
 import { getDb } from '@/data/cliente';
+import { correr, type Parte } from './lote';
 import { dayKey } from '@/domain/fechas';
 import type { AlternativaVoz, JuegoId, JuegoRecord, RetoSemanal, UsoModo } from '@/types';
 
@@ -37,26 +38,28 @@ export async function logGame(
 }
 
 /** El mejor puntaje propio y cuántas partidas lleva, por juego. */
-export async function getGameRecords(
-  usuarioId: number
-): Promise<Record<string, JuegoRecord>> {
-  const db = await getDb();
-  const rows = await db.getAllAsync<{
-    juego: string;
-    partidas: number;
-    mejor: number;
-    ultima: string | null;
-  }>(
-    `SELECT juego,
+export function parteRecords(usuarioId: number): Parte<Record<string, JuegoRecord>> {
+  return {
+    sql: `SELECT juego,
             COUNT(*)      AS partidas,
             MAX(aciertos) AS mejor,
             MAX(dia)      AS ultima
        FROM juego_log
       WHERE usuario_id = ?
-      GROUP BY juego;`,
-    [usuarioId]
-  );
+      GROUP BY juego`,
+    params: [usuarioId],
+    columnas: ['juego', 'partidas', 'mejor', 'ultima'],
+    leer: (filas) => recordsDe(filas as { juego: string; partidas: number; mejor: number; ultima: string | null }[]),
+  };
+}
 
+export function getGameRecords(usuarioId: number): Promise<Record<string, JuegoRecord>> {
+  return correr(parteRecords(usuarioId));
+}
+
+function recordsDe(
+  rows: { juego: string; partidas: number; mejor: number; ultima: string | null }[]
+): Record<string, JuegoRecord> {
   const out: Record<string, JuegoRecord> = {};
   for (const r of rows) {
     out[r.juego] = {
@@ -88,27 +91,26 @@ export function lunesDe(ts: number = Date.now()): string {
   return dayKey(d.getTime());
 }
 
-export async function getRetoSemanal(
-  usuarioId: number,
-  meta: number = RETO_META
-): Promise<RetoSemanal> {
-  const db = await getDb();
-  const desde = lunesDe();
+/**
+ * El reto semanal en una parte: cuenta aciertos de la sesión de estudio y de las partidas. Las dos formas de
+ * practicar valen igual, que es justo lo que hace que el arcade no compita con el estudio.
+ */
+export function parteReto(usuarioId: number, meta: number = RETO_META, desde: string = lunesDe()): Parte<RetoSemanal> {
+  return {
+    sql: `SELECT (SELECT COALESCE(SUM(aciertos), 0) FROM sesion WHERE usuario_id = ? AND dia >= ?) AS s,
+                 (SELECT COALESCE(SUM(aciertos), 0) FROM juego_log WHERE usuario_id = ? AND dia >= ?) AS j`,
+    params: [usuarioId, desde, usuarioId, desde],
+    columnas: ['s', 'j'],
+    leer: (filas) => {
+      const f = filas[0] as { s?: number; j?: number } | undefined;
+      const llevas = (f?.s ?? 0) + (f?.j ?? 0);
+      return { llevas, meta, desde, cumplido: llevas >= meta };
+    },
+  };
+}
 
-  // Cuenta aciertos de la sesión de estudio y de las partidas: las dos
-  // formas de practicar valen igual, que es justo lo que hace que el
-  // arcade no compita con el estudio.
-  const s = await db.getFirstAsync<{ n: number }>(
-    'SELECT COALESCE(SUM(aciertos), 0) AS n FROM sesion WHERE usuario_id = ? AND dia >= ?;',
-    [usuarioId, desde]
-  );
-  const j = await db.getFirstAsync<{ n: number }>(
-    'SELECT COALESCE(SUM(aciertos), 0) AS n FROM juego_log WHERE usuario_id = ? AND dia >= ?;',
-    [usuarioId, desde]
-  );
-
-  const llevas = (s?.n ?? 0) + (j?.n ?? 0);
-  return { llevas, meta, desde, cumplido: llevas >= meta };
+export function getRetoSemanal(usuarioId: number, meta: number = RETO_META): Promise<RetoSemanal> {
+  return correr(parteReto(usuarioId, meta));
 }
 
 /* ============================================================
@@ -145,20 +147,22 @@ export async function logHabla(
 const HABLA_CUENTA = "(veredicto IS NULL OR veredicto <> 'no_entendi')";
 
 /** Cuántos pares mínimos ha acertado al menos una vez. Para el arcade. */
-export async function getHablaResumen(
-  usuarioId: number
-): Promise<{ intentos: number; dominados: number }> {
-  const db = await getDb();
-  const row = await db.getFirstAsync<{ intentos: number; dominados: number }>(
-    `SELECT COUNT(*) AS intentos,
-            COUNT(DISTINCT CASE WHEN acierto = 1 THEN par_id END) AS dominados
-       FROM habla_log WHERE usuario_id = ? AND ${HABLA_CUENTA};`,
-    [usuarioId]
-  );
+export function parteHabla(usuarioId: number): Parte<{ intentos: number; dominados: number }> {
   return {
-    intentos: row?.intentos ?? 0,
-    dominados: row?.dominados ?? 0,
+    sql: `SELECT COUNT(*) AS intentos,
+            COUNT(DISTINCT CASE WHEN acierto = 1 THEN par_id END) AS dominados
+       FROM habla_log WHERE usuario_id = ? AND ${HABLA_CUENTA}`,
+    params: [usuarioId],
+    columnas: ['intentos', 'dominados'],
+    leer: (filas) => {
+      const row = filas[0] as { intentos?: number; dominados?: number } | undefined;
+      return { intentos: row?.intentos ?? 0, dominados: row?.dominados ?? 0 };
+    },
   };
+}
+
+export function getHablaResumen(usuarioId: number): Promise<{ intentos: number; dominados: number }> {
+  return correr(parteHabla(usuarioId));
 }
 
 /**
@@ -167,16 +171,9 @@ export async function getHablaResumen(
  * `habla_log`. Los modos que no dejan registro (gramática, lecturas, oído…)
  * no aparecen.
  */
-export async function getUsoModos(
-  usuarioId: number
-): Promise<Record<string, UsoModo>> {
-  const db = await getDb();
-  const rows = await db.getAllAsync<{
-    modo: string;
-    dias: number;
-    ultimo: number | null;
-  }>(
-    `SELECT juego AS modo, COUNT(DISTINCT dia) AS dias, MAX(jugado_en) AS ultimo
+export function parteUso(usuarioId: number): Parte<Record<string, UsoModo>> {
+  return {
+    sql: `SELECT juego AS modo, COUNT(DISTINCT dia) AS dias, MAX(jugado_en) AS ultimo
        FROM juego_log WHERE usuario_id = ? GROUP BY juego
      UNION ALL
      SELECT 'study', COUNT(DISTINCT dia), MAX(inicio)
@@ -185,10 +182,18 @@ export async function getUsoModos(
      SELECT 'pares_minimos',
             COUNT(DISTINCT date(creado_en / 1000, 'unixepoch', 'localtime')),
             MAX(creado_en)
-       FROM habla_log WHERE usuario_id = ? AND ${HABLA_CUENTA};`,
-    [usuarioId, usuarioId, usuarioId]
-  );
+       FROM habla_log WHERE usuario_id = ? AND ${HABLA_CUENTA}`,
+    params: [usuarioId, usuarioId, usuarioId],
+    columnas: ['modo', 'dias', 'ultimo'],
+    leer: (filas) => usoDe(filas as { modo: string; dias: number; ultimo: number | null }[]),
+  };
+}
 
+export function getUsoModos(usuarioId: number): Promise<Record<string, UsoModo>> {
+  return correr(parteUso(usuarioId));
+}
+
+function usoDe(rows: { modo: string; dias: number; ultimo: number | null }[]): Record<string, UsoModo> {
   const out: Record<string, UsoModo> = {};
   for (const r of rows) {
     if (r.ultimo === null) continue;

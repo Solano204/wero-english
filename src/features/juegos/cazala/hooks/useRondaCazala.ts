@@ -35,7 +35,7 @@ export const MARCAS = 3;
 export function useRondaCazala() {
   const nav = useNavigation<Nav>();
   const content = useMemo(loadContent, []);
-  const porId = useMemo(() => new Map(content.catalog.entries.map((e) => [e.id, e])), [content]);
+  const porId = useMemo(() => new Map(content.cazalaEntradas.entries.map((e) => [e.id, e])), [content]);
   // Un dato roto (reducción que no suena en la frase, o regla gramatical
   // que no se puede "cazar") nunca debe llegar a una ronda jugable.
   const items = useMemo(
