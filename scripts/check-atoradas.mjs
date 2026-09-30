@@ -107,7 +107,7 @@ await prueba('lo que no se toca: `toggleFavorite`, el orden de `getFavorites` y 
   assert.match(q, /DO UPDATE SET favorito = 1 - favorito;/, 'toggleFavorite sigue alternando');
   assert.match(q, /WHERE \$\{f\.sql\} AND t\.favorito = 1\s*ORDER BY t\.ultimo_repaso DESC NULLS LAST, e\.id ASC;/, 'el orden de siempre: aún no se guarda la fecha en que se guardó');
   assert.ok(!/guardada_en|fecha_guardado/.test(leer('src/data/esquema.ts')), 'no se agregó ninguna columna');
-  const mazoScreen = sinComentarios(leer('src/screens/utility/DeckScreen.tsx'));
+  const mazoScreen = sinComentarios(leer('src/features/mazo/screens/DeckScreen.tsx'));
   assert.ok(!/upsertCardState|useSessionStore|calificar|Repasar/.test(mazoScreen), 'Mi mazo no toca SM-2 ni ofrece «Repasar»');
 });
 
@@ -115,7 +115,7 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
   const motion = leer('src/theme/motion.ts');
   assert.match(motion, /export const motionAviso = \{ duracion: 5000 \} as const;/);
   assert.match(motion, /export const reacomodarResorte = \(\) =>\s*LinearTransition\.springify\(\)\s*\.damping\(motionSpring\.rebote\.damping\)/, 'las de abajo suben con el resorte de rebote');
-  const pantalla = sinComentarios(leer('src/screens/utility/DeckScreen.tsx'));
+  const pantalla = sinComentarios(leer('src/features/mazo/screens/DeckScreen.tsx'));
   assert.match(pantalla, /setTimeout\(\(\) => setAviso\(null\), motionAviso\.duracion\)/);
   assert.match(pantalla, /texto=\{aviso\.tipo === 'quitada' \? 'Quitada de tu mazo'/);
   assert.match(pantalla, /onDeshacer=\{aviso\.tipo === 'quitada' \? deshacer : undefined\}/);
@@ -127,7 +127,7 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
   assert.match(pantalla, /useFocusEffect\(|useCortarAudioAlSalir\(/);
   assert.match(pantalla, /actionLabel="Ir a Frases sueltas"/);
   assert.match(pantalla, /body="Toca la estrella en cualquier frase para guardarla aquí\."/, 'el texto vacío ya dice cómo guardar');
-  const aviso = sinComentarios(leer('src/components/mazo/AvisoDeshacer.tsx'));
+  const aviso = sinComentarios(leer('src/features/mazo/components/AvisoDeshacer.tsx'));
   assert.match(aviso, /label="Deshacer"/);
   assert.match(aviso, /accessibilityLiveRegion="polite"/);
   assert.match(aviso, /\{onDeshacer && !reducido \? \(/, 'sin la barra con reducir movimiento');
@@ -135,7 +135,7 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
 });
 
 await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Español, chevron, botón al mantener presionado y deslizar sin rojo', () => {
-  const t = sinComentarios(leer('src/components/mazo/TarjetaGuardada.tsx'));
+  const t = sinComentarios(leer('src/features/mazo/components/TarjetaGuardada.tsx'));
   assert.match(t, /export const TarjetaGuardada = memo\(/);
   assert.ok(t.includes("label: 'Quitar de mi mazo'"), 'acción «Quitar de mi mazo»');
   const hook = sinComentarios(leer('src/shared/hooks/useAudioFrase.ts'));
@@ -149,7 +149,7 @@ await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Españo
   assert.match(t, /onLongPress=\{alMantener\}/, 'mantener presionado muestra el botón');
   assert.match(t, /<Button variant="ghost" icon="star" label="Quitar de mi mazo"/);
   assert.match(t, /<DeslizarQuitar onQuitar=\{quitar\}>/);
-  const d = sinComentarios(leer('src/components/mazo/DeslizarQuitar.tsx'));
+  const d = sinComentarios(leer('src/features/mazo/components/DeslizarQuitar.tsx'));
   assert.match(d, /\.activeOffsetX\(\[-QUITAR\.activa, QUITAR\.activa\]\)/);
   assert.match(d, /\.failOffsetY\(\[-QUITAR\.falla, QUITAR\.falla\]\)/, 'cede ante el scroll de la lista');
   assert.match(d, /decidirQuitar\(tx\.value, e\.velocityX\)/);

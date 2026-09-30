@@ -114,7 +114,7 @@ export function RootNavigator() {
       <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
       <Stack.Screen name="Borrar" getComponent={() => require('@/screens/utility/BorrarScreen').BorrarScreen} />
       <Stack.Screen name="Stuck" getComponent={() => require('@/screens/utility/StuckScreen').StuckScreen} />
-      <Stack.Screen name="Deck" getComponent={() => require('@/screens/utility/DeckScreen').DeckScreen} />
+      <Stack.Screen name="Deck" getComponent={() => require('@/features/mazo/screens/DeckScreen').DeckScreen} />
       <Stack.Screen name="Niveles" getComponent={() => require('@/features/juegos/niveles/screens/NivelesScreen').NivelesScreen} />
       <Stack.Screen name="Gramatica" getComponent={() => require('@/features/gramatica/screens/GramaticaScreen').GramaticaScreen} />
       <Stack.Screen name="GramaticaTema" getComponent={() => require('@/features/gramatica/screens/GramaticaTemaScreen').GramaticaTemaScreen} />
