@@ -12,12 +12,15 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, 'src');
 const CONFIG = path.join(SRC, 'config', 'monetizacion.ts');
 
+// Una pantalla se lee con lo que es suyo (su hook y su logic): la lógica de las pantallas delgadas vive ahí.
 function leer(rel) {
+  if (/\/screens\/\w+Screen\.tsx$/.test(rel)) return fuenteDePantalla(path.join(ROOT, rel), ROOT);
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
 }
 
