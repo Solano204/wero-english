@@ -17,17 +17,15 @@ export function useNivel(juego: JuegoId, pedido?: number) {
   const content = loadContent();
   const def = content.niveles.juegos[juego];
 
-  const [nivel, setNivel] = useState<number | null>(pedido ?? null);
+  // El nivel pedido se usa tal cual (derivado, no copiado a estado); sin pedido, el siguiente sin terminar.
+  const [desbloqueado, setDesbloqueado] = useState<number | null>(null);
+  const nivel = pedido ? pedido : desbloqueado;
 
   useEffect(() => {
-    if (pedido) {
-      setNivel(pedido);
-      return;
-    }
-    if (!user || !def) return;
+    if (pedido || !user || !def) return;
     let vivo = true;
     void nivelDesbloqueado(user.id, juego).then((n) => {
-      if (vivo) setNivel(Math.min(n, def.total));
+      if (vivo) setDesbloqueado(Math.min(n, def.total));
     });
     return () => {
       vivo = false;

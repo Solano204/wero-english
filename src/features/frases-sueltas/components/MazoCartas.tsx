@@ -247,7 +247,10 @@ export function MazoVacio() {
   return (
     <View
       style={styles.vacio}
-      onLayout={(e) => setCaja({ ancho: e.nativeEvent.layout.width, alto: e.nativeEvent.layout.height })}
+      onLayout={(e) => {
+        const { width: ancho, height: alto } = e.nativeEvent.layout;
+        setCaja((c) => (c.ancho === ancho && c.alto === alto ? c : { ancho, alto }));
+      }}
     >
       {caja.ancho > 0 ? <BordePunteado ancho={caja.ancho} alto={caja.alto} tono={color.textFaint} /> : null}
       <Text style={styles.barajando}>Barajando…</Text>

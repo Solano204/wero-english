@@ -142,15 +142,6 @@ export function useRondaColmena() {
   });
   useEffect(() => efectoResuelta(), [resuelta]);
 
-  useEffect(() => {
-    empezoEn.current = Date.now();
-    setArmado('');
-    setUsadas([]);
-    despachar({ tipo: 'nuevaRonda' });
-    setEscuchas(ESCUCHAS_POR_RONDA);
-    setSonandoEscuchar(false);
-  }, [idx]);
-
   const tocarLetra = useCallback(
     (i: number, viaPista = false) => {
       if (!round || resuelta || resueltaEn.current === idx || usadas.includes(i)) return;
@@ -255,9 +246,13 @@ export function useRondaColmena() {
     if (avanzadaDesde.current === idx) return;
     avanzadaDesde.current = idx;
     limpiar();
+    // Todo lo de la ronda nueva en el mismo toque (antes, un efecto en [idx] lo repetía en un segundo render).
+    empezoEn.current = Date.now();
     setArmado('');
     setUsadas([]);
     despachar({ tipo: 'nuevaRonda' });
+    setEscuchas(ESCUCHAS_POR_RONDA);
+    setSonandoEscuchar(false);
     setIdx((i) => i + 1);
   };
 

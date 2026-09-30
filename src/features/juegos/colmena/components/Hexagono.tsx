@@ -178,11 +178,19 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   });
   useEffect(() => efectoVuelo(), [vuelo]);
 
-  // Una letra que no va: llega, rebota de regreso y destella en ámbar.
+  // Una letra que no va: el aviso y la sacudida se prenden en el mismo render que trae el rechazo (sin esperar a un
+  // efecto que los ponga en un segundo render); la animación y el temporizador que apaga la sacudida van en el efecto.
+  const [rechazoVisto, setRechazoVisto] = useState<Rechazo | null>(null);
+  if (rechazo !== rechazoVisto) {
+    setRechazoVisto(rechazo);
+    if (rechazo) {
+      setConAviso(true);
+      setSacude(true);
+    }
+  }
+  // Llega, rebota de regreso y destella en ámbar.
   const efectoRechazo = useEffectEvent(() => {
     if (!rechazo) return undefined;
-    setConAviso(true);
-    setSacude(true);
     const t = setTimeout(() => setSacude(false), motionDuration.base);
     vx.set(rechazo.dx);
     vy.set(rechazo.dy);

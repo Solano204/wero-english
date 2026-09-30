@@ -126,9 +126,8 @@ export function StudyCardView({
   const cardId = `${card.entry.id}:${card.kind}`;
 
   const efectoCardId = useEffectEvent(() => {
+    // `typed` y `usedHint` ya arrancan vacíos: la tarjeta se vuelve a montar con cada una (key en StudyScreen).
     startedAt.current = Date.now();
-    setTyped('');
-    setUsedHint(false);
 
     // En Escuchar y en Dictado el audio suena solo: el ejercicio es el
     // audio, y obligar a un toque extra antes de empezar solo estorba.

@@ -73,10 +73,15 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
   const source = imageSource(path);
   const conImagen = Boolean(source) && !fallo && hayImagen(path);
 
-  // Cambió la frase (o su imagen): se olvida el fallo/carga anterior y se vuelve a fundir.
-  useEffect(() => {
+  // Cambió la frase (o su imagen): se olvida el fallo/carga anterior en el mismo render (sin un cuadro con el
+  // estado viejo) y la opacidad vuelve a cero para fundir otra vez.
+  const [pathPrevio, setPathPrevio] = useState(path);
+  if (pathPrevio !== path) {
+    setPathPrevio(path);
     setCargada(false);
     setFallo(false);
+  }
+  useEffect(() => {
     opacidadCarga.set(0);
   }, [path, opacidadCarga]);
 

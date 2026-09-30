@@ -48,9 +48,13 @@ export function useMazo() {
   useLayoutEffect(() => {
     itemsRef.current = items;
   }, [items]);
-  useEffect(() => {
+  // Datos nuevos de la base (al volver a la pantalla): reemplazan la lista en el mismo render, sin un efecto que
+  // la copie después.
+  const [datosPrevios, setDatosPrevios] = useState(carga.datos);
+  if (datosPrevios !== carga.datos) {
+    setDatosPrevios(carga.datos);
     if (carga.datos) setLista(carga.datos);
-  }, [carga.datos]);
+  }
 
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const avisoRef = useRef(aviso);

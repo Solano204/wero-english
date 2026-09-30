@@ -141,7 +141,11 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
       >
         <Animated.View
           style={[styles.fila, { minHeight: compacta ? layout.tapMin : layout.filaModo, backgroundColor: fondo, borderColor: borde }, estiloFila]}
-          onLayout={(e) => setTam({ ancho: e.nativeEvent.layout.width, alto: e.nativeEvent.layout.height })}
+          onLayout={(e) => {
+            const { width: ancho, height: alto } = e.nativeEvent.layout;
+            // El mismo tamaño no vuelve a pintar el renglón (marcar cambia la fuente y dispara un onLayout).
+            setTam((t) => (t.ancho === ancho && t.alto === alto ? t : { ancho, alto }));
+          }}
         >
           {estado === 'perdida' && tam.ancho > 0 ? <BordePunteado ancho={tam.ancho} alto={tam.alto} tono={color.correct} /> : null}
 
