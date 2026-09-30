@@ -59,7 +59,7 @@ export const TarjetaGuardada = memo(function TarjetaGuardada({ entry, indice, an
           accessibilityActions={[{ name: 'quitar', label: 'Quitar de mi mazo' }, ...acciones]}
           onAccessibilityAction={alAccion}
         >
-          <Card>
+          <Card enLista>
             <View style={styles.fila}>
               <View style={styles.textos}>
                 <Presionable

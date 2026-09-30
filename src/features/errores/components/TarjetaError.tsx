@@ -33,7 +33,7 @@ export const TarjetaError = memo(function TarjetaError({ error: e, indice, anima
 
   return (
     <Animated.View entering={animar && !reducido ? aparecerSubiendo(escalon(indice)) : undefined}>
-      <Card onPress={abrir} accessibilityLabel={descripcion}>
+      <Card onPress={abrir} accessibilityLabel={descripcion} enLista>
         <View style={styles.fila}>
           <View style={styles.textos}>
             <View style={styles.renglon}>

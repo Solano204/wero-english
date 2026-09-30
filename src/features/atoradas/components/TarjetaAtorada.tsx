@@ -49,7 +49,7 @@ export const TarjetaAtorada = memo(function TarjetaAtorada({ entry, fallos, indi
         accessibilityActions={acciones}
         onAccessibilityAction={alAccion}
       >
-        <Card>
+        <Card enLista>
           <View style={styles.fila}>
             <View style={styles.textos}>
               <Presionable

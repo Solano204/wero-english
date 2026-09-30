@@ -42,6 +42,11 @@ interface Props {
   compacta?: boolean;
   /** El cuerpo y su contenido llenan el alto que se le dé con `style.height`: una carta de mazo mide siempre lo mismo. */
   llena?: boolean;
+  /**
+   * Una fila de lista: sin sombra. La sombra es negra sobre un fondo casi negro (`bgAlto` a `bgFin`), así que no se
+   * ve, y en Android cada `elevation` es una capa más que el scroll paga por fila.
+   */
+  enLista?: boolean;
 }
 
 /**
@@ -73,6 +78,7 @@ export function Card({
   accessibilityLabel,
   compacta = false,
   llena = false,
+  enLista = false,
 }: Props) {
   const [imagenFallo, setImagenFallo] = React.useState(false);
 
@@ -156,7 +162,7 @@ export function Card({
       end={sol.end}
       style={[
         styles.filo,
-        elevated ? styles.elevated : styles.apoyada,
+        enLista ? null : elevated ? styles.elevated : styles.apoyada,
         estiloFuera as ViewStyle,
       ].filter(Boolean) as ViewStyle[]}
     >

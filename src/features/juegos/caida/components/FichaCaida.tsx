@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon } from '@/shared/ui/Icon';
 import { Presionable } from '@/shared/ui/Presionable';
-import { color, depth, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
+import { color, depth, font, motionDuration, motionEasing, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ALTO_FICHA, MARGEN_ARRIBA } from '@/features/juegos/caida/logic/medidas';
 
@@ -161,7 +161,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.md,
-    ...shadow.card,
+    // Sin sombra: la ficha cae cuadro a cuadro y en Android una `elevation` en movimiento se vuelve a pintar en cada
+    // uno; sobre la pista casi negra no se veía. El canto de abajo (`depth`) es lo que la hace ver como pieza.
   },
   fallo: { backgroundColor: color.wrongFondo, borderColor: color.wrong },
   texto: {
