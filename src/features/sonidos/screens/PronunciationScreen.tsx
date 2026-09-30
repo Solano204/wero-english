@@ -1,53 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import React, { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { EmptyState, Header, IconButton, Screen } from '@/shared/ui';
-import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { IndiceFonemas } from '@/features/sonidos/components/IndiceFonemas';
 import { PaginaFonema } from '@/features/sonidos/components/PaginaFonema';
-import { ViajeSimbolo, type Viaje } from '@/features/sonidos/components/ViajeSimbolo';
+import { ViajeSimbolo } from '@/features/sonidos/components/ViajeSimbolo';
 import { sinBarras } from '@/domain/vocales';
-import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
-import * as audio from '@/services/audio';
-import { loadContent } from '@/data/contenido';
-import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { color, font, layout, space } from '@/theme';
 import type { Fonema } from '@/types';
-import type { RootStackParams } from '@/types/rutas';
-
-/** Pausa entre vueltas del modo "Repetir". */
-const PAUSA_REPETIR_MS = 700;
-/** Lo más que puede durar el viaje del símbolo (esperar a que la página se mida y volar) antes de darlo por terminado. */
-const VIAJE_TOPE_MS = motionDuration.coreografia + motionDuration.escena;
-
-/**
- * Reproduce `path` en bucle hasta que `activo()` deje de dar true.
- *
- * También se apaga solo si alguien más toca cualquier otro audio
- * mientras tanto (otro botón, un ejemplo, otro fonema): compara la
- * generación de audio.ts antes y después de cada espera, y si cambió
- * más de lo que causó su propio play(), ya no es el dueño del player.
- */
-async function repiteEnBucle(path: string, activo: () => boolean): Promise<void> {
-  while (activo()) {
-    const antes = audio.generacionActual();
-    const sonó = await audio.play(path);
-    if (!sonó || audio.generacionActual() !== antes + 1) return;
-
-    await audio.waitUntilDone();
-    if (audio.generacionActual() !== antes + 1) return;
-
-    if (!activo()) return;
-    await new Promise((r) => setTimeout(r, PAUSA_REPETIR_MS));
-    if (audio.generacionActual() !== antes + 1) return;
-  }
-}
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-type Ruta = RouteProp<RootStackParams, 'Pronunciation'>;
+import { usePronunciacion } from '@/features/sonidos/hooks/usePronunciacion';
 
 interface PagerProps {
   fonemas: Fonema[];
@@ -99,150 +60,7 @@ function Pager({ fonemas, pagina, ancho, onCambia, renderPagina }: PagerProps) {
  * llega `fonemaId`, abre directo en esa página.
  */
 export function PronunciationScreen() {
-  const nav = useNavigation<Nav>();
-  const { params } = useRoute<Ruta>();
-  const content = useMemo(loadContent, []);
-  const fonemas = content.fonemas.fonemas;
-  const total = content.fonemas.total_fonemas;
-  const reducido = useMovimientoReducido();
-  const { width: ancho } = useWindowDimensions();
-
-  const inicial = useMemo(() => {
-    const i = params?.fonemaId ? fonemas.findIndex((f) => f.id === params.fonemaId) : -1;
-    return i >= 0 ? i : null;
-    // Solo cuenta con lo que llegó al abrir.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // La página abierta (null = el índice) y la última que se vio: la página sigue montada mientras se desvanece.
-  const [pagina, setPagina] = useState<number | null>(inicial);
-  const [montada, setMontada] = useState(inicial !== null);
-  const ultima = useRef(inicial ?? 0);
-  const [viaje, setViaje] = useState<Viaje | null>(null);
-  const enPagina = pagina !== null;
-  const transicion = useSharedValue(enPagina ? 1 : 0);
-
-  // Este ejercicio es puro oído: la música compite con el sonido que hay
-  // que distinguir.
-  useMusicaPantalla('silencio');
-
-  // Qué fonema está en modo "Repetir" ahorita, o null si ninguno.
-  const [repitiendo, setRepitiendo] = useState<string | null>(null);
-  // Fuente de verdad para repiteEnBucle: un state en un closure viejo no
-  // sirve para cortar un bucle que ya está corriendo.
-  const repiteRef = useRef(false);
-
-  const cancelarRepetir = useCallback(() => {
-    repiteRef.current = false;
-    setRepitiendo(null);
-  }, []);
-
-  // Perder el foco apaga cualquier repetición en curso y corta todo el audio.
-  useCortarAudioAlSalir(cancelarRepetir);
-
-  const alternarRepetir = useCallback(
-    (fonema: Fonema) => {
-      if (repiteRef.current) {
-        cancelarRepetir();
-        audio.stop();
-        return;
-      }
-      repiteRef.current = true;
-      setRepitiendo(fonema.id);
-      void repiteEnBucle(fonema.audio, () => repiteRef.current).finally(() => {
-        if (repiteRef.current) cancelarRepetir();
-      });
-    },
-    [cancelarRepetir]
-  );
-
-  // Cambiar de fonema (abrir otro, deslizar, volver al índice) corta cualquier repetición en curso: nunca debe
-  // sonar la de uno mientras se lee otro.
-  useEffect(() => {
-    cancelarRepetir();
-    audio.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagina]);
-
-  useEffect(() => {
-    return () => {
-      cancelarRepetir();
-      audio.stop();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Índice y páginas se funden entre sí; al volver al índice la página sale del árbol cuando ya se apagó.
-  useEffect(() => {
-    const destino = enPagina ? 1 : 0;
-    if (reducido) {
-      transicion.value = destino;
-      if (!enPagina) setMontada(false);
-      return;
-    }
-    transicion.value = withTiming(
-      destino,
-      { duration: motionDuration.escena, easing: enPagina ? motionEasing.entrar : motionEasing.salir },
-      (fin) => {
-        if (fin && destino === 0) runOnJS(setMontada)(false);
-      }
-    );
-  }, [enPagina, reducido, transicion]);
-
-  const abrir = useCallback(
-    (indice: number, rect: Rect) => {
-      const f = fonemas[indice];
-      if (!f) return;
-      ultima.current = indice;
-      setMontada(true);
-      setPagina(indice);
-      // El símbolo del chip viaja hasta el de la página; con «reducir movimiento» no hay viaje.
-      if (!reducido) setViaje({ ipa: sinBarras(f.ipa), desde: rect, hasta: null });
-    },
-    [fonemas, reducido]
-  );
-
-  const cambiarPagina = useCallback((indice: number) => {
-    ultima.current = indice;
-    setPagina(indice);
-  }, []);
-
-  const volverAlIndice = useCallback(() => {
-    setViaje(null);
-    setPagina(null);
-  }, []);
-
-  const simboloMedido = useCallback((rect: Rect) => {
-    setViaje((v) => (v && !v.hasta ? { ...v, hasta: rect } : v));
-  }, []);
-  const finViaje = useCallback(() => setViaje(null), []);
-
-  // Red de seguridad: si la página nunca dice dónde está su símbolo, el viaje se da por terminado y el símbolo
-  // de la página se ve (no puede quedarse oculto).
-  useEffect(() => {
-    if (!viaje) return undefined;
-    const t = setTimeout(() => setViaje(null), VIAJE_TOPE_MS);
-    return () => clearTimeout(t);
-  }, [viaje]);
-
-  // «Practicar estos pares»: «Di la palabra» con los pares de este fonema.
-  const practicarPares = useCallback(
-    (fonema: Fonema) => nav.navigate('MinimalPairs', { fonemaId: fonema.id }),
-    [nav]
-  );
-
-  // Con una página abierta, «atrás» del sistema vuelve al índice y no sale de la pantalla.
-  useEffect(() => {
-    if (!enPagina) return undefined;
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      volverAlIndice();
-      return true;
-    });
-    return () => sub.remove();
-  }, [enPagina, volverAlIndice]);
-
-  const estiloIndice = useAnimatedStyle(() => ({ opacity: 1 - transicion.value }));
-  const estiloPagina = useAnimatedStyle(() => ({ opacity: transicion.value }));
+  const { nav, fonemas, total, ancho, pagina, montada, ultima, viaje, enPagina, repitiendo, alternarRepetir, abrir, cambiarPagina, volverAlIndice, simboloMedido, finViaje, practicarPares, estiloIndice, estiloPagina } = usePronunciacion();
 
   if (fonemas.length === 0) {
     return (
