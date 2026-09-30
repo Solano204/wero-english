@@ -9,7 +9,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { color, motionDuration, motionEasing, motionSenal, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FxSeguro } from './FxSeguro';
 
 /** Aire alrededor del anillo: por ahí se abre el destello de meta cumplida. */

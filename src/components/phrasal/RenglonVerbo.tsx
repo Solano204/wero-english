@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Presionable } from '@/components/base';
 import type { Rect } from '@/components/fx';
 import { color, font, layout, radius, space, text } from '@/theme';
-import { conteo } from '@/utils';
+import { conteo } from '@/domain/texto';
 
 /** Cuánto se espera la medida del verbo antes de abrir la página sin vuelo (ms). */
 const MEDIDA_MAX_MS = 250;

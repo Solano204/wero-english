@@ -7,7 +7,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTimin
 import { Button, EmptyState, ErrorCarga, Header, IconButton, Screen } from '@/components/base';
 import { Hueso, HuesoBoton, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
 import { AnilloRadio, BarraSesion, FraseKaraoke, PuntosRepeticion, useBolsillo, useVozEnVivo } from '@/components/fx';
-import { getRandomEntries } from '@/db/queries';
+import { getRandomEntries } from '@/data/repos/frases';
 import { analizar } from '@/domain/marcas';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
@@ -16,7 +16,7 @@ import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { marcasDe } from '@/services/marcas';
 import { color, desaparecer, font, fraseEntra, fraseSale, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

@@ -4,8 +4,8 @@ import Animated from 'react-native-reanimated';
 import { Button } from '@/components/base';
 import { etiquetaProximoRepaso } from '@/domain/session';
 import { aparecerSubiendo, color, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
-import { conteo } from '@/utils/text';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { conteo } from '@/domain/texto';
 
 interface Props {
   /** El resumen de la sesión que acaba de terminar; null si no hubo sesión (no había nada que repasar). */

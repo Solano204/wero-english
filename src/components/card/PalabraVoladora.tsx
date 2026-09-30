@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import type { Rect } from '@/components/fx';
 import { color, font, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Cuánto crece al llegar: de la letra de una opción (16) a la de la frase (28). */
 const CRECE = font.size.xxl / font.size.md - 1;

@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import { MIGRATIONS, SCHEMA_VERSION } from './schema';
+import { MIGRATIONS, SCHEMA_VERSION } from './esquema';
 
 const DB_NAME = 'wero.db';
 

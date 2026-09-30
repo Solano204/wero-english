@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const yaEntraron = new Set<string>();
 

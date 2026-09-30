@@ -12,7 +12,7 @@ import { Card } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { OndaVoz, type VozEnVivo } from '@/components/fx';
 import { aparecer, color, desaparecer, font, motionDuration, motionEasing, reacomodar, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const ALTO_ONDA = 32;
 const GROSOR_MARCA = 2;

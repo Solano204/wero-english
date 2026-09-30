@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon, ICON_SIZE } from '@/components/base/Icon';
 import { color, motionDuration, motionEasing, motionLogro, motionSpring } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const LADO = ICON_SIZE.sm;
 /** Hasta cuánto crece el destello dorado de una estrella nueva. */

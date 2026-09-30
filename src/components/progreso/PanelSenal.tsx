@@ -10,8 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Badge, Card } from '@/components/base';
 import { Marcador, MedidorSenal } from '@/components/fx';
-import type { Stats } from '@/db/queries';
-import { celebrarSiToca } from '@/screens/extras/practicar/celebracion';
+import type { Stats } from '@/data/repos/estadisticas';
+import { celebrarSiToca } from '@/data/local/celebracion';
 import {
   aparecerSubiendo,
   color,
@@ -22,7 +22,7 @@ import {
   radius,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import {
   esRecordActual,
   etiquetaMedidor,

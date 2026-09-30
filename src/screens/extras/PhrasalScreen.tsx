@@ -6,7 +6,7 @@ import { EmptyState, Header, Input, Screen } from '@/components/base';
 import type { Rect } from '@/components/fx';
 import { RenglonVerbo, type FormaRenglon } from '@/components/phrasal/RenglonVerbo';
 import { buscarGrupos, etiquetasParticulas } from '@/domain/phrasal';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { useSettingsStore } from '@/store';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';

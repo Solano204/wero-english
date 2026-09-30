@@ -1,4 +1,4 @@
-import { getDb } from './client';
+import { getDb } from '@/data/cliente';
 import type { JuegoId } from '@/types';
 
 /**

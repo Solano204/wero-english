@@ -96,3 +96,6 @@ export function toEntry(r: EntryRow): Entry {
     imagen: r.imagen,
   };
 }
+
+/** Columnas de `entrada` que leen las consultas de contenido (alias `e`). */
+export const ENTRY_COLS = 'e.*';

@@ -14,7 +14,7 @@ import Animated, {
 import { ALTO_ITEM, VISIBLES, destinoSuelta, destinoToque, limitarIndice, poseItem, posElastica } from '@/domain/ruleta';
 import * as haptics from '@/services/haptics';
 import { color, motionSpring, text } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Tres partículas a la vista: la elegida y una arriba y una abajo (las que siguen se apagan al salir). */
 export const ALTO_RUEDA = ALTO_ITEM * 3;

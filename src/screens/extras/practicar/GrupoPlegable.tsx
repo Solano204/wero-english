@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { Badge, Icon, Presionable, type IconName } from '@/components/base';
 import { color, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { conteo, useMovimientoReducido } from '@/utils';
+import { conteo } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** El despliegue del grupo: sus renglones entran escalonados al abrir y todos a la vez al cerrar. */
 export interface Avance {

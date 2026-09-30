@@ -26,8 +26,8 @@ import {
   sol,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
-import { ACIERTO, elegirFrase } from '@/utils/frases';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { ACIERTO, elegirFrase } from '@/domain/frases';
 
 /** El velo nunca pasa de esto: lo de atrás sigue leyéndose. */
 const VELO_MAX = 0.5;

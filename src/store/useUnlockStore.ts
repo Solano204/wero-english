@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { claveDe, desbloquear, getDesbloqueos, type TipoDesbloqueo } from '@/db/unlock';
+import { claveDe, desbloquear, getDesbloqueos, type TipoDesbloqueo } from '@/data/repos/desbloqueos';
 import * as ads from '@/services/ads';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 

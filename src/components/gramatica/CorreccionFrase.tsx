@@ -24,8 +24,8 @@ import {
   saleArriba,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
-import { diffFrase, numerarCambios, type PiezaNumerada } from '@/utils/diff';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { diffFrase, numerarCambios, type PiezaNumerada } from '@/domain/diffFrase';
 
 type Fase = 'mal' | 'bien';
 /** `morph`: la frase se transforma. `fundido`: las dos se ven, una tras otra (se parecen poco). `estatico`: reducir movimiento. */

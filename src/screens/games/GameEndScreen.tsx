@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,14 +7,14 @@ import Animated from 'react-native-reanimated';
 import { Button, Card, Header, Screen } from '@/components/base';
 import { FilaEstrellas } from '@/components/card';
 import { Confetti } from '@/components/feedback';
-import { logGame } from '@/db/economy';
-import { estrellasPara, guardarNivel } from '@/db/levels';
-import { loadContent } from '@/store/content';
+import { logGame } from '@/data/repos/partidas';
+import { estrellasPara, guardarNivel } from '@/data/repos/niveles';
+import { loadContent } from '@/data/contenido';
 import { useAuthStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
-import { PARTIDA_PERFECTA, TRES_ESTRELLAS, elegirFrase } from '@/utils/frases';
+import { PARTIDA_PERFECTA, TRES_ESTRELLAS, elegirFrase } from '@/domain/frases';
 import { color, font, space, aparecer, aparecerSubiendo, motionDuration } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 

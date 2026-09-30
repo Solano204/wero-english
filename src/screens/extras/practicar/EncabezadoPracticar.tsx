@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
 import { EncabezadoComprimido, Icon } from '@/components/base';
 import { color, font, radius, space } from '@/theme';
-import { conteo } from '@/utils';
+import { conteo } from '@/domain/texto';
 
 export { ALTO_ENCABEZADO } from '@/components/base';
 

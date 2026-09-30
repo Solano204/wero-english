@@ -4,8 +4,9 @@ import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } 
 import { Button } from '@/components/base/Button';
 import { Marcador } from '@/components/fx';
 import { color, font, motionDuration, motionEasing, radius, space } from '@/theme';
-import { plural, useMovimientoReducido } from '@/utils';
-import { conteo } from '@/utils/text';
+import { plural } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { conteo } from '@/domain/texto';
 
 /** En las últimas jugadas la barra late una vez por jugada. */
 const ULTIMAS = 5;

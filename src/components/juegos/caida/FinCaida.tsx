@@ -12,7 +12,8 @@ import { Button } from '@/components/base/Button';
 import { Icon } from '@/components/base/Icon';
 import { Marcador } from '@/components/fx';
 import { color, escalon, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
-import { plural, useMovimientoReducido } from '@/utils';
+import { plural } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 
 /** Cuánto suben de abajo el número, la tarjeta y los botones al entrar. */

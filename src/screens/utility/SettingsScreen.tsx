@@ -7,7 +7,7 @@ import { Button, Card, Header, Icon, Screen, Presionable } from '@/components/ba
 import { SectionTitle } from '@/components/list';
 import { FilaLegal, useConsentimiento } from '@/components/legal';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { NOTIF_MAX_POR_DIA } from '@/db/settings';
+import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
 import { setSimularCargaLenta } from '@/hooks/useCarga';
 import * as notifications from '@/services/notifications';
 import * as speech from '@/services/speech';

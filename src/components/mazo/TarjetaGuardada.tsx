@@ -7,7 +7,7 @@ import { useAudioFrase } from '@/components/card/useAudioFrase';
 import { FraseKaraoke } from '@/components/fx';
 import * as haptics from '@/services/haptics';
 import { aparecer, aparecerSubiendo, color, escalon, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 import { DeslizarQuitar } from './DeslizarQuitar';
 

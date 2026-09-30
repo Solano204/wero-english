@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Button } from '@/components/base';
 import { color, font, layout, motionDuration, motionEasing, reflejo, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Alto del pie: el del botón grande, para que no cambie de tamaño al revisar. */
 const ALTO_PIE = 58;

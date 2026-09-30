@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import {
   useNavigation,
@@ -10,10 +10,10 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Carga, Header, Screen } from '@/components/base';
 import { ProveedorEsqueleto } from '@/components/esqueleto';
 import { EntryRow, EntryRowHueso } from '@/components/list';
-import { getPackEntries } from '@/db/queries';
+import { getPackEntries } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
 import { useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';

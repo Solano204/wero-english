@@ -1,4 +1,4 @@
-import { levenshtein, mismoTexto } from '@/utils/text';
+import { levenshtein, mismoTexto } from '@/domain/texto';
 
 /**
  * Los distractores de Reconocer y Escuchar: las tres traducciones falsas que acompañan a la correcta.

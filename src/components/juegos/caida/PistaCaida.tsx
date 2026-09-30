@@ -4,7 +4,7 @@ import { Canvas, Group, LinearGradient, Path, Rect, Skia, vec } from '@shopify/r
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 import { FxSeguro } from '@/components/fx/FxSeguro';
 import { color, resplandorPiso, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { BarraTiempo } from './BarraTiempo';
 import { ALTO_PISO, MARGEN_ARRIBA, MARGEN_PISO, distanciaCaida } from './medidas';
 import { PisoResplandor } from './PisoResplandor';

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { motionDuration, motionEasing, motionPresion } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { useValoresResultado, type Resultado } from '@/components/feedback/useEfectoResultado';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

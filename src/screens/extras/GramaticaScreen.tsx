@@ -9,12 +9,12 @@ import { MedidorNivel } from '@/components/gramatica/MedidorNivel';
 import { RenglonTema } from '@/components/gramatica/RenglonTema';
 import { SectionTitle } from '@/components/list';
 import { nivelMaximo } from '@/domain/gramatica';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { useUnlockStore } from '@/store';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { color, font, space, aparecerSubiendo, escalon } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { RootStackParams } from '@/navigation/routes';
 import type { GramaticaTema } from '@/types';
 

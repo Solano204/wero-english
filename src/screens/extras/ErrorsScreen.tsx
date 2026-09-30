@@ -18,9 +18,9 @@ import {
   type OrdenErrores,
 } from '@/domain/errores';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, desvaneceDerecha, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ErrorCard } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

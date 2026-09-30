@@ -7,7 +7,8 @@ import { HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/components/esquel
 import { BotonGuardar } from '@/components/detalle';
 import type { Modo, Sonando } from '@/components/mazo/CartaFrase';
 import { MazoCartas, MazoVacio, type ManejadorMazo } from '@/components/mazo/MazoCartas';
-import { getRandomEntries, isFavorite, toggleFavorite } from '@/db/queries';
+import { getRandomEntries } from '@/data/repos/frases';
+import { isFavorite, toggleFavorite } from '@/data/repos/tarjetas';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';

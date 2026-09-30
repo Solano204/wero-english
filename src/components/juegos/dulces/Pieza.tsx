@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Presionable } from '@/components/base/Presionable';
 import { color, motionDuration, motionDulces, motionEasing, motionSpring, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { CaraPieza } from './SimboloPieza';
 import { etiquetaPieza } from './piezas';
 import { REBOTE_DP, duracionCaida } from './tablero';

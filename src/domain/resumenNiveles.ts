@@ -1,5 +1,5 @@
 /** Lógica pura de los destacados. Sin React: `check:practicar` la prueba con node. */
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 
 /** Niveles de cada juego con niveles (Colmena, Pares, Caída y Dulces). */
 export const TOTAL_NIVELES = 200;

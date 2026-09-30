@@ -4,11 +4,11 @@ import {
   loadSettings,
   saveSetting,
   type Settings,
-} from '@/db/settings';
+} from '@/data/repos/ajustes';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import * as music from '@/services/music';
-import type { ContentFilter } from '@/db/queries';
+import type { ContentFilter } from '@/types';
 
 interface SettingsState extends Settings {
   loaded: boolean;

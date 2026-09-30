@@ -1,5 +1,5 @@
-import { getDb } from './client';
-import { dayKey } from '@/utils/date';
+import { getDb } from '@/data/cliente';
+import { dayKey } from '@/domain/fechas';
 import type { AlternativaVoz, JuegoId, JuegoRecord, RetoSemanal, UsoModo } from '@/types';
 
 /**

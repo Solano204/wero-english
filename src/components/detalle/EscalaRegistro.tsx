@@ -12,7 +12,7 @@ import Animated, {
 import { Icon } from '@/components/base/Icon';
 import { PASOS_REGISTRO, PASO_EXPLICITO, pasoRegistro, textoRegistro } from '@/domain/registro';
 import { color, font, motionSpring, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const PASOS = PASOS_REGISTRO.length;
 const HUECO = space.xs;

@@ -6,7 +6,8 @@ import { Carga, EmptyState, Header, Screen } from '@/components/base';
 import { HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
 import { Desatorar } from '@/components/atoradas/Desatorar';
 import { TarjetaAtorada } from '@/components/atoradas/TarjetaAtorada';
-import { getCardStates, getEntriesByIds, getStuckEntries } from '@/db/queries';
+import { getCardStates } from '@/data/repos/tarjetas';
+import { getEntriesByIds, getStuckEntries } from '@/data/repos/frases';
 import {
   candidatasDestrabadas,
   destrabadas,
@@ -20,7 +21,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { color, font, motionDesatorar, space } from '@/theme';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

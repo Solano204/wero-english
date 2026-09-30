@@ -87,7 +87,7 @@ await prueba('ordenar no modifica la lista de entrada y el ajuste guardado se no
   assert.equal(E.normalizarOrden('graves'), 'graves');
   for (const raro of [undefined, null, 3, 'otro', '']) assert.equal(E.normalizarOrden(raro), 'graves', String(raro));
   assert.deepEqual(E.ORDENES_ERRORES.map((o) => o.label), ['Más graves primero', 'En orden']);
-  assert.match(leer('src/db/settings.ts'), /ordenErrores: 'graves',/, 'el orden de siempre es el que arranca');
+  assert.match(leer('src/data/repos/ajustes.ts'), /ordenErrores: 'graves',/, 'el orden de siempre es el que arranca');
 });
 
 /* ---------- encabezado, gravedad, anuncio y compartir ---------- */
@@ -126,7 +126,7 @@ await prueba('el detalle se anuncia en orden y sin doble punto; el texto de comp
 });
 
 await prueba('la secuencia del detalle: los tres pasos caben en 1.6 s en los 194 pares y el glitch termina cuando arranca «Lo correcto»', async () => {
-  const D = await cargar('src/utils/diff.ts');
+  const D = await cargar('src/domain/diffFrase.ts');
   const motion = leer('src/theme/motion.ts');
   const num = (patron, nombre) => {
     const m = motion.match(patron);
@@ -244,8 +244,8 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
   assert.match(sinComentarios(leer('src/components/gramatica/CorreccionFrase.tsx')), /export function useCorreccion\(/);
   const detalle = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
   assert.match(detalle, /<SecuenciaMalentendido key=\{err\.id\} error=\{err\} \/>/);
-  assert.match(detalle, /useFocusEffect\(/);
-  assert.match(detalle, /audio\.stop\(\)/, 'salir corta la voz');
+  assert.match(detalle, /useFocusEffect\(|useCortarAudioAlSalir\(/);
+  assert.match(detalle, /audio\.stop\(\)|useCortarAudioAlSalir\(/, 'salir corta la voz');
 });
 
 await prueba('el detalle: el duelo solo sale con audio de contraste (los 22 de pronunciación), «Por qué pasa» con NotaInfo y Compartir solo si se puede contar', () => {

@@ -4,8 +4,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { Button } from '@/components/base/Button';
 import { OndaVoz, type VozEnVivo } from '@/components/fx';
 import { motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
-import { plural } from '@/utils/text';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { plural } from '@/domain/texto';
 
 const ANCHO_ONDA = 88;
 const ALTO_ONDA = 32;

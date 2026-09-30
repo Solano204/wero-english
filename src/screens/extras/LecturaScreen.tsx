@@ -29,16 +29,17 @@ import { TextoAcompanado, useOracionActual, type MedidasTexto } from '@/componen
 import { useReproductorCapitulo } from '@/components/lectura/useReproductorCapitulo';
 import { partirTexto, type Trozo } from '@/domain/lectura';
 import { dividirOraciones, inicioDeMarcas, inicioEstimado, trozosPorOracion } from '@/domain/oraciones';
-import { getCardStates, getEntriesByIds } from '@/db/queries';
+import { getCardStates } from '@/data/repos/tarjetas';
+import { getEntriesByIds } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { marcasOracionesDe } from '@/services/marcas';
 import { aparecer, color, desaparecer, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

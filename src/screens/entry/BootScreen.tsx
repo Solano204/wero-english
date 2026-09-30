@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Screen, ProgressBar } from '@/components/base';
-import { seedCatalog } from '@/db/seed';
-import { getDb } from '@/db/client';
-import { loadContent } from '@/store/content';
+import { seedCatalog } from '@/data/semilla/sembrar';
+import { getDb } from '@/data/cliente';
+import { loadContent } from '@/data/contenido';
 import { useAuthStore } from '@/store';
 import * as audio from '@/services/audio';
 import * as notifications from '@/services/notifications';

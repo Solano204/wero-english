@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { Icon } from '@/components/base/Icon';
 import { Presionable } from '@/components/base/Presionable';
 import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 interface Props {
   titulo: string;

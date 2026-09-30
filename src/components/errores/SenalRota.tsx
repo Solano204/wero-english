@@ -9,7 +9,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { color, motionEasing, motionMalentendido } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const PASOS = motionMalentendido.glitchPasos;
 const DESPLAZO = motionMalentendido.glitchDesplazo;

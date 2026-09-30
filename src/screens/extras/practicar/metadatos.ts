@@ -1,7 +1,7 @@
 /** El dato de cada renglón de "Todo lo demás". Sin React: `check:practicar` lo prueba con node. */
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import type { ModoId } from './hoy';
-import type { Niveles } from './resumenNiveles';
+import type { Niveles } from '@/domain/resumenNiveles';
 
 export type Meta =
   | { tipo: 'nivel'; nivel: number; estrellas: number }

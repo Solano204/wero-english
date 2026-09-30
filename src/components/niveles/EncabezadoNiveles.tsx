@@ -12,7 +12,7 @@ import { IconButton } from '@/components/base/IconButton';
 import { Marcador } from '@/components/fx/Marcador';
 import { BarraFina } from '@/components/progreso/BarraFina';
 import { blur, color, font, layout, space, text } from '@/theme';
-import { miles } from '@/utils/text';
+import { miles } from '@/domain/texto';
 
 /** Scroll (dp) que tarda la banda en llegar a su opacidad completa. */
 const RANGO_BANDA = space.xl;

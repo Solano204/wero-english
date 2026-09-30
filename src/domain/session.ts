@@ -1,8 +1,8 @@
 import { buildCard } from './exercise';
 import { REINSERCION_MAX, REINSERCION_MIN, intercalar } from './cola';
 import { review, gradeFrom, newCardState } from './sm2';
-import { conteo } from '@/utils/text';
-import { addDays, startOfDay } from '@/utils/date';
+import { conteo } from '@/domain/texto';
+import { addDays, startOfDay } from '@/domain/fechas';
 import type {
   AnswerResult,
   CardState,

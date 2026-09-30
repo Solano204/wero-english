@@ -9,9 +9,9 @@ import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useEscucha } from '@/hooks/useEscucha';
 import * as speech from '@/services/speech';
 import type { ResultadoEscucha } from '@/services/speech';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, radius, space } from '@/theme';
-import { normalizeAnswer } from '@/utils/text';
+import { normalizeAnswer } from '@/domain/texto';
 import type { ParMinimoRound } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

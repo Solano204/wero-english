@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { color, motionDuration, motionEasing, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Alto de la barra: fina. */
 const ALTO = 4;

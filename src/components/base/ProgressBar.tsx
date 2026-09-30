@@ -5,7 +5,7 @@ import Animated, {
   useSharedValue,
   withTiming } from 'react-native-reanimated';
 import { color, radius, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 interface Props {
   value: number;

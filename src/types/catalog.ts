@@ -76,3 +76,11 @@ export interface Catalog {
   schema_version: number;
   entries: Entry[];
 }
+
+/** El filtro de contenido de todas las consultas: modo limpio, nivel, pack y mundo (ver data/repos/cola.ts). */
+export interface ContentFilter {
+  modoLimpio: boolean;
+  niveles: Nivel[];
+  packs?: string[];
+  mundos?: string[];
+}

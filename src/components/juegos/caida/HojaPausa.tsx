@@ -25,7 +25,7 @@ import {
   sol,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 
 // Copias locales: un worklet captura estos colores, no el objeto de tema entero.

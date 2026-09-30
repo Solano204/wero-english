@@ -7,7 +7,7 @@ import { FraseKaraoke, useVozEnVivo, useVozFrase } from '@/components/fx';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, layout, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { GramaticaTema } from '@/types';
 
 type Ejemplo = GramaticaTema['ejemplos'][number];

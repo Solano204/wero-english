@@ -18,8 +18,8 @@ const cargar = async (rel, sustituir = (s) => s) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 const G = await cargar('src/components/juegos/colmena/geometria.ts');
-const { formaPalabras } = await cargar('src/utils/text.ts');
-const { normaliza } = await cargar('src/domain/colmena.ts', (s) => s.replace(/import \{ shuffle \} from '@\/utils\/array';/, 'const shuffle = (a) => a;'));
+const { formaPalabras } = await cargar('src/domain/texto.ts');
+const { normaliza } = await cargar('src/domain/colmena.ts', (s) => s.replace(/import \{ shuffle \} from '@\/domain\/arreglos';/, 'const shuffle = (a) => a;'));
 const { distribuirRanuras, disposicionPanal, ordenDesdeCentro, fichasParaCompletar, retrasoVuelo, etiquetaRanura, puntosHexagono } = G;
 
 let total = 0;

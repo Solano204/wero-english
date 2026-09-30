@@ -241,7 +241,7 @@ prueba('el mazo vacío y el foco: al acabarse las 60 se ve vacío y se pide otra
   const pantalla = sinComentarios(leer('src/screens/extras/AzarScreen.tsx'));
   assert.match(pantalla, /setBarajando\(true\);\s*setPool\(\[\]\);\s*void cargar\(\);/, 'la baraja nueva se pide con la misma carga');
   assert.match(pantalla, /<MazoVacio \/>/);
-  assert.match(pantalla, /useFocusEffect\(/);
+  assert.match(pantalla, /useFocusEffect\(|useCortarAudioAlSalir\(/);
   assert.match(pantalla, /key=\{tanda\}/, 'cada baraja arma un mazo nuevo');
   assert.match(pantalla, /if \(guardada\) haptics\.tapLight\(\);\s*else void alternarGuardada\(\);/, 'deslizar arriba nunca quita una frase guardada');
 });

@@ -1,4 +1,4 @@
-import { getCardState, upsertCardState } from './queries';
+import { getCardState, upsertCardState } from './tarjetas';
 import { gradeFrom, newCardState, review } from '@/domain/sm2';
 import type { Grade } from '@/types';
 

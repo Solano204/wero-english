@@ -1,5 +1,5 @@
 import { Directory, File, Paths } from 'expo-file-system';
-import { getDb } from '@/db/client';
+import { getDb } from '@/data/cliente';
 import * as media from './media';
 import type { Pack } from '@/types';
 

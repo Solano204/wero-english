@@ -1,4 +1,4 @@
-import { getDb } from './client';
+import { getDb } from '@/data/cliente';
 import type { AtoradaVista } from '@/domain/atoradas';
 import type { OrdenErrores } from '@/domain/errores';
 import type { Nivel } from '@/types';

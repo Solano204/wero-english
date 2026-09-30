@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { IconButton } from '@/components/base';
 import { aparecer, font, layout, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { ESTILO_FRASE_NUEVA, ESTILO_FRASE_VISTA } from './Oracion';
 
 interface Props {

@@ -1,6 +1,6 @@
-import { getDb } from './client';
+import { getDb } from '@/data/cliente';
 import { consultaNuevasHoy } from './cola';
-import { dayKey, daysBetween } from '@/utils/date';
+import { dayKey, daysBetween } from '@/domain/fechas';
 
 export interface DayRecord {
   dia: string;

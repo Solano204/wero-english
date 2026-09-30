@@ -7,11 +7,13 @@ import { Hueso, HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto'
 import { SectionTitle } from '@/components/list';
 import { TarjetaLectura, type LecturaFila } from '@/components/lectura/TarjetaLectura';
 import { destacarLectura, dificultadPara, estadoDesbloqueo } from '@/domain/lectura';
-import { getCardStates, getDominadasPorMundo, getEntriesByIds } from '@/db/queries';
+import { getCardStates } from '@/data/repos/tarjetas';
+import { getDominadasPorMundo } from '@/data/repos/estadisticas';
+import { getEntriesByIds } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';

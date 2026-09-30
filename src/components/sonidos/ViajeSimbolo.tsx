@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import type { Rect } from '@/components/fx';
 import { color, font, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { SIMBOLO_CHIP } from './IndiceFonemas';
 
 /** El símbolo grande de la página, en dp. */

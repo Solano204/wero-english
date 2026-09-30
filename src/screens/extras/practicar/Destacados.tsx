@@ -20,7 +20,7 @@ import {
   space,
   tarjeta,
 } from '@/theme';
-import { TOTAL_NIVELES, resumenNivel, type Niveles } from './resumenNiveles';
+import { TOTAL_NIVELES, resumenNivel, type Niveles } from '@/domain/resumenNiveles';
 import type { ModoId } from './hoy';
 import { ICONO_MODO } from './iconos';
 import { MODOS } from './modos';

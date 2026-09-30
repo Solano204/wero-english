@@ -4,7 +4,7 @@ import { Button, Icon, Presionable, ProgressBar } from '@/components/base';
 import { OndaVoz, type VozEnVivo } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
 import { color, font, layout, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ReproductorCapitulo } from './useReproductorCapitulo';
 
 /** Alto de la onda mini, en dp. */

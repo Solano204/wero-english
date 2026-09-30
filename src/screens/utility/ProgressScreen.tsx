@@ -24,20 +24,20 @@ import {
   ventana,
   type ProgresoMundo,
 } from '@/components/progreso/datos';
-import { getGameRecords } from '@/db/economy';
-import { resumenTodos } from '@/db/levels';
-import { getProgresoPorMundo, getStats, type Stats } from '@/db/queries';
-import { getRecentDays } from '@/db/progress';
+import { getGameRecords } from '@/data/repos/partidas';
+import { resumenTodos } from '@/data/repos/niveles';
+import { getProgresoPorMundo, getStats, type Stats } from '@/data/repos/estadisticas';
+import { getRecentDays } from '@/data/repos/progreso';
 import { ICONO_MODO } from '@/screens/extras/practicar/iconos';
 import { MODOS } from '@/screens/extras/practicar/modos';
-import type { Niveles } from '@/screens/extras/practicar/resumenNiveles';
+import type { Niveles } from '@/domain/resumenNiveles';
 import type { JuegoRecord } from '@/types';
 import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
-import { dayKey } from '@/utils/date';
+import { dayKey } from '@/domain/fechas';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;

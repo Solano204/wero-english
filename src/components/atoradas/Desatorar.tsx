@@ -12,7 +12,7 @@ import Animated, {
 import { Card, Icon } from '@/components/base';
 import { puntosEncendidos } from '@/domain/atoradas';
 import { color, font, motionDesatorar, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 import { MedidorAtasco } from './MedidorAtasco';
 

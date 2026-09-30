@@ -26,7 +26,7 @@ import {
   sol,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FraseMorph, type ItemMorph } from './FraseMorph';
 
 interface Props {

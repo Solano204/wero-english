@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Tope de un paso del reloj: al volver de una pausa larga no se salta la fase. */
 const MAX_PASO_MS = 100;

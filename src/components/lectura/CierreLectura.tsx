@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { Card, Icon } from '@/components/base';
 import { aparecerSubiendo, color, font, motionDuration, motionEasing, space } from '@/theme';
-import { conteo, useMovimientoReducido } from '@/utils';
+import { conteo } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Lado del círculo del ícono, en dp. */
 const LADO = 72;

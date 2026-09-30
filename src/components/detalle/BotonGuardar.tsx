@@ -10,7 +10,7 @@ import Animated, {
 import { Button } from '@/components/base/Button';
 import { Icon } from '@/components/base/Icon';
 import { color, motionDuration, motionEasing, motionSpring } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Lado del ícono (el `lg` de `Icon`): el anillo nace de ese tamaño. */
 const LADO = 24;

@@ -99,9 +99,9 @@ const PERMITIDOS = new Set(
     'src/screens/extras/GramaticaScreen.tsx',
     'src/screens/extras/GramaticaTemaScreen.tsx',
     'src/store/useUnlockStore.ts',
-    'src/db/unlock.ts',
-    'src/db/levels.ts',
-    'src/db/schema.ts',
+    'src/data/repos/desbloqueos.ts',
+    'src/data/repos/niveles.ts',
+    'src/data/esquema.ts',
     'src/domain/niveles.ts',
     'src/navigation/TabNavigator.tsx',
   ].map((p) => path.join(ROOT, p))

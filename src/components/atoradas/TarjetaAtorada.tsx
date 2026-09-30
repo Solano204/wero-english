@@ -7,7 +7,7 @@ import { useAudioFrase } from '@/components/card/useAudioFrase';
 import { FraseKaraoke } from '@/components/fx';
 import { etiquetaFallos, tamanoAtorada } from '@/domain/atoradas';
 import { aparecerSubiendo, color, escalon, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 import { MedidorAtasco } from './MedidorAtasco';
 

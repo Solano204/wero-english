@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getDb } from '@/db/client';
-import { initProgress } from '@/db/progress';
-import { saveSetting } from '@/db/settings';
-import { nuevaSemilla, olvidarSemilla } from '@/db/semilla';
+import { getDb } from '@/data/cliente';
+import { initProgress } from '@/data/repos/progreso';
+import { saveSetting } from '@/data/repos/ajustes';
+import { nuevaSemilla, olvidarSemilla } from '@/data/semilla/semillaAleatoria';
 import * as downloads from './downloads';
 import * as consentimiento from './consentimiento';
 import { continuarSinCuenta, signOut } from './auth';

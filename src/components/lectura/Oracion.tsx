@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { Trozo } from '@/domain/lectura';
 import { color, font, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Tamaño e interlineado del texto de la lectura. El esqueleto del lector usa los mismos. */
 export const TAMANO_LECTURA = font.size.lg;

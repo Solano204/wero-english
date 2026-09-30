@@ -6,7 +6,8 @@ import { Badge, Icon, LevelBadge, Presionable } from '@/components/base';
 import { PuntoMundo } from '@/components/list';
 import { etiquetaDificultad, nivelDificultad } from '@/domain/lectura';
 import { aparecerSubiendo, color, escalon, font, gradiente, radius, space, text } from '@/theme';
-import { conteo, useMovimientoReducido } from '@/utils';
+import { conteo } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Lectura } from '@/types';
 import { AnilloFrases } from './AnilloFrases';
 

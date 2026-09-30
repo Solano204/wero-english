@@ -4,7 +4,7 @@ import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { FxSeguro } from '@/components/fx/FxSeguro';
 import { motionDuration, motionDulces, motionEasing, pieza } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { MAX_VIVAS, TROZOS_RETRASO_MS } from './tablero';
 
 /** Un trozo de una pieza que estalló: de dónde sale y a dónde va (en el espacio de la pantalla) y su retraso. */

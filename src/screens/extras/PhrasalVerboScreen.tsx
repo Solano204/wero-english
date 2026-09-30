@@ -13,10 +13,10 @@ import { anunciarForma, etiquetasParticulas } from '@/domain/phrasal';
 import { limitarIndice } from '@/domain/ruleta';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as haptics from '@/services/haptics';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { useSettingsStore } from '@/store';
 import { color, font, layout, space, text } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { RootStackParams } from '@/navigation/routes';
 import type { PhrasalVerb } from '@/types';
 

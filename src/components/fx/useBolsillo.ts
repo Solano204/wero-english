@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { motionDuration, motionEasing, motionRadio } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /**
  * El modo bolsillo de Modo oído. Con `activo` (la secuencia está sonando), a los `motionRadio.bolsillo` ms sin

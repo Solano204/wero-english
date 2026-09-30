@@ -15,7 +15,7 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 interface Props {
   texto: string;

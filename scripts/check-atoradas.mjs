@@ -103,10 +103,10 @@ await prueba('reinsertar no duplica, no se sale de la lista y quitar varias segu
 /* ---------- Mi mazo: lo que no se toca y lo que se puede revisar sin teléfono ---------- */
 
 await prueba('lo que no se toca: `toggleFavorite`, el orden de `getFavorites` y SM-2 quedan como estaban', () => {
-  const q = leer('src/db/queries.ts');
+  const q = leer('src/data/repos/tarjetas.ts') + leer('src/data/repos/frases.ts');
   assert.match(q, /DO UPDATE SET favorito = 1 - favorito;/, 'toggleFavorite sigue alternando');
   assert.match(q, /WHERE \$\{f\.sql\} AND t\.favorito = 1\s*ORDER BY t\.ultimo_repaso DESC NULLS LAST, e\.id ASC;/, 'el orden de siempre: aún no se guarda la fecha en que se guardó');
-  assert.ok(!/guardada_en|fecha_guardado/.test(leer('src/db/schema.ts')), 'no se agregó ninguna columna');
+  assert.ok(!/guardada_en|fecha_guardado/.test(leer('src/data/esquema.ts')), 'no se agregó ninguna columna');
   const mazoScreen = sinComentarios(leer('src/screens/utility/DeckScreen.tsx'));
   assert.ok(!/upsertCardState|useSessionStore|calificar|Repasar/.test(mazoScreen), 'Mi mazo no toca SM-2 ni ofrece «Repasar»');
 });
@@ -124,7 +124,7 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
   assert.match(pantalla, /itemLayoutAnimation=\{reducido \? undefined : REACOMODO\}/, 'sin resorte con reducir movimiento');
   assert.match(pantalla, /keyExtractor=\{claveEntrada\}/);
   assert.match(pantalla, /<Marcador\b/);
-  assert.match(pantalla, /useFocusEffect\(/);
+  assert.match(pantalla, /useFocusEffect\(|useCortarAudioAlSalir\(/);
   assert.match(pantalla, /actionLabel="Ir a Frases sueltas"/);
   assert.match(pantalla, /body="Toca la estrella en cualquier frase para guardarla aquí\."/, 'el texto vacío ya dice cómo guardar');
   const aviso = sinComentarios(leer('src/components/mazo/AvisoDeshacer.tsx'));
@@ -198,7 +198,7 @@ await prueba('las más atoradas van arriba y más grandes; a igual número, por 
 });
 
 await prueba('qué cuenta como atorada no cambió (fallos >= 3 y no dominada) y la pantalla no toca SM-2', () => {
-  const q = leer('src/db/queries.ts');
+  const q = leer('src/data/repos/frases.ts');
   assert.match(q, /WHERE t\.fallos >= \? AND t\.dominada = 0\s*ORDER BY t\.fallos DESC LIMIT \?;/);
   assert.match(sinComentarios(leer('src/screens/utility/StuckScreen.tsx')), /getStuckEntries\(user\.id, 3, 30\)/, 'el mismo umbral de siempre');
   const pantalla = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
@@ -217,7 +217,7 @@ await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio 
   assert.match(p, /ordenarAtoradas\(carga\.datos\?\.atoradas \?\? \[\]\)/);
   assert.match(p, /iconColor=\{color\.correct\}/, 'el vacío lleva el check en correct');
   assert.match(p, /body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma\."/, 'el texto vacío de siempre');
-  assert.match(p, /useFocusEffect\(/);
+  assert.match(p, /useFocusEffect\(|useCortarAudioAlSalir\(/);
   const t = sinComentarios(leer('src/components/atoradas/TarjetaAtorada.tsx'));
   assert.match(t, /export const TarjetaAtorada = memo\(/);
   assert.match(t, /<GrupoAudio controles=\{controles\}/, 'el grupo Inglés · Español en lugar de los dos plays');
@@ -236,7 +236,7 @@ await prueba('lo guardado en ajustes se normaliza: lo que no sirve se descarta y
   assert.deepEqual(A.normalizarVistas(undefined), []);
   assert.deepEqual(A.normalizarVistas('x'), []);
   assert.deepEqual(A.normalizarVistas([{ id: 4, fallos: 3 }, null, 7, { id: 'a', fallos: 2 }, { id: 4, fallos: 9 }, { id: 5, fallos: -1 }, { id: 0, fallos: 3 }, { id: 6, fallos: 2.5 }, { id: 8, fallos: 5 }]), [{ id: 4, fallos: 3 }, { id: 8, fallos: 5 }]);
-  assert.match(leer('src/db/settings.ts'), /atoradasVistas: \[\],/, 'sin visita previa no hay nada que comparar');
+  assert.match(leer('src/data/repos/ajustes.ts'), /atoradasVistas: \[\],/, 'sin visita previa no hay nada que comparar');
   assert.deepEqual(A.vistasDe([{ entry: { id: 3 }, fallos: 4 }]), [{ id: 3, fallos: 4 }]);
   assert.equal(A.mismasVistas([{ id: 1, fallos: 3 }, { id: 2, fallos: 4 }], [{ id: 2, fallos: 4 }, { id: 1, fallos: 3 }]), true, 'sin importar el orden');
   assert.equal(A.mismasVistas([{ id: 1, fallos: 3 }], [{ id: 1, fallos: 4 }]), false, 'un fallo más ya es un cambio');

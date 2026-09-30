@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, with
 import { Icon } from '@/components/base/Icon';
 import { Presionable } from '@/components/base/Presionable';
 import { color, font, motionDuration, motionEasing, motionSpring, radius, shadow, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ParFicha } from '@/types';
 import type { Rect } from './geometria';
 

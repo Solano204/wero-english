@@ -21,7 +21,7 @@ import {
   sol,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { Icon } from '@/components/base/Icon';
 import { Presionable } from '@/components/base/Presionable';
 import type { Rect } from '@/components/fx';

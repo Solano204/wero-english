@@ -23,7 +23,7 @@ import {
   nivelDesbloqueado,
   nivelesPagados,
   type NivelEstado,
-} from '@/db/levels';
+} from '@/data/repos/niveles';
 import {
   COLUMNAS,
   aplanar,
@@ -38,11 +38,11 @@ import {
 } from '@/domain/niveles';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { MuroDesbloqueo } from '@/components/unlock';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { aparecer, color, desaparecer, escalon, font, layout, motionDuration, motionLogro, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;

@@ -23,7 +23,7 @@ import {
   sinBarras,
 } from '@/domain/vocales';
 import { color, font, layout, motionDuration, motionSpring } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const MARGEN_IZQ = 20;
 /** Arriba caben «anterior» y «posterior»; a la derecha, «cerrada» y «abierta». */

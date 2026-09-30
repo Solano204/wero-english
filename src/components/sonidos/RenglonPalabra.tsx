@@ -7,7 +7,7 @@ import { analizar } from '@/domain/marcas';
 import * as audio from '@/services/audio';
 import { marcasDe } from '@/services/marcas';
 import { color, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { FonemaEjemplo } from '@/types';
 
 const ANCHO_ONDA = 56;

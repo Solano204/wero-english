@@ -13,7 +13,7 @@ import { FraseKaraoke, OndaVoz, useVozEnVivo } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry, ParFicha } from '@/types';
 import { FichaPar } from './FichaPar';
 import type { Rect } from './geometria';

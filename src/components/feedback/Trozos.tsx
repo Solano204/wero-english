@@ -7,7 +7,7 @@ import Animated, {
   withTiming } from 'react-native-reanimated';
 import { useDesfaseVentana } from '@/components/fx/useDesfaseVentana';
 import { color, motionEasing, motionEfecto } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const N = 12;
 

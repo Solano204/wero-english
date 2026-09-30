@@ -12,7 +12,7 @@ import Animated, {
 import type { Trozo } from '@/domain/lectura';
 import { indiceEn, type Oracion as OracionTexto } from '@/domain/oraciones';
 import { color, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { Oracion } from './Oracion';
 
 /** Dónde quedó cada oración del texto (dp, dentro del contenido del scroll) y dónde termina el texto. */

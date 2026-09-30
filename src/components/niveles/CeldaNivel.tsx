@@ -24,7 +24,7 @@ import {
   senal,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { AnilloActual } from './AnilloActual';
 import { BordePunteado } from '@/components/fx/BordePunteado';
 import { DesbloqueoCelda } from './DesbloqueoCelda';

@@ -8,10 +8,10 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Header, ProgressBar, Screen } from '@/components/base';
 import { Hueso, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
-import { getPackCounts } from '@/db/queries';
+import { getPackCounts } from '@/data/repos/estadisticas';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, radius, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 import { PuntoMundo } from '@/components/list';

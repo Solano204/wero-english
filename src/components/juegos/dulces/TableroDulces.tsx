@@ -4,7 +4,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 import { idsTrasPaso, idsTrasRebaraje, type Paso } from '@/domain/match3Pasos';
 import { motionDuration, motionDulces } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { ChipCascada } from './ChipCascada';
 import { Pieza, type Entrada, type Movimiento } from './Pieza';
 import {

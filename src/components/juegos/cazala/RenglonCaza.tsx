@@ -25,7 +25,7 @@ import {
   tarjetaEntra,
   tarjetaSale,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { Reticulo } from './Reticulo';
 
 /**

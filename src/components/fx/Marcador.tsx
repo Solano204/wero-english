@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
 import { color as tinta, escalon, font, motionSpring } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Ancho de un dígito respecto de su tamaño: fijo, para que las cifras no bailen al rodar. */
 const ANCHO_CIFRA = 0.62;

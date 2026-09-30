@@ -213,7 +213,7 @@ prueba('lector: la leyenda va arriba y se guarda en ajustes, y las frases dicen 
   const iLeyenda = pantalla.indexOf('<LeyendaFrases');
   assert.ok(iLeyenda > 0 && iLeyenda < pantalla.indexOf('<TextoAcompanado'), 'la leyenda va antes del texto');
   assert.ok(!/Toca cualquiera para abrir su ficha/.test(pantalla), 'ya no hay leyenda al final');
-  assert.match(leer('src/db/settings.ts'), /leyendaLecturaVista: false/);
+  assert.match(leer('src/data/repos/ajustes.ts'), /leyendaLecturaVista: false/);
   const oracion = leer('src/components/lectura/Oracion.tsx');
   assert.match(oracion, /nueva, abre su ficha/);
   assert.match(oracion, /ya la viste/);

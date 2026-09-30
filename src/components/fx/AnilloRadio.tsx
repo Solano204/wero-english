@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { color, font, motionDuration, motionEasing, motionRadio, radius, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FxSeguro } from './FxSeguro';
 import { energiaEn } from './OndaVoz';
 import { useSenalActiva } from './useSenalActiva';

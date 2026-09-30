@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { plural } from '@/utils/text';
+import { plural } from '@/domain/texto';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -23,13 +23,13 @@ import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/hooks/useCarga';
 import { useConsentimiento } from '@/components/legal';
 import { useShallow } from 'zustand/react/shallow';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as notifications from '@/services/notifications';
 import { aparecerSubiendo, color, font, layout, radius, space } from '@/theme';
 import type { StudyCard } from '@/types';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;

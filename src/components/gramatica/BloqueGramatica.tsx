@@ -9,7 +9,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Badge, Icon, Presionable } from '@/components/base';
 import { color, font, layout, motionDuration, motionEasing, radius, space, text } from '@/theme';
-import { conteo, useMovimientoReducido } from '@/utils';
+import { conteo } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** El despliegue del bloque: sus renglones entran escalonados al abrir y todos a la vez al cerrar. */
 export interface Avance {

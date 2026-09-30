@@ -12,7 +12,7 @@ import Animated, {
 import { Icon } from '@/components/base';
 import { QUITAR, amortiguarQuitar, avanceQuitar, decidirQuitar } from '@/domain/guardadas';
 import { color, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Lo que sale de más una tarjeta que se va, en dp, para que quede del todo fuera de la pantalla. */
 const SALIDA_EXTRA = 96;

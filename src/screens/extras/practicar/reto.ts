@@ -1,5 +1,5 @@
 /** Lógica pura del reto de la semana. Sin React: `check:practicar` la prueba con node. */
-import { conteo, plural } from '@/utils/text';
+import { conteo, plural } from '@/domain/texto';
 
 const DIAS_SEMANA = 7;
 const MS_DIA = 24 * 60 * 60 * 1000;

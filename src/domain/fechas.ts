@@ -1,4 +1,4 @@
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 
 const MS_DAY = 86_400_000;
 

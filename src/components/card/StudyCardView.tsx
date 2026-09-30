@@ -9,7 +9,7 @@ import { PalabraVoladora } from './PalabraVoladora';
 import { TileBuilder } from './TileBuilder';
 import { Button, RiskBadge } from '@/components/base';
 import { answerMode, imagenRevelaSignificado, instructionFor, promptFor } from '@/domain/exercise';
-import { isCloseEnough } from '@/utils/text';
+import { isCloseEnough } from '@/domain/texto';
 import { color, font, layout, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
 import type { RellenoHueco } from './FraseHueco';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -17,7 +17,7 @@ import * as audio from '@/services/audio';
 import type { StudyCard } from '@/types';
 import { useEfectoResultado } from '@/components/feedback';
 import { useDesfaseVentana, type Rect } from '@/components/fx';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /**
  * La tarjeta que se va sale hacia la izquierda con un fundido (`base`) y la nueva

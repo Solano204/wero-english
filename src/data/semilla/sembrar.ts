@@ -1,5 +1,5 @@
-import { getDb } from './client';
-import { getAppMeta, setAppMeta } from './settings';
+import { getDb } from '@/data/cliente';
+import { getAppMeta, setAppMeta } from '@/data/repos/ajustes';
 import type { Catalog, Entry } from '@/types';
 
 const CATALOG_VERSION_KEY = 'catalog_version';

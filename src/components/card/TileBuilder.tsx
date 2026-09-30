@@ -23,8 +23,8 @@ import {
 } from '@/theme';
 import * as haptics from '@/services/haptics';
 import { Presionable } from '@/components/base';
-import { normalizeAnswer } from '@/utils/text';
-import { useMovimientoReducido } from '@/utils';
+import { normalizeAnswer } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Reflow de las fichas armadas al agregar/quitar una. Respeta
  *  useMovimientoReducido por su cuenta: los presets de layout de

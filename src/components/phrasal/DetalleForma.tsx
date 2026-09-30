@@ -9,7 +9,7 @@ import { rangoEnFrase } from '@/domain/cazala';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { PhrasalVerb } from '@/types';
 
 /** Cuánto se desplaza el contenido al cambiar de forma, en dp. */

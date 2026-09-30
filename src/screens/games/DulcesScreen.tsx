@@ -21,17 +21,17 @@ import {
   swap,
   type Board } from '@/domain/match3';
 import { resolverPorPasos, type Paso } from '@/domain/match3Pasos';
-import { applyGameGrade } from '@/db/games';
-import { getRandomEntries } from '@/db/queries';
+import { applyGameGrade } from '@/data/repos/juegos';
+import { getRandomEntries } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
-import { shuffle } from '@/utils/array';
+import { shuffle } from '@/domain/arreglos';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, motionDulces, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';

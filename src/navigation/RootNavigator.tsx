@@ -9,7 +9,7 @@ import { AuthScreen } from '@/screens/entry/AuthScreen';
 import { BootScreen } from '@/screens/entry/BootScreen';
 import { useAuthStore, useSettingsStore } from '@/store';
 import * as music from '@/services/music';
-import { precargarDistractores } from '@/db/queries';
+import { precargarDistractores } from '@/data/repos/distractores';
 import * as notifications from '@/services/notifications';
 import { color, motionDuration } from '@/theme';
 

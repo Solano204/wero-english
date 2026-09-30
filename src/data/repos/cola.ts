@@ -1,18 +1,11 @@
-import { addDays, dayKey, startOfDay } from '@/utils/date';
-import type { CardState, Nivel } from '@/types';
+import { addDays, dayKey, startOfDay } from '@/domain/fechas';
+import type { CardState, ContentFilter } from '@/types';
 import { ORDEN_NUEVAS, type OrdenNuevas } from '@/config/aprendizaje';
 
 /**
  * La cola de repaso como SQL puro, sin nada de Expo, para que la misma
  * consulta que corre en el teléfono se pruebe en Node (scripts/check-srs.mjs).
  */
-
-export interface ContentFilter {
-  modoLimpio: boolean;
-  niveles: Nivel[];
-  packs?: string[];
-  mundos?: string[];
-}
 
 export interface Fragment {
   sql: string;

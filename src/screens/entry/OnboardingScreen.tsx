@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, ProgressBar, Screen, Presionable } from '@/components/base';
-import { NOTIF_MAX_POR_DIA } from '@/db/settings';
+import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import * as notifications from '@/services/notifications';
 import { useConsentimiento } from '@/components/legal';
 import { color, font, layout, radius, space, aparecer } from '@/theme';

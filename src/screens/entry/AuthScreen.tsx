@@ -9,7 +9,7 @@ import { BotonGoogle } from '@/components/entrada';
 import { useConsentimiento } from '@/components/legal';
 import { useAuthStore } from '@/store';
 import { color, font, layout, space, aparecer, desaparecer, motionDuration } from '@/theme';
-import * as googleAuth from '../../../modules/wero-google-auth';
+import * as googleAuth from '@modules/wero-google-auth';
 
 type Vista = 'inicio' | 'usuario';
 type Accion = 'google' | 'sin' | 'usuario' | 'vincular' | 'nueva' | null;

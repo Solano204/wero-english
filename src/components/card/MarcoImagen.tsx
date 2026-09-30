@@ -16,7 +16,7 @@ import { PuntoMundo } from '@/components/list/PuntoMundo';
 import { hayImagen } from './SceneImage';
 import { imageSource } from '@/services/media';
 import { blur, color, motionDuration, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const RAZON = 16 / 9;
 const FADE_MS = motionDuration.base;

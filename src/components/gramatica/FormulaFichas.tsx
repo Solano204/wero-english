@@ -11,7 +11,7 @@ import Animated, {
 import { useVisto } from '@/components/fx/useVisibilidad';
 import { partirFormula, type Ficha, type Segmento } from '@/domain/gramatica';
 import { color, escalon, font, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Cuánto llega desde la izquierda cada pieza al entrar, en dp. */
 const DESLIZA = 8;

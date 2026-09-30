@@ -27,9 +27,9 @@ import { PistaCaida } from '@/components/juegos/caida/PistaCaida';
 import { MARGEN_ARRIBA, chevronsPara, largoEstela } from '@/components/juegos/caida/medidas';
 import { CAIDA_INICIAL_MS, CAIDA_MINIMA_MS, buildRounds } from '@/domain/caida';
 import { useNivel } from './useNivel';
-import { applyGameGrade } from '@/db/games';
-import { getNiveles } from '@/db/levels';
-import { getRandomEntries } from '@/db/queries';
+import { applyGameGrade } from '@/data/repos/juegos';
+import { getNiveles } from '@/data/repos/niveles';
+import { getRandomEntries } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -47,7 +47,7 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { CaidaRound, Entry, NivelCaida } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

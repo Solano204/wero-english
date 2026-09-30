@@ -10,7 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Badge, Icon } from '@/components/base';
 import { color, font, motionDuration, motionEasing } from '@/theme';
-import { conteo, useMovimientoReducido } from '@/utils';
+import { conteo } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { consumirPulsoNuevo, pulsoNuevoPendiente } from './entrada';
 import type { Avance } from './GrupoPlegable';
 import type { Meta } from './metadatos';

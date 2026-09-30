@@ -6,7 +6,7 @@ import { Presionable } from '@/components/base/Presionable';
 import { useVozEnVivo } from '@/components/fx';
 import * as audio from '@/services/audio';
 import { color, font, motionDuration, motionEasing, motionPulso, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ParMinimo } from '@/types';
 
 /** Pausa entre las dos palabras de «Escuchar las dos». */

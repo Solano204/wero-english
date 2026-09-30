@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated from 'react-native-reanimated';
 import { Button, Icon } from '@/components/base';
 import { useAuthStore, useUnlockStore } from '@/store';
-import type { TipoDesbloqueo } from '@/db/unlock';
+import type { TipoDesbloqueo } from '@/data/repos/desbloqueos';
 import { color, filoLuz, font, radius, shadow, sol, space, aparecer, aparecerSubiendo } from '@/theme';
 
 interface Props {

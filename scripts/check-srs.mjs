@@ -1,6 +1,6 @@
 /**
  * Prueba la cola de repaso: la lógica pura (SM-2, motor de sesión, cupos) y
- * las consultas SQL reales de src/db/cola.ts contra SQLite en memoria (sql.js).
+ * las consultas SQL reales de src/data/repos/cola.ts contra SQLite en memoria (sql.js).
  *
  *   npm run check:srs              corre las pruebas
  *   npm run check:srs -- --informe imprime además una cola de ejemplo
@@ -42,11 +42,11 @@ function cargar(archivo) {
 }
 const importar = (rel) => import(cargar(path.join(ROOT, rel)));
 
-const fecha = await importar('src/utils/date.ts');
+const fecha = await importar('src/domain/fechas.ts');
 const sm2 = await importar('src/domain/sm2.ts');
 const { StudySession, etiquetaRepaso, sesionMerece, etiquetaProximoRepaso } = await importar('src/domain/session.ts');
 const plan = await importar('src/domain/cola.ts');
-const sql = await importar('src/db/cola.ts');
+const sql = await importar('src/data/repos/cola.ts');
 const plantillas = await importar('src/domain/plantillas.ts');
 const INFORME = process.argv.includes('--informe');
 
@@ -58,7 +58,7 @@ process.env.TZ = MX;
 const AHORA = new Date(2026, 8, 19, 9, 0, 0).getTime(); // 19 sep 2026, 9:00 hora local
 
 const SQL = await initSqlJs();
-const esquema = fs.readFileSync(path.join(ROOT, 'src/db/schema.ts'), 'utf8');
+const esquema = fs.readFileSync(path.join(ROOT, 'src/data/esquema.ts'), 'utf8');
 const tabla = (nombre) => {
   const m = esquema.match(new RegExp(`CREATE TABLE IF NOT EXISTS ${nombre} \\([\\s\\S]*?\\n    \\);`));
   if (!m) throw new Error(`no encontré la tabla ${nombre} en schema.ts`);

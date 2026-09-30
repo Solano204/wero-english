@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { useUnlockStore } from './useUnlockStore';
 import * as authService from '@/services/auth';
 import { AuthFailure } from '@/services/auth';
-import * as googleAuth from '../../modules/wero-google-auth';
+import * as googleAuth from '@modules/wero-google-auth';
 import * as consentimiento from '@/services/consentimiento';
 import * as audio from '@/services/audio';
 import * as music from '@/services/music';

@@ -13,10 +13,10 @@ import {
 } from '@/components/base';
 import { AudioButton } from '@/components/card';
 import { buildRounds, explicar, juzgar } from '@/domain/minimalPairs';
-import { logHabla } from '@/db/economy';
+import { logHabla } from '@/data/repos/partidas';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { useConsentimiento } from '@/components/legal';
 import { MedidorMicrofono } from '@/components/voz/MedidorMicrofono';
 import { useEscucha } from '@/hooks/useEscucha';

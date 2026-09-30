@@ -26,7 +26,7 @@ import {
   opacidadDeProfundidad,
 } from '@/domain/mazo';
 import { aparecerRapido, color, font, motionDuration, motionEasing, motionMazo, motionSpring, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 import { CartaFrase, type Modo, type Sonando } from './CartaFrase';
 import { IndicadorArrastre } from './IndicadorArrastre';

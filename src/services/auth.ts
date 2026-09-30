@@ -1,8 +1,8 @@
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getDb } from '@/db/client';
-import { initProgress } from '@/db/progress';
-import { nuevaSemilla } from '@/db/semilla';
+import { getDb } from '@/data/cliente';
+import { initProgress } from '@/data/repos/progreso';
+import { nuevaSemilla } from '@/data/semilla/semillaAleatoria';
 import type { AuthError, Credentials, PerfilGoogle, User } from '@/types';
 
 /**

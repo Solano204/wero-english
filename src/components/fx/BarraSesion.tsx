@@ -10,7 +10,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { nivelSeguidas } from '@/domain/seguidas';
 import { color, motionDuration, motionEasing, motionSpring, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const ALTO_BARRA = 6;
 const PUNTO = 12;

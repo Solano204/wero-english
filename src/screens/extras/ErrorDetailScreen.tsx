@@ -12,7 +12,7 @@ import { MedidorGravedad } from '@/components/errores/MedidorGravedad';
 import { SecuenciaMalentendido } from '@/components/errores/SecuenciaMalentendido';
 import { textoParaCompartir } from '@/domain/errores';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, motionMalentendido, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 

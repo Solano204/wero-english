@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
 import { color, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Diámetro del círculo en reposo. */
 const DIAMETRO = 72;

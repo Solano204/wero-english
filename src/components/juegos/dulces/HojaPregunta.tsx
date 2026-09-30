@@ -9,7 +9,7 @@ import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, filoLuz, font, motionDuration, motionEasing, motionSpring, radius, sol, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { DulceObjetivo } from '@/types';
 
 /** El velo nunca pasa de esto: el tablero, congelado, sigue viéndose. */

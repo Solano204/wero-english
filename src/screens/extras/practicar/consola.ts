@@ -2,7 +2,7 @@
  * Lógica pura de la consola de HOY. Sin React ni Skia: `check:practicar` la
  * prueba con node.
  */
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 
 /** Energía de la onda con 0 pendientes: casi plana y en calma. */
 export const ENERGIA_MIN = 0.06;

@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } fro
 import { BordePunteado } from '@/components/fx/BordePunteado';
 import { Icon } from '@/components/base/Icon';
 import { color, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Rect } from './geometria';
 
 interface Props {

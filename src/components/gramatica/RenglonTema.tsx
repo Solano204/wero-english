@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon, Presionable } from '@/components/base';
 import { color, escalon, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { GramaticaTema } from '@/types';
 import type { Avance } from './BloqueGramatica';
 import { MedidorNivel } from './MedidorNivel';

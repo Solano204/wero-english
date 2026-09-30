@@ -6,7 +6,7 @@ import { hayAudio } from '@/components/card/AudioButton';
 import { useVozEnVivo } from '@/components/fx';
 import * as audio from '@/services/audio';
 import { color, font, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ErrorCard } from '@/types';
 
 interface MitadProps {

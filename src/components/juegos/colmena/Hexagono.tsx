@@ -13,7 +13,7 @@ import Svg, { Defs, LinearGradient, Polygon, Stop } from 'react-native-svg';
 import { Icon } from '@/components/base/Icon';
 import { Presionable } from '@/components/base/Presionable';
 import { color, font, motionColmena, motionDuration, motionEasing, motionSpring, radius, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { puntosHexagono } from './geometria';
 
 /** Lo que tarda una ficha en llegar a su ranura. */

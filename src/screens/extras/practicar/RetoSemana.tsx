@@ -5,8 +5,9 @@ import { Badge, Card, Icon } from '@/components/base';
 import { Marcador, MedidorVU } from '@/components/fx';
 import { useVisibilidad } from '@/components/fx/useVisibilidad';
 import { aparecerZoom, color, font, motionSenal, space } from '@/theme';
-import { conteo, plural, useMovimientoReducido } from '@/utils';
-import { celebrarSiToca } from './celebracion';
+import { conteo, plural } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { celebrarSiToca } from '@/data/local/celebracion';
 import { diasQueQuedan, textoDiasReto } from './reto';
 
 interface Props {

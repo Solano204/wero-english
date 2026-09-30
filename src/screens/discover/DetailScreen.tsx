@@ -28,14 +28,15 @@ import {
   FilaDondeVive,
   HeroeFrase,
 } from '@/components/detalle';
-import { getEntry, isFavorite, toggleFavorite } from '@/db/queries';
+import { getEntry } from '@/data/repos/frases';
+import { isFavorite, toggleFavorite } from '@/data/repos/tarjetas';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, layout, motionDuration, motionEasing, motionEntrada, radius, space, type WorldId } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
-import { mismoTexto } from '@/utils/text';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { mismoTexto } from '@/domain/texto';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;

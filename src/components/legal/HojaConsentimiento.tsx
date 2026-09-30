@@ -18,7 +18,7 @@ import { CONSENTIMIENTOS } from '@/config/consentimientos';
 import * as consentimiento from '@/services/consentimiento';
 import type { TipoConsentimiento } from '@/services/consentimiento';
 import { color, font, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 interface Props {
   /** Qué hoja mostrar; null la cierra. */

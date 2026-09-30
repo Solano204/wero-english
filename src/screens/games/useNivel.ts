@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { nivelDesbloqueado } from '@/db/levels';
-import { loadContent } from '@/store/content';
+import { nivelDesbloqueado } from '@/data/repos/niveles';
+import { loadContent } from '@/data/contenido';
 import { useAuthStore } from '@/store';
 import type { Entry, JuegoId, NivelJuego } from '@/types';
 

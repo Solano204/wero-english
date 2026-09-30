@@ -4,7 +4,7 @@ import { useVozEnVivo } from '@/components/fx';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { CazalaItem } from '@/types';
 
 /** Cuánto se espera a que arranque la voz de la revisión (suena después del efecto) antes de correr el reloj propio. */

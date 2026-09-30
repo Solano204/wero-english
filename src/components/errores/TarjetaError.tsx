@@ -4,7 +4,7 @@ import Animated from 'react-native-reanimated';
 import { Badge, Card, Icon } from '@/components/base';
 import { anuncioDeError, anuncioGravedad } from '@/domain/errores';
 import { aparecerSubiendo, color, escalon, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ErrorCard } from '@/types';
 import { MedidorGravedad } from './MedidorGravedad';
 

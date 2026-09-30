@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
 import { color, motionDuration, motionEasing, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { BordePunteado } from '@/components/fx/BordePunteado';
 
 /** Cuánto se inclina el candado al abrirse (grados) y cuánto sube. */

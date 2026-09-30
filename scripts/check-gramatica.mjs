@@ -25,7 +25,7 @@ const cargar = async (rel) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 
-const { diffFrase, numerarCambios, MIN_COMPARTIDAS, MAX_TRAMOS } = await cargar('src/utils/diff.ts');
+const { diffFrase, numerarCambios, MIN_COMPARTIDAS, MAX_TRAMOS } = await cargar('src/domain/diffFrase.ts');
 const { partirFormula, segmentos, nivelMaximo } = await cargar('src/domain/gramatica.ts');
 const temas = JSON.parse(leer('assets/data/gramatica.json')).temas;
 

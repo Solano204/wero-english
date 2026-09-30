@@ -3,7 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Icon, type IconName } from '@/components/base/Icon';
 import { color, font, motionDuration, radius, space, aparecerZoom, desaparecer } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { Marcador } from './Marcador';
 
 interface Props {

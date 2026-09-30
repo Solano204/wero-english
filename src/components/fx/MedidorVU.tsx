@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Canvas, LinearGradient, Path, Rect, Skia, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
 import { color, medidor, motionDuration, motionEasing, motionSenal, senal, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FxSeguro } from './FxSeguro';
 
 /** Cuánto se ilumina el medidor completo en el destello de reto cumplido. */

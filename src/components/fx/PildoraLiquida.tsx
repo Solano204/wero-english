@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
 import { color, motionEscalon, motionSpring } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 const ANCHO = 54;
 const ALTO = 28;

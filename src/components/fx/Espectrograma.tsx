@@ -22,7 +22,7 @@ import {
 } from '@/components/progreso/datos';
 import * as haptics from '@/services/haptics';
 import { color, font, motionDuration, motionEasing, motionSenal, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FxSeguro } from './FxSeguro';
 
 /** Alto de las columnas. */

@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Icon, Presionable, type IconName } from '@/components/base';
 import { color, escalon, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Avance } from './GrupoPlegable';
 import { MetaModo } from './MetaModo';
 import { textoMeta, type Meta } from './metadatos';

@@ -12,9 +12,9 @@ import { sinBarras } from '@/domain/vocales';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Fonema } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

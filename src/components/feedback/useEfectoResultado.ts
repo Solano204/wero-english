@@ -6,7 +6,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { color, motionDuration, motionEasing, motionPulso, motionSacudida } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 export type Resultado = 'acierto' | 'fallo';
 

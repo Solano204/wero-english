@@ -25,9 +25,9 @@ const cargar = async (rel, sustituir = (s) => s) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 
-globalThis.__texto = await cargar('src/utils/text.ts');
+globalThis.__texto = await cargar('src/domain/texto.ts');
 const D = await cargar('src/domain/distractores.ts', (s) =>
-  s.replace(/import \{ levenshtein, mismoTexto \} from '@\/utils\/text';/, 'const { levenshtein, mismoTexto } = globalThis.__texto;')
+  s.replace(/import \{ levenshtein, mismoTexto \} from '@\/domain\/texto';/, 'const { levenshtein, mismoTexto } = globalThis.__texto;')
 );
 
 let total = 0;

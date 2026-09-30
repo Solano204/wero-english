@@ -1,21 +1,12 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  countDue,
-  countNew,
-  getProximoRepaso,
-  getDistractors,
-  getDueCards,
-  getNewCards,
-  getWordDecoys,
-  upsertCardState,
-  type ContentFilter,
-} from '@/db/queries';
-import { endSession, getNuevasHoy, startSession, touchStreak } from '@/db/progress';
-import { nuevaSemilla } from '@/db/semilla';
+import { countDue, countNew, getProximoRepaso, getDueCards, getNewCards, upsertCardState } from '@/data/repos/tarjetas';
+import { getDistractors, getWordDecoys } from '@/data/repos/distractores';
+import { endSession, getNuevasHoy, startSession, touchStreak } from '@/data/repos/progreso';
+import { nuevaSemilla } from '@/data/semilla/semillaAleatoria';
 import { MAX_REINSERCIONES, armarSesion, filtroEstudio } from '@/domain/cola';
 import { StudySession, etiquetaRepaso, gradeFrom } from '@/domain/session';
-import type { SessionSummary, StudyCard } from '@/types';
+import type { ContentFilter, SessionSummary, StudyCard } from '@/types';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 

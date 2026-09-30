@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,7 +13,7 @@ import {
   razonMuro,
 } from '@/components/base';
 import { useAuthStore } from '@/store';
-import { loadContent } from '@/store/content';
+import { loadContent } from '@/data/contenido';
 import { useConsentimiento } from '@/components/legal';
 import * as downloads from '@/services/downloads';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';

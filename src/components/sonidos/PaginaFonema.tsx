@@ -9,7 +9,7 @@ import { analizar } from '@/domain/marcas';
 import { posicionVocal, sinBarras } from '@/domain/vocales';
 import * as audio from '@/services/audio';
 import { color, entraSube, font, layout, motionDuration, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Fonema } from '@/types';
 import { DueloPar } from './DueloPar';
 import { MapaBoca } from './MapaBoca';

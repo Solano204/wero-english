@@ -5,7 +5,7 @@ import { Presionable } from '@/components/base/Presionable';
 import type { Rect } from '@/components/fx';
 import { sinBarras } from '@/domain/vocales';
 import { color, font, layout, radius, space } from '@/theme';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import type { Fonema } from '@/types';
 
 const COLUMNAS = 4;

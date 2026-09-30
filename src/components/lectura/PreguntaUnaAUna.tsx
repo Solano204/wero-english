@@ -4,7 +4,7 @@ import Animated from 'react-native-reanimated';
 import { OptionButton, type OptionState } from '@/components/card';
 import { PuntosRepeticion } from '@/components/fx';
 import { aparecer, color, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { LecturaPregunta } from '@/types';
 
 /** Cuántas preguntas tiene toda historia: son los tres puntos de arriba. */

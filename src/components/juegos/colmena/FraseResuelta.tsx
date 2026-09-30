@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } fro
 import { Icon } from '@/components/base/Icon';
 import { FraseKaraoke, type VozEnVivo } from '@/components/fx';
 import { color, font, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry } from '@/types';
 
 /** La frase sube este poco mientras se aclara. */

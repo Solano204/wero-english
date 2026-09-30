@@ -1,5 +1,5 @@
-import { shuffle } from '@/utils/array';
-import { blankOut } from '@/utils/text';
+import { shuffle } from '@/domain/arreglos';
+import { blankOut } from '@/domain/texto';
 import type {
   AnswerMode,
   CardState,

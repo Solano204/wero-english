@@ -9,7 +9,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { brilloEsqueleto, color, desaparecer, layout, motionCiclo, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Con «reducir movimiento» el hueso se queda fijo a esta opacidad, sin brillo. */
 const OPACIDAD_REDUCIDA = 0.6;

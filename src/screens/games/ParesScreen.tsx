@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { conteo } from '@/utils/text';
+import { conteo } from '@/domain/texto';
 import { AppState, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,8 +16,8 @@ import { Sello } from '@/components/juegos/pares/Sello';
 import { TarjetaFusion } from '@/components/juegos/pares/TarjetaFusion';
 import { buildTablero, sonPareja } from '@/domain/pares';
 import { useNivel } from './useNivel';
-import { applyGameGrade } from '@/db/games';
-import { getRandomEntries } from '@/db/queries';
+import { applyGameGrade } from '@/data/repos/juegos';
+import { getRandomEntries } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -25,7 +25,7 @@ import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, escalon, font, motionDuration, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 

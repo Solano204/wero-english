@@ -2,8 +2,8 @@
  * Lógica pura de la pantalla de Progreso. Sin React ni Skia: `check:practicar` la
  * prueba con node.
  */
-import { TOTAL_NIVELES, type Niveles } from '@/screens/extras/practicar/resumenNiveles';
-import { conteo, miles, plural } from '@/utils/text';
+import { TOTAL_NIVELES, type Niveles } from '@/domain/resumenNiveles';
+import { conteo, miles, plural } from '@/domain/texto';
 
 /* ── Medidor y chips ─────────────────────────────────────────────────── */
 

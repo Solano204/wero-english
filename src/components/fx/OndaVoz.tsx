@@ -4,7 +4,7 @@ import { Canvas, LinearGradient, Path, Skia, vec, type SkPath, type SkSize } fro
 import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { ENV_HZ } from '@/domain/marcas';
 import { color, motionDuration, motionEasing, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FxSeguro } from './FxSeguro';
 import type { VozEnVivo } from './useVozEnVivo';
 

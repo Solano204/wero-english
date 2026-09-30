@@ -1,5 +1,5 @@
 import * as Crypto from 'expo-crypto';
-import { getDb } from './client';
+import { getDb } from '@/data/cliente';
 
 /**
  * La semilla de cada usuario: de ella sale el orden propio de sus frases nuevas (ver

@@ -5,7 +5,7 @@ import { Presionable } from '@/components/base/Presionable';
 import { BarraFina } from '@/components/progreso/BarraFina';
 import { avisoBloqueo, tituloTramo, type Tramo } from '@/domain/niveles';
 import { color, font, layout, space, text } from '@/theme';
-import { conteo, miles } from '@/utils/text';
+import { conteo, miles } from '@/domain/texto';
 
 /** Alto fijo del encabezado: la lista calcula sus posiciones con él (`getItemLayout`). */
 export const ALTO_TRAMO = 72;

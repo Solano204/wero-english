@@ -36,7 +36,7 @@ import {
   motionMalentendido,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import type { ErrorCard } from '@/types';
 import { SenalRota } from './SenalRota';
 

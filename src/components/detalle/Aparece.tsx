@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useVisto } from '@/components/fx/useVisibilidad';
 import { motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 
 /** Cuánto sube un bloque al aparecer (dp). */
 const SUBE = 8;

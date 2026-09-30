@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Canvas, Circle, LinearGradient, Path, Skia, vec } from '@shopify/react-native-skia';
 import { interpolateColor, useDerivedValue, type SharedValue } from 'react-native-reanimated';
 import { color, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { FxSeguro } from './FxSeguro';
 
 /** Lo que cuelga un cable flojo, en fracción de su largo y con tope. */

@@ -1,17 +1,15 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import { color } from '@/theme';
-import { getDb } from '@/db/client';
-import { getLastActive } from '@/db/progress';
-import { countDue, getStuckEntries } from '@/db/queries';
+import { getDb } from '@/data/cliente';
+import { getLastActive } from '@/data/repos/progreso';
+import { countDue } from '@/data/repos/tarjetas';
+import { getStuckEntries } from '@/data/repos/frases';
 import { filtroEstudio } from '@/domain/cola';
 import { rellena, tokensDe, tokensDesconocidos, type Valores } from '@/domain/plantillas';
-import { weightedPick } from '@/utils/array';
-import { dayKey, daysBetween } from '@/utils/date';
-import type {
-  ContentFilter,
-} from '@/db/queries';
-import type { NotificacionesFile, NotifPlantilla } from '@/types';
+import { weightedPick } from '@/domain/arreglos';
+import { dayKey, daysBetween } from '@/domain/fechas';
+import type { ContentFilter, NotificacionesFile, NotifPlantilla } from '@/types';
 
 /**
  * Notificaciones locales.

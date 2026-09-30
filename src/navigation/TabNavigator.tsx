@@ -20,7 +20,7 @@ import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motio
 import { AdBar, Icon, Presionable, type IconName } from '@/components/base';
 import { PildoraLiquida } from '@/components/fx';
 import * as haptics from '@/services/haptics';
-import { useMovimientoReducido } from '@/utils';
+import { useMovimientoReducido } from '@/utils/accessibility';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { MainTabParams } from './routes';
 

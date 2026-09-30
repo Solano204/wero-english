@@ -36,10 +36,11 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { conteo, plural, useMovimientoReducido } from '@/utils';
-import { dayKey } from '@/utils/date';
+import { conteo, plural } from '@/domain/texto';
+import { useMovimientoReducido } from '@/utils/accessibility';
+import { dayKey } from '@/domain/fechas';
 import { energiaOnda, metaCumplida } from './consola';
-import { celebrarSiToca } from './celebracion';
+import { celebrarSiToca } from '@/data/local/celebracion';
 import type { Modo } from './modos';
 
 interface Props {
