@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
 import { FraseHueco } from './FraseHueco';
@@ -7,10 +7,11 @@ import { MarcoImagen } from '@/shared/ui/MarcoImagen';
 import { OptionButton, type OptionState } from '@/shared/ui/OptionButton';
 import { PalabraVoladora } from './PalabraVoladora';
 import { TileBuilder } from './TileBuilder';
-import { Button, RiskBadge } from '@/shared/ui';
+import { ZonaEscribir } from './ZonaEscribir';
+import { RiskBadge } from '@/shared/ui';
 import { answerMode, imagenRevelaSignificado, instructionFor, promptFor } from '@/domain/exercise';
 import { isCloseEnough } from '@/domain/texto';
-import { color, font, layout, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
+import { color, font, layout, motionDuration, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
 import type { RellenoHueco } from './FraseHueco';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -271,46 +272,20 @@ export function StudyCardView({
           />
         </Animated.View>
       ) : isTyping ? (
-        <Animated.View style={[styles.zona, styles.typeArea, estiloBloque]}>
-          <TextInput
-            style={[
-              styles.input,
-              locked && (acierto ? styles.inputOk : styles.inputMiss),
-            ]}
-            value={typed}
-            onChangeText={setTyped}
-            editable={!locked}
-            placeholder={
-              card.kind === 'dictado' ? 'Escribe lo que oíste' : 'Escríbelo aquí'
-            }
-            placeholderTextColor={color.textFaint}
-            autoCapitalize="none"
-            autoCorrect={false}
-            selectionColor={color.accent}
-            onSubmitEditing={handleSubmit}
-            returnKeyType="done"
-            accessibilityLabel="Tu respuesta en inglés"
-          />
-          {!locked ? (
-            <View style={styles.typeActions}>
-              <Button
-                label={usedHint ? 'Pista usada' : 'Pista'}
-                variant="ghost"
-                onPress={() => {
-                  setUsedHint(true);
-                  setTyped(firstWords(card.answer));
-                }}
-                disabled={usedHint}
-              />
-              <Button
-                label="Revisar"
-                onPress={handleSubmit}
-                disabled={typed.trim().length === 0}
-                style={styles.grow}
-              />
-            </View>
-          ) : null}
-        </Animated.View>
+        <ZonaEscribir
+          typed={typed}
+          setTyped={setTyped}
+          locked={locked}
+          acierto={acierto}
+          dictado={card.kind === 'dictado'}
+          usedHint={usedHint}
+          estiloBloque={estiloBloque}
+          onPista={() => {
+            setUsedHint(true);
+            setTyped(firstWords(card.answer));
+          }}
+          onRevisar={handleSubmit}
+        />
       ) : (
         <ScrollView
           style={styles.zona}
@@ -403,20 +378,4 @@ const styles = StyleSheet.create({
   revealCompacto: { gap: space.sm },
   options: { gap: space.md },
   optionsCompacto: { gap: space.sm },
-  typeArea: { gap: space.md, flexShrink: 0 },
-  input: {
-    minHeight: 58,
-    backgroundColor: color.surface,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: color.border,
-    paddingHorizontal: space.lg,
-    color: color.text,
-    fontFamily: font.family.body,
-    fontSize: font.size.lg,
-  },
-  inputOk: { borderColor: color.correct },
-  inputMiss: { borderColor: color.wrong },
-  typeActions: { flexDirection: 'row', gap: space.sm },
-  grow: { flex: 1 },
 });

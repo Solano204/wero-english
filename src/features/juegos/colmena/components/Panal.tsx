@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { ordenDesdeCentro, retrasoVuelo, type DisposicionPanal } from '@/features/juegos/colmena/logic/geometria';
 import { motionColmena } from '@/theme';
-import { ContornoHex, Hexagono, type Rechazo, type Vuelo } from './Hexagono';
+import { ContornoHex } from './ContornoHex';
+import { Hexagono, type Rechazo, type Vuelo } from './Hexagono';
 
 /** Una ficha que ya se puso (o va camino a su ranura): su vuelo, y a qué ranura llega. */
 export interface Colocada extends Vuelo {
