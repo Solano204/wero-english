@@ -17,7 +17,9 @@ import { useBarraOculta } from '@/app/arranque/useBarraOculta';
 import { OCULTAR_BARRA_ESTADO } from '@/config/pantalla';
 import * as audio from '@/services/audio';
 import { color, fuentes, tema } from '@/theme';
+import { marcar } from '@/shared/utils/marcasArranque';
 
+marcar('app');
 void SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -34,7 +36,8 @@ export default function App() {
   // listas, no cuando React montó: si se esconde antes, se ve un parpadeo
   // negro y luego el salto de fuente.
   useEffect(() => {
-    if (status !== 'booting' && fuentesListas) void SplashScreen.hideAsync();
+    if (fuentesListas) marcar('fuentes');
+    if (status !== 'booting' && fuentesListas) void SplashScreen.hideAsync().then(() => marcar('splash'), () => undefined);
   }, [status, fuentesListas]);
 
   // Los ajustes se cargan al entrar y al cambiar de usuario.

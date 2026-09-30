@@ -15,7 +15,7 @@ import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { dayKey } from '@/domain/fechas';
-import { marcarPracticarInteractivo } from '@/shared/utils/medicion';
+import { marcar, marcarPracticarInteractivo } from '@/shared/utils/marcasArranque';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 import { metaDe, textoMeta, type FuentesMeta } from '@/features/practicar/logic/metadatos';
@@ -88,6 +88,8 @@ export function usePracticar() {
   // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
   // el caso "usuario nuevo" un instante y luego saltaría a otro.
   const listo = carga.estado === 'listo';
+  // Medición del arranque: el primer cuadro de Practicar, con o sin datos.
+  useEffect(() => marcar('primerRender'), []);
   // Medición del arranque (docs/RENDIMIENTO.md): el primer cuadro con los datos ya pintados.
   useEffect(() => {
     if (!listo) return undefined;

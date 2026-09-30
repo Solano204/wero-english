@@ -8,6 +8,7 @@ import { useAuthStore } from '@/estado/useAuthStore';
 import * as audio from '@/services/audio';
 import * as notifications from '@/services/notificaciones';
 import { color, font, space } from '@/theme';
+import { marcar } from '@/shared/utils/marcasArranque';
 
 /**
  * Arranque. Hace el trabajo pesado una sola vez:
@@ -31,6 +32,7 @@ export function BootScreen() {
       try {
         setStep('Abriendo la base');
         await getDb();
+        marcar('base');
 
         const content = loadContent();
 
@@ -48,6 +50,7 @@ export function BootScreen() {
           });
         }
 
+        marcar('catalogo');
         setStep('Preparando el sonido');
         await audio.initAudio();
         await notifications.setupChannel();

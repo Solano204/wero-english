@@ -73,13 +73,18 @@ app cerrada antes de cada corrida. Se toma la **mediana de 5**.
 adb shell am force-stop app.wero.mobile
 adb shell am start -W -n app.wero.mobile/.MainActivity
 
-# Cronómetro de la app: desde que arranca el JS hasta que Practicar es interactivo
-# (release: construir con EXPO_PUBLIC_MEDIR=1; en debug siempre está prendido)
+# Marcas de la app por tramo (release: construir con EXPO_PUBLIC_MEDIR=1; en debug siempre están prendidas)
 adb logcat -c && adb logcat -s ReactNativeJS | grep "\[medir\]"
+
+# Todo junto: 5 arranques en frío con TotalTime y las marcas, y la mediana de cada una
+scripts/medir-arranque.sh 5
 ```
 
-El cronómetro vive en `src/utils/medicion.ts` y se dispara en el primer frame con Practicar ya cargado. Sin
-`EXPO_PUBLIC_MEDIR=1` no hace nada en release.
+Las marcas viven en `src/shared/utils/marcasArranque.ts`. Cada una es el tiempo desde que empezó el JS
+(`__BUNDLE_START_TIME__`): `app` (se evaluó App.tsx), `base` (SQLite abierta y migrada), `catalogo` (catálogo
+revisado o sembrado), `fuentes`, `splash` (oculto), `primerRender` (primer cuadro de Practicar) e `interactivo`
+(Practicar con sus datos pintados). Un vigía cada 16 ms anota el bloqueo más largo del hilo de JS hasta 3 s después de
+`interactivo`. Sin `EXPO_PUBLIC_MEDIR=1` no hace nada en release.
 
 ### Flashlight
 
