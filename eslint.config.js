@@ -6,6 +6,7 @@
  *    prompt 4 de la serie de rendimiento).
  *  - Sin imports sin usar.
  *  - Sin console fuera de __DEV__, salvo console.error (el único que queda en producción: ver babel.config.js).
+ *  - Sin Touchable* ni el Button nativo: todo lo que se toca pasa por Presionable.
  *
  * Las reglas de capas (qué puede importar a qué) las revisan `npm run check:imports` y `npm run check:capas`.
  */
@@ -56,6 +57,18 @@ module.exports = tseslint.config(
       'react-hooks/exhaustive-deps': 'error',
       'react-compiler/react-compiler': 'warn',
       'unused-imports/no-unused-imports': 'error',
+      // Todo lo que se toca pasa por `Presionable` (o `Pressable`): los Touchable* no dan el feedback en el hilo de UI
+      // y dejan de responder mientras el hilo de JS está ocupado. Ni los de React Native ni los de gesture-handler.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: ['react-native', 'react-native-gesture-handler'].map((name) => ({
+            name,
+            importNames: ['TouchableOpacity', 'TouchableHighlight', 'TouchableWithoutFeedback', 'TouchableNativeFeedback', 'Button'],
+            message: 'Usa Presionable (src/shared/ui/Presionable) o el Button de shared/ui.',
+          })),
+        },
+      ],
       'no-restricted-syntax': [
         'error',
         { selector: CONSOLE_FUERA_DE_DEV, message: 'console fuera de __DEV__ (solo console.error queda en producción).' },
