@@ -1,7 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import type { ImageSourcePropType } from 'react-native';
-import { BUNDLED, bundledModule } from '@/assets/bundled';
+import { bundledModule } from '@/assets/bundled';
 
 /**
  * Resuelve una ruta relativa del JSON ("aud/18.mp3", "img/err/err_001.webp")
@@ -84,8 +84,8 @@ export async function uriFor(relPath: string | null): Promise<string | null> {
  */
 export function imageSource(relPath: string | null): ImageSourcePropType | null {
   if (!relPath) return null;
-  const mod = BUNDLED[relPath];
-  if (mod !== undefined) return mod;
+  const mod = bundledModule(relPath);
+  if (mod !== null) return mod;
   try {
     return { uri: fileFor(relPath).uri };
   } catch {

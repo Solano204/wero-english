@@ -750,7 +750,7 @@ function analizaTicks(r, src, out) {
 
 /** d) Audio: rutas de los JSON que no están en bundled.ts, y botones que las usan. */
 function auditaAudio(archivos, bundledSrc) {
-  const bundled = new Set([...bundledSrc.matchAll(/'([^']+)':\s*require/g)].map((m) => m[1]));
+  const bundled = new Set([...bundledSrc.matchAll(/^\s*'([^']+)':\s*(?:require|\d+,)/gm)].map((m) => m[1]));
   const refs = new Set();
   const dataDir = path.join(ROOT, 'assets/data');
   const rec = (v) => {

@@ -34,30 +34,42 @@ for (const d of DIRS) {
 }
 files.sort();
 
-const lines = files.map(
-  (f) => `  '${f}': require('../../assets/${f}'),`
-);
+const indice = files.map((f, i) => `  '${f}': ${i},`);
+const casos = files.map((f, i) => `    case ${i}: return require('../../assets/${f}');`);
 
+// El mapa NO hace los require() al cargarse: con ~7.9k medios, evaluarlos todos
+// registraba cada asset (AssetRegistry) en el arranque en frío aunque la
+// sesión solo usara unos cuantos. El índice es solo texto → número, y el
+// require() de cada medio corre la primera vez que alguien lo pide.
 const body = `// GENERADO POR scripts/build-asset-map.mjs — NO EDITAR A MANO
 // Corre "npm run build:assets" después de agregar o quitar medios.
 //
 // Metro solo entiende require() con ruta literal, así que el mapa de
-// archivos empaquetados tiene que existir en el código fuente.
+// archivos empaquetados tiene que existir en el código fuente. Los require()
+// viven dentro de un switch para que se evalúen al pedirse, no al arrancar.
 
-/** Los medios que van dentro del APK, indexados por su ruta del JSON. */
-export const BUNDLED: Record<string, number> = {
-${lines.join('\n')}
+/** Los medios que van dentro del APK: ruta del JSON → índice en \`cargar\`. */
+const INDICE: Record<string, number> = {
+${indice.join('\n')}
 };
+
+function cargar(i: number): number | null {
+  switch (i) {
+${casos.join('\n')}
+    default: return null;
+  }
+}
 
 /** Cuántos medios trae el binario. Lo muestra la pantalla de diagnóstico. */
 export const BUNDLED_COUNT = ${files.length};
 
 export function isBundled(relPath: string | null | undefined): boolean {
-  return Boolean(relPath && relPath in BUNDLED);
+  return Boolean(relPath && Object.prototype.hasOwnProperty.call(INDICE, relPath));
 }
 
 export function bundledModule(relPath: string): number | null {
-  return BUNDLED[relPath] ?? null;
+  const i = Object.prototype.hasOwnProperty.call(INDICE, relPath) ? INDICE[relPath] : undefined;
+  return i === undefined ? null : cargar(i);
 }
 `;
 
