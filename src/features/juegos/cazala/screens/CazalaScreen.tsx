@@ -106,7 +106,8 @@ export function CazalaScreen() {
                 estado={estadoDe(id)}
                 bajada={picked.length === MARCAS && !picked.includes(id)}
                 caceria={checked && item.reducciones.includes(id) ? { pos: posRevision, t: tiempoDe(id) } : null}
-                onPress={() => toggle(id)}
+                id={id}
+                onPress={toggle}
               />
             ))}
           </ScrollView>

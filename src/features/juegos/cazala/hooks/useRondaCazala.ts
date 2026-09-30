@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { RONDA_INICIAL, alternarMarca, rondaCazala } from '@/features/juegos/cazala/logic/ronda';
 import { AccessibilityInfo, AppState, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -99,7 +99,14 @@ export function useRondaCazala() {
     };
   }, []);
 
+  // La ronda más reciente para `toggle`: así la función es la misma en toda la ronda y los renglones (memo) que no
+  // cambian no se repintan al marcar otro.
+  const rondaActual = useRef({ checked, picked });
+  useLayoutEffect(() => {
+    rondaActual.current = { checked, picked };
+  }, [checked, picked]);
   const toggle = (id: number) => {
+    const { checked, picked } = rondaActual.current;
     if (checked) return;
     const next = alternarMarca(picked, id, MARCAS);
     if (next === picked) return;

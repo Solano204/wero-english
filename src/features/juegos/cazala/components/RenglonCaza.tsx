@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedReaction,
@@ -67,7 +67,9 @@ interface Props {
   bajada: boolean;
   /** Teléfono de poco alto: renglón de 48 en lugar de 56. */
   compacta: boolean;
-  onPress: () => void;
+  /** La reducción de este renglón: va de vuelta en `onPress`, así la función es la misma para los seis. */
+  id: number;
+  onPress: (id: number) => void;
   /** Solo al revisar y en las reducciones correctas: la posición del audio y el segundo en que suena esta. */
   caceria: { pos: SharedValue<number>; t: number } | null;
 }
@@ -78,7 +80,8 @@ interface Props {
  * y, en las correctas, late una vez cuando el karaoke de la frase llega a ella. Con «reducir movimiento» no hay
  * retículo, pulsos ni sacudida: solo el borde, el fondo y el ícono.
  */
-export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, caceria }: Props) {
+/** Memo: al marcar uno, los otros cinco reciben las mismas props y no se repintan. */
+export const RenglonCaza = memo(function RenglonCaza({ label, indice, estado, bajada, compacta, id, onPress, caceria }: Props) {
   const reducido = useMovimientoReducido();
   const [tam, setTam] = useState({ ancho: 0, alto: 0 });
   const marcada = estado === 'marcada' || estado === 'cazada' || estado === 'noIba';
@@ -132,7 +135,7 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
       exiting={tarjetaSale().delay(escalon(indice))}
     >
       <Presionable
-        onPress={onPress}
+        onPress={() => onPress(id)}
         disabled={!interactivo}
         accessibilityRole="checkbox"
         accessibilityLabel={etiquetaA11y(label, estado)}
@@ -174,7 +177,7 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
       </Presionable>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   fila: {

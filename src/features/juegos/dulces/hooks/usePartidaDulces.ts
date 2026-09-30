@@ -233,7 +233,13 @@ export function usePartidaDulces() {
 
   /** Lo que llegó a las barras de las metas: los trozos de un paso de la cascada. */
   const sumarAMetas = (paso: Paso) => {
-    setObjetivos((prev) => prev.map((o) => ({ ...o, llevas: o.llevas + (paso.porColor[o.color] ?? 0) })));
+    // Una meta a la que no le tocó nada conserva su objeto: su MetaFrase (memo) no se repinta.
+    setObjetivos((prev) =>
+      prev.map((o) => {
+        const suma = paso.porColor[o.color] ?? 0;
+        return suma === 0 ? o : { ...o, llevas: o.llevas + suma };
+      })
+    );
   };
 
   /*

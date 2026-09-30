@@ -25,7 +25,7 @@ import {
   space,
 } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
-import { diffFrase, numerarCambios, type PiezaNumerada } from '@/domain/diffFrase';
+import { diffFrase, numerarCambios, type Pieza, type PiezaNumerada } from '@/domain/diffFrase';
 
 type Fase = 'mal' | 'bien';
 /** `morph`: la frase se transforma. `fundido`: las dos se ven, una tras otra (se parecen poco). `estatico`: reducir movimiento. */
@@ -91,24 +91,40 @@ interface FraseProps {
 }
 
 /**
+ * La clave de cada pieza, tomada de lo que dice (tipo y texto, más cuántas veces salió antes): una palabra
+ * conserva su nodo aunque cambie de lugar, y las animaciones de salida y de reacomodo siguen a la palabra correcta.
+ */
+function clavesDePiezas(piezas: readonly Pieza[]): string[] {
+  const vistas = new Map<string, number>();
+  return piezas.map((p) => {
+    const base = p.tipo === 'letras' ? `letras:${p.partes.map((x) => x.texto).join('')}` : `${p.tipo}:${p.texto}`;
+    const n = vistas.get(base) ?? 0;
+    vistas.set(base, n + 1);
+    return `${base}#${n}`;
+  });
+}
+
+/**
  * La frase como piezas con clave estable: las palabras iguales no se vuelven a montar, las que sobran salen y las que
  * faltan entran, y el resto se reacomoda con `reacomodar()`. Una palabra que cambia de letras es una fila de trozos:
  * los iguales se quedan, los que sobran suben y se van, los nuevos llegan en `correct`.
  */
 function FraseTransformada({ plan, fase, tacha, resuelto, totalTachas }: FraseProps) {
+  const claves = clavesDePiezas(plan.map((p) => p.pieza));
   return (
     <View style={styles.frase}>
       {plan.map(({ pieza, tacha: lugarTacha, entra }, i) => {
-        if (pieza.tipo === 'igual') return <TextoIgual key={i} texto={pieza.texto} resuelto={resuelto} />;
+        const clave = claves[i] ?? String(i);
+        if (pieza.tipo === 'igual') return <TextoIgual key={clave} texto={pieza.texto} resuelto={resuelto} />;
         if (pieza.tipo === 'sale') {
           return fase === 'mal' ? (
-            <Animated.View key={i} exiting={saleArriba()}>
+            <Animated.View key={clave} exiting={saleArriba()}>
               <Text style={[styles.palabra, styles.sale]}>{pieza.texto}</Text>
               <Tacha indice={lugarTacha} tacha={tacha} total={totalTachas} />
             </Animated.View>
           ) : null;
         }
-        if (pieza.tipo === 'entra') return fase === 'bien' ? <TextoEntra key={i} texto={pieza.texto} indice={entra} /> : null;
+        if (pieza.tipo === 'entra') return fase === 'bien' ? <TextoEntra key={clave} texto={pieza.texto} indice={entra} /> : null;
         // El lugar de cada palabra que entra, contado desde `entra` (sin mutar nada dentro del map).
         const lugares: number[] = [];
         let n = entra;
@@ -117,7 +133,7 @@ function FraseTransformada({ plan, fase, tacha, resuelto, totalTachas }: FrasePr
           if (parte.tipo !== 'igual' && parte.tipo !== 'sale') n += 1;
         }
         return (
-          <Animated.View key={i} layout={REACOMODO} style={styles.letras}>
+          <Animated.View key={clave} layout={REACOMODO} style={styles.letras}>
             {pieza.partes.map((parte, p) => {
               if (parte.tipo === 'igual') return <TextoIgual key={p} texto={parte.texto} resuelto={resuelto} />;
               if (parte.tipo === 'sale') {
