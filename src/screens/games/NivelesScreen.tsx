@@ -52,6 +52,8 @@ type Ruta = RouteProp<RootStackParams, 'Niveles'>;
 
 /** Cuánto se queda el aviso de un anuncio que falló. */
 const DURACION_AVISO_MS = 5000;
+
+const claveItem = (it: ItemLista) => it.key;
 /** La entrada escalonada cuenta desde unos renglones arriba del nivel actual (lo que cabe en pantalla). */
 const FILAS_ANTES_DEL_ACTUAL = 4;
 
@@ -78,7 +80,7 @@ export function NivelesScreen() {
   const { params } = useRoute<Ruta>();
   const user = useAuthStore((s) => s.user);
   const content = useMemo(loadContent, []);
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   const juego = params.juego;
   const def = content.niveles.juegos[juego];
@@ -100,6 +102,9 @@ export function NivelesScreen() {
   // Se abren de uno en uno y no encadenan.
   const [abiertosAhora, setAbiertosAhora] = useState<number[]>([]);
   const [abriendo, setAbriendo] = useState(false);
+  // `saltar` lee el candado de aquí: con `abriendo` en sus dependencias, cada anuncio cambiaba
+  // `alTocar` y `renderItem`, y la lista repintaba todos los renglones montados dos veces.
+  const abriendoRef = useRef(false);
   const [expandidos, setExpandidos] = useState<ReadonlySet<string>>(new Set());
 
   // El aviso cuando el anuncio falla o se cierra antes de tiempo: unos segundos y se va.
@@ -126,7 +131,8 @@ export function NivelesScreen() {
    */
   const saltar = useCallback(
     async (nivel: number) => {
-      if (!user || abriendo) return;
+      if (!user || abriendoRef.current) return;
+      abriendoRef.current = true;
       setAbriendo(true);
       const r = await pedirRecompensa();
       if (r === 'visto') {
@@ -138,9 +144,10 @@ export function NivelesScreen() {
         // La celda se queda como estaba y se dice por qué, con el tono de siempre.
         avisar(razonMuro(r));
       }
+      abriendoRef.current = false;
       setAbriendo(false);
     },
-    [user, juego, abriendo, avisar]
+    [user, juego, avisar]
   );
 
   const alTocar = useCallback(
@@ -244,6 +251,10 @@ export function NivelesScreen() {
       : { filaBase: 0, tramoActual: null };
   }, [items, indiceActual]);
 
+  // Solo los renglones que se ven al entrar se animan (y encienden su cascada): la lista monta
+  // varias pantallas de renglones de una vez, y animar los que están fuera de la vista eran
+  // cientos de resortes de estrellas que nadie ve, justo mientras la pantalla entra.
+  const filasEnVista = Math.ceil(height / altoFila) + 1;
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ItemLista>) =>
       item.tipo === 'tramo' ? (
@@ -255,11 +266,15 @@ export function NivelesScreen() {
           onPress={alTocar}
           logros={recompensa.logros}
           saltoActual={recompensa.saltoActual}
-          retrasoEntrada={entrando && !reducido ? escalon(Math.max(0, item.fila - filaBase)) : undefined}
+          retrasoEntrada={
+            entrando && !reducido && item.fila - filaBase >= -FILAS_ANTES_DEL_ACTUAL && item.fila - filaBase <= filasEnVista
+              ? escalon(Math.max(0, item.fila - filaBase))
+              : undefined
+          }
           cascada={item.tramo === tramoActual}
         />
       ),
-    [lado, alTocar, alternarTramo, recompensa, entrando, reducido, filaBase, tramoActual]
+    [lado, alTocar, alternarTramo, recompensa, entrando, reducido, filaBase, filasEnVista, tramoActual]
   );
   // Sin esto la lista no repinta renglones ya montados cuando cambia la recompensa o termina la entrada.
   const extraData = useMemo(() => ({ recompensa: recompensa.id, entrando }), [recompensa.id, entrando]);
@@ -314,7 +329,7 @@ export function NivelesScreen() {
               ref={listaRef}
               data={items}
               renderItem={renderItem}
-              keyExtractor={(it) => it.key}
+              keyExtractor={claveItem}
               getItemLayout={getItemLayout}
               extraData={extraData}
               stickyHeaderIndices={pegados}
