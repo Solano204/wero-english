@@ -1,20 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/shared/ui';
 import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { AudioButton } from '@/shared/ui/AudioButton';
-import { getEntriesByIds } from '@/data/repos/frases';
-import { useCarga } from '@/shared/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
-import { loadContent } from '@/data/contenido';
 import { aparecer, color, font, radius, space } from '@/theme';
-import type { Entry } from '@/types';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
+import { useContracciones } from '@/features/sonidos/hooks/useContracciones';
 
 /**
  * P-19, "cómo suena de verdad".
@@ -24,27 +15,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
  * nuevo es el ejercicio Cázala, que está en su propia pantalla.
  */
 export function ContractionsScreen() {
-  const nav = useNavigation<Nav>();
-  const content = useMemo(loadContent, []);
-  useCortarAudioAlSalir();
-  // Memoizado: con un array nuevo en cada render, el efecto de carga se
-  // volvía a disparar en cada render y no paraba nunca.
-  const grupos = useMemo(
-    () => [...content.contracciones.grupos].sort((a, b) => a.orden - b.orden),
-    [content]
-  );
-
-  const [activo, setActivo] = useState<string>(grupos[0]?.id ?? '');
-  const carga = useCarga(
-    async (): Promise<Entry[]> => {
-      const g = grupos.find((x) => x.id === activo);
-      return g ? getEntriesByIds(g.entradas) : [];
-    },
-    [activo, grupos]
-  );
-  const entries = carga.datos ?? [];
-  // El giro de carga sale de inmediato, sin el retraso del esqueleto: es lo que ya se veía.
-  const cargando = carga.estado === 'cargando';
+  const { nav, content, grupos, activo, setActivo, carga, entries, cargando } = useContracciones();
 
   if (grupos.length === 0) {
     return (
