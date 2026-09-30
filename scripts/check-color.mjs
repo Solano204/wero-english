@@ -30,7 +30,7 @@ const EXPLICITO = new Set([
   // El paso explícito de la escala de registro.
   'src/features/detalle/components/EscalaRegistro.tsx',
   // El aviso «Fuerte» de una frase con vulgaridad 2.
-  'src/components/mazo/CartaFrase.tsx',
+  'src/features/frases-sueltas/components/CartaFrase.tsx',
   'src/features/phrasal/components/DetalleForma.tsx',
 ]);
 const ROJO = /\briskStrong(?:Soft)?\b|['"]strong['"]/;

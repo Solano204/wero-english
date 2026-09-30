@@ -183,7 +183,7 @@ prueba('desborda: cabe justo al límite, se pasa un dp más', () => {
 const sinComentarios = (codigo) => codigo.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 prueba('la pantalla: sin contador, con la nota, con el mismo pedido de 60 y guardar como Detalle (estado real, botón secondary)', () => {
-  const pantalla = sinComentarios(leer('src/screens/extras/AzarScreen.tsx'));
+  const pantalla = sinComentarios(leer('src/features/frases-sueltas/screens/AzarScreen.tsx'));
   assert.ok(!/contador|setVistas|vistas/.test(pantalla), 'el contador de arriba se fue');
   assert.match(pantalla, /Aquí no se lleva cuenta de nada\. Solo pasa frases\./, 'la nota se queda');
   assert.match(pantalla, /getRandomEntries\(filter\(\), 60\)/, 'la baraja se pide igual');
@@ -196,7 +196,7 @@ prueba('la pantalla: sin contador, con la nota, con el mismo pedido de 60 y guar
 });
 
 prueba('la carta: frase en text con karaoke (no en accent), IPA centrado, grupos segmentados y acciones del lector', () => {
-  const carta = sinComentarios(leer('src/components/mazo/CartaFrase.tsx'));
+  const carta = sinComentarios(leer('src/features/frases-sueltas/components/CartaFrase.tsx'));
   assert.match(carta, /<FraseKaraoke palabras=\{palabras\} voz=\{voz\}/);
   assert.ok(!/color\.accent/.test(carta), 'el accent queda para lo que se toca');
   assert.match(carta, /ipa: \{[^}]*textAlign: 'center'/, 'el IPA lleva su textAlign');
@@ -210,7 +210,7 @@ prueba('la carta: frase en text con karaoke (no en accent), IPA centrado, grupos
 });
 
 prueba('el mazo: solo tres cartas, el umbral sale de mazo.ts, se asoman detrás, la que sube y la que sale cambian en el mismo cuadro y no hay abanico ni gesto con reducir movimiento', () => {
-  const mazo = sinComentarios(leer('src/components/mazo/MazoCartas.tsx'));
+  const mazo = sinComentarios(leer('src/features/frases-sueltas/components/MazoCartas.tsx'));
   assert.match(mazo, /indicesVisibles\(actual, entradas\.length\)/, 'solo se montan las cartas de indicesVisibles');
   assert.match(mazo, /decidirGesto\(tx\.value, ty\.value, e\.velocityX, e\.velocityY\)/, 'el umbral sale de mazo.ts');
   assert.match(mazo, /transformOrigin: '50% 100%'/, 'las de atrás conservan el borde de abajo: por eso se asoman');
@@ -234,11 +234,11 @@ prueba('el mazo: solo tres cartas, el umbral sale de mazo.ts, se asoman detrás,
 });
 
 prueba('el mazo vacío y el foco: al acabarse las 60 se ve vacío y se pide otra baraja; perder el foco corta la voz', () => {
-  const mazo = leer('src/components/mazo/MazoCartas.tsx');
+  const mazo = leer('src/features/frases-sueltas/components/MazoCartas.tsx');
   assert.match(mazo, /export function MazoVacio\(\)/);
   assert.match(mazo, /<BordePunteado/);
   assert.match(mazo, /Barajando…/);
-  const pantalla = sinComentarios(leer('src/screens/extras/AzarScreen.tsx'));
+  const pantalla = sinComentarios(leer('src/features/frases-sueltas/screens/AzarScreen.tsx'));
   assert.match(pantalla, /setBarajando\(true\);\s*setPool\(\[\]\);\s*void cargar\(\);/, 'la baraja nueva se pide con la misma carga');
   assert.match(pantalla, /<MazoVacio \/>/);
   assert.match(pantalla, /useFocusEffect\(|useCortarAudioAlSalir\(/);

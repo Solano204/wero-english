@@ -9,6 +9,6 @@ export { LecturasScreen } from '@/features/lecturas/screens/LecturasScreen';
 export { LecturaScreen } from '@/features/lecturas/screens/LecturaScreen';
 export { PhrasalScreen } from '@/features/phrasal/screens/PhrasalScreen';
 export { PhrasalVerboScreen } from '@/features/phrasal/screens/PhrasalVerboScreen';
-export { AzarScreen } from './AzarScreen';
+export { AzarScreen } from '@/features/frases-sueltas/screens/AzarScreen';
 export { GramaticaScreen } from '@/features/gramatica/screens/GramaticaScreen';
 export { GramaticaTemaScreen } from '@/features/gramatica/screens/GramaticaTemaScreen';

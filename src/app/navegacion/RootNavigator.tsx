@@ -125,7 +125,7 @@ export function RootNavigator() {
         getComponent={() => require('@/features/phrasal/screens/PhrasalVerboScreen').PhrasalVerboScreen}
         options={{ animation: 'fade', animationDuration: motionDuration.lento }}
       />
-      <Stack.Screen name="Azar" getComponent={() => require('@/screens/extras/AzarScreen').AzarScreen} />
+      <Stack.Screen name="Azar" getComponent={() => require('@/features/frases-sueltas/screens/AzarScreen').AzarScreen} />
       <Stack.Screen name="Lecturas" getComponent={() => require('@/features/lecturas/screens/LecturasScreen').LecturasScreen} />
       <Stack.Screen name="Lectura" getComponent={() => require('@/features/lecturas/screens/LecturaScreen').LecturaScreen} />
       <Stack.Screen name="Diagnostics" getComponent={() => require('@/screens/utility/DiagnosticsScreen').DiagnosticsScreen} />

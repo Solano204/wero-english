@@ -460,7 +460,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/gramatica/') || r === 'src/features/gramatica/screens/GramaticaScreen.tsx' || r === 'src/features/gramatica/screens/GramaticaTemaScreen.tsx' ||
   r.startsWith('src/components/phrasal/') || r === 'src/features/phrasal/screens/PhrasalScreen.tsx' || r === 'src/features/phrasal/screens/PhrasalVerboScreen.tsx' ||
   r.startsWith('src/components/lectura/') || r === 'src/features/lecturas/screens/LecturasScreen.tsx' || r === 'src/features/lecturas/screens/LecturaScreen.tsx' ||
-  r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
+  r.startsWith('src/components/mazo/') || r === 'src/features/frases-sueltas/screens/AzarScreen.tsx' ||
   r.startsWith('src/components/errores/') || r === 'src/features/errores/screens/ErrorsScreen.tsx' || r === 'src/features/errores/screens/ErrorDetailScreen.tsx' ||
   r.startsWith('src/components/atoradas/') || r === 'src/features/mazo/screens/DeckScreen.tsx' || r === 'src/features/atoradas/screens/StuckScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/features/practicar/screens/PracticeScreen.tsx' ||
