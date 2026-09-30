@@ -88,7 +88,7 @@ export function RootNavigator() {
 
       {/* La sesión entra desde abajo: se siente como entrar a un modo,
           no como navegar a otra sección. */}
-      <Stack.Group screenOptions={{ animation: 'slide_from_bottom' }}>
+      <Stack.Group screenOptions={OPCIONES_MODO}>
         <Stack.Screen name="Study" getComponent={() => require('@/features/estudio/screens/StudyScreen').StudyScreen} />
         <Stack.Screen name="EarMode" getComponent={() => require('@/features/oido/screens/EarModeScreen').EarModeScreen} />
         <Stack.Screen name="Cazala" getComponent={() => require('@/features/juegos/cazala/screens/CazalaScreen').CazalaScreen} />
@@ -129,7 +129,7 @@ export function RootNavigator() {
       <Stack.Screen
         name="PhrasalVerbo"
         getComponent={() => require('@/features/phrasal/screens/PhrasalVerboScreen').PhrasalVerboScreen}
-        options={{ animation: 'fade', animationDuration: motionDuration.lento }}
+        options={OPCIONES_FUNDIDO}
       />
       <Stack.Screen name="Azar" getComponent={() => require('@/features/frases-sueltas/screens/AzarScreen').AzarScreen} />
       <Stack.Screen name="Lecturas" getComponent={() => require('@/features/lecturas/screens/LecturasScreen').LecturasScreen} />
@@ -140,6 +140,11 @@ export function RootNavigator() {
     </Stack.Navigator>
   );
 }
+
+/** Las pantallas que son un modo (sesión, juegos) entran desde abajo. */
+const OPCIONES_MODO = { animation: 'slide_from_bottom' } as const;
+/** El verbo de Phrasal viaja a su título: la pantalla solo se funde. */
+const OPCIONES_FUNDIDO = { animation: 'fade', animationDuration: motionDuration.lento } as const;
 
 const SCREEN_OPTIONS = {
   headerShown: false,

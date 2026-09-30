@@ -155,6 +155,20 @@ function BarraLiquida(props: BottomTabBarProps) {
 const PADDING_BOTON_PESTANA = 5;
 const ARRIBA_PILDORA = space.sm + space.xs + PADDING_BOTON_PESTANA - 1;
 
+/*
+ * Lo que la barra le pide a cada pestaña, fuera del componente: las mismas funciones en cada render del navegador
+ * (antes, `screenOptions` creaba un fondo y un ícono nuevos por pestaña cada vez).
+ */
+const barraDePestanas = (props: BottomTabBarProps) => <BarraLiquida {...props} />;
+const fondoDeBarra = () => <FondoBarra />;
+const iconoDe = (nombre: keyof MainTabParams) =>
+  function IconoPestana({ color: tint, focused }: { color: string; focused: boolean }) {
+    return <Icono nombre={ICONO[nombre]} activo={focused} tint={tint} indice={ORDEN_PESTANAS.indexOf(nombre)} />;
+  };
+const ICONO_DE_PESTANA: Record<string, ReturnType<typeof iconoDe>> = Object.fromEntries(
+  ORDEN_PESTANAS.map((nombre) => [nombre, iconoDe(nombre as keyof MainTabParams)])
+);
+
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
   /*
@@ -166,27 +180,26 @@ export function TabNavigator() {
    * pestaña sube por encima suyo en vez de quedar tapada.
    */
   const abajo = insets.bottom > 0 ? insets.bottom + space.xs : space.md;
+  const estiloBarra = [styles.bar, { bottom: abajo }];
 
   return (
     <View style={{ flex: 1, backgroundColor: color.bg }}>
       <Tab.Navigator
       initialRouteName="Practice"
-      tabBar={(props) => <BarraLiquida {...props} />}
+      tabBar={barraDePestanas}
       screenOptions={({ route }) => ({
         headerShown: false,
         // La barra flota: se despega de los bordes y deja ver el
         // contenido desenfocado por detrás. Pegada al borde aplastaba la
         // pantalla; flotando, la app respira.
-        tabBarStyle: [styles.bar, { bottom: abajo }],
-        tabBarBackground: () => <FondoBarra />,
+        tabBarStyle: estiloBarra,
+        tabBarBackground: fondoDeBarra,
         tabBarActiveTintColor: color.barraActivo,
         tabBarInactiveTintColor: color.barraInactivo,
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: styles.item,
         tabBarButton: BotonPestana,
-        tabBarIcon: ({ color: tint, focused }) => (
-          <Icono nombre={ICONO[route.name]} activo={focused} tint={tint} indice={ORDEN_PESTANAS.indexOf(route.name)} />
-        ),
+        tabBarIcon: ICONO_DE_PESTANA[route.name],
       })}
     >
       {/* Solo Practicar (la inicial) se evalúa al abrir: Vocabulario y Progreso (con sus gráficas de Skia) cargan
