@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type ReactNode, useEffectEvent, useLayoutEffect } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
@@ -99,6 +99,10 @@ export function CableSenal({
   onUnionLista,
   children,
 }: Props) {
+  'use no memo';
+  // Fuera del React Compiler a propósito: los callbacks del gesto leen refs con los avisos más recientes (así el
+  // gesto no se rearma a media partida, lo que cortaría un arrastre en curso) y el compilador no sabe que esos
+  // callbacks corren después del render. Se queda con su memorización a mano (useMemo del gesto, useCallback).
   const reducido = useMovimientoReducido();
 
   const ax = useSharedValue(0);
@@ -121,19 +125,21 @@ export function CableSenal({
 
   // Los callbacks del padre cambian en cada render; el gesto y las animaciones llaman siempre al último.
   const cb = useRef({ onIniciar, onSoltar, onCancelar, onUnionLista });
-  cb.current = { onIniciar, onSoltar, onCancelar, onUnionLista };
+  useLayoutEffect(() => {
+    cb.current = { onIniciar, onSoltar, onCancelar, onUnionLista };
+  }, [onIniciar, onSoltar, onCancelar, onUnionLista]);
   const alIniciar = useCallback((i: number) => cb.current.onIniciar(i), []);
   const alCancelar = useCallback(() => cb.current.onCancelar(), []);
   const alUnionLista = useCallback(() => cb.current.onUnionLista(), []);
 
   useEffect(() => {
-    anclaSv.value = ancla;
+    anclaSv.set(ancla);
   }, [ancla, anclaSv]);
   useEffect(() => {
-    bloqueadoSv.value = bloqueado ? 1 : 0;
+    bloqueadoSv.set(bloqueado ? 1 : 0);
   }, [bloqueado, bloqueadoSv]);
   useEffect(() => {
-    libresSv.value = libres.map((l) => (l ? 1 : 0));
+    libresSv.set(libres.map((l) => (l ? 1 : 0)));
   }, [libres, libresSv]);
   useEffect(
     () => () => {
@@ -147,18 +153,18 @@ export function CableSenal({
   const preparar = useCallback(
     (a: Punto, siguiente: number) => {
       'worklet';
-      const desdeDedo = estado.value === SIGUE;
-      ax.value = a.x;
-      ay.value = a.y;
+      const desdeDedo = estado.get() === SIGUE;
+      ax.set(a.x);
+      ay.set(a.y);
       if (!desdeDedo) {
-        ex.value = a.x;
-        ey.value = a.y;
+        ex.set(a.x);
+        ey.set(a.y);
       }
-      estado.value = siguiente;
-      vis.value = 1;
-      ambar.value = 0;
-      brillo.value = 0;
-      pulso.value = 0;
+      estado.set(siguiente);
+      vis.set(1);
+      ambar.set(0);
+      brillo.set(0);
+      pulso.set(0);
     },
     [estado, ax, ay, ex, ey, vis, ambar, brillo, pulso]
   );
@@ -167,27 +173,27 @@ export function CableSenal({
     (a: Punto, b: Punto) => {
       'worklet';
       preparar(a, UNION);
-      tension.value = TENSION_INICIO;
+      tension.set(TENSION_INICIO);
       const llegar = { duration: motionDuration.rapido, easing: motionEasing.entrar };
-      ex.value = withTiming(b.x, llegar);
-      ey.value = withTiming(b.y, llegar);
-      tension.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
-      brillo.value = withDelay(motionDuration.rapido, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-      pulso.value = withDelay(
+      ex.set(withTiming(b.x, llegar));
+      ey.set(withTiming(b.y, llegar));
+      tension.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+      brillo.set(withDelay(motionDuration.rapido, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
+      pulso.set(withDelay(
         motionDuration.rapido,
         withTiming(1, { duration: motionDuration.base, easing: motionEasing.lineal }, (terminada) => {
           'worklet';
           if (terminada) runOnJS(alUnionLista)();
         })
-      );
+      ));
       // El cable se apaga mientras las fichas empiezan a fundirse.
-      vis.value = withDelay(
+      vis.set(withDelay(
         motionDuration.rapido + motionDuration.base,
         withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }, (terminada) => {
           'worklet';
-          if (terminada) estado.value = REPOSO;
+          if (terminada) estado.set(REPOSO);
         })
-      );
+      ));
     },
     [preparar, tension, ex, ey, brillo, pulso, vis, estado, alUnionLista]
   );
@@ -196,40 +202,40 @@ export function CableSenal({
     (a: Punto, b: Punto) => {
       'worklet';
       preparar(a, FALLO);
-      tension.value = TENSION_FLOJA;
+      tension.set(TENSION_FLOJA);
       // Llega, cuelga un instante y se recoge: 150 + 150 + 220 ms, la ventana de la jugada fallida.
       const llegar = { duration: motionDuration.rapido, easing: motionEasing.entrar };
       const volver = { duration: motionDuration.base, easing: motionEasing.salir };
-      ex.value = withSequence(withTiming(b.x, llegar), withDelay(motionDuration.rapido, withTiming(a.x, volver)));
-      ey.value = withSequence(withTiming(b.y, llegar), withDelay(motionDuration.rapido, withTiming(a.y, volver)));
-      ambar.value = withTiming(1, llegar);
-      vis.value = withDelay(
+      ex.set(withSequence(withTiming(b.x, llegar), withDelay(motionDuration.rapido, withTiming(a.x, volver))));
+      ey.set(withSequence(withTiming(b.y, llegar), withDelay(motionDuration.rapido, withTiming(a.y, volver))));
+      ambar.set(withTiming(1, llegar));
+      vis.set(withDelay(
         motionDuration.rapido * 2,
         withTiming(0, volver, (terminada) => {
           'worklet';
-          if (terminada) estado.value = REPOSO;
+          if (terminada) estado.set(REPOSO);
         })
-      );
+      ));
     },
     [preparar, tension, ex, ey, ambar, vis, estado]
   );
 
   const recoger = useCallback(() => {
     'worklet';
-    estado.value = CANCELA;
+    estado.set(CANCELA);
     const salir = { duration: motionDuration.base, easing: motionEasing.salir };
-    ex.value = withTiming(ax.value, salir);
-    ey.value = withTiming(ay.value, salir);
-    vis.value = withTiming(0, salir, (terminada) => {
+    ex.set(withTiming(ax.get(), salir));
+    ey.set(withTiming(ay.get(), salir));
+    vis.set(withTiming(0, salir, (terminada) => {
       'worklet';
-      if (terminada) estado.value = REPOSO;
-    });
+      if (terminada) estado.set(REPOSO);
+    }));
   }, [estado, ex, ey, ax, ay, vis]);
 
   /** Si el dedo se soltó sobre una ficha y aun así ninguna unión ni fallo tomó el cable, se recoge. */
   const recogerSiSigue = useCallback(() => {
     'worklet';
-    if (estado.value === SIGUE) recoger();
+    if (estado.get() === SIGUE) recoger();
   }, [estado, recoger]);
 
   const alSoltar = useCallback(
@@ -241,7 +247,7 @@ export function CableSenal({
     [recogerSiSigue]
   );
 
-  useEffect(() => {
+  const efectoUnion = useEffectEvent(() => {
     if (!union) return undefined;
     if (reducido) {
       const t = setTimeout(() => cb.current.onUnionLista(), motionDuration.base);
@@ -253,26 +259,26 @@ export function CableSenal({
     else cb.current.onUnionLista();
     return undefined;
     // Solo cuenta la unión que llega: un cambio de medidas no la reinicia.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [union]);
+  });
+  useEffect(() => efectoUnion(), [union]);
 
-  useEffect(() => {
+  const efectoFallo = useEffectEvent(() => {
     if (!fallo || reducido) return;
     const a = rectas[fallo.a];
     const b = rectas[fallo.b];
     if (a && b) runOnUI(arrancarFallo)(centroDe(a), centroDe(b));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fallo]);
+  });
+  useEffect(() => efectoFallo(), [fallo]);
 
   const habilitado = arrastrable && !reducido;
   const gesto = useMemo(() => {
     const puede = (i: number) => {
       'worklet';
-      return i >= 0 && libresSv.value[i] === 1 && bloqueadoSv.value === 0 && (anclaSv.value === -1 || anclaSv.value === i);
+      return i >= 0 && libresSv.get()[i] === 1 && bloqueadoSv.get() === 0 && (anclaSv.get() === -1 || anclaSv.get() === i);
     };
     const libre = (i: number) => {
       'worklet';
-      return i >= 0 && libresSv.value[i] === 1;
+      return i >= 0 && libresSv.get()[i] === 1;
     };
     return (
       Gesture.Pan()
@@ -287,49 +293,49 @@ export function CableSenal({
             manejador.fail();
             return;
           }
-          desde.value = i;
-          inicioX.value = t.x;
-          inicioY.value = t.y;
+          desde.set(i);
+          inicioX.set(t.x);
+          inicioY.set(t.y);
         })
         .onTouchesMove((e, manejador) => {
           const t = e.allTouches[0];
-          if (!t || desde.value < 0 || estado.value === SIGUE) return;
-          if (Math.hypot(t.x - inicioX.value, t.y - inicioY.value) < UMBRAL_ARRASTRE) return;
-          const origen = rectas[desde.value];
+          if (!t || desde.get() < 0 || estado.get() === SIGUE) return;
+          if (Math.hypot(t.x - inicioX.get(), t.y - inicioY.get()) < UMBRAL_ARRASTRE) return;
+          const origen = rectas[desde.get()];
           if (!origen) return;
           const c = centroDe(origen);
           cancelAnimation(vis);
-          ax.value = c.x;
-          ay.value = c.y;
-          ex.value = t.x;
-          ey.value = t.y;
+          ax.set(c.x);
+          ay.set(c.y);
+          ex.set(t.x);
+          ey.set(t.y);
           manejador.activate();
         })
         .onStart(() => {
-          estado.value = SIGUE;
-          tension.value = TENSION_ARRASTRE;
-          ambar.value = 0;
-          brillo.value = 0;
-          pulso.value = 0;
-          vis.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
-          if (anclaSv.value !== desde.value) runOnJS(alIniciar)(desde.value);
+          estado.set(SIGUE);
+          tension.set(TENSION_ARRASTRE);
+          ambar.set(0);
+          brillo.set(0);
+          pulso.set(0);
+          vis.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
+          if (anclaSv.get() !== desde.get()) runOnJS(alIniciar)(desde.get());
         })
         .onUpdate((e) => {
           const sobre = fichaEn(rectas, e.x, e.y);
-          const objetivo = libre(sobre) && sobre !== desde.value ? rectas[sobre] : undefined;
+          const objetivo = libre(sobre) && sobre !== desde.get() ? rectas[sobre] : undefined;
           if (objetivo) {
             const c = centroDe(objetivo);
-            ex.value = e.x + (c.x - e.x) * IMAN;
-            ey.value = e.y + (c.y - e.y) * IMAN;
+            ex.set(e.x + (c.x - e.x) * IMAN);
+            ey.set(e.y + (c.y - e.y) * IMAN);
           } else {
-            ex.value = e.x;
-            ey.value = e.y;
+            ex.set(e.x);
+            ey.set(e.y);
           }
         })
         .onFinalize((e, exito) => {
-          const origen = desde.value;
-          desde.value = -1;
-          if (estado.value !== SIGUE) return;
+          const origen = desde.get();
+          desde.set(-1);
+          if (estado.get() !== SIGUE) return;
           const sobre = fichaEn(rectas, e.x, e.y);
           if (exito && libre(sobre) && sobre !== origen) {
             runOnJS(alSoltar)(sobre);

@@ -10,6 +10,7 @@ import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, filoLuz, font, motionDuration, motionEasing, motionSpring, radius, sol, space } from '@/theme';
+import { useUltimo } from '@/shared/hooks/useUltimo';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { DulceObjetivo } from '@/types';
 
@@ -70,9 +71,7 @@ export function HojaPregunta({
   const { height: alturaVentana } = useWindowDimensions();
 
   // Al irse, la hoja se lleva su contenido: no se vacía a media salida.
-  const ultima = useRef<PreguntaDulces | null>(null);
-  if (pregunta) ultima.current = pregunta;
-  const p = ultima.current;
+  const p = useUltimo(pregunta);
   const visible = pregunta !== null;
 
   const entry = p?.objetivo.entry ?? null;
@@ -93,33 +92,33 @@ export function HojaPregunta({
 
   useEffect(() => {
     if (visible) {
-      velo.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+      velo.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
       if (reducido) {
-        y.value = 0;
-        opacidad.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+        y.set(0);
+        opacidad.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
       } else {
-        opacidad.value = 1;
+        opacidad.set(1);
         // La barra destella un instante antes de que suba la hoja.
-        y.value = withDelay(motionDuration.rapido, withSpring(0, motionSpring.rebote));
+        y.set(withDelay(motionDuration.rapido, withSpring(0, motionSpring.rebote)));
       }
     } else {
-      velo.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
-      if (reducido) opacidad.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
-      else y.value = withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      velo.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
+      if (reducido) opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
+      else y.set(withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir }));
     }
   }, [visible, reducido, alturaVentana, y, velo, opacidad]);
 
   // El título aparece cuando la frase de la meta llega a su lugar.
   useEffect(() => {
-    titulo.value = withTiming(tituloListo ? 1 : 0, {
+    titulo.set(withTiming(tituloListo ? 1 : 0, {
       duration: reducido ? 0 : motionDuration.rapido,
       easing: motionEasing.entrar,
-    });
+    }));
   }, [tituloListo, reducido, titulo]);
 
-  const hojaAnim = useAnimatedStyle(() => ({ opacity: opacidad.value, transform: [{ translateY: y.value }] }));
-  const veloAnim = useAnimatedStyle(() => ({ opacity: velo.value * VELO_MAX }));
-  const tituloAnim = useAnimatedStyle(() => ({ opacity: titulo.value }));
+  const hojaAnim = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ translateY: y.get() }] }));
+  const veloAnim = useAnimatedStyle(() => ({ opacity: velo.get() * VELO_MAX }));
+  const tituloAnim = useAnimatedStyle(() => ({ opacity: titulo.get() }));
 
   // Dónde quedará el título cuando la hoja termine de subir: la hoja va pegada al fondo de la capa.
   const [altoHoja, setAltoHoja] = useState(0);

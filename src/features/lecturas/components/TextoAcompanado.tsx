@@ -36,9 +36,9 @@ export function useOracionActual(
 ): SharedValue<number> {
   const actual = useSharedValue(-1);
   useAnimatedReaction(
-    () => (enCurso.value === 1 ? indiceEn(inicios, pos.value) : -1),
+    () => (enCurso.get() === 1 ? indiceEn(inicios, pos.get()) : -1),
     (ahora, antes) => {
-      if (ahora !== antes) actual.value = ahora;
+      if (ahora !== antes) actual.set(ahora);
     },
     [inicios]
   );
@@ -95,8 +95,8 @@ export const TextoAcompanado = memo(function TextoAcompanado({
     const n = oraciones.length;
     const nuevasYs = Array.from({ length: n }, (_, k) => medidas.current[k]?.y ?? -1);
     const nuevasHs = Array.from({ length: n }, (_, k) => medidas.current[k]?.alto ?? 0);
-    ys.value = nuevasYs;
-    hs.value = nuevasHs;
+    ys.set(nuevasYs);
+    hs.set(nuevasHs);
     alMedir?.({ base: contenedor.current.y, ys: nuevasYs, hs: nuevasHs, alto: contenedor.current.alto });
   }, [oraciones.length, ys, hs, alMedir]);
 
@@ -127,54 +127,54 @@ export const TextoAcompanado = memo(function TextoAcompanado({
   // El resaltado se desliza hasta la oración que suena; la primera vez que aparece no viaja, aparece ahí.
   useAnimatedReaction(
     () => {
-      const i = actual.value;
-      return { i, y: i >= 0 ? ys.value[i] ?? -1 : -1, h: i >= 0 ? hs.value[i] ?? 0 : 0 };
+      const i = actual.get();
+      return { i, y: i >= 0 ? ys.get()[i] ?? -1 : -1, h: i >= 0 ? hs.get()[i] ?? 0 : 0 };
     },
     (r, antes) => {
       if (r.i < 0 || r.y < 0) {
-        hop.value = reducido ? 0 : withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir });
+        hop.set(reducido ? 0 : withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir }));
         return;
       }
       const sinViaje = reducido || !antes || antes.i < 0 || antes.y < 0;
       if (sinViaje) {
-        hy.value = r.y;
-        hh.value = r.h;
+        hy.set(r.y);
+        hh.set(r.h);
       } else {
-        hy.value = withTiming(r.y, { duration: motionDuration.base, easing: motionEasing.entrar });
-        hh.value = withTiming(r.h, { duration: motionDuration.base, easing: motionEasing.entrar });
+        hy.set(withTiming(r.y, { duration: motionDuration.base, easing: motionEasing.entrar }));
+        hh.set(withTiming(r.h, { duration: motionDuration.base, easing: motionEasing.entrar }));
       }
-      hop.value = reducido ? 1 : withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+      hop.set(reducido ? 1 : withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
     },
     [reducido]
   );
 
   const estiloResaltado = useAnimatedStyle(() => ({
-    opacity: hop.value,
-    height: hh.value,
-    transform: [{ translateY: hy.value }],
+    opacity: hop.get(),
+    height: hh.get(),
+    transform: [{ translateY: hy.get() }],
   }));
   const estiloPulso = useAnimatedStyle(() => {
-    const i = iPulso.value;
+    const i = iPulso.get();
     return {
-      opacity: pulso.value * 0.3,
-      height: i >= 0 ? hs.value[i] ?? 0 : 0,
-      transform: [{ translateY: i >= 0 ? ys.value[i] ?? 0 : 0 }],
+      opacity: pulso.get() * 0.3,
+      height: i >= 0 ? hs.get()[i] ?? 0 : 0,
+      transform: [{ translateY: i >= 0 ? ys.get()[i] ?? 0 : 0 }],
     };
   });
 
   const alFrase = useCallback(
     (entryId: number, indice: number) => {
-      if (reducido || pulso.value > 0 || (ys.value[indice] ?? -1) < 0) {
-        if (pulso.value === 0) onFrase(entryId);
+      if (reducido || pulso.get() > 0 || (ys.get()[indice] ?? -1) < 0) {
+        if (pulso.get() === 0) onFrase(entryId);
         return;
       }
-      iPulso.value = indice;
-      pulso.value = 0;
-      pulso.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }, (fin) => {
+      iPulso.set(indice);
+      pulso.set(0);
+      pulso.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }, (fin) => {
         if (!fin) return;
-        pulso.value = 0;
+        pulso.set(0);
         runOnJS(onFrase)(entryId);
-      });
+      }));
     },
     [reducido, pulso, iPulso, ys, onFrase]
   );

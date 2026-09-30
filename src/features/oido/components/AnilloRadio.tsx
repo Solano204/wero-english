@@ -75,22 +75,22 @@ function Barras({ voz, envolvente, diametro, bolsillo }: BarrasProps) {
   const intervalo = useSharedValue<number>(motionRadio.cuadro);
 
   useEffect(() => {
-    env.value = envolvente;
+    env.set(envolvente);
   }, [envolvente, env]);
 
   useEffect(() => {
-    intervalo.value = bolsillo ? motionRadio.cuadroBolsillo : motionRadio.cuadro;
+    intervalo.set(bolsillo ? motionRadio.cuadroBolsillo : motionRadio.cuadro);
   }, [bolsillo, intervalo]);
 
   // La energía y la fase salen de la posición del audio, sin re-render de React y a lo sumo cada `intervalo` ms:
   // en bolsillo el anillo se dibuja a 30 fps.
   const control = useFrameCallback((cuadro) => {
     'worklet';
-    acumulado.value += cuadro.timeSincePreviousFrame ?? 0;
-    if (acumulado.value < intervalo.value) return;
-    acumulado.value = 0;
-    energia.value = energiaEn(env.value, pos.value) * activa.value;
-    fase.value = Math.max(0, pos.value) * VAIVEN;
+    acumulado.set(acumulado.get() + (cuadro.timeSincePreviousFrame ?? 0));
+    if (acumulado.get() < intervalo.get()) return;
+    acumulado.set(0);
+    energia.set(energiaEn(env.get(), pos.get()) * activa.get());
+    fase.set(Math.max(0, pos.get()) * VAIVEN);
   }, false);
 
   // Solo corre mientras suena la voz y hay foco (y sin «reducir movimiento»): en pausa, sin sonido o en segundo
@@ -98,12 +98,12 @@ function Barras({ voz, envolvente, diametro, bolsillo }: BarrasProps) {
   const corre = activo && sonando;
   useEffect(() => {
     control.setActive(corre);
-    if (!corre) energia.value = 0;
+    if (!corre) energia.set(0);
     return () => control.setActive(false);
   }, [corre, control, energia]);
 
-  const trazo = useDerivedValue(() => trazarAnillo(diametro, energia.value, fase.value));
-  const opacidad = useDerivedValue(() => OPACIDAD_REPOSO + (1 - OPACIDAD_REPOSO) * activa.value);
+  const trazo = useDerivedValue(() => trazarAnillo(diametro, energia.get(), fase.get()));
+  const opacidad = useDerivedValue(() => OPACIDAD_REPOSO + (1 - OPACIDAD_REPOSO) * activa.get());
   const c = diametro / 2;
   const centro = vec(c, c);
 
@@ -130,23 +130,23 @@ function Pildora({ idioma, activo }: PildoraProps) {
 
   useEffect(() => {
     const destino = idioma === 'es' ? 1 : 0;
-    flip.value = reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+    flip.set(reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [idioma, reducido, flip]);
 
   // Cada cara gira hasta quedar de canto (a la mitad del flip) y la otra sale de canto: el texto cambia sin que
   // se vean las dos a la vez. Con «reducir movimiento» no hay giro: se cambia de cara y solo cambia el color.
   const en = useAnimatedStyle(() => ({
-    opacity: flip.value < 0.5 ? 1 : 0,
+    opacity: flip.get() < 0.5 ? 1 : 0,
     transform: [
       { perspective: PERSPECTIVA },
-      { rotateX: `${interpolate(flip.value, [0, 0.5], [0, -90], Extrapolation.CLAMP)}deg` },
+      { rotateX: `${interpolate(flip.get(), [0, 0.5], [0, -90], Extrapolation.CLAMP)}deg` },
     ],
   }));
   const es = useAnimatedStyle(() => ({
-    opacity: flip.value >= 0.5 ? 1 : 0,
+    opacity: flip.get() >= 0.5 ? 1 : 0,
     transform: [
       { perspective: PERSPECTIVA },
-      { rotateX: `${interpolate(flip.value, [0.5, 1], [90, 0], Extrapolation.CLAMP)}deg` },
+      { rotateX: `${interpolate(flip.get(), [0.5, 1], [90, 0], Extrapolation.CLAMP)}deg` },
     ],
   }));
 

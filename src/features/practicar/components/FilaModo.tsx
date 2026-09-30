@@ -53,26 +53,26 @@ export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice 
   const chevron = useSharedValue(0);
 
   const entrada = useAnimatedStyle(() => {
-    const progreso = avance ? avance.progreso.value : 1;
+    const progreso = avance ? avance.progreso.get() : 1;
     // Cerrando no hay escalón: todos salen juntos.
-    const espera = avance && avance.abriendo.value === 0 ? 0 : retraso;
+    const espera = avance && avance.abriendo.get() === 0 ? 0 : retraso;
     const t = interpolate(progreso * motionDuration.lento, [espera, motionDuration.lento], [0, 1], Extrapolation.CLAMP);
     return { opacity: t, transform: [{ translateY: (1 - t) * space.sm }] };
   });
   const estiloBarrido = useAnimatedStyle(() => ({
-    opacity: interpolate(barrido.value, [0, 0.15, 0.85, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
-    transform: [{ translateX: interpolate(barrido.value, [0, 1], [-ancho.value * ANCHO_BARRIDO, ancho.value]) }],
+    opacity: interpolate(barrido.get(), [0, 0.15, 0.85, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ translateX: interpolate(barrido.get(), [0, 1], [-ancho.get() * ANCHO_BARRIDO, ancho.get()]) }],
   }));
-  const estiloChevron = useAnimatedStyle(() => ({ transform: [{ translateX: chevron.value }] }));
+  const estiloChevron = useAnimatedStyle(() => ({ transform: [{ translateX: chevron.get() }] }));
 
   const alPresionar = () => {
     if (reducido) return;
-    barrido.value = 0;
-    barrido.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
-    chevron.value = withSequence(
+    barrido.set(0);
+    barrido.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+    chevron.set(withSequence(
       withTiming(AVANCE_CHEVRON, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.entrar })
-    );
+    ));
   };
 
   const dato = textoMeta(meta);
@@ -82,7 +82,7 @@ export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice 
         onPress={onPress}
         onPressIn={alPresionar}
         onLayout={(e) => {
-          ancho.value = e.nativeEvent.layout.width;
+          ancho.set(e.nativeEvent.layout.width);
         }}
         accessibilityRole="button"
         accessibilityLabel={dato ? `${titulo}. ${corta}. ${dato}` : `${titulo}. ${corta}`}

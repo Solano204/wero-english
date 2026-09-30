@@ -63,7 +63,7 @@ export function BarraSesion({ hecho, meta, seguidas = 0, barrido = false }: Prop
   const nivelPrevio = useRef(0);
 
   useEffect(() => {
-    progreso.value = reducido ? fraccion : withSpring(fraccion, motionSpring.liquido);
+    progreso.set(reducido ? fraccion : withSpring(fraccion, motionSpring.liquido));
   }, [fraccion, reducido, progreso]);
 
   useEffect(() => {
@@ -71,38 +71,38 @@ export function BarraSesion({ hecho, meta, seguidas = 0, barrido = false }: Prop
     nivelPrevio.current = nivel;
     const objetivo = BRILLO[nivel];
     if (reducido) {
-      brillo.value = objetivo;
+      brillo.set(objetivo);
       return;
     }
-    brillo.value = sube
+    brillo.set(sube
       ? withSequence(
           withTiming(Math.min(1, objetivo + PASO_ARRIBA), { duration: motionDuration.rapido, easing: motionEasing.entrar }),
           withTiming(objetivo, { duration: motionDuration.lento, easing: motionEasing.salir })
         )
-      : withTiming(objetivo, { duration: motionDuration.escena, easing: motionEasing.salir });
+      : withTiming(objetivo, { duration: motionDuration.escena, easing: motionEasing.salir }));
   }, [nivel, reducido, brillo]);
 
   useEffect(() => {
-    pasada.value = barrido && !reducido ? withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }) : 0;
+    pasada.set(barrido && !reducido ? withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }) : 0);
   }, [barrido, reducido, pasada]);
 
   // La franja nace y muere en los bordes de la barra: sube a plena luz en el medio del recorrido.
   const luz = useAnimatedStyle(() => ({
-    opacity: 1 - Math.abs(2 * pasada.value - 1),
-    transform: [{ translateX: pasada.value * (ancho.value + BANDA) - BANDA }],
+    opacity: 1 - Math.abs(2 * pasada.get() - 1),
+    transform: [{ translateX: pasada.get() * (ancho.get() + BANDA) - BANDA }],
   }));
-  const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: acotar(progreso.value) }] }));
+  const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: acotar(progreso.get()) }] }));
   const resplandor = useAnimatedStyle(() => ({
-    opacity: brillo.value,
-    transform: [{ scaleX: acotar(progreso.value) }],
+    opacity: brillo.get(),
+    transform: [{ scaleX: acotar(progreso.get()) }],
   }));
   const punto = useAnimatedStyle(() => ({
-    transform: [{ translateX: acotar(progreso.value) * ancho.value - HALO / 2 }],
+    transform: [{ translateX: acotar(progreso.get()) * ancho.get() - HALO / 2 }],
   }));
-  const halo = useAnimatedStyle(() => ({ transform: [{ scale: 1 + CRECE_HALO * brillo.value }] }));
+  const halo = useAnimatedStyle(() => ({ transform: [{ scale: 1 + CRECE_HALO * brillo.get() }] }));
 
   const alMedir = (e: LayoutChangeEvent) => {
-    ancho.value = e.nativeEvent.layout.width;
+    ancho.set(e.nativeEvent.layout.width);
   };
 
   return (

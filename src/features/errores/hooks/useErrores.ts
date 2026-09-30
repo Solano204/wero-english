@@ -23,7 +23,7 @@ export function useErrores() {
   const user = useAuthStore((s) => s.user);
   const guardado = useSettingsStore((s) => s.ordenErrores);
   const guardarAjuste = useSettingsStore((s) => s.set);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const todos = content.errores.errores;
   const total = content.errores.total;
 
@@ -42,7 +42,7 @@ export function useErrores() {
   const alCambiarVista = useCallback(
     (sig: Vista) => {
       setVista(sig);
-      salida.value = 1;
+      salida.set(1);
     },
     [salida]
   );
@@ -53,9 +53,9 @@ export function useErrores() {
         setVista(sig);
         return;
       }
-      salida.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }, (fin) => {
+      salida.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }, (fin) => {
         if (fin) runOnJS(alCambiarVista)(sig);
-      });
+      }));
     },
     [reducido, salida, alCambiarVista]
   );

@@ -53,7 +53,7 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
         clearInterval(reloj);
         reloj = null;
       }
-      activa.value = reducido ? 0 : withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir });
+      activa.set(reducido ? 0 : withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir }));
       // `sonando` baja cuando la onda ya se aplanó, no antes: quien cambia de estilo por él no la corta.
       if (apagar) clearTimeout(apagar);
       apagar = setTimeout(() => setSonando(false), reducido ? 0 : motionDuration.base);
@@ -73,12 +73,12 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
         return;
       }
       // Se apunta a donde estará el audio en la próxima lectura: sin escalones ni retraso.
-      pos.value = reducido
+      pos.set(reducido
         ? p
         : withTiming(p + (motionSenal.muestreo / 1000) * velocidad, {
             duration: motionSenal.muestreo,
             easing: motionEasing.lineal,
-          });
+          }));
     };
 
     const alArrancar = (e: audio.ArranqueFrase) => {
@@ -94,8 +94,8 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
       sono = false;
       arrancoEn = Date.now();
       cancelAnimation(pos);
-      pos.value = 0;
-      activa.value = reducido ? 1 : withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      pos.set(0);
+      activa.set(reducido ? 1 : withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
       if (!reloj) reloj = setInterval(muestrear, motionSenal.muestreo);
     };
 
@@ -106,7 +106,7 @@ export function useVozEnVivo(ruta: string | null): VozEnVivo {
       if (apagar) clearTimeout(apagar);
       cancelAnimation(pos);
       cancelAnimation(activa);
-      activa.value = 0;
+      activa.set(0);
     };
   }, [ruta, vivo, reducido, pos, activa]);
 

@@ -42,11 +42,11 @@ export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style, sal
 
   useEffect(() => {
     if (reducido) return;
-    brillo.value = withRepeat(
+    brillo.set(withRepeat(
       withTiming(1, { duration: motionCiclo.brilloEsqueleto, easing: motionEasing.lineal }),
       -1,
       false
-    );
+    ));
   }, [reducido, brillo]);
 
   return (
@@ -77,8 +77,8 @@ export function Hueso({ width = '100%', height, radius: r = radius.sm, style }: 
 
   const estiloBrillo = useAnimatedStyle(() => {
     if (!brillo) return { opacity: 0 };
-    const w = ancho.value || 1;
-    return { opacity: 1, transform: [{ translateX: (brillo.value * 2 - 1) * w }] };
+    const w = ancho.get() || 1;
+    return { opacity: 1, transform: [{ translateX: (brillo.get() * 2 - 1) * w }] };
   });
 
   return (
@@ -86,7 +86,7 @@ export function Hueso({ width = '100%', height, radius: r = radius.sm, style }: 
       accessible={false}
       importantForAccessibility="no-hide-descendants"
       onLayout={(e) => {
-        ancho.value = e.nativeEvent.layout.width;
+        ancho.set(e.nativeEvent.layout.width);
       }}
       style={[
         styles.hueso,

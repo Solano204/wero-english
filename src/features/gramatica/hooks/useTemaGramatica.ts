@@ -71,8 +71,8 @@ export function useTemaGramatica() {
   const { top: insetArriba, bottom: insetAbajo } = useSafeAreaInsets();
 
   useDerivedValue(() => {
-    if (animandoScroll.value === 0) return;
-    scrollTo(scrollRef, 0, destinoScroll.value, false);
+    if (animandoScroll.get() === 0) return;
+    scrollTo(scrollRef, 0, destinoScroll.get(), false);
   });
 
   const irAlScroll = useCallback(
@@ -84,11 +84,11 @@ export function useTemaGramatica() {
         })(y);
         return;
       }
-      animandoScroll.value = 1;
-      destinoScroll.value = scrollY.value;
-      destinoScroll.value = withTiming(y, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
-        animandoScroll.value = 0;
-      });
+      animandoScroll.set(1);
+      destinoScroll.set(scrollY.get());
+      destinoScroll.set(withTiming(y, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
+        animandoScroll.set(0);
+      }));
     },
     [reducido, scrollRef, scrollY, destinoScroll, animandoScroll]
   );
@@ -103,7 +103,7 @@ export function useTemaGramatica() {
         if (y < techo) delta = y - techo;
         else if (y + alto > piso) delta = Math.min(y + alto - piso, y - techo);
         if (Math.abs(delta) < 1) return;
-        irAlScroll(Math.max(0, scrollY.value + delta));
+        irAlScroll(Math.max(0, scrollY.get() + delta));
       });
     },
     [insetArriba, insetAbajo, altoVentana, irAlScroll, scrollY]

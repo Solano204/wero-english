@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useEffectEvent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -103,91 +103,91 @@ export const Pieza = memo(function Pieza({
 
   /** Cae hasta `destino` acelerando y rebota un poco al aterrizar; un paso de fila y media cae en 160 ms. */
   const caer = (destino: number, filas: number, retraso: number) => {
-    py.value = withDelay(
+    py.set(withDelay(
       retraso,
       withSequence(
         withTiming(destino, { duration: duracionCaida(filas), easing: motionEasing.salir }),
         withTiming(destino - REBOTE_DP, { duration: motionDulces.reboteMs / 2, easing: motionEasing.entrar }),
         withTiming(destino, { duration: motionDulces.reboteMs / 2, easing: motionEasing.salir })
       )
-    );
+    ));
   };
 
   // Al montar: la que entra por arriba cae a su celda con el escalón de su columna.
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (!entrada) return;
     if (reducido) {
-      py.value = y;
-      opacidad.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      py.set(y);
+      opacidad.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
       return;
     }
     if (entrada.desde >= fila) {
       // Sin nada que caer (una pieza nueva del rebarajado): solo aparece.
-      opacidad.value = 0;
-      opacidad.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+      opacidad.set(0);
+      opacidad.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
       return;
     }
     caer(y, fila - entrada.desde, entrada.retraso);
     // Solo cuenta la entrada del montaje.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   // Cada vez que cambia de celda: el intercambio, la caída o el rebarajado.
-  useEffect(() => {
+  const efectoMov = useEffectEvent(() => {
     if (!mov) return;
     if (reducido) {
-      px.value = x;
-      py.value = y;
-      opacidad.value = withSequence(
+      px.set(x);
+      py.set(y);
+      opacidad.set(withSequence(
         withTiming(0.35, { duration: motionDuration.rapido / 2, easing: motionEasing.salir }),
         withTiming(1, { duration: motionDuration.rapido / 2, easing: motionEasing.entrar })
-      );
+      ));
       return;
     }
     if (mov.tipo === 'caida') {
-      px.value = x;
+      px.set(x);
       caer(y, mov.filas, 0);
       return;
     }
     const duracion = mov.tipo === 'rebaraja' ? motionDuration.lento : motionDuration.base;
     const cfg = { duration: duracion, easing: motionEasing.entrar };
-    px.value = withTiming(x, cfg);
-    py.value = withTiming(y, cfg);
+    px.set(withTiming(x, cfg));
+    py.set(withTiming(y, cfg));
     if (mov.tipo === 'rebaraja') {
-      giro.value = 0;
-      giro.value = withTiming(360, cfg);
+      giro.set(0);
+      giro.set(withTiming(360, cfg));
     } else if (mov.asienta) {
       // El intercambio no armó nada: se queda, y las piezas se asientan con un rebote corto al llegar.
-      escala.value = withDelay(
+      escala.set(withDelay(
         duracion,
         withSequence(
           withTiming(ASIENTO, { duration: motionDuration.rapido / 2, easing: motionEasing.salir }),
           withSpring(1, motionSpring.rebote)
         )
-      );
+      ));
     }
     // El movimiento es lo que cambia de celda, no `x` ni `y` sueltas.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mov]);
+  });
+  useEffect(() => efectoMov(), [mov]);
 
   // Forma línea: pulsa y se va.
   useEffect(() => {
     if (!explota) return;
     if (reducido) {
-      opacidad.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
       return;
     }
-    escala.value = withSequence(
+    escala.set(withSequence(
       withTiming(PULSO, { duration: motionDulces.pulso, easing: motionEasing.entrar }),
       withTiming(ENCOGIDA, { duration: motionDulces.estallido, easing: motionEasing.salir })
-    );
-    opacidad.value = withDelay(motionDulces.pulso, withTiming(0, { duration: motionDulces.estallido, easing: motionEasing.salir }));
+    ));
+    opacidad.set(withDelay(motionDulces.pulso, withTiming(0, { duration: motionDulces.estallido, easing: motionEasing.salir })));
   }, [explota, reducido, escala, opacidad]);
 
   // La pieza elegida se levanta un poco.
   useEffect(() => {
     const meta = elegida && !reducido ? REALCE : 1;
-    realce.value = withTiming(meta, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+    realce.set(withTiming(meta, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
   }, [elegida, reducido, realce]);
 
   // El deslizamiento no tenía a dónde ir: cabecea y se sacude (la sacudida estándar), sin color de error.
@@ -195,22 +195,22 @@ export const Pieza = memo(function Pieza({
     if (!rechazo) return undefined;
     setSacude(true);
     if (!reducido) {
-      escala.value = withSequence(
+      escala.set(withSequence(
         withTiming(REBOTE_RECHAZO, { duration: motionDuration.rapido / 2, easing: motionEasing.salir }),
         withSpring(1, motionSpring.rebote)
-      );
+      ));
     }
     const t = setTimeout(() => setSacude(false), motionDuration.base);
     return () => clearTimeout(t);
   }, [rechazo, reducido, escala]);
 
   const lugar = useAnimatedStyle(() => ({
-    opacity: opacidad.value,
+    opacity: opacidad.get(),
     transform: [
-      { translateX: px.value },
-      { translateY: py.value },
-      { rotate: `${giro.value}deg` },
-      { scale: escala.value * realce.value },
+      { translateX: px.get() },
+      { translateY: py.get() },
+      { rotate: `${giro.get()}deg` },
+      { scale: escala.get() * realce.get() },
     ],
   }));
 

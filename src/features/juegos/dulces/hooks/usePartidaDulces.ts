@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
 import { AppState, Dimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -68,7 +68,9 @@ export function usePartidaDulces() {
   const [pool, setPool] = useState<Entry[]>([]);
   const [objetivos, setObjetivos] = useState<DulceObjetivo[]>([]);
   const objetivosRef = useRef(objetivos);
-  objetivosRef.current = objetivos;
+  useLayoutEffect(() => {
+    objetivosRef.current = objetivos;
+  }, [objetivos]);
   const [elegida, setElegida] = useState<number | null>(null);
   // Cubitos al acertar.
   const reaccion = useReaccion();
@@ -103,6 +105,15 @@ export function usePartidaDulces() {
 
   const siguienteFrase = useRef(0);
   const empezoEn = useRef(Date.now());
+  const tomarSiguienteFrase = useCallback(() => {
+    const i = siguienteFrase.current;
+    siguienteFrase.current = i + 1;
+    return i;
+  }, []);
+  const msDesdeInicio = useCallback(() => Date.now() - empezoEn.current, []);
+  const reiniciarReloj = useCallback(() => {
+    empezoEn.current = Date.now();
+  }, []);
   const montado = useRef(true);
 
   const { reproducirVozMatch, cancelarVozMatch } = useVozMatch(autoAudio);
@@ -117,8 +128,9 @@ export function usePartidaDulces() {
     respondiendo,
     pool,
     META,
-    siguienteFrase,
-    empezoEn,
+    tomarSiguienteFrase,
+    msDesdeInicio,
+    reiniciarReloj,
     montado,
     despachar,
     setObjetivos,
@@ -346,15 +358,15 @@ export function usePartidaDulces() {
 
   // Al mostrarse la pregunta: corta lo que sonaba (incluida una voz de
   // match que hubiera quedado pendiente) y dice la frase en inglés.
-  useEffect(() => {
+  const efectoPregunta = useEffectEvent(() => {
     if (!pregunta) return;
     cancelarVozMatch(true);
     audio.stop();
     if (autoAudio) void audio.play(pregunta.objetivo.entry.audio_en);
     // Solo debe correr cuando aparece una pregunta nueva, no en cada
     // cambio de `respondiendo` mientras la misma sigue abierta.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pregunta]);
+  });
+  useEffect(() => efectoPregunta(), [pregunta]);
 
   useEffect(() => {
     if (jugadas <= 0 && !pregunta && !animando) {

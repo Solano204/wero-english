@@ -37,9 +37,9 @@ export function RenglonPalabra({ ejemplo, esActual }: Props) {
   const luz = useSharedValue(0);
   useEffect(() => {
     const destino = suena ? 1 : 0;
-    luz.value = reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+    luz.set(reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [suena, reducido, luz]);
-  const estiloFilo = useAnimatedStyle(() => ({ opacity: luz.value }));
+  const estiloFilo = useAnimatedStyle(() => ({ opacity: luz.get() }));
 
   return (
     <Presionable

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { celebrarSiToca, type TemaCelebracion } from '@/data/local/celebracion';
 
 /**
@@ -16,7 +16,9 @@ export function useCelebracion(
 ): boolean {
   const [celebrar, setCelebrar] = useState(false);
   const marcaActual = useRef(marca);
-  marcaActual.current = marca;
+  useLayoutEffect(() => {
+    marcaActual.current = marca;
+  }, [marca]);
   const clave = dependeDeLaMarca ? marca : null;
 
   useEffect(() => {

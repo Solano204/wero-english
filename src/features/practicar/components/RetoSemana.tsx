@@ -35,7 +35,7 @@ export function RetoSemana({ llevas, meta, cumplido, desde, hoy, usuarioId, scro
   const [visto, setVisto] = useState(false);
 
   useAnimatedReaction(
-    () => visible.value,
+    () => visible.get(),
     (ahora, antes) => {
       if (ahora === 1 && antes !== 1) runOnJS(setVisto)(true);
     }

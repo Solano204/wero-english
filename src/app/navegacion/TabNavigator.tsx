@@ -86,14 +86,14 @@ function Icono({ nombre, activo, tint, indice }: IconoProps) {
       return;
     }
     if (!enfocada || !activo || reducido) return;
-    escala.value = withSequence(
+    escala.set(withSequence(
       withTiming(1.12, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar })
-    );
+    ));
   }, [enfocada, activo, reducido, escala]);
 
   const simbolo = useAnimatedStyle(() => ({
-    transform: [{ scale: escala.value }],
+    transform: [{ scale: escala.get() }],
   }));
 
   return (

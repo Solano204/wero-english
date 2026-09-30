@@ -38,27 +38,27 @@ const Segmento = memo(function Segmento({ encendido, ola, retraso }: SegmentoPro
 
   useEffect(() => {
     const meta = encendido ? 1 : 0;
-    luz.value = reducido ? meta : withSpring(meta, motionSpring.rebote);
+    luz.set(reducido ? meta : withSpring(meta, motionSpring.rebote));
   }, [encendido, reducido, luz]);
 
   // Al cerrar el tablero cada segmento crece y vuelve, uno tras otro (`escalon`).
   useEffect(() => {
     if (!ola || reducido) return;
-    pulso.value = withDelay(
+    pulso.set(withDelay(
       retraso,
       withSequence(
         withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
       )
-    );
+    ));
   }, [ola, reducido, retraso, pulso]);
 
   const relleno = useAnimatedStyle(() => ({
-    opacity: Math.min(1, luz.value * 2),
-    transform: [{ scaleX: Math.max(0, luz.value) }],
+    opacity: Math.min(1, luz.get() * 2),
+    transform: [{ scaleX: Math.max(0, luz.get()) }],
   }));
   const onda = useAnimatedStyle(() => ({
-    transform: [{ scaleY: 1 + CRECE_ALTO * pulso.value }, { scaleX: 1 + CRECE_ANCHO * pulso.value }],
+    transform: [{ scaleY: 1 + CRECE_ALTO * pulso.get() }, { scaleX: 1 + CRECE_ANCHO * pulso.get() }],
   }));
 
   return (

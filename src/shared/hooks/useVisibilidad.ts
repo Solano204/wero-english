@@ -45,7 +45,7 @@ export function useVisibilidad(scrollY: SharedValue<number>) {
 
   const activa = useSharedValue(enfocada && primerPlano);
   useEffect(() => {
-    activa.value = enfocada && primerPlano;
+    activa.set(enfocada && primerPlano);
   }, [enfocada, primerPlano, activa]);
 
   const visible = useSharedValue(0);
@@ -64,23 +64,23 @@ export function useVisibilidad(scrollY: SharedValue<number>) {
       // Sin layout todavía, ya desmontada, o el ref no llegó a un nodo nativo:
       // se queda sin medición, y la reacción de abajo la trata como no visible.
       if (m === null) return;
-      posicion.value = m.pageY;
-      scrollEnMedida.value = scrollY.value;
-      alto.value = m.height;
+      posicion.set(m.pageY);
+      scrollEnMedida.set(scrollY.get());
+      alto.set(m.height);
     })();
   };
 
   useAnimatedReaction(
-    () => ({ scroll: scrollY.value, y: posicion.value, h: alto.value, activa: activa.value }),
+    () => ({ scroll: scrollY.get(), y: posicion.get(), h: alto.get(), activa: activa.get() }),
     (ahora) => {
       if (!ahora.activa || ahora.y === null) {
-        visible.value = 0;
+        visible.set(0);
         return;
       }
-      const pageY = ahora.y - (ahora.scroll - scrollEnMedida.value);
-      visible.value = pageY < pantalla && pageY + ahora.h > 0 ? 1 : 0;
+      const pageY = ahora.y - (ahora.scroll - scrollEnMedida.get());
+      visible.set(pageY < pantalla && pageY + ahora.h > 0 ? 1 : 0);
       const centro = pageY + ahora.h / 2 - pantalla / 2;
-      desfase.value = Math.max(-MARGEN_PARALAJE, Math.min(MARGEN_PARALAJE, -centro * FACTOR_PARALAJE));
+      desfase.set(Math.max(-MARGEN_PARALAJE, Math.min(MARGEN_PARALAJE, -centro * FACTOR_PARALAJE)));
     }
   );
 
@@ -95,7 +95,7 @@ export function useVisto(scrollY: SharedValue<number>) {
   const { ref, visible, alAcomodar } = useVisibilidad(scrollY);
   const [visto, setVisto] = useState(false);
   useAnimatedReaction(
-    () => visible.value,
+    () => visible.get(),
     (ahora, antes) => {
       if (ahora === 1 && antes !== 1) runOnJS(setVisto)(true);
     }

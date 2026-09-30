@@ -16,7 +16,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function useDescargas() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
 
   const [progress, setProgress] = useState<
     Record<string, downloads.DownloadProgress>
@@ -82,5 +82,10 @@ export function useDescargas() {
     (a, b) => a.orden - b.orden || a.mundo.localeCompare(b.mundo)
   );
 
-  return { nav, progress, errors, cancel, hoja, descargar, packs };
+  // «Cancelar» de un pack: la descarga en curso lo lee entre archivo y archivo.
+  const cancelar = useCallback((packId: string) => {
+    cancel.current[packId] = true;
+  }, []);
+
+  return { nav, progress, errors, cancelar, hoja, descargar, packs };
 }

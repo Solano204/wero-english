@@ -29,12 +29,12 @@ export function BarraFina({ fraccion, tinte, activo, retraso = 0 }: Props) {
   useEffect(() => {
     if (!activo) return;
     const meta = Math.min(1, Math.max(0, fraccion));
-    progreso.value = reducido
+    progreso.set(reducido
       ? meta
-      : withDelay(retraso, withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.entrar }));
+      : withDelay(retraso, withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.entrar })));
   }, [activo, fraccion, retraso, reducido, progreso]);
 
-  const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: progreso.value }] }));
+  const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: progreso.get() }] }));
 
   return (
     <View style={styles.carril} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">

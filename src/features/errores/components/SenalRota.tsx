@@ -39,8 +39,8 @@ interface FranjaProps {
 /** Una franja horizontal del texto que se corre de lado a saltos: una copia del texto recortada a esa banda. */
 function Franja({ texto, estilo, g, desde, alto, lado }: FranjaProps) {
   const anim = useAnimatedStyle(() => {
-    const k = 1 - g.value;
-    return { opacity: k, transform: [{ translateX: lado * (SALTOS[cuadro(g.value)] ?? 0) * DESPLAZO * 2 * k }] };
+    const k = 1 - g.get();
+    return { opacity: k, transform: [{ translateX: lado * (SALTOS[cuadro(g.get())] ?? 0) * DESPLAZO * 2 * k }] };
   });
   return (
     <Animated.View
@@ -66,7 +66,7 @@ interface CopiaProps {
 /** La aberración: una copia del texto en ámbar, corrida de lado, que se desvanece y vuelve a su lugar. */
 function Aberracion({ texto, estilo, g, lado, opacidad }: CopiaProps) {
   const anim = useAnimatedStyle(() => {
-    const k = 1 - g.value;
+    const k = 1 - g.get();
     return { opacity: opacidad * k, transform: [{ translateX: lado * DESPLAZO * k }] };
   });
   return (
@@ -102,16 +102,16 @@ export function SenalRota({ texto, estilo, disparo }: Props) {
 
   useEffect(() => {
     if (disparo === 0 || reducido) return undefined;
-    g.value = 0;
-    g.value = withTiming(1, { duration: motionMalentendido.glitch, easing: motionEasing.lineal });
+    g.set(0);
+    g.set(withTiming(1, { duration: motionMalentendido.glitch, easing: motionEasing.lineal }));
     return () => cancelAnimation(g);
   }, [disparo, reducido, g]);
 
   const base = useAnimatedStyle(() => {
-    const paso = cuadro(g.value);
-    const k = 1 - g.value;
+    const paso = cuadro(g.get());
+    const k = 1 - g.get();
     return {
-      color: interpolateColor(g.value, [0.55, 1], [TEXTO, AMBAR]),
+      color: interpolateColor(g.get(), [0.55, 1], [TEXTO, AMBAR]),
       opacity: paso >= PASOS - 2 || paso % 2 === 1 ? 1 : 0.6,
       transform: [{ translateX: (SALTOS[paso] ?? 0) * DESPLAZO * 0.4 * k }],
     };

@@ -90,11 +90,11 @@ function Barras({ voz, envolvente, alto, tono = 'senal' }: Props) {
   const conexion = useSharedValue(reducido ? 1 : 0);
 
   useEffect(() => {
-    env.value = envolvente;
+    env.set(envolvente);
   }, [envolvente, env]);
 
   useEffect(() => {
-    conexion.value = reducido ? 1 : withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
+    conexion.set(reducido ? 1 : withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [reducido, conexion]);
 
   const barras = lenta ? BARRAS_LENTA : BARRAS_NORMAL;
@@ -102,21 +102,21 @@ function Barras({ voz, envolvente, alto, tono = 'senal' }: Props) {
   const vaiven = lenta ? VAIVEN_LENTO : VAIVEN;
 
   const trazo = useDerivedValue(() => {
-    const { width, height } = tam.value;
+    const { width, height } = tam.get();
     // Con reducir movimiento la onda es una línea estática: no lee la posición.
-    const energia = reducido ? 0 : energiaEn(env.value, pos.value) * activa.value;
+    const energia = reducido ? 0 : energiaEn(env.get(), pos.get()) * activa.get();
     return trazarVoz({
       ancho: width,
       alto: height,
       barras,
       grosor,
       energia,
-      fase: reducido ? 0 : Math.max(0, pos.value) * vaiven,
-      conexion: conexion.value,
+      fase: reducido ? 0 : Math.max(0, pos.get()) * vaiven,
+      conexion: conexion.get(),
     });
   });
-  const opacidad = useDerivedValue(() => OPACIDAD_REPOSO + (1 - OPACIDAD_REPOSO) * activa.value);
-  const fin = useDerivedValue(() => vec(tam.value.width, 0));
+  const opacidad = useDerivedValue(() => OPACIDAD_REPOSO + (1 - OPACIDAD_REPOSO) * activa.get());
+  const fin = useDerivedValue(() => vec(tam.get().width, 0));
 
   return (
     <Canvas style={[styles.lienzo, { height: alto }]} onSize={tam} pointerEvents="none" accessible={false}>

@@ -90,13 +90,16 @@ export function PaginaFonema({
   const simbolo = useRef<View>(null);
 
   const medir = useCallback(
-    (intento: number) => {
-      simbolo.current?.measureInWindow((x, y, width, height) => {
-        // La página puede no estar todavía en su lugar (el pager se acomoda un cuadro después de montarse).
-        const dentro = width > 0 && x > -width && x < anchoVentana;
-        if (dentro) alSimboloMedido?.({ x, y, width, height });
-        else if (intento < INTENTOS_MEDIR) requestAnimationFrame(() => medir(intento + 1));
-      });
+    (primerIntento: number) => {
+      const intentar = (intento: number) => {
+        simbolo.current?.measureInWindow((x, y, width, height) => {
+          // La página puede no estar todavía en su lugar (el pager se acomoda un cuadro después de montarse).
+          const dentro = width > 0 && x > -width && x < anchoVentana;
+          if (dentro) alSimboloMedido?.({ x, y, width, height });
+          else if (intento < INTENTOS_MEDIR) requestAnimationFrame(() => intentar(intento + 1));
+        });
+      };
+      intentar(primerIntento);
     },
     [alSimboloMedido, anchoVentana]
   );

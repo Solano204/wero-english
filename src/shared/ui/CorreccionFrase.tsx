@@ -48,7 +48,7 @@ function Tacha({ indice, tacha, total }: TachaProps) {
   const inicio = escalon(indice);
   const duracion = motionError.tacha;
   const estilo = useAnimatedStyle(() => ({
-    transform: [{ scaleX: Math.min(1, Math.max(0, (tacha.value * total - inicio) / duracion)) }],
+    transform: [{ scaleX: Math.min(1, Math.max(0, (tacha.get() * total - inicio) / duracion)) }],
   }));
   // El fundido de salida va en el nodo exterior y la escala en el interior: una animación de layout y un transform
   // animado en el mismo nodo se pisan.
@@ -61,7 +61,7 @@ function Tacha({ indice, tacha, total }: TachaProps) {
 
 /** Texto que se queda: pasa de ámbar al color de la frase correcta cuando se resuelve. */
 function TextoIgual({ texto, resuelto }: { texto: string; resuelto: SharedValue<number> }) {
-  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(resuelto.value, [0, 1], [COLOR_MAL, COLOR_BIEN]) }));
+  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(resuelto.get(), [0, 1], [COLOR_MAL, COLOR_BIEN]) }));
   return (
     <Animated.Text layout={REACOMODO} style={[styles.palabra, estilo]}>
       {texto}
@@ -109,7 +109,13 @@ function FraseTransformada({ plan, fase, tacha, resuelto, totalTachas }: FrasePr
           ) : null;
         }
         if (pieza.tipo === 'entra') return fase === 'bien' ? <TextoEntra key={i} texto={pieza.texto} indice={entra} /> : null;
-        let siguiente = entra;
+        // El lugar de cada palabra que entra, contado desde `entra` (sin mutar nada dentro del map).
+        const lugares: number[] = [];
+        let n = entra;
+        for (const parte of pieza.partes) {
+          lugares.push(n);
+          if (parte.tipo !== 'igual' && parte.tipo !== 'sale') n += 1;
+        }
         return (
           <Animated.View key={i} layout={REACOMODO} style={styles.letras}>
             {pieza.partes.map((parte, p) => {
@@ -121,8 +127,7 @@ function FraseTransformada({ plan, fase, tacha, resuelto, totalTachas }: FrasePr
                   </Animated.Text>
                 ) : null;
               }
-              const lugar = siguiente++;
-              return fase === 'bien' ? <TextoEntra key={p} texto={parte.texto} indice={lugar} /> : null;
+              return fase === 'bien' ? <TextoEntra key={p} texto={parte.texto} indice={lugares[p] ?? entra} /> : null;
             })}
             {fase === 'mal' ? <Tacha indice={lugarTacha} tacha={tacha} total={totalTachas} /> : null}
           </Animated.View>
@@ -143,7 +148,7 @@ interface DosLineasProps {
 
 /** Las dos frases, una bajo la otra: la incorrecta se apaga y tacha, la correcta llega con un fundido. Sin morph. */
 function DosLineas({ mal, bien, resuelta, animada, resuelto }: DosLineasProps) {
-  const estiloMal = useAnimatedStyle(() => ({ opacity: 1 - 0.4 * resuelto.value }));
+  const estiloMal = useAnimatedStyle(() => ({ opacity: 1 - 0.4 * resuelto.get() }));
   return (
     <View style={styles.lineas}>
       <View style={styles.linea}>
@@ -212,14 +217,14 @@ export function useCorreccion(mal: string, bien: string): Correccion {
 
   const jugar = useCallback(() => {
     detener();
-    tacha.value = 0;
-    resuelto.value = 0;
+    tacha.set(0);
+    resuelto.set(0);
     setFase('mal');
     setCiclo((c) => c + 1);
-    if (totalTachas > 0) tacha.value = withTiming(1, { duration: totalTachas, easing: motionEasing.lineal });
+    if (totalTachas > 0) tacha.set(withTiming(1, { duration: totalTachas, easing: motionEasing.lineal }));
     temporizador.current = setTimeout(() => {
       setFase('bien');
-      resuelto.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+      resuelto.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
     }, retrasoCambio);
   }, [detener, tacha, resuelto, totalTachas, retrasoCambio]);
 

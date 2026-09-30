@@ -55,22 +55,22 @@ export function useReloj(
   const pendiente = useSharedValue(0);
   const control = useFrameCallback((cuadro) => {
     'worklet';
-    if (visible && visible.value === 0) return;
-    if (unaVez && acumulado.value >= periodo) return;
+    if (visible && visible.get() === 0) return;
+    if (unaVez && acumulado.get() >= periodo) return;
     const paso = Math.min(cuadro.timeSincePreviousFrame ?? 0, MAX_PASO_MS);
-    acumulado.value += paso;
-    if (unaVez && acumulado.value >= periodo) {
-      fase.value = faseQuieta;
+    acumulado.set(acumulado.get() + paso);
+    if (unaVez && acumulado.get() >= periodo) {
+      fase.set(faseQuieta);
       return;
     }
     if (cadaMs > 0) {
-      pendiente.value += paso;
-      if (pendiente.value < cadaMs) return;
-      fase.value = (fase.value + pendiente.value / periodo) % 1;
-      pendiente.value = 0;
+      pendiente.set(pendiente.get() + paso);
+      if (pendiente.get() < cadaMs) return;
+      fase.set((fase.get() + pendiente.get() / periodo) % 1);
+      pendiente.set(0);
       return;
     }
-    fase.value = (fase.value + paso / periodo) % 1;
+    fase.set((fase.get() + paso / periodo) % 1);
   }, false);
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export function useReloj(
   }, [activo, control]);
 
   useEffect(() => {
-    if (reducido) fase.value = faseQuieta;
+    if (reducido) fase.set(faseQuieta);
   }, [reducido, faseQuieta, fase]);
 
   return fase;

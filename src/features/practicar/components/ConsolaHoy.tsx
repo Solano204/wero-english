@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useEffectEvent } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -87,14 +87,14 @@ function BarridoLuz({ ancho, activo }: { ancho: number; activo: boolean }) {
   const avance = useSharedValue(0);
   useEffect(() => {
     if (!activo) return;
-    avance.value = withDelay(
+    avance.set(withDelay(
       motionEntrada.hoy + motionDuration.base,
       withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar })
-    );
+    ));
   }, [activo, avance]);
   const estilo = useAnimatedStyle(() => ({
-    opacity: interpolate(avance.value, [0, 0.1, 0.9, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
-    transform: [{ translateX: interpolate(avance.value, [0, 1], [-ancho, ancho * 1.2]) }, { skewX: '-20deg' }],
+    opacity: interpolate(avance.get(), [0, 0.1, 0.9, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ translateX: interpolate(avance.get(), [0, 1], [-ancho, ancho * 1.2]) }, { skewX: '-20deg' }],
   }));
   if (!activo) return null;
   return (
@@ -138,38 +138,38 @@ export function ConsolaHoy({
   useEffect(() => {
     if (!listo) return;
     if (reducido) {
-      encendido.value = 1;
-      contenido.value = 1;
+      encendido.set(1);
+      contenido.set(1);
       return;
     }
     const espera = entrada ? motionEntrada.onda : 0;
-    encendido.value = withDelay(espera, withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
-    contenido.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+    encendido.set(withDelay(espera, withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar })));
+    contenido.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [listo, entrada, reducido, encendido, contenido]);
 
   const cumplida = metaCumplida(hoyFrases, meta);
   const celebrar = useCelebracion(listo && cumplida, usuarioId, 'meta', dayKey(), false);
 
-  const estiloContenido = useAnimatedStyle(() => ({ opacity: contenido.value }));
+  const estiloContenido = useAnimatedStyle(() => ({ opacity: contenido.get() }));
 
   const interferir = () => {
     if (reducido) return;
     const mitad = motionSenal.interferencia / 2;
-    interferencia.value = withSequence(
+    interferencia.set(withSequence(
       withTiming(1, { duration: mitad }),
       withTiming(0, { duration: mitad })
-    );
+    ));
   };
 
   const primerRefresco = useRef(true);
-  useEffect(() => {
+  const efectoRefrescos = useEffectEvent(() => {
     if (primerRefresco.current) {
       primerRefresco.current = false;
       return;
     }
     interferir();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refrescos]);
+  });
+  useEffect(() => efectoRefrescos(), [refrescos]);
 
   const alTocar = () => {
     if (reducido) {

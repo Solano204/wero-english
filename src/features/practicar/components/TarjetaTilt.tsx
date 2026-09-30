@@ -27,10 +27,10 @@ export function TarjetaTilt({ children, style }: Props) {
   const gesto = useMemo(() => {
     const seguir = (x: number, y: number) => {
       'worklet';
-      const nx = Math.max(-1, Math.min(1, (x - ancho.value / 2) / (ancho.value / 2)));
-      const ny = Math.max(-1, Math.min(1, (y - alto.value / 2) / (alto.value / 2)));
-      giroY.value = nx * inclinacion.maxGrados;
-      giroX.value = -ny * inclinacion.maxGrados;
+      const nx = Math.max(-1, Math.min(1, (x - ancho.get() / 2) / (ancho.get() / 2)));
+      const ny = Math.max(-1, Math.min(1, (y - alto.get() / 2) / (alto.get() / 2)));
+      giroY.set(nx * inclinacion.maxGrados);
+      giroX.set(-ny * inclinacion.maxGrados);
     };
     return Gesture.Pan()
       .enabled(!reducido)
@@ -38,16 +38,16 @@ export function TarjetaTilt({ children, style }: Props) {
       .onStart((e) => seguir(e.x, e.y))
       .onUpdate((e) => seguir(e.x, e.y))
       .onFinalize(() => {
-        giroX.value = withSpring(0, motionSpring.rebote);
-        giroY.value = withSpring(0, motionSpring.rebote);
+        giroX.set(withSpring(0, motionSpring.rebote));
+        giroY.set(withSpring(0, motionSpring.rebote));
       });
   }, [reducido, ancho, alto, giroX, giroY]);
 
   const estilo = useAnimatedStyle(() => ({
     transform: [
       { perspective: inclinacion.perspectiva },
-      { rotateX: `${giroX.value}deg` },
-      { rotateY: `${giroY.value}deg` },
+      { rotateX: `${giroX.get()}deg` },
+      { rotateY: `${giroY.get()}deg` },
     ],
   }));
 
@@ -56,8 +56,8 @@ export function TarjetaTilt({ children, style }: Props) {
       <Animated.View
         style={[style, estilo]}
         onLayout={(e) => {
-          ancho.value = e.nativeEvent.layout.width;
-          alto.value = e.nativeEvent.layout.height;
+          ancho.set(e.nativeEvent.layout.width);
+          alto.set(e.nativeEvent.layout.height);
         }}
       >
         {children}

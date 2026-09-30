@@ -35,18 +35,18 @@ export function useChoqueCaida(
     if (!finRonda || reducido) return undefined;
     let duracion = motionDuration.lento;
     if (finRonda === 'fallo') {
-      y.value = withDelay(
+      y.set(withDelay(
         motionDuration.lento,
         withTiming(altoPista, { duration: motionDuration.escena, easing: motionEasing.salir })
-      );
+      ));
       duracion += motionDuration.escena;
     } else {
-      aplasta.value = APLASTE;
-      aplasta.value = withSpring(1, motionSpring.rebote);
-      golpe.value = withSequence(
+      aplasta.set(APLASTE);
+      aplasta.set(withSpring(1, motionSpring.rebote));
+      golpe.set(withSequence(
         withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
-      );
+      ));
     }
     const t = setTimeout(() => setAnimandoFin(false), duracion);
     return () => clearTimeout(t);
@@ -54,7 +54,7 @@ export function useChoqueCaida(
 
   // Con «reducir movimiento» las fichas no caen: se quedan arriba y una barra cuenta el tiempo.
   const anim = useAnimatedStyle(() => ({
-    transform: reducido ? [] : [{ translateY: y.value }, { scaleY: aplasta.value }],
+    transform: reducido ? [] : [{ translateY: y.get() }, { scaleY: aplasta.get() }],
   }));
 
   return { golpe, anim };

@@ -38,15 +38,15 @@ export function FraseResuelta({ entry, palabras, voz, seAcabo, retraso, saliendo
   useEffect(() => {
     const cfg = { duration: reducido ? motionDuration.rapido : motionDuration.base, easing: motionEasing.entrar };
     if (saliendo) {
-      visible.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      visible.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
       return;
     }
-    visible.value = reducido || retraso <= 0 ? withTiming(1, cfg) : withDelay(retraso, withTiming(1, cfg));
+    visible.set(reducido || retraso <= 0 ? withTiming(1, cfg) : withDelay(retraso, withTiming(1, cfg)));
   }, [saliendo, retraso, reducido, visible]);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: visible.value,
-    transform: [{ translateY: reducido ? 0 : (1 - visible.value) * SUBE }],
+    opacity: visible.get(),
+    transform: [{ translateY: reducido ? 0 : (1 - visible.get()) * SUBE }],
   }));
 
   return (

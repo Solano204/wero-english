@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import * as audio from '@/services/audio';
 
@@ -17,13 +17,18 @@ import * as audio from '@/services/audio';
  * con su propio ref de "vigente" (playingRef, reproduciendoRef...) lo apaga.
  */
 export function useCortarAudioAlSalir(alPerderFoco?: () => void): void {
+  // La versión más reciente de `alPerderFoco` (se anota al confirmar cada render), sin volver a suscribir el foco
+  // cada vez que la pantalla crea una función nueva.
+  const alPerderFocoRef = useRef(alPerderFoco);
+  useLayoutEffect(() => {
+    alPerderFocoRef.current = alPerderFoco;
+  }, [alPerderFoco]);
   useFocusEffect(
     useCallback(() => {
       return () => {
-        alPerderFoco?.();
+        alPerderFocoRef.current?.();
         audio.detenerTodo();
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
   );
 }

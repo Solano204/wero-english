@@ -89,23 +89,23 @@ function ParalajeGiro({ dx, dy }: { dx: SharedValue<number>; dy: SharedValue<num
   const basePitch = useSharedValue(0);
 
   useAnimatedReaction(
-    () => sensor.sensor.value,
+    () => sensor.sensor.get(),
     (v) => {
       // La postura con la que se abre la pantalla es el punto de reposo.
-      if (!listo.value) {
-        baseRoll.value = v.roll;
-        basePitch.value = v.pitch;
-        listo.value = true;
+      if (!listo.get()) {
+        baseRoll.set(v.roll);
+        basePitch.set(v.pitch);
+        listo.set(true);
       }
       const opciones = { duration: motionDuration.rapido, easing: motionEasing.entrar };
-      dx.value = withTiming(
-        interpolate(v.roll - baseRoll.value, [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP),
+      dx.set(withTiming(
+        interpolate(v.roll - baseRoll.get(), [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP),
         opciones
-      );
-      dy.value = withTiming(
-        interpolate(v.pitch - basePitch.value, [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP),
+      ));
+      dy.set(withTiming(
+        interpolate(v.pitch - basePitch.get(), [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP),
         opciones
-      );
+      ));
     }
   );
   return null;
@@ -143,7 +143,7 @@ function LuzAurora() {
 
   const uniformes = useDerivedValue(() => ({
     tam: [ancho, alto],
-    fase: fase.value,
+    fase: fase.get(),
     sol,
     maxOp: aurora.opacidadMax,
     tinte,
@@ -151,12 +151,12 @@ function LuzAurora() {
 
   useEffect(() => {
     if (activo) return;
-    dx.value = withTiming(0, { duration: motionDuration.base, easing: motionEasing.entrar });
-    dy.value = withTiming(0, { duration: motionDuration.base, easing: motionEasing.entrar });
+    dx.set(withTiming(0, { duration: motionDuration.base, easing: motionEasing.entrar }));
+    dy.set(withTiming(0, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [activo, dx, dy]);
 
   const desplazamiento = useAnimatedStyle(() => ({
-    transform: [{ translateX: dx.value }, { translateY: dy.value }],
+    transform: [{ translateX: dx.get() }, { translateY: dy.get() }],
   }));
 
   if (!fuente) return null;

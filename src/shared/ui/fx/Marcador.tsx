@@ -35,11 +35,11 @@ function Columna({ digito, posicion, retraso, ancho, alto, tamano, color }: Colu
   const rodillo = useSharedValue(reducido ? digito : 0);
 
   useEffect(() => {
-    rodillo.value = reducido ? digito : withDelay(retraso + escalon(posicion), withSpring(digito, motionSpring.rebote));
+    rodillo.set(reducido ? digito : withDelay(retraso + escalon(posicion), withSpring(digito, motionSpring.rebote)));
   }, [digito, posicion, retraso, reducido, rodillo]);
 
   const estilo = useAnimatedStyle(() => ({
-    transform: [{ translateY: -Math.min(9, Math.max(0, rodillo.value)) * alto }],
+    transform: [{ translateY: -Math.min(9, Math.max(0, rodillo.get())) * alto }],
   }));
 
   return (

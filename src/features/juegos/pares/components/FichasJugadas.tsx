@@ -12,10 +12,10 @@ const Ficha = memo(function Ficha({ queda }: { queda: boolean }) {
 
   useEffect(() => {
     const meta = queda ? 1 : 0;
-    presencia.value = reducido ? meta : withTiming(meta, { duration: motionDuration.base, easing: motionEasing.salir });
+    presencia.set(reducido ? meta : withTiming(meta, { duration: motionDuration.base, easing: motionEasing.salir }));
   }, [queda, reducido, presencia]);
 
-  const anim = useAnimatedStyle(() => ({ opacity: presencia.value, transform: [{ scale: 0.4 + 0.6 * presencia.value }] }));
+  const anim = useAnimatedStyle(() => ({ opacity: presencia.get(), transform: [{ scale: 0.4 + 0.6 * presencia.get() }] }));
   return <Animated.View style={[styles.ficha, anim]} />;
 });
 

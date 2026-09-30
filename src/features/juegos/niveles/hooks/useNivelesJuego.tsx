@@ -45,7 +45,7 @@ export function useNivelesJuego() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Ruta>();
   const user = useAuthStore((s) => s.user);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const { width, height } = useWindowDimensions();
 
   const juego = params.juego;

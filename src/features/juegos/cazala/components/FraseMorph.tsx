@@ -37,11 +37,11 @@ interface CeldaProps {
 /** Una letra que cambia: la vieja sube y se va, la nueva baja y llega, cada una a su turno. */
 function CeldaMorph({ a, b, indice, total, progreso }: CeldaProps) {
   const sale = useAnimatedStyle(() => {
-    const l = Math.min(1, Math.max(0, (progreso.value * total - indice * ESCALON) / LETRA));
+    const l = Math.min(1, Math.max(0, (progreso.get() * total - indice * ESCALON) / LETRA));
     return { opacity: 1 - l, transform: [{ translateY: -l * DESPLAZA }] };
   });
   const entra = useAnimatedStyle(() => {
-    const l = Math.min(1, Math.max(0, (progreso.value * total - indice * ESCALON) / LETRA));
+    const l = Math.min(1, Math.max(0, (progreso.get() * total - indice * ESCALON) / LETRA));
     return { opacity: l, transform: [{ translateY: (1 - l) * DESPLAZA }] };
   });
   return (
@@ -71,9 +71,9 @@ function ChipMorph({ item, indice, pos, estatico }: ChipProps) {
   const t = item.t;
 
   useAnimatedReaction(
-    () => !estatico && pos.value >= t,
+    () => !estatico && pos.get() >= t,
     (ya, antes) => {
-      if (ya && !antes) progreso.value = withTiming(1, { duration: total, easing: motionEasing.lineal });
+      if (ya && !antes) progreso.set(withTiming(1, { duration: total, easing: motionEasing.lineal }));
     },
     [pos, t, total, estatico]
   );

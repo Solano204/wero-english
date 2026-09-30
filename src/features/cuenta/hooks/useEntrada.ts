@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParams } from '@/types/rutas';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useAuthStore } from '@/estado/useAuthStore';
+import { conFinalAsync } from '@/shared/utils/conFinal';
 
 type Vista = 'inicio' | 'usuario';
 
@@ -41,11 +42,11 @@ export function useEntrada() {
   const correr = useCallback(async (quien: Accion, fn: () => Promise<unknown>) => {
     limpiarAviso();
     setAccion(quien);
-    try {
+    await conFinalAsync(async () => {
       await fn();
-    } finally {
+    }, () => {
       setAccion(null);
-    }
+    });
   }, [limpiarAviso]);
 
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();

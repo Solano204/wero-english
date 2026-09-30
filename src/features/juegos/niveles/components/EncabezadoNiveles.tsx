@@ -34,7 +34,7 @@ interface Props {
  */
 export function EncabezadoNiveles({ titulo, estrellas, maximo, scrollY, onBack }: Props) {
   const banda = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, RANGO_BANDA], [0, 1], Extrapolation.CLAMP),
+    opacity: interpolate(scrollY.get(), [0, RANGO_BANDA], [0, 1], Extrapolation.CLAMP),
   }));
   const etiqueta = estrellas === null ? undefined : `${miles(estrellas)} de ${miles(maximo)} estrellas`;
 

@@ -42,7 +42,7 @@ export function useBolsillo(activo: boolean): { bolsillo: boolean; brillo: Share
 
   useEffect(() => {
     const destino = bolsillo ? 1 - motionRadio.velo : 1;
-    brillo.value = reducido ? destino : withTiming(destino, { duration: motionDuration.lento, easing: motionEasing.entrar });
+    brillo.set(reducido ? destino : withTiming(destino, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [bolsillo, reducido, brillo]);
 
   return { bolsillo, brillo, despertar };

@@ -74,7 +74,7 @@ export function OptionButton({
   const conVeredicto = state === 'correct' || state === 'wrong';
 
   useEffect(() => {
-    enter.value = reducido
+    enter.set(reducido
       ? withTiming(1, { duration: 0 })
       : withDelay(
           index * 30,
@@ -82,27 +82,27 @@ export function OptionButton({
             duration: motionDuration.base,
             easing: motionEasing.entrar,
           })
-        );
+        ));
   }, [enter, reducido, index]);
 
   useEffect(() => {
     if (!conVeredicto) {
-      veredicto.value = 0;
-      marca.value = 0;
+      veredicto.set(0);
+      marca.set(0);
       return;
     }
-    veredicto.value = reducido ? 1 : withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
-    marca.value = reducido ? 1 : withSpring(1, motionSpring.rebote);
+    veredicto.set(reducido ? 1 : withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+    marca.set(reducido ? 1 : withSpring(1, motionSpring.rebote));
   }, [conVeredicto, reducido, veredicto, marca]);
 
   const anim = useAnimatedStyle(() => ({
-    opacity: enter.value,
-    transform: [{ translateY: (1 - enter.value) * 12 }],
+    opacity: enter.get(),
+    transform: [{ translateY: (1 - enter.get()) * 12 }],
   }));
-  const luz = useAnimatedStyle(() => ({ opacity: veredicto.value }));
+  const luz = useAnimatedStyle(() => ({ opacity: veredicto.get() }));
   const simbolo = useAnimatedStyle(() => ({
-    opacity: veredicto.value,
-    transform: [{ scale: 0.4 + 0.6 * marca.value }],
+    opacity: veredicto.get(),
+    transform: [{ scale: 0.4 + 0.6 * marca.get() }],
   }));
 
   const alTocar = () => {

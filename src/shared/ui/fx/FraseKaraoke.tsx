@@ -34,10 +34,10 @@ function PalabraKaraoke({ palabra, voz, tamano, destacada, apagada }: PalabraPro
   const reposo = apagada ? DICHA : ACTUAL;
 
   const estilo = useAnimatedStyle(() => {
-    const k = activa.value;
+    const k = activa.get();
     // En reposo la frase se lee entera en su color de siempre.
     if (k === 0) return destacada ? { transform: [{ translateY: 0 }] } : { color: reposo, transform: [{ translateY: 0 }] };
-    const p = pos.value;
+    const p = pos.get();
     let base: string;
     if (!hablada) base = DICHA;
     else if (reducido) base = p < inicio ? PENDIENTE : p < sig ? ACTUAL : DICHA;

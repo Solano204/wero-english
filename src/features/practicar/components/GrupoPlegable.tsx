@@ -38,24 +38,24 @@ export function GrupoPlegable({ titulo, icono, total, abierto, onAlternar, child
 
   useEffect(() => {
     const meta = abierto ? 1 : 0;
-    abriendo.value = meta;
+    abriendo.set(meta);
     if (reducido) {
-      progreso.value = meta;
-      giro.value = meta;
+      progreso.set(meta);
+      giro.set(meta);
       return;
     }
     // Abrir desacelera; cerrar acelera.
     const easing = abierto ? motionEasing.entrar : motionEasing.salir;
-    progreso.value = withTiming(meta, { duration: motionDuration.lento, easing });
-    giro.value = withTiming(meta, { duration: motionDuration.base, easing });
+    progreso.set(withTiming(meta, { duration: motionDuration.lento, easing }));
+    giro.set(withTiming(meta, { duration: motionDuration.base, easing }));
   }, [abierto, reducido, progreso, abriendo, giro]);
 
   const estilo = useAnimatedStyle(() => ({
-    height: alto.value * progreso.value,
-    opacity: progreso.value,
+    height: alto.get() * progreso.get(),
+    opacity: progreso.get(),
   }));
   const chevron = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${giro.value * 180}deg` }],
+    transform: [{ rotate: `${giro.get() * 180}deg` }],
   }));
 
   return (
@@ -85,7 +85,7 @@ export function GrupoPlegable({ titulo, icono, total, abierto, onAlternar, child
         <View
           style={styles.medida}
           onLayout={(e) => {
-            alto.value = e.nativeEvent.layout.height;
+            alto.set(e.nativeEvent.layout.height);
           }}
         >
           {children({ progreso, abriendo })}

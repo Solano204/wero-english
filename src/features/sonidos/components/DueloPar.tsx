@@ -28,9 +28,9 @@ function Mitad({ palabra, ipa, es, sonando, onPress }: MitadProps) {
   const luz = useSharedValue(0);
   useEffect(() => {
     const destino = sonando ? 1 : 0;
-    luz.value = reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+    luz.set(reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [sonando, reducido, luz]);
-  const estilo = useAnimatedStyle(() => ({ opacity: luz.value }));
+  const estilo = useAnimatedStyle(() => ({ opacity: luz.get() }));
 
   return (
     <Presionable
@@ -70,12 +70,12 @@ export function DueloPar({ par, esActual }: Props) {
   const suenaAlguna = vozA.sonando || vozB.sonando;
   useEffect(() => {
     if (!suenaAlguna || reducido) return;
-    pulso.value = withSequence(
+    pulso.set(withSequence(
       withTiming(PULSO_DIFERENTE, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.salir })
-    );
+    ));
   }, [suenaAlguna, reducido, pulso]);
-  const estiloDiferente = useAnimatedStyle(() => ({ transform: [{ scale: pulso.value }] }));
+  const estiloDiferente = useAnimatedStyle(() => ({ transform: [{ scale: pulso.get() }] }));
 
   useEffect(
     () => () => {

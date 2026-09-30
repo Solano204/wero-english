@@ -45,9 +45,9 @@ export function ViajeSimbolo({ viaje, onFin }: Props) {
       return;
     }
     if (!hasta || !origen) return;
-    p.value = withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }, (fin) => {
+    p.set(withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }, (fin) => {
       if (fin) runOnJS(onFin)();
-    });
+    }));
   }, [reducido, hasta, origen, p, onFin]);
 
   const listo = hasta !== null && origen !== null;
@@ -62,9 +62,9 @@ export function ViajeSimbolo({ viaje, onFin }: Props) {
     return {
       opacity: 1,
       transform: [
-        { translateX: x0 + (x1 - x0) * p.value },
-        { translateY: y0 + (y1 - y0) * p.value },
-        { scale: ESCALA_INICIAL + (1 - ESCALA_INICIAL) * p.value },
+        { translateX: x0 + (x1 - x0) * p.get() },
+        { translateY: y0 + (y1 - y0) * p.get() },
+        { scale: ESCALA_INICIAL + (1 - ESCALA_INICIAL) * p.get() },
       ],
     };
   });

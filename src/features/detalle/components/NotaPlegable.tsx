@@ -28,17 +28,17 @@ export function NotaPlegable({ titulo, nota }: Props) {
   useEffect(() => {
     const meta = abierta ? 1 : 0;
     if (reducido) {
-      progreso.value = meta;
-      giro.value = meta;
+      progreso.set(meta);
+      giro.set(meta);
       return;
     }
     const easing = abierta ? motionEasing.entrar : motionEasing.salir;
-    progreso.value = withTiming(meta, { duration: motionDuration.lento, easing });
-    giro.value = withTiming(meta, { duration: motionDuration.base, easing });
+    progreso.set(withTiming(meta, { duration: motionDuration.lento, easing }));
+    giro.set(withTiming(meta, { duration: motionDuration.base, easing }));
   }, [abierta, reducido, progreso, giro]);
 
-  const cuerpo = useAnimatedStyle(() => ({ height: alto.value * progreso.value, opacity: progreso.value }));
-  const chevron = useAnimatedStyle(() => ({ transform: [{ rotate: `${giro.value * 180}deg` }] }));
+  const cuerpo = useAnimatedStyle(() => ({ height: alto.get() * progreso.get(), opacity: progreso.get() }));
+  const chevron = useAnimatedStyle(() => ({ transform: [{ rotate: `${giro.get() * 180}deg` }] }));
 
   return (
     <View style={styles.wrap}>
@@ -60,7 +60,7 @@ export function NotaPlegable({ titulo, nota }: Props) {
         accessibilityElementsHidden={!abierta}
         importantForAccessibility={abierta ? 'auto' : 'no-hide-descendants'}
       >
-        <View style={styles.medida} onLayout={(e) => (alto.value = e.nativeEvent.layout.height)}>
+        <View style={styles.medida} onLayout={(e) => alto.set(e.nativeEvent.layout.height)}>
           <Text style={styles.texto}>{nota}</Text>
         </View>
       </Animated.View>

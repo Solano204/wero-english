@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useEffectEvent, useLayoutEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -37,16 +37,18 @@ export function useCuentaRegresiva({ segundos, llave, onFin, pausado = false }: 
   // solo la primera reinicia la barra a cero.
   const llaveAnterior = useRef(llave);
   const onFinRef = useRef(onFin);
-  onFinRef.current = onFin;
+  useLayoutEffect(() => {
+    onFinRef.current = onFin;
+  }, [onFin]);
   const alFin = useCallback(() => onFinRef.current(), []);
 
-  useEffect(() => {
+  const efectoLlave = useEffectEvent(() => {
     const rondaNueva = llaveAnterior.current !== llave;
     llaveAnterior.current = llave;
 
     if (rondaNueva) {
       cancelAnimation(avance);
-      avance.value = 0;
+      avance.set(0);
     }
 
     if (pausado) {
@@ -59,21 +61,21 @@ export function useCuentaRegresiva({ segundos, llave, onFin, pausado = false }: 
     // Ronda nueva: la barra completa. Reanudación tras pausa: solo lo
     // que falta, para que el tiempo pausado no cuente ni de más ni de
     // menos.
-    const restante = rondaNueva ? 1 : 1 - avance.value;
+    const restante = rondaNueva ? 1 : 1 - avance.get();
     if (restante <= 0) return;
 
-    avance.value = withTiming(
+    avance.set(withTiming(
       1,
       { duration: segundos * 1000 * restante, easing: Easing.linear },
       (terminada) => {
         if (terminada) runOnJS(alFin)();
       }
-    );
+    ));
 
     return () => cancelAnimation(avance);
     // `llave` es lo que reinicia: cada ronda nueva trae una distinta.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [llave, segundos, pausado]);
+  });
+  useEffect(() => efectoLlave(), [llave, segundos, pausado]);
 
   return avance;
 }
@@ -97,9 +99,9 @@ export function RoundTimer({ segundos, llave, onFin, pausado = false, tint }: Pr
   const avance = useCuentaRegresiva({ segundos, llave, onFin, pausado });
 
   const barra = useAnimatedStyle(() => ({
-    width: `${Math.max(0, (1 - avance.value) * 100)}%`,
+    width: `${Math.max(0, (1 - avance.get()) * 100)}%`,
     backgroundColor:
-      avance.value > 0.66 ? color.riskWarn : tint ?? color.accent,
+      avance.get() > 0.66 ? color.riskWarn : tint ?? color.accent,
   }));
 
   return (

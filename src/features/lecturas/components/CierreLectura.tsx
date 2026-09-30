@@ -35,16 +35,16 @@ export function CierreLectura({ nuevas, todas }: Props) {
 
   useEffect(() => {
     if (!todas || reducido) return;
-    destello.value = withDelay(
+    destello.set(withDelay(
       motionDuration.lento,
       withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar })
-    );
+    ));
     return () => cancelAnimation(destello);
   }, [todas, reducido, destello]);
 
   const estiloDestello = useAnimatedStyle(() => ({
-    opacity: destello.value > 0 ? OPACIDAD * (1 - destello.value) : 0,
-    transform: [{ scale: 1 + CRECE * destello.value }],
+    opacity: destello.get() > 0 ? OPACIDAD * (1 - destello.get()) : 0,
+    transform: [{ scale: 1 + CRECE * destello.get() }],
   }));
 
   return (

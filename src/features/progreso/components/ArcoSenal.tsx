@@ -73,19 +73,19 @@ export function Arco({ ancho, valor, activo, retraso, pulsos, visible }: ArcoPro
   useEffect(() => {
     if (!activo) return;
     if (reducido) {
-      angulo.value = objetivo;
+      angulo.set(objetivo);
       return;
     }
     const espera = primeraSubida.current ? retraso : 0;
     primeraSubida.current = false;
     // Sube hasta pasarse un poco y se asienta con resorte: el total es fijo (`aguja` + `motionSpring.aguja`).
-    angulo.value = withDelay(
+    angulo.set(withDelay(
       espera,
       withSequence(
         withTiming(Math.min(180, objetivo + SOBREPASO_GRADOS), { duration: motionSenal.aguja, easing: motionEasing.entrar }),
         withSpring(objetivo, motionSpring.aguja)
       )
-    );
+    ));
   }, [activo, objetivo, reducido, retraso, angulo]);
 
   useEffect(() => {
@@ -94,29 +94,29 @@ export function Arco({ ancho, valor, activo, retraso, pulsos, visible }: ArcoPro
       return;
     }
     if (reducido) return;
-    empuje.value = withSequence(
+    empuje.set(withSequence(
       withTiming(EMPUJE_GRADOS, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withSpring(0, motionSpring.aguja)
-    );
+    ));
   }, [pulsos, reducido, empuje]);
 
   // El temblor solo existe con la pantalla viva y a la vista; si no, la aguja queda exacta.
   useEffect(() => {
-    temblor.value = withTiming(viva && activo && !reducido ? 1 : 0, {
+    temblor.set(withTiming(viva && activo && !reducido ? 1 : 0, {
       duration: motionDuration.base,
       easing: motionEasing.entrar,
-    });
+    }));
   }, [viva, activo, reducido, temblor]);
 
   const rotacion = useDerivedValue(() => {
-    const t = Math.sin(2 * Math.PI * fase.value) * 0.6 + Math.sin(6 * Math.PI * fase.value + 1.3) * 0.4;
-    const grados = angulo.value + empuje.value + t * TEMBLOR_GRADOS * temblor.value;
+    const t = Math.sin(2 * Math.PI * fase.get()) * 0.6 + Math.sin(6 * Math.PI * fase.get() + 1.3) * 0.4;
+    const grados = angulo.get() + empuje.get() + t * TEMBLOR_GRADOS * temblor.get();
     return [{ rotate: (grados * Math.PI) / 180 }];
   });
-  const finArco = useDerivedValue(() => Math.min(1, Math.max(0, angulo.value / 180)));
-  const arcoVisible = useDerivedValue(() => (angulo.value > 0.4 ? 1 : 0));
+  const finArco = useDerivedValue(() => Math.min(1, Math.max(0, angulo.get() / 180)));
+  const arcoVisible = useDerivedValue(() => (angulo.get() > 0.4 ? 1 : 0));
   // El degradado abarca lo lleno, no el semicírculo entero: con poco valor también se ve de punta a punta.
-  const finBarrido = useDerivedValue(() => 180 + Math.max(2, Math.min(180, angulo.value)));
+  const finBarrido = useDerivedValue(() => 180 + Math.max(2, Math.min(180, angulo.get())));
 
   return (
     <Canvas style={{ width: ancho, height: alto }} pointerEvents="none" accessible={false}>

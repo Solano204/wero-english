@@ -48,9 +48,9 @@ interface TrozosDeColorProps {
 const TrozosDeColor = memo(function TrozosDeColor({ color, datos, reloj }: TrozosDeColorProps) {
   const trazo = useDerivedValue(() => {
     // `reloj` solo despierta el cálculo en cada cuadro; la hora sale de `Date.now()`.
-    void reloj.value;
+    void reloj.get();
     const p = Skia.Path.Make();
-    const d = datos.value;
+    const d = datos.get();
     const ahora = Date.now();
     for (let i = 0; i + CAMPOS <= d.length; i += CAMPOS) {
       if (d[i + 4] !== color) continue;
@@ -102,9 +102,9 @@ export function Estallidos({ ref }: Props) {
         const nuevos: number[] = [];
         for (const t of trozos.slice(0, cupo)) nuevos.push(t.x0, t.y0, t.x1, t.y1, t.color, ahora, t.retraso);
         lista.current = [...vivos, ...nuevos];
-        datos.value = lista.current;
-        reloj.value = 0;
-        reloj.value = withTiming(1, { duration: VIDA, easing: motionEasing.lineal });
+        datos.set(lista.current);
+        reloj.set(0);
+        reloj.set(withTiming(1, { duration: VIDA, easing: motionEasing.lineal }));
       },
     }),
     [reducido, datos, reloj]

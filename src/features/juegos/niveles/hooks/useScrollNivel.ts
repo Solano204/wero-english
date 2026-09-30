@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useLayoutEffect } from 'react';
 import type { LayoutChangeEvent, ViewToken } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -50,20 +50,22 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
   const enCurso = useRef(false);
   const yaPosicionada = useRef(false);
   const indiceRef = useRef(indiceActual);
-  indiceRef.current = indiceActual;
+  useLayoutEffect(() => {
+    indiceRef.current = indiceActual;
+  }, [indiceActual]);
 
   useDerivedValue(() => {
-    if (animando.value === 0) return;
-    scrollTo(listaRef, 0, posicion.value, false);
+    if (animando.get() === 0) return;
+    scrollTo(listaRef, 0, posicion.get(), false);
   });
 
   const alScroll = useAnimatedScrollHandler({
     onScroll: (e) => {
-      scrollY.value = e.contentOffset.y;
+      scrollY.set(e.contentOffset.y);
     },
     // Si el dedo toma la lista, la animación se suelta: manda el usuario.
     onBeginDrag: () => {
-      animando.value = 0;
+      animando.set(0);
       cancelAnimation(posicion);
     },
   });
@@ -76,12 +78,12 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
   const irA = useCallback(
     (desde: number, hasta: number, duracion: number) => {
       enCurso.current = duracion > 0;
-      animando.value = 1;
-      posicion.value = desde;
-      posicion.value = withTiming(hasta, { duration: duracion, easing: motionEasing.entrar }, (llego) => {
-        animando.value = 0;
+      animando.set(1);
+      posicion.set(desde);
+      posicion.set(withTiming(hasta, { duration: duracion, easing: motionEasing.entrar }, (llego) => {
+        animando.set(0);
         runOnJS(terminar)(Boolean(llego));
-      });
+      }));
     },
     [animando, posicion, terminar]
   );
@@ -105,19 +107,19 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
   }, [hayDatos, viewport, indiceActual, medidas, reducido, irA]);
 
   // Estable: FlatList no admite cambiar este callback en caliente.
-  const alVisibles = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  const [alVisibles] = useState(() => ({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (enCurso.current || !yaPosicionada.current) return;
     const indices = viewableItems.map((v) => v.index).filter((i): i is number => i !== null);
     if (indices.length === 0) return;
     const actual = indiceRef.current;
     if (actual < 0 || indices.includes(actual)) setLejos(null);
     else setLejos(actual > Math.max(...indices) ? 'abajo' : 'arriba');
-  }).current;
+  });
 
   const irAlActual = useCallback(() => {
     if (indiceActual < 0) return;
     const objetivo = offsetCentrado(medidas, indiceActual, viewport, ALTO_TRAMO);
-    irA(scrollY.value, objetivo, reducido ? 0 : motionDuration.lento);
+    irA(scrollY.get(), objetivo, reducido ? 0 : motionDuration.lento);
   }, [indiceActual, medidas, viewport, reducido, irA, scrollY]);
 
   return { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual };

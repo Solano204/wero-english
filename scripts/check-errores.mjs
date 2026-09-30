@@ -225,7 +225,7 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
   assert.match(sec, /accessibilityLabel=\{anuncioDeError\(e\)\}/, 'el lector oye el malentendido completo, en orden');
   assert.match(sec, /Ver otra vez/);
   assert.match(sec, /\{reducido \? null : \(\s*<View style=\{styles\.otraVez\}>/, 'sin animación no hay «Ver otra vez»');
-  const reducido = sec.slice(sec.indexOf('if (reducido) {'), sec.indexOf('v1.value = 0;'));
+  const reducido = sec.slice(sec.indexOf('if (reducido) {'), sec.indexOf('v1.set(0);'));
   assert.ok(/setFinal\(true\)/.test(reducido) && !/soltarCable|jugarCorreccion|setGlitch|programar/.test(reducido), 'con reducir movimiento: los tres pasos con fundido, sin cable, glitch ni morph');
   assert.ok(!/riskStrong|tone="strong"/.test(sec));
   const rota = sinComentarios(leer('src/features/errores/components/SenalRota.tsx'));

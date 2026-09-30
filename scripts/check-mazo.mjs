@@ -215,9 +215,9 @@ prueba('la carta: frase en text con karaoke (no en accent), IPA centrado, grupos
 prueba('el mazo: solo tres cartas, el umbral sale de mazo.ts, se asoman detrás, la que sube y la que sale cambian en el mismo cuadro y no hay abanico ni gesto con reducir movimiento', () => {
   const mazo = sinComentarios(leer('src/features/frases-sueltas/components/MazoCartas.tsx'));
   assert.match(mazo, /indicesVisibles\(actual, entradas\.length\)/, 'solo se montan las cartas de indicesVisibles');
-  assert.match(mazo, /decidirGesto\(tx\.value, ty\.value, e\.velocityX, e\.velocityY\)/, 'el umbral sale de mazo.ts');
+  assert.match(mazo, /decidirGesto\(tx\.get\(\), ty\.get\(\), e\.velocityX, e\.velocityY\)/, 'el umbral sale de mazo.ts');
   assert.match(mazo, /transformOrigin: '50% 100%'/, 'las de atrás conservan el borde de abajo: por eso se asoman');
-  assert.match(mazo, /topIdx\.value = n \+ 1;\s*tx\.value = 0;\s*ty\.value = 0;\s*rot\.value = 0;/, 'la de atrás pasa a ser la de arriba y el dedo vuelve a cero a la vez');
+  assert.match(mazo, /topIdx\.set\(n \+ 1\);\s*tx\.set\(0\);\s*ty\.set\(0\);\s*rot\.set\(0\);/, 'la de atrás pasa a ser la de arriba y el dedo vuelve a cero a la vez');
   assert.match(mazo, /regresar\(\);/, 'si no pasa el umbral regresa con resorte');
   assert.match(mazo, /withSpring\(0, motionSpring\.rebote\)/);
   assert.match(mazo, /if \(g === 'guardar'\) runOnJS\(guardado\)\(\);\s*regresar\(\);/, 'guardar no pasa a la siguiente: la carta regresa');

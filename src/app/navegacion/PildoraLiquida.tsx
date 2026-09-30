@@ -36,24 +36,24 @@ export function PildoraLiquida({ indice, total, ancho, arriba }: Props) {
     if (ancho === 0) return;
     const destino = (ancho / total) * (indice + 0.5);
     if (reducido || !colocada.current) {
-      cabeza.value = destino;
-      cola.value = destino;
+      cabeza.set(destino);
+      cola.set(destino);
       colocada.current = true;
       return;
     }
-    cabeza.value = withSpring(destino, motionSpring.liquido);
-    cola.value = withDelay(motionEscalon.ms, withSpring(destino, motionSpring.liquido));
+    cabeza.set(withSpring(destino, motionSpring.liquido));
+    cola.set(withDelay(motionEscalon.ms, withSpring(destino, motionSpring.liquido)));
   }, [indice, ancho, total, reducido, cabeza, cola]);
 
   const tapaIzquierda = useAnimatedStyle(() => ({
-    transform: [{ translateX: Math.min(cabeza.value, cola.value) - ANCHO / 2 }],
+    transform: [{ translateX: Math.min(cabeza.get(), cola.get()) - ANCHO / 2 }],
   }));
   const tapaDerecha = useAnimatedStyle(() => ({
-    transform: [{ translateX: Math.max(cabeza.value, cola.value) + ANCHO / 2 - RADIO }],
+    transform: [{ translateX: Math.max(cabeza.get(), cola.get()) + ANCHO / 2 - RADIO }],
   }));
   const cuerpo = useAnimatedStyle(() => {
-    const izquierda = Math.min(cabeza.value, cola.value) - ANCHO / 2 + RADIO;
-    const derecha = Math.max(cabeza.value, cola.value) + ANCHO / 2 - RADIO;
+    const izquierda = Math.min(cabeza.get(), cola.get()) - ANCHO / 2 + RADIO;
+    const derecha = Math.max(cabeza.get(), cola.get()) + ANCHO / 2 - RADIO;
     return { transform: [{ translateX: izquierda }, { scaleX: Math.max(derecha - izquierda, 0.001) }] };
   });
 

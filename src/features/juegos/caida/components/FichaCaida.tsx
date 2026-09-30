@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useLayoutEffect } from 'react';
 import { StyleSheet, Text, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   runOnJS,
@@ -67,61 +67,63 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
   const descarte = useSharedValue(0);
   const centro = useSharedValue(0);
   const alLlegar = useRef(onLlego);
-  alLlegar.current = onLlego;
+  useLayoutEffect(() => {
+    alLlegar.current = onLlego;
+  }, [onLlego]);
   const llegar = useCallback(() => alLlegar.current(), []);
 
   useEffect(() => {
-    entrada.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
-    destello.value = reducido ? 0 : withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir });
+    entrada.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
+    destello.set(reducido ? 0 : withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir }));
   }, [reducido, entrada, destello]);
 
   useEffect(() => {
     if (estado === 'fallo') {
-      fallado.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      fallado.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
     } else if (estado === 'acierto' || estado === 'correcta') {
-      llenado.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      llenado.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
       if (estado === 'correcta') return undefined;
       if (reducido) {
         const t = setTimeout(llegar, motionDuration.base);
         return () => clearTimeout(t);
       }
-      vuelo.value = withDelay(
+      vuelo.set(withDelay(
         motionDuration.rapido,
         withTiming(1, { duration: motionDuration.lento, easing: motionEasing.salir }, (terminada) => {
           'worklet';
           if (terminada) runOnJS(llegar)();
         })
-      );
+      ));
     } else if (estado === 'descartada') {
-      descarte.value = withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.salir });
+      descarte.set(withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.salir }));
     }
     return undefined;
   }, [estado, reducido, llenado, fallado, vuelo, descarte, llegar]);
 
   const alMedir = useCallback(
     (e: LayoutChangeEvent) => {
-      centro.value = e.nativeEvent.layout.x + e.nativeEvent.layout.width / 2;
+      centro.set(e.nativeEvent.layout.x + e.nativeEvent.layout.width / 2);
     },
     [centro]
   );
 
   const lugar = useAnimatedStyle(() => {
-    const v = vuelo.value;
-    const d = descarte.value;
-    const dx = destino ? (destino.x - centro.value) * v : 0;
-    const dy = destino ? (destino.y - (MARGEN_ARRIBA + y.value + ALTO_FICHA / 2)) * v : 0;
+    const v = vuelo.get();
+    const d = descarte.get();
+    const dx = destino ? (destino.x - centro.get()) * v : 0;
+    const dy = destino ? (destino.y - (MARGEN_ARRIBA + y.get() + ALTO_FICHA / 2)) * v : 0;
     return {
-      opacity: entrada.value * (1 - acotar((v - 0.6) / 0.4)) * (1 - d),
+      opacity: entrada.get() * (1 - acotar((v - 0.6) / 0.4)) * (1 - d),
       transform: [
         { translateX: dx },
         { translateY: dy + CAIDA_DESCARTE * d * (reducido ? 0 : 1) },
-        { scale: (reducido ? 1 : ESCALA_INICIO + (1 - ESCALA_INICIO) * entrada.value) * (1 - (1 - ESCALA_VUELO) * v) },
+        { scale: (reducido ? 1 : ESCALA_INICIO + (1 - ESCALA_INICIO) * entrada.get()) * (1 - (1 - ESCALA_VUELO) * v) },
       ],
     };
   });
-  const luz = useAnimatedStyle(() => ({ opacity: destello.value }));
-  const lleno = useAnimatedStyle(() => ({ opacity: llenado.value }));
-  const roto = useAnimatedStyle(() => ({ opacity: fallado.value }));
+  const luz = useAnimatedStyle(() => ({ opacity: destello.get() }));
+  const lleno = useAnimatedStyle(() => ({ opacity: llenado.get() }));
+  const roto = useAnimatedStyle(() => ({ opacity: fallado.get() }));
 
   return (
     <Animated.View style={[styles.lugar, lugar]} onLayout={alMedir}>

@@ -29,14 +29,14 @@ function EstrellaEncendida({ retraso, destello }: Encendida) {
 
   useEffect(() => {
     if (reducido) return;
-    llegada.value = withDelay(retraso, withSpring(1, motionSpring.rebote));
-    luz.value = withDelay(retraso, withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }));
+    llegada.set(withDelay(retraso, withSpring(1, motionSpring.rebote)));
+    luz.set(withDelay(retraso, withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar })));
   }, [reducido, retraso, llegada, luz]);
 
-  const estrella = useAnimatedStyle(() => ({ opacity: Math.min(1, llegada.value * 2), transform: [{ scale: llegada.value }] }));
+  const estrella = useAnimatedStyle(() => ({ opacity: Math.min(1, llegada.get() * 2), transform: [{ scale: llegada.get() }] }));
   const halo = useAnimatedStyle(() => ({
-    opacity: OPACIDAD_DESTELLO * (1 - luz.value),
-    transform: [{ scale: 1 + (CRECE_DESTELLO - 1) * luz.value }],
+    opacity: OPACIDAD_DESTELLO * (1 - luz.get()),
+    transform: [{ scale: 1 + (CRECE_DESTELLO - 1) * luz.get() }],
   }));
 
   return (

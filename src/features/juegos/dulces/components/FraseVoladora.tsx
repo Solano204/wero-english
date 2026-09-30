@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useEffectEvent } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { color, font, motionDuration, motionEasing } from '@/theme';
@@ -35,22 +35,22 @@ export function FraseVoladora({ texto, desde, hasta, onFin }: Props) {
   const reducido = useMovimientoReducido();
   const avance = useSharedValue(0);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (reducido) {
       onFin();
       return;
     }
-    avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }, (terminada) => {
+    avance.set(withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }, (terminada) => {
       'worklet';
       if (terminada) runOnJS(onFin)();
-    });
+    }));
     // El vuelo se lanza una sola vez por montaje.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   const escalaFinal = TAMANO_TITULO / TAMANO_META;
   const estilo = useAnimatedStyle(() => {
-    const p = avance.value;
+    const p = avance.get();
     return {
       opacity: 1 - Math.max(0, (p - 0.8) / 0.2),
       transform: [

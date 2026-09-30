@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useEffectEvent } from 'react';
 import { Keyboard, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
@@ -98,7 +98,7 @@ export function StudyCardView({
   const reducido = useMovimientoReducido();
   const esCompletar = card.kind === 'completar';
   const huecoRef = useRef<View>(null);
-  const capa = useDesfaseVentana();
+  const { alAcomodar: acomodarCapa, desfase, ref: capaRef } = useDesfaseVentana();
   const [vuelo, setVuelo] = useState<{ palabra: string; de: Rect; a: Rect } | null>(null);
   const [aterrizo, setAterrizo] = useState(false);
   const anchoHueco = useMemo(
@@ -113,14 +113,14 @@ export function StudyCardView({
     const t = setTimeout(() => setAterrizo(true), reducido ? 0 : motionDuration.lento);
     return () => clearTimeout(t);
   }, [esCompletar, locked, aterrizo, reducido, vuelo]);
-  useEffect(() => {
+  const efectoLocked = useEffectEvent(() => {
     // El teclado de Dictado y Escribir se va al calificar: la hoja del veredicto sube en su lugar.
     if (locked) Keyboard.dismiss();
     if (!locked || modo === 'choice') return;
     disparar(acierto ? 'acierto' : 'fallo');
     // Solo al bloquearse la tarjeta.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locked]);
+  });
+  useEffect(() => efectoLocked(), [locked]);
 
   // Id estable de la tarjeta. `card` es un objeto nuevo en cada
   // respuesta (el store lo reconstruye), así que depender de él directo
@@ -128,7 +128,7 @@ export function StudyCardView({
   // cambiado de verdad.
   const cardId = `${card.entry.id}:${card.kind}`;
 
-  useEffect(() => {
+  const efectoCardId = useEffectEvent(() => {
     startedAt.current = Date.now();
     setTyped('');
     setUsedHint(false);
@@ -151,8 +151,8 @@ export function StudyCardView({
     }, 150);
 
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cardId, autoAudio]);
+  });
+  useEffect(() => efectoCardId(), [cardId, autoAudio]);
 
   // Escuchar y Dictado son ejercicios de oído puro: hasta la música de
   // fondo suave estorba. Cada tarjeta es un montaje nuevo (StudyScreen le
@@ -311,13 +311,13 @@ export function StudyCardView({
       )}
 
       {esCompletar ? (
-        <View ref={capa.ref} collapsable={false} onLayout={capa.alAcomodar} pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <View ref={capaRef} collapsable={false} onLayout={acomodarCapa} pointerEvents="none" style={StyleSheet.absoluteFill}>
           {vuelo && !aterrizo ? (
             <PalabraVoladora
               palabra={vuelo.palabra}
               de={vuelo.de}
               a={vuelo.a}
-              desfase={capa.desfase}
+              desfase={desfase}
               alTerminar={() => setAterrizo(true)}
             />
           ) : null}

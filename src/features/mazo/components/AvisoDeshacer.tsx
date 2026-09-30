@@ -35,11 +35,11 @@ export function AvisoDeshacer({ texto, onDeshacer }: Props) {
 
   useEffect(() => {
     if (!onDeshacer || reducido) return undefined;
-    resto.value = 1;
-    resto.value = withTiming(0, { duration: motionAviso.duracion, easing: motionEasing.lineal });
+    resto.set(1);
+    resto.set(withTiming(0, { duration: motionAviso.duracion, easing: motionEasing.lineal }));
     return () => cancelAnimation(resto);
   }, [onDeshacer, reducido, resto]);
-  const estiloBarra = useAnimatedStyle(() => ({ transform: [{ scaleX: resto.value }] }));
+  const estiloBarra = useAnimatedStyle(() => ({ transform: [{ scaleX: resto.get() }] }));
 
   return (
     <Animated.View

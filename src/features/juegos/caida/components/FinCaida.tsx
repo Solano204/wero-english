@@ -34,12 +34,12 @@ function Entra({ orden, style, children }: EntraProps) {
   const avance = useSharedValue(0);
 
   useEffect(() => {
-    avance.value = withDelay(reducido ? 0 : escalon(orden), withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.entrar }));
+    avance.set(withDelay(reducido ? 0 : escalon(orden), withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.entrar })));
   }, [orden, reducido, avance]);
 
   const anim = useAnimatedStyle(() => ({
-    opacity: avance.value,
-    transform: [{ translateY: reducido ? 0 : (1 - avance.value) * SUBE }],
+    opacity: avance.get(),
+    transform: [{ translateY: reducido ? 0 : (1 - avance.get()) * SUBE }],
   }));
 
   return <Animated.View style={[style, anim]}>{children}</Animated.View>;
@@ -52,16 +52,16 @@ function RecordNuevo() {
 
   useEffect(() => {
     if (reducido) return;
-    destello.value = withDelay(
+    destello.set(withDelay(
       motionDuration.lento + escalon(1),
       withSequence(
         withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir })
       )
-    );
+    ));
   }, [reducido, destello]);
 
-  const luz = useAnimatedStyle(() => ({ opacity: destello.value * 0.3 }));
+  const luz = useAnimatedStyle(() => ({ opacity: destello.get() * 0.3 }));
 
   return (
     <View style={styles.recordNuevo} accessible accessibilityRole="text" accessibilityLabel="Récord nuevo">

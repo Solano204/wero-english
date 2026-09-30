@@ -5,6 +5,7 @@ import { applyGameGrade } from '@/data/repos/juegos';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { DulceObjetivo, Entry, User } from '@/types';
+import { conFinal } from '@/shared/utils/conFinal';
 
 /** Tope duro de la secuencia de la pregunta: si el audio no carga, se suelta igual. */
 const RESPUESTA_MAXIMA_MS = 6000;
@@ -22,8 +23,12 @@ interface Params {
   respondiendo: boolean;
   pool: Entry[];
   META: number;
-  siguienteFrase: RefObject<number>;
-  empezoEn: RefObject<number>;
+  /** La siguiente frase de la bolsa (su índice); cada llamada avanza uno. */
+  tomarSiguienteFrase: () => number;
+  /** Cuántos ms lleva la jugada actual. */
+  msDesdeInicio: () => number;
+  /** La jugada empieza ahora (al cerrar una pregunta). */
+  reiniciarReloj: () => void;
   montado: RefObject<boolean>;
   despachar: Dispatch<EventoPartida>;
   setObjetivos: Dispatch<SetStateAction<DulceObjetivo[]>>;
@@ -45,8 +50,9 @@ export function useRespuestaDulces(p: Params) {
     respondiendo,
     pool,
     META,
-    siguienteFrase,
-    empezoEn,
+    tomarSiguienteFrase,
+    msDesdeInicio,
+    reiniciarReloj,
     montado,
     despachar,
     setObjetivos,
@@ -86,8 +92,7 @@ export function useRespuestaDulces(p: Params) {
       // contestadas en la misma partida. Si se acaban, el color se
       // queda con la que tenía y deja de pedir pregunta; la partida
       // termina por jugadas, como siempre.
-      const nueva = pool[siguienteFrase.current];
-      siguienteFrase.current++;
+      const nueva = pool[tomarSiguienteFrase()];
 
       setObjetivos((prev) =>
         prev
@@ -100,9 +105,9 @@ export function useRespuestaDulces(p: Params) {
       );
       despachar({ tipo: 'cerrarPregunta' });
       alCerrarPregunta();
-      empezoEn.current = Date.now();
+      reiniciarReloj();
     },
-    [pool, META, montado, siguienteFrase, setObjetivos, despachar, alCerrarPregunta, empezoEn]
+    [pool, META, montado, tomarSiguienteFrase, setObjetivos, despachar, alCerrarPregunta, reiniciarReloj]
   );
 
   /**
@@ -165,7 +170,7 @@ export function useRespuestaDulces(p: Params) {
         user.id,
         objetivo.entry.id,
         bien,
-        Date.now() - empezoEn.current,
+        msDesdeInicio(),
         'reconocer'
       );
 
@@ -179,7 +184,7 @@ export function useRespuestaDulces(p: Params) {
 
       void reproducirSecuenciaRespuesta(objetivo, bien);
     },
-    [pregunta, user, respondiendo, despachar, empezoEn, celebra, setResueltas, reproducirSecuenciaRespuesta]
+    [pregunta, user, respondiendo, despachar, msDesdeInicio, celebra, setResueltas, reproducirSecuenciaRespuesta]
   );
 
   /** Botón "Seguir ›" de la pregunta: corta la voz y avanza ya. */
@@ -187,16 +192,16 @@ export function useRespuestaDulces(p: Params) {
     if (candadoAvanzar.current || !pregunta) return;
     candadoAvanzar.current = true;
     setAvanzando(true);
-    try {
+    conFinal(() => {
       avanzarTrasRespuesta(respuestaToken.current, pregunta.objetivo);
-    } finally {
+    }, () => {
       // El candado se suelta siempre, pase lo que pase al avanzar.
       if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
       avanzarDebounce.current = setTimeout(() => {
         candadoAvanzar.current = false;
         setAvanzando(false);
       }, AVANZAR_DEBOUNCE_MS);
-    }
+    });
   }, [pregunta, avanzarTrasRespuesta]);
 
   /** Al desmontar: nada de la secuencia en camino puede seguir. */

@@ -46,11 +46,11 @@ export function useDetalleFrase() {
   const reducido = useMovimientoReducido();
   const entrada = useSharedValue(reducido ? 1 : 0);
   useEffect(() => {
-    entrada.value = reducido ? 1 : withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar });
+    entrada.set(reducido ? 1 : withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }));
   }, [reducido, entrada]);
   const entradaAnim = useAnimatedStyle(() => ({
-    opacity: entrada.value,
-    transform: [{ scale: ESCALA_LLEGADA + (1 - ESCALA_LLEGADA) * entrada.value }],
+    opacity: entrada.get(),
+    transform: [{ scale: ESCALA_LLEGADA + (1 - ESCALA_LLEGADA) * entrada.get() }],
   }));
 
   // El estado real: antes el botón arrancaba siempre en «Guardar», aunque la frase ya estuviera guardada.

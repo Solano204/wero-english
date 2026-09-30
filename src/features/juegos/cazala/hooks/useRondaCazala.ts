@@ -16,6 +16,7 @@ import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { RootStackParams } from '@/types/rutas';
+import { conFinal } from '@/shared/utils/conFinal';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -34,7 +35,7 @@ export const MARCAS = 3;
  */
 export function useRondaCazala() {
   const nav = useNavigation<Nav>();
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const porId = useMemo(() => new Map(content.cazalaEntradas.entries.map((e) => [e.id, e])), [content]);
   // Un dato roto (reducción que no suena en la frase, o regla gramatical
   // que no se puede "cazar") nunca debe llegar a una ronda jugable.
@@ -154,7 +155,7 @@ export function useRondaCazala() {
     if (candadoAvanzar.current) return;
     candadoAvanzar.current = true;
     setEsperando(true);
-    try {
+    conFinal(() => {
       audio.stop();
       if (idx + 1 >= items.length) {
         nav.goBack();
@@ -162,14 +163,14 @@ export function useRondaCazala() {
       }
       despachar({ tipo: 'nuevaRonda' });
       setIdx((i) => i + 1);
-    } finally {
+    }, () => {
       // El candado se suelta siempre, aunque el cambio de ronda fallara.
       if (esperaTimer.current) clearTimeout(esperaTimer.current);
       esperaTimer.current = setTimeout(() => {
         candadoAvanzar.current = false;
         setEsperando(false);
       }, AVANZAR_DEBOUNCE_MS);
-    }
+    });
   }, [idx, items.length, nav]);
 
   return { nav, porId, items, idx, picked, checked, esperando, alturaHoja, setAlturaHoja, compacta, item, order, voz, vozLenta, analisis, analisisLento, posRevision, reducciones, destacadas, tiempos, morphs, toggle, revisar, siguiente };

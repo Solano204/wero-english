@@ -60,7 +60,7 @@ export function ErrorsScreen() {
     [abrir]
   );
 
-  const estiloSalida = useAnimatedStyle(() => ({ opacity: salida.value }));
+  const estiloSalida = useAnimatedStyle(() => ({ opacity: salida.get() }));
 
   if (todos.length === 0) {
     return (

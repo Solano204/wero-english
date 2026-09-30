@@ -15,7 +15,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
  */
 export function useContracciones() {
   const nav = useNavigation<Nav>();
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   useCortarAudioAlSalir();
   // Memoizado: con un array nuevo en cada render, el efecto de carga se
   // volvía a disparar en cada render y no paraba nunca.

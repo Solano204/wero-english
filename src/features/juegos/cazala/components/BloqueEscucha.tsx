@@ -31,19 +31,19 @@ function MarcaCaza({ caceria }: { caceria: Caceria }) {
   const { pos, tiempos } = caceria;
 
   useAnimatedReaction(
-    () => (reducido ? 0 : tiempos.reduce((n, t) => n + (pos.value >= t ? 1 : 0), 0)),
+    () => (reducido ? 0 : tiempos.reduce((n, t) => n + (pos.get() >= t ? 1 : 0), 0)),
     (cuenta, antes) => {
       if (antes !== null && cuenta > antes) {
-        destello.value = withSequence(
+        destello.set(withSequence(
           withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
           withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
-        );
+        ));
       }
     },
     [pos, tiempos, reducido]
   );
 
-  const estilo = useAnimatedStyle(() => ({ opacity: destello.value, transform: [{ scaleY: 0.6 + 0.4 * destello.value }] }));
+  const estilo = useAnimatedStyle(() => ({ opacity: destello.get(), transform: [{ scaleY: 0.6 + 0.4 * destello.get() }] }));
   if (reducido) return null;
   return <Animated.View pointerEvents="none" style={[styles.marca, estilo]} />;
 }

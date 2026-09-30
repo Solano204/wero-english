@@ -42,7 +42,7 @@ export function usePhrasalVerbo() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<R>();
   const reducido = useMovimientoReducido();
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   useCortarAudioAlSalir();
   const modoLimpio = useSettingsStore((s) => s.modoLimpio);
   const verboRef = useRef<View>(null);

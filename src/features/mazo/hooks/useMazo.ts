@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getFavorites } from '@/data/repos/frases';
@@ -24,6 +24,9 @@ type AvisoSinId = { tipo: 'quitada'; entry: Entry; indice: number } | { tipo: 'f
 
 type Aviso = AvisoSinId & { id: number };
 
+/** Sin frases todavía: un solo arreglo vacío, no uno nuevo en cada render. */
+const SIN_ITEMS: Entry[] = [];
+
 /**
  * El mazo: las frases guardadas, filtros y acciones.
  */
@@ -40,16 +43,20 @@ export function useMazo() {
 
   // La lista que se ve: sale de la base, pero al quitar una frase se recorta al momento (y se regresa al deshacer).
   const [lista, setLista] = useState<Entry[] | null>(null);
-  const items = lista ?? carga.datos ?? [];
+  const items = lista ?? carga.datos ?? SIN_ITEMS;
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useLayoutEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
   useEffect(() => {
     if (carga.datos) setLista(carga.datos);
   }, [carga.datos]);
 
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const avisoRef = useRef(aviso);
-  avisoRef.current = aviso;
+  useLayoutEffect(() => {
+    avisoRef.current = aviso;
+  }, [aviso]);
   const [reinsertada, setReinsertada] = useState<number | null>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   const regreso = useRef<ReturnType<typeof setTimeout> | null>(null);

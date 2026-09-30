@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { StyleSheet, View, type AccessibilityActionEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -37,7 +37,7 @@ interface ItemProps {
 /** Una partícula de la rueda: su lugar, tamaño, giro, opacidad y color salen de qué tan lejos está del centro. */
 function ItemRuleta({ indice, etiqueta, pos, plano }: ItemProps) {
   const estilo = useAnimatedStyle(() => {
-    const d = indice - pos.value;
+    const d = indice - pos.get();
     const p = poseItem(d);
     return {
       opacity: p.opacidad,
@@ -75,6 +75,10 @@ interface Props {
  * directo.
  */
 export function RuletaParticulas({ verbo, etiquetas, indice, anuncio, onElegir }: Props) {
+  'use no memo';
+  // Fuera del React Compiler a propósito: los callbacks del gesto leen refs con los avisos más recientes (así el
+  // gesto no se rearma a media partida, lo que cortaría un arrastre en curso) y el compilador no sabe que esos
+  // callbacks corren después del render. Se queda con su memorización a mano (useMemo del gesto, useCallback).
   const reducido = useMovimientoReducido();
   const n = etiquetas.length;
   const pos = useSharedValue(indice);
@@ -83,10 +87,12 @@ export function RuletaParticulas({ verbo, etiquetas, indice, anuncio, onElegir }
   const [centro, setCentro] = useState(indice);
   const confirmado = useRef(indice);
   const alElegir = useRef(onElegir);
-  alElegir.current = onElegir;
+  useLayoutEffect(() => {
+    alElegir.current = onElegir;
+  }, [onElegir]);
 
   useAnimatedReaction(
-    () => limitarIndice(pos.value, n),
+    () => limitarIndice(pos.get(), n),
     (ahora, antes) => {
       if (ahora !== antes) runOnJS(setCentro)(ahora);
     },
@@ -104,45 +110,45 @@ export function RuletaParticulas({ verbo, etiquetas, indice, anuncio, onElegir }
   // Si la forma cambia desde fuera, la rueda gira hasta ella (salvo que el dedo la tenga tomada).
   useEffect(() => {
     confirmado.current = indice;
-    if (arrastrando.value === 1 || Math.abs(pos.value - indice) < 0.01) return;
-    pos.value = reducido ? indice : withSpring(indice, motionSpring.ruleta);
+    if (arrastrando.get() === 1 || Math.abs(pos.get() - indice) < 0.01) return;
+    pos.set(reducido ? indice : withSpring(indice, motionSpring.ruleta));
   }, [indice, reducido, pos, arrastrando]);
 
   const gesto = useMemo(() => {
     const irA = (destino: number) => {
       'worklet';
       if (reducido) {
-        pos.value = destino;
+        pos.set(destino);
         runOnJS(asentar)(destino);
         return;
       }
-      pos.value = withSpring(destino, motionSpring.ruleta, (fin) => {
+      pos.set(withSpring(destino, motionSpring.ruleta, (fin) => {
         if (fin) runOnJS(asentar)(destino);
-      });
+      }));
     };
     const arrastre = Gesture.Pan()
       .activeOffsetY([-8, 8])
       .failOffsetX([-24, 24])
       .onStart(() => {
         cancelAnimation(pos);
-        inicio.value = pos.value;
-        arrastrando.value = 1;
+        inicio.set(pos.get());
+        arrastrando.set(1);
       })
       .onUpdate((e) => {
-        pos.value = posElastica(inicio.value - e.translationY / ALTO_ITEM, n);
+        pos.set(posElastica(inicio.get() - e.translationY / ALTO_ITEM, n));
       })
       .onEnd((e, exito) => {
-        irA(destinoSuelta(pos.value, exito ? e.velocityY : 0, n));
+        irA(destinoSuelta(pos.get(), exito ? e.velocityY : 0, n));
       })
       .onFinalize(() => {
-        arrastrando.value = 0;
+        arrastrando.set(0);
       });
     const toque = Gesture.Tap()
       .maxDistance(10)
       .onEnd((e, exito) => {
         if (!exito) return;
-        const destino = destinoToque(e.y, ALTO_RUEDA, pos.value, n);
-        if (destino !== limitarIndice(pos.value, n)) irA(destino);
+        const destino = destinoToque(e.y, ALTO_RUEDA, pos.get(), n);
+        if (destino !== limitarIndice(pos.get(), n)) irA(destino);
       });
     return Gesture.Race(arrastre, toque);
   }, [n, reducido, pos, inicio, arrastrando, asentar]);

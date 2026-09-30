@@ -21,7 +21,7 @@ export function useDetalleMundo() {
   const { params } = useRoute<Rt>();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
 
   const carga = useCarga(
     async (): Promise<Record<string, { total: number; vistas: number; dominadas: number }>> =>

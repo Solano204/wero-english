@@ -57,11 +57,11 @@ interface EstelaProps {
 const Estela = memo(function Estela({ indice, progreso, origen, destino }: EstelaProps) {
   const k = indice + 1;
   const estilo = useAnimatedStyle(() => {
-    const q = Math.min(1, Math.max(0, progreso.value - k * PASO_ESTELA));
+    const q = Math.min(1, Math.max(0, progreso.get() - k * PASO_ESTELA));
     const x = origen.x + (destino.x - origen.x) * q - 5;
     const y = origen.y + (destino.y - origen.y) * q - 5;
-    const sale = interpolate(progreso.value, [0.85, 1], [1, 0], Extrapolation.CLAMP);
-    const entra = interpolate(progreso.value, [0, 0.05], [0, 1], Extrapolation.CLAMP);
+    const sale = interpolate(progreso.get(), [0.85, 1], [1, 0], Extrapolation.CLAMP);
+    const entra = interpolate(progreso.get(), [0, 0.05], [0, 1], Extrapolation.CLAMP);
     return {
       opacity: (0.55 - k * 0.1) * sale * entra,
       transform: [{ translateX: x }, { translateY: y }],
@@ -94,10 +94,10 @@ export function MapaBoca({ ipa, esActual, voz }: Props) {
 
   useEffect(() => {
     if (reducido) {
-      progreso.value = 1;
+      progreso.set(1);
       return;
     }
-    progreso.value = esActual ? withDelay(ESPERA_MS, withSpring(1, motionSpring.viaje)) : 0;
+    progreso.set(esActual ? withDelay(ESPERA_MS, withSpring(1, motionSpring.viaje)) : 0);
   }, [esActual, reducido, progreso]);
 
   const g = useMemo(() => {
@@ -125,12 +125,12 @@ export function MapaBoca({ ipa, esActual, voz }: Props) {
   const real = g?.real ?? { x: 0, y: 0 };
   const origen = g?.origen ?? { x: 0, y: 0 };
   const estiloPunto = useAnimatedStyle(() => {
-    const q = progreso.value;
+    const q = progreso.get();
     const x = origen.x + (real.x - origen.x) * q - RADIO_PUNTO;
     const y = origen.y + (real.y - origen.y) * q - RADIO_PUNTO;
     const latido = reducido
       ? 1
-      : 1 + LATIDO * activa.value * (0.5 + 0.5 * Math.sin(2 * Math.PI * LATIDOS_POR_S * Math.max(0, posAudio.value)));
+      : 1 + LATIDO * activa.get() * (0.5 + 0.5 * Math.sin(2 * Math.PI * LATIDOS_POR_S * Math.max(0, posAudio.get())));
     return { transform: [{ translateX: x }, { translateY: y }, { scale: latido }] };
   });
 

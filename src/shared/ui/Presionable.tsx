@@ -27,7 +27,7 @@ export function usePresion(resultado?: Resultado | null) {
   }, [resultado, disparar]);
 
   const animado = useAnimatedStyle(() => ({
-    transform: [{ translateX: dx.value }, { scale: escala.value * pulso.value }],
+    transform: [{ translateX: dx.get() }, { scale: escala.get() * pulso.get() }],
   }));
 
   const alPresionar = useCallback(() => {
@@ -35,10 +35,10 @@ export function usePresion(resultado?: Resultado | null) {
       setAbajo(true);
       return;
     }
-    escala.value = withTiming(motionPresion.escala, {
+    escala.set(withTiming(motionPresion.escala, {
       duration: motionDuration.rapido,
       easing: motionEasing.entrar,
-    });
+    }));
   }, [reducido, escala]);
 
   const alSoltar = useCallback(() => {
@@ -46,7 +46,7 @@ export function usePresion(resultado?: Resultado | null) {
       setAbajo(false);
       return;
     }
-    escala.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+    escala.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
   }, [reducido, escala]);
 
   const estilo = [animado, reducido && abajo ? { opacity: motionPresion.opacidad } : null];

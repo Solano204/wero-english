@@ -142,9 +142,7 @@ export function ColmenaScreen() {
         />
 
         <View
-          onLayout={(e) => {
-            tablero.origenRanuras.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y };
-          }}
+          onLayout={(e) => tablero.medirRanuras(e.nativeEvent.layout.x, e.nativeEvent.layout.y)}
         >
           <RanurasPalabra
             key={p.idx}
@@ -163,9 +161,7 @@ export function ColmenaScreen() {
 
         <View
           style={{ width: tablero.disposicion.ancho, minHeight: tablero.disposicion.alto }}
-          onLayout={(e) => {
-            tablero.origenPanal.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y };
-          }}
+          onLayout={(e) => tablero.medirPanal(e.nativeEvent.layout.x, e.nativeEvent.layout.y)}
         >
           <View style={styles.panalCapa}>
             <Panal

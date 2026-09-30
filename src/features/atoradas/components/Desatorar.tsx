@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -51,15 +51,17 @@ export function Desatorar({ entry, fallos, retraso, onTerminar }: Props) {
 
   // El aviso final va por una referencia: la pantalla puede cambiar su callback mientras la tarjeta se anima.
   const alTerminar = useRef(onTerminar);
-  alTerminar.current = onTerminar;
+  useLayoutEffect(() => {
+    alTerminar.current = onTerminar;
+  }, [onTerminar]);
   const terminar = useCallback(() => alTerminar.current(), []);
 
   useEffect(() => {
     const t = motionDesatorar;
     if (reducido) {
-      entra.value = 1;
-      apagado.value = encendidos;
-      etiqueta.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+      entra.set(1);
+      apagado.set(encendidos);
+      etiqueta.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
       const reloj = setTimeout(terminar, t.mantenerReducido);
       return () => {
         clearTimeout(reloj);
@@ -67,26 +69,26 @@ export function Desatorar({ entry, fallos, retraso, onTerminar }: Props) {
       };
     }
     const trasPuntos = retraso + t.entra + encendidos * t.punto;
-    entra.value = withDelay(retraso, withTiming(1, { duration: t.entra, easing: motionEasing.entrar }));
-    apagado.value = withDelay(
+    entra.set(withDelay(retraso, withTiming(1, { duration: t.entra, easing: motionEasing.entrar })));
+    apagado.set(withDelay(
       retraso + t.entra,
       withTiming(encendidos, { duration: Math.max(1, encendidos * t.punto), easing: motionEasing.lineal })
-    );
-    destello.value = withDelay(
+    ));
+    destello.set(withDelay(
       trasPuntos,
       withSequence(
         withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withTiming(0, { duration: t.destello, easing: motionEasing.salir })
       )
-    );
-    etiqueta.value = withDelay(trasPuntos, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-    sale.value = withDelay(
+    ));
+    etiqueta.set(withDelay(trasPuntos, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
+    sale.set(withDelay(
       trasPuntos + t.pausa,
       withTiming(1, { duration: t.sale, easing: motionEasing.salir }, (fin) => {
         'worklet';
         if (fin) runOnJS(terminar)();
       })
-    );
+    ));
     return () => {
       [entra, apagado, destello, etiqueta, sale].forEach((v) => cancelAnimation(v));
     };
@@ -94,21 +96,21 @@ export function Desatorar({ entry, fallos, retraso, onTerminar }: Props) {
 
   // Al irse, el alto baja a 0 para que la lista de abajo suba sin saltar; antes de irse no se toca.
   const estiloAlto = useAnimatedStyle(() =>
-    sale.value > 0 && altoMedido.value > 0 ? { height: altoMedido.value * (1 - sale.value) } : {}
+    sale.get() > 0 && altoMedido.get() > 0 ? { height: altoMedido.get() * (1 - sale.get()) } : {}
   );
   const estiloTarjeta = useAnimatedStyle(() => ({
-    opacity: entra.value * (1 - sale.value),
-    transform: [{ translateY: reducido ? 0 : (entra.value - 1) * DESPLAZA - sale.value * DESPLAZA }],
+    opacity: entra.get() * (1 - sale.get()),
+    transform: [{ translateY: reducido ? 0 : (entra.get() - 1) * DESPLAZA - sale.get() * DESPLAZA }],
   }));
-  const estiloDestello = useAnimatedStyle(() => ({ opacity: destello.value * OPACIDAD_DESTELLO }));
-  const estiloEtiqueta = useAnimatedStyle(() => ({ opacity: etiqueta.value }));
+  const estiloDestello = useAnimatedStyle(() => ({ opacity: destello.get() * OPACIDAD_DESTELLO }));
+  const estiloEtiqueta = useAnimatedStyle(() => ({ opacity: etiqueta.get() }));
 
   return (
     <Animated.View style={[styles.alto, estiloAlto]}>
       <View
         style={styles.medida}
         onLayout={(e) => {
-          altoMedido.value = e.nativeEvent.layout.height;
+          altoMedido.set(e.nativeEvent.layout.height);
         }}
         accessible
         accessibilityLabel={`${entry.phrase}. Ya no se te atora`}

@@ -21,12 +21,12 @@ export function FraseRonda({ texto }: Props) {
   const entrada = useSharedValue(0);
 
   useEffect(() => {
-    entrada.value = withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.entrar });
+    entrada.set(withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.lento, easing: motionEasing.entrar }));
   }, [reducido, entrada]);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: entrada.value,
-    transform: [{ scale: reducido ? 1 : ESCALA_INICIO + (1 - ESCALA_INICIO) * entrada.value }],
+    opacity: entrada.get(),
+    transform: [{ scale: reducido ? 1 : ESCALA_INICIO + (1 - ESCALA_INICIO) * entrada.get() }],
   }));
 
   return <Animated.Text style={[styles.frase, estilo]}>{texto}</Animated.Text>;

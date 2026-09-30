@@ -73,22 +73,22 @@ function FichaPuesta({ texto, pos, veredicto, onQuitar }: FichaPuestaProps) {
 
   useEffect(() => {
     if (!veredicto) {
-      luz.value = 0;
+      luz.set(0);
       return;
     }
     const retraso = Math.min(pos, motionVeredicto.maxPalabras) * motionVeredicto.palabra;
-    luz.value = reducido
+    luz.set(reducido
       ? 1
-      : withDelay(retraso, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+      : withDelay(retraso, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
   }, [veredicto, pos, reducido, luz]);
 
   const fondo = veredicto === 'mal' ? FONDO_MAL : FONDO_OK;
   const borde = veredicto === 'mal' ? MAL : OK;
   const estilo = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(luz.value, [0, 1], [ACENTO_SUAVE, fondo]),
-    borderColor: interpolateColor(luz.value, [0, 1], [ACENTO, borde]),
+    backgroundColor: interpolateColor(luz.get(), [0, 1], [ACENTO_SUAVE, fondo]),
+    borderColor: interpolateColor(luz.get(), [0, 1], [ACENTO, borde]),
   }));
-  const tinta = useAnimatedStyle(() => ({ color: interpolateColor(luz.value, [0, 1], [ACENTO, borde]) }));
+  const tinta = useAnimatedStyle(() => ({ color: interpolateColor(luz.get(), [0, 1], [ACENTO, borde]) }));
 
   return (
     // El reacomodo y la entrada van en un `Animated.View` aparte: `Presionable` anima su propio transform (la escala)

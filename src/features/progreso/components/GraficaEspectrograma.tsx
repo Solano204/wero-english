@@ -81,9 +81,9 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
 
   useEffect(() => {
     if (!activo) return;
-    progreso.value = reducido
+    progreso.set(reducido
       ? 1
-      : withDelay(retraso, withTiming(1, { duration: motionSenal.espectro, easing: motionEasing.lineal }));
+      : withDelay(retraso, withTiming(1, { duration: motionSenal.espectro, easing: motionEasing.lineal })));
   }, [activo, reducido, retraso, progreso]);
 
   // Las columnas suben una tras otra: cada una empieza `columna` ms después de la anterior.
@@ -93,7 +93,7 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
     const radio = Math.min(RADIO_COLUMNA, columna / 2);
     const duracion = motionSenal.espectro - (n - 1) * motionSenal.columna;
     for (let i = 0; i < n; i++) {
-      const t = Math.min(1, Math.max(0, (progreso.value * motionSenal.espectro - i * motionSenal.columna) / duracion));
+      const t = Math.min(1, Math.max(0, (progreso.get() * motionSenal.espectro - i * motionSenal.columna) / duracion));
       const alto = (alturas[i] ?? 0) * (1 - (1 - t) * (1 - t) * (1 - t));
       if (alto < 0.5) continue;
       trazo.addRRect(Skia.RRectXY(Skia.XYWHRect(xs[i] ?? 0, ALTO - alto, columna, alto), radio, radio));
@@ -102,8 +102,8 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
   };
   const totales = useDerivedValue(() => dibujar(altos));
   const aciertos = useDerivedValue(() => dibujar(altosAciertos));
-  const guiaX = useDerivedValue(() => (seleccion.value >= 0 ? (xs[seleccion.value] ?? 0) - HUECO / 2 : -ancho));
-  const guiaOpacidad = useDerivedValue(() => mostrar.value * OPACIDAD_GUIA);
+  const guiaX = useDerivedValue(() => (seleccion.get() >= 0 ? (xs[seleccion.get()] ?? 0) - HUECO / 2 : -ancho));
+  const guiaOpacidad = useDerivedValue(() => mostrar.get() * OPACIDAD_GUIA);
 
   const cambio = useCallback(
     (i: number) => {
@@ -126,9 +126,9 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
           mejor = i;
         }
       }
-      mostrar.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
-      if (mejor !== seleccion.value) {
-        seleccion.value = mejor;
+      mostrar.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
+      if (mejor !== seleccion.get()) {
+        seleccion.set(mejor);
         runOnJS(cambio)(mejor);
       }
     };
@@ -138,14 +138,14 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
       .onStart((e) => tocar(e.x))
       .onUpdate((e) => tocar(e.x))
       .onFinalize(() => {
-        mostrar.value = withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir });
+        mostrar.set(withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir }));
       });
   }, [centros, cambio, mostrar, seleccion]);
 
   const estiloEtiqueta = useAnimatedStyle(() => {
-    const centro = seleccion.value >= 0 ? (centros[seleccion.value] ?? 0) : 0;
-    const izquierda = Math.min(Math.max(centro - anchoEtiqueta.value / 2, 0), Math.max(0, ancho - anchoEtiqueta.value));
-    return { opacity: mostrar.value, transform: [{ translateX: izquierda }] };
+    const centro = seleccion.get() >= 0 ? (centros[seleccion.get()] ?? 0) : 0;
+    const izquierda = Math.min(Math.max(centro - anchoEtiqueta.get() / 2, 0), Math.max(0, ancho - anchoEtiqueta.get()));
+    return { opacity: mostrar.get(), transform: [{ translateX: izquierda }] };
   });
 
   const ultimo = n - 1;
@@ -184,7 +184,7 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
             pointerEvents="none"
             style={[styles.etiqueta, estiloEtiqueta]}
             onLayout={(e) => {
-              anchoEtiqueta.value = e.nativeEvent.layout.width;
+              anchoEtiqueta.set(e.nativeEvent.layout.width);
             }}
           >
             <Text style={styles.etiquetaTexto}>{etiqueta}</Text>

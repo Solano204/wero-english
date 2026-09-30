@@ -72,14 +72,14 @@ function Cubo({ i, tinte }: { i: number; tinte: string }) {
   const giro = (i % 2 === 0 ? 1 : -1) * (180 + (i % 4) * 90);
 
   useEffect(() => {
-    p.value = withDelay(
+    p.set(withDelay(
       i * motionEfecto.trozosEscalon,
       withTiming(1, { duration: motionEfecto.trozos, easing: motionEasing.entrar })
-    );
+    ));
   }, [i, p]);
 
   const anim = useAnimatedStyle(() => {
-    const t = p.value;
+    const t = p.get();
     return {
       // Se apaga en el último cuarto, no de golpe.
       opacity: t < 0.72 ? 1 : (1 - t) / 0.28,

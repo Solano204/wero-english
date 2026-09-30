@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -55,7 +55,7 @@ function Fantasma({ ficha, recta, hacia, entrada }: FantasmaProps) {
   const dx = hacia.x - (recta.x + recta.width / 2);
   const dy = hacia.y - (recta.y + recta.height / 2);
   const estilo = useAnimatedStyle(() => {
-    const p = entrada.value;
+    const p = entrada.get();
     return {
       opacity: 1 - acotar((p - 0.5) / 0.4),
       transform: [{ translateX: dx * p }, { translateY: dy * p }, { scale: 1 + 0.12 * p }],
@@ -132,7 +132,9 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
   const [lista, setLista] = useState(false);
   const empezo = useRef(false);
   const alLlegar = useRef(onAterrizo);
-  alLlegar.current = onAterrizo;
+  useLayoutEffect(() => {
+    alLlegar.current = onAterrizo;
+  }, [onAterrizo]);
   const marcarLista = useCallback(() => setLista(true), []);
   const aterrizar = useCallback(() => alLlegar.current(), []);
 
@@ -140,7 +142,7 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
   const cy = capa.alto / 2;
   const hacia = useMemo(() => ({ x: cx, y: cy }), [cx, cy]);
 
-  useEffect(() => {
+  const efectoIniciar = useEffectEvent(() => {
     if (!iniciar || empezo.current) return;
     // La voz ya se acabó (o se saltó) antes de que terminara el cable: no hay nada que mostrar.
     if (saliendo) {
@@ -150,28 +152,28 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
     }
     empezo.current = true;
     AccessibilityInfo.announceForAccessibility(`Par unido. ${entry.phrase}. ${entry.spanish_main}`);
-    entrada.value = withTiming(
+    entrada.set(withTiming(
       1,
       { duration: reducido ? motionDuration.base : motionDuration.escena, easing: motionEasing.entrar },
       (terminada) => {
         'worklet';
         if (terminada) runOnJS(marcarLista)();
       }
-    );
+    ));
     // Arranca una sola vez, cuando el cable termina: la voz que cambie después no reinicia la entrada.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [iniciar]);
+  });
+  useEffect(() => efectoIniciar(), [iniciar]);
 
   useEffect(() => {
     if (!saliendo || !lista) return;
-    salida.value = withTiming(
+    salida.set(withTiming(
       1,
       { duration: reducido ? motionDuration.base : motionDuration.lento, easing: motionEasing.entrar },
       (terminada) => {
         'worklet';
         if (terminada) runOnJS(aterrizar)();
       }
-    );
+    ));
   }, [saliendo, lista, reducido, salida, aterrizar]);
 
   useEffect(
@@ -182,13 +184,13 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
     [entrada, salida]
   );
 
-  const veloEstilo = useAnimatedStyle(() => ({ opacity: entrada.value * (1 - salida.value) }));
+  const veloEstilo = useAnimatedStyle(() => ({ opacity: entrada.get() * (1 - salida.get()) }));
 
   const dx = destino.x - cx;
   const dy = destino.y - cy;
   const tarjetaEstilo = useAnimatedStyle(() => {
-    const p = entrada.value;
-    const s = salida.value;
+    const p = entrada.get();
+    const s = salida.get();
     if (reducido) return { opacity: p * (1 - s) };
     return {
       opacity: acotar((p - 0.4) / 0.4) * (1 - acotar((s - 0.6) / 0.4)),
@@ -201,7 +203,7 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
   });
 
   // La traducción se enciende mientras suena el español.
-  const traduccionEstilo = useAnimatedStyle(() => ({ color: interpolateColor(activaEs.value, [0, 1], [TENUE, ENCENDIDA]) }));
+  const traduccionEstilo = useAnimatedStyle(() => ({ color: interpolateColor(activaEs.get(), [0, 1], [TENUE, ENCENDIDA]) }));
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">

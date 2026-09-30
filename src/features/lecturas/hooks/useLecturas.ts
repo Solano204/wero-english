@@ -21,7 +21,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function useLecturas() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const carga = useCarga(
     async (): Promise<LecturaFila[]> => {
       if (!user) return [];

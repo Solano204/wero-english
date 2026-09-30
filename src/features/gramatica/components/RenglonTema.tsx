@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -44,40 +44,40 @@ export const RenglonTema = memo(function RenglonTema({ tema, niveles, cerrado, p
   const reducido = useMovimientoReducido();
   const retraso = escalon(indice);
   // Un tema que nunca estuvo cerrado no reserva el hueco del candado.
-  const tuvoCandado = useRef(cerrado).current;
+  const [tuvoCandado] = useState(cerrado);
   const abierta = useSharedValue(cerrado ? 0 : 1);
 
   useEffect(() => {
     if (cerrado) {
-      abierta.value = 0;
+      abierta.set(0);
       return;
     }
     if (reducido || !tuvoCandado) {
-      abierta.value = 1;
+      abierta.set(1);
       return;
     }
-    abierta.value = withDelay(
+    abierta.set(withDelay(
       motionDuration.lento,
       withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar })
-    );
+    ));
     return () => cancelAnimation(abierta);
   }, [cerrado, reducido, tuvoCandado, abierta]);
 
   const entrada = useAnimatedStyle(() => {
-    const progreso = avance.progreso.value;
+    const progreso = avance.progreso.get();
     // Cerrando no hay escalón: todos salen juntos.
-    const espera = avance.abriendo.value === 0 ? 0 : retraso;
+    const espera = avance.abriendo.get() === 0 ? 0 : retraso;
     const t = interpolate(progreso * motionDuration.lento, [espera, motionDuration.lento], [0, 1], Extrapolation.CLAMP);
     return { opacity: t, transform: [{ translateY: (1 - t) * space.sm }] };
   });
   const estiloTitulo = useAnimatedStyle(() => ({
-    color: interpolateColor(abierta.value, [0, 1], [color.textMuted, color.text]),
+    color: interpolateColor(abierta.get(), [0, 1], [color.textMuted, color.text]),
   }));
   const estiloCandado = useAnimatedStyle(() => ({
-    opacity: 1 - abierta.value,
-    transform: [{ rotate: `${-abierta.value * GIRO_CANDADO}deg` }],
+    opacity: 1 - abierta.get(),
+    transform: [{ rotate: `${-abierta.get() * GIRO_CANDADO}deg` }],
   }));
-  const estiloAnuncio = useAnimatedStyle(() => ({ opacity: 1 - abierta.value }));
+  const estiloAnuncio = useAnimatedStyle(() => ({ opacity: 1 - abierta.get() }));
 
   const etiqueta = `${tema.titulo}. ${tema.gancho}. Nivel ${tema.nivel} de ${niveles}.${
     cerrado ? ' Se abre con un anuncio.' : ''

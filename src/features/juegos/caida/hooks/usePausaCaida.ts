@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, type Dispatch, type RefObject } from 're
 import type { EventoPartida } from '@/features/juegos/caida/logic/partida';
 import * as audio from '@/services/audio';
 import type { Entry } from '@/types';
+import { conFinal } from '@/shared/utils/conFinal';
 
 /**
  * Tope duro de la pausa de fin de ronda (acierto o fallo): si el audio
@@ -88,16 +89,16 @@ export function usePausaCaida(despachar: Dispatch<EventoPartida>, montado: RefOb
     if (candadoAvanzar.current) return;
     candadoAvanzar.current = true;
     setAvanzando(true);
-    try {
+    conFinal(() => {
       avanzarTrasPausa(pausaToken.current);
-    } finally {
+    }, () => {
       // El candado se suelta siempre, pase lo que pase al avanzar.
       if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
       avanzarDebounce.current = setTimeout(() => {
         candadoAvanzar.current = false;
         setAvanzando(false);
       }, AVANZAR_DEBOUNCE_MS);
-    }
+    });
   }, [avanzarTrasPausa]);
 
   /** Al desmontar: nada de la pausa en camino puede seguir. */

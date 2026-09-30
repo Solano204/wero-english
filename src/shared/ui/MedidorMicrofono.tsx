@@ -25,8 +25,8 @@ export function MedidorMicrofono({ nivel, activo }: Props) {
   const reducido = useMovimientoReducido();
   const onda = useAnimatedStyle(() =>
     reducido
-      ? { opacity: activo ? 0.35 + nivel.value * 0.65 : 0 }
-      : { opacity: activo ? 1 : 0, transform: [{ scale: 1 + nivel.value * CRECE }] }
+      ? { opacity: activo ? 0.35 + nivel.get() * 0.65 : 0 }
+      : { opacity: activo ? 1 : 0, transform: [{ scale: 1 + nivel.get() * CRECE }] }
   );
   return (
     <View style={styles.caja} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>

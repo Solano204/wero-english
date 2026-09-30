@@ -50,7 +50,7 @@ function Carriles({ ancho, alto, y, largoEstela, estela }: CarrilesProps) {
   }, [ancho, alto]);
 
   const columna = (ancho - space.lg * 2 - HUECO_FICHAS) / 2;
-  const posicion = useDerivedValue(() => [{ translateY: MARGEN_ARRIBA + y.value }]);
+  const posicion = useDerivedValue(() => [{ translateY: MARGEN_ARRIBA + y.get() }]);
 
   return (
     <FxSeguro>

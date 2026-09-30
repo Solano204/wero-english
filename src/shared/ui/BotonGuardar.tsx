@@ -45,15 +45,15 @@ export function BotonGuardar({ guardada, pulso, onPress, variante = 'primary', s
 
   useEffect(() => {
     if (pulso === 0 || reducido) return;
-    escala.value = withSequence(withSpring(ESCALA_ESTRELLA, motionSpring.rebote), withSpring(1, motionSpring.rebote));
-    anillo.value = 0;
-    anillo.value = withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar });
+    escala.set(withSequence(withSpring(ESCALA_ESTRELLA, motionSpring.rebote), withSpring(1, motionSpring.rebote)));
+    anillo.set(0);
+    anillo.set(withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }));
   }, [pulso, reducido, escala, anillo]);
 
-  const estrella = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+  const estrella = useAnimatedStyle(() => ({ transform: [{ scale: escala.get() }] }));
   const halo = useAnimatedStyle(() => ({
-    opacity: 0.9 * (1 - anillo.value),
-    transform: [{ scale: 1 + (EXPANSION_ANILLO - 1) * anillo.value }],
+    opacity: 0.9 * (1 - anillo.get()),
+    transform: [{ scale: 1 + (EXPANSION_ANILLO - 1) * anillo.get() }],
   }));
 
   const icono = (

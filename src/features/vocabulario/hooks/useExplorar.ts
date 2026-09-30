@@ -22,7 +22,7 @@ export function useExplorar() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
 
   const [term, setTerm] = useState('');
   const [results, setResults] = useState<Entry[]>([]);

@@ -12,10 +12,10 @@ const Chevron = memo(function Chevron({ encendido }: { encendido: boolean }) {
 
   useEffect(() => {
     const meta = encendido ? 1 : 0;
-    luz.value = reducido ? meta : withTiming(meta, { duration: motionDuration.base, easing: motionEasing.entrar });
+    luz.set(reducido ? meta : withTiming(meta, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [encendido, reducido, luz]);
 
-  const encendida = useAnimatedStyle(() => ({ opacity: luz.value }));
+  const encendida = useAnimatedStyle(() => ({ opacity: luz.get() }));
 
   return (
     <View style={styles.chevron}>

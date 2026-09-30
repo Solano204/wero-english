@@ -36,7 +36,7 @@ export function PieDulces({ jugadas, total, onDejar }: Props) {
   const enUltimas = jugadas <= ULTIMAS;
 
   useEffect(() => {
-    avance.value = reducido ? pct : withTiming(pct, { duration: motionDuration.lento, easing: motionEasing.entrar });
+    avance.set(reducido ? pct : withTiming(pct, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [pct, reducido, avance]);
 
   // Una vez por jugada gastada, mientras quedan pocas.
@@ -44,15 +44,15 @@ export function PieDulces({ jugadas, total, onDejar }: Props) {
     const gasto = jugadas < anterior.current;
     anterior.current = jugadas;
     if (!gasto || jugadas > ULTIMAS || reducido) return;
-    pulso.value = withSequence(
+    pulso.set(withSequence(
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
-    );
+    ));
   }, [jugadas, reducido, pulso]);
 
   // Solo transform: animar `width` fuerza layout nativo en cada cuadro.
   const relleno = useAnimatedStyle(() => ({
-    transform: [{ scaleX: avance.value }, { scaleY: 1 + (LATE - 1) * pulso.value }],
+    transform: [{ scaleX: avance.get() }, { scaleY: 1 + (LATE - 1) * pulso.get() }],
   }));
 
   return (
@@ -92,10 +92,10 @@ export function NotaInicial({ visible, texto }: NotaProps) {
 
   useEffect(() => {
     const meta = visible ? 1 : 0;
-    opacidad.value = reducido ? meta : withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.salir });
+    opacidad.set(reducido ? meta : withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.salir }));
   }, [visible, reducido, opacidad]);
 
-  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.value }));
+  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.get() }));
   return (
     <Animated.Text
       style={[styles.nota, estilo]}

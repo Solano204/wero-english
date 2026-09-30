@@ -155,7 +155,7 @@ await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Españo
   const d = sinComentarios(leer('src/features/mazo/components/DeslizarQuitar.tsx'));
   assert.match(d, /\.activeOffsetX\(\[-QUITAR\.activa, QUITAR\.activa\]\)/);
   assert.match(d, /\.failOffsetY\(\[-QUITAR\.falla, QUITAR\.falla\]\)/, 'cede ante el scroll de la lista');
-  assert.match(d, /decidirQuitar\(tx\.value, e\.velocityX\)/);
+  assert.match(d, /decidirQuitar\(tx\.get\(\), e\.velocityX\)/);
   assert.match(d, /if \(reducido\) return <>\{children\}<\/>;/, 'con reducir movimiento no hay deslizamiento');
   assert.match(d, /name="star"/, 'la estrella en contorno');
   assert.match(d, /color\.wrongSoft/);
@@ -291,11 +291,11 @@ await prueba('desatorar dura poco y una sola vez: una tarjeta ≤ 2.5 s, tres es
   assert.ok(2 * 600 + A.duracionDesatorar(5, t) <= 4000, 'las tres escalonadas');
   const d = sinComentarios(leer('src/features/atoradas/components/Desatorar.tsx'));
   assert.ok(!/withRepeat|skia|Shader/i.test(d), 'una sola vez, sin bucles ni shaders');
-  assert.match(d, /if \(reducido\) \{\s*entra\.value = 1;\s*apagado\.value = encendidos;/, 'con reducir movimiento los puntos ya están apagados');
-  assert.match(d, /etiqueta\.value = withTiming\(1, \{ duration: motionDuration\.base/, 'la etiqueta aparece con fade');
+  assert.match(d, /if \(reducido\) \{\s*entra\.set\(1\);\s*apagado\.set\(encendidos\);/, 'con reducir movimiento los puntos ya están apagados');
+  assert.match(d, /etiqueta\.set\(withTiming\(1, \{ duration: motionDuration\.base/, 'la etiqueta aparece con fade');
   assert.match(d, /setTimeout\(terminar, t\.mantenerReducido\)/);
   assert.match(d, /Ya no se te atora/);
-  assert.match(d, /height: altoMedido\.value \* \(1 - sale\.value\)/, 'al irse el hueco se cierra: la lista no salta');
+  assert.match(d, /height: altoMedido\.get\(\) \* \(1 - sale\.get\(\)\)/, 'al irse el hueco se cierra: la lista no salta');
   assert.match(d, /color: color\.correct|backgroundColor: color\.correct/, 'el destello y la etiqueta en correct');
   assert.match(d, /accessibilityLabel=\{`\$\{entry\.phrase\}\. Ya no se te atora`\}/);
   assert.ok(!/riskStrong|tone="strong"/.test(d));

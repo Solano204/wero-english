@@ -32,10 +32,10 @@ export function AnilloFrases({ dominadas, total, lado, retraso = 0 }: Props) {
 
   useEffect(() => {
     if (reducido) {
-      llenado.value = fraccion;
+      llenado.set(fraccion);
       return;
     }
-    llenado.value = withDelay(retraso, withTiming(fraccion, { duration: motionDuration.escena, easing: motionEasing.entrar }));
+    llenado.set(withDelay(retraso, withTiming(fraccion, { duration: motionDuration.escena, easing: motionEasing.entrar })));
     return () => cancelAnimation(llenado);
   }, [fraccion, reducido, retraso, llenado]);
 
@@ -43,9 +43,9 @@ export function AnilloFrases({ dominadas, total, lado, retraso = 0 }: Props) {
   const radio = (lado - GROSOR) / 2;
   const circunferencia = 2 * Math.PI * radio;
   const propsArco = useAnimatedProps(() => ({
-    strokeDashoffset: circunferencia * (1 - llenado.value),
+    strokeDashoffset: circunferencia * (1 - llenado.get()),
     // Con el anillo vacío la punta redondeada dibujaría un punto: no se dibuja nada.
-    opacity: llenado.value > 0.001 ? 1 : 0,
+    opacity: llenado.get() > 0.001 ? 1 : 0,
   }));
 
   return (

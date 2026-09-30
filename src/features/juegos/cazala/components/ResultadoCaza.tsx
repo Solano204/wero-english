@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useEffectEvent } from 'react';
 import { AccessibilityInfo, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -78,17 +78,17 @@ export function ResultadoCaza({
   useEffect(() => {
     // Espera a que el veredicto se vea en los renglones antes de subir.
     const espera = motionDuration.lento;
-    if (reducido) opacidad.value = withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-    else y.value = withDelay(espera, withSpring(0, motionSpring.rebote));
+    if (reducido) opacidad.set(withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
+    else y.set(withDelay(espera, withSpring(0, motionSpring.rebote)));
   }, [reducido, y, opacidad]);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     AccessibilityInfo.announceForAccessibility(`${veredicto}. ${fraseReal}. Forma completa: ${fraseFormal}`);
     // Solo cuenta el momento en que aparece la hoja.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
-  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.value, transform: [{ translateY: y.value }] }));
+  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ translateY: y.get() }] }));
 
   return (
     <Animated.View exiting={desaparecer(motionDuration.rapido)} style={styles.raiz} pointerEvents="box-none">

@@ -6,6 +6,7 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { FONDO, aparecer, color, desaparecer, layout, resplandorSol, space } from '@/theme';
+import { conFinalAsync } from '@/shared/utils/conFinal';
 
 interface Props {
   children: ReactNode;
@@ -55,10 +56,10 @@ interface PropsScrollAnimado extends ScrollViewProps {
 function ScrollAnimado({ y, refScroll, soltar, ...props }: PropsScrollAnimado) {
   const alDesplazar = useAnimatedScrollHandler({
     onScroll: (e) => {
-      y.value = e.contentOffset.y;
+      y.set(e.contentOffset.y);
     },
     onBeginDrag: () => {
-      if (soltar) soltar.value = 0;
+      if (soltar) soltar.set(0);
     },
   });
   return <Animated.ScrollView {...props} ref={refScroll} onScroll={alDesplazar} scrollEventThrottle={16} />;
@@ -99,11 +100,11 @@ export function Screen({
   const refrescar = useCallback(async () => {
     if (!alRefrescar) return;
     setRefrescando(true);
-    try {
+    await conFinalAsync(async () => {
       await alRefrescar();
-    } finally {
+    }, () => {
       setRefrescando(false);
-    }
+    });
   }, [alRefrescar]);
   const refreshControl = alRefrescar ? (
     <RefreshControl

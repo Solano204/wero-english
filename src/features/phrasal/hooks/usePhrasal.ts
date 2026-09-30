@@ -22,7 +22,7 @@ export interface ItemVerbo {
  */
 export function usePhrasal() {
   const nav = useNavigation<Nav>();
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const modoLimpio = useSettingsStore((s) => s.modoLimpio);
   const [consulta, setConsulta] = useState('');
 

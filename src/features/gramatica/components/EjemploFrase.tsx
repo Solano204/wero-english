@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Card, Presionable } from '@/shared/ui';
@@ -42,16 +42,18 @@ export function EjemploFrase({ ejemplo, activo, antes, alActivarse }: Props) {
   useEffect(() => {
     const destino = suena ? 1 : 0;
     if (reducido) {
-      luz.value = destino;
+      luz.set(destino);
       return;
     }
-    luz.value = withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+    luz.set(withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar }));
     return () => cancelAnimation(luz);
   }, [suena, reducido, luz]);
-  const estiloFilo = useAnimatedStyle(() => ({ opacity: luz.value }));
+  const estiloFilo = useAnimatedStyle(() => ({ opacity: luz.get() }));
 
   const alActivarseRef = useRef(alActivarse);
-  alActivarseRef.current = alActivarse;
+  useLayoutEffect(() => {
+    alActivarseRef.current = alActivarse;
+  }, [alActivarse]);
   useEffect(() => {
     if (activo) alActivarseRef.current(vista.current);
   }, [activo]);

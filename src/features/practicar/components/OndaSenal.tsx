@@ -30,24 +30,24 @@ function Barras({ energia, encendido, interferencia, visible }: Props) {
   const tam = useSharedValue<SkSize>({ width: 0, height: 0 });
 
   useEffect(() => {
-    nivel.value = reducido
+    nivel.set(reducido
       ? energia
-      : withTiming(energia, { duration: motionDuration.lento, easing: motionEasing.entrar });
+      : withTiming(energia, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [energia, reducido, nivel]);
 
   const trazo = useDerivedValue(() => {
-    const { width, height } = tam.value;
+    const { width, height } = tam.get();
     return trazarBarras({
       ancho: width,
       alto: height,
-      fase: fase.value,
-      energia: nivel.value * encendido.value,
-      ruido: interferencia.value,
+      fase: fase.get(),
+      energia: nivel.get() * encendido.get(),
+      ruido: interferencia.get(),
       margenAbajo: space.lg,
     });
   });
-  const inicio = useDerivedValue(() => vec(0, tam.value.height));
-  const fin = useDerivedValue(() => vec(0, tam.value.height * (1 - ZONA)));
+  const inicio = useDerivedValue(() => vec(0, tam.get().height));
+  const fin = useDerivedValue(() => vec(0, tam.get().height * (1 - ZONA)));
 
   return (
     <Canvas style={StyleSheet.absoluteFill} onSize={tam} pointerEvents="none" accessible={false}>

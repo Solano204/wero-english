@@ -27,16 +27,16 @@ export function ProgressBar({ value, total, tint = color.accent, height = 6 }: P
   const reducido = useMovimientoReducido();
 
   useEffect(() => {
-    progreso.value = reducido
+    progreso.set(reducido
       ? pct
-      : withTiming(pct, { duration: motionDuration.lento, easing: motionEasing.entrar });
+      : withTiming(pct, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [pct, progreso, reducido]);
 
   // Solo transform: animar `width` fuerza layout nativo en cada cuadro.
   // El relleno queda a ancho completo y se recorta con scaleX desde la
   // izquierda, que es composición pura en el hilo de UI.
   const style = useAnimatedStyle(() => ({
-    transform: [{ scaleX: progreso.value }],
+    transform: [{ scaleX: progreso.get() }],
   }));
 
   return (

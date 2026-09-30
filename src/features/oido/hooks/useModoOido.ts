@@ -18,6 +18,12 @@ import { marcasDe } from '@/services/marcas';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 
+/** Sube la «vigencia» (invalida lo que va en camino). Función aparte: la limpieza de un efecto no toca
+ *  `.current` de frente, que la regla de hooks confunde con una ref a un nodo. */
+function invalidar(vigencia: { current: number }): void {
+  vigencia.current++;
+}
+
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
 const PAUSA_ENTRE_IDIOMAS_MS = 800;
@@ -107,7 +113,7 @@ export function useModoOido() {
 
   // Modo bolsillo: sin tocar la pantalla mientras suena, baja el brillo de todo menos el anillo y la frase.
   const { bolsillo, brillo, despertar } = useBolsillo(playing);
-  const estiloBrillo = useAnimatedStyle(() => ({ opacity: brillo.value }));
+  const estiloBrillo = useAnimatedStyle(() => ({ opacity: brillo.get() }));
 
   const detener = useCallback(() => {
     cicloRef.current++;
@@ -128,8 +134,7 @@ export function useModoOido() {
     });
     return () => {
       sub.remove();
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
-      cicloRef.current++;
+      invalidar(cicloRef);
       playingRef.current = false;
       audio.stop();
     };

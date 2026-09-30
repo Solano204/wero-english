@@ -26,21 +26,21 @@ function PulsoNuevo({ avance, children }: { avance?: Avance; children: ReactNode
   const pendiente = useSharedValue(pulsoNuevoPendiente());
 
   useAnimatedReaction(
-    () => (avance ? avance.progreso.value : 1),
+    () => (avance ? avance.progreso.get() : 1),
     (progreso) => {
-      if (progreso < 1 || !pendiente.value) return;
-      pendiente.value = false;
+      if (progreso < 1 || !pendiente.get()) return;
+      pendiente.set(false);
       runOnJS(consumirPulsoNuevo)();
       if (reducido) return;
-      opacidad.value = withSequence(
+      opacidad.set(withSequence(
         withTiming(PULSO_MIN, { duration: motionDuration.base, easing: motionEasing.entrar }),
         withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })
-      );
+      ));
     },
     [reducido]
   );
 
-  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.value }));
+  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.get() }));
   return <Animated.View style={estilo}>{children}</Animated.View>;
 }
 

@@ -52,21 +52,21 @@ function EfectoCelda({ pulso, llega, children }: EfectoProps) {
   const escala = useSharedValue(llega && !reducido ? ESCALA_LLEGADA : 1);
 
   useEffect(() => {
-    if (llega && !reducido) escala.value = withDelay(RETRASO_LOGRO, withSpring(1, motionSpring.rebote));
+    if (llega && !reducido) escala.set(withDelay(RETRASO_LOGRO, withSpring(1, motionSpring.rebote)));
   }, [llega, reducido, escala]);
 
   useEffect(() => {
     if (pulso === undefined || reducido) return;
-    escala.value = withDelay(
+    escala.set(withDelay(
       RETRASO_LOGRO,
       withSequence(
         withTiming(motionLogro.escala, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withTiming(1, { duration: motionDuration.base, easing: motionEasing.salir })
       )
-    );
+    ));
   }, [pulso, reducido, escala]);
 
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: escala.get() }] }));
   return <Animated.View style={anim}>{children}</Animated.View>;
 }
 

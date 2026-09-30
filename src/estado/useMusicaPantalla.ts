@@ -38,7 +38,6 @@ export function useMusicaPantalla(
         return () => music.setFactorFoco(1);
       }
       return undefined;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pista, musicaJuegosDistinta, volumenFactor])
   );
 }

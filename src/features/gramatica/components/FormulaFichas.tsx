@@ -31,16 +31,16 @@ function Entra({ activo, retraso, children }: EntraProps) {
   useEffect(() => {
     if (!activo) return;
     if (reducido) {
-      avance.value = 1;
+      avance.set(1);
       return;
     }
-    avance.value = withDelay(retraso, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+    avance.set(withDelay(retraso, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
     return () => cancelAnimation(avance);
   }, [activo, reducido, retraso, avance]);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: avance.value,
-    transform: [{ translateX: (avance.value - 1) * DESLIZA }],
+    opacity: avance.get(),
+    transform: [{ translateX: (avance.get() - 1) * DESLIZA }],
   }));
   return <Animated.View style={estilo}>{children}</Animated.View>;
 }

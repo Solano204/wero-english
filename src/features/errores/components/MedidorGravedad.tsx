@@ -25,16 +25,16 @@ function Barra({ numero, encendida, animada, retraso }: BarraProps) {
 
   useEffect(() => {
     if (!animada || reducido) {
-      luz.value = encendida ? 1 : 0;
+      luz.set(encendida ? 1 : 0);
       return;
     }
-    luz.value = encendida
+    luz.set(encendida
       ? withDelay(retraso + escalon(numero - 1), withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }))
-      : 0;
+      : 0);
     return () => cancelAnimation(luz);
   }, [animada, reducido, encendida, retraso, numero, luz]);
 
-  const estilo = useAnimatedStyle(() => ({ opacity: luz.value }));
+  const estilo = useAnimatedStyle(() => ({ opacity: luz.get() }));
   return (
     <View style={[styles.barra, { height: ALTO_BASE + ALTO_PASO * (numero - 1) }]}>
       <Animated.View style={[StyleSheet.absoluteFill, styles.encendida, estilo]} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
 import { AppState } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +15,12 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+
+/** Sube la «vigencia» (invalida lo que va en camino). Función aparte: la limpieza de un efecto no toca
+ *  `.current` de frente, que la regla de hooks confunde con una ref a un nodo. */
+function invalidar(vigencia: { current: number }): void {
+  vigencia.current++;
+}
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -86,11 +92,17 @@ export function useFrasesSueltas() {
   const entry = pool[i];
   // Lo que el mazo avisa al terminar una salida puede llegar antes de que React pinte: la cuenta va también en una referencia.
   const iRef = useRef(0);
-  iRef.current = i;
+  useLayoutEffect(() => {
+    iRef.current = i;
+  }, [i]);
   const largoRef = useRef(0);
-  largoRef.current = pool.length;
+  useLayoutEffect(() => {
+    largoRef.current = pool.length;
+  }, [pool]);
   const arribaRef = useRef<number | null>(null);
-  arribaRef.current = entry?.id ?? null;
+  useLayoutEffect(() => {
+    arribaRef.current = entry?.id ?? null;
+  }, [entry]);
 
   // Corta la voz al salir de la pantalla o al ir a background, e
   // igual al desmontar (recarga en caliente, navegación hacia atrás).
@@ -104,8 +116,7 @@ export function useFrasesSueltas() {
     });
     return () => {
       sub.remove();
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
-      vozToken.current++;
+      invalidar(vozToken);
       audio.stop();
     };
   }, []);
@@ -144,20 +155,19 @@ export function useFrasesSueltas() {
   // Audio automático al mostrarse cada frase: arranca ~250ms después,
   // cancelable por entry.id para que pasar rápido no dispare audios
   // viejos, y solo si "Voz automática" está prendida en Ajustes.
-  useEffect(() => {
+  const efectoEntryid = useEffectEvent(() => {
     if (!entry || !autoAudio) return;
     const t = setTimeout(() => {
       void reproduceSecuencia(entry);
     }, RETRASO_AUTO_MS);
     return () => {
       clearTimeout(t);
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
-      vozToken.current++;
+      invalidar(vozToken);
       audio.stop();
       setSonando(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entry?.id, autoAudio]);
+  });
+  useEffect(() => efectoEntryid(), [entry?.id, autoAudio]);
 
   /** Toque manual de un solo idioma: cancela lo que suene y reproduce solo eso. */
   const reproduceUna = useCallback(

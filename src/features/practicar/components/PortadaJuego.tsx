@@ -40,19 +40,19 @@ function EscenaPares({ fase, ancho, alto }: EscenaProps) {
   const lejos = ancho * 0.32;
 
   const izquierda = useDerivedValue(() => {
-    const f = fase.value;
+    const f = fase.get();
     const d = f < 0.5 ? lejos + (cerca - lejos) * suave(tramo(f, 0, 0.35)) : cerca + (lejos - cerca) * suave(tramo(f, 0.8, 1));
     const clic = 1 + 0.08 * Math.sin(Math.PI * tramo(f, 0.4, 0.5));
     return [{ translateX: cx - d }, { translateY: cy }, { scale: clic }];
   });
   const derecha = useDerivedValue(() => {
-    const f = fase.value;
+    const f = fase.get();
     const d = f < 0.5 ? lejos + (cerca - lejos) * suave(tramo(f, 0, 0.35)) : cerca + (lejos - cerca) * suave(tramo(f, 0.8, 1));
     const clic = 1 + 0.08 * Math.sin(Math.PI * tramo(f, 0.4, 0.5));
     return [{ translateX: cx + d }, { translateY: cy }, { scale: clic }];
   });
   const linea = useDerivedValue(() => {
-    const f = fase.value;
+    const f = fase.get();
     return [{ translateX: cx }, { translateY: cy }, { scaleX: tramo(f, 0.35, 0.45) * (1 - tramo(f, 0.8, 0.9)) }];
   });
 
@@ -85,7 +85,7 @@ interface FichaCaidaProps {
 function FichaCaida({ fase, x, desfase, ancho, alto, recorrido, estela, tinte }: FichaCaidaProps) {
   const posicion = useDerivedValue(() => [
     { translateX: x },
-    { translateY: ((fase.value + desfase) % 1) * recorrido - (alto + estela) },
+    { translateY: ((fase.get() + desfase) % 1) * recorrido - (alto + estela) },
   ]);
   return (
     <Group transform={posicion}>
@@ -126,7 +126,7 @@ interface CuboProps {
 
 function Cubo({ fase, x, y, lado, paso, tinte, mov, encoge }: CuboProps) {
   const transformacion = useDerivedValue(() => {
-    const f = fase.value;
+    const f = fase.get();
     const cambio = suave(tramo(f, 0.15, 0.35)) - suave(tramo(f, 0.85, 1));
     const escala = encoge ? 1 - suave(tramo(f, 0.4, 0.55)) + suave(tramo(f, 0.85, 1)) : 1;
     return [{ translateX: x }, { translateY: y + mov * cambio * paso }, { scale: escala }];
@@ -216,7 +216,7 @@ function Lienzo({ escena, ancho, alto, bucle, ambiente, visible, desfase }: Omit
     visible,
     unaVez: !bucle,
   });
-  const paralaje = useAnimatedStyle(() => ({ transform: [{ translateY: reducido ? 0 : desfase.value }] }));
+  const paralaje = useAnimatedStyle(() => ({ transform: [{ translateY: reducido ? 0 : desfase.get() }] }));
   const { Componente } = escena;
   return (
     <Animated.View style={[styles.lienzo, { top: -MARGEN_PARALAJE, height: alto + MARGEN_PARALAJE * 2 }, paralaje]}>

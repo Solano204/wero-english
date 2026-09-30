@@ -25,7 +25,7 @@ interface PildoraProps {
 
 function Pildora({ tx, ty, cual, etiqueta, icono }: PildoraProps) {
   const estilo = useAnimatedStyle(() => {
-    const a = cual === 'siguiente' ? avanceSiguiente(tx.value, ty.value) : avanceGuardar(tx.value, ty.value);
+    const a = cual === 'siguiente' ? avanceSiguiente(tx.get(), ty.get()) : avanceGuardar(tx.get(), ty.get());
     const desliza = (1 - a) * DESLIZA;
     return {
       opacity: a,

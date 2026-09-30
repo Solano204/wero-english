@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useEffectEvent } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
@@ -32,21 +32,21 @@ export function PalabraVoladora({ palabra, de, a, desfase, alTerminar }: Props) 
   const dx = a.x + a.width / 2 - (de.x + de.width / 2);
   const dy = a.y + a.height / 2 - (de.y + de.height / 2);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     // Con movimiento reducido no hay vuelo: el hueco se llena de una vez.
     if (reducido) {
       alTerminar();
       return;
     }
-    avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }, (terminado) => {
+    avance.set(withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }, (terminado) => {
       if (terminado) runOnJS(alTerminar)();
-    });
+    }));
     // Un vuelo por montaje: la capa se remonta con cada palabra.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   const anim = useAnimatedStyle(() => {
-    const t = avance.value;
+    const t = avance.get();
     return {
       opacity: t < DESDE_DESVANECE ? 1 : (1 - t) / (1 - DESDE_DESVANECE),
       transform: [{ translateX: dx * t }, { translateY: dy * t }, { scale: 1 + CRECE * t }],

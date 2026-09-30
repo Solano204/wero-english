@@ -74,11 +74,11 @@ const Ranura = memo(function Ranura({ x, y, ancho, alto, letra, etiqueta, estado
 
   useEffect(() => {
     if (!letra) {
-      aparece.value = 0;
+      aparece.set(0);
       return;
     }
     const cfg = { duration: motionDuration.rapido, easing: motionEasing.entrar };
-    aparece.value = reducido ? withTiming(1, cfg) : withDelay(retraso, withTiming(1, cfg));
+    aparece.set(reducido ? withTiming(1, cfg) : withDelay(retraso, withTiming(1, cfg)));
   }, [letra, retraso, reducido, aparece]);
 
   // La onda de luz llega, la ranura se enciende un instante en `senal` y se queda en `correct`.
@@ -86,28 +86,28 @@ const Ranura = memo(function Ranura({ x, y, ancho, alto, letra, etiqueta, estado
     if (!acierto) return;
     const cfg = { duration: motionDuration.rapido, easing: motionEasing.entrar };
     if (reducido) {
-      ok.value = withTiming(1, cfg);
+      ok.set(withTiming(1, cfg));
       return;
     }
-    ok.value = withDelay(onda, withTiming(1, cfg));
-    destello.value = withDelay(
+    ok.set(withDelay(onda, withTiming(1, cfg)));
+    destello.set(withDelay(
       onda,
       withSequence(
         withTiming(1, { duration: motionDuration.rapido / 2, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
       )
-    );
+    ));
   }, [acierto, onda, reducido, ok, destello]);
 
   const relleno = estado === 'vacia' ? null : RELLENO[estado];
   const base = relleno?.letra ?? color.text;
   // La capa de color entra con la letra; el aviso de una letra que no va se ve desde el primer cuadro.
-  const capa = useAnimatedStyle(() => ({ opacity: estado === 'fallo' ? 1 : aparece.value }));
-  const capaOk = useAnimatedStyle(() => ({ opacity: ok.value }));
-  const capaOnda = useAnimatedStyle(() => ({ opacity: destello.value }));
+  const capa = useAnimatedStyle(() => ({ opacity: estado === 'fallo' ? 1 : aparece.get() }));
+  const capaOk = useAnimatedStyle(() => ({ opacity: ok.get() }));
+  const capaOnda = useAnimatedStyle(() => ({ opacity: destello.get() }));
   const texto = useAnimatedStyle(() => ({
-    opacity: aparece.value,
-    color: acierto ? interpolateColor(ok.value, [0, 1], [color.text, color.correct]) : base,
+    opacity: aparece.get(),
+    color: acierto ? interpolateColor(ok.get(), [0, 1], [color.text, color.correct]) : base,
   }));
 
   return (
@@ -149,15 +149,15 @@ function Insignia({ x, y, tipo, retraso }: InsigniaProps) {
   useEffect(() => {
     const cfg = { duration: motionDuration.rapido, easing: motionEasing.entrar };
     if (reducido) {
-      escala.value = 1;
-      opacidad.value = withTiming(1, cfg);
+      escala.set(1);
+      opacidad.set(withTiming(1, cfg));
       return;
     }
-    opacidad.value = withDelay(retraso, withTiming(1, cfg));
-    escala.value = withDelay(retraso, withSpring(1, motionSpring.rebote));
+    opacidad.set(withDelay(retraso, withTiming(1, cfg)));
+    escala.set(withDelay(retraso, withSpring(1, motionSpring.rebote)));
   }, [retraso, reducido, escala, opacidad]);
 
-  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.value, transform: [{ scale: escala.value }] }));
+  const estilo = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ scale: escala.get() }] }));
   const acierto = tipo === 'acierto';
   return (
     <Animated.View
@@ -197,25 +197,25 @@ function Cursor({ x, y, ancho, alto, visible }: CursorProps) {
   useEffect(() => {
     if (primera.current || reducido) {
       primera.current = false;
-      px.value = x;
-      py.value = y;
+      px.set(x);
+      py.set(y);
       return;
     }
     const cfg = { duration: motionDuration.rapido, easing: motionEasing.entrar };
-    px.value = withTiming(x, cfg);
-    py.value = withTiming(y, cfg);
+    px.set(withTiming(x, cfg));
+    py.set(withTiming(y, cfg));
   }, [x, y, reducido, px, py]);
 
   useEffect(() => {
-    presente.value = withTiming(visible ? 1 : 0, {
+    presente.set(withTiming(visible ? 1 : 0, {
       duration: reducido ? 0 : motionDuration.rapido,
       easing: motionEasing.entrar,
-    });
+    }));
   }, [visible, reducido, presente]);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: presente.value * (OPACIDAD_CURSOR_MIN + (1 - OPACIDAD_CURSOR_MIN) * (0.5 - 0.5 * Math.cos(2 * Math.PI * fase.value))),
-    transform: [{ translateX: px.value }, { translateY: py.value }],
+    opacity: presente.get() * (OPACIDAD_CURSOR_MIN + (1 - OPACIDAD_CURSOR_MIN) * (0.5 - 0.5 * Math.cos(2 * Math.PI * fase.get()))),
+    transform: [{ translateX: px.get() }, { translateY: py.get() }],
   }));
 
   return (

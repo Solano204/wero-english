@@ -26,13 +26,13 @@ export function useEntradaPantalla(pantalla: string) {
   useFocusEffect(
     useCallback(() => {
       if (yaEnfoco.current && !reducido) {
-        fundido.value = 0;
-        fundido.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+        fundido.set(0);
+        fundido.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
       }
       yaEnfoco.current = true;
     }, [fundido, reducido])
   );
-  const estiloFundido = useAnimatedStyle(() => ({ opacity: fundido.value }));
+  const estiloFundido = useAnimatedStyle(() => ({ opacity: fundido.get() }));
 
   return { primera, estiloFundido };
 }

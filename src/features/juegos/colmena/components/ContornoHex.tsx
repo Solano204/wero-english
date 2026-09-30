@@ -33,10 +33,10 @@ export const ContornoHex = memo(function ContornoHex({ x, y, ancho, alto, atenua
   const salida = useSharedValue(0);
 
   useEffect(() => {
-    tenue.value = withTiming(atenuado ? 1 : 0, {
+    tenue.set(withTiming(atenuado ? 1 : 0, {
       duration: reducido ? motionDuration.rapido : motionDuration.base,
       easing: motionEasing.entrar,
-    });
+    }));
   }, [atenuado, reducido, tenue]);
 
   useEffect(() => {
@@ -45,12 +45,12 @@ export const ContornoHex = memo(function ContornoHex({ x, y, ancho, alto, atenua
       duration: reducido ? motionDuration.rapido : motionColmena.salida / 2,
       easing: motionEasing.salir,
     });
-    salida.value = reducido || retrasoSalida <= 0 ? ir : withDelay(retrasoSalida, ir);
+    salida.set(reducido || retrasoSalida <= 0 ? ir : withDelay(retrasoSalida, ir));
   }, [saliendo, reducido, retrasoSalida, salida]);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: (1 - (1 - OPACIDAD_TENUE) * tenue.value) * (1 - salida.value),
-    transform: [{ translateY: reducido ? 0 : salida.value * motionColmena.caeDp * 1.5 }],
+    opacity: (1 - (1 - OPACIDAD_TENUE) * tenue.get()) * (1 - salida.get()),
+    transform: [{ translateY: reducido ? 0 : salida.get() * motionColmena.caeDp * 1.5 }],
   }));
 
   return (

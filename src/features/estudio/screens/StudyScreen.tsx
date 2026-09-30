@@ -171,7 +171,7 @@ export function StudyScreen() {
         ) : null}
       </View>
 
-      {ultimaTarjeta.current ? (
+      {ultimaTarjeta ? (
         <HojaVeredicto
           visible={Boolean(feedback)}
           correct={feedback?.correct ?? false}
@@ -182,7 +182,7 @@ export function StudyScreen() {
             // Dictado y Escribir: la frase con lo que faltó y lo que sobró marcado en su lugar.
             feedback &&
             !feedback.correct &&
-            (ultimaTarjeta.current.kind === 'dictado' || ultimaTarjeta.current.kind === 'escribir') &&
+            (ultimaTarjeta.kind === 'dictado' || ultimaTarjeta.kind === 'escribir') &&
             chosen ? (
               <DiffFrase dado={chosen} esperado={feedback.answer} />
             ) : undefined
@@ -190,7 +190,7 @@ export function StudyScreen() {
           avanzando={avanzando}
           onContinue={handleContinue}
           onDetail={() => {
-            const abierta = ultimaTarjeta.current;
+            const abierta = ultimaTarjeta;
             if (abierta) nav.navigate('Detail', { entryId: abierta.entry.id });
           }}
         />

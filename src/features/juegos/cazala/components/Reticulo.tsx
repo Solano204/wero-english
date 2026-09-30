@@ -15,9 +15,9 @@ interface EsquinaProps {
 
 function Esquina({ arriba, izquierda, cierre }: EsquinaProps) {
   const estilo = useAnimatedStyle(() => {
-    const afuera = (1 - cierre.value) * motionCaza.reticulo;
+    const afuera = (1 - cierre.get()) * motionCaza.reticulo;
     return {
-      opacity: cierre.value,
+      opacity: cierre.get(),
       transform: [{ translateX: (izquierda ? -1 : 1) * afuera }, { translateY: (arriba ? -1 : 1) * afuera }],
     };
   });
@@ -47,10 +47,10 @@ export function Reticulo({ activo }: Props) {
   const cierre = useSharedValue(0);
 
   useEffect(() => {
-    cierre.value = withTiming(activo ? 1 : 0, {
+    cierre.set(withTiming(activo ? 1 : 0, {
       duration: motionDuration.rapido,
       easing: activo ? motionEasing.entrar : motionEasing.salir,
-    });
+    }));
   }, [activo, cierre]);
 
   if (reducido) return null;

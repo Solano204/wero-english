@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { cancelAnimation, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
@@ -37,7 +37,9 @@ export function useVozCaza(item: CazalaItem | undefined, revisada: boolean, auto
   const [conReloj, setConReloj] = useState(false);
   const arranco = useRef(false);
   const analisisRef = useRef(analisis);
-  analisisRef.current = analisis;
+  useLayoutEffect(() => {
+    analisisRef.current = analisis;
+  }, [analisis]);
 
   useEffect(() => {
     if (revisada && voz.sonando) arranco.current = true;
@@ -48,8 +50,8 @@ export function useVozCaza(item: CazalaItem | undefined, revisada: boolean, auto
     const correr = () => {
       const fin = Math.max(0, ...(analisisRef.current?.palabras.map((p) => p.sig) ?? [])) || FIN_POR_OMISION_S;
       setConReloj(true);
-      posReloj.value = 0;
-      posReloj.value = withTiming(fin, { duration: fin * 1000, easing: motionEasing.lineal });
+      posReloj.set(0);
+      posReloj.set(withTiming(fin, { duration: fin * 1000, easing: motionEasing.lineal }));
     };
     const espera = setTimeout(() => {
       if (!arranco.current) correr();
@@ -57,7 +59,7 @@ export function useVozCaza(item: CazalaItem | undefined, revisada: boolean, auto
     return () => {
       clearTimeout(espera);
       cancelAnimation(posReloj);
-      posReloj.value = -1;
+      posReloj.set(-1);
       setConReloj(false);
       arranco.current = false;
     };

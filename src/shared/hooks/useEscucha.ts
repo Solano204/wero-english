@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import * as speech from '@/services/voz';
 import type { ResultadoEscucha } from '@/services/voz';
+import { conFinalAsync } from '@/shared/utils/conFinal';
 
 export type FaseEscucha = 'inactivo' | speech.EstadoEscucha;
 
@@ -48,8 +49,8 @@ export function useEscucha() {
       volumenMax.current = -2;
       setSinVoz(false);
       setParcial(null);
-      nivel.value = 0;
-      try {
+      nivel.set(0);
+      return await conFinalAsync(async () => {
         return await speech.listenOnce({
           candidatos,
           onEstado: (e) => {
@@ -62,27 +63,27 @@ export function useEscucha() {
               }, SIN_VOZ_MS);
             } else {
               limpiarReloj();
-              nivel.value = withTiming(0, { duration: SUAVIZADO_MS });
+              nivel.set(withTiming(0, { duration: SUAVIZADO_MS }));
             }
           },
           onVolumen: (v) => {
             if (v > volumenMax.current) volumenMax.current = v;
             if (v >= UMBRAL_VOZ && vivo.current) setSinVoz(false);
-            nivel.value = withTiming(Math.min(1, Math.max(0, v / 10)), { duration: SUAVIZADO_MS });
+            nivel.set(withTiming(Math.min(1, Math.max(0, v / 10)), { duration: SUAVIZADO_MS }));
           },
           onParcial: (t) => {
             if (vivo.current) setParcial(t);
           },
         });
-      } finally {
+      }, () => {
         enCurso.current = false;
         limpiarReloj();
-        nivel.value = 0;
+        nivel.set(0);
         if (vivo.current) {
           setFase('inactivo');
           setSinVoz(false);
         }
-      }
+      });
     },
     [nivel]
   );

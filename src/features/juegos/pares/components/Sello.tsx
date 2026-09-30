@@ -28,14 +28,14 @@ export function Sello({ recta, saliendo = false, retraso = 0 }: Props) {
 
   useEffect(() => {
     if (reducido) {
-      presencia.value = 1;
+      presencia.set(1);
       return;
     }
     const cfg = { duration: motionDuration.base, easing: motionEasing.entrar };
-    presencia.value = saliendo ? withDelay(retraso, withTiming(0, cfg)) : withTiming(1, cfg);
+    presencia.set(saliendo ? withDelay(retraso, withTiming(0, cfg)) : withTiming(1, cfg));
   }, [saliendo, reducido, retraso, presencia]);
 
-  const estilo = useAnimatedStyle(() => ({ opacity: presencia.value }));
+  const estilo = useAnimatedStyle(() => ({ opacity: presencia.get() }));
 
   return (
     <Animated.View

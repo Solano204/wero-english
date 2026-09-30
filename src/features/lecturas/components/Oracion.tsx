@@ -77,14 +77,14 @@ export const Oracion = memo(function Oracion({ indice, trozos, separada, actual,
   const apagada = useSharedValue(0);
 
   useAnimatedReaction(
-    () => (enCurso.value === 1 && actual.value !== indice ? 1 : 0),
+    () => (enCurso.get() === 1 && actual.get() !== indice ? 1 : 0),
     (ahora, antes) => {
       if (ahora === antes) return;
-      apagada.value = reducido ? ahora : withTiming(ahora, { duration: motionDuration.base, easing: motionEasing.entrar });
+      apagada.set(reducido ? ahora : withTiming(ahora, { duration: motionDuration.base, easing: motionEasing.entrar }));
     },
     [indice, reducido]
   );
-  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(apagada.value, [0, 1], [TEXTO, APAGADO]) }));
+  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(apagada.get(), [0, 1], [TEXTO, APAGADO]) }));
 
   const etiqueta = useMemo(() => etiquetaOracion(trozos), [trozos]);
   const acciones = useMemo(() => {

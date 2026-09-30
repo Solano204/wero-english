@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type DependencyList } from 'react';
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type DependencyList } from 'react';
 import { NavigationRouteContext, useFocusEffect } from '@react-navigation/native';
 
 export type EstadoCarga = 'cargando' | 'listo' | 'vacio' | 'error';
@@ -63,13 +63,26 @@ export function useCarga<T>(
   // Cuándo se prendió el esqueleto (null si esta carga nunca llegó a pintarlo).
   const demoraDesde = useRef<number | null>(null);
   const cargarRef = useRef(cargar);
-  cargarRef.current = cargar;
   const esVacioRef = useRef(esVacio);
-  esVacioRef.current = esVacio;
   // Solo __DEV__: de qué pantalla es esta carga, para el registro de tiempos de abajo.
   const ruta = useContext(NavigationRouteContext)?.name ?? 'sin ruta';
   const rutaRef = useRef(ruta);
-  rutaRef.current = ruta;
+  // Lo último que pasó la pantalla, para la carga que corre después: se anota al confirmar el render (antes de los
+  // efectos que cargan), no durante el render.
+  useLayoutEffect(() => {
+    cargarRef.current = cargar;
+    esVacioRef.current = esVacio;
+    rutaRef.current = ruta;
+  }, [cargar, esVacio, ruta]);
+
+  // Las dependencias de la carga, como un número que sube cuando alguna cambia: los efectos dependen de él y no de
+  // un arreglo esparcido (que ni la regla de hooks ni el React Compiler pueden revisar).
+  const [claveDeps, setClaveDeps] = useState({ deps, version: 0 });
+  let version = claveDeps.version;
+  if (!mismasDeps(claveDeps.deps, deps)) {
+    version += 1;
+    setClaveDeps({ deps, version });
+  }
 
   useEffect(() => {
     vivo.current = true;
@@ -119,15 +132,10 @@ export function useCarga<T>(
     try {
       const inicio = Date.now();
       const resultado = await cargarRef.current();
-      if (__DEV__) {
-        // Cuánto tarda de verdad cada carga en el teléfono (sin el retraso simulado de abajo):
-        // lo que decide si una pantalla necesita esqueleto o no.
-        const ms = Date.now() - inicio;
-        console.log(`[carga] ${rutaRef.current}: ${ms} ms${ms > DEMORA_ESQUELETO_MS ? ' (pinta esqueleto)' : ''}`);
-      }
-      if (__DEV__ && simularCargaLenta) {
-        await new Promise((r) => setTimeout(r, RETRASO_SIMULADO_MS));
-      }
+      // Cuánto tarda de verdad cada carga en el teléfono (sin el retraso simulado de abajo):
+      // lo que decide si una pantalla necesita esqueleto o no.
+      if (__DEV__) registrarDuracion(rutaRef.current, Date.now() - inicio);
+      if (__DEV__) await retrasoSimulado();
       aplicar(() => {
         // Una recarga por foco que trae lo mismo conserva la referencia de antes: React no
         // repinta la pantalla (cambiar de pestaña ida y vuelta no repinta Practicar entera).
@@ -137,38 +145,56 @@ export function useCarga<T>(
         setEstado(esVacioRef.current?.(resultado) ? 'vacio' : 'listo');
       });
     } catch (err) {
+      const fallo = err;
       aplicar(() => {
-        if (__DEV__) console.warn('[useCarga] no se pudo cargar', err);
-        setError(err);
+        if (__DEV__) console.warn('[useCarga] no se pudo cargar', fallo);
+        setError(fallo);
         setDemora(false);
         setEstado('error');
       });
-    } finally {
-      if (vigente() && temporizador.current) clearTimeout(temporizador.current);
     }
+    // Como un `finally` (el catch de arriba no deja salir errores), sin `finally`: el React Compiler no lo compila.
+    if (vigente() && temporizador.current) clearTimeout(temporizador.current);
   }, []);
 
   useEffect(() => {
     if (alEnfocar) return;
     void ejecutar(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alEnfocar, ejecutar, ...deps]);
+  }, [alEnfocar, ejecutar, version]);
 
   const yaEnfoco = useRef(false);
+  const versionEnfocada = useRef(version);
   useFocusEffect(
     useCallback(() => {
       if (!alEnfocar) return;
-      const silenciosa = yaEnfoco.current;
+      // Con las dependencias nuevas (otra `version`) y la pantalla enfocada, se vuelve a cargar en silencio.
+      const silenciosa = yaEnfoco.current || versionEnfocada.current !== version;
+      versionEnfocada.current = version;
       yaEnfoco.current = true;
       void ejecutar(silenciosa);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [alEnfocar, ejecutar, ...deps])
+    }, [alEnfocar, ejecutar, version])
   );
 
   const reintentar = useCallback(() => void ejecutar(false), [ejecutar]);
   const refrescar = useCallback(() => ejecutar(true), [ejecutar]);
 
   return { estado, datos, error, demora, huboEsqueleto, reintentar, refrescar };
+}
+
+/** Solo __DEV__ y con `simularCargaLenta`: el retraso para ver los esqueletos. */
+async function retrasoSimulado(): Promise<void> {
+  if (simularCargaLenta) await new Promise((r) => setTimeout(r, RETRASO_SIMULADO_MS));
+}
+
+/** Solo __DEV__: el registro de cuánto tardó una carga (fuera del hook: el React Compiler no compila un ternario
+ *  dentro de un try). */
+function registrarDuracion(ruta: string, ms: number): void {
+  if (__DEV__) console.log(`[carga] ${ruta}: ${ms} ms${ms > DEMORA_ESQUELETO_MS ? ' (pinta esqueleto)' : ''}`);
+}
+
+/** Las mismas dependencias (como las compara React: `Object.is` una por una). */
+function mismasDeps(a: DependencyList, b: DependencyList): boolean {
+  return a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
 }
 
 /**

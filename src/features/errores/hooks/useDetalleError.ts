@@ -17,7 +17,7 @@ type Rt = RouteProp<RootStackParams, 'ErrorDetail'>;
 export function useDetalleError() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const [falloCompartir, setFalloCompartir] = useState(false);
 
   const err = content.errores.errores.find((e) => e.id === params.errorId);

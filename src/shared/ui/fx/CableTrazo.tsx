@@ -52,24 +52,24 @@ export function CableTrazo({ ax, ay, ex, ey, tension, vis, brillo, ambar, pulso,
 
   const trazo = useDerivedValue(() => {
     const p = Skia.Path.Make();
-    const largo = Math.hypot(ex.value - ax.value, ey.value - ay.value);
+    const largo = Math.hypot(ex.get() - ax.get(), ey.get() - ay.get());
     if (largo < 0.5) return p;
-    const holgura = (1 - tension.value) * Math.min(largo * HOLGURA_FRAC, HOLGURA_MAX);
-    const d = desvio ? desvio.value : 0;
-    const nx = (-(ey.value - ay.value) / largo) * d;
-    const ny = ((ex.value - ax.value) / largo) * d;
-    p.moveTo(ax.value, ay.value);
-    p.quadTo((ax.value + ex.value) / 2 + nx, (ay.value + ey.value) / 2 + holgura + ny, ex.value, ey.value);
+    const holgura = (1 - tension.get()) * Math.min(largo * HOLGURA_FRAC, HOLGURA_MAX);
+    const d = desvio ? desvio.get() : 0;
+    const nx = (-(ey.get() - ay.get()) / largo) * d;
+    const ny = ((ex.get() - ax.get()) / largo) * d;
+    p.moveTo(ax.get(), ay.get());
+    p.quadTo((ax.get() + ex.get()) / 2 + nx, (ay.get() + ey.get()) / 2 + holgura + ny, ex.get(), ey.get());
     return p;
   });
-  const inicio = useDerivedValue(() => vec(ax.value, ay.value));
-  const fin = useDerivedValue(() => vec(ex.value, ey.value));
-  const opacidadBrillo = useDerivedValue(() => brillo.value * OPACIDAD_BRILLO * vis.value * (1 - ambar.value));
-  const opacidadSenal = useDerivedValue(() => vis.value * (1 - ambar.value));
-  const opacidadAmbar = useDerivedValue(() => vis.value * ambar.value);
-  const opacidadPulso = useDerivedValue(() => (pulso.value > 0.001 ? vis.value : 0));
-  const pulsoInicio = useDerivedValue(() => Math.max(0, pulso.value - LARGO_PULSO));
-  const colorPunto = useDerivedValue(() => interpolateColor(ambar.value, [0, 1], [ACENTO, AMBAR]));
+  const inicio = useDerivedValue(() => vec(ax.get(), ay.get()));
+  const fin = useDerivedValue(() => vec(ex.get(), ey.get()));
+  const opacidadBrillo = useDerivedValue(() => brillo.get() * OPACIDAD_BRILLO * vis.get() * (1 - ambar.get()));
+  const opacidadSenal = useDerivedValue(() => vis.get() * (1 - ambar.get()));
+  const opacidadAmbar = useDerivedValue(() => vis.get() * ambar.get());
+  const opacidadPulso = useDerivedValue(() => (pulso.get() > 0.001 ? vis.get() : 0));
+  const pulsoInicio = useDerivedValue(() => Math.max(0, pulso.get() - LARGO_PULSO));
+  const colorPunto = useDerivedValue(() => interpolateColor(ambar.get(), [0, 1], [ACENTO, AMBAR]));
 
   if (reducido) return null;
   return (

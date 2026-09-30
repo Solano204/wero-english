@@ -41,18 +41,18 @@ export function BotonSenal({ label, onPress }: Props) {
     const paso = motionSenal.reflejoPaso / motionSenal.reflejo;
     return {
       transform: [
-        { translateX: interpolate(fase.value, [0, paso], [-ancho.value * 0.5, ancho.value * 1.1], Extrapolation.CLAMP) },
+        { translateX: interpolate(fase.get(), [0, paso], [-ancho.get() * 0.5, ancho.get() * 1.1], Extrapolation.CLAMP) },
         { skewX: INCLINACION },
       ],
     };
   });
 
   const estiloOnda = useAnimatedStyle(() => ({
-    opacity: (1 - onda.value) * 0.55,
+    opacity: (1 - onda.get()) * 0.55,
     transform: [
-      { translateX: dedoX.value - DIAMETRO_ONDA / 2 },
-      { translateY: dedoY.value - DIAMETRO_ONDA / 2 },
-      { scale: onda.value },
+      { translateX: dedoX.get() - DIAMETRO_ONDA / 2 },
+      { translateY: dedoY.get() - DIAMETRO_ONDA / 2 },
+      { scale: onda.get() },
     ],
   }));
 
@@ -61,10 +61,10 @@ export function BotonSenal({ label, onPress }: Props) {
     const { pageX, pageY } = e.nativeEvent;
     // `locationX` es relativo al hijo tocado (el texto); la capa mide su propia posición en pantalla.
     capa.current?.measureInWindow((x, y) => {
-      dedoX.value = pageX - x;
-      dedoY.value = pageY - y;
-      onda.value = 0;
-      onda.value = withTiming(1, { duration: motionSenal.onda, easing: motionEasing.entrar });
+      dedoX.set(pageX - x);
+      dedoY.set(pageY - y);
+      onda.set(0);
+      onda.set(withTiming(1, { duration: motionSenal.onda, easing: motionEasing.entrar }));
     });
   };
 
@@ -75,7 +75,7 @@ export function BotonSenal({ label, onPress }: Props) {
       style={StyleSheet.absoluteFill}
       pointerEvents="none"
       onLayout={(e) => {
-        ancho.value = e.nativeEvent.layout.width;
+        ancho.set(e.nativeEvent.layout.width);
       }}
     >
       {reducido ? null : (

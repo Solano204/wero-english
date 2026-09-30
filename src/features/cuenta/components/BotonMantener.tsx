@@ -38,15 +38,15 @@ export function BotonMantener({ etiqueta, onConfirmar, cargando = false, dialogo
   const empezar = useCallback(() => {
     if (lector || cargando) return;
     haptics.tapLight();
-    progreso.value = withTiming(1, { duration: motionConfirmar.mantener, easing: motionEasing.lineal }, (completo) => {
+    progreso.set(withTiming(1, { duration: motionConfirmar.mantener, easing: motionEasing.lineal }, (completo) => {
       if (completo) runOnJS(confirmar)();
-    });
+    }));
   }, [lector, cargando, progreso, confirmar]);
 
   // Soltar antes de tiempo cancela: la animación termina sin completarse y nada se borra.
   const soltar = useCallback(() => {
     cancelAnimation(progreso);
-    progreso.value = withTiming(0, { duration: motionDuration.rapido });
+    progreso.set(withTiming(0, { duration: motionDuration.rapido }));
   }, [progreso]);
 
   const conLector = useCallback(() => {
@@ -57,7 +57,7 @@ export function BotonMantener({ etiqueta, onConfirmar, cargando = false, dialogo
     ]);
   }, [lector, cargando, dialogo, onConfirmar]);
 
-  const relleno = useAnimatedStyle(() => ({ width: `${progreso.value * 100}%` }));
+  const relleno = useAnimatedStyle(() => ({ width: `${progreso.get() * 100}%` }));
 
   return (
     <Presionable

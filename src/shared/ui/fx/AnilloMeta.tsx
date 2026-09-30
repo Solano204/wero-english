@@ -50,32 +50,32 @@ function Arco({ valor, total, diametro, trazo, retraso = 0, celebrar = false }: 
 
   useEffect(() => {
     if (reducido) {
-      avance.value = meta;
+      avance.set(meta);
       return;
     }
     const espera = primeraVez.current ? retraso : 0;
     primeraVez.current = false;
-    avance.value = withDelay(
+    avance.set(withDelay(
       espera,
       withTiming(meta, { duration: motionSenal.anillo, easing: motionEasing.entrar })
-    );
+    ));
   }, [meta, retraso, reducido, avance]);
 
   useEffect(() => {
     if (!celebrar || reducido) return;
     // El destello llega cuando el arco ya cerró.
-    destello.value = withDelay(
+    destello.set(withDelay(
       motionSenal.anillo,
       withSequence(
         withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.rapido })
       )
-    );
+    ));
   }, [celebrar, reducido, destello]);
 
-  const visible = useDerivedValue(() => (avance.value > PROGRESO_VISIBLE ? 1 : 0));
-  const radioDestello = useDerivedValue(() => radio + destello.value * MARGEN);
-  const opacidadDestello = useDerivedValue(() => (destello.value > 0 ? 1 - destello.value : 0));
+  const visible = useDerivedValue(() => (avance.get() > PROGRESO_VISIBLE ? 1 : 0));
+  const radioDestello = useDerivedValue(() => radio + destello.get() * MARGEN);
+  const opacidadDestello = useDerivedValue(() => (destello.get() > 0 ? 1 - destello.get() : 0));
 
   return (
     <Canvas style={{ width: lado, height: lado }} pointerEvents="none" accessible={false}>

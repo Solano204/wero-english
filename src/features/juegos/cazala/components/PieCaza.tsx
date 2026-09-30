@@ -20,15 +20,15 @@ function Destello({ activo }: { activo: boolean }) {
 
   useEffect(() => {
     if (activo && !previo.current && !reducido) {
-      barrido.value = 0;
-      barrido.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
+      barrido.set(0);
+      barrido.set(withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
     }
     previo.current = activo;
   }, [activo, reducido, barrido]);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: barrido.value >= 1 ? 0 : 1,
-    transform: [{ translateX: interpolate(barrido.value, [0, 1], [-ancho.value * 0.5, ancho.value * 1.1], Extrapolation.CLAMP) }],
+    opacity: barrido.get() >= 1 ? 0 : 1,
+    transform: [{ translateX: interpolate(barrido.get(), [0, 1], [-ancho.get() * 0.5, ancho.get() * 1.1], Extrapolation.CLAMP) }],
   }));
 
   if (reducido) return null;
@@ -37,7 +37,7 @@ function Destello({ activo }: { activo: boolean }) {
       style={StyleSheet.absoluteFill}
       pointerEvents="none"
       onLayout={(e) => {
-        ancho.value = e.nativeEvent.layout.width;
+        ancho.set(e.nativeEvent.layout.width);
       }}
     >
       <Animated.View style={[styles.reflejo, estilo]}>

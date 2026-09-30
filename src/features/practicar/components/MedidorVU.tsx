@@ -57,26 +57,26 @@ function Segmentos({ valor, total, ancho, activo, celebrar }: Omit<Props, 'etiqu
 
   useEffect(() => {
     if (!activo) return;
-    encendidos.value = reducido
+    encendidos.set(reducido
       ? valor
-      : withTiming(valor, { duration: motionSenal.medidor, easing: motionEasing.entrar });
+      : withTiming(valor, { duration: motionSenal.medidor, easing: motionEasing.entrar }));
   }, [activo, valor, reducido, encendidos]);
 
   useEffect(() => {
     if (!celebrar || !activo || reducido) return;
     // El destello llega cuando el último segmento ya se encendió.
-    destello.value = withDelay(
+    destello.set(withDelay(
       motionSenal.medidor,
       withSequence(
         withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir })
       )
-    );
+    ));
   }, [celebrar, activo, reducido, destello]);
 
   const encendido = useDerivedValue(() => {
     const trazo = Skia.Path.Make();
-    const n = Math.min(total, Math.floor(encendidos.value + 0.0001));
+    const n = Math.min(total, Math.floor(encendidos.get() + 0.0001));
     for (let i = 0; i < n; i++) {
       const s = segmentos[i];
       if (!s) break;
@@ -88,9 +88,9 @@ function Segmentos({ valor, total, ancho, activo, celebrar }: Omit<Props, 'etiqu
   });
   // El degradado abarca lo encendido (no la fila entera): con pocos aciertos también se ve de punta a punta.
   const fin = useDerivedValue(() =>
-    vec(Math.max(1, Math.min(encendidos.value, porFila) * PASO - medidor.separacion), 0)
+    vec(Math.max(1, Math.min(encendidos.get(), porFila) * PASO - medidor.separacion), 0)
   );
-  const opacidadDestello = useDerivedValue(() => destello.value * OPACIDAD_DESTELLO);
+  const opacidadDestello = useDerivedValue(() => destello.get() * OPACIDAD_DESTELLO);
 
   return (
     <Canvas style={{ width: ancho, height: alto }} pointerEvents="none" accessible={false}>

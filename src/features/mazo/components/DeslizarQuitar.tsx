@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type ReactNode, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -31,6 +31,10 @@ interface Props {
  * presionado o con la acción del lector de pantalla). El deslizamiento nunca es la única forma de quitar.
  */
 export function DeslizarQuitar({ children, onQuitar }: Props) {
+  'use no memo';
+  // Fuera del React Compiler a propósito: los callbacks del gesto leen refs con los avisos más recientes (así el
+  // gesto no se rearma a media partida, lo que cortaría un arrastre en curso) y el compilador no sabe que esos
+  // callbacks corren después del render. Se queda con su memorización a mano (useMemo del gesto, useCallback).
   const reducido = useMovimientoReducido();
   const { width } = useWindowDimensions();
   const tx = useSharedValue(0);
@@ -38,7 +42,9 @@ export function DeslizarQuitar({ children, onQuitar }: Props) {
 
   // El aviso va por una referencia: el gesto no se rearma cada vez que la pantalla cambia de lista.
   const alQuitar = useRef(onQuitar);
-  alQuitar.current = onQuitar;
+  useLayoutEffect(() => {
+    alQuitar.current = onQuitar;
+  }, [onQuitar]);
   const avisar = useCallback(() => alQuitar.current(), []);
 
   useEffect(() => () => cancelAnimation(tx), [tx]);
@@ -49,31 +55,31 @@ export function DeslizarQuitar({ children, onQuitar }: Props) {
         .activeOffsetX([-QUITAR.activa, QUITAR.activa])
         .failOffsetY([-QUITAR.falla, QUITAR.falla])
         .onUpdate((e) => {
-          if (saliendo.value === 1) return;
-          tx.value = amortiguarQuitar(e.translationX);
+          if (saliendo.get() === 1) return;
+          tx.set(amortiguarQuitar(e.translationX));
         })
         .onEnd((e) => {
-          if (saliendo.value === 1) return;
-          if (decidirQuitar(tx.value, e.velocityX) === 'quitar') {
-            saliendo.value = 1;
-            tx.value = withTiming(-(width + SALIDA_EXTRA), { duration: motionDuration.base, easing: motionEasing.salir }, (fin) => {
+          if (saliendo.get() === 1) return;
+          if (decidirQuitar(tx.get(), e.velocityX) === 'quitar') {
+            saliendo.set(1);
+            tx.set(withTiming(-(width + SALIDA_EXTRA), { duration: motionDuration.base, easing: motionEasing.salir }, (fin) => {
               'worklet';
               if (fin) runOnJS(avisar)();
-            });
+            }));
             return;
           }
-          tx.value = withSpring(0, motionSpring.rebote);
+          tx.set(withSpring(0, motionSpring.rebote));
         })
         .onFinalize((_, exito) => {
           // Un gesto interrumpido no deja la tarjeta a medio camino.
-          if (!exito && saliendo.value === 0) tx.value = withSpring(0, motionSpring.rebote);
+          if (!exito && saliendo.get() === 0) tx.set(withSpring(0, motionSpring.rebote));
         }),
     [tx, saliendo, width, avisar]
   );
 
-  const estiloTarjeta = useAnimatedStyle(() => ({ transform: [{ translateX: tx.value }] }));
+  const estiloTarjeta = useAnimatedStyle(() => ({ transform: [{ translateX: tx.get() }] }));
   const estiloAccion = useAnimatedStyle(() => {
-    const a = avanceQuitar(tx.value);
+    const a = avanceQuitar(tx.get());
     return { opacity: Math.min(1, a * 2), transform: [{ scale: 0.9 + 0.1 * a }] };
   });
 

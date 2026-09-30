@@ -37,10 +37,10 @@ export function useValoresResultado() {
   const acierto = useCallback(() => {
     if (reducido) return;
     const mitad = motionDuration.base / 2;
-    pulso.value = withSequence(
+    pulso.set(withSequence(
       withTiming(motionPulso.escala, { duration: mitad, easing: motionEasing.entrar }),
       withTiming(1, { duration: mitad, easing: motionEasing.salir })
-    );
+    ));
   }, [reducido, pulso]);
 
   const fallo = useCallback(() => {
@@ -51,7 +51,7 @@ export function useValoresResultado() {
     const swings = Array.from({ length: motionSacudida.oscilaciones * 2 }, (_, i) =>
       tramo(i % 2 === 0 ? motionSacudida.amplitud : -motionSacudida.amplitud)
     );
-    dx.value = withSequence(...swings, tramo(0));
+    dx.set(withSequence(...swings, tramo(0)));
   }, [reducido, dx]);
 
   const disparar = useCallback(
@@ -70,7 +70,7 @@ export function useEfectoResultado() {
   const valores = useValoresResultado();
   const { dx, pulso } = valores;
   const estilo = useAnimatedStyle(() => ({
-    transform: [{ translateX: dx.value }, { scale: pulso.value }],
+    transform: [{ translateX: dx.get() }, { scale: pulso.get() }],
   }));
   return { ...valores, estilo };
 }

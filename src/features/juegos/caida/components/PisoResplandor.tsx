@@ -50,25 +50,25 @@ export function PisoResplandor({ y, distancia, armado, golpe }: Props) {
 
   // Una sola vez por caída: `y` vuelve a 0 al empezar la ronda siguiente y el aviso se rearma.
   useAnimatedReaction(
-    () => avance(y.value, distancia) >= AVISO_EN,
+    () => avance(y.get(), distancia) >= AVISO_EN,
     (llego, antes) => {
       if (!llego || antes || !armado) return;
       runOnJS(avisar)();
       if (reducido) return;
-      pulso.value = withSequence(
+      pulso.set(withSequence(
         withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
-      );
+      ));
     },
     [distancia, reducido, armado]
   );
 
   const brillo = useAnimatedStyle(() => ({
-    opacity: Math.min(1, resplandor(avance(y.value, distancia)) + PULSO_BRILLO * pulso.value),
+    opacity: Math.min(1, resplandor(avance(y.get(), distancia)) + PULSO_BRILLO * pulso.get()),
   }));
   const linea = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(golpe.value, [0, 1], [interpolateColor(pulso.value, [0, 1], [APAGADO, ACENTO]), DESTELLO]),
-    transform: [{ scaleY: 1 + pulso.value + golpe.value }],
+    backgroundColor: interpolateColor(golpe.get(), [0, 1], [interpolateColor(pulso.get(), [0, 1], [APAGADO, ACENTO]), DESTELLO]),
+    transform: [{ scaleY: 1 + pulso.get() + golpe.get() }],
   }));
 
   return (

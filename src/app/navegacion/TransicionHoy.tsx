@@ -37,12 +37,12 @@ function Escena({ origen }: { origen: Rectangulo }) {
   const salida = useSharedValue(1);
 
   useEffect(() => {
-    avance.value = withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }, (termino) => {
+    avance.set(withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar }, (termino) => {
       if (!termino) return;
-      salida.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }, (listo) => {
+      salida.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }, (listo) => {
         if (listo) runOnJS(terminarTransicionHoy)();
-      });
-    });
+      }));
+    }));
     const tope = setTimeout(
       terminarTransicionHoy,
       motionDuration.escena + motionDuration.rapido + MARGEN_SEGURIDAD
@@ -50,24 +50,24 @@ function Escena({ origen }: { origen: Rectangulo }) {
     return () => clearTimeout(tope);
   }, [avance, salida]);
 
-  const x = useDerivedValue(() => origen.x * (1 - avance.value));
-  const y = useDerivedValue(() => origen.y * (1 - avance.value));
-  const ancho = useDerivedValue(() => origen.width + (width - origen.width) * avance.value);
-  const alto = useDerivedValue(() => origen.height + (height - origen.height) * avance.value);
-  const esquina = useDerivedValue(() => radius.lg * (1 - avance.value));
+  const x = useDerivedValue(() => origen.x * (1 - avance.get()));
+  const y = useDerivedValue(() => origen.y * (1 - avance.get()));
+  const ancho = useDerivedValue(() => origen.width + (width - origen.width) * avance.get());
+  const alto = useDerivedValue(() => origen.height + (height - origen.height) * avance.get());
+  const esquina = useDerivedValue(() => radius.lg * (1 - avance.get()));
 
-  const desplazamiento = useDerivedValue(() => [{ translateX: x.value }, { translateY: y.value }]);
+  const desplazamiento = useDerivedValue(() => [{ translateX: x.get() }, { translateY: y.get() }]);
   const onda = useDerivedValue(() =>
     trazarBarras({
-      ancho: ancho.value,
-      alto: alto.value,
+      ancho: ancho.get(),
+      alto: alto.get(),
       fase: FASE_ONDA,
-      energia: ENERGIA_INICIAL * (1 - avance.value),
+      energia: ENERGIA_INICIAL * (1 - avance.get()),
       ruido: 0,
       margenAbajo: space.lg,
     })
   );
-  const opacidadLinea = useDerivedValue(() => interpolate(avance.value, [0.5, 1], [0, 1], Extrapolation.CLAMP));
+  const opacidadLinea = useDerivedValue(() => interpolate(avance.get(), [0.5, 1], [0, 1], Extrapolation.CLAMP));
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="auto">

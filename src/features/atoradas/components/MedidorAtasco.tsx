@@ -18,7 +18,7 @@ interface PuntoProps {
 
 function PuntoApagable({ indice, encendido, lado, apagado }: PuntoProps) {
   const estilo = useAnimatedStyle(() => ({
-    opacity: encendido ? 1 - Math.min(1, Math.max(0, apagado.value - indice)) : 0,
+    opacity: encendido ? 1 - Math.min(1, Math.max(0, apagado.get() - indice)) : 0,
   }));
   return (
     <View style={[styles.punto, { width: lado, height: lado, borderRadius: lado / 2 }]}>

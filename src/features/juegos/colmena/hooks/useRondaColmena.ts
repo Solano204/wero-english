@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
 import { AccessibilityInfo, AppState } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,6 +20,7 @@ import * as haptics from '@/services/haptics';
 import { motionColmena, motionDuration } from '@/theme';
 import type { ColmenaRound, NivelColmena } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { conFinal, conFinalAsync } from '@/shared/utils/conFinal';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Colmena'>;
@@ -131,15 +132,15 @@ export function useRondaColmena() {
   const { volarFaltantes, rechazar, colocar, limpiar } = tablero;
 
   // El lector de pantalla oye la frase completa cuando se resuelve la ronda.
-  useEffect(() => {
+  const efectoResuelta = useEffectEvent(() => {
     if (!resuelta || !round) return;
     const frase = round.entry.phrase;
     AccessibilityInfo.announceForAccessibility(
       ayudaDesde === null ? `Frase completa: ${frase}` : `${seAcabo ? 'Se acabó el tiempo. ' : ''}La frase era: ${frase}`
     );
     // Solo cuenta el momento de resolverse.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resuelta]);
+  });
+  useEffect(() => efectoResuelta(), [resuelta]);
 
   useEffect(() => {
     empezoEn.current = Date.now();
@@ -197,7 +198,9 @@ export function useRondaColmena() {
 
   // El panal no se vuelve a pintar entero con cada letra: las fichas reciben siempre la misma función.
   const tocarRef = useRef(tocarLetra);
-  tocarRef.current = tocarLetra;
+  useLayoutEffect(() => {
+    tocarRef.current = tocarLetra;
+  }, [tocarLetra]);
   const alTocarFicha = useCallback((ficha: number) => tocarRef.current(ficha), []);
 
   const usarPista = useCallback(() => {
@@ -231,15 +234,15 @@ export function useRondaColmena() {
     if (!round || resuelta || sonandoEscuchar || escuchas <= 0) return;
     setEscuchas((n) => n - 1);
     setSonandoEscuchar(true);
-    try {
+    await conFinalAsync(async () => {
       await audio.play(round.entry.audio_en);
       await audio.waitUntilDone();
-    } finally {
+    }, () => {
       // Pase lo que pase (audio.ts ya pone su propio tope, pero el
       // candado de este botón se libera aquí siempre): "Escuchar" nunca
       // se queda deshabilitado el resto de la ronda.
       setSonandoEscuchar(false);
-    }
+    });
   }, [round, resuelta, sonandoEscuchar, escuchas]);
 
   // Qué ronda ya mandó a avanzarRonda: una sola vez por ronda, sin
@@ -264,7 +267,7 @@ export function useRondaColmena() {
     if (candadoAvanzar.current) return;
     candadoAvanzar.current = true;
     setAvanzando(true);
-    try {
+    conFinal(() => {
       // Corta SFX y voz en camino: si no, la de la ronda que se deja
       // atrás compite con el audio automático de la que entra.
       audio.stop();
@@ -289,7 +292,7 @@ export function useRondaColmena() {
       despachar({ tipo: 'salir' });
       if (salidaTimer.current) clearTimeout(salidaTimer.current);
       salidaTimer.current = setTimeout(avanzarRonda, motionColmena.salida);
-    } finally {
+    }, () => {
       // Pase lo que pase arriba (un error, un retorno temprano), el
       // candado se suelta solo.
       if (avanzandoTimer.current) clearTimeout(avanzandoTimer.current);
@@ -297,7 +300,7 @@ export function useRondaColmena() {
         candadoAvanzar.current = false;
         setAvanzando(false);
       }, AVANZAR_DEBOUNCE_MS);
-    }
+    });
   }, [idx, rounds.length, aciertos, nav, nivel, reducido, avanzarRonda]);
 
   /**

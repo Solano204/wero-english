@@ -31,13 +31,13 @@ const Celda = memo(function Celda({ estado, ancho }: CeldaProps) {
     if (previo.current === estado) return;
     previo.current = estado;
     if (reducido || estado === 'pendiente') return;
-    escala.value = withSequence(
+    escala.set(withSequence(
       withTiming(PULSO, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withSpring(1, motionSpring.rebote)
-    );
+    ));
   }, [estado, reducido, escala]);
 
-  const estilo = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+  const estilo = useAnimatedStyle(() => ({ transform: [{ scale: escala.get() }] }));
 
   // El grosor del trazo redondea las puntas: el relleno y el trazo van del mismo color salvo en la actual.
   const relleno = estado === 'hecha' ? color.accent : color.trackFondo;

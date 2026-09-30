@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -53,7 +53,7 @@ export function useLectura() {
   const user = useAuthStore((s) => s.user);
   const leyendaVista = useSettingsStore((s) => s.leyendaLecturaVista);
   const guardarAjuste = useSettingsStore((s) => s.set);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const { height: altoVentana } = useWindowDimensions();
   const { top: insetArriba, bottom: insetAbajo } = useSafeAreaInsets();
 
@@ -114,7 +114,9 @@ export function useLectura() {
 
   const rep = useReproductorCapitulo(capitulo?.audio ?? null);
   const repRef = useRef(rep);
-  repRef.current = rep;
+  useLayoutEffect(() => {
+    repRef.current = rep;
+  }, [rep]);
   const duracion = rep.progreso.dur;
   const inicios = useMemo(() => {
     if (!capitulo) return [];
@@ -124,7 +126,9 @@ export function useLectura() {
     );
   }, [capitulo, oraciones, duracion]);
   const iniciosRef = useRef(inicios);
-  iniciosRef.current = inicios;
+  useLayoutEffect(() => {
+    iniciosRef.current = inicios;
+  }, [inicios]);
   const actual = useOracionActual(inicios, rep.pos, rep.enCurso);
 
   // El scroll: se publica su desplazamiento para saber si se llegó al final del texto.
@@ -136,8 +140,8 @@ export function useLectura() {
 
   useAnimatedReaction(
     () => {
-      const visible = altoVentana - insetArriba - insetAbajo - altoPie.value - RESERVA_ENCABEZADO;
-      return finTexto.value > 0 && scrollY.value + visible >= finTexto.value - MARGEN_FIN ? 1 : 0;
+      const visible = altoVentana - insetArriba - insetAbajo - altoPie.get() - RESERVA_ENCABEZADO;
+      return finTexto.get() > 0 && scrollY.get() + visible >= finTexto.get() - MARGEN_FIN ? 1 : 0;
     },
     (ahora, antes) => {
       if (ahora !== antes) runOnJS(setAlFinal)(ahora === 1);
@@ -155,59 +159,59 @@ export function useLectura() {
   const [mostrarVolver, setMostrarVolver] = useState(false);
 
   useDerivedValue(() => {
-    if (animandoScroll.value === 0) return;
-    scrollTo(scrollRef, 0, destinoScroll.value, false);
+    if (animandoScroll.get() === 0) return;
+    scrollTo(scrollRef, 0, destinoScroll.get(), false);
   });
 
   /** Lleva la oración `indice` a su lugar en la pantalla; con `forzar` aunque ya esté cerca. Con reducir movimiento salta. */
   const llevarA = useCallback(
     (indice: number, forzar: boolean) => {
       'worklet';
-      const y = ysTexto.value[indice];
+      const y = ysTexto.get()[indice];
       if (y === undefined || y < 0) return;
-      const visible = altoVentana - insetArriba - insetAbajo - altoPie.value - RESERVA_ENCABEZADO;
-      const objetivo = Math.max(0, inicioTexto.value + y - visible * LINEA_LECTURA);
-      if (!forzar && Math.abs(objetivo - scrollY.value) < UMBRAL_SCROLL) return;
+      const visible = altoVentana - insetArriba - insetAbajo - altoPie.get() - RESERVA_ENCABEZADO;
+      const objetivo = Math.max(0, inicioTexto.get() + y - visible * LINEA_LECTURA);
+      if (!forzar && Math.abs(objetivo - scrollY.get()) < UMBRAL_SCROLL) return;
       if (reducido) {
-        animandoScroll.value = 0;
+        animandoScroll.set(0);
         scrollTo(scrollRef, 0, objetivo, false);
         return;
       }
-      animandoScroll.value = 1;
-      destinoScroll.value = scrollY.value;
-      destinoScroll.value = withTiming(objetivo, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
-        animandoScroll.value = 0;
-      });
+      animandoScroll.set(1);
+      destinoScroll.set(scrollY.get());
+      destinoScroll.set(withTiming(objetivo, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
+        animandoScroll.set(0);
+      }));
     },
     [altoVentana, insetArriba, insetAbajo, reducido, ysTexto, inicioTexto, altoPie, scrollY, scrollRef, animandoScroll, destinoScroll]
   );
 
   useAnimatedReaction(
-    () => actual.value,
+    () => actual.get(),
     (i, antes) => {
-      if (i < 0 || i === antes || siguiendo.value === 0) return;
+      if (i < 0 || i === antes || siguiendo.get() === 0) return;
       llevarA(i, false);
     },
     [llevarA]
   );
   // El dedo toma el scroll: se suelta la animación que llevaba el texto.
   useAnimatedReaction(
-    () => siguiendo.value,
+    () => siguiendo.get(),
     (s) => {
       if (s !== 0) return;
       cancelAnimation(destinoScroll);
-      animandoScroll.value = 0;
+      animandoScroll.set(0);
     }
   );
   // Al empezar el audio se vuelve a seguir.
   useAnimatedReaction(
-    () => rep.enCurso.value,
+    () => rep.enCurso.get(),
     (ahora, antes) => {
-      if (ahora === 1 && antes !== 1) siguiendo.value = 1;
+      if (ahora === 1 && antes !== 1) siguiendo.set(1);
     }
   );
   useAnimatedReaction(
-    () => (rep.enCurso.value === 1 && siguiendo.value === 0 ? 1 : 0),
+    () => (rep.enCurso.get() === 1 && siguiendo.get() === 0 ? 1 : 0),
     (ahora, antes) => {
       if (ahora !== antes) runOnJS(setMostrarVolver)(ahora === 1);
     }
@@ -216,14 +220,14 @@ export function useLectura() {
   const volverAlAudio = useCallback(() => {
     runOnUI(() => {
       'worklet';
-      siguiendo.value = 1;
-      if (actual.value >= 0) llevarA(actual.value, true);
+      siguiendo.set(1);
+      if (actual.get() >= 0) llevarA(actual.get(), true);
     })();
   }, [siguiendo, actual, llevarA]);
 
   // Cada capítulo empieza arriba y siguiendo.
   useEffect(() => {
-    siguiendo.value = 1;
+    siguiendo.set(1);
     runOnUI(() => {
       'worklet';
       scrollTo(scrollRef, 0, 0, false);
@@ -232,9 +236,9 @@ export function useLectura() {
 
   const alMedirTexto = useCallback(
     (m: MedidasTexto) => {
-      finTexto.value = m.base + m.alto;
-      inicioTexto.value = m.base;
-      ysTexto.value = m.ys;
+      finTexto.set(m.base + m.alto);
+      inicioTexto.set(m.base);
+      ysTexto.set(m.ys);
     },
     [finTexto, inicioTexto, ysTexto]
   );
@@ -251,7 +255,7 @@ export function useLectura() {
     if (r.estado !== 'sonando' && r.estado !== 'pausado') return;
     haptics.tapLight();
     // Quien toca una oración quiere seguir el audio desde ahí.
-    siguiendo.value = 1;
+    siguiendo.set(1);
     const enPausa = r.estado === 'pausado';
     void r.saltar(iniciosRef.current[indice] ?? 0).then(() => {
       if (enPausa) repRef.current.reanudar();

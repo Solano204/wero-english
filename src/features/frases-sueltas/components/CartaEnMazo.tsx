@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useEffectEvent } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming, type SharedValue } from 'react-native-reanimated';
 import { bajaDeProfundidad, escalaDeProfundidad, opacidadDeProfundidad } from '@/domain/mazo';
@@ -59,38 +59,38 @@ export const CartaEnMazo = memo(function CartaEnMazo({
   const lado = lugarInicial === 1 ? -1 : lugarInicial === 2 ? 1 : 0;
 
   useEffect(() => {
-    llegada.value = reducido ? 1 : withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+    llegada.set(reducido ? 1 : withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
     return () => cancelAnimation(llegada);
   }, [reducido, llegada]);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (reducido || lugarInicial === null || lugarInicial === 0) return;
-    abre.value = withDelay(
+    abre.set(withDelay(
       motionMazo.escalon * lugarInicial,
       withSequence(
         withTiming(1, { duration: motionMazo.abre, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionMazo.junta, easing: motionEasing.ciclo })
       )
-    );
+    ));
     return () => cancelAnimation(abre);
     // Solo al armarse el mazo: `lugarInicial` no cambia mientras la carta está montada.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   // Las de atrás van tapadas con el color de la carta (en iOS el fondo es translúcido y se les vería el texto); al subir se destapan.
-  const velo = useAnimatedStyle(() => ({ opacity: Math.min(1, Math.max(0, n - pos.value)) }));
+  const velo = useAnimatedStyle(() => ({ opacity: Math.min(1, Math.max(0, n - pos.get())) }));
 
   const estilo = useAnimatedStyle(() => {
-    const d = n - pos.value;
+    const d = n - pos.get();
     // La que ya salió no se ve, aunque su lugar en pantalla sea el último del lanzamiento.
     if (d <= -1) return { opacity: 0 };
-    const arriba = topIdx.value === n;
+    const arriba = topIdx.get() === n;
     return {
-      opacity: opacidadDeProfundidad(d) * llegada.value,
+      opacity: opacidadDeProfundidad(d) * llegada.get(),
       transform: [
-        { translateX: (arriba ? tx.value : 0) + lado * motionMazo.separa * abre.value },
-        { translateY: (arriba ? ty.value : 0) + bajaDeProfundidad(d) },
-        { rotate: `${(arriba ? rot.value : 0) + lado * motionMazo.abanico * abre.value}deg` },
+        { translateX: (arriba ? tx.get() : 0) + lado * motionMazo.separa * abre.get() },
+        { translateY: (arriba ? ty.get() : 0) + bajaDeProfundidad(d) },
+        { rotate: `${(arriba ? rot.get() : 0) + lado * motionMazo.abanico * abre.get()}deg` },
         { scale: escalaDeProfundidad(d) },
       ],
     };

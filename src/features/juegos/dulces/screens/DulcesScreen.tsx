@@ -27,8 +27,8 @@ import { color, radius, space } from '@/theme';
  * tablero, en domain/match3.ts, probada desde node. Aquí solo se pinta.
  */
 export function DulcesScreen() {
-  const p = usePartidaDulces();
-  const { nav, carga, tablero, pregunta, medidas } = p;
+  const { animando, avanzando, capaAlto, carga, deslizar, destinoTitulo, elegidaOpcion, huboLinea, jugadas, jugadasTotal, loading, medidas, nav, nivel, objetivos, pregunta, reaccion, responder, respondiendo, seguirAhora, setCapaAlto, setContenidoAlto, setDestinoTitulo, setVistaAlto, setVuelo, tablero, tableroRef, terminar, tocar, vuelo } = usePartidaDulces();
+  const { capaRef, estallidosRef, registrarBarra, registrarFrase, tableroCajaRef } = medidas;
 
   if (carga.estado === 'error') {
     return (
@@ -39,7 +39,7 @@ export function DulcesScreen() {
     );
   }
 
-  if (p.loading) {
+  if (loading) {
     return (
       <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Dulces" />
@@ -65,7 +65,7 @@ export function DulcesScreen() {
     );
   }
 
-  if (!tablero.board || p.objetivos.length === 0) {
+  if (!tablero.board || objetivos.length === 0) {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Dulces" />
@@ -81,12 +81,12 @@ export function DulcesScreen() {
 
   return (
     <Screen padded={false} style={styles.sinHueco} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
-      <View ref={medidas.capaRef} style={styles.capa} onLayout={(e) => p.setCapaAlto(e.nativeEvent.layout.height)}>
-        <Trozos disparo={p.reaccion.trozos} tinte={color.world.cultura} />
+      <View ref={capaRef} style={styles.capa} onLayout={(e) => setCapaAlto(e.nativeEvent.layout.height)}>
+        <Trozos disparo={reaccion.trozos} tinte={color.world.cultura} />
         <View style={styles.top}>
           <Header
             onBack={() => nav.goBack()}
-            title={p.nivel ? `Nivel ${p.nivel}` : undefined}
+            title={nivel ? `Nivel ${nivel}` : undefined}
           />
         </View>
 
@@ -99,26 +99,26 @@ export function DulcesScreen() {
           contentContainerStyle={styles.medioContenido}
           showsVerticalScrollIndicator={false}
           scrollEnabled={pregunta === null}
-          onLayout={(e) => p.setVistaAlto(e.nativeEvent.layout.height)}
-          onContentSizeChange={(_, alto) => p.setContenidoAlto(alto)}
+          onLayout={(e) => setVistaAlto(e.nativeEvent.layout.height)}
+          onContentSizeChange={(_, alto) => setContenidoAlto(alto)}
         >
           <View style={styles.metas}>
             <TarjetaMetas
               key={tablero.llave}
-              objetivos={p.objetivos}
-              registrarBarra={medidas.registrarBarra}
-              registrarFrase={medidas.registrarFrase}
+              objetivos={objetivos}
+              registrarBarra={registrarBarra}
+              registrarFrase={registrarFrase}
               llenaColor={pregunta?.objetivo.color ?? null}
             />
           </View>
 
           <View
-            ref={medidas.tableroCajaRef}
+            ref={tableroCajaRef}
             collapsable={false}
             style={{ width: tablero.ANCHO_TABLERO, height: tablero.ALTO_TABLERO, alignSelf: 'center' }}
           >
             <TableroDulces
-              ref={p.tableroRef}
+              ref={tableroRef}
               celdas={tablero.board.cells}
               cols={tablero.COLS}
               rows={tablero.ROWS}
@@ -126,39 +126,39 @@ export function DulcesScreen() {
               hueco={space.xs}
               llave={tablero.llave}
               elegida={tablero.elegida}
-              bloqueado={p.animando || p.jugadas <= 0 || pregunta !== null}
+              bloqueado={animando || jugadas <= 0 || pregunta !== null}
               soloHorizontal={tablero.puedeScroll}
-              onTocar={p.tocar}
-              onDeslizar={p.deslizar}
+              onTocar={tocar}
+              onDeslizar={deslizar}
             />
           </View>
 
-          <NotaInicial visible={!p.huboLinea} texto="Junta tres del mismo color para llenar su barra" />
+          <NotaInicial visible={!huboLinea} texto="Junta tres del mismo color para llenar su barra" />
         </ScrollView>
 
-        <PieDulces jugadas={p.jugadas} total={p.jugadasTotal} onDejar={p.terminar} />
+        <PieDulces jugadas={jugadas} total={jugadasTotal} onDejar={terminar} />
 
         <HojaPregunta
           pregunta={pregunta}
-          respondiendo={p.respondiendo}
-          elegidaOpcion={p.elegidaOpcion}
-          avanzando={p.avanzando}
-          tituloListo={p.vuelo === null}
-          capaAlto={p.capaAlto}
-          onDestinoTitulo={p.setDestinoTitulo}
-          onResponder={p.responder}
-          onSeguir={p.seguirAhora}
+          respondiendo={respondiendo}
+          elegidaOpcion={elegidaOpcion}
+          avanzando={avanzando}
+          tituloListo={vuelo === null}
+          capaAlto={capaAlto}
+          onDestinoTitulo={setDestinoTitulo}
+          onResponder={responder}
+          onSeguir={seguirAhora}
         />
-        {p.vuelo && p.destinoTitulo ? (
+        {vuelo && destinoTitulo ? (
           <FraseVoladora
-            key={p.vuelo.texto}
-            texto={p.vuelo.texto}
-            desde={p.vuelo.desde}
-            hasta={p.destinoTitulo}
-            onFin={() => p.setVuelo(null)}
+            key={vuelo.texto}
+            texto={vuelo.texto}
+            desde={vuelo.desde}
+            hasta={destinoTitulo}
+            onFin={() => setVuelo(null)}
           />
         ) : null}
-        <Estallidos ref={medidas.estallidosRef} />
+        <Estallidos ref={estallidosRef} />
       </View>
     </Screen>
   );

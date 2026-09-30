@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useEffectEvent } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -38,12 +38,12 @@ function BarraMeta({ llevas, meta, tinte, barraRef, brillo }: BarraProps) {
   const progreso = useSharedValue(pct);
 
   useEffect(() => {
-    progreso.value = reducido ? pct : withSpring(pct, motionSpring.liquido);
+    progreso.set(reducido ? pct : withSpring(pct, motionSpring.liquido));
   }, [pct, reducido, progreso]);
 
   // Solo transform: animar `width` fuerza layout nativo en cada cuadro.
-  const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.min(1, Math.max(0, progreso.value)) }] }));
-  const destello = useAnimatedStyle(() => ({ opacity: brillo.value * 0.6 }));
+  const relleno = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.min(1, Math.max(0, progreso.get())) }] }));
+  const destello = useAnimatedStyle(() => ({ opacity: brillo.get() * 0.6 }));
 
   return (
     <View ref={barraRef} collapsable={false} style={styles.pista}>
@@ -80,7 +80,7 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
 
   useEffect(() => {
     const meta = cercana ? 1 : 0;
-    filo.value = reducido ? meta : withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.entrar });
+    filo.set(reducido ? meta : withTiming(meta, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [cercana, reducido, filo]);
 
   const destello = useSharedValue(0);
@@ -92,39 +92,39 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
   const alRegistrarFrase = useCallback((vista: View | null) => registrarFrase?.(colorDeMeta, vista), [registrarFrase, colorDeMeta]);
 
   // Al empezar, las metas entran una tras otra: suben un poco mientras se aclaran.
-  useEffect(() => {
-    entrada.value = reducido ? 1 : withDelay(escalon(orden), withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
+  const alMontar = useEffectEvent(() => {
+    entrada.set(reducido ? 1 : withDelay(escalon(orden), withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar })));
     // Solo cuenta la entrada del montaje.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   // La barra se llena y sale la pregunta: destella una vez (con «reducir movimiento» queda encendida mientras dura).
   useEffect(() => {
     if (!llena) {
-      destello.value = 0;
+      destello.set(0);
       return;
     }
-    destello.value = reducido
+    destello.set(reducido
       ? 1
       : withSequence(
           withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
           withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir })
-        );
+        ));
   }, [llena, reducido, destello]);
 
   // Al cerrar la pregunta la meta se reinicia con la frase nueva, que entra con un fundido.
   useEffect(() => {
     if (idFrase.current === objetivo.entry.id) return;
     idFrase.current = objetivo.entry.id;
-    fundido.value = 0;
-    fundido.value = reducido ? 1 : withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
+    fundido.set(0);
+    fundido.set(reducido ? 1 : withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [objetivo.entry.id, reducido, fundido]);
 
-  const luz = useAnimatedStyle(() => ({ opacity: Math.max(filo.value, destello.value) }));
-  const fraseAnim = useAnimatedStyle(() => ({ opacity: fundido.value }));
+  const luz = useAnimatedStyle(() => ({ opacity: Math.max(filo.get(), destello.get()) }));
+  const fraseAnim = useAnimatedStyle(() => ({ opacity: fundido.get() }));
   const entra = useAnimatedStyle(() => ({
-    opacity: entrada.value,
-    transform: [{ translateY: (1 - entrada.value) * ENTRADA_SUBE }],
+    opacity: entrada.get(),
+    transform: [{ translateY: (1 - entrada.get()) * ENTRADA_SUBE }],
   }));
 
   return (

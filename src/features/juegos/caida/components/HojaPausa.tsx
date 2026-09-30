@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, {
   interpolateColor,
@@ -26,6 +26,7 @@ import {
   sol,
   space,
 } from '@/theme';
+import { useUltimo } from '@/shared/hooks/useUltimo';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 
@@ -66,11 +67,7 @@ export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: P
   const { height: alturaVentana } = useWindowDimensions();
 
   // Al irse, la hoja se lleva su contenido: no se vacía a media salida.
-  const ultimo = useRef<Contenido | null>(null);
-  if (entry && (ultimo.current?.entry !== entry || ultimo.current.correct !== correct)) {
-    ultimo.current = { entry, correct };
-  }
-  const c = ultimo.current;
+  const c = useUltimo<Contenido>(entry ? { entry, correct } : null, (a, b) => a.entry === b.entry && a.correct === b.correct);
 
   const vozEn = useVozEnVivo(c?.entry.audio_en ?? null);
   const vozEs = useVozEnVivo(c?.entry.audio_es ?? null);
@@ -90,22 +87,22 @@ export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: P
   useEffect(() => {
     if (visible) {
       if (reducido) {
-        y.value = 0;
-        opacidad.value = withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar });
+        y.set(0);
+        opacidad.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
       } else {
-        opacidad.value = 1;
-        y.value = withSpring(0, motionSpring.rebote);
+        opacidad.set(1);
+        y.set(withSpring(0, motionSpring.rebote));
       }
     } else if (reducido) {
-      opacidad.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
     } else {
-      y.value = withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      y.set(withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir }));
     }
   }, [visible, reducido, alturaVentana, y, opacidad]);
 
-  const hoja = useAnimatedStyle(() => ({ opacity: opacidad.value, transform: [{ translateY: y.value }] }));
+  const hoja = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ translateY: y.get() }] }));
   // La traducción se enciende mientras suena el español.
-  const traduccion = useAnimatedStyle(() => ({ color: interpolateColor(activaEs.value, [0, 1], [TENUE, ENCENDIDA]) }));
+  const traduccion = useAnimatedStyle(() => ({ color: interpolateColor(activaEs.get(), [0, 1], [TENUE, ENCENDIDA]) }));
 
   if (!c || !en) return null;
 

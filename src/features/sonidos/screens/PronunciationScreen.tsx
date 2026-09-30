@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { EmptyState, Header, IconButton, Screen } from '@/shared/ui';
@@ -25,9 +25,11 @@ interface PagerProps {
  */
 function Pager({ fonemas, pagina, ancho, onCambia, renderPagina }: PagerProps) {
   // Solo el lugar inicial: si `contentOffset` siguiera a la página, pelearía con el dedo.
-  const inicial = useRef(pagina).current;
+  const [inicial] = useState(pagina);
   const actual = useRef(pagina);
-  actual.current = pagina;
+  useLayoutEffect(() => {
+    actual.current = pagina;
+  }, [pagina]);
   const [alto, setAlto] = useState(0);
 
   return (

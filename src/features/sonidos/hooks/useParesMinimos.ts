@@ -30,7 +30,7 @@ export function useParesMinimos() {
   const micHabilitado = useSettingsStore((s) => s.micHabilitado);
   const setSetting = useSettingsStore((s) => s.set);
 
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const estado = useMemo(() => speech.isAvailable(), []);
   useCortarAudioAlSalir();
 

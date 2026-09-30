@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -75,7 +75,7 @@ interface BarraTachaProps {
 /** La línea que tacha un renglón de «Lo que dices» de izquierda a derecha; los renglones se tachan uno tras otro. */
 function BarraTacha({ linea, indice, total, progreso }: BarraTachaProps) {
   const estilo = useAnimatedStyle(() => ({
-    transform: [{ scaleX: Math.min(1, Math.max(0, progreso.value * total - indice)) }],
+    transform: [{ scaleX: Math.min(1, Math.max(0, progreso.get() * total - indice)) }],
   }));
   // La posición va en el nodo de afuera y la escala en el de adentro.
   return (
@@ -133,7 +133,7 @@ export function SecuenciaMalentendido({ error: e }: Props) {
   const pulso = useSharedValue(0);
   const vibra = useSharedValue(0);
   const desvio = useDerivedValue(
-    () => Math.sin(vibra.value * Math.PI * 2 * motionMalentendido.oscilaciones) * motionMalentendido.amplitud * (1 - vibra.value)
+    () => Math.sin(vibra.get() * Math.PI * 2 * motionMalentendido.oscilaciones) * motionMalentendido.amplitud * (1 - vibra.get())
   );
 
   const voz = useVozEnVivo(e.audio);
@@ -161,21 +161,21 @@ export function SecuenciaMalentendido({ error: e }: Props) {
     const hasta = c2.current.y;
     runOnUI(() => {
       'worklet';
-      ax.value = x;
-      ay.value = desde;
-      ex.value = x;
-      ey.value = desde;
-      tension.value = 1;
-      vis.value = 1;
-      brillo.value = 1;
-      ambar.value = 0;
-      pulso.value = 0;
-      vibra.value = 0;
+      ax.set(x);
+      ay.set(desde);
+      ex.set(x);
+      ey.set(desde);
+      tension.set(1);
+      vis.set(1);
+      brillo.set(1);
+      ambar.set(0);
+      pulso.set(0);
+      vibra.set(0);
       const media = motionMalentendido.cable / 2;
-      ey.value = withTiming(hasta, { duration: motionMalentendido.cable, easing: motionEasing.entrar });
-      ambar.value = withDelay(media, withTiming(1, { duration: motionMalentendido.interferencia, easing: motionEasing.entrar }));
-      vibra.value = withDelay(media, withTiming(1, { duration: motionMalentendido.interferencia, easing: motionEasing.lineal }));
-      vis.value = withDelay(motionMalentendido.cable, withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
+      ey.set(withTiming(hasta, { duration: motionMalentendido.cable, easing: motionEasing.entrar }));
+      ambar.set(withDelay(media, withTiming(1, { duration: motionMalentendido.interferencia, easing: motionEasing.entrar })));
+      vibra.set(withDelay(media, withTiming(1, { duration: motionMalentendido.interferencia, easing: motionEasing.lineal })));
+      vis.set(withDelay(motionMalentendido.cable, withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir })));
     })();
   }, [ax, ay, ex, ey, tension, vis, brillo, ambar, pulso, vibra]);
 
@@ -184,36 +184,36 @@ export function SecuenciaMalentendido({ error: e }: Props) {
     setFinal(false);
     const aparece = { duration: motionDuration.base, easing: motionEasing.entrar };
     if (reducido) {
-      v1.value = withTiming(1, aparece);
-      v2.value = withTiming(1, aparece);
-      v3.value = withTiming(1, aparece);
-      tachaDices.value = 1;
+      v1.set(withTiming(1, aparece));
+      v2.set(withTiming(1, aparece));
+      v3.set(withTiming(1, aparece));
+      tachaDices.set(1);
       setFinal(true);
       return;
     }
-    v1.value = 0;
-    v2.value = 0;
-    v3.value = 0;
-    tachaDices.value = 0;
-    vis.value = 0;
+    v1.set(0);
+    v2.set(0);
+    v3.set(0);
+    tachaDices.set(0);
+    vis.set(0);
     const modo = correccion.modo === 'morph' ? 'morph' : 'fundido';
     const duracion = duracionCorreccion(modo, correccion.tachas, correccion.entradas, TIEMPOS);
     const inicioC = inicioDeCorreccion(duracion, TIEMPOS);
     const mitadCable = motionMalentendido.cableInicio + motionMalentendido.cable / 2;
     // a) «Lo que dices» entra con la frase normal.
     programar(0, () => {
-      v1.value = withTiming(1, aparece);
+      v1.set(withTiming(1, aparece));
     });
     // b) El cable baja; a medio camino la señal hace interferencia y lo que entienden llega con glitch.
     programar(motionMalentendido.cableInicio, soltarCable);
     programar(mitadCable, () => {
-      v2.value = withTiming(1, aparece);
+      v2.set(withTiming(1, aparece));
       setGlitch((g) => g + 1);
     });
     // c) «Lo que dices» se tacha y «Lo correcto» transforma la frase incorrecta en la correcta.
     programar(inicioC, () => {
-      tachaDices.value = withTiming(1, { duration: motionError.tacha, easing: motionEasing.lineal });
-      v3.value = withTiming(1, aparece);
+      tachaDices.set(withTiming(1, { duration: motionError.tacha, easing: motionEasing.lineal }));
+      v3.set(withTiming(1, aparece));
       jugarCorreccion();
     });
     programar(inicioC + duracion + MARGEN_FINAL, () => setFinal(true));
@@ -221,7 +221,9 @@ export function SecuenciaMalentendido({ error: e }: Props) {
 
   // Arranca al entrar y se suelta al salir. `arrancar` cambia con la corrección: la referencia evita rearmar el arranque.
   const arrancarRef = useRef(arrancar);
-  arrancarRef.current = arrancar;
+  useLayoutEffect(() => {
+    arrancarRef.current = arrancar;
+  }, [arrancar]);
   useEffect(() => {
     const t = setTimeout(() => arrancarRef.current(), RETRASO_ENTRADA);
     return () => {
@@ -231,10 +233,10 @@ export function SecuenciaMalentendido({ error: e }: Props) {
   }, [limpiar]);
 
   // Con «reducir movimiento» solo el fundido: nada sube.
-  const estilo1 = useAnimatedStyle(() => ({ opacity: v1.value, transform: [{ translateY: reducido ? 0 : (1 - v1.value) * SUBE }] }));
-  const estilo2 = useAnimatedStyle(() => ({ opacity: v2.value, transform: [{ translateY: reducido ? 0 : (1 - v2.value) * SUBE }] }));
-  const estilo3 = useAnimatedStyle(() => ({ opacity: v3.value, transform: [{ translateY: reducido ? 0 : (1 - v3.value) * SUBE }] }));
-  const estiloDices = useAnimatedStyle(() => ({ opacity: 1 - 0.35 * tachaDices.value }));
+  const estilo1 = useAnimatedStyle(() => ({ opacity: v1.get(), transform: [{ translateY: reducido ? 0 : (1 - v1.get()) * SUBE }] }));
+  const estilo2 = useAnimatedStyle(() => ({ opacity: v2.get(), transform: [{ translateY: reducido ? 0 : (1 - v2.get()) * SUBE }] }));
+  const estilo3 = useAnimatedStyle(() => ({ opacity: v3.get(), transform: [{ translateY: reducido ? 0 : (1 - v3.get()) * SUBE }] }));
+  const estiloDices = useAnimatedStyle(() => ({ opacity: 1 - 0.35 * tachaDices.get() }));
 
   const alTexto = useCallback((ev: NativeSyntheticEvent<TextLayoutEventData>) => setLineas(ev.nativeEvent.lines), []);
 

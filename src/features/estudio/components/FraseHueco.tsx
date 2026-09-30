@@ -26,9 +26,9 @@ function Relleno({ palabra, estado }: RellenoHueco) {
   const reducido = useMovimientoReducido();
   const escala = useSharedValue(reducido ? 1 : 0.85);
   useEffect(() => {
-    escala.value = reducido ? 1 : withSpring(1, motionSpring.rebote);
+    escala.set(reducido ? 1 : withSpring(1, motionSpring.rebote));
   }, [reducido, escala]);
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: escala.get() }] }));
   return (
     <Animated.Text style={[styles.palabra, estado === 'ok' ? styles.ok : styles.mal, anim]}>{palabra}</Animated.Text>
   );

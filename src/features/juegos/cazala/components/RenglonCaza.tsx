@@ -91,16 +91,16 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
 
   const objetivo = estado === 'atenuada' ? OPACIDAD_ATENUADA : bajada ? OPACIDAD_BAJADA : 1;
   useEffect(() => {
-    opacidad.value = withTiming(objetivo, { duration: motionDuration.base, easing: motionEasing.entrar });
+    opacidad.set(withTiming(objetivo, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [objetivo, opacidad]);
 
   // La casilla pulsa 1 → 1.1 → 1 al marcarla.
   useEffect(() => {
     if (estado === 'marcada' && previo.current !== 'marcada' && !reducido) {
-      casilla.value = withSequence(
+      casilla.set(withSequence(
         withTiming(motionCaza.casilla, { duration: MITAD_RAPIDO, easing: motionEasing.entrar }),
         withTiming(1, { duration: MITAD_RAPIDO, easing: motionEasing.salir })
-      );
+      ));
     }
     previo.current = estado;
   }, [estado, reducido, casilla]);
@@ -109,20 +109,20 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
   const pos = caceria?.pos;
   const t = caceria?.t ?? -1;
   useAnimatedReaction(
-    () => !reducido && pos !== undefined && t >= 0 && pos.value >= t,
+    () => !reducido && pos !== undefined && t >= 0 && pos.get() >= t,
     (ya, antes) => {
       if (ya && !antes) {
-        pulso.value = withSequence(
+        pulso.set(withSequence(
           withTiming(motionPulso.escala, { duration: MITAD_BASE, easing: motionEasing.entrar }),
           withTiming(1, { duration: MITAD_BASE, easing: motionEasing.salir })
-        );
+        ));
       }
     },
     [pos, t, reducido]
   );
 
-  const estiloFila = useAnimatedStyle(() => ({ opacity: opacidad.value, transform: [{ scale: pulso.value }] }));
-  const estiloCasilla = useAnimatedStyle(() => ({ transform: [{ scale: casilla.value }] }));
+  const estiloFila = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ scale: pulso.get() }] }));
+  const estiloCasilla = useAnimatedStyle(() => ({ transform: [{ scale: casilla.get() }] }));
 
   const { fondo, borde } = APARIENCIA[estado];
 

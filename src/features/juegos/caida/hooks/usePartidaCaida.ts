@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState, useLayoutEffect } from 'react';
 import { AppState } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -63,6 +63,8 @@ export function usePartidaCaida() {
   // Cara y cubitos. El numero se relanza en cada respuesta;
   // no hace falta apagarlo con un temporizador.
   const reaccion = useReaccion();
+  // La versión más reciente de retomarCaida (definida más abajo), para quien la llama desde un temporizador.
+  const retomarRef = useRef<() => void>(() => undefined);
   const { celebra } = reaccion;
   const [idx, setIdx] = useState(0);
   const [aciertos, setAciertos] = useState(0);
@@ -210,13 +212,15 @@ export function usePartidaCaida() {
     setFinRonda('piso');
     setAnimandoFin(!reducido);
     haptics.failure();
-    estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
+    estela.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
     void pausarConVoz(round.entry, false, terminarPartida);
   }, [round, idx, enPausa, pausarConVoz, terminarPartida, estela, reducido]);
 
   // El aviso de fin de la caída llega desde el hilo de UI: siempre corre la versión vigente de seCayo.
   const seCayoRef = useRef(seCayo);
-  seCayoRef.current = seCayo;
+  useLayoutEffect(() => {
+    seCayoRef.current = seCayo;
+  }, [seCayo]);
   const alLlegarAlPiso = useCallback(() => seCayoRef.current(), []);
 
   /**
@@ -229,9 +233,9 @@ export function usePartidaCaida() {
       if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
       caidaRestante.current = null;
       caidaFin.current = Date.now() + duracionMs;
-      y.value = withTiming(altoPista, { duration: duracionMs, easing: Easing.linear }, (terminada) => {
+      y.set(withTiming(altoPista, { duration: duracionMs, easing: Easing.linear }, (terminada) => {
         if (terminada) runOnJS(alLlegarAlPiso)();
-      });
+      }));
       respaldoCaida.current = setTimeout(alLlegarAlPiso, duracionMs + RESPALDO_CAIDA_MS);
     },
     [y, altoPista, alLlegarAlPiso]
@@ -247,19 +251,20 @@ export function usePartidaCaida() {
     }
     lanzarCaida(restante);
   }, [round, perdio, enPausa, idx, lanzarCaida]);
-  const retomarRef = useRef(retomarCaida);
-  retomarRef.current = retomarCaida;
+  useLayoutEffect(() => {
+    retomarRef.current = retomarCaida;
+  }, [retomarCaida]);
 
   // Arranca la caída de cada ronda.
   useEffect(() => {
     if (!round || perdio || enPausa) return;
 
     empezoEn.current = Date.now();
-    y.value = 0;
-    estela.value = 0;
+    y.set(0);
+    estela.set(0);
     if (altoPista <= 0) return;
 
-    estela.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+    estela.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
     lanzarCaida(round.duracionMs);
 
     // Aviso corto de que algo empieza a caer, antes de la frase.
@@ -283,7 +288,7 @@ export function usePartidaCaida() {
       if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
       respaldoCaida.current = null;
       caidaRestante.current = null;
-      estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      estela.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
 
       const bien = texto === round.correcta;
       const ms = Date.now() - empezoEn.current;

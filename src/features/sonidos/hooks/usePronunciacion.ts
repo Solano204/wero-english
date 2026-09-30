@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useEffectEvent } from 'react';
 import { BackHandler, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -54,18 +54,17 @@ type Ruta = RouteProp<RootStackParams, 'Pronunciation'>;
 export function usePronunciacion() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Ruta>();
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   const fonemas = content.fonemas.fonemas;
   const total = content.fonemas.total_fonemas;
   const reducido = useMovimientoReducido();
   const { width: ancho } = useWindowDimensions();
 
-  const inicial = useMemo(() => {
+  // Solo cuenta con lo que llegó al abrir.
+  const [inicial] = useState(() => {
     const i = params?.fonemaId ? fonemas.findIndex((f) => f.id === params.fonemaId) : -1;
     return i >= 0 ? i : null;
-    // Solo cuenta con lo que llegó al abrir.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   // La página abierta (null = el índice) y la última que se vio: la página sigue montada mientras se desvanece.
   const [pagina, setPagina] = useState<number | null>(inicial);
@@ -111,35 +110,35 @@ export function usePronunciacion() {
 
   // Cambiar de fonema (abrir otro, deslizar, volver al índice) corta cualquier repetición en curso: nunca debe
   // sonar la de uno mientras se lee otro.
-  useEffect(() => {
+  const efectoPagina = useEffectEvent(() => {
     cancelarRepetir();
     audio.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagina]);
+  });
+  useEffect(() => efectoPagina(), [pagina]);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     return () => {
       cancelarRepetir();
       audio.stop();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   // Índice y páginas se funden entre sí; al volver al índice la página sale del árbol cuando ya se apagó.
   useEffect(() => {
     const destino = enPagina ? 1 : 0;
     if (reducido) {
-      transicion.value = destino;
+      transicion.set(destino);
       if (!enPagina) setMontada(false);
       return;
     }
-    transicion.value = withTiming(
+    transicion.set(withTiming(
       destino,
       { duration: motionDuration.escena, easing: enPagina ? motionEasing.entrar : motionEasing.salir },
       (fin) => {
         if (fin && destino === 0) runOnJS(setMontada)(false);
       }
-    );
+    ));
   }, [enPagina, reducido, transicion]);
 
   const abrir = useCallback(
@@ -194,8 +193,8 @@ export function usePronunciacion() {
     return () => sub.remove();
   }, [enPagina, volverAlIndice]);
 
-  const estiloIndice = useAnimatedStyle(() => ({ opacity: 1 - transicion.value }));
-  const estiloPagina = useAnimatedStyle(() => ({ opacity: transicion.value }));
+  const estiloIndice = useAnimatedStyle(() => ({ opacity: 1 - transicion.get() }));
+  const estiloPagina = useAnimatedStyle(() => ({ opacity: transicion.get() }));
 
   return { nav, fonemas, total, ancho, pagina, montada, ultima, viaje, enPagina, repitiendo, alternarRepetir, abrir, cambiarPagina, volverAlIndice, simboloMedido, finViaje, practicarPares, estiloIndice, estiloPagina };
 }

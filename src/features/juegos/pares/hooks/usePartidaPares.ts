@@ -23,6 +23,7 @@ import * as haptics from '@/services/haptics';
 import { escalon, motionDuration, space } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { conFinal, conFinalAsync } from '@/shared/utils/conFinal';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Pares'>;
@@ -192,14 +193,14 @@ export function usePartidaPares() {
       }, PAUSA_MAXIMA_MS);
       limiteTimer.current = limite;
 
-      try {
+      await conFinalAsync(async () => {
         await audio.playRoundResultBilingue(true, entry.audio_en, entry.audio_es);
-      } finally {
+      }, () => {
         clearTimeout(limite);
         // Si nadie más tomó el token (ni saltarPausa ni un abort externo
         // ya lo hicieron), esta es la que cierra la pausa.
         if (pausaToken.current === miToken && montado.current) setEnPausa(false);
-      }
+      });
     },
     [abortarPausa]
   );
@@ -208,16 +209,16 @@ export function usePartidaPares() {
     if (candadoSaltar.current) return;
     candadoSaltar.current = true;
     setSaltando(true);
-    try {
+    conFinal(() => {
       abortarPausa();
-    } finally {
+    }, () => {
       // El candado se suelta siempre, aunque cortar la pausa fallara.
       if (saltarTimer.current) clearTimeout(saltarTimer.current);
       saltarTimer.current = setTimeout(() => {
         candadoSaltar.current = false;
         setSaltando(false);
       }, SALTAR_DEBOUNCE_MS);
-    }
+    });
   }, [abortarPausa]);
 
   const tocar = useCallback(

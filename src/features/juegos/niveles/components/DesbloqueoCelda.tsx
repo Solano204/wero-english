@@ -31,17 +31,17 @@ export function DesbloqueoCelda({ lado }: Props) {
   const avance = useSharedValue(0);
 
   useEffect(() => {
-    if (!reducido) avance.value = withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar });
+    if (!reducido) avance.set(withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
   }, [reducido, avance]);
 
   // El punteado desaparece en el primer tercio; el sólido entra, se sostiene y se va.
-  const punteado = useAnimatedStyle(() => ({ opacity: 1 - Math.min(1, avance.value * 3) }));
+  const punteado = useAnimatedStyle(() => ({ opacity: 1 - Math.min(1, avance.get() * 3) }));
   const solido = useAnimatedStyle(() => ({
-    opacity: interpolate(avance.value, [0, 0.35, 0.75, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+    opacity: interpolate(avance.get(), [0, 0.35, 0.75, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
   const candado = useAnimatedStyle(() => ({
-    opacity: 1 - avance.value,
-    transform: [{ rotate: `${GIRO * avance.value}deg` }, { translateY: -SUBE * avance.value }],
+    opacity: 1 - avance.get(),
+    transform: [{ rotate: `${GIRO * avance.get()}deg` }, { translateY: -SUBE * avance.get() }],
   }));
 
   // Con reducir movimiento la celda solo cambia de estado: no hay punteado que se apague ni candado.

@@ -91,7 +91,7 @@ export function LecturaScreen() {
     </Animated.View>
   ) : null;
   const pie = (
-    <View onLayout={(e) => (altoPie.value = e.nativeEvent.layout.height)}>
+    <View onLayout={(e) => altoPie.set(e.nativeEvent.layout.height)}>
       <PieReproductor
         rep={rep}
         texto={capitulo?.texto ?? ''}

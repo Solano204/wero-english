@@ -124,6 +124,16 @@ export function useTableroColmena(round: ColmenaRound | undefined) {
     setRechazo(null);
   }, []);
 
+  /** Dónde quedaron las ranuras en la pantalla (su onLayout): de ahí salen los vuelos. */
+  const medirRanuras = useCallback((x: number, y: number) => {
+    origenRanuras.current = { x, y };
+  }, []);
+
+  /** Dónde quedó el panal en la pantalla (su onLayout). */
+  const medirPanal = useCallback((x: number, y: number) => {
+    origenPanal.current = { x, y };
+  }, []);
+
   return {
     forma,
     distribucion,
@@ -132,8 +142,8 @@ export function useTableroColmena(round: ColmenaRound | undefined) {
     aterrizaMs,
     colocadas,
     rechazo,
-    origenRanuras,
-    origenPanal,
+    medirRanuras,
+    medirPanal,
     volarFaltantes,
     rechazar,
     colocar,

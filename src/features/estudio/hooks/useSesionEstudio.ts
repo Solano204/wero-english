@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useEffectEvent } from 'react';
 import { BackHandler, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,7 @@ import { sesionMerece } from '@/domain/session';
 import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/shared/hooks/useCarga';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useShallow } from 'zustand/react/shallow';
+import { useUltimo } from '@/shared/hooks/useUltimo';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSessionStore } from '@/features/estudio/hooks/useSessionStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
@@ -135,8 +136,7 @@ export function useSesionEstudio() {
   const cerrada = useRef(false);
   const salidaManual = useRef(false);
   // La hoja de veredicto sigue en pantalla mientras sale, cuando ya no hay tarjeta.
-  const ultimaTarjeta = useRef<StudyCard | null>(null);
-  if (card) ultimaTarjeta.current = card;
+  const ultimaTarjeta = useUltimo<StudyCard>(card);
 
   // Cubitos al responder. Salen de la opción acertada; sin opción (armar, escribir) del centro.
   const reaccion = useReaccion();
@@ -146,7 +146,7 @@ export function useSesionEstudio() {
   // Misma pista que el resto de la app, pero más baja: aquí se estudia.
   useMusicaPantalla('app', { volumenFactor: 0.4 });
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (!user) return;
     void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia, {
       soloNuevas: params?.modo === 'nuevas',
@@ -154,8 +154,8 @@ export function useSesionEstudio() {
     return () => reset();
     // Se arranca una sola vez al montar: las dependencias completas
     // reiniciarían la sesión cada vez que cambie un ajuste.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   /*
    * Al terminar.
@@ -230,16 +230,6 @@ export function useSesionEstudio() {
   const seguirRepasando = useCallback(() => otraSesion(false), [otraSesion]);
   const aprenderNuevas = useCallback(() => otraSesion(true), [otraSesion]);
 
-  // El botón físico de atrás cierra la sesión igual que la X.
-  useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      void handleClose();
-      return true;
-    });
-    return () => sub.remove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, phase]);
-
   const handleClose = useCallback(async () => {
     // Ya terminó, no había nada que armar o falló al armarse: la flecha sale de una vez.
     if (phase !== 'active') {
@@ -251,6 +241,16 @@ export function useSesionEstudio() {
     cerrada.current = true;
     await finish(user.id);
   }, [user, finish, phase, nav]);
+
+  // El botón físico de atrás cierra la sesión igual que la X.
+  const efectoUser = useEffectEvent(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      void handleClose();
+      return true;
+    });
+    return () => sub.remove();
+  });
+  useEffect(() => efectoUser(), [user, phase]);
 
   const handleAnswer = useCallback(
     async (correct: boolean, elapsedMs: number, usedHint: boolean) => {

@@ -21,6 +21,12 @@ import {
   vecinaHacia,
 } from '@/features/juegos/dulces/logic/tablero';
 
+/** Sube la «vigencia» (invalida lo que va en camino). Función aparte: la limpieza de un efecto no toca
+ *  `.current` de frente, que la regla de hooks confunde con una ref a un nodo. */
+function invalidar(vigencia: { current: number }): void {
+  vigencia.current++;
+}
+
 interface Props {
   ref?: Ref<TableroDulcesRef>;
   /** El tablero de partida: solo se lee al montar y cada vez que cambia `llave`. */
@@ -62,6 +68,10 @@ export function TableroDulces({
   onTocar,
   onDeslizar,
 }: Props) {
+  'use no memo';
+  // Fuera del React Compiler a propósito: los callbacks del gesto leen refs con los avisos más recientes (así el
+  // gesto no se rearma a media partida, lo que cortaría un arrastre en curso) y el compilador no sabe que esos
+  // callbacks corren después del render. Se queda con su memorización a mano (useMemo del gesto, useCallback).
   const reducido = useMovimientoReducido();
   const paso = lado + hueco;
   const ancho = cols * paso - hueco;
@@ -90,8 +100,7 @@ export function TableroDulces({
     const pendientes = timers.current;
     return () => {
       montado.current = false;
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
-      jugadaToken.current++;
+      invalidar(jugadaToken);
       pendientes.forEach((t) => clearTimeout(t));
       pendientes.clear();
     };
@@ -255,9 +264,7 @@ export function TableroDulces({
         if (!vive()) return;
 
         // 2. Cada paso: estallan, y mientras sus trozos vuelan a las barras, caen las de arriba.
-        for (let k = 0; k < j.pasos.length; k++) {
-          const p = j.pasos[k];
-          if (!p) continue;
+        for (const [k, p] of j.pasos.entries()) {
           if (k >= 1) mostrarChip(`Cascada ×${k + 1}`);
           marcarExplota(p);
           j.onEstallido?.(p, k);
@@ -325,20 +332,20 @@ export function TableroDulces({
     const conEje = soloHorizontal ? base.failOffsetY([-10, 10]) : base.activeOffsetY([-8, 8]);
     return conEje
       .onBegin((e) => {
-        origen.value = celdaEn(e.x, e.y, paso, cols, rows);
-        hecho.value = 0;
+        origen.set(celdaEn(e.x, e.y, paso, cols, rows));
+        hecho.set(0);
       })
       .onUpdate((e) => {
-        if (hecho.value === 1 || origen.value < 0) return;
+        if (hecho.get() === 1 || origen.get() < 0) return;
         if (Math.max(Math.abs(e.translationX), Math.abs(e.translationY)) < umbral) return;
-        hecho.value = 1;
-        const destino = vecinaHacia(origen.value, e.translationX, e.translationY, cols, rows, soloHorizontal);
+        hecho.set(1);
+        const destino = vecinaHacia(origen.get(), e.translationX, e.translationY, cols, rows, soloHorizontal);
         if (!destino) return;
-        if (destino.celda >= 0) runOnJS(alDeslizar)(origen.value, destino.celda);
-        else runOnJS(alBorde)(origen.value);
+        if (destino.celda >= 0) runOnJS(alDeslizar)(origen.get(), destino.celda);
+        else runOnJS(alBorde)(origen.get());
       })
       .onFinalize(() => {
-        origen.value = -1;
+        origen.set(-1);
       });
   }, [bloqueado, entrando, soloHorizontal, lado, paso, cols, rows, origen, hecho, alDeslizar, alBorde]);
 

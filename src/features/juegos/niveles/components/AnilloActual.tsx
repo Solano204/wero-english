@@ -28,8 +28,8 @@ export function AnilloActual({ lado }: Props) {
   const fase = useReloj(motionSenal.ondaNivel, { activo, reducido, faseQuieta: 0 });
 
   const onda = useAnimatedStyle(() => ({
-    opacity: reducido ? 0 : OPACIDAD_ONDA * (1 - fase.value),
-    transform: [{ scale: ESCALA_ANILLO + (ESCALA_ONDA - ESCALA_ANILLO) * fase.value }],
+    opacity: reducido ? 0 : OPACIDAD_ONDA * (1 - fase.get()),
+    transform: [{ scale: ESCALA_ANILLO + (ESCALA_ONDA - ESCALA_ANILLO) * fase.get() }],
   }));
 
   return (

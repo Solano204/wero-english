@@ -61,8 +61,8 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
     (e: EstadoCapitulo) => {
       estadoRef.current = e;
       setEstado(e);
-      sonando.value = e === 'sonando' ? 1 : 0;
-      enCurso.value = e === 'sonando' || e === 'pausado' ? 1 : 0;
+      sonando.set(e === 'sonando' ? 1 : 0);
+      enCurso.set(e === 'sonando' || e === 'pausado' ? 1 : 0);
     },
     [sonando, enCurso]
   );
@@ -70,7 +70,7 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
   const aReposo = useCallback(() => {
     cambiar('idle');
     setProgreso(SIN_PROGRESO);
-    pos.value = 0;
+    pos.set(0);
   }, [cambiar, pos]);
 
   // Otro capítulo (otro audio) o salir de la pantalla: se corta lo suyo y se vuelve a reposo.
@@ -120,7 +120,7 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
   useEffect(() => {
     if (estado !== 'sonando') return;
     const id = setInterval(() => {
-      pos.value = audio.progresoFrase().pos;
+      pos.set(audio.progresoFrase().pos);
     }, MUESTREO_MS);
     return () => clearInterval(id);
   }, [estado, pos]);
@@ -171,7 +171,7 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
     async (seg: number) => {
       if (estadoRef.current !== 'sonando' && estadoRef.current !== 'pausado') return;
       if (!(await audio.saltarFrase(seg))) return;
-      pos.value = seg;
+      pos.set(seg);
       setProgreso((p) => ({ ...p, pos: seg }));
     },
     [pos]

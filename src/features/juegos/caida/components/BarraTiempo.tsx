@@ -21,7 +21,7 @@ interface Props {
  */
 export function BarraTiempo({ y, distancia }: Props) {
   const relleno = useAnimatedStyle(() => {
-    const p = avance(y.value, distancia);
+    const p = avance(y.get(), distancia);
     return { width: `${(1 - p) * 100}%`, backgroundColor: resplandor(p) > 0 ? ACENTO : APAGADO };
   });
 

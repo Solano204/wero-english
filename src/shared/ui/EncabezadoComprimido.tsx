@@ -39,13 +39,13 @@ export function EncabezadoComprimido({ titulo, scrollY, entrada = false, derecha
   const { top } = useSafeAreaInsets();
 
   const banda = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, RANGO], [0, 1], Extrapolation.CLAMP),
+    opacity: interpolate(scrollY.get(), [0, RANGO], [0, 1], Extrapolation.CLAMP),
   }));
   const fila = useAnimatedStyle(() => ({
-    transform: [{ translateY: interpolate(scrollY.value, [0, RANGO], [CAIDA, 0], Extrapolation.CLAMP) }],
+    transform: [{ translateY: interpolate(scrollY.get(), [0, RANGO], [CAIDA, 0], Extrapolation.CLAMP) }],
   }));
   const tituloAnimado = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(scrollY.value, [0, RANGO], [1, ESCALA_COMPACTA], Extrapolation.CLAMP) }],
+    transform: [{ scale: interpolate(scrollY.get(), [0, RANGO], [1, ESCALA_COMPACTA], Extrapolation.CLAMP) }],
   }));
 
   return (

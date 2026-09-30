@@ -51,18 +51,18 @@ function Piece({ index, width }: { index: number; width: number }) {
   const delay = index * motionEfecto.confetiEscalon;
 
   useEffect(() => {
-    fall.value = withDelay(
+    fall.set(withDelay(
       delay,
       withTiming(1, { duration: motionEfecto.confeti, easing: motionEasing.entrar })
-    );
+    ));
   }, [fall, delay]);
 
   const anim = useAnimatedStyle(() => ({
-    opacity: 1 - fall.value * 0.9,
+    opacity: 1 - fall.get() * 0.9,
     transform: [
-      { translateY: -40 + fall.value * 420 },
-      { translateX: fall.value * drift },
-      { rotate: `${fall.value * spin}deg` },
+      { translateY: -40 + fall.get() * 420 },
+      { translateX: fall.get() * drift },
+      { rotate: `${fall.get() * spin}deg` },
     ],
   }));
 

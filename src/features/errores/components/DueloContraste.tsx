@@ -28,10 +28,10 @@ function Mitad({ tono, titulo, texto, ipa, ruta }: MitadProps) {
 
   useEffect(() => {
     const destino = voz.sonando ? 1 : 0;
-    luz.value = reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+    luz.set(reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar }));
     return () => cancelAnimation(luz);
   }, [voz.sonando, reducido, luz]);
-  const estiloLuz = useAnimatedStyle(() => ({ opacity: luz.value }));
+  const estiloLuz = useAnimatedStyle(() => ({ opacity: luz.get() }));
 
   return (
     <Presionable

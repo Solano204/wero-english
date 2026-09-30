@@ -35,12 +35,12 @@ export function BloqueEscuchar({ escuchas, sonando, voz, envolvente, onEscuchar,
   const reducido = useMovimientoReducido();
   const presente = useSharedValue(visible ? 1 : 0);
   useEffect(() => {
-    presente.value = withTiming(visible ? 1 : 0, {
+    presente.set(withTiming(visible ? 1 : 0, {
       duration: reducido ? motionDuration.rapido : motionDuration.base,
       easing: motionEasing.salir,
-    });
+    }));
   }, [visible, reducido, presente]);
-  const estilo = useAnimatedStyle(() => ({ opacity: presente.value }));
+  const estilo = useAnimatedStyle(() => ({ opacity: presente.get() }));
   const sinEscuchas = escuchas <= 0;
   const etiqueta = sinEscuchas ? 'Sin escuchas' : `Escuchar · ${plural(escuchas, 'queda', 'quedan')} ${escuchas}`;
   return (

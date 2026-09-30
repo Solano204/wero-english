@@ -49,10 +49,10 @@ export function useMarcadorCaida(
   const alLlegarFicha = useCallback(() => {
     setVolando(false);
     if (reducido) return;
-    pulsoMarcador.value = withSequence(
+    pulsoMarcador.set(withSequence(
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
-    );
+    ));
   }, [reducido, pulsoMarcador, setVolando]);
 
   // Si la ficha no avisa que llegó (app en segundo plano a mitad del vuelo), el marcador se actualiza igual.
@@ -68,7 +68,7 @@ export function useMarcadorCaida(
 
   // 1 → `motionLogro.escala` → 1: la misma escala con la que pulsa un logro en Niveles.
   const pulsoAnim = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 + (motionLogro.escala - 1) * pulsoMarcador.value }],
+    transform: [{ scale: 1 + (motionLogro.escala - 1) * pulsoMarcador.get() }],
   }));
 
   return { destino, capaRef, pistaRef, marcadorRef, medirDestino, alLlegarFicha, pulsoAnim };

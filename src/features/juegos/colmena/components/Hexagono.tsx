@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useEffectEvent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -63,13 +63,13 @@ interface RastroProps {
 
 function PuntoRastro({ avance, vx, vy, atraso, opacidad }: RastroProps) {
   const estilo = useAnimatedStyle(() => {
-    const p = avance.value;
+    const p = avance.get();
     const q = Math.max(0, p - atraso);
     return {
       opacity: p > 0 && p < 1 ? opacidad * (1 - p) : 0,
       transform: [
-        { translateX: (q - p) * vx.value },
-        { translateY: (q - p) * vy.value - ARCO * (Math.sin(Math.PI * q) - Math.sin(Math.PI * p)) },
+        { translateX: (q - p) * vx.get() },
+        { translateY: (q - p) * vy.get() - ARCO * (Math.sin(Math.PI * q) - Math.sin(Math.PI * p)) },
       ],
     };
   });
@@ -123,16 +123,16 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   const [conAviso, setConAviso] = useState(false);
 
   // Al armarse el panal: cada ficha crece y se aclara con el escalón de su distancia al centro.
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     const espera = reducido ? 0 : entrada;
     const abrir = (valor: number) => (espera > 0 ? withDelay(espera, valor) : valor);
-    opacidad.value = abrir(
+    opacidad.set(abrir(
       withTiming(1, { duration: reducido ? motionDuration.rapido : motionDuration.base, easing: motionEasing.entrar })
-    );
-    if (!reducido) entra.value = abrir(withSpring(1, motionSpring.rebote));
+    ));
+    if (!reducido) entra.set(abrir(withSpring(1, motionSpring.rebote)));
     // Solo cuenta la entrada del montaje.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   // Un señuelo, con la ronda ya resuelta: cae y se desvanece. Las fichas que se usaron ya se fueron volando.
   useEffect(() => {
@@ -141,91 +141,91 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
       duration: reducido ? motionDuration.rapido : motionColmena.cae,
       easing: motionEasing.salir,
     });
-    caida.value = reducido || retrasoCae <= 0 ? caer : withDelay(retrasoCae, caer);
+    caida.set(reducido || retrasoCae <= 0 ? caer : withDelay(retrasoCae, caer));
   }, [cae, vuelo, reducido, retrasoCae, caida]);
 
   // Vuela a su ranura.
-  useEffect(() => {
+  const efectoVuelo = useEffectEvent(() => {
     if (!vuelo) return;
     if (reducido) {
-      opacidad.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
       return;
     }
-    vx.value = vuelo.dx;
-    vy.value = vuelo.dy;
-    rx.value = vuelo.ranuraAncho / ancho;
-    ry.value = vuelo.ranuraAlto / alto;
-    fr.value = vuelo.fuente / font.size.xl;
-    morph.value = 1;
+    vx.set(vuelo.dx);
+    vy.set(vuelo.dy);
+    rx.set(vuelo.ranuraAncho / ancho);
+    ry.set(vuelo.ranuraAlto / alto);
+    fr.set(vuelo.fuente / font.size.xl);
+    morph.set(1);
     const llegar = withTiming(1, { duration: DURACION_VUELO, easing: motionEasing.entrar });
-    avance.value = 0;
-    avance.value = vuelo.retraso > 0 ? withDelay(vuelo.retraso, llegar) : llegar;
+    avance.set(0);
+    avance.set(vuelo.retraso > 0 ? withDelay(vuelo.retraso, llegar) : llegar);
     // Al llegar la ficha se apaga y deja su lugar a la letra de la ranura.
-    opacidad.value = withDelay(
+    opacidad.set(withDelay(
       vuelo.retraso + DURACION_VUELO,
       withTiming(0, { duration: motionDuration.rapido / 2, easing: motionEasing.salir })
-    );
+    ));
     if (vuelo.tipo === 'pista') {
-      brillo.value = withSequence(
+      brillo.set(withSequence(
         withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withDelay(
           Math.max(0, vuelo.retraso - motionDuration.rapido) + DURACION_VUELO,
           withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir })
         )
-      );
+      ));
     }
     // Un vuelo nuevo es un objeto nuevo: solo él lo dispara.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vuelo]);
+  });
+  useEffect(() => efectoVuelo(), [vuelo]);
 
   // Una letra que no va: llega, rebota de regreso y destella en ámbar.
-  useEffect(() => {
+  const efectoRechazo = useEffectEvent(() => {
     if (!rechazo) return undefined;
     setConAviso(true);
     setSacude(true);
     const t = setTimeout(() => setSacude(false), motionDuration.base);
-    vx.value = rechazo.dx;
-    vy.value = rechazo.dy;
-    morph.value = 0;
-    fr.value = 1;
-    destello.value = withSequence(
+    vx.set(rechazo.dx);
+    vy.set(rechazo.dy);
+    morph.set(0);
+    fr.set(1);
+    destello.set(withSequence(
       withTiming(1, { duration: motionDuration.rapido / 2, easing: motionEasing.entrar }),
       withDelay(motionDuration.base, withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir }))
-    );
+    ));
     if (!reducido) {
-      avance.value = withSequence(
+      avance.set(withSequence(
         withTiming(LLEGA, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
         withSpring(0, motionSpring.rebote)
-      );
+      ));
     }
     return () => clearTimeout(t);
     // Un rechazo nuevo es un objeto nuevo: solo él lo dispara.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rechazo]);
+  });
+  useEffect(() => efectoRechazo(), [rechazo]);
 
   const lugar = useAnimatedStyle(() => {
-    const p = avance.value;
+    const p = avance.get();
     return {
-      opacity: opacidad.value * (1 - caida.value),
+      opacity: opacidad.get() * (1 - caida.get()),
       zIndex: p > 0 ? 10 : 0,
       transform: [
-        { translateX: vx.value * p },
-        { translateY: vy.value * p - ARCO * Math.sin(Math.PI * p) + (reducido ? 0 : caida.value * motionColmena.caeDp) },
-        { scale: entra.value },
+        { translateX: vx.get() * p },
+        { translateY: vy.get() * p - ARCO * Math.sin(Math.PI * p) + (reducido ? 0 : caida.get() * motionColmena.caeDp) },
+        { scale: entra.get() },
       ],
     };
   });
   // El hexágono se aplasta hasta la proporción de la ranura y se funde con ella en la segunda mitad del vuelo.
   const cara = useAnimatedStyle(() => {
-    const q = morph.value * Math.min(1, Math.max(0, (avance.value - FUNDE_DESDE) / (1 - FUNDE_DESDE)));
-    return { opacity: 1 - q, transform: [{ scaleX: 1 + (rx.value - 1) * q }, { scaleY: 1 + (ry.value - 1) * q }] };
+    const q = morph.get() * Math.min(1, Math.max(0, (avance.get() - FUNDE_DESDE) / (1 - FUNDE_DESDE)));
+    return { opacity: 1 - q, transform: [{ scaleX: 1 + (rx.get() - 1) * q }, { scaleY: 1 + (ry.get() - 1) * q }] };
   });
   const ranura = useAnimatedStyle(() => ({
-    opacity: morph.value * Math.min(1, Math.max(0, (avance.value - FUNDE_DESDE) / (1 - FUNDE_DESDE))),
+    opacity: morph.get() * Math.min(1, Math.max(0, (avance.get() - FUNDE_DESDE) / (1 - FUNDE_DESDE))),
   }));
-  const texto = useAnimatedStyle(() => ({ transform: [{ scale: 1 + (fr.value - 1) * avance.value }] }));
-  const luz = useAnimatedStyle(() => ({ opacity: brillo.value }));
-  const aviso = useAnimatedStyle(() => ({ opacity: destello.value }));
+  const texto = useAnimatedStyle(() => ({ transform: [{ scale: 1 + (fr.get() - 1) * avance.get() }] }));
+  const luz = useAnimatedStyle(() => ({ opacity: brillo.get() }));
+  const aviso = useAnimatedStyle(() => ({ opacity: destello.get() }));
 
   const paleta = vuelo?.tipo === 'ayuda' ? CARA_AYUDA : CARA;
   const enPanal = vuelo === null;

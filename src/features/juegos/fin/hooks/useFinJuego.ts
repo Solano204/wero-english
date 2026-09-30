@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useEffectEvent } from 'react';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { logGame } from '@/data/repos/partidas';
@@ -25,7 +25,7 @@ export function useFinJuego() {
   const [ocupado, setOcupado] = useState(false);
 
   const { juego, rondas, aciertos, nivel } = params;
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
   useMusicaPantalla('juegos');
   useCortarAudioAlSalir();
 
@@ -42,7 +42,7 @@ export function useFinJuego() {
 
   const estrellas = umbrales ? estrellasPara(aciertos, umbrales) : 0;
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (!user) return;
 
     void (async () => {
@@ -52,8 +52,8 @@ export function useFinJuego() {
       }
     })();
     // Solo al montar: guardar dos veces sumaría dos intentos.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   const salir = () => nav.navigate('Main');
 
@@ -68,12 +68,12 @@ export function useFinJuego() {
   );
   const tresEstrellas = useMemo(() => elegirFrase(TRES_ESTRELLAS), []);
 
-  useEffect(() => {
+  const alMontar2 = useEffectEvent(() => {
     // Una sola vez, al mostrar el resultado. Sin buen resultado no suena nada:
     // ni el acierto ni el fallo, terminar una partida no es ninguno de los dos.
     if (merece) void audio.playNivelCompleto();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar2(), []);
 
   return { nav, juego, rondas, aciertos, nivel, umbrales, estrellas, salir, pct, merece, perfecta, tresEstrellas };
 }

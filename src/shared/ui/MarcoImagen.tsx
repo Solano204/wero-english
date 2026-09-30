@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useEffectEvent } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -77,29 +77,29 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
   useEffect(() => {
     setCargada(false);
     setFallo(false);
-    opacidadCarga.value = 0;
+    opacidadCarga.set(0);
   }, [path, opacidadCarga]);
 
   useEffect(() => {
-    revelo.value = reducido ? (desenfocada ? 0 : 1) : withTiming(desenfocada ? 0 : 1, { duration: REVELA_MS });
+    revelo.set(reducido ? (desenfocada ? 0 : 1) : withTiming(desenfocada ? 0 : 1, { duration: REVELA_MS }));
   }, [desenfocada, reducido, revelo]);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (!zoomEntrada) return;
-    zoom.value = reducido ? 1 : withTiming(1, { duration: motionDuration.escena });
+    zoom.set(reducido ? 1 : withTiming(1, { duration: motionDuration.escena }));
     // Solo al montar: es la llegada de la pantalla, no cada cambio de imagen.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   const imagenAnim = useAnimatedStyle(() => {
-    const desplazamiento = scrollY ? Math.min(Math.max(scrollY.value, 0), TOPE_PARALAJE) * PARALAJE : 0;
+    const desplazamiento = scrollY ? Math.min(Math.max(scrollY.get(), 0), TOPE_PARALAJE) * PARALAJE : 0;
     return {
       // Antes de revelar queda a mitad de opacidad, no invisible: se ve que hay algo debajo del blur.
-      opacity: opacidadCarga.value * (0.5 + 0.5 * revelo.value),
-      transform: [{ translateY: reducido ? 0 : desplazamiento }, { scale: zoom.value }],
+      opacity: opacidadCarga.get() * (0.5 + 0.5 * revelo.get()),
+      transform: [{ translateY: reducido ? 0 : desplazamiento }, { scale: zoom.get() }],
     };
   });
-  const blurAnim = useAnimatedStyle(() => ({ opacity: 1 - revelo.value }));
+  const blurAnim = useAnimatedStyle(() => ({ opacity: 1 - revelo.get() }));
 
   const caja: ViewStyle = ancho && alto ? { width: ancho, height: alto } : { alignSelf: 'stretch', aspectRatio: RAZON };
 
@@ -117,7 +117,7 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
           contentFit="cover"
           onLoad={() => {
             setCargada(true);
-            opacidadCarga.value = reducido ? 1 : withTiming(1, { duration: FADE_MS });
+            opacidadCarga.set(reducido ? 1 : withTiming(1, { duration: FADE_MS }));
           }}
           onError={() => setFallo(true)}
           style={[StyleSheet.absoluteFill, imagenAnim]}

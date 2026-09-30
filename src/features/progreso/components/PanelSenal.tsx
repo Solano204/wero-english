@@ -56,16 +56,16 @@ function ChipRecord({ texto, actual, celebrar, retraso }: { texto: string; actua
   useEffect(() => {
     if (!celebrar || reducido) return;
     // Un solo destello dorado.
-    destello.value = withDelay(
+    destello.set(withDelay(
       retraso,
       withSequence(
         withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }),
         withTiming(0, { duration: motionDuration.lento, easing: motionEasing.salir })
       )
-    );
+    ));
   }, [celebrar, reducido, retraso, destello]);
 
-  const estilo = useAnimatedStyle(() => ({ opacity: destello.value * OPACIDAD_DESTELLO }));
+  const estilo = useAnimatedStyle(() => ({ opacity: destello.get() * OPACIDAD_DESTELLO }));
   return (
     <View style={styles.record}>
       <Badge label={texto} tone={actual ? 'accent' : 'neutral'} />

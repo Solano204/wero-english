@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import React, { useEffect, useState, type ReactNode } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -26,6 +26,7 @@ import {
   sol,
   space,
 } from '@/theme';
+import { useUltimo } from '@/shared/hooks/useUltimo';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ACIERTO, elegirFrase } from '@/domain/frases';
 
@@ -90,14 +91,24 @@ export function HojaVeredicto({
   const [esperando, setEsperando] = useState(false);
 
   // Al irse, la hoja se lleva su contenido: no se vacía a media salida.
-  const ultimo = useRef<Contenido | null>(null);
-  if (visible) ultimo.current = { correct, answer, nota, repaso, frase };
-  const c = ultimo.current;
+  // `frase` es un elemento nuevo en cada render: cuenta como el mismo contenido si lo demás no cambió.
+  const c = useUltimo<Contenido>(
+    visible ? { correct, answer, nota, repaso, frase } : null,
+    (a, b) => a.correct === b.correct && a.answer === b.answer && a.nota === b.nota && a.repaso === b.repaso
+  );
 
   // Una felicitación distinta cada vez (frases.ts): la oye el lector de pantalla; en pantalla manda «ESO ES».
-  // visible y answer no se leen, pero son el disparador: una frase nueva cada vez que la hoja sube con otra respuesta.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const felicitacion = useMemo(() => (correct ? elegirFrase(ACIERTO) : 'Era esta'), [visible, correct, answer]);
+  // Se elige de nuevo cada vez que la hoja sube (o cambia de respuesta), no en cada render.
+  const claveFelicitacion = `${visible}|${correct}|${answer}`;
+  const [felicitacionGuardada, setFelicitacion] = useState(() => ({
+    clave: claveFelicitacion,
+    texto: correct ? elegirFrase(ACIERTO) : 'Era esta',
+  }));
+  let felicitacion = felicitacionGuardada.texto;
+  if (felicitacionGuardada.clave !== claveFelicitacion) {
+    felicitacion = correct ? elegirFrase(ACIERTO) : 'Era esta';
+    setFelicitacion({ clave: claveFelicitacion, texto: felicitacion });
+  }
 
   const y = useSharedValue(alturaVentana);
   const arrastre = useSharedValue(0);
@@ -108,26 +119,26 @@ export function HojaVeredicto({
     if (visible) {
       // Espera a que el veredicto se vea en su sitio antes de subir.
       const espera = motionDuration.lento;
-      velo.value = withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+      velo.set(withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
       if (reducido) {
-        y.value = 0;
-        opacidad.value = withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
+        y.set(0);
+        opacidad.set(withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
       } else {
-        opacidad.value = 1;
-        y.value = withDelay(espera, withSpring(0, motionSpring.rebote));
+        opacidad.set(1);
+        y.set(withDelay(espera, withSpring(0, motionSpring.rebote)));
       }
     } else {
-      velo.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
-      if (reducido) opacidad.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
-      else y.value = withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir });
+      velo.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
+      if (reducido) opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
+      else y.set(withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir }));
     }
   }, [visible, reducido, alturaVentana, y, velo, opacidad]);
 
   const hojaAnim = useAnimatedStyle(() => ({
-    opacity: opacidad.value,
-    transform: [{ translateY: y.value + arrastre.value }],
+    opacity: opacidad.get(),
+    transform: [{ translateY: y.get() + arrastre.get() }],
   }));
-  const veloAnim = useAnimatedStyle(() => ({ opacity: velo.value * VELO_MAX }));
+  const veloAnim = useAnimatedStyle(() => ({ opacity: velo.get() * VELO_MAX }));
 
   const continuar = async () => {
     if (esperando || avanzando) return;
@@ -144,14 +155,13 @@ export function HojaVeredicto({
     .activeOffsetY([-12, 12])
     .failOffsetX([-24, 24])
     .onUpdate((e) => {
-      arrastre.value =
-        e.translationY < 0
+      arrastre.set(e.translationY < 0
           ? e.translationY * SEGUIR_ARRIBA
-          : Math.min(e.translationY, TOPE_ABAJO) * SEGUIR_ABAJO;
+          : Math.min(e.translationY, TOPE_ABAJO) * SEGUIR_ABAJO);
     })
     .onEnd((e) => {
       const sube = e.translationY < -UMBRAL_DESLIZAR || e.velocityY < -VELOCIDAD_DESLIZAR;
-      arrastre.value = withSpring(0, motionSpring.rebote);
+      arrastre.set(withSpring(0, motionSpring.rebote));
       if (sube) runOnJS(continuar)();
     });
 

@@ -44,10 +44,10 @@ function Traduccion({ texto, luz }: { texto: string; luz: boolean }) {
 
   useEffect(() => {
     const destino = luz ? 1 : 0;
-    encendida.value = reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar });
+    encendida.set(reducido ? destino : withTiming(destino, { duration: motionDuration.base, easing: motionEasing.entrar }));
   }, [luz, reducido, encendida]);
 
-  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(encendida.value, [0, 1], [APAGADA, ENCENDIDA]) }));
+  const estilo = useAnimatedStyle(() => ({ color: interpolateColor(encendida.get(), [0, 1], [APAGADA, ENCENDIDA]) }));
   return <Animated.Text style={[styles.spanish, estilo]}>{texto}</Animated.Text>;
 }
 

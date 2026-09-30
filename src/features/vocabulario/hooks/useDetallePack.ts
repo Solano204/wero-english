@@ -19,7 +19,7 @@ export function useDetallePack() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
   const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(loadContent, []);
+  const content = useMemo(() => loadContent(), []);
 
   const carga = useCarga(() => getPackEntries(params.packId, filter()), [params.packId, filter], {
     alEnfocar: true,

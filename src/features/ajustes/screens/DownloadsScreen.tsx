@@ -13,7 +13,7 @@ import { useDescargas } from '@/features/ajustes/hooks/useDescargas';
  * espacio ocupan en el teléfono, no si se pagan.
  */
 export function DownloadsScreen() {
-  const { nav, progress, errors, cancel, hoja, descargar, packs } = useDescargas();
+  const { nav, progress, errors, cancelar, hoja, descargar, packs } = useDescargas();
 
   return (
     <Screen scroll>
@@ -49,9 +49,7 @@ export function DownloadsScreen() {
                   <Button
                     label="Cancelar"
                     variant="ghost"
-                    onPress={() => {
-                      cancel.current[p.id] = true;
-                    }}
+                    onPress={() => cancelar(p.id)}
                   />
                 ) : (
                   <Button

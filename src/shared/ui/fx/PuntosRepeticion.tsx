@@ -18,13 +18,13 @@ function Punto({ estado }: { estado: Estado }) {
 
   useEffect(() => {
     if (estado !== 'actual' || reducido) return;
-    escala.value = withSequence(
+    escala.set(withSequence(
       withTiming(PULSO, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withSpring(1, motionSpring.rebote)
-    );
+    ));
   }, [estado, reducido, escala]);
 
-  const animado = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+  const animado = useAnimatedStyle(() => ({ transform: [{ scale: escala.get() }] }));
   return <Animated.View style={[styles.punto, estilos[estado], animado]} />;
 }
 

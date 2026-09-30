@@ -33,8 +33,7 @@ import { color, font, radius, space } from '@/theme';
  * La partida vive en usePartidaCaida (y su máquina de estados en logic/partida.ts). Aquí solo se pinta.
  */
 export function CaidaScreen() {
-  const p = usePartidaCaida();
-  const { nav, carga } = p;
+  const { acertada, aciertos, alLlegarFicha, altoPista, anim, animandoFin, avanzando, capaRef, carga, destino, enPausa, estela, fallada, golpe, idx, loading, marcadorRef, medirDestino, nav, nivel, nv, otraVez, pausaInfo, perdio, pistaRef, pulsoAnim, reaccion, recordAntes, responder, round, rounds, setAltoPista, tocarSiguienteEnPausa, volando, y } = usePartidaCaida();
 
   if (carga.estado === 'error') {
     return (
@@ -45,7 +44,7 @@ export function CaidaScreen() {
     );
   }
 
-  if (p.loading) {
+  if (loading) {
     return (
       <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Caída" />
@@ -70,7 +69,7 @@ export function CaidaScreen() {
     );
   }
 
-  if (p.rounds.length === 0) {
+  if (rounds.length === 0) {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Caída" />
@@ -84,35 +83,35 @@ export function CaidaScreen() {
     );
   }
 
-  if (p.perdio) {
+  if (perdio) {
     return (
       <Screen
         footer={
           // Fijo abajo: una frase larga en la tarjeta (o un "Elegiste: ..." largo) no debe poder empujar
           // estos dos botones fuera de la pantalla en un equipo chico.
           <PieFinCaida
-            onOtraVez={p.otraVez}
+            onOtraVez={otraVez}
             onVerResultado={() =>
               nav.replace('GameEnd', {
                 juego: 'caida',
-                rondas: p.rounds.length,
-                aciertos: p.aciertos,
-                nivel: p.nivel ?? undefined,
+                rondas: rounds.length,
+                aciertos: aciertos,
+                nivel: nivel ?? undefined,
               })
             }
           />
         }
       >
-        <Header onBack={() => nav.goBack()} title={p.nivel ? `Nivel ${p.nivel}` : undefined} />
-        {p.round ? (
-          <FinCaida aciertos={p.aciertos} entry={p.round.entry} correcta={p.round.correcta} fallada={p.fallada} record={p.recordAntes} />
+        <Header onBack={() => nav.goBack()} title={nivel ? `Nivel ${nivel}` : undefined} />
+        {round ? (
+          <FinCaida aciertos={aciertos} entry={round.entry} correcta={round.correcta} fallada={fallada} record={recordAntes} />
         ) : null}
       </Screen>
     );
   }
 
   // Entre la última ronda y el resumen no hay ronda: la pantalla nunca queda en blanco, sale con su encabezado.
-  if (!p.round) {
+  if (!round) {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Caída" />
@@ -120,82 +119,82 @@ export function CaidaScreen() {
     );
   }
 
-  const izquierda = p.round.correctaIzquierda ? p.round.correcta : p.round.falsa;
-  const derecha = p.round.correctaIzquierda ? p.round.falsa : p.round.correcta;
+  const izquierda = round.correctaIzquierda ? round.correcta : round.falsa;
+  const derecha = round.correctaIzquierda ? round.falsa : round.correcta;
   // El ritmo es el del nivel: cada uno trae su duración inicial y su mínima. Las constantes son el respaldo.
   const chevrons = chevronsPara(
-    p.round.duracionMs,
-    p.nv?.caidaInicialMs ?? CAIDA_INICIAL_MS,
-    p.nv?.caidaMinimaMs ?? CAIDA_MINIMA_MS
+    round.duracionMs,
+    nv?.caidaInicialMs ?? CAIDA_INICIAL_MS,
+    nv?.caidaMinimaMs ?? CAIDA_MINIMA_MS
   );
 
   return (
     <Screen padded={false} style={styles.sinHueco} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
-      <View ref={p.capaRef} style={styles.capa}>
-        <Trozos disparo={p.reaccion.trozos} tinte={color.correct} x="50%" y="62%" />
+      <View ref={capaRef} style={styles.capa}>
+        <Trozos disparo={reaccion.trozos} tinte={color.correct} x="50%" y="62%" />
         <View style={styles.top}>
           <Header
             onBack={() => nav.goBack()}
-            title={p.nivel ? `Nivel ${p.nivel}` : undefined}
+            title={nivel ? `Nivel ${nivel}` : undefined}
             right={
               <View style={styles.derecha}>
                 <IndicadorRitmo nivel={chevrons} />
-                <View ref={p.marcadorRef} collapsable={false} onLayout={p.medirDestino}>
-                  <Animated.View style={p.pulsoAnim}>
+                <View ref={marcadorRef} collapsable={false} onLayout={medirDestino}>
+                  <Animated.View style={pulsoAnim}>
                     <Marcador
-                      valor={p.aciertos - (p.volando ? 1 : 0)}
+                      valor={aciertos - (volando ? 1 : 0)}
                       tamano={font.size.xl}
                       color={color.accent}
-                      etiqueta={`${p.aciertos} ${p.aciertos === 1 ? 'acierto' : 'aciertos'}`}
+                      etiqueta={`${aciertos} ${aciertos === 1 ? 'acierto' : 'aciertos'}`}
                     />
                   </Animated.View>
                 </View>
               </View>
             }
           />
-          <FraseRonda key={p.idx} texto={p.round.entry.phrase} />
+          <FraseRonda key={idx} texto={round.entry.phrase} />
           <Text style={styles.instruccion}>
             Toca el significado antes de que lleguen abajo
           </Text>
         </View>
 
         <PistaCaida
-          pistaRef={p.pistaRef}
-          y={p.y}
-          onDistancia={p.setAltoPista}
-          largoEstela={largoEstela(p.altoPista, p.round.duracionMs)}
-          estela={p.estela}
-          armado={!p.enPausa}
-          golpe={p.golpe}
+          pistaRef={pistaRef}
+          y={y}
+          onDistancia={setAltoPista}
+          largoEstela={largoEstela(altoPista, round.duracionMs)}
+          estela={estela}
+          armado={!enPausa}
+          golpe={golpe}
         >
-          <Animated.View style={[styles.fila, p.anim]}>
+          <Animated.View style={[styles.fila, anim]}>
             <FichaCaida
-              key={`${p.idx}-a`}
+              key={`${idx}-a`}
               texto={izquierda}
-              estado={estadoFicha(izquierda, p.round.correcta, p.fallada, p.acertada, p.idx)}
-              y={p.y}
-              destino={p.destino}
-              onLlego={p.alLlegarFicha}
-              onPress={() => void p.responder(izquierda)}
+              estado={estadoFicha(izquierda, round.correcta, fallada, acertada, idx)}
+              y={y}
+              destino={destino}
+              onLlego={alLlegarFicha}
+              onPress={() => void responder(izquierda)}
             />
             <FichaCaida
-              key={`${p.idx}-b`}
+              key={`${idx}-b`}
               texto={derecha}
-              estado={estadoFicha(derecha, p.round.correcta, p.fallada, p.acertada, p.idx)}
-              y={p.y}
-              destino={p.destino}
-              onLlego={p.alLlegarFicha}
-              onPress={() => void p.responder(derecha)}
+              estado={estadoFicha(derecha, round.correcta, fallada, acertada, idx)}
+              y={y}
+              destino={destino}
+              onLlego={alLlegarFicha}
+              onPress={() => void responder(derecha)}
             />
           </Animated.View>
         </PistaCaida>
 
         <HojaPausa
-          entry={p.pausaInfo?.entry ?? null}
-          correct={p.pausaInfo?.correct ?? false}
-          visible={p.enPausa && !p.volando && !p.animandoFin}
-          avanzando={p.avanzando}
-          onContinuar={p.tocarSiguienteEnPausa}
+          entry={pausaInfo?.entry ?? null}
+          correct={pausaInfo?.correct ?? false}
+          visible={enPausa && !volando && !animandoFin}
+          avanzando={avanzando}
+          onContinuar={tocarSiguienteEnPausa}
         />
       </View>
     </Screen>

@@ -30,7 +30,7 @@ interface SegmentoProps {
 /** Un segmento de la escala: gris, y se enciende cuando el indicador pasa por él. */
 function Segmento({ indice, pos, tinte }: SegmentoProps) {
   const luz = useAnimatedStyle(() => ({
-    opacity: interpolate(pos.value, [indice - ALCANCE, indice, indice + ALCANCE], [0, 1, 0], Extrapolation.CLAMP),
+    opacity: interpolate(pos.get(), [indice - ALCANCE, indice, indice + ALCANCE], [0, 1, 0], Extrapolation.CLAMP),
   }));
   return (
     <View style={styles.segmento}>
@@ -63,16 +63,16 @@ export function EscalaRegistro({ registro, vulgaridad, retraso = 0 }: Props) {
   const ancho = useSharedValue(0);
 
   useEffect(() => {
-    pos.value = reducido ? actual : withDelay(retraso, withSpring(actual, motionSpring.rebote));
+    pos.set(reducido ? actual : withDelay(retraso, withSpring(actual, motionSpring.rebote)));
   }, [actual, reducido, retraso, pos]);
 
   const indicador = useAnimatedStyle(() => {
-    const paso = (ancho.value + HUECO) / PASOS;
-    return { transform: [{ translateX: (pos.value + 0.5) * paso - HUECO / 2 - INDICADOR / 2 }] };
+    const paso = (ancho.get() + HUECO) / PASOS;
+    return { transform: [{ translateX: (pos.get() + 0.5) * paso - HUECO / 2 - INDICADOR / 2 }] };
   });
 
   const alMedir = (e: LayoutChangeEvent) => {
-    ancho.value = e.nativeEvent.layout.width;
+    ancho.set(e.nativeEvent.layout.width);
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useEffectEvent } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { Icon } from '@/shared/ui/Icon';
@@ -42,33 +42,33 @@ export function FichaPar({ ficha, recta, elevada, falla, sacude, onPress, entra 
   const esEn = ficha.lado === 'en';
 
   // La entrada es de la primera vez que se monta: un `entra` que cambie después no vuelve a dejarla caer.
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     if (entra === undefined) return;
     const fundido = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
     if (reducido) {
-      caida.value = 0;
-      aparece.value = fundido;
+      caida.set(0);
+      aparece.set(fundido);
       return;
     }
-    aparece.value = withDelay(entra, fundido);
-    caida.value = withDelay(entra, withSpring(0, motionSpring.liquido));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    aparece.set(withDelay(entra, fundido));
+    caida.set(withDelay(entra, withSpring(0, motionSpring.liquido)));
+  });
+  useEffect(() => alMontar(), []);
 
   useEffect(() => {
     const suave = { duration: motionDuration.rapido, easing: motionEasing.entrar };
     const sube = elevada ? 1 : 0;
     // En un fallo la ficha queda ámbar: el anillo `accent` se va.
     const borde = elevada && !falla ? 1 : 0;
-    alzada.value = reducido ? sube : withTiming(sube, suave);
-    marcada.value = reducido ? borde : withTiming(borde, suave);
+    alzada.set(reducido ? sube : withTiming(sube, suave));
+    marcada.set(reducido ? borde : withTiming(borde, suave));
   }, [elevada, falla, reducido, alzada, marcada]);
 
   const alzar = useAnimatedStyle(() => ({
-    opacity: aparece.value,
-    transform: [{ translateY: -ELEVACION * alzada.value - CAIDA * caida.value }],
+    opacity: aparece.get(),
+    transform: [{ translateY: -ELEVACION * alzada.get() - CAIDA * caida.get() }],
   }));
-  const borde = useAnimatedStyle(() => ({ opacity: marcada.value }));
+  const borde = useAnimatedStyle(() => ({ opacity: marcada.get() }));
 
   return (
     <Animated.View

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Badge, Card, NotaInfo, Presionable } from '@/shared/ui';
@@ -46,39 +46,41 @@ export function DetalleForma({ forma, direccion, eje }: Props) {
   const reducido = useMovimientoReducido();
   const [mostrada, setMostrada] = useState(forma);
   const mostradaId = useRef(forma.id);
-  mostradaId.current = mostrada.id;
+  useLayoutEffect(() => {
+    mostradaId.current = mostrada.id;
+  }, [mostrada]);
   const v = useSharedValue(0);
   const ejeY = useSharedValue(eje === 'y' ? 1 : 0);
 
   useEffect(() => {
     if (forma.id === mostradaId.current) {
       // Volvió a la que se ve: se termina de mostrar.
-      v.value = reducido ? 0 : withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.entrar });
+      v.set(reducido ? 0 : withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
       return;
     }
     if (reducido) {
       setMostrada(forma);
       return;
     }
-    ejeY.value = eje === 'y' ? 1 : 0;
+    ejeY.set(eje === 'y' ? 1 : 0);
     const cambiar = () => {
       setMostrada(forma);
-      v.value = direccion;
-      v.value = withTiming(0, { duration: motionDuration.base, easing: motionEasing.entrar });
+      v.set(direccion);
+      v.set(withTiming(0, { duration: motionDuration.base, easing: motionEasing.entrar }));
     };
-    v.value = withTiming(-direccion, { duration: motionDuration.rapido, easing: motionEasing.salir }, (fin) => {
+    v.set(withTiming(-direccion, { duration: motionDuration.rapido, easing: motionEasing.salir }, (fin) => {
       if (fin) runOnJS(cambiar)();
-    });
+    }));
     return () => cancelAnimation(v);
   }, [forma, direccion, eje, reducido, v, ejeY]);
 
   const contenido = useAnimatedStyle(() => ({
-    opacity: 1 - Math.abs(v.value),
-    transform: [{ translateX: (1 - ejeY.value) * v.value * DESPLAZA }, { translateY: ejeY.value * v.value * DESPLAZA }],
+    opacity: 1 - Math.abs(v.get()),
+    transform: [{ translateX: (1 - ejeY.get()) * v.get() * DESPLAZA }, { translateY: ejeY.get() * v.get() * DESPLAZA }],
   }));
   const flip = useAnimatedStyle(() => ({
-    opacity: 1 - Math.abs(v.value),
-    transform: [{ perspective: PERSPECTIVA }, { rotateX: `${v.value * 90}deg` }],
+    opacity: 1 - Math.abs(v.get()),
+    transform: [{ perspective: PERSPECTIVA }, { rotateX: `${v.get() * 90}deg` }],
   }));
 
   const frase = useVozFrase(mostrada.frase, mostrada.audio_frase, mostrada.audio_frase_lento);

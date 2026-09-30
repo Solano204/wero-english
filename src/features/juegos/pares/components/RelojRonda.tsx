@@ -37,7 +37,7 @@ export function RelojRonda({ segundos, llave, onFin, pausado = false, etiqueta =
 
   const [enUltimoTramo, setEnUltimoTramo] = useState(false);
   useAnimatedReaction(
-    () => avance.value > ULTIMO_TRAMO,
+    () => avance.get() > ULTIMO_TRAMO,
     (ahora, antes) => {
       if (ahora !== antes) runOnJS(setEnUltimoTramo)(ahora);
     }
@@ -45,10 +45,10 @@ export function RelojRonda({ segundos, llave, onFin, pausado = false, etiqueta =
   const latido = useReloj(motionSenal.latido, { activo: enUltimoTramo && !pausado && activo, reducido });
 
   const barra = useAnimatedStyle(() => {
-    const final = avance.value > ULTIMO_TRAMO;
-    const pulso = final && !reducido ? OPACIDAD_MINIMA + (1 - OPACIDAD_MINIMA) * (0.5 - 0.5 * Math.cos(2 * Math.PI * latido.value)) : 1;
+    const final = avance.get() > ULTIMO_TRAMO;
+    const pulso = final && !reducido ? OPACIDAD_MINIMA + (1 - OPACIDAD_MINIMA) * (0.5 - 0.5 * Math.cos(2 * Math.PI * latido.get())) : 1;
     return {
-      width: `${Math.max(0, (1 - avance.value) * 100)}%`,
+      width: `${Math.max(0, (1 - avance.get()) * 100)}%`,
       backgroundColor: final ? ACENTO : APAGADO,
       opacity: pulso,
     };

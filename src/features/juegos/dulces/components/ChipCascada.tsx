@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useEffectEvent } from 'react';
 import { AccessibilityInfo, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   runOnJS,
@@ -31,10 +31,10 @@ export function ChipCascada({ texto, onFin }: Props) {
   const avance = useSharedValue(0);
   const visible = useSharedValue(0);
 
-  useEffect(() => {
+  const alMontar = useEffectEvent(() => {
     AccessibilityInfo.announceForAccessibility(texto);
     const espera = Math.max(0, motionDulces.chip - motionDuration.rapido - motionDuration.base);
-    visible.value = withSequence(
+    visible.set(withSequence(
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withDelay(
         espera,
@@ -43,15 +43,15 @@ export function ChipCascada({ texto, onFin }: Props) {
           if (terminada) runOnJS(onFin)();
         })
       )
-    );
-    if (!reducido) avance.value = withTiming(1, { duration: motionDulces.chip, easing: motionEasing.entrar });
+    ));
+    if (!reducido) avance.set(withTiming(1, { duration: motionDulces.chip, easing: motionEasing.entrar }));
     // El chip se lanza una sola vez por montaje.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => alMontar(), []);
 
   const estilo = useAnimatedStyle(() => ({
-    opacity: visible.value,
-    transform: [{ translateY: -SUBE * avance.value }],
+    opacity: visible.get(),
+    transform: [{ translateY: -SUBE * avance.get() }],
   }));
 
   return (

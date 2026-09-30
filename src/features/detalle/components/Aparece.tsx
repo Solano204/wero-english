@@ -37,14 +37,14 @@ export function Aparece({ scrollY, retraso = 0, children }: Props) {
     if (!visto) return;
     // El retraso escalona lo que ya estaba a la vista al abrir; lo que aparece al hacer scroll no espera.
     const espera = Date.now() - montado.current < motionDuration.coreografia ? retraso : 0;
-    avance.value = reducido
+    avance.set(reducido
       ? 1
-      : withDelay(espera, withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar }));
+      : withDelay(espera, withTiming(1, { duration: motionDuration.lento, easing: motionEasing.entrar })));
   }, [visto, reducido, retraso, avance]);
 
   const anim = useAnimatedStyle(() => ({
-    opacity: avance.value,
-    transform: [{ translateY: (1 - avance.value) * SUBE }],
+    opacity: avance.get(),
+    transform: [{ translateY: (1 - avance.get()) * SUBE }],
   }));
 
   return (

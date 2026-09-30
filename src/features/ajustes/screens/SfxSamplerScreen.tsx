@@ -9,6 +9,7 @@ import * as haptics from '@/services/haptics';
 import type { SfxPackId } from '@/services/audio';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/types/rutas';
+import { conFinalAsync } from '@/shared/utils/conFinal';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -64,7 +65,7 @@ export function SfxSamplerScreen() {
       setSimulando(id);
       activar(id);
       audio.reiniciaRacha();
-      try {
+      await conFinalAsync(async () => {
         for (let i = 0; i < 5; i++) {
           haptics.success();
           void audio.playSuccess();
@@ -73,9 +74,9 @@ export function SfxSamplerScreen() {
         haptics.tapLight();
         void audio.playFail();
         await esperar(PAUSA_TRAS_FALLO_MS);
-      } finally {
+      }, () => {
         setSimulando(null);
-      }
+      });
     },
     [simulando, activar]
   );

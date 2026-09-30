@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { cancelAnimation, runOnJS, runOnUI, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -50,6 +50,10 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
   { entradas, actual, sonando, onSonar, guardada, onGuardar, onGuardarDeslizando, alLanzar, alAvanzar },
   ref
 ) {
+  'use no memo';
+  // Fuera del React Compiler a propósito: los callbacks del gesto leen refs con los avisos más recientes (así el
+  // gesto no se rearma a media partida, lo que cortaría un arrastre en curso) y el compilador no sabe que esos
+  // callbacks corren después del render. Se queda con su memorización a mano (useMemo del gesto, useCallback).
   const reducido = useMovimientoReducido();
   const [zona, setZona] = useState({ ancho: 0, alto: 0 });
   const pos = useSharedValue(actual);
@@ -65,7 +69,9 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
 
   // Los avisos van por una referencia: el gesto no se rearma cada vez que la pantalla cambia de frase.
   const avisos = useRef({ alLanzar, alAvanzar, onGuardarDeslizando });
-  avisos.current = { alLanzar, alAvanzar, onGuardarDeslizando };
+  useLayoutEffect(() => {
+    avisos.current = { alLanzar, alAvanzar, onGuardarDeslizando };
+  }, [alLanzar, alAvanzar, onGuardarDeslizando]);
   const lanzado = useCallback(() => avisos.current.alLanzar(), []);
   const avanzado = useCallback(() => avisos.current.alAvanzar(), []);
   const guardado = useCallback(() => avisos.current.onGuardarDeslizando(), []);
@@ -84,22 +90,22 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
   const lanzar = useCallback(
     (vx: number) => {
       'worklet';
-      if (ocupada.value === 1) return;
-      ocupada.value = 1;
-      const n = topIdx.value;
-      tx.value = withTiming(-(anchoZona.value + SALIDA_EXTRA), { duration: motionMazo.lanzar, easing: motionEasing.salir });
-      rot.value = withTiming(giroDeSalida(vx), { duration: motionMazo.lanzar, easing: motionEasing.salir });
-      pos.value = withTiming(n + 1, { duration: motionMazo.lanzar, easing: motionEasing.entrar }, (fin) => {
+      if (ocupada.get() === 1) return;
+      ocupada.set(1);
+      const n = topIdx.get();
+      tx.set(withTiming(-(anchoZona.get() + SALIDA_EXTRA), { duration: motionMazo.lanzar, easing: motionEasing.salir }));
+      rot.set(withTiming(giroDeSalida(vx), { duration: motionMazo.lanzar, easing: motionEasing.salir }));
+      pos.set(withTiming(n + 1, { duration: motionMazo.lanzar, easing: motionEasing.entrar }, (fin) => {
         'worklet';
         if (!fin) return;
         // La de atrás pasa a ser la de arriba y el dedo vuelve a cero en el mismo cuadro: no hay salto.
-        topIdx.value = n + 1;
-        tx.value = 0;
-        ty.value = 0;
-        rot.value = 0;
-        ocupada.value = 0;
+        topIdx.set(n + 1);
+        tx.set(0);
+        ty.set(0);
+        rot.set(0);
+        ocupada.set(0);
         runOnJS(avanzado)();
-      });
+      }));
       runOnJS(lanzado)();
     },
     [ocupada, topIdx, tx, ty, rot, pos, anchoZona, avanzado, lanzado]
@@ -107,31 +113,31 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
 
   const regresar = useCallback(() => {
     'worklet';
-    tx.value = withSpring(0, motionSpring.rebote);
-    ty.value = withSpring(0, motionSpring.rebote);
-    rot.value = withSpring(0, motionSpring.rebote);
+    tx.set(withSpring(0, motionSpring.rebote));
+    ty.set(withSpring(0, motionSpring.rebote));
+    rot.set(withSpring(0, motionSpring.rebote));
   }, [tx, ty, rot]);
 
   const gesto = useMemo(() => {
     return Gesture.Pan()
       .minDistance(10)
       .onStart(() => {
-        if (ocupada.value === 1) return;
+        if (ocupada.get() === 1) return;
         cancelAnimation(tx);
         cancelAnimation(ty);
         cancelAnimation(rot);
-        origenX.value = tx.value;
-        origenY.value = ty.value;
+        origenX.set(tx.get());
+        origenY.set(ty.get());
       })
       .onUpdate((e) => {
-        if (ocupada.value === 1) return;
-        tx.value = amortiguar(origenX.value + e.translationX);
-        ty.value = amortiguar(origenY.value + e.translationY);
-        rot.value = giroDeArrastre(tx.value);
+        if (ocupada.get() === 1) return;
+        tx.set(amortiguar(origenX.get() + e.translationX));
+        ty.set(amortiguar(origenY.get() + e.translationY));
+        rot.set(giroDeArrastre(tx.get()));
       })
       .onEnd((e) => {
-        if (ocupada.value === 1) return;
-        const g = decidirGesto(tx.value, ty.value, e.velocityX, e.velocityY);
+        if (ocupada.get() === 1) return;
+        const g = decidirGesto(tx.get(), ty.get(), e.velocityX, e.velocityY);
         if (g === 'siguiente') {
           lanzar(e.velocityX);
           return;
@@ -141,7 +147,7 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
       })
       .onFinalize((_, exito) => {
         // Un gesto interrumpido (llamada, otro gesto) no deja la carta a medio camino.
-        if (!exito && ocupada.value === 0) regresar();
+        if (!exito && ocupada.get() === 0) regresar();
       });
   }, [ocupada, tx, ty, rot, origenX, origenY, lanzar, regresar, guardado]);
 
@@ -164,7 +170,7 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
   const listo = zona.alto > 0 && zona.ancho > 0;
   const alMedir = useCallback(
     (e: { nativeEvent: { layout: { width: number; height: number } } }) => {
-      anchoZona.value = e.nativeEvent.layout.width;
+      anchoZona.set(e.nativeEvent.layout.width);
       setZona({ ancho: e.nativeEvent.layout.width, alto: e.nativeEvent.layout.height });
     },
     [anchoZona]
