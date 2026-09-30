@@ -129,7 +129,9 @@ export function useCarga<T>(
         await new Promise((r) => setTimeout(r, RETRASO_SIMULADO_MS));
       }
       aplicar(() => {
-        setDatos(resultado);
+        // Una recarga por foco que trae lo mismo conserva la referencia de antes: React no
+        // repinta la pantalla (cambiar de pestaña ida y vuelta no repinta Practicar entera).
+        setDatos((antes) => (silenciosa && antes !== null && igualProfundo(antes, resultado) ? antes : resultado));
         setError(null);
         setDemora(false);
         setEstado(esVacioRef.current?.(resultado) ? 'vacio' : 'listo');
@@ -167,4 +169,42 @@ export function useCarga<T>(
   const refrescar = useCallback(() => ejecutar(true), [ejecutar]);
 
   return { estado, datos, error, demora, huboEsqueleto, reintentar, refrescar };
+}
+
+/**
+ * Igualdad estructural de lo que devuelven las cargas: primitivos, arreglos, objetos planos,
+ * Map, Set y Date. Cualquier otra clase cuenta como distinta (se prefiere repintar de más).
+ */
+export function igualProfundo(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (!igualProfundo(a[i], b[i])) return false;
+    return true;
+  }
+  if (Array.isArray(b)) return false;
+  if (a instanceof Date || b instanceof Date) {
+    return a instanceof Date && b instanceof Date && a.getTime() === b.getTime();
+  }
+  if (a instanceof Map || b instanceof Map) {
+    if (!(a instanceof Map) || !(b instanceof Map) || a.size !== b.size) return false;
+    for (const [k, v] of a) if (!b.has(k) || !igualProfundo(v, b.get(k))) return false;
+    return true;
+  }
+  if (a instanceof Set || b instanceof Set) {
+    if (!(a instanceof Set) || !(b instanceof Set) || a.size !== b.size) return false;
+    for (const v of a) if (!b.has(v)) return false;
+    return true;
+  }
+  const protoA = Object.getPrototypeOf(a);
+  if (protoA !== Object.getPrototypeOf(b) || (protoA !== Object.prototype && protoA !== null)) return false;
+  const ka = Object.keys(a);
+  const kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+    if (!igualProfundo((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])) return false;
+  }
+  return true;
 }
