@@ -4,8 +4,9 @@ dist/
 web-build/
 *.log
 .DS_Store
-android/
-ios/
+# Los genera `expo prebuild` en la raíz. Anclados: modules/*/android es código propio.
+/android/
+/ios/
 assets/aud/*
 assets/img/*
 !assets/aud/.gitkeep
@@ -18,6 +19,7 @@ keys/
 # logs y credenciales locales
 .polly-log.json
 .env*
+!.env.example
 
 # audio: copias de respaldo y carpetas de prueba (ya cubiertas por assets/aud/*)
 assets/aud/**/_respaldo_*/

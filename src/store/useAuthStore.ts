@@ -182,9 +182,10 @@ function mapearErrorGoogle(err: unknown): AuthFailure {
   const mapa: Record<string, AuthError> = {
     ERR_CANCELADO: 'google_cancelado',
     ERR_SIN_CUENTAS: 'google_sin_cuentas',
+    ERR_SIN_INTERNET: 'google_sin_internet',
     ERR_CONFIGURACION: 'google_configuracion',
-    ERR_SIN_ACTIVIDAD: 'desconocido',
     ERR_NO_DISPONIBLE: 'google_configuracion',
+    ERR_DESCONOCIDO: 'desconocido',
   };
   return new AuthFailure(mapa[codigo] ?? 'desconocido');
 }

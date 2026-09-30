@@ -59,6 +59,7 @@
         }
       ],
       "expo-audio",
+      "./plugins/withFirmaRelease.js",
       "expo-splash-screen",
       "expo-sqlite",
       [

@@ -1,0 +1,24 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'app.wero.mobile'
+version = '1.0.0'
+
+android {
+  namespace "app.wero.mobile.googleauth"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+}
+
+dependencies {
+  // Credential Manager + «Sign in with Google» (la forma que recomienda Android hoy):
+  // hoja nativa de cuentas, sin navegador ni Custom Tabs. Credential Manager 1.6 pide minSdk 23;
+  // Expo 57 usa 24.
+  implementation "androidx.credentials:credentials:1.6.0"
+  implementation "androidx.credentials:credentials-play-services-auth:1.6.0"
+  implementation "com.google.android.libraries.identity.googleid:googleid:1.2.1"
+}

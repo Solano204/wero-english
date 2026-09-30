@@ -32,6 +32,7 @@ export type AuthError =
   | 'credenciales_malas'
   | 'google_cancelado'
   | 'google_sin_cuentas'
+  | 'google_sin_internet'
   | 'google_configuracion'
   | 'google_vinculado_otro'
   | 'desconocido';
@@ -44,6 +45,7 @@ export const AUTH_MESSAGES: Record<AuthError, string> = {
   credenciales_malas: 'Usuario o contraseña incorrectos.',
   google_cancelado: 'Cerraste la ventana de Google. Intenta de nuevo cuando quieras.',
   google_sin_cuentas: 'Este teléfono no tiene ninguna cuenta de Google. Agrega una en Ajustes del sistema, o entra sin cuenta.',
+  google_sin_internet: 'Sin internet no se puede entrar con Google. Conéctate y vuelve a intentar, o entra sin cuenta.',
   google_configuracion: 'Google no está listo todavía en esta versión de la app. Entra sin cuenta mientras tanto.',
   google_vinculado_otro: 'Esa cuenta de Google ya está en otro perfil de este teléfono.',
   desconocido: 'No se pudo completar. Intenta de nuevo; si sigue igual, cierra y abre la app.',
