@@ -14,6 +14,12 @@ import { useMazo } from '@/features/mazo/hooks/useMazo';
 /** Cuántas tarjetas entran animadas al abrir la pantalla; el resto aparece directo. */
 const ANIMADAS = 8;
 
+/**
+ * Filas que la lista arma por tanda al hacer scroll (el default es 10). Cada tarjeta lleva karaoke por palabra y su
+ * grupo de audio: diez de golpe ocupan el hilo de JS más de un cuadro; de cuatro en cuatro la tanda cabe.
+ */
+const LOTE = 4;
+
 const REACOMODO = reacomodarResorte();
 
 /**
@@ -93,6 +99,7 @@ export function DeckScreen() {
           ItemSeparatorComponent={Separador}
           initialNumToRender={ANIMADAS}
           windowSize={7}
+          maxToRenderPerBatch={LOTE}
         />
       )}
       {aviso ? (

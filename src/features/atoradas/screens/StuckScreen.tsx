@@ -12,6 +12,12 @@ import { Atorada, useAtoradas } from '@/features/atoradas/hooks/useAtoradas';
 const ANIMADAS = 8;
 
 /**
+ * Filas que la lista arma por tanda al hacer scroll (el default es 10). Cada tarjeta lleva karaoke por palabra y su
+ * grupo de audio: diez de golpe ocupan el hilo de JS más de un cuadro; de cuatro en cuatro la tanda cabe.
+ */
+const LOTE = 4;
+
+/**
  * P-14, las que se atoran.
  *
  * Sin cronómetro y sin calificación: aquí el usuario solo lee y escucha.
@@ -88,6 +94,7 @@ export function StuckScreen() {
         initialNumToRender={ANIMADAS}
         windowSize={7}
         removeClippedSubviews
+        maxToRenderPerBatch={LOTE}
       />
     </Screen>
   );
