@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { RONDA_INICIAL, alternarMarca, rondaCazala } from '@/features/juegos/cazala/logic/ronda';
 import { AccessibilityInfo, AppState, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -39,13 +39,9 @@ export function useRondaCazala() {
   const porId = useMemo(() => new Map(content.cazalaEntradas.entries.map((e) => [e.id, e])), [content]);
   // Un dato roto (reducción que no suena en la frase, o regla gramatical
   // que no se puede "cazar") nunca debe llegar a una ronda jugable.
-  const items = useMemo(
-    () =>
-      itemsCazalaValidos(content.contracciones.cazala, porId, (item, errores) => {
+  const items = itemsCazalaValidos(content.contracciones.cazala, porId, (item, errores) => {
         if (__DEV__) console.warn(`[Cázala] ronda "${item.id}" descartada: ${errores.join('; ')}`);
-      }),
-    [content, porId]
-  );
+      });
 
   const [idx, setIdx] = useState(0);
   const user = useAuthStore((st) => st.user);
@@ -67,7 +63,7 @@ export function useRondaCazala() {
 
   const item = items[idx];
   // Las seis opciones ya barajadas: una sola vez por ronda.
-  const order = useMemo(() => (item ? shuffle(item.opciones) : []), [item]);
+  const order = (item ? shuffle(item.opciones) : []);
   const { voz, vozLenta, analisis, analisisLento, posRevision } = useVozCaza(item, checked, autoAudio);
 
   // Las tres reducciones en el orden en que suenan, las palabras de la frase que ocupan y el segundo en que suena cada una.
@@ -103,19 +99,16 @@ export function useRondaCazala() {
     };
   }, []);
 
-  const toggle = useCallback(
-    (id: number) => {
-      if (checked) return;
-      const next = alternarMarca(picked, id, MARCAS);
-      if (next === picked) return;
-      haptics.selection();
-      despachar({ tipo: 'marcar', marcadas: next });
-      AccessibilityInfo.announceForAccessibility(`${next.length} de ${MARCAS} marcadas`);
-    },
-    [checked, picked]
-  );
+  const toggle = (id: number) => {
+    if (checked) return;
+    const next = alternarMarca(picked, id, MARCAS);
+    if (next === picked) return;
+    haptics.selection();
+    despachar({ tipo: 'marcar', marcadas: next });
+    AccessibilityInfo.announceForAccessibility(`${next.length} de ${MARCAS} marcadas`);
+  };
 
-  const revisar = useCallback(() => {
+  const revisar = () => {
     if (!item || picked.length !== MARCAS) return;
     despachar({ tipo: 'revisar', marcas: MARCAS });
     const bien = picked.filter((p) => item.reducciones.includes(p)).length;
@@ -149,9 +142,9 @@ export function useRondaCazala() {
         void applyGameGrade(user.id, id, picked.includes(id), 0, 'reconocer');
       }
     }
-  }, [item, picked, user, autoAudio]);
+  };
 
-  const siguiente = useCallback(() => {
+  const siguiente = () => {
     if (candadoAvanzar.current) return;
     candadoAvanzar.current = true;
     setEsperando(true);
@@ -171,7 +164,7 @@ export function useRondaCazala() {
         setEsperando(false);
       }, AVANZAR_DEBOUNCE_MS);
     });
-  }, [idx, items.length, nav]);
+  };
 
   return { nav, porId, items, idx, picked, checked, esperando, alturaHoja, setAlturaHoja, compacta, item, order, voz, vozLenta, analisis, analisisLento, posRevision, reducciones, destacadas, tiempos, morphs, toggle, revisar, siguiente };
 }

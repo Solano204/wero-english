@@ -257,7 +257,7 @@ export function RanurasPalabra({ distribucion, palabras, objetivo, armado, resol
   const foco = distribucion.ranuras[Math.min(armado.length, total - 1)];
 
   // La onda sale cuando aterriza la última ficha y cruza las ranuras en `ondaPaso` ms cada una, sin pasar de `ondaTope`.
-  const aterriza = useMemo(() => (retrasos ?? []).reduce((m, r) => Math.max(m, r ?? 0), 0), [retrasos]);
+  const aterriza = ((retrasos ?? []).reduce((m, r) => Math.max(m, r ?? 0), 0));
   const paso = Math.min(motionColmena.ondaPaso, motionColmena.ondaTope / Math.max(1, total));
   const ultimaDe = useMemo(() => {
     const ultima: number[] = [];

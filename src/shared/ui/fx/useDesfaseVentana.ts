@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { View } from 'react-native';
 
 export interface Rect {
@@ -17,8 +17,8 @@ export interface Rect {
 export function useDesfaseVentana() {
   const ref = useRef<View>(null);
   const [desfase, setDesfase] = useState({ x: 0, y: 0 });
-  const alAcomodar = useCallback(() => {
+  const alAcomodar = () => {
     ref.current?.measureInWindow((x, y) => setDesfase((d) => (d.x === x && d.y === y ? d : { x, y })));
-  }, []);
+  };
   return { ref, alAcomodar, desfase };
 }

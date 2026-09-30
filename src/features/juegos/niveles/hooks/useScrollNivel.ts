@@ -88,7 +88,7 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
     [animando, posicion, terminar]
   );
 
-  const alMedir = useCallback((e: LayoutChangeEvent) => setViewport(e.nativeEvent.layout.height), []);
+  const alMedir = (e: LayoutChangeEvent) => setViewport(e.nativeEvent.layout.height);
 
   useEffect(() => {
     if (!hayDatos || viewport === 0 || yaPosicionada.current) return;
@@ -116,11 +116,11 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
     else setLejos(actual > Math.max(...indices) ? 'abajo' : 'arriba');
   });
 
-  const irAlActual = useCallback(() => {
+  const irAlActual = () => {
     if (indiceActual < 0) return;
     const objetivo = offsetCentrado(medidas, indiceActual, viewport, ALTO_TRAMO);
     irA(scrollY.get(), objetivo, reducido ? 0 : motionDuration.lento);
-  }, [indiceActual, medidas, viewport, reducido, irA, scrollY]);
+  };
 
   return { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual };
 }

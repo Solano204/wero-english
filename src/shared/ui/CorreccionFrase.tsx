@@ -215,7 +215,7 @@ export function useCorreccion(mal: string, bien: string): Correccion {
     cancelAnimation(resuelto);
   }, [tacha, resuelto]);
 
-  const jugar = useCallback(() => {
+  const jugar = () => {
     detener();
     tacha.set(0);
     resuelto.set(0);
@@ -226,7 +226,7 @@ export function useCorreccion(mal: string, bien: string): Correccion {
       setFase('bien');
       resuelto.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
     }, retrasoCambio);
-  }, [detener, tacha, resuelto, totalTachas, retrasoCambio]);
+  };
 
   useEffect(() => detener, [detener]);
 

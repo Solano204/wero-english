@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Share } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,7 +17,7 @@ type Rt = RouteProp<RootStackParams, 'ErrorDetail'>;
 export function useDetalleError() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
   const [falloCompartir, setFalloCompartir] = useState(false);
 
   const err = content.errores.errores.find((e) => e.id === params.errorId);
@@ -25,7 +25,7 @@ export function useDetalleError() {
   // Perder el foco (salir, abrir la frase completa) corta todo el audio: el reproductor de frases es uno solo y compartido.
   useCortarAudioAlSalir();
 
-  const compartir = useCallback(async () => {
+  const compartir = async () => {
     if (!err) return;
     setFalloCompartir(false);
     try {
@@ -33,7 +33,7 @@ export function useDetalleError() {
     } catch {
       setFalloCompartir(true);
     }
-  }, [err]);
+  };
 
   return { nav, falloCompartir, err, compartir };
 }

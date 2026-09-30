@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Presionable } from '@/shared/ui/Presionable';
@@ -30,32 +30,32 @@ export function BotonMantener({ etiqueta, onConfirmar, cargando = false, dialogo
     return () => sub.remove();
   }, []);
 
-  const confirmar = useCallback(() => {
+  const confirmar = () => {
     haptics.tapMedium();
     onConfirmar();
-  }, [onConfirmar]);
+  };
 
-  const empezar = useCallback(() => {
+  const empezar = () => {
     if (lector || cargando) return;
     haptics.tapLight();
     progreso.set(withTiming(1, { duration: motionConfirmar.mantener, easing: motionEasing.lineal }, (completo) => {
       if (completo) runOnJS(confirmar)();
     }));
-  }, [lector, cargando, progreso, confirmar]);
+  };
 
   // Soltar antes de tiempo cancela: la animación termina sin completarse y nada se borra.
-  const soltar = useCallback(() => {
+  const soltar = () => {
     cancelAnimation(progreso);
     progreso.set(withTiming(0, { duration: motionDuration.rapido }));
-  }, [progreso]);
+  };
 
-  const conLector = useCallback(() => {
+  const conLector = () => {
     if (!lector || cargando) return;
     Alert.alert(dialogo.titulo, dialogo.mensaje, [
       { text: 'Cancelar', style: 'cancel' },
       { text: dialogo.boton, style: 'destructive', onPress: onConfirmar },
     ]);
-  }, [lector, cargando, dialogo, onConfirmar]);
+  };
 
   const relleno = useAnimatedStyle(() => ({ width: `${progreso.get() * 100}%` }));
 

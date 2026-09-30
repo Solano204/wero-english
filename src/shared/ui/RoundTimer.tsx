@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useEffectEvent, useLayoutEffect } from 'react';
+import React, { useEffect, useRef, useEffectEvent, useLayoutEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -40,7 +40,7 @@ export function useCuentaRegresiva({ segundos, llave, onFin, pausado = false }: 
   useLayoutEffect(() => {
     onFinRef.current = onFin;
   }, [onFin]);
-  const alFin = useCallback(() => onFinRef.current(), []);
+  const alFin = () => onFinRef.current();
 
   const efectoLlave = useEffectEvent(() => {
     const rondaNueva = llaveAnterior.current !== llave;

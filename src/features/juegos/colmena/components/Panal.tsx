@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { ordenDesdeCentro, retrasoVuelo, type DisposicionPanal } from '@/features/juegos/colmena/logic/geometria';
 import { motionColmena } from '@/theme';
@@ -41,8 +41,8 @@ interface Props {
  * fichas vuelan: la pantalla calcula los vuelos contra ella.
  */
 export function Panal({ letras, disposicion: d, colocadas, rechazo, resuelta, saliendo, onTocar }: Props) {
-  const rangos = useMemo(() => ordenDesdeCentro(d.hexagonos, d.hexAncho, d.hexAlto), [d]);
-  const porFicha = useMemo(() => new Map(colocadas.map((c) => [c.ficha, c])), [colocadas]);
+  const rangos = ordenDesdeCentro(d.hexagonos, d.hexAncho, d.hexAlto);
+  const porFicha = (new Map(colocadas.map((c) => [c.ficha, c])));
   const total = d.hexagonos.length;
 
   return (

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -46,7 +46,7 @@ interface Props {
 export function PisoResplandor({ y, distancia, armado, golpe }: Props) {
   const reducido = useMovimientoReducido();
   const pulso = useSharedValue(0);
-  const avisar = useCallback(() => haptics.tapLight(), []);
+  const avisar = () => haptics.tapLight();
 
   // Una sola vez por caída: `y` vuelve a 0 al empezar la ronda siguiente y el aviso se rearma.
   useAnimatedReaction(

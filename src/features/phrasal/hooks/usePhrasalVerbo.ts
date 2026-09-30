@@ -61,22 +61,22 @@ export function usePhrasalVerbo() {
       .map((id) => porId.get(id))
       .filter((v): v is PhrasalVerb => v !== undefined && !(modoLimpio && v.vulgaridad === 2));
   }, [content, params.verbo, modoLimpio]);
-  const etiquetas = useMemo(() => etiquetasParticulas(formas.map((f) => f.particula)), [formas]);
+  const etiquetas = etiquetasParticulas(formas.map((f) => f.particula));
   const n = formas.length;
 
-  const medirVerbo = useCallback(() => {
+  const medirVerbo = () => {
     verboRef.current?.measureInWindow((x, y, width, height) =>
       setViaje((v) => (v && !v.hasta ? { ...v, hasta: { x, y, width, height } } : v))
     );
-  }, []);
-  const finViaje = useCallback(() => setViaje(null), []);
+  };
+  const finViaje = () => setViaje(null);
   const elegir = useCallback(
     (indice: number, eje: 'x' | 'y') =>
       setCambio((c) => (indice === c.indice ? c : { indice, direccion: indice > c.indice ? 1 : -1, eje })),
     []
   );
-  const elegirConRuleta = useCallback((indice: number) => elegir(indice, 'y'), [elegir]);
-  const elegirConChips = useCallback((indice: number) => elegir(indice, 'x'), [elegir]);
+  const elegirConRuleta = (indice: number) => elegir(indice, 'y');
+  const elegirConChips = (indice: number) => elegir(indice, 'x');
 
   /** Pasa a la forma anterior o a la siguiente (deslizar la tarjeta de lado). */
   const pasar = useCallback(

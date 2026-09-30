@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
@@ -21,31 +21,25 @@ export function useAjustes() {
   const s = useSettingsStore();
   const [cargaLenta, setCargaLenta] = useState(false);
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
-  const micEstado = useMemo(() => speech.isAvailable(), []);
-  const notifEstado = useMemo(() => notifications.isAvailable(), []);
+  const micEstado = speech.isAvailable();
+  const notifEstado = notifications.isAvailable();
 
-  const cambiar = useCallback(
-    async <K extends keyof typeof s>(key: K, value: (typeof s)[K]) => {
-      if (!user) return;
-      // El cast es necesario: el tipo del store incluye métodos además
-      // de los ajustes, y set() solo acepta las claves de Settings.
-      await s.set(user.id, key as never, value as never);
-    },
-    [user, s]
-  );
+  const cambiar = async <K extends keyof typeof s>(key: K, value: (typeof s)[K]) => {
+    if (!user) return;
+    // El cast es necesario: el tipo del store incluye métodos además
+    // de los ajustes, y set() solo acepta las claves de Settings.
+    await s.set(user.id, key as never, value as never);
+  };
 
-  const alternarNivel = useCallback(
-    (n: Nivel) => {
-      const tiene = s.niveles.includes(n);
-      // Nunca se pueden apagar los tres: quedaría una app sin contenido.
-      if (tiene && s.niveles.length === 1) return;
-      const next = tiene
-        ? s.niveles.filter((x) => x !== n)
-        : [...s.niveles, n].sort();
-      void cambiar('niveles', next as never);
-    },
-    [s.niveles, cambiar]
-  );
+  const alternarNivel = (n: Nivel) => {
+    const tiene = s.niveles.includes(n);
+    // Nunca se pueden apagar los tres: quedaría una app sin contenido.
+    if (tiene && s.niveles.length === 1) return;
+    const next = tiene
+      ? s.niveles.filter((x) => x !== n)
+      : [...s.niveles, n].sort();
+    void cambiar('niveles', next as never);
+  };
 
   return { nav, user, signOut, s, cargaLenta, setCargaLenta, pedirConsentimiento, hoja, micEstado, notifEstado, cambiar, alternarNivel };
 }

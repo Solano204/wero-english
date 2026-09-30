@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -34,16 +33,16 @@ export function useValoresResultado() {
   const dx = useSharedValue(0);
   const pulso = useSharedValue(1);
 
-  const acierto = useCallback(() => {
+  const acierto = () => {
     if (reducido) return;
     const mitad = motionDuration.base / 2;
     pulso.set(withSequence(
       withTiming(motionPulso.escala, { duration: mitad, easing: motionEasing.entrar }),
       withTiming(1, { duration: mitad, easing: motionEasing.salir })
     ));
-  }, [reducido, pulso]);
+  };
 
-  const fallo = useCallback(() => {
+  const fallo = () => {
     if (reducido) return;
     const pasos = motionSacudida.oscilaciones * 2 + 1;
     const duracion = motionDuration.base / pasos;
@@ -52,15 +51,12 @@ export function useValoresResultado() {
       tramo(i % 2 === 0 ? motionSacudida.amplitud : -motionSacudida.amplitud)
     );
     dx.set(withSequence(...swings, tramo(0)));
-  }, [reducido, dx]);
+  };
 
-  const disparar = useCallback(
-    (r: Resultado | null | undefined) => {
-      if (r === 'acierto') acierto();
-      else if (r === 'fallo') fallo();
-    },
-    [acierto, fallo]
-  );
+  const disparar = (r: Resultado | null | undefined) => {
+    if (r === 'acierto') acierto();
+    else if (r === 'fallo') fallo();
+  };
 
   return { dx, pulso, acierto, fallo, disparar };
 }

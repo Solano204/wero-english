@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef, useEffectEvent } from 'react';
+import React, { memo, useEffect, useRef, useEffectEvent } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -88,8 +88,8 @@ export const MetaFrase = memo(function MetaFrase({ objetivo, cercana, registrarB
   const entrada = useSharedValue(reducido ? 1 : 0);
   const idFrase = useRef(objetivo.entry.id);
   const colorDeMeta = objetivo.color;
-  const alRegistrar = useCallback((vista: View | null) => registrarBarra?.(colorDeMeta, vista), [registrarBarra, colorDeMeta]);
-  const alRegistrarFrase = useCallback((vista: View | null) => registrarFrase?.(colorDeMeta, vista), [registrarFrase, colorDeMeta]);
+  const alRegistrar = (vista: View | null) => registrarBarra?.(colorDeMeta, vista);
+  const alRegistrarFrase = (vista: View | null) => registrarFrase?.(colorDeMeta, vista);
 
   // Al empezar, las metas entran una tras otra: suben un poco mientras se aclaran.
   const alMontar = useEffectEvent(() => {

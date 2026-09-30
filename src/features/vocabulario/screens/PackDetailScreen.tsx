@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { conteo } from '@/domain/texto';
 import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { Button, Carga, Header, Screen } from '@/shared/ui';
@@ -18,10 +18,7 @@ import { useDetallePack } from '@/features/vocabulario/hooks/useDetallePack';
 export function PackDetailScreen() {
   const { nav, params, carga, pack, abrir } = useDetallePack();
 
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<Entry>) => <EntryRow entry={item} index={index} onPress={abrir} />,
-    [abrir]
-  );
+  const renderItem = ({ item, index }: ListRenderItemInfo<Entry>) => <EntryRow entry={item} index={index} onPress={abrir} />;
 
   return (
     <Screen padded={false}>

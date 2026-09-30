@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { color, font, layout, radius, space } from '@/theme';
 import { Icon } from '@/shared/ui/Icon';
@@ -43,12 +43,12 @@ export function AudioButton({ path, size = 'md', slow = false, label, descripcio
   const apagado = missing || sinAudio;
   // El reloj de arena solo no dice "lento": en slow el texto siempre se ve.
   const etiqueta = slow ? (label ?? 'Lento') : label;
-  const onPress = useCallback(async () => {
+  const onPress = async () => {
     onBeforePlay?.();
     haptics.tapLight();
     const ok = slow ? await audio.playSlow(path) : await audio.play(path);
     if (!ok) setMissing(true);
-  }, [path, slow, onBeforePlay]);
+  };
 
   return (
     <Presionable

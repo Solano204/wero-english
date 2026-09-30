@@ -89,15 +89,15 @@ export function usePartidaPares() {
   // «en vuelo» (sin encender su segmento) hasta que su tarjeta llega.
   const [union, setUnion] = useState<ParIndices | null>(null);
   const [fusion, setFusion] = useState<Fusion | null>(null);
-  const alTerminarUnion = useCallback(() => setUnion(null), []);
-  const alAterrizar = useCallback(() => setFusion(null), []);
+  const alTerminarUnion = () => setUnion(null);
+  const alAterrizar = () => setFusion(null);
   // Si el aviso del cable no llega (app en segundo plano a media unión), el tablero no se queda bloqueado.
   useEffect(() => {
     if (!union) return undefined;
     const t = setTimeout(() => setUnion(null), UNION_MAXIMA_MS);
     return () => clearTimeout(t);
   }, [union]);
-  const libres = useMemo(() => tablero?.fichas.map((f) => !resueltas.includes(f.entryId)) ?? [], [tablero, resueltas]);
+  const libres = (tablero?.fichas.map((f) => !resueltas.includes(f.entryId)) ?? []);
   const fallo = useMemo(() => {
     if (!tablero || fallando.length !== 2) return null;
     const a = tablero.fichas.findIndex((f) => f.id === fallando[0]);
@@ -181,31 +181,28 @@ export function usePartidaPares() {
    * cortar en cualquier punto (saltarPausa, salir, background); un tope
    * de PAUSA_MAXIMA_MS evita quedarse pegado si el audio no carga.
    */
-  const pausarConVoz = useCallback(
-    async (entry: Entry) => {
-      const miToken = ++pausaToken.current;
-      setEnPausa(true);
+  const pausarConVoz = async (entry: Entry) => {
+    const miToken = ++pausaToken.current;
+    setEnPausa(true);
 
-      // Se guarda también en local: el finally solo debe apagar SU tope,
-      // no el de una pausa nueva que arrancó mientras esta se desenredaba.
-      const limite = setTimeout(() => {
-        if (pausaToken.current === miToken) abortarPausa();
-      }, PAUSA_MAXIMA_MS);
-      limiteTimer.current = limite;
+    // Se guarda también en local: el finally solo debe apagar SU tope,
+    // no el de una pausa nueva que arrancó mientras esta se desenredaba.
+    const limite = setTimeout(() => {
+      if (pausaToken.current === miToken) abortarPausa();
+    }, PAUSA_MAXIMA_MS);
+    limiteTimer.current = limite;
 
-      await conFinalAsync(async () => {
-        await audio.playRoundResultBilingue(true, entry.audio_en, entry.audio_es);
-      }, () => {
-        clearTimeout(limite);
-        // Si nadie más tomó el token (ni saltarPausa ni un abort externo
-        // ya lo hicieron), esta es la que cierra la pausa.
-        if (pausaToken.current === miToken && montado.current) setEnPausa(false);
-      });
-    },
-    [abortarPausa]
-  );
+    await conFinalAsync(async () => {
+      await audio.playRoundResultBilingue(true, entry.audio_en, entry.audio_es);
+    }, () => {
+      clearTimeout(limite);
+      // Si nadie más tomó el token (ni saltarPausa ni un abort externo
+      // ya lo hicieron), esta es la que cierra la pausa.
+      if (pausaToken.current === miToken && montado.current) setEnPausa(false);
+    });
+  };
 
-  const saltarPausa = useCallback(() => {
+  const saltarPausa = () => {
     if (candadoSaltar.current) return;
     candadoSaltar.current = true;
     setSaltando(true);
@@ -219,95 +216,89 @@ export function usePartidaPares() {
         setSaltando(false);
       }, SALTAR_DEBOUNCE_MS);
     });
-  }, [abortarPausa]);
+  };
 
-  const tocar = useCallback(
-    (f: ParFicha) => {
-      // Solo en `jugando` el tablero acepta toques: repartiendo, con un fallo parpadeando, con el cable
-      // uniendo un par, con su voz sonando o con su tarjeta en vuelo, no.
-      if (!tablero || fase !== 'jugando') return;
-      if (resueltas.includes(f.entryId)) return;
+  const tocar = (f: ParFicha) => {
+    // Solo en `jugando` el tablero acepta toques: repartiendo, con un fallo parpadeando, con el cable
+    // uniendo un par, con su voz sonando o con su tarjeta en vuelo, no.
+    if (!tablero || fase !== 'jugando') return;
+    if (resueltas.includes(f.entryId)) return;
 
-      if (!elegida) {
-        haptics.tapLight();
-        void audio.playTap();
-        setElegida(f);
-        return;
+    if (!elegida) {
+      haptics.tapLight();
+      void audio.playTap();
+      setElegida(f);
+      return;
+    }
+
+    if (elegida.id === f.id) {
+      setElegida(null);
+      return;
+    }
+
+    setJugadas((j) => j + 1);
+
+    if (sonPareja(elegida, f)) {
+      haptics.success();
+      reaccion.celebra();
+      setResueltas((prev) => [...prev, f.entryId]);
+      const a = tablero.fichas.findIndex((x) => x.id === elegida.id);
+      const b = tablero.fichas.findIndex((x) => x.id === f.id);
+      setUnion({ a, b });
+      setElegida(null);
+      const entry = entradas.current.get(f.entryId);
+      // Siempre se oyen las dos frases al acertar un par, sin mirar
+      // "Audio automático": es la recompensa del acierto, no un
+      // extra opcional. El efecto de acierto lo pone la propia pausa:
+      // sonarlo aparte cancelaría la frase en inglés (playSfx hace
+      // stop()). Solo si no hay voz que oír suena suelto.
+      if (entry && (entry.audio_en || entry.audio_es)) {
+        setFusion({ a, b, segmento: resueltas.length, entry });
+        void pausarConVoz(entry);
+      } else {
+        void audio.playSuccess();
       }
-
-      if (elegida.id === f.id) {
-        setElegida(null);
-        return;
-      }
-
-      setJugadas((j) => j + 1);
-
-      if (sonPareja(elegida, f)) {
-        haptics.success();
-        reaccion.celebra();
-        setResueltas((prev) => [...prev, f.entryId]);
-        const a = tablero.fichas.findIndex((x) => x.id === elegida.id);
-        const b = tablero.fichas.findIndex((x) => x.id === f.id);
-        setUnion({ a, b });
-        setElegida(null);
-        const entry = entradas.current.get(f.entryId);
-        // Siempre se oyen las dos frases al acertar un par, sin mirar
-        // "Audio automático": es la recompensa del acierto, no un
-        // extra opcional. El efecto de acierto lo pone la propia pausa:
-        // sonarlo aparte cancelaría la frase en inglés (playSfx hace
-        // stop()). Solo si no hay voz que oír suena suelto.
-        if (entry && (entry.audio_en || entry.audio_es)) {
-          setFusion({ a, b, segmento: resueltas.length, entry });
-          void pausarConVoz(entry);
-        } else {
-          void audio.playSuccess();
-        }
-        if (user) {
-          void applyGameGrade(
-            user.id,
-            f.entryId,
-            true,
-            Date.now() - empezoEn.current,
-            'reconocer'
-          );
-        }
-        return;
-      }
-
-      // Falló: las dos parpadean en ámbar y se sueltan. Ámbar y no
-      // rojo, por la misma razón que en la tarjeta de estudio. Sin
-      // pausa ni voz: solo el SFX suave, igual que siempre.
-      haptics.failure();
-      void audio.playFail();
-      setFallando([elegida.id, f.id]);
       if (user) {
         void applyGameGrade(
           user.id,
-          elegida.entryId,
-          false,
+          f.entryId,
+          true,
           Date.now() - empezoEn.current,
           'reconocer'
         );
       }
-      if (falloTimer.current) clearTimeout(falloTimer.current);
-      falloTimer.current = setTimeout(() => {
-        setFallando([]);
-        setElegida(null);
-      }, 520);
-    },
-    [tablero, fase, elegida, resueltas, reaccion, user, pausarConVoz]
-  );
+      return;
+    }
+
+    // Falló: las dos parpadean en ámbar y se sueltan. Ámbar y no
+    // rojo, por la misma razón que en la tarjeta de estudio. Sin
+    // pausa ni voz: solo el SFX suave, igual que siempre.
+    haptics.failure();
+    void audio.playFail();
+    setFallando([elegida.id, f.id]);
+    if (user) {
+      void applyGameGrade(
+        user.id,
+        elegida.entryId,
+        false,
+        Date.now() - empezoEn.current,
+        'reconocer'
+      );
+    }
+    if (falloTimer.current) clearTimeout(falloTimer.current);
+    falloTimer.current = setTimeout(() => {
+      setFallando([]);
+      setElegida(null);
+    }, 520);
+  };
 
   // El cable arrastra: soltar sobre una ficha es el segundo toque, y una ficha que no tenía
   // par elegida al arrancar el arrastre es el primero.
-  const tocarIndice = useCallback(
-    (i: number) => {
-      const f = tablero?.fichas[i];
-      if (f) tocar(f);
-    },
-    [tablero, tocar]
-  );
-  const cancelarArrastre = useCallback(() => setElegida(null), []);
+  const tocarIndice = (i: number) => {
+    const f = tablero?.fichas[i];
+    if (f) tocar(f);
+  };
+  const cancelarArrastre = () => setElegida(null);
 
   const terminar = useCallback(() => {
     audio.stop();

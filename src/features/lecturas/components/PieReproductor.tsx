@@ -48,10 +48,7 @@ export function PieReproductor({ rep, texto, siguiente }: Props) {
   const alTocar = estado === 'sonando' ? rep.pausar : estado === 'pausado' ? rep.reanudar : () => void rep.escuchar();
 
   // La onda sigue la posición del audio; su forma sale de los tiempos estimados de las palabras del capítulo.
-  const envolvente = useMemo(
-    () => (progreso.dur > 0 ? analizar(texto, texto, undefined, progreso.dur).envolvente : []),
-    [texto, progreso.dur]
-  );
+  const envolvente = (progreso.dur > 0 ? analizar(texto, texto, undefined, progreso.dur).envolvente : []);
   const voz = useMemo<VozEnVivo>(
     () => ({ pos: rep.pos, activa: rep.sonando, duracion: progreso.dur, lenta: false, sonando: estado === 'sonando', reducido }),
     [rep.pos, rep.sonando, progreso.dur, estado, reducido]

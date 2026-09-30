@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDesbloqueo } from '@/estado/useDesbloqueo';
 import { View, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -75,39 +75,33 @@ export function useTemaGramatica() {
     scrollTo(scrollRef, 0, destinoScroll.get(), false);
   });
 
-  const irAlScroll = useCallback(
-    (y: number) => {
-      if (reducido) {
-        runOnUI((v: number) => {
-          'worklet';
-          scrollTo(scrollRef, 0, v, false);
-        })(y);
-        return;
-      }
-      animandoScroll.set(1);
-      destinoScroll.set(scrollY.get());
-      destinoScroll.set(withTiming(y, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
-        animandoScroll.set(0);
-      }));
-    },
-    [reducido, scrollRef, scrollY, destinoScroll, animandoScroll]
-  );
+  const irAlScroll = (y: number) => {
+    if (reducido) {
+      runOnUI((v: number) => {
+        'worklet';
+        scrollTo(scrollRef, 0, v, false);
+      })(y);
+      return;
+    }
+    animandoScroll.set(1);
+    destinoScroll.set(scrollY.get());
+    destinoScroll.set(withTiming(y, { duration: motionDuration.lento, easing: motionEasing.entrar }, () => {
+      animandoScroll.set(0);
+    }));
+  };
 
   /** Lleva la tarjeta del ejemplo que empieza a sonar a la parte visible de la pantalla, sin moverla si ya se ve. */
-  const llevarAVista = useCallback(
-    (vista: View | null) => {
-      vista?.measureInWindow((_x, y, _ancho, alto) => {
-        const techo = insetArriba + RESERVA_ENCABEZADO;
-        const piso = altoVentana - insetAbajo - space.xl;
-        let delta = 0;
-        if (y < techo) delta = y - techo;
-        else if (y + alto > piso) delta = Math.min(y + alto - piso, y - techo);
-        if (Math.abs(delta) < 1) return;
-        irAlScroll(Math.max(0, scrollY.get() + delta));
-      });
-    },
-    [insetArriba, insetAbajo, altoVentana, irAlScroll, scrollY]
-  );
+  const llevarAVista = (vista: View | null) => {
+    vista?.measureInWindow((_x, y, _ancho, alto) => {
+      const techo = insetArriba + RESERVA_ENCABEZADO;
+      const piso = altoVentana - insetAbajo - space.xl;
+      let delta = 0;
+      if (y < techo) delta = y - techo;
+      else if (y + alto > piso) delta = Math.min(y + alto - piso, y - techo);
+      if (Math.abs(delta) < 1) return;
+      irAlScroll(Math.max(0, scrollY.get() + delta));
+    });
+  };
 
   const tema = useMemo(
     () => gramatica.temas.find((t) => t.id === params.temaId) ?? null,

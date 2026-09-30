@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useEffectEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, useEffectEvent } from 'react';
 import { BackHandler, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -54,7 +54,7 @@ type Ruta = RouteProp<RootStackParams, 'Pronunciation'>;
 export function usePronunciacion() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Ruta>();
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
   const fonemas = content.fonemas.fonemas;
   const total = content.fonemas.total_fonemas;
   const reducido = useMovimientoReducido();
@@ -84,29 +84,26 @@ export function usePronunciacion() {
   // sirve para cortar un bucle que ya está corriendo.
   const repiteRef = useRef(false);
 
-  const cancelarRepetir = useCallback(() => {
+  const cancelarRepetir = () => {
     repiteRef.current = false;
     setRepitiendo(null);
-  }, []);
+  };
 
   // Perder el foco apaga cualquier repetición en curso y corta todo el audio.
   useCortarAudioAlSalir(cancelarRepetir);
 
-  const alternarRepetir = useCallback(
-    (fonema: Fonema) => {
-      if (repiteRef.current) {
-        cancelarRepetir();
-        audio.stop();
-        return;
-      }
-      repiteRef.current = true;
-      setRepitiendo(fonema.id);
-      void repiteEnBucle(fonema.audio, () => repiteRef.current).finally(() => {
-        if (repiteRef.current) cancelarRepetir();
-      });
-    },
-    [cancelarRepetir]
-  );
+  const alternarRepetir = (fonema: Fonema) => {
+    if (repiteRef.current) {
+      cancelarRepetir();
+      audio.stop();
+      return;
+    }
+    repiteRef.current = true;
+    setRepitiendo(fonema.id);
+    void repiteEnBucle(fonema.audio, () => repiteRef.current).finally(() => {
+      if (repiteRef.current) cancelarRepetir();
+    });
+  };
 
   // Cambiar de fonema (abrir otro, deslizar, volver al índice) corta cualquier repetición en curso: nunca debe
   // sonar la de uno mientras se lee otro.
@@ -141,33 +138,30 @@ export function usePronunciacion() {
     ));
   }, [enPagina, reducido, transicion]);
 
-  const abrir = useCallback(
-    (indice: number, rect: Rect) => {
-      const f = fonemas[indice];
-      if (!f) return;
-      ultima.current = indice;
-      setMontada(true);
-      setPagina(indice);
-      // El símbolo del chip viaja hasta el de la página; con «reducir movimiento» no hay viaje.
-      if (!reducido) setViaje({ ipa: sinBarras(f.ipa), desde: rect, hasta: null });
-    },
-    [fonemas, reducido]
-  );
+  const abrir = (indice: number, rect: Rect) => {
+    const f = fonemas[indice];
+    if (!f) return;
+    ultima.current = indice;
+    setMontada(true);
+    setPagina(indice);
+    // El símbolo del chip viaja hasta el de la página; con «reducir movimiento» no hay viaje.
+    if (!reducido) setViaje({ ipa: sinBarras(f.ipa), desde: rect, hasta: null });
+  };
 
-  const cambiarPagina = useCallback((indice: number) => {
+  const cambiarPagina = (indice: number) => {
     ultima.current = indice;
     setPagina(indice);
-  }, []);
+  };
 
   const volverAlIndice = useCallback(() => {
     setViaje(null);
     setPagina(null);
   }, []);
 
-  const simboloMedido = useCallback((rect: Rect) => {
+  const simboloMedido = (rect: Rect) => {
     setViaje((v) => (v && !v.hasta ? { ...v, hasta: rect } : v));
-  }, []);
-  const finViaje = useCallback(() => setViaje(null), []);
+  };
+  const finViaje = () => setViaje(null);
 
   // Red de seguridad: si la página nunca dice dónde está su símbolo, el viaje se da por terminado y el símbolo
   // de la página se ve (no puede quedarse oculto).
@@ -178,10 +172,7 @@ export function usePronunciacion() {
   }, [viaje]);
 
   // «Practicar estos pares»: «Di la palabra» con los pares de este fonema.
-  const practicarPares = useCallback(
-    (fonema: Fonema) => nav.navigate('MinimalPairs', { fonemaId: fonema.id }),
-    [nav]
-  );
+  const practicarPares = (fonema: Fonema) => nav.navigate('MinimalPairs', { fonemaId: fonema.id });
 
   // Con una página abierta, «atrás» del sistema vuelve al índice y no sale de la pantalla.
   useEffect(() => {

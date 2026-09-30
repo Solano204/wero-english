@@ -86,7 +86,7 @@ export const Oracion = memo(function Oracion({ indice, trozos, separada, actual,
   );
   const estilo = useAnimatedStyle(() => ({ color: interpolateColor(apagada.get(), [0, 1], [TEXTO, APAGADO]) }));
 
-  const etiqueta = useMemo(() => etiquetaOracion(trozos), [trozos]);
+  const etiqueta = etiquetaOracion(trozos);
   const acciones = useMemo(() => {
     const lista: { name: string; label: string }[] = [];
     const vistas = new Set<number>();

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -116,14 +116,8 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
   const activaEs = vozEs.activa;
   // Lo que se dice puede diferir de lo que se ve; los tiempos se calculan sobre lo dicho.
   const hablado = entry.phrase_tts || entry.phrase;
-  const en = useMemo(
-    () => analizar(entry.phrase, hablado, marcasDe(entry.audio_en), vozEn.duracion),
-    [entry.phrase, hablado, entry.audio_en, vozEn.duracion]
-  );
-  const es = useMemo(
-    () => analizar(entry.spanish_main, entry.spanish_main, undefined, vozEs.duracion),
-    [entry.spanish_main, vozEs.duracion]
-  );
+  const en = analizar(entry.phrase, hablado, marcasDe(entry.audio_en), vozEn.duracion);
+  const es = analizar(entry.spanish_main, entry.spanish_main, undefined, vozEs.duracion);
   // Si el inglés arranca mientras el español se apaga, manda el inglés.
   const hablaEs = vozEs.sonando && !vozEn.sonando;
 
@@ -135,12 +129,12 @@ export function TarjetaFusion({ fichas, rectas, capa, destino, entry, iniciar, s
   useLayoutEffect(() => {
     alLlegar.current = onAterrizo;
   }, [onAterrizo]);
-  const marcarLista = useCallback(() => setLista(true), []);
+  const marcarLista = () => setLista(true);
   const aterrizar = useCallback(() => alLlegar.current(), []);
 
   const cx = capa.ancho / 2;
   const cy = capa.alto / 2;
-  const hacia = useMemo(() => ({ x: cx, y: cy }), [cx, cy]);
+  const hacia = ({ x: cx, y: cy });
 
   const efectoIniciar = useEffectEvent(() => {
     if (!iniciar || empezo.current) return;

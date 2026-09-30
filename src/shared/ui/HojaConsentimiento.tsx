@@ -45,10 +45,10 @@ export function HojaConsentimiento({ tipo, onAceptar, onAhoraNo, onLeerAviso }: 
     if (tipo) setMostrado(tipo);
   }, [tipo]);
 
-  const alMostrar = useCallback(() => {
+  const alMostrar = () => {
     const nodo = titulo.current ? findNodeHandle(titulo.current) : null;
     if (nodo) AccessibilityInfo.setAccessibilityFocus(nodo);
-  }, []);
+  };
 
   const texto = mostrado ? CONSENTIMIENTOS[mostrado] : null;
 
@@ -150,10 +150,10 @@ export function useConsentimiento() {
   const [leyendo, setLeyendo] = useState(false);
   const resolver = useRef<((ok: boolean) => void) | null>(null);
 
-  const leerAviso = useCallback(() => {
+  const leerAviso = () => {
     setLeyendo(true);
     nav.navigate('LegalDoc', { doc: 'privacidad' });
-  }, [nav]);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -161,7 +161,7 @@ export function useConsentimiento() {
     }, [])
   );
 
-  const pedir = useCallback(async (tipo: TipoConsentimiento, { sinInsistir = false }: OpcionesPedir = {}) => {
+  const pedir = async (tipo: TipoConsentimiento, { sinInsistir = false }: OpcionesPedir = {}) => {
     if (await consentimiento.vigente(tipo)) return true;
     if (sinInsistir && (await consentimiento.rechazadoVigente(tipo))) return false;
     // Una hoja a la vez: si había otra esperando, cuenta como «Ahora no».
@@ -170,18 +170,15 @@ export function useConsentimiento() {
       resolver.current = resolve;
       setAbierta(tipo);
     });
-  }, []);
+  };
 
-  const responder = useCallback(
-    (ok: boolean) => {
-      const tipo = abierta;
-      setAbierta(null);
-      if (tipo) void consentimiento.guardar(tipo, ok);
-      resolver.current?.(ok);
-      resolver.current = null;
-    },
-    [abierta]
-  );
+  const responder = (ok: boolean) => {
+    const tipo = abierta;
+    setAbierta(null);
+    if (tipo) void consentimiento.guardar(tipo, ok);
+    resolver.current?.(ok);
+    resolver.current = null;
+  };
 
   // Si la pantalla se desmonta con una hoja abierta, quien esperaba recibe «Ahora no» y no se queda colgado.
   useEffect(() => () => resolver.current?.(false), []);

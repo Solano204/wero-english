@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Badge, Card, NotaInfo, Presionable } from '@/shared/ui';
@@ -106,14 +106,14 @@ export function DetalleForma({ forma, direccion, eje }: Props) {
     return indices;
   }, [mostrada.ejemplo, mostrada.particula]);
 
-  const marcarEscucho = useCallback(() => {
+  const marcarEscucho = () => {
     escuchoAlgunaVez = true;
-  }, []);
-  const sonar = useCallback((ruta: string, lento: boolean) => {
+  };
+  const sonar = (ruta: string, lento: boolean) => {
     escuchoAlgunaVez = true;
     haptics.tapLight();
     void (lento ? audio.playSlow(ruta) : audio.play(ruta));
-  }, []);
+  };
 
   const controlesFrase: ControlAudio[] = [
     { clave: 'frase', etiqueta: 'Escuchar', descripcion: `Escuchar ${mostrada.frase}`, icono: 'play', ruta: mostrada.audio_frase, lento: false, suena: frase.sonandoNormal },

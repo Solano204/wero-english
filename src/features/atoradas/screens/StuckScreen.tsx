@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { Carga, EmptyState, Header, Screen } from '@/shared/ui';
 import { HuesoTarjeta, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
@@ -27,11 +27,8 @@ const ANIMADAS = 8;
 export function StuckScreen() {
   const { nav, carga, items, mostrando, retirar, abrir } = useAtoradas();
 
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<Atorada>) => (
-      <TarjetaAtorada entry={item.entry} fallos={item.fallos} indice={index} animar={index < ANIMADAS} onAbrir={abrir} />
-    ),
-    [abrir]
+  const renderItem = ({ item, index }: ListRenderItemInfo<Atorada>) => (
+    <TarjetaAtorada entry={item.entry} fallos={item.fallos} indice={index} animar={index < ANIMADAS} onAbrir={abrir} />
   );
 
   const vacio = (

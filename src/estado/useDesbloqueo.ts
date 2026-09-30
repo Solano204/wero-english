@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useAuthStore } from './useAuthStore';
 import { useUnlockStore } from './useUnlockStore';
 import type { TipoDesbloqueo } from '@/types';
@@ -16,9 +15,9 @@ export function useDesbloqueo(tipo: TipoDesbloqueo, id: string): Desbloqueo {
   const user = useAuthStore((s) => s.user);
   const abierto = useUnlockStore((s) => s.abierto(tipo, id));
   const abrir = useUnlockStore((s) => s.abrir);
-  const desbloquear = useCallback(async () => {
+  const desbloquear = async () => {
     if (!user) return;
     await abrir(user.id, tipo, id);
-  }, [user, abrir, tipo, id]);
+  };
   return { abierto, puede: user != null, desbloquear };
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Canvas, Fill, Shader, Skia } from '@shopify/react-native-skia';
 import Animated, {
@@ -112,7 +112,7 @@ function ParalajeGiro({ dx, dy }: { dx: SharedValue<number>; dy: SharedValue<num
 }
 
 function GranoFino() {
-  const fuente = useMemo(() => Skia.RuntimeEffect.Make(GRANO), []);
+  const fuente = Skia.RuntimeEffect.Make(GRANO);
   if (!fuente) return null;
   return (
     <Canvas style={StyleSheet.absoluteFill} pointerEvents="none" accessible={false}>
@@ -130,16 +130,13 @@ function LuzAurora() {
   const dx = useSharedValue(0);
   const dy = useSharedValue(0);
 
-  const fuente = useMemo(() => Skia.RuntimeEffect.Make(AURORA), []);
-  const tinte = useMemo(() => Array.from(Skia.Color(color.accent)), []);
+  const fuente = Skia.RuntimeEffect.Make(AURORA);
+  const tinte = Array.from(Skia.Color(color.accent));
 
   const sangre = aurora.paralaje;
   const ancho = Math.round((width + sangre * 2) * aurora.resolucion);
   const alto = Math.round((REGION + sangre * 2) * aurora.resolucion);
-  const sol = useMemo(
-    () => [(width * SOL_X + sangre) * aurora.resolucion, sangre * aurora.resolucion],
-    [width, sangre]
-  );
+  const sol = ([(width * SOL_X + sangre) * aurora.resolucion, sangre * aurora.resolucion]);
 
   const uniformes = useDerivedValue(() => ({
     tam: [ancho, alto],

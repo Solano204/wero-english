@@ -175,8 +175,8 @@ export function useCarga<T>(
     }, [alEnfocar, ejecutar, version])
   );
 
-  const reintentar = useCallback(() => void ejecutar(false), [ejecutar]);
-  const refrescar = useCallback(() => ejecutar(true), [ejecutar]);
+  const reintentar = () => void ejecutar(false);
+  const refrescar = () => ejecutar(true);
 
   return { estado, datos, error, demora, huboEsqueleto, reintentar, refrescar };
 }

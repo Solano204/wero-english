@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { motionDuration, motionEasing, motionPresion } from '@/theme';
@@ -30,7 +30,7 @@ export function usePresion(resultado?: Resultado | null) {
     transform: [{ translateX: dx.get() }, { scale: escala.get() * pulso.get() }],
   }));
 
-  const alPresionar = useCallback(() => {
+  const alPresionar = () => {
     if (reducido) {
       setAbajo(true);
       return;
@@ -39,15 +39,15 @@ export function usePresion(resultado?: Resultado | null) {
       duration: motionDuration.rapido,
       easing: motionEasing.entrar,
     }));
-  }, [reducido, escala]);
+  };
 
-  const alSoltar = useCallback(() => {
+  const alSoltar = () => {
     if (reducido) {
       setAbajo(false);
       return;
     }
     escala.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
-  }, [reducido, escala]);
+  };
 
   const estilo = [animado, reducido && abajo ? { opacity: motionPresion.opacidad } : null];
   return { estilo, alPresionar, alSoltar };

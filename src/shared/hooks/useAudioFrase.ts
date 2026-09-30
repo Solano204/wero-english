@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useVozEnVivo, type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar, type Palabra } from '@/domain/marcas';
 import * as audio from '@/services/audio';
@@ -35,10 +35,10 @@ export function useAudioFrase(entry: Entry): AudioFrase {
     [entry.phrase, hablado, entry.audio_en, vozEn.duracion]
   );
 
-  const sonar = useCallback((ruta: string) => {
+  const sonar = (ruta: string) => {
     haptics.tapLight();
     void audio.play(ruta);
-  }, []);
+  };
 
   const controles: ControlAudio[] = [
     { clave: 'en', etiqueta: 'Inglés', descripcion: 'Escuchar en inglés', icono: 'play', ruta: entry.audio_en, lento: false, suena: vozEn.sonando },

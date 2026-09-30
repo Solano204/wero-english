@@ -105,22 +105,22 @@ export function usePartidaDulces() {
 
   const siguienteFrase = useRef(0);
   const empezoEn = useRef(Date.now());
-  const tomarSiguienteFrase = useCallback(() => {
+  const tomarSiguienteFrase = () => {
     const i = siguienteFrase.current;
     siguienteFrase.current = i + 1;
     return i;
-  }, []);
-  const msDesdeInicio = useCallback(() => Date.now() - empezoEn.current, []);
-  const reiniciarReloj = useCallback(() => {
+  };
+  const msDesdeInicio = () => Date.now() - empezoEn.current;
+  const reiniciarReloj = () => {
     empezoEn.current = Date.now();
-  }, []);
+  };
   const montado = useRef(true);
 
   const { reproducirVozMatch, cancelarVozMatch } = useVozMatch(autoAudio);
-  const alCerrarPregunta = useCallback(() => {
+  const alCerrarPregunta = () => {
     setVuelo(null);
     setDestinoTitulo(null);
-  }, []);
+  };
   const respuesta = useRespuestaDulces({
     user,
     autoAudio,
@@ -207,20 +207,17 @@ export function usePartidaDulces() {
   }, [vuelo]);
 
   /** Sale la pregunta: la meta destella y su frase vuela al título de la hoja (si se pudo medir y hay movimiento). */
-  const abrirPregunta = useCallback(
-    (nueva: PreguntaDulces) => {
-      const donde = cajaFrase(nueva.objetivo.color);
-      setDestinoTitulo(null);
-      setVuelo(
-        donde && !reducido ? { desde: { x: donde.x, y: donde.y, ancho: donde.w }, texto: nueva.objetivo.entry.phrase } : null
-      );
-      despachar({ tipo: 'abrirPregunta', pregunta: nueva });
-    },
-    [reducido, cajaFrase]
-  );
+  const abrirPregunta = (nueva: PreguntaDulces) => {
+    const donde = cajaFrase(nueva.objetivo.color);
+    setDestinoTitulo(null);
+    setVuelo(
+      donde && !reducido ? { desde: { x: donde.x, y: donde.y, ancho: donde.w }, texto: nueva.objetivo.entry.phrase } : null
+    );
+    despachar({ tipo: 'abrirPregunta', pregunta: nueva });
+  };
 
   /** Le pide al tablero que anime la jugada y no acepta toques hasta que termine. */
-  const animar = useCallback((jugada: Omit<Jugada, 'onFin'>, alTerminar?: () => void) => {
+  const animar = (jugada: Omit<Jugada, 'onFin'>, alTerminar?: () => void) => {
     animandoRef.current = true;
     despachar({ tipo: 'animar' });
     medirPosiciones();
@@ -232,12 +229,12 @@ export function usePartidaDulces() {
         alTerminar?.();
       },
     });
-  }, [medirPosiciones]);
+  };
 
   /** Lo que llegó a las barras de las metas: los trozos de un paso de la cascada. */
-  const sumarAMetas = useCallback((paso: Paso) => {
+  const sumarAMetas = (paso: Paso) => {
     setObjetivos((prev) => prev.map((o) => ({ ...o, llevas: o.llevas + (paso.porColor[o.color] ?? 0) })));
-  }, []);
+  };
 
   /*
    * Intercambio libre, y libre de verdad.
@@ -258,103 +255,94 @@ export function usePartidaDulces() {
    * cuando llegan los trozos. La pregunta, si esta jugada llenó una barra,
    * sale cuando termina la animación.
    */
-  const intercambiar = useCallback(
-    (a: number, c: number) => {
-      if (!board) return;
-      const nuevo = clone(board);
-      swap(nuevo, a, c);
+  const intercambiar = (a: number, c: number) => {
+    if (!board) return;
+    const nuevo = clone(board);
+    swap(nuevo, a, c);
 
-      const arma = findMatches(nuevo).length > 0;
-      if (arma) setHuboLinea(true);
-      setElegida(null);
-      setJugadas((j) => j - 1);
+    const arma = findMatches(nuevo).length > 0;
+    if (arma) setHuboLinea(true);
+    setElegida(null);
+    setJugadas((j) => j - 1);
 
-      if (!arma) {
-        // El cambio se queda. Un golpecito seco: no pasó nada malo,
-        // simplemente no armó.
-        haptics.tapLight();
-        void audio.playTap();
-        setBoard(nuevo);
-        animar({ a, c, pasos: [], rebarajado: null, final: nuevo.cells });
-        return;
-      }
-
-      const res = resolverPorPasos(nuevo, COLORES);
-
-      haptics.success();
-      void audio.playSuccess();
+    if (!arma) {
+      // El cambio se queda. Un golpecito seco: no pasó nada malo,
+      // simplemente no armó.
+      haptics.tapLight();
+      void audio.playTap();
       setBoard(nuevo);
+      animar({ a, c, pasos: [], rebarajado: null, final: nuevo.cells });
+      return;
+    }
 
-      // Se reparte lo quitado entre las frases de cada color.
-      const sig = objetivos.map((o) => ({ ...o, llevas: o.llevas + (res.porColor[o.color] ?? 0) }));
-      const llena = sig.find((o) => o.llevas >= o.meta);
-      let pendiente: PreguntaDulces | null = null;
-      if (llena) {
-        // Si esta jugada llena una barra, la voz del match se salta:
-        // pasa directo a la pregunta (cuando termine la animación).
-        pendiente = { objetivo: llena, opciones: opcionesPara(llena, pool) };
-      } else {
-        // El color con más piezas quitadas en esta jugada (una cascada
-        // cuenta como una sola jugada, resolve() ya la resolvió
-        // entera). En empate, el que esté más cerca de llenar su barra.
-        const colorGanador = mejorColor(res.porColor, sig);
-        const objetivo = sig.find((o) => o.color === colorGanador);
-        if (objetivo) reproducirVozMatch(objetivo.entry);
+    const res = resolverPorPasos(nuevo, COLORES);
+
+    haptics.success();
+    void audio.playSuccess();
+    setBoard(nuevo);
+
+    // Se reparte lo quitado entre las frases de cada color.
+    const sig = objetivos.map((o) => ({ ...o, llevas: o.llevas + (res.porColor[o.color] ?? 0) }));
+    const llena = sig.find((o) => o.llevas >= o.meta);
+    let pendiente: PreguntaDulces | null = null;
+    if (llena) {
+      // Si esta jugada llena una barra, la voz del match se salta:
+      // pasa directo a la pregunta (cuando termine la animación).
+      pendiente = { objetivo: llena, opciones: opcionesPara(llena, pool) };
+    } else {
+      // El color con más piezas quitadas en esta jugada (una cascada
+      // cuenta como una sola jugada, resolve() ya la resolvió
+      // entera). En empate, el que esté más cerca de llenar su barra.
+      const colorGanador = mejorColor(res.porColor, sig);
+      const objetivo = sig.find((o) => o.color === colorGanador);
+      if (objetivo) reproducirVozMatch(objetivo.entry);
+    }
+
+    let rebarajado: number[] | null = null;
+    if (!hayMovimiento(nuevo)) {
+      const otro = clone(nuevo);
+      rebarajar(otro, COLORES);
+      setBoard(otro);
+      rebarajado = otro.cells;
+    }
+
+    animar(
+      {
+        a,
+        c,
+        pasos: res.pasos,
+        rebarajado,
+        final: rebarajado ?? nuevo.cells,
+        onEstallido: alEstallar,
+        onLlegan: sumarAMetas,
+      },
+      () => {
+        if (pendiente) abrirPregunta(pendiente);
       }
+    );
+  };
 
-      let rebarajado: number[] | null = null;
-      if (!hayMovimiento(nuevo)) {
-        const otro = clone(nuevo);
-        rebarajar(otro, COLORES);
-        setBoard(otro);
-        rebarajado = otro.cells;
-      }
+  const tocar = (i: number) => {
+    if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
 
-      animar(
-        {
-          a,
-          c,
-          pasos: res.pasos,
-          rebarajado,
-          final: rebarajado ?? nuevo.cells,
-          onEstallido: alEstallar,
-          onLlegan: sumarAMetas,
-        },
-        () => {
-          if (pendiente) abrirPregunta(pendiente);
-        }
-      );
-    },
-    [board, objetivos, pool, COLORES, reproducirVozMatch, animar, alEstallar, sumarAMetas, abrirPregunta]
-  );
-
-  const tocar = useCallback(
-    (i: number) => {
-      if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
-
-      if (elegida === null) {
-        haptics.tapLight();
-        void audio.playTap();
-        setElegida(i);
-        return;
-      }
-      if (elegida === i) {
-        setElegida(null);
-        return;
-      }
-      intercambiar(elegida, i);
-    },
-    [board, elegida, pregunta, jugadas, intercambiar]
-  );
+    if (elegida === null) {
+      haptics.tapLight();
+      void audio.playTap();
+      setElegida(i);
+      return;
+    }
+    if (elegida === i) {
+      setElegida(null);
+      return;
+    }
+    intercambiar(elegida, i);
+  };
 
   /** Deslizar una pieza hacia su vecina las intercambia, como en cualquier tres en línea. */
-  const deslizar = useCallback(
-    (origen: number, destino: number) => {
-      if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
-      intercambiar(origen, destino);
-    },
-    [board, pregunta, jugadas, intercambiar]
-  );
+  const deslizar = (origen: number, destino: number) => {
+    if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
+    intercambiar(origen, destino);
+  };
 
   // Al mostrarse la pregunta: corta lo que sonaba (incluida una voz de
   // match que hubiera quedado pendiente) y dice la frase en inglés.

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { type LecturaFila } from '@/features/lecturas/components/TarjetaLectura';
@@ -54,7 +54,7 @@ export function useLecturas() {
   // Red de seguridad: ningún audio de lectura sobrevive a salir de aquí.
   useCortarAudioAlSalir();
 
-  const abrir = useCallback((lecturaId: string) => nav.navigate('Lectura', { lecturaId }), [nav]);
+  const abrir = (lecturaId: string) => nav.navigate('Lectura', { lecturaId });
 
   return { nav, carga, abrir };
 }

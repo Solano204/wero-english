@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { juzgar } from '@/domain/minimalPairs';
@@ -66,8 +66,8 @@ const correcto = (i: Intento, r: Resultado) => (i.dije === 'objetivo' ? r === 'a
 export function useProbarVoz() {
   const nav = useNavigation<Nav>();
   useCortarAudioAlSalir();
-  const disponible = useMemo(() => speech.isAvailable(), []);
-  const variantes = useMemo(() => loadContent().confusionesVoz.pares, []);
+  const disponible = speech.isAvailable();
+  const variantes = (loadContent().confusionesVoz.pares);
   const { fase, ocupado, sinVoz, parcial, nivel, escuchar } = useEscucha();
   const [par, setPar] = useState(0);
   const [dije, setDije] = useState<'objetivo' | 'confusa'>('objetivo');
@@ -81,9 +81,9 @@ export function useProbarVoz() {
   }, []);
 
   const [objetivo, confusa] = PARES[par] ?? PARES[0]!;
-  const r = useMemo(() => ronda(objetivo, confusa), [objetivo, confusa]);
+  const r = ronda(objetivo, confusa);
 
-  const probar = useCallback(async () => {
+  const probar = async () => {
     const ok = await speech.requestPermission();
     if (!ok) return;
     const e = await escuchar([r.objetivo, r.confusa]);
@@ -99,7 +99,7 @@ export function useProbarVoz() {
         despues: despues.tipo === 'no_disponible' ? 'no_entendi' : despues.tipo,
       },
     ]);
-  }, [escuchar, r, variantes, dije]);
+  };
 
   const veredicto = ultimo ? juzgar(r, ultimo.alternativas, variantes) : null;
   const porcentaje = (lista: Intento[], cual: 'antes' | 'despues') =>

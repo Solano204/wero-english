@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { analizar, type Palabra } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { useVozEnVivo, type VozEnVivo } from './useVozEnVivo';
@@ -19,14 +18,8 @@ export interface VozFrase {
 export function useVozFrase(texto: string, ruta: string, rutaLenta: string): VozFrase {
   const normal = useVozEnVivo(ruta);
   const lenta = useVozEnVivo(rutaLenta);
-  const analisisNormal = useMemo(
-    () => analizar(texto, texto, marcasDe(ruta), normal.duracion),
-    [texto, ruta, normal.duracion]
-  );
-  const analisisLento = useMemo(
-    () => analizar(texto, texto, marcasDe(rutaLenta), lenta.duracion),
-    [texto, rutaLenta, lenta.duracion]
-  );
+  const analisisNormal = analizar(texto, texto, marcasDe(ruta), normal.duracion);
+  const analisisLento = analizar(texto, texto, marcasDe(rutaLenta), lenta.duracion);
   const conLenta = lenta.sonando;
   return {
     voz: conLenta ? lenta : normal,

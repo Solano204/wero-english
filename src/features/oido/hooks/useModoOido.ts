@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -98,18 +98,10 @@ export function useModoOido() {
   const actual = queue[idx];
   const vozEn = useVozEnVivo(actual?.audio_en ?? null);
   const vozEs = useVozEnVivo(actual?.audio_es ?? null);
-  const analisisEn = useMemo(
-    () =>
-      actual ? analizar(actual.phrase, actual.phrase_tts || actual.phrase, marcasDe(actual.audio_en), vozEn.duracion) : null,
-    [actual, vozEn.duracion]
-  );
-  const analisisEs = useMemo(
-    () =>
-      actual?.audio_es
+  const analisisEn = (actual ? analizar(actual.phrase, actual.phrase_tts || actual.phrase, marcasDe(actual.audio_en), vozEn.duracion) : null);
+  const analisisEs = (actual?.audio_es
         ? analizar(actual.spanish_main, actual.spanish_main, marcasDe(actual.audio_es), vozEs.duracion)
-        : null,
-    [actual, vozEs.duracion]
-  );
+        : null);
 
   // Modo bolsillo: sin tocar la pantalla mientras suena, baja el brillo de todo menos el anillo y la frase.
   const { bolsillo, brillo, despertar } = useBolsillo(playing);
@@ -141,41 +133,38 @@ export function useModoOido() {
   }, [detener]);
 
   /** Reproduce una frase completa (o desde el paso `desde`, al reanudar). */
-  const reproduceFrase = useCallback(async (entry: Entry, desde: number, vigente: () => boolean) => {
+  const reproduceFrase = async (entry: Entry, desde: number, vigente: () => boolean) => {
     const pasos = pasosFrase(entry.audio_en, entry.audio_es);
     await audio.playSequence(pasos.slice(desde), vigente, (i) => {
       pasoIdxRef.current = desde + i;
       setPasoIdx(desde + i);
     });
-  }, []);
+  };
 
-  const loop = useCallback(
-    async (desdeIdx: number, desdePaso: number) => {
-      const ciclo = ++cicloRef.current;
-      const vigente = () => playingRef.current && cicloRef.current === ciclo;
-      let i = desdeIdx;
-      let desde = desdePaso;
-      while (vigente() && i < queue.length) {
-        const e = queue[i];
-        if (!e) break;
-        idxRef.current = i;
-        setIdx(i);
+  const loop = async (desdeIdx: number, desdePaso: number) => {
+    const ciclo = ++cicloRef.current;
+    const vigente = () => playingRef.current && cicloRef.current === ciclo;
+    let i = desdeIdx;
+    let desde = desdePaso;
+    while (vigente() && i < queue.length) {
+      const e = queue[i];
+      if (!e) break;
+      idxRef.current = i;
+      setIdx(i);
 
-        await reproduceFrase(e, desde, vigente);
-        desde = 0; // solo la frase reanudada arranca a media secuencia
+      await reproduceFrase(e, desde, vigente);
+      desde = 0; // solo la frase reanudada arranca a media secuencia
 
-        if (!vigente()) return; // se pausó a media frase, o se saltó a otra
-        i++;
-      }
-      if (vigente()) {
-        playingRef.current = false;
-        setPlaying(false);
-      }
-    },
-    [queue, reproduceFrase]
-  );
+      if (!vigente()) return; // se pausó a media frase, o se saltó a otra
+      i++;
+    }
+    if (vigente()) {
+      playingRef.current = false;
+      setPlaying(false);
+    }
+  };
 
-  const alternar = useCallback(() => {
+  const alternar = () => {
     if (playingRef.current) {
       // Pausar corta el audio ya. pasoIdxRef se queda tal cual: es lo
       // que usa "reanudar" para retomar desde ese mismo paso.
@@ -186,24 +175,21 @@ export function useModoOido() {
     setPlaying(true);
     setEmpezo(true);
     void loop(idxRef.current, pasoIdxRef.current);
-  }, [loop, detener]);
+  };
 
   /** Anterior (-1) y siguiente (+1): la frase de destino empieza desde su primera repetición. */
-  const saltar = useCallback(
-    (delta: 1 | -1) => {
-      const destino = idxRef.current + delta;
-      if (destino < 0 || destino >= queue.length) return;
-      cicloRef.current++;
-      audio.stop();
-      idxRef.current = destino;
-      setIdx(destino);
-      pasoIdxRef.current = 0;
-      setPasoIdx(0);
-      // Si estaba sonando, la frase nueva sigue sonando; si estaba en pausa, queda lista y en pausa.
-      if (playingRef.current) void loop(destino, 0);
-    },
-    [queue.length, loop]
-  );
+  const saltar = (delta: 1 | -1) => {
+    const destino = idxRef.current + delta;
+    if (destino < 0 || destino >= queue.length) return;
+    cicloRef.current++;
+    audio.stop();
+    idxRef.current = destino;
+    setIdx(destino);
+    pasoIdxRef.current = 0;
+    setPasoIdx(0);
+    // Si estaba sonando, la frase nueva sigue sonando; si estaba en pausa, queda lista y en pausa.
+    if (playingRef.current) void loop(destino, 0);
+  };
 
   return { nav, altoVentana, queue, idx, playing, empezo, pasoIdx, carga, loading, actual, vozEn, vozEs, analisisEn, analisisEs, bolsillo, despertar, estiloBrillo, alternar, saltar };
 }

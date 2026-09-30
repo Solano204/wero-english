@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getWorldCounts } from '@/data/repos/estadisticas';
@@ -22,7 +22,7 @@ export function useExplorar() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
 
   const [term, setTerm] = useState('');
   const [results, setResults] = useState<Entry[]>([]);
@@ -44,28 +44,25 @@ export function useExplorar() {
     },
     []
   );
-  const buscar = useCallback(
-    (t: string) => {
-      setTerm(t);
-      const id = ++pedida.current;
-      if (espera.current) clearTimeout(espera.current);
-      if (t.trim().length < 2) {
-        setResults([]);
-        return;
-      }
-      espera.current = setTimeout(() => {
-        searchEntries(t, filter(), 30)
-          .then((r) => {
-            if (id === pedida.current) setResults(r);
-          })
-          .catch(() => undefined);
-      }, ESPERA_BUSQUEDA_MS);
-    },
-    [filter]
-  );
-  const abrir = useCallback((e: Entry) => nav.navigate('Detail', { entryId: e.id }), [nav]);
+  const buscar = (t: string) => {
+    setTerm(t);
+    const id = ++pedida.current;
+    if (espera.current) clearTimeout(espera.current);
+    if (t.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    espera.current = setTimeout(() => {
+      searchEntries(t, filter(), 30)
+        .then((r) => {
+          if (id === pedida.current) setResults(r);
+        })
+        .catch(() => undefined);
+    }, ESPERA_BUSQUEDA_MS);
+  };
+  const abrir = (e: Entry) => nav.navigate('Detail', { entryId: e.id });
 
-  const mundos = useMemo(() => [...content.packs.mundos].sort((a, b) => a.orden - b.orden), [content]);
+  const mundos = ([...content.packs.mundos].sort((a, b) => a.orden - b.orden));
   const buscando = term.trim().length >= 2;
 
   return { nav, term, results, cargaMundos, buscar, abrir, mundos, buscando };

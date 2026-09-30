@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useEffectEvent } from 'react';
+import React, { useEffect, useRef, useState, useEffectEvent } from 'react';
 import { Keyboard, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
@@ -81,7 +81,7 @@ export function StudyCardView({
   const [sonando, setSonando] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
 
-  const prompt = useMemo(() => promptFor(card), [card]);
+  const prompt = promptFor(card);
   const modo = answerMode(card.kind);
   const isTyping = modo === 'type';
 
@@ -101,10 +101,7 @@ export function StudyCardView({
   const { alAcomodar: acomodarCapa, desfase, ref: capaRef } = useDesfaseVentana();
   const [vuelo, setVuelo] = useState<{ palabra: string; de: Rect; a: Rect } | null>(null);
   const [aterrizo, setAterrizo] = useState(false);
-  const anchoHueco = useMemo(
-    () => Math.min(220, Math.max(72, ...card.options.map((o) => o.length * font.size.xxl * 0.55))),
-    [card.options]
-  );
+  const anchoHueco = Math.min(220, Math.max(72, ...card.options.map((o) => o.length * font.size.xxl * 0.55)));
   const relleno: RellenoHueco | null =
     esCompletar && aterrizo && chosen !== null ? { palabra: chosen, estado: acierto ? 'ok' : 'mal' } : null;
   useEffect(() => {

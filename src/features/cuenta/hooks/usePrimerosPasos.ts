@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
@@ -15,25 +15,25 @@ export function usePrimerosPasos() {
   const [permisoNegado, setPermisoNegado] = useState(false);
   // En Expo Go no hay notificaciones desde el SDK 53. Se dice tal cual
   // en vez de fingir que el usuario negó un permiso que nunca se pidió.
-  const notifEstado = useMemo(() => notifications.isAvailable(), []);
+  const notifEstado = notifications.isAvailable();
 
-  const avanzar = useCallback(() => setPaso((p) => p + 1), []);
+  const avanzar = () => setPaso((p) => p + 1);
   const [slide, setSlide] = useState(0);
 
-  const terminar = useCallback(async () => {
+  const terminar = async () => {
     if (!user) return;
     await settings.set(user.id, 'onboardingHecho', true);
-  }, [user, settings]);
+  };
 
-  const saltarTodo = useCallback(async () => {
+  const saltarTodo = async () => {
     // Saltar deja los valores por omisión y entra. Nunca se atrapa a
     // nadie en el onboarding.
     await terminar();
-  }, [terminar]);
+  };
 
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
 
-  const pedirNotificaciones = useCallback(async () => {
+  const pedirNotificaciones = async () => {
     if (!user) return;
     if (!notifEstado.ok) {
       await terminar();
@@ -64,7 +64,7 @@ export function usePrimerosPasos() {
       hasta: settings.notifHasta,
     });
     await terminar();
-  }, [user, settings, terminar, notifEstado, pedirConsentimiento]);
+  };
 
   // Presentación, groserías, recordatorios y cierre. El onboarding ya no pregunta nada que decida
   // qué frases te tocan: esas llegan en un orden al azar propio de cada usuario.

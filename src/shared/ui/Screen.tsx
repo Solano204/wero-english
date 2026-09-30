@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState, type ReactNode } from 'react';
+import React, { useContext, useState, type ReactNode } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View, type ScrollViewProps, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedScrollHandler, type AnimatedRef, type SharedValue } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-area-context';
@@ -97,7 +97,7 @@ export function Screen({
   const [altoRaiz, setAltoRaiz] = useState(0);
   const [inicioFooter, setInicioFooter] = useState<number | null>(null);
   const [refrescando, setRefrescando] = useState(false);
-  const refrescar = useCallback(async () => {
+  const refrescar = async () => {
     if (!alRefrescar) return;
     setRefrescando(true);
     await conFinalAsync(async () => {
@@ -105,7 +105,7 @@ export function Screen({
     }, () => {
       setRefrescando(false);
     });
-  }, [alRefrescar]);
+  };
   const refreshControl = alRefrescar ? (
     <RefreshControl
       refreshing={refrescando}

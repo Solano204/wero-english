@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
@@ -58,10 +58,7 @@ export function usePhrasal() {
     [grupos, porId, consulta]
   );
 
-  const abrir = useCallback(
-    (verbo: string, origen: Rect | null) => nav.navigate('PhrasalVerbo', { verbo, origen }),
-    [nav]
-  );
+  const abrir = (verbo: string, origen: Rect | null) => nav.navigate('PhrasalVerbo', { verbo, origen });
 
   return { nav, content, consulta, setConsulta, grupos, items, abrir };
 }

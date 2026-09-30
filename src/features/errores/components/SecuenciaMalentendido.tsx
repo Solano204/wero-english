@@ -238,7 +238,7 @@ export function SecuenciaMalentendido({ error: e }: Props) {
   const estilo3 = useAnimatedStyle(() => ({ opacity: v3.get(), transform: [{ translateY: reducido ? 0 : (1 - v3.get()) * SUBE }] }));
   const estiloDices = useAnimatedStyle(() => ({ opacity: 1 - 0.35 * tachaDices.get() }));
 
-  const alTexto = useCallback((ev: NativeSyntheticEvent<TextLayoutEventData>) => setLineas(ev.nativeEvent.lines), []);
+  const alTexto = (ev: NativeSyntheticEvent<TextLayoutEventData>) => setLineas(ev.nativeEvent.lines);
 
   const sonar = (ruta: string, lento: boolean) => {
     void (lento ? audio.playSlow(ruta) : audio.play(ruta));

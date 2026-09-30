@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDesbloqueo } from '@/estado/useDesbloqueo';
 import { useWindowDimensions, type ListRenderItemInfo } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -45,7 +45,7 @@ export function useNivelesJuego() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Ruta>();
   const user = useAuthStore((s) => s.user);
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
   const { width, height } = useWindowDimensions();
 
   const juego = params.juego;
@@ -77,11 +77,11 @@ export function useNivelesJuego() {
   // El aviso cuando el anuncio falla o se cierra antes de tiempo: unos segundos y se va.
   const [aviso, setAviso] = useState<string | null>(null);
   const temporizadorAviso = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const avisar = useCallback((mensaje: string) => {
+  const avisar = (mensaje: string) => {
     setAviso(mensaje);
     if (temporizadorAviso.current) clearTimeout(temporizadorAviso.current);
     temporizadorAviso.current = setTimeout(() => setAviso(null), DURACION_AVISO_MS);
-  }, []);
+  };
   useEffect(
     () => () => {
       if (temporizadorAviso.current) clearTimeout(temporizadorAviso.current);
@@ -96,47 +96,41 @@ export function useNivelesJuego() {
    * poder saltar del 3 al 180 con un video vacía los 176 de en medio y
    * el usuario se queda sin nada que hacer al día siguiente.
    */
-  const saltar = useCallback(
-    async (nivel: number) => {
-      if (!user || abriendoRef.current) return;
-      abriendoRef.current = true;
-      setAbriendo(true);
-      const r = await pedirRecompensa();
-      if (r === 'visto') {
-        // Un anuncio abre UN nivel: el que se pagó, y nada más. No toca
-        // `siguiente`, porque eso es la cadena de niveles jugados.
-        await abrirConAnuncio(user.id, juego, nivel);
-        setAbiertosAhora((prev) => [...prev, nivel]);
-      } else {
-        // La celda se queda como estaba y se dice por qué, con el tono de siempre.
-        avisar(razonMuro(r));
-      }
-      abriendoRef.current = false;
-      setAbriendo(false);
-    },
-    [user, juego, avisar]
-  );
+  const saltar = async (nivel: number) => {
+    if (!user || abriendoRef.current) return;
+    abriendoRef.current = true;
+    setAbriendo(true);
+    const r = await pedirRecompensa();
+    if (r === 'visto') {
+      // Un anuncio abre UN nivel: el que se pagó, y nada más. No toca
+      // `siguiente`, porque eso es la cadena de niveles jugados.
+      await abrirConAnuncio(user.id, juego, nivel);
+      setAbiertosAhora((prev) => [...prev, nivel]);
+    } else {
+      // La celda se queda como estaba y se dice por qué, con el tono de siempre.
+      avisar(razonMuro(r));
+    }
+    abriendoRef.current = false;
+    setAbriendo(false);
+  };
 
-  const alTocar = useCallback(
-    (n: number, estado: EstadoNivel) => {
-      if (estado === 'anuncio') {
-        void saltar(n);
-        return;
-      }
-      if (estado === 'bloqueado') return;
-      const ruta = RUTA[juego];
-      if (ruta) nav.navigate(ruta, { nivel: n });
-    },
-    [saltar, juego, nav]
-  );
+  const alTocar = (n: number, estado: EstadoNivel) => {
+    if (estado === 'anuncio') {
+      void saltar(n);
+      return;
+    }
+    if (estado === 'bloqueado') return;
+    const ruta = RUTA[juego];
+    if (ruta) nav.navigate(ruta, { nivel: n });
+  };
 
-  const alternarTramo = useCallback((id: string) => {
+  const alternarTramo = (id: string) => {
     setExpandidos((prev) => {
       const siguienteSet = new Set(prev);
       if (!siguienteSet.delete(id)) siguienteSet.add(id);
       return siguienteSet;
     });
-  }, []);
+  };
 
   // La celda sale del ancho de la pantalla; el renglón mide exactamente celda + hueco, y con
   // eso la lista sabe dónde está cada cosa sin medir nada en pantalla.
@@ -161,17 +155,14 @@ export function useNivelesJuego() {
     }));
   }, [bandas, def, siguiente, pagados, estrellas]);
   const items = useMemo(() => aplanar(tramos, expandidos), [tramos, expandidos]);
-  const medidas = useMemo(() => medir(items, ALTO_TRAMO, altoFila), [items, altoFila]);
-  const pegados = useMemo(() => indicesEncabezado(items), [items]);
+  const medidas = medir(items, ALTO_TRAMO, altoFila);
+  const pegados = indicesEncabezado(items);
 
-  const getItemLayout = useCallback(
-    (_: ArrayLike<ItemLista> | null | undefined, index: number) => ({
-      length: medidas.alturas[index] ?? altoFila,
-      offset: medidas.offsets[index] ?? 0,
-      index,
-    }),
-    [medidas, altoFila]
-  );
+  const getItemLayout = (_: ArrayLike<ItemLista> | null | undefined, index: number) => ({
+    length: medidas.alturas[index] ?? altoFila,
+    offset: medidas.offsets[index] ?? 0,
+    index,
+  });
 
   // Al abrir, la lista deja el nivel actual centrado: con doscientos, obligar a bajar hasta
   // donde te quedaste es una molestia diaria. Sale de las medidas reales de la lista.
@@ -222,29 +213,26 @@ export function useNivelesJuego() {
   // varias pantallas de renglones de una vez, y animar los que están fuera de la vista eran
   // cientos de resortes de estrellas que nadie ve, justo mientras la pantalla entra.
   const filasEnVista = Math.ceil(height / altoFila) + 1;
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<ItemLista>) =>
-      item.tipo === 'tramo' ? (
-        <EncabezadoTramo tramo={item.tramo} expandido={item.expandido} onAlternar={alternarTramo} />
-      ) : (
-        <FilaNiveles
-          niveles={item.niveles}
-          lado={lado}
-          onPress={alTocar}
-          logros={recompensa.logros}
-          saltoActual={recompensa.saltoActual}
-          retrasoEntrada={
-            entrando && !reducido && item.fila - filaBase >= -FILAS_ANTES_DEL_ACTUAL && item.fila - filaBase <= filasEnVista
-              ? escalon(Math.max(0, item.fila - filaBase))
-              : undefined
-          }
-          cascada={item.tramo === tramoActual}
-        />
-      ),
-    [lado, alTocar, alternarTramo, recompensa, entrando, reducido, filaBase, filasEnVista, tramoActual]
-  );
+  const renderItem = ({ item }: ListRenderItemInfo<ItemLista>) =>
+    item.tipo === 'tramo' ? (
+      <EncabezadoTramo tramo={item.tramo} expandido={item.expandido} onAlternar={alternarTramo} />
+    ) : (
+      <FilaNiveles
+        niveles={item.niveles}
+        lado={lado}
+        onPress={alTocar}
+        logros={recompensa.logros}
+        saltoActual={recompensa.saltoActual}
+        retrasoEntrada={
+          entrando && !reducido && item.fila - filaBase >= -FILAS_ANTES_DEL_ACTUAL && item.fila - filaBase <= filasEnVista
+            ? escalon(Math.max(0, item.fila - filaBase))
+            : undefined
+        }
+        cascada={item.tramo === tramoActual}
+      />
+    );
   // Sin esto la lista no repinta renglones ya montados cuando cambia la recompensa o termina la entrada.
-  const extraData = useMemo(() => ({ recompensa: recompensa.id, entrando }), [recompensa.id, entrando]);
+  const extraData = ({ recompensa: recompensa.id, entrando });
 
   return { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, cuenta, renderItem, extraData };
 }

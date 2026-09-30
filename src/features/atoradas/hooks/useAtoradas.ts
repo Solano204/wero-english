@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getCardStates } from '@/data/repos/tarjetas';
@@ -54,7 +54,7 @@ export function useAtoradas() {
     [user],
     { alEnfocar: true, esVacio: (d) => d.atoradas.length === 0 && d.desatoradas.length === 0 }
   );
-  const items = useMemo(() => ordenarAtoradas(carga.datos?.atoradas ?? []), [carga.datos]);
+  const items = ordenarAtoradas(carga.datos?.atoradas ?? []);
 
   // Lo que se guarda al terminar de cargar es la lista de ahora: la próxima visita compara contra ella.
   useEffect(() => {
@@ -73,15 +73,12 @@ export function useAtoradas() {
     nuevas.forEach((d) => yaMostradas.current.add(d.entry.id));
     setMostrando((m) => [...m, ...nuevas.map((d, i) => ({ ...d, retraso: i * motionDesatorar.escalon }))]);
   }, [carga.datos]);
-  const retirar = useCallback((id: number) => setMostrando((m) => m.filter((d) => d.entry.id !== id)), []);
+  const retirar = (id: number) => setMostrando((m) => m.filter((d) => d.entry.id !== id));
 
   // Perder el foco (abrir el Detalle) corta todo el audio: el reproductor de frases es uno solo y compartido.
   useCortarAudioAlSalir();
 
-  const abrir = useCallback(
-    (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
-    [nav]
-  );
+  const abrir = (e: Entry) => nav.navigate('Detail', { entryId: e.id });
 
   return { nav, carga, items, mostrando, retirar, abrir };
 }

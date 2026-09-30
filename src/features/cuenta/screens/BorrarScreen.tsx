@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -50,7 +50,7 @@ export function BorrarScreen() {
   const sinCuenta = !conGoogle && Boolean(user?.username.startsWith('invitado_'));
   const cuenta = params.modo === 'cuenta';
 
-  const confirmar = useCallback(async () => {
+  const confirmar = async () => {
     if (cuenta) {
       // Al terminar, status 'anon' cambia la navegación a la pila de entrada: no hay nada a qué regresar.
       await eliminarCuenta();
@@ -62,7 +62,7 @@ export function BorrarScreen() {
         CommonActions.reset({ index: 0, routes: [{ name: 'Main', params: { screen: 'Practice' } }] })
       );
     }
-  }, [cuenta, eliminarCuenta, borrarMisDatos, nav]);
+  };
 
   const avance = [
     'Tu avance y tu racha',

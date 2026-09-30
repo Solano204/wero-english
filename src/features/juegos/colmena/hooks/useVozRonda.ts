@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useVozEnVivo, type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
@@ -11,13 +10,9 @@ import type { Entry } from '@/types';
  */
 export function useVozRonda(entry: Entry | null) {
   const voz: VozEnVivo = useVozEnVivo(entry?.audio_en ?? null);
-  const analisis = useMemo(
-    () =>
-      entry
+  const analisis = (entry
         ? // Lo que se dice puede diferir de lo que se ve; los tiempos se calculan sobre lo dicho.
           analizar(entry.phrase, entry.phrase_tts || entry.phrase, marcasDe(entry.audio_en), voz.duracion)
-        : null,
-    [entry, voz.duracion]
-  );
+        : null);
   return { voz, analisis };
 }

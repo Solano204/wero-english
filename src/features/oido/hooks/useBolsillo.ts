@@ -26,10 +26,10 @@ export function useBolsillo(activo: boolean): { bolsillo: boolean; brillo: Share
     if (activo) reloj.current = setTimeout(() => setBolsillo(true), motionRadio.bolsillo);
   }, [activo, limpiar]);
 
-  const despertar = useCallback(() => {
+  const despertar = () => {
     setBolsillo(false);
     armar();
-  }, [armar]);
+  };
 
   useEffect(() => {
     if (activo) armar();

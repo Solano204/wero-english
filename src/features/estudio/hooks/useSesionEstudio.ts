@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useEffectEvent } from 'react';
+import { useEffect, useRef, useState, useEffectEvent } from 'react';
 import { BackHandler, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -216,21 +216,18 @@ export function useSesionEstudio() {
   }, [phase, summary, nav, user, settings, finish, pedirConsentimiento]);
 
   /** Otra sesión en la misma pantalla: la normal (seguir repasando) o la extra de solo nuevas. */
-  const otraSesion = useCallback(
-    (soloNuevas: boolean) => {
-      if (!user) return;
-      setMostrarFin(false);
-      setFin(null);
-      cerrada.current = false;
-      salidaManual.current = false;
-      void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia, { soloNuevas });
-    },
-    [user, start, settings]
-  );
-  const seguirRepasando = useCallback(() => otraSesion(false), [otraSesion]);
-  const aprenderNuevas = useCallback(() => otraSesion(true), [otraSesion]);
+  const otraSesion = (soloNuevas: boolean) => {
+    if (!user) return;
+    setMostrarFin(false);
+    setFin(null);
+    cerrada.current = false;
+    salidaManual.current = false;
+    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia, { soloNuevas });
+  };
+  const seguirRepasando = () => otraSesion(false);
+  const aprenderNuevas = () => otraSesion(true);
 
-  const handleClose = useCallback(async () => {
+  const handleClose = async () => {
     // Ya terminó, no había nada que armar o falló al armarse: la flecha sale de una vez.
     if (phase !== 'active') {
       nav.goBack();
@@ -240,7 +237,7 @@ export function useSesionEstudio() {
     salidaManual.current = true;
     cerrada.current = true;
     await finish(user.id);
-  }, [user, finish, phase, nav]);
+  };
 
   // El botón físico de atrás cierra la sesión igual que la X.
   const efectoUser = useEffectEvent(() => {
@@ -252,20 +249,17 @@ export function useSesionEstudio() {
   });
   useEffect(() => efectoUser(), [user, phase]);
 
-  const handleAnswer = useCallback(
-    async (correct: boolean, elapsedMs: number, usedHint: boolean) => {
-      if (!user) return;
-      if (correct) celebra();
-      await answer(user.id, correct, elapsedMs, usedHint);
-    },
-    [user, answer, celebra]
-  );
+  const handleAnswer = async (correct: boolean, elapsedMs: number, usedHint: boolean) => {
+    if (!user) return;
+    if (correct) celebra();
+    await answer(user.id, correct, elapsedMs, usedHint);
+  };
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = () => {
     setChosen(null);
     setOrigenTrozos(null);
     next();
-  }, [next]);
+  };
 
   return { reducido, nav, params, barra, settings, phase, card, feedback, done, goal, seguidas, avanzando, skip, aciertos, pendientes, summary, proximoRepaso, nuevasCatalogo, demoraSesion, huboEsqueleto, chosen, setChosen, hoja, mostrarFin, fin, ultimaTarjeta, reaccion, origenTrozos, setOrigenTrozos, otraSesion, seguirRepasando, aprenderNuevas, handleClose, handleAnswer, handleContinue };
 }

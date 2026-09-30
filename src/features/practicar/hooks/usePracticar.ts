@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -96,10 +96,10 @@ export function usePracticar() {
   // Jalar para refrescar: recarga sin esqueleto y la onda de HOY da un pulso al terminar.
   const [refrescos, setRefrescos] = useState(0);
   const { refrescar: recargar } = carga;
-  const refrescar = useCallback(async () => {
+  const refrescar = async () => {
     await recargar();
     setRefrescos((n) => n + 1);
-  }, [recargar]);
+  };
   const { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas, nuevas } = carga.datos ?? SIN_DATOS;
 
   const atoradas = stats?.atoradas ?? 0;

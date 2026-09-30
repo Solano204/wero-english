@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, type ReactNode, type Ref } from 'react';
+import React, { useMemo, useState, type ReactNode, type Ref } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { Canvas, Group, LinearGradient, Path, Rect, Skia, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
@@ -96,14 +96,11 @@ export function PistaCaida({ pistaRef, y, onDistancia, largoEstela, estela, arma
   const reducido = useMovimientoReducido();
   const [medida, setMedida] = useState({ ancho: 0, alto: 0 });
 
-  const alMedir = useCallback(
-    (e: LayoutChangeEvent) => {
-      const { width, height } = e.nativeEvent.layout;
-      setMedida((m) => (m.ancho === width && m.alto === height ? m : { ancho: width, alto: height }));
-      onDistancia(distanciaCaida(height));
-    },
-    [onDistancia]
-  );
+  const alMedir = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setMedida((m) => (m.ancho === width && m.alto === height ? m : { ancho: width, alto: height }));
+    onDistancia(distanciaCaida(height));
+  };
 
   return (
     <View ref={pistaRef} style={styles.pista} onLayout={alMedir}>

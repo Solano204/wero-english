@@ -100,12 +100,9 @@ export function FichaCaida({ texto, onPress, estado, y, destino, onLlego }: Prop
     return undefined;
   }, [estado, reducido, llenado, fallado, vuelo, descarte, llegar]);
 
-  const alMedir = useCallback(
-    (e: LayoutChangeEvent) => {
-      centro.set(e.nativeEvent.layout.x + e.nativeEvent.layout.width / 2);
-    },
-    [centro]
-  );
+  const alMedir = (e: LayoutChangeEvent) => {
+    centro.set(e.nativeEvent.layout.x + e.nativeEvent.layout.width / 2);
+  };
 
   const lugar = useAnimatedStyle(() => {
     const v = vuelo.get();

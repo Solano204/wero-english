@@ -66,11 +66,8 @@ export function Grafica({ dias, ancho, activo, retraso = 0 }: Props & { ancho: n
   );
   const centros = useMemo(() => xs.map((x) => x + columna / 2), [xs, columna]);
   const max = maximo(dias);
-  const altos = useMemo(() => dias.map((d) => alturaColumna(d.respuestas, max, ALTO)), [dias, max]);
-  const altosAciertos = useMemo(
-    () => dias.map((d, i) => (d.respuestas > 0 ? (altos[i] ?? 0) * (d.aciertos / d.respuestas) : 0)),
-    [dias, altos]
-  );
+  const altos = dias.map((d) => alturaColumna(d.respuestas, max, ALTO));
+  const altosAciertos = dias.map((d, i) => (d.respuestas > 0 ? (altos[i] ?? 0) * (d.aciertos / d.respuestas) : 0));
   const puntos = useMemo(() => {
     const trazo = Skia.Path.Make();
     dias.forEach((d, i) => {

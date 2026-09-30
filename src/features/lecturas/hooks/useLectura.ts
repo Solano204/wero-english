@@ -110,7 +110,7 @@ export function useLectura() {
 
   // Las oraciones del capítulo y cuándo empieza cada una: con las marcas de Polly si existen y, si no, por caracteres.
   const oraciones = useMemo(() => (capitulo ? dividirOraciones(capitulo.texto) : []), [capitulo]);
-  const porOracion = useMemo(() => trozosPorOracion(oraciones, trozos), [oraciones, trozos]);
+  const porOracion = trozosPorOracion(oraciones, trozos);
 
   const rep = useReproductorCapitulo(capitulo?.audio ?? null);
   const repRef = useRef(rep);
@@ -217,13 +217,13 @@ export function useLectura() {
     }
   );
 
-  const volverAlAudio = useCallback(() => {
+  const volverAlAudio = () => {
     runOnUI(() => {
       'worklet';
       siguiendo.set(1);
       if (actual.get() >= 0) llevarA(actual.get(), true);
     })();
-  }, [siguiendo, actual, llevarA]);
+  };
 
   // Cada capítulo empieza arriba y siguiendo.
   useEffect(() => {
@@ -234,23 +234,20 @@ export function useLectura() {
     })();
   }, [cap, scrollRef, siguiendo]);
 
-  const alMedirTexto = useCallback(
-    (m: MedidasTexto) => {
-      finTexto.set(m.base + m.alto);
-      inicioTexto.set(m.base);
-      ysTexto.set(m.ys);
-    },
-    [finTexto, inicioTexto, ysTexto]
-  );
+  const alMedirTexto = (m: MedidasTexto) => {
+    finTexto.set(m.base + m.alto);
+    inicioTexto.set(m.base);
+    ysTexto.set(m.ys);
+  };
 
-  const marcarLeyenda = useCallback(() => {
+  const marcarLeyenda = () => {
     if (user) void guardarAjuste(user.id, 'leyendaLecturaVista', true);
-  }, [user, guardarAjuste]);
+  };
 
-  const abrirFrase = useCallback((entryId: number) => nav.navigate('Detail', { entryId }), [nav]);
+  const abrirFrase = (entryId: number) => nav.navigate('Detail', { entryId });
 
   /** Tocar una oración mientras suena (o en pausa) lleva el audio a ella. */
-  const irAOracion = useCallback((indice: number) => {
+  const irAOracion = (indice: number) => {
     const r = repRef.current;
     if (r.estado !== 'sonando' && r.estado !== 'pausado') return;
     haptics.tapLight();
@@ -260,9 +257,9 @@ export function useLectura() {
     void r.saltar(iniciosRef.current[indice] ?? 0).then(() => {
       if (enPausa) repRef.current.reanudar();
     });
-  }, [siguiendo]);
+  };
 
-  const siguiente = useCallback(() => {
+  const siguiente = () => {
     if (!lectura) return;
     audio.stop();
     if (cap + 1 < lectura.capitulos.length) {
@@ -270,35 +267,28 @@ export function useLectura() {
       return;
     }
     setEnPreguntas(true);
-  }, [cap, lectura]);
+  };
 
-  const responder = useCallback(
-    (i: number, opcion: number) => {
-      if (respuestas[i] !== undefined) return;
-      const correcta = lectura?.preguntas[i]?.correcta;
-      if (opcion === correcta) {
-        haptics.success();
-        void audio.playSuccess();
-      } else {
-        // Light, no Warning: el fallo informa, no regaña.
-        haptics.tapLight();
-        void audio.playFail();
-      }
-      setRespuestas((r) => ({ ...r, [i]: opcion }));
-    },
-    [respuestas, lectura]
-  );
+  const responder = (i: number, opcion: number) => {
+    if (respuestas[i] !== undefined) return;
+    const correcta = lectura?.preguntas[i]?.correcta;
+    if (opcion === correcta) {
+      haptics.success();
+      void audio.playSuccess();
+    } else {
+      // Light, no Warning: el fallo informa, no regaña.
+      haptics.tapLight();
+      void audio.playFail();
+    }
+    setRespuestas((r) => ({ ...r, [i]: opcion }));
+  };
 
   // Estable entre ticks del audio: si no, PieReproductor se repinta cada vez que la pantalla lo hace.
   const hayBotonSiguiente = rep.terminado || alFinal;
   const esUltimo = lectura ? cap + 1 >= lectura.capitulos.length : false;
-  const botonSiguiente = useMemo(
-    () =>
-      hayBotonSiguiente
+  const botonSiguiente = (hayBotonSiguiente
         ? { etiqueta: esUltimo ? 'Ver las preguntas' : `Capítulo ${cap + 2}`, onPress: siguiente }
-        : null,
-    [hayBotonSiguiente, esUltimo, cap, siguiente]
-  );
+        : null);
 
   return { nav, reducido, leyendaVista, lectura, cap, enPreguntas, setEnPreguntas, pregunta, setPregunta, respuestas, carga, estados, capitulo, oraciones, porOracion, rep, actual, scrollY, scrollRef, altoPie, siguiendo, mostrarVolver, volverAlAudio, alMedirTexto, marcarLeyenda, abrirFrase, irAOracion, siguiente, responder, botonSiguiente };
 }

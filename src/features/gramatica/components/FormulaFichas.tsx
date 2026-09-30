@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, type ReactNode } from 'react';
+import React, { useEffect, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -76,7 +76,7 @@ interface Props {
  * están en su lugar. Una fórmula sin «·» ni «+» se muestra como texto.
  */
 export function FormulaFichas({ formula, scrollY }: Props) {
-  const partida = useMemo(() => partirFormula(formula), [formula]);
+  const partida = partirFormula(formula);
   const { ref, alAcomodar, visto } = useVisto(scrollY);
 
   if (partida.tipo === 'texto') {

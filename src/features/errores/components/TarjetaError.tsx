@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Badge, Card, Icon } from '@/shared/ui';
@@ -28,7 +28,7 @@ interface Props {
  */
 export const TarjetaError = memo(function TarjetaError({ error: e, indice, animar, onAbrir }: Props) {
   const reducido = useMovimientoReducido();
-  const abrir = useCallback(() => onAbrir(e.id), [onAbrir, e.id]);
+  const abrir = () => onAbrir(e.id);
   const descripcion = `${anuncioDeError(e)} ${anuncioGravedad(e.gravedad)}.${e.compartible ? ' Para contar.' : ''}`;
 
   return (

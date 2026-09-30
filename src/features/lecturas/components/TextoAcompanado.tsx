@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -90,7 +90,7 @@ export const TextoAcompanado = memo(function TextoAcompanado({
   const pulso = useSharedValue(0);
   const iPulso = useSharedValue(-1);
 
-  const sincronizar = useCallback(() => {
+  const sincronizar = () => {
     programado.current = null;
     const n = oraciones.length;
     const nuevasYs = Array.from({ length: n }, (_, k) => medidas.current[k]?.y ?? -1);
@@ -98,20 +98,17 @@ export const TextoAcompanado = memo(function TextoAcompanado({
     ys.set(nuevasYs);
     hs.set(nuevasHs);
     alMedir?.({ base: contenedor.current.y, ys: nuevasYs, hs: nuevasHs, alto: contenedor.current.alto });
-  }, [oraciones.length, ys, hs, alMedir]);
+  };
 
   // Las medidas llegan una por oración: se juntan y se publican una vez por cuadro.
-  const programar = useCallback(() => {
+  const programar = () => {
     if (programado.current === null) programado.current = requestAnimationFrame(sincronizar);
-  }, [sincronizar]);
+  };
 
-  const alMedirOracion = useCallback(
-    (indice: number, y: number, alto: number) => {
-      medidas.current[indice] = { y, alto };
-      programar();
-    },
-    [programar]
-  );
+  const alMedirOracion = (indice: number, y: number, alto: number) => {
+    medidas.current[indice] = { y, alto };
+    programar();
+  };
 
   useEffect(
     () => () => {
@@ -162,22 +159,19 @@ export const TextoAcompanado = memo(function TextoAcompanado({
     };
   });
 
-  const alFrase = useCallback(
-    (entryId: number, indice: number) => {
-      if (reducido || pulso.get() > 0 || (ys.get()[indice] ?? -1) < 0) {
-        if (pulso.get() === 0) onFrase(entryId);
-        return;
-      }
-      iPulso.set(indice);
+  const alFrase = (entryId: number, indice: number) => {
+    if (reducido || pulso.get() > 0 || (ys.get()[indice] ?? -1) < 0) {
+      if (pulso.get() === 0) onFrase(entryId);
+      return;
+    }
+    iPulso.set(indice);
+    pulso.set(0);
+    pulso.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }, (fin) => {
+      if (!fin) return;
       pulso.set(0);
-      pulso.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }, (fin) => {
-        if (!fin) return;
-        pulso.set(0);
-        runOnJS(onFrase)(entryId);
-      }));
-    },
-    [reducido, pulso, iPulso, ys, onFrase]
-  );
+      runOnJS(onFrase)(entryId);
+    }));
+  };
 
   return (
     <View

@@ -28,10 +28,7 @@ export function useVozCaza(item: CazalaItem | undefined, revisada: boolean, auto
     () => (item ? analizar(item.frase_real, item.frase_real, marcasDe(item.audio), voz.duracion) : null),
     [item, voz.duracion]
   );
-  const analisisLento = useMemo(
-    () => (item ? analizar(item.frase_real, item.frase_real, marcasDe(item.audio_lento), vozLenta.duracion) : null),
-    [item, vozLenta.duracion]
-  );
+  const analisisLento = (item ? analizar(item.frase_real, item.frase_real, marcasDe(item.audio_lento), vozLenta.duracion) : null);
 
   const posReloj = useSharedValue(-1);
   const [conReloj, setConReloj] = useState(false);

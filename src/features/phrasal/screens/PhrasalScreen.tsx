@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { EmptyState, Header, Input, Screen } from '@/shared/ui';
 import { RenglonVerbo } from '@/features/phrasal/components/RenglonVerbo';
@@ -29,11 +29,8 @@ const Separador = () => <View style={styles.separador} />;
 export function PhrasalScreen() {
   const { nav, content, consulta, setConsulta, grupos, items, abrir } = usePhrasal();
 
-  const renderItem = useCallback(
-    ({ item }: { item: ItemVerbo }) => (
-      <RenglonVerbo verbo={item.verbo} formas={item.formas} coinciden={item.coinciden} onAbrir={abrir} />
-    ),
-    [abrir]
+  const renderItem = ({ item }: { item: ItemVerbo }) => (
+    <RenglonVerbo verbo={item.verbo} formas={item.formas} coinciden={item.coinciden} onAbrir={abrir} />
   );
 
   const intro = (

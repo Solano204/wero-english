@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Presionable } from '@/shared/ui/Presionable';
@@ -28,10 +28,7 @@ interface Props {
 export function RenglonPalabra({ ejemplo, esActual }: Props) {
   const reducido = useMovimientoReducido();
   const voz = useVozEnVivo(esActual ? ejemplo.audio : null);
-  const analisis = useMemo(
-    () => analizar(ejemplo.palabra, ejemplo.palabra, marcasDe(ejemplo.audio), voz.duracion),
-    [ejemplo.palabra, ejemplo.audio, voz.duracion]
-  );
+  const analisis = analizar(ejemplo.palabra, ejemplo.palabra, marcasDe(ejemplo.audio), voz.duracion);
 
   const suena = voz.sonando;
   const luz = useSharedValue(0);

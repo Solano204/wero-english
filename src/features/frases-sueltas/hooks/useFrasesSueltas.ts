@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
+import { useEffect, useRef, useState, useEffectEvent, useLayoutEffect } from 'react';
 import { AppState } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -142,7 +142,7 @@ export function useFrasesSueltas() {
   }, [user, entryId]);
 
   /** Reproduce EN, pausa, ES (si hay), resaltando el texto que suena. */
-  const reproduceSecuencia = useCallback(async (e: Entry) => {
+  const reproduceSecuencia = async (e: Entry) => {
     const miToken = ++vozToken.current;
     await audio.playSequence(
       pasosSecuencia(e),
@@ -150,7 +150,7 @@ export function useFrasesSueltas() {
       (idx) => setSonando({ modo: 'ambos', lengua: idx === 0 ? 'en' : 'es' })
     );
     if (vozToken.current === miToken) setSonando(null);
-  }, []);
+  };
 
   // Audio automático al mostrarse cada frase: arranca ~250ms después,
   // cancelable por entry.id para que pasar rápido no dispare audios
@@ -170,37 +170,31 @@ export function useFrasesSueltas() {
   useEffect(() => efectoEntryid(), [entry?.id, autoAudio]);
 
   /** Toque manual de un solo idioma: cancela lo que suene y reproduce solo eso. */
-  const reproduceUna = useCallback(
-    async (lang: 'en' | 'es', lento: boolean) => {
-      const path = lang === 'en' ? entry?.audio_en ?? null : entry?.audio_es ?? null;
-      const miToken = ++vozToken.current;
-      setSonando({ modo: lang === 'es' ? 'es' : lento ? 'lento' : 'en', lengua: lang });
-      await audio.playAndWait(path, lento ? { rate: VELOCIDAD_LENTA } : undefined);
-      if (vozToken.current === miToken) setSonando(null);
-    },
-    [entry]
-  );
+  const reproduceUna = async (lang: 'en' | 'es', lento: boolean) => {
+    const path = lang === 'en' ? entry?.audio_en ?? null : entry?.audio_es ?? null;
+    const miToken = ++vozToken.current;
+    setSonando({ modo: lang === 'es' ? 'es' : lento ? 'lento' : 'en', lengua: lang });
+    await audio.playAndWait(path, lento ? { rate: VELOCIDAD_LENTA } : undefined);
+    if (vozToken.current === miToken) setSonando(null);
+  };
 
-  const sonar = useCallback(
-    (modo: Modo) => {
-      if (!entry) return;
-      haptics.tapLight();
-      if (modo === 'ambos') void reproduceSecuencia(entry);
-      else void reproduceUna(modo === 'es' ? 'es' : 'en', modo === 'lento');
-    },
-    [entry, reproduceSecuencia, reproduceUna]
-  );
+  const sonar = (modo: Modo) => {
+    if (!entry) return;
+    haptics.tapLight();
+    if (modo === 'ambos') void reproduceSecuencia(entry);
+    else void reproduceUna(modo === 'es' ? 'es' : 'en', modo === 'lento');
+  };
 
   /** La carta de arriba empieza a irse: se corta la voz ANTES de cambiar de frase (un salto rápido dejaría sonando la que ya no se ve). */
-  const alLanzar = useCallback(() => {
+  const alLanzar = () => {
     haptics.tapLight();
     vozToken.current++;
     audio.stop();
     setSonando(null);
-  }, []);
+  };
 
   /** La carta ya salió. Al acabarse la baraja el mazo queda vacío y se pide otra: nunca se repite dentro de la misma tanda. */
-  const alAvanzar = useCallback(() => {
+  const alAvanzar = () => {
     const siguiente = iRef.current + 1;
     iRef.current = siguiente;
     if (siguiente >= largoRef.current) {
@@ -210,11 +204,11 @@ export function useFrasesSueltas() {
       return;
     }
     setI(siguiente);
-  }, [cargar]);
+  };
 
-  const pedirSiguiente = useCallback(() => mazo.current?.siguiente(), []);
+  const pedirSiguiente = () => mazo.current?.siguiente();
 
-  const alternarGuardada = useCallback(async () => {
+  const alternarGuardada = async () => {
     if (!user || !entry) return;
     const ahora = await toggleFavorite(user.id, entry.id);
     // La frase de arriba pudo cambiar mientras se guardaba: el botón habla de la de ahora.
@@ -224,13 +218,13 @@ export function useFrasesSueltas() {
       haptics.success();
       setPulso((p) => p + 1);
     }
-  }, [user, entry]);
+  };
 
   /** Deslizar hacia arriba solo guarda: quitar una frase de Mi mazo se hace con el botón. */
-  const guardarDeslizando = useCallback(() => {
+  const guardarDeslizando = () => {
     if (guardada) haptics.tapLight();
     else void alternarGuardada();
-  }, [guardada, alternarGuardada]);
+  };
 
   return { nav, pool, i, barajando, guardada, pulso, sonando, tanda, mazo, carga, loading, entry, sonar, alLanzar, alAvanzar, pedirSiguiente, alternarGuardada, guardarDeslizando };
 }

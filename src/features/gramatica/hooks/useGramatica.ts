@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { nivelMaximo } from '@/domain/gramatica';
@@ -39,13 +39,10 @@ export function useGramatica() {
     }
     return m;
   }, [gramatica]);
-  const niveles = useMemo(() => nivelMaximo(gramatica.temas), [gramatica]);
+  const niveles = nivelMaximo(gramatica.temas);
 
   const bloques = Object.entries(gramatica.bloques);
-  const abrirTema = useCallback(
-    (tema: GramaticaTema) => nav.navigate('GramaticaTema', { temaId: tema.id }),
-    [nav]
-  );
+  const abrirTema = (tema: GramaticaTema) => nav.navigate('GramaticaTema', { temaId: tema.id });
 
   return { nav, reducido, gramatica, clavesVistas, abierto, setAbierto, porBloque, niveles, bloques, abrirTema };
 }

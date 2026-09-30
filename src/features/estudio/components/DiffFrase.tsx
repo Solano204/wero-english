@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { diffLetras } from '@/domain/diff';
@@ -19,16 +19,12 @@ interface Props {
  */
 export function DiffFrase({ dado, esperado }: Props) {
   const reducido = useMovimientoReducido();
-  const tramos = useMemo(() => diffLetras(dado, esperado), [dado, esperado]);
+  const tramos = diffLetras(dado, esperado);
 
   // Para el lector de pantalla: la frase con lo que faltó y lo que sobró dicho en palabras.
-  const descripcion = useMemo(
-    () =>
-      tramos
+  const descripcion = (tramos
         .map((t) => (t.tipo === 'igual' ? t.texto : t.tipo === 'falta' ? `[faltó ${t.texto}]` : `[sobró ${t.texto}]`))
-        .join(''),
-    [tramos]
-  );
+        .join(''));
 
   return (
     <Animated.View entering={reducido ? undefined : aparecer()} style={styles.wrap} accessible accessibilityRole="text" accessibilityLabel={descripcion}>

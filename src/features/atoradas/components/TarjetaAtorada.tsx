@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Card, Presionable } from '@/shared/ui';
@@ -34,7 +34,7 @@ export const TarjetaAtorada = memo(function TarjetaAtorada({ entry, fallos, indi
   const reducido = useMovimientoReducido();
   const { vozEn, palabras, controles, sonar, acciones, atender } = useAudioFrase(entry);
   const tamano = tamanoAtorada(fallos);
-  const abrir = useCallback(() => onAbrir(entry), [onAbrir, entry]);
+  const abrir = () => onAbrir(entry);
   const alAccion = (e: AccessibilityActionEvent) => {
     atender(e.nativeEvent.actionName);
   };

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Carga, EmptyState, Header, Screen } from '@/shared/ui';
@@ -29,17 +29,14 @@ const REACOMODO = reacomodarResorte();
 export function DeckScreen() {
   const { nav, reducido, carga, items, aviso, reinsertada, quitar, deshacer, abrir } = useMazo();
 
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<Entry>) => (
-      <TarjetaGuardada
-        entry={item}
-        indice={item.id === reinsertada ? 0 : index}
-        animar={index < ANIMADAS || item.id === reinsertada}
-        onAbrir={abrir}
-        onQuitar={quitar}
-      />
-    ),
-    [abrir, quitar, reinsertada]
+  const renderItem = ({ item, index }: ListRenderItemInfo<Entry>) => (
+    <TarjetaGuardada
+      entry={item}
+      indice={item.id === reinsertada ? 0 : index}
+      animar={index < ANIMADAS || item.id === reinsertada}
+      onAbrir={abrir}
+      onQuitar={quitar}
+    />
   );
 
   const vacio = (

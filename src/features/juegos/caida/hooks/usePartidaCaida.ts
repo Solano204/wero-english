@@ -113,11 +113,11 @@ export function usePartidaCaida() {
   const [recordAntes, setRecordAntes] = useState(0);
   const montado = useRef(true);
 
-  const alSoltarPausa = useCallback(() => {
+  const alSoltarPausa = () => {
     setVolando(false);
     setFinRonda(null);
     setAnimandoFin(false);
-  }, []);
+  };
   const pausa = usePausaCaida(despachar, montado, alSoltarPausa);
   const { pausarConVoz, invalidarPausa, limpiarTemporizadores } = pausa;
 
@@ -280,65 +280,62 @@ export function usePartidaCaida() {
 
   const choque = useChoqueCaida(finRonda, reducido, altoPista, y, setAnimandoFin);
 
-  const responder = useCallback(
-    (texto: string) => {
-      if (!round || perdio || enPausa || cerradaEn.current === idx) return;
-      cerradaEn.current = idx;
-      cancelAnimation(y);
-      if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
-      respaldoCaida.current = null;
-      caidaRestante.current = null;
-      estela.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
+  const responder = (texto: string) => {
+    if (!round || perdio || enPausa || cerradaEn.current === idx) return;
+    cerradaEn.current = idx;
+    cancelAnimation(y);
+    if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
+    respaldoCaida.current = null;
+    caidaRestante.current = null;
+    estela.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
 
-      const bien = texto === round.correcta;
-      const ms = Date.now() - empezoEn.current;
+    const bien = texto === round.correcta;
+    const ms = Date.now() - empezoEn.current;
 
-      if (user) {
-        void applyGameGrade(user.id, round.entry.id, bien, ms, 'reconocer');
+    if (user) {
+      void applyGameGrade(user.id, round.entry.id, bien, ms, 'reconocer');
+    }
+
+    if (!bien) {
+      haptics.failure();
+      setFallada(texto);
+      setFinRonda('fallo');
+      setAnimandoFin(!reducido);
+      void pausarConVoz(round.entry, false, terminarPartida);
+      return;
+    }
+
+    setAcertada(`${idx}|${texto}`);
+    setVolando(true);
+    haptics.success();
+    celebra();
+    const totalAciertos = aciertosRef.current + 1;
+    aciertosRef.current = totalAciertos;
+    setAciertos(totalAciertos);
+    const esUltima = idx + 1 >= rounds.length;
+
+    void pausarConVoz(round.entry, true, () => {
+      if (esUltima) {
+        nav.replace('GameEnd', {
+          juego: 'caida',
+          rondas: rounds.length,
+          aciertos: totalAciertos,
+          nivel: nivel ?? undefined,
+        });
+      } else {
+        setIdx((i) => i + 1);
       }
-
-      if (!bien) {
-        haptics.failure();
-        setFallada(texto);
-        setFinRonda('fallo');
-        setAnimandoFin(!reducido);
-        void pausarConVoz(round.entry, false, terminarPartida);
-        return;
-      }
-
-      setAcertada(`${idx}|${texto}`);
-      setVolando(true);
-      haptics.success();
-      celebra();
-      const totalAciertos = aciertosRef.current + 1;
-      aciertosRef.current = totalAciertos;
-      setAciertos(totalAciertos);
-      const esUltima = idx + 1 >= rounds.length;
-
-      void pausarConVoz(round.entry, true, () => {
-        if (esUltima) {
-          nav.replace('GameEnd', {
-            juego: 'caida',
-            rondas: rounds.length,
-            aciertos: totalAciertos,
-            nivel: nivel ?? undefined,
-          });
-        } else {
-          setIdx((i) => i + 1);
-        }
-      });
-      // Caída no tiene vidas: cualquier fallo termina la corrida, así
-      // que `aciertos` mientras se sigue jugando ES la racha. Cada
-      // tercera se marca con un sonido distinto al acierto normal: se
-      // dispara después del SFX de acierto de pausarConVoz para que lo
-      // reemplace (stop() del combo corta el que ya estaba sonando).
-      if (totalAciertos % 3 === 0) void audio.playCombo();
-    },
-    [round, perdio, enPausa, y, estela, user, idx, rounds.length, nav, nivel, pausarConVoz, terminarPartida, reducido, celebra]
-  );
+    });
+    // Caída no tiene vidas: cualquier fallo termina la corrida, así
+    // que `aciertos` mientras se sigue jugando ES la racha. Cada
+    // tercera se marca con un sonido distinto al acierto normal: se
+    // dispara después del SFX de acierto de pausarConVoz para que lo
+    // reemplace (stop() del combo corta el que ya estaba sonando).
+    if (totalAciertos % 3 === 0) void audio.playCombo();
+  };
 
   /** «Otra vez» en la pantalla final: la misma partida desde la ronda 0. */
-  const otraVez = useCallback(() => {
+  const otraVez = () => {
     // El contador de aciertos vive también en un ref (la pausa lo lee sin esperar al render):
     // empezar de nuevo lo reinicia igual que el estado.
     aciertosRef.current = 0;
@@ -352,7 +349,7 @@ export function usePartidaCaida() {
     setFinRonda(null);
     setAnimandoFin(false);
     despachar({ tipo: 'otraVez' });
-  }, []);
+  };
 
   return {
     nav,

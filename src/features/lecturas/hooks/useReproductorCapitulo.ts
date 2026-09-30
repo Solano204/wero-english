@@ -136,7 +136,7 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
     return () => sub.remove();
   }, [estado, cambiar]);
 
-  const escuchar = useCallback(async () => {
+  const escuchar = async () => {
     cambiar('cargando');
     setTerminado(false);
     const ok = await audio.play(path);
@@ -147,35 +147,32 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
     }
     genRef.current = audio.generacionActual();
     cambiar('sonando');
-  }, [path, cambiar, aReposo]);
+  };
 
-  const pausar = useCallback(() => {
+  const pausar = () => {
     audio.pauseFrase();
     cambiar('pausado');
-  }, [cambiar]);
+  };
 
-  const reanudar = useCallback(() => {
+  const reanudar = () => {
     if (audio.generacionActual() !== genRef.current || !audio.resumeFrase()) {
       aReposo();
       return;
     }
     cambiar('sonando');
-  }, [cambiar, aReposo]);
+  };
 
-  const detener = useCallback(() => {
+  const detener = () => {
     audio.stop();
     aReposo();
-  }, [aReposo]);
+  };
 
-  const saltar = useCallback(
-    async (seg: number) => {
-      if (estadoRef.current !== 'sonando' && estadoRef.current !== 'pausado') return;
-      if (!(await audio.saltarFrase(seg))) return;
-      pos.set(seg);
-      setProgreso((p) => ({ ...p, pos: seg }));
-    },
-    [pos]
-  );
+  const saltar = async (seg: number) => {
+    if (estadoRef.current !== 'sonando' && estadoRef.current !== 'pausado') return;
+    if (!(await audio.saltarFrase(seg))) return;
+    pos.set(seg);
+    setProgreso((p) => ({ ...p, pos: seg }));
+  };
 
   return {
     estado,

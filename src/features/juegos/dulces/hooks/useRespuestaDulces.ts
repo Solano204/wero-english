@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from 'react';
+import { useRef, useState, type Dispatch, type RefObject, type SetStateAction } from 'react';
 import type { EventoPartida } from '@/features/juegos/dulces/logic/partida';
 import type { PreguntaDulces } from '@/features/juegos/dulces/components/HojaPregunta';
 import { applyGameGrade } from '@/data/repos/juegos';
@@ -80,35 +80,32 @@ export function useRespuestaDulces(p: Params) {
    * natural de la voz como "Seguir" y el tope de RESPUESTA_MAXIMA_MS;
    * el token evita que dos de ellos avancen dos veces.
    */
-  const avanzarTrasRespuesta = useCallback(
-    (miToken: number, objetivo: DulceObjetivo) => {
-      if (respuestaToken.current !== miToken) return;
-      respuestaToken.current++;
-      if (limiteRespuesta.current) clearTimeout(limiteRespuesta.current);
-      audio.stop();
-      if (!montado.current) return;
+  const avanzarTrasRespuesta = (miToken: number, objetivo: DulceObjetivo) => {
+    if (respuestaToken.current !== miToken) return;
+    respuestaToken.current++;
+    if (limiteRespuesta.current) clearTimeout(limiteRespuesta.current);
+    audio.stop();
+    if (!montado.current) return;
 
-      // Sin módulo: antes daba la vuelta a la bolsa y repetía frases ya
-      // contestadas en la misma partida. Si se acaban, el color se
-      // queda con la que tenía y deja de pedir pregunta; la partida
-      // termina por jugadas, como siempre.
-      const nueva = pool[tomarSiguienteFrase()];
+    // Sin módulo: antes daba la vuelta a la bolsa y repetía frases ya
+    // contestadas en la misma partida. Si se acaban, el color se
+    // queda con la que tenía y deja de pedir pregunta; la partida
+    // termina por jugadas, como siempre.
+    const nueva = pool[tomarSiguienteFrase()];
 
-      setObjetivos((prev) =>
-        prev
-          .map((o) =>
-            o.color === objetivo.color && nueva
-              ? { entry: nueva, color: o.color, llevas: 0, meta: META }
-              : o
-          )
-          .filter((o) => o.entry.id !== objetivo.entry.id || nueva)
-      );
-      despachar({ tipo: 'cerrarPregunta' });
-      alCerrarPregunta();
-      reiniciarReloj();
-    },
-    [pool, META, montado, tomarSiguienteFrase, setObjetivos, despachar, alCerrarPregunta, reiniciarReloj]
-  );
+    setObjetivos((prev) =>
+      prev
+        .map((o) =>
+          o.color === objetivo.color && nueva
+            ? { entry: nueva, color: o.color, llevas: 0, meta: META }
+            : o
+        )
+        .filter((o) => o.entry.id !== objetivo.entry.id || nueva)
+    );
+    despachar({ tipo: 'cerrarPregunta' });
+    alCerrarPregunta();
+    reiniciarReloj();
+  };
 
   /**
    * ACIERTO: SFX de acierto, inglés, pausa breve, español.
@@ -116,79 +113,73 @@ export function useRespuestaDulces(p: Params) {
    * el significado). Sin "Voz automática" solo queda el SFX y un
    * momento visual para leer la marca, sin voces ni pausas largas.
    */
-  const reproducirSecuenciaRespuesta = useCallback(
-    async (objetivo: DulceObjetivo, bien: boolean) => {
-      const miToken = ++respuestaToken.current;
-      cancelarVozMatch(true);
-      audio.stop();
+  const reproducirSecuenciaRespuesta = async (objetivo: DulceObjetivo, bien: boolean) => {
+    const miToken = ++respuestaToken.current;
+    cancelarVozMatch(true);
+    audio.stop();
 
-      limiteRespuesta.current = setTimeout(
-        () => avanzarTrasRespuesta(miToken, objetivo),
-        RESPUESTA_MAXIMA_MS
-      );
+    limiteRespuesta.current = setTimeout(
+      () => avanzarTrasRespuesta(miToken, objetivo),
+      RESPUESTA_MAXIMA_MS
+    );
 
-      void (bien ? audio.playSuccess() : audio.playFail());
+    void (bien ? audio.playSuccess() : audio.playFail());
 
-      if (!autoAudio) {
-        await new Promise((r) => setTimeout(r, SIN_VOZ_VISUAL_MS));
-        avanzarTrasRespuesta(miToken, objetivo);
-        return;
+    if (!autoAudio) {
+      await new Promise((r) => setTimeout(r, SIN_VOZ_VISUAL_MS));
+      avanzarTrasRespuesta(miToken, objetivo);
+      return;
+    }
+
+    if (bien) {
+      if (objetivo.entry.audio_en) {
+        await audio.play(objetivo.entry.audio_en);
+        await audio.waitUntilDone();
       }
-
-      if (bien) {
-        if (objetivo.entry.audio_en) {
-          await audio.play(objetivo.entry.audio_en);
-          await audio.waitUntilDone();
-        }
-        if (respuestaToken.current !== miToken) return; // Seguir/timeout ya cerró
-        await new Promise((r) => setTimeout(r, PAUSA_ENTRE_IDIOMAS_MS));
-        if (respuestaToken.current !== miToken) return;
-        if (objetivo.entry.audio_es) {
-          await audio.play(objetivo.entry.audio_es);
-          await audio.waitUntilDone();
-        }
-      } else if (objetivo.entry.audio_es) {
+      if (respuestaToken.current !== miToken) return; // Seguir/timeout ya cerró
+      await new Promise((r) => setTimeout(r, PAUSA_ENTRE_IDIOMAS_MS));
+      if (respuestaToken.current !== miToken) return;
+      if (objetivo.entry.audio_es) {
         await audio.play(objetivo.entry.audio_es);
         await audio.waitUntilDone();
       }
+    } else if (objetivo.entry.audio_es) {
+      await audio.play(objetivo.entry.audio_es);
+      await audio.waitUntilDone();
+    }
 
-      if (respuestaToken.current !== miToken) return;
-      avanzarTrasRespuesta(miToken, objetivo);
-    },
-    [autoAudio, avanzarTrasRespuesta, cancelarVozMatch]
-  );
+    if (respuestaToken.current !== miToken) return;
+    avanzarTrasRespuesta(miToken, objetivo);
+  };
 
-  const responder = useCallback(
-    (opcion: string) => {
-      if (!pregunta || !user || respondiendo) return;
-      const objetivo = pregunta.objetivo;
-      const bien = opcion === objetivo.entry.spanish_main;
+  const responder = (opcion: string) => {
+    if (!pregunta || !user || respondiendo) return;
+    const objetivo = pregunta.objetivo;
+    const bien = opcion === objetivo.entry.spanish_main;
 
-      despachar({ tipo: 'responder', opcion });
+    despachar({ tipo: 'responder', opcion });
 
-      void applyGameGrade(
-        user.id,
-        objetivo.entry.id,
-        bien,
-        msDesdeInicio(),
-        'reconocer'
-      );
+    void applyGameGrade(
+      user.id,
+      objetivo.entry.id,
+      bien,
+      msDesdeInicio(),
+      'reconocer'
+    );
 
-      if (bien) {
-        haptics.success();
-        celebra();
-        setResueltas((r) => r + 1);
-      } else {
-        haptics.failure();
-      }
+    if (bien) {
+      haptics.success();
+      celebra();
+      setResueltas((r) => r + 1);
+    } else {
+      haptics.failure();
+    }
 
-      void reproducirSecuenciaRespuesta(objetivo, bien);
-    },
-    [pregunta, user, respondiendo, despachar, msDesdeInicio, celebra, setResueltas, reproducirSecuenciaRespuesta]
-  );
+    void reproducirSecuenciaRespuesta(objetivo, bien);
+  };
 
   /** Botón "Seguir ›" de la pregunta: corta la voz y avanza ya. */
-  const seguirAhora = useCallback(() => {
+  const seguirAhora = () => {
     if (candadoAvanzar.current || !pregunta) return;
     candadoAvanzar.current = true;
     setAvanzando(true);
@@ -202,14 +193,14 @@ export function useRespuestaDulces(p: Params) {
         setAvanzando(false);
       }, AVANZAR_DEBOUNCE_MS);
     });
-  }, [pregunta, avanzarTrasRespuesta]);
+  };
 
   /** Al desmontar: nada de la secuencia en camino puede seguir. */
-  const soltarRespuesta = useCallback(() => {
+  const soltarRespuesta = () => {
     respuestaToken.current++;
     if (limiteRespuesta.current) clearTimeout(limiteRespuesta.current);
     if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
-  }, []);
+  };
 
   return { avanzando, responder, seguirAhora, soltarRespuesta };
 }

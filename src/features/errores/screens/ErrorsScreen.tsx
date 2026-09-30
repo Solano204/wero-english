@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
@@ -53,11 +53,8 @@ const Chip = memo(function Chip({ etiqueta, cuenta, activo, onPress }: ChipProps
 export function ErrorsScreen() {
   const { nav, todos, cat, orden, vista, salida, cuentas, lista, encabezado, elegirCategoria, elegirOrden, abrir } = useErrores();
 
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<ErrorCard>) => (
-      <TarjetaError error={item} indice={index} animar={index < ANIMADAS} onAbrir={abrir} />
-    ),
-    [abrir]
+  const renderItem = ({ item, index }: ListRenderItemInfo<ErrorCard>) => (
+    <TarjetaError error={item} indice={index} animar={index < ANIMADAS} onAbrir={abrir} />
   );
 
   const estiloSalida = useAnimatedStyle(() => ({ opacity: salida.get() }));

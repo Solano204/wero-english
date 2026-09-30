@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { DURACION_VUELO, type Vuelo } from '@/features/juegos/colmena/components/Hexagono';
 import type { Colocada, RechazoFicha } from '@/features/juegos/colmena/components/Panal';
@@ -44,14 +44,8 @@ export function useTableroColmena(round: ColmenaRound | undefined) {
     // Por si algún día la forma no suma lo que hay que armar: una sola palabra, sin perder ninguna letra.
     return largos.reduce((a, n) => a + n, 0) === round.objetivo.length ? largos : [round.objetivo.length];
   }, [round]);
-  const distribucion = useMemo(
-    () => distribuirRanuras(forma, anchoVentana - space.lg * 2, RANURAS),
-    [forma, anchoVentana]
-  );
-  const disposicion = useMemo(
-    () => disposicionPanal(round?.letras.length ?? 0, anchoVentana - space.lg * 2, PANAL),
-    [round, anchoVentana]
-  );
+  const distribucion = distribuirRanuras(forma, anchoVentana - space.lg * 2, RANURAS);
+  const disposicion = disposicionPanal(round?.letras.length ?? 0, anchoVentana - space.lg * 2, PANAL);
   // Cada letra aparece en su ranura cuando llega la ficha que vuela hasta ella.
   const retrasos = useMemo(() => {
     const r: number[] = [];
@@ -59,80 +53,68 @@ export function useTableroColmena(round: ColmenaRound | undefined) {
     return r;
   }, [colocadas]);
 
-  const aterrizaMs = useMemo(() => retrasos.reduce((m, r) => Math.max(m, r ?? 0), 0), [retrasos]);
+  const aterrizaMs = retrasos.reduce((m, r) => Math.max(m, r ?? 0), 0);
 
   /** El vuelo de una ficha del panal a una ranura, del centro de una al centro de la otra. */
-  const vueloA = useCallback(
-    (ficha: number, ranura: number, tipo: Vuelo['tipo'], retraso: number): Vuelo | null => {
-      const h = disposicion.hexagonos[ficha];
-      const r = distribucion.ranuras[ranura];
-      if (!h || !r) return null;
-      const centroFichaX = origenPanal.current.x + h.x + disposicion.hexAncho / 2;
-      const centroFichaY = origenPanal.current.y + h.y + disposicion.hexAlto / 2;
-      const centroRanuraX = origenRanuras.current.x + r.x + distribucion.ranuraAncho / 2;
-      const centroRanuraY = origenRanuras.current.y + r.y + distribucion.ranuraAlto / 2;
-      return {
-        dx: centroRanuraX - centroFichaX,
-        dy: centroRanuraY - centroFichaY,
-        ranuraAncho: distribucion.ranuraAncho,
-        ranuraAlto: distribucion.ranuraAlto,
-        fuente: fuenteDeRanura(distribucion.ranuraAncho),
-        retraso,
-        tipo,
-      };
-    },
-    [disposicion, distribucion]
-  );
+  const vueloA = (ficha: number, ranura: number, tipo: Vuelo['tipo'], retraso: number): Vuelo | null => {
+    const h = disposicion.hexagonos[ficha];
+    const r = distribucion.ranuras[ranura];
+    if (!h || !r) return null;
+    const centroFichaX = origenPanal.current.x + h.x + disposicion.hexAncho / 2;
+    const centroFichaY = origenPanal.current.y + h.y + disposicion.hexAlto / 2;
+    const centroRanuraX = origenRanuras.current.x + r.x + distribucion.ranuraAncho / 2;
+    const centroRanuraY = origenRanuras.current.y + r.y + distribucion.ranuraAlto / 2;
+    return {
+      dx: centroRanuraX - centroFichaX,
+      dy: centroRanuraY - centroFichaY,
+      ranuraAncho: distribucion.ranuraAncho,
+      ranuraAlto: distribucion.ranuraAlto,
+      fuente: fuenteDeRanura(distribucion.ranuraAncho),
+      retraso,
+      tipo,
+    };
+  };
 
   /** Las fichas que faltan vuelan una por una a su ranura («No me sale» y el tiempo). Solo dibuja. */
-  const volarFaltantes = useCallback(
-    (usadas: number[], armado: string) => {
-      if (!round) return;
-      const fichas = fichasParaCompletar(round.letras, usadas, round.objetivo, armado.length);
-      const nuevas: Colocada[] = [];
-      fichas.forEach((ficha, j) => {
-        const ranura = armado.length + j;
-        const vuelo = vueloA(ficha, ranura, 'ayuda', retrasoVuelo(j, fichas.length));
-        if (vuelo) nuevas.push({ ...vuelo, ficha, ranura });
-      });
-      setColocadas((prev) => [...prev, ...nuevas]);
-    },
-    [round, vueloA]
-  );
+  const volarFaltantes = (usadas: number[], armado: string) => {
+    if (!round) return;
+    const fichas = fichasParaCompletar(round.letras, usadas, round.objetivo, armado.length);
+    const nuevas: Colocada[] = [];
+    fichas.forEach((ficha, j) => {
+      const ranura = armado.length + j;
+      const vuelo = vueloA(ficha, ranura, 'ayuda', retrasoVuelo(j, fichas.length));
+      if (vuelo) nuevas.push({ ...vuelo, ficha, ranura });
+    });
+    setColocadas((prev) => [...prev, ...nuevas]);
+  };
 
   /** La ficha se asoma hacia la ranura que sigue y regresa; ahí no hay nada que descontar. */
-  const rechazar = useCallback(
-    (ficha: number, ranura: number) => {
-      const hacia = vueloA(ficha, ranura, 'toque', 0);
-      if (hacia) setRechazo({ id: ++rechazoId.current, ficha, dx: hacia.dx, dy: hacia.dy });
-    },
-    [vueloA]
-  );
+  const rechazar = (ficha: number, ranura: number) => {
+    const hacia = vueloA(ficha, ranura, 'toque', 0);
+    if (hacia) setRechazo({ id: ++rechazoId.current, ficha, dx: hacia.dx, dy: hacia.dy });
+  };
 
   /** La ficha tocada (o la de la pista) vuela a su ranura. */
-  const colocar = useCallback(
-    (ficha: number, ranura: number, viaPista: boolean, retraso: number) => {
-      const vuelo = vueloA(ficha, ranura, viaPista ? 'pista' : 'toque', retraso);
-      if (vuelo) setColocadas((prev) => [...prev, { ...vuelo, ficha, ranura }]);
-    },
-    [vueloA]
-  );
+  const colocar = (ficha: number, ranura: number, viaPista: boolean, retraso: number) => {
+    const vuelo = vueloA(ficha, ranura, viaPista ? 'pista' : 'toque', retraso);
+    if (vuelo) setColocadas((prev) => [...prev, { ...vuelo, ficha, ranura }]);
+  };
 
   /** Lo de la ronda que se deja se limpia junto con el cambio. */
-  const limpiar = useCallback(() => {
+  const limpiar = () => {
     setColocadas([]);
     setRechazo(null);
-  }, []);
+  };
 
   /** Dónde quedaron las ranuras en la pantalla (su onLayout): de ahí salen los vuelos. */
-  const medirRanuras = useCallback((x: number, y: number) => {
+  const medirRanuras = (x: number, y: number) => {
     origenRanuras.current = { x, y };
-  }, []);
+  };
 
   /** Dónde quedó el panal en la pantalla (su onLayout). */
-  const medirPanal = useCallback((x: number, y: number) => {
+  const medirPanal = (x: number, y: number) => {
     origenPanal.current = { x, y };
-  }, []);
+  };
 
   return {
     forma,

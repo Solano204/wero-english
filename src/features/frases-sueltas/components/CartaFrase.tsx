@@ -51,16 +51,13 @@ export function CartaFrase({ entry, activa, alto, ancho, sonando, onSonar, guard
     [entry.phrase, hablado, entry.audio_en, voz.duracion]
   );
 
-  const densidad = useMemo(() => elegirDensidad(entry, ancho, alto), [entry, ancho, alto]);
+  const densidad = elegirDensidad(entry, ancho, alto);
   const d = DENSIDAD[densidad];
   // El marco de imagen (16:9 al ancho de la carta) siempre se reserva, con imagen o sin ella. Si aun en la
   // densidad más apretada el contenido no cabe (frase muy larga, con nota), la carta deja hacer scroll: es la
   // excepción, no la norma, así que no compite con el deslizamiento de "Siguiente"/"Guardar" casi nunca.
   const altoImagen = alturaImagen(ancho);
-  const seDesborda = useMemo(
-    () => desborda(alto, alturaEstimada(entry, ancho, densidad)),
-    [entry, ancho, alto, densidad]
-  );
+  const seDesborda = desborda(alto, alturaEstimada(entry, ancho, densidad));
   const tinte = color.world[entry.mundo as WorldId];
 
   const grupoFrase: ControlAudio[] = [

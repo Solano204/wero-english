@@ -46,14 +46,14 @@ export function useMarcadorCaida(
   }, []);
 
   /** La ficha acertada llegó: el marcador rueda al número nuevo y pulsa 1 → 1.06 → 1. */
-  const alLlegarFicha = useCallback(() => {
+  const alLlegarFicha = () => {
     setVolando(false);
     if (reducido) return;
     pulsoMarcador.set(withSequence(
       withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }),
       withTiming(0, { duration: motionDuration.base, easing: motionEasing.salir })
     ));
-  }, [reducido, pulsoMarcador, setVolando]);
+  };
 
   // Si la ficha no avisa que llegó (app en segundo plano a mitad del vuelo), el marcador se actualiza igual.
   useEffect(() => {

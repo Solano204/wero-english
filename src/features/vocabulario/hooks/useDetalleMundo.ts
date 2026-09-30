@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPackCounts } from '@/data/repos/estadisticas';
@@ -21,7 +20,7 @@ export function useDetalleMundo() {
   const { params } = useRoute<Rt>();
   const user = useAuthStore((s) => s.user);
   const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
 
   const carga = useCarga(
     async (): Promise<Record<string, { total: number; vistas: number; dominadas: number }>> =>

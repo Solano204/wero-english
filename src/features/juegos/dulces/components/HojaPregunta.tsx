@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -76,14 +76,10 @@ export function HojaPregunta({
 
   const entry = p?.objetivo.entry ?? null;
   const vozEn = useVozEnVivo(entry?.audio_en ?? null);
-  const en = useMemo(
-    () =>
-      entry
+  const en = (entry
         ? // Lo que se dice puede diferir de lo que se ve; los tiempos se calculan sobre lo dicho.
           analizar(entry.phrase, entry.phrase_tts || entry.phrase, marcasDe(entry.audio_en), vozEn.duracion)
-        : null,
-    [entry, vozEn.duracion]
-  );
+        : null);
 
   const y = useSharedValue(alturaVentana);
   const velo = useSharedValue(0);
@@ -130,14 +126,11 @@ export function HojaPregunta({
   useEffect(() => {
     avisar();
   }, [avisar, p]);
-  const alMedirTitulo = useCallback(
-    (e: LayoutChangeEvent) => {
-      const { x, y: dentro, width } = e.nativeEvent.layout;
-      tituloEn.current = { x: x + FILO, y: dentro + FILO, ancho: width };
-      avisar();
-    },
-    [avisar]
-  );
+  const alMedirTitulo = (e: LayoutChangeEvent) => {
+    const { x, y: dentro, width } = e.nativeEvent.layout;
+    tituloEn.current = { x: x + FILO, y: dentro + FILO, ancho: width };
+    avisar();
+  };
 
   if (!p || !en) return null;
   const correcta = p.objetivo.entry.spanish_main;

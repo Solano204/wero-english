@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { loadContent } from '@/data/contenido';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -62,14 +62,14 @@ export function useProgreso() {
 
   // Jalar para refrescar: recarga sin esqueleto y la aguja da un empujón al terminar.
   const { refrescar: recargar } = carga;
-  const refrescar = useCallback(async () => {
+  const refrescar = async () => {
     await recargar();
     setPulsos((n) => n + 1);
-  }, [recargar]);
+  };
 
   const diasCargados = carga.datos?.dias;
-  const registrados = useMemo(() => diasCargados ?? [], [diasCargados]);
-  const dias = useMemo(() => ventana(registrados, dayKey()), [registrados]);
+  const registrados = (diasCargados ?? []);
+  const dias = ventana(registrados, dayKey());
   // Sin días registrados, o ninguno dentro de las últimas tres semanas: nada de gráfica en ceros.
   const sinDias = registrados.length === 0 || dias.every((d) => d.respuestas === 0);
   const espectro = useVisto(scrollY);
@@ -78,7 +78,7 @@ export function useProgreso() {
   const seccionDetalle = useVisto(scrollY);
 
   // Los mundos del catálogo se leen cuando la pantalla los pide (loadContent es perezoso por archivo).
-  const mundosCatalogo = useCallback(() => loadContent().packs.mundos, []);
+  const mundosCatalogo = () => loadContent().packs.mundos;
 
   return { nav, top, user, scrollY, primera, estiloFundido, pulsos, carga, refrescar, dias, sinDias, espectro, seccionMundos, seccionJuegos, seccionDetalle, mundosCatalogo };
 }

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 /**
  * Estado compartido del estallido de cubitos.
@@ -20,9 +20,9 @@ export function useReaccion() {
   /** Sube solo con los aciertos: es lo que revienta las cajas. */
   const [trozos, setTrozos] = useState(0);
 
-  const celebra = useCallback(() => {
+  const celebra = () => {
     setTrozos((n) => n + 1);
-  }, []);
+  };
 
   return { trozos, celebra };
 }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AudioButton } from '@/shared/ui/AudioButton';
 import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
@@ -30,14 +30,8 @@ export function HeroeFrase({ entry }: Props) {
   // Lo que se dice puede diferir de lo que se ve; los tiempos se calculan sobre lo dicho.
   const hablado = entry.phrase_tts || entry.phrase;
 
-  const en = useMemo(
-    () => analizar(entry.phrase, hablado, marcasDe(entry.audio_en), vozEn.duracion),
-    [entry.phrase, hablado, entry.audio_en, vozEn.duracion]
-  );
-  const es = useMemo(
-    () => analizar(entry.spanish_main, entry.spanish_main, undefined, vozEs.duracion),
-    [entry.spanish_main, vozEs.duracion]
-  );
+  const en = analizar(entry.phrase, hablado, marcasDe(entry.audio_en), vozEn.duracion);
+  const es = analizar(entry.spanish_main, entry.spanish_main, undefined, vozEs.duracion);
 
   // Si el inglés arranca mientras el español se apaga, manda el inglés.
   const hablaEs = vozEs.sonando && !vozEn.sonando;

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -49,37 +49,34 @@ export function SfxSamplerScreen() {
   const [activo, setActivo] = useState<SfxPackId>(audio.paqueteSfxActual());
   const [simulando, setSimulando] = useState<SfxPackId | null>(null);
 
-  const activar = useCallback((id: SfxPackId) => {
+  const activar = (id: SfxPackId) => {
     audio.setPaqueteSfx(id);
     setActivo(id);
-  }, []);
+  };
 
-  const usar = useCallback(async (id: SfxPackId) => {
+  const usar = async (id: SfxPackId) => {
     await audio.guardaPaqueteDevPreferido(id);
     setActivo(id);
-  }, []);
+  };
 
-  const simularRacha = useCallback(
-    async (id: SfxPackId) => {
-      if (simulando) return;
-      setSimulando(id);
-      activar(id);
-      audio.reiniciaRacha();
-      await conFinalAsync(async () => {
-        for (let i = 0; i < 5; i++) {
-          haptics.success();
-          void audio.playSuccess();
-          await esperar(PAUSA_ENTRE_ACIERTOS_MS);
-        }
-        haptics.tapLight();
-        void audio.playFail();
-        await esperar(PAUSA_TRAS_FALLO_MS);
-      }, () => {
-        setSimulando(null);
-      });
-    },
-    [simulando, activar]
-  );
+  const simularRacha = async (id: SfxPackId) => {
+    if (simulando) return;
+    setSimulando(id);
+    activar(id);
+    audio.reiniciaRacha();
+    await conFinalAsync(async () => {
+      for (let i = 0; i < 5; i++) {
+        haptics.success();
+        void audio.playSuccess();
+        await esperar(PAUSA_ENTRE_ACIERTOS_MS);
+      }
+      haptics.tapLight();
+      void audio.playFail();
+      await esperar(PAUSA_TRAS_FALLO_MS);
+    }, () => {
+      setSimulando(null);
+    });
+  };
 
   return (
     <Screen scroll>

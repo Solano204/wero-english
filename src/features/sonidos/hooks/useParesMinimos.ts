@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { buildRounds, juzgar } from '@/domain/minimalPairs';
@@ -30,8 +30,8 @@ export function useParesMinimos() {
   const micHabilitado = useSettingsStore((s) => s.micHabilitado);
   const setSetting = useSettingsStore((s) => s.set);
 
-  const content = useMemo(() => loadContent(), []);
-  const estado = useMemo(() => speech.isAvailable(), []);
+  const content = loadContent();
+  const estado = speech.isAvailable();
   useCortarAudioAlSalir();
 
   // Si llega `fonemaId` (desde el laboratorio de sonidos), las rondas salen de los pares de ese fonema; si no
@@ -69,7 +69,7 @@ export function useParesMinimos() {
 
   const round = rounds[idx];
 
-  const escuchar = useCallback(async () => {
+  const escuchar = async () => {
     if (!round || ocupado) return;
 
     // Antes de tocar el micrófono, la hoja que dice adónde va la voz. «Ahora no» sigue sin micro.
@@ -122,9 +122,9 @@ export function useParesMinimos() {
     if (user && v.tipo !== 'no_disponible') {
       await logHabla(user.id, round.id, round.objetivo, v.tipo, v.oido, v.alternativas);
     }
-  }, [round, ocupado, micHabilitado, user, setSetting, pedirConsentimiento, escucharVoz, content]);
+  };
 
-  const siguiente = useCallback(() => {
+  const siguiente = () => {
     setVeredicto(null);
     setFallidos(0);
     if (idx + 1 >= rounds.length) {
@@ -136,7 +136,7 @@ export function useParesMinimos() {
       return;
     }
     setIdx((i) => i + 1);
-  }, [idx, rounds.length, aciertos, nav]);
+  };
 
   return { nav, estado, rounds, idx, fase, ocupado, sinVoz, nivel, enDispositivo, veredicto, hoja, efecto, fallidos, round, escuchar, siguiente };
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -73,12 +73,12 @@ export function Button({
   onPressIn,
   haptico = 'ligero',
 }: Props) {
-  const handlePress = useCallback(() => {
+  const handlePress = () => {
     if (disabled || loading) return;
     if (haptico === 'medio') haptics.tapMedium();
     else haptics.tapLight();
     onPress();
-  }, [disabled, loading, onPress, haptico]);
+  };
 
   const blocked = disabled || loading;
   const glifo =

@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from 'react';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPackEntries } from '@/data/repos/frases';
@@ -19,7 +18,7 @@ export function useDetallePack() {
   const nav = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
   const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
 
   const carga = useCarga(() => getPackEntries(params.packId, filter()), [params.packId, filter], {
     alEnfocar: true,
@@ -27,10 +26,7 @@ export function useDetallePack() {
 
   const pack = content.packs.packs.find((p) => p.id === params.packId);
 
-  const abrir = useCallback(
-    (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
-    [nav]
-  );
+  const abrir = (e: Entry) => nav.navigate('Detail', { entryId: e.id });
 
   return { nav, params, carga, pack, abrir };
 }

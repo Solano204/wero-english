@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { loadContent } from '@/data/contenido';
 import { AccessibilityInfo } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -65,17 +65,17 @@ export function useDetalleFrase() {
     };
   }, [user, params.entryId]);
 
-  const alternar = useCallback(async () => {
+  const alternar = async () => {
     if (!user || !entry) return;
     tocado.current = true;
     const guardada = await toggleFavorite(user.id, entry.id);
     setFav(guardada);
     if (guardada) setPulso((n) => n + 1);
     AccessibilityInfo.announceForAccessibility(guardada ? 'Guardada en Mi mazo' : 'Quitada de Mi mazo');
-  }, [user, entry]);
+  };
 
   // Los mundos del catálogo se leen cuando la pantalla los pide (loadContent es perezoso por archivo).
-  const mundosCatalogo = useCallback(() => loadContent().packs.mundos, []);
+  const mundosCatalogo = () => loadContent().packs.mundos;
 
   return { nav, top, scrollY, carga, entry, fav, pulso, entradaAnim, alternar, mundosCatalogo };
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, {
   interpolateColor,
@@ -72,14 +72,10 @@ export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: P
   const vozEn = useVozEnVivo(c?.entry.audio_en ?? null);
   const vozEs = useVozEnVivo(c?.entry.audio_es ?? null);
   const activaEs = vozEs.activa;
-  const en = useMemo(
-    () =>
-      c
+  const en = (c
         ? // Lo que se dice puede diferir de lo que se ve; los tiempos se calculan sobre lo dicho.
           analizar(c.entry.phrase, c.entry.phrase_tts || c.entry.phrase, marcasDe(c.entry.audio_en), vozEn.duracion)
-        : null,
-    [c, vozEn.duracion]
-  );
+        : null);
 
   const y = useSharedValue(alturaVentana);
   const opacidad = useSharedValue(reducido ? 0 : 1);

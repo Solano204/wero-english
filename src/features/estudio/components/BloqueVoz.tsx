@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AudioButton } from '@/shared/ui/AudioButton';
 import { PhraseBlock } from './PhraseBlock';
@@ -38,10 +38,7 @@ export function BloqueVoz({ entry, variante, pista, dictado = false, compacto }:
   const voz = useVozEnVivo(entry.audio_en);
   // Lo que se dice puede diferir de lo que se ve; los tiempos se calculan sobre lo dicho.
   const hablado = entry.phrase_tts || entry.phrase;
-  const analisis = useMemo(
-    () => analizar(variante === 'frase' ? entry.phrase : hablado, hablado, marcasDe(entry.audio_en), voz.duracion),
-    [variante, entry.phrase, hablado, entry.audio_en, voz.duracion]
-  );
+  const analisis = analizar(variante === 'frase' ? entry.phrase : hablado, hablado, marcasDe(entry.audio_en), voz.duracion);
 
   if (variante === 'oido') {
     return (

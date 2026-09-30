@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Icon, Presionable } from '@/shared/ui';
@@ -35,12 +35,12 @@ export const TarjetaGuardada = memo(function TarjetaGuardada({ entry, indice, an
   const { vozEn, palabras, controles, sonar, acciones, atender } = useAudioFrase(entry);
   const [verQuitar, setVerQuitar] = useState(false);
 
-  const abrir = useCallback(() => onAbrir(entry), [onAbrir, entry]);
-  const quitar = useCallback(() => onQuitar(entry), [onQuitar, entry]);
-  const alMantener = useCallback(() => {
+  const abrir = () => onAbrir(entry);
+  const quitar = () => onQuitar(entry);
+  const alMantener = () => {
     haptics.tapMedium();
     setVerQuitar((v) => !v);
-  }, []);
+  };
   const alAccion = (e: AccessibilityActionEvent) => {
     const nombre = e.nativeEvent.actionName;
     if (nombre === 'quitar') quitar();

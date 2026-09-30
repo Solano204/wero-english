@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { isBundled } from '@/services/media';
 import Animated from 'react-native-reanimated';
@@ -118,14 +118,8 @@ export function PaginaFonema({
   const vozLento = useVozEnVivo(esActual && hayLento ? fonema.audio_lento : null);
   // El sonido aislado no tiene palabras: su energía es una sola campana sobre la duración real del audio.
   const simboloIpa = sinBarras(fonema.ipa);
-  const envolvente = useMemo(
-    () => analizar(simboloIpa, simboloIpa, undefined, vozSolo.duracion).envolvente,
-    [simboloIpa, vozSolo.duracion]
-  );
-  const envolventeLenta = useMemo(
-    () => analizar(simboloIpa, simboloIpa, undefined, vozLento.duracion).envolvente,
-    [simboloIpa, vozLento.duracion]
-  );
+  const envolvente = (analizar(simboloIpa, simboloIpa, undefined, vozSolo.duracion).envolvente);
+  const envolventeLenta = (analizar(simboloIpa, simboloIpa, undefined, vozLento.duracion).envolvente);
   const lenta = vozLento.sonando;
 
   const oirLento = () => {

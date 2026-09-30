@@ -62,11 +62,8 @@ export function useFinJuego() {
   // resto, cinco rondas o más con el 70 % de aciertos. Solo entonces hay fiesta.
   const merece = umbrales ? estrellas >= 2 : rondas >= 5 && pct >= 70;
   // Las felicitaciones se eligen una vez por pantalla, no en cada render.
-  const perfecta = useMemo(
-    () => elegirFrase(PARTIDA_PERFECTA).split('{n}').join(String(rondas)),
-    [rondas]
-  );
-  const tresEstrellas = useMemo(() => elegirFrase(TRES_ESTRELLAS), []);
+  const perfecta = elegirFrase(PARTIDA_PERFECTA).split('{n}').join(String(rondas));
+  const tresEstrellas = elegirFrase(TRES_ESTRELLAS);
 
   const alMontar2 = useEffectEvent(() => {
     // Una sola vez, al mostrar el resultado. Sin buen resultado no suena nada:

@@ -14,7 +14,7 @@ import type { Entry, JuegoId, NivelJuego } from '@/types';
  */
 export function useNivel(juego: JuegoId, pedido?: number) {
   const user = useAuthStore((s) => s.user);
-  const content = useMemo(() => loadContent(), []);
+  const content = loadContent();
   const def = content.niveles.juegos[juego];
 
   const [nivel, setNivel] = useState<number | null>(pedido ?? null);

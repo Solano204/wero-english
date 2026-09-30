@@ -201,9 +201,9 @@ export function useRondaColmena() {
   useLayoutEffect(() => {
     tocarRef.current = tocarLetra;
   }, [tocarLetra]);
-  const alTocarFicha = useCallback((ficha: number) => tocarRef.current(ficha), []);
+  const alTocarFicha = (ficha: number) => tocarRef.current(ficha);
 
-  const usarPista = useCallback(() => {
+  const usarPista = () => {
     if (!round || resuelta || pistas <= 0) return;
 
     const letra = pistaPara(round.objetivo, armado);
@@ -219,7 +219,7 @@ export function useRondaColmena() {
       void audio.playPista();
       tocarLetra(i, true);
     }
-  }, [round, resuelta, pistas, armado, usadas, tocarLetra]);
+  };
 
   /**
    * Escuchar la palabra completa en inglés. Independiente de las pistas
@@ -230,7 +230,7 @@ export function useRondaColmena() {
    * ya está bloqueado por sonandoEscuchar, no hay forma normal de que
    * esto se dispare dos veces por el mismo uso.
    */
-  const escucharPalabra = useCallback(async () => {
+  const escucharPalabra = async () => {
     if (!round || resuelta || sonandoEscuchar || escuchas <= 0) return;
     setEscuchas((n) => n - 1);
     setSonandoEscuchar(true);
@@ -243,7 +243,7 @@ export function useRondaColmena() {
       // se queda deshabilitado el resto de la ronda.
       setSonandoEscuchar(false);
     });
-  }, [round, resuelta, sonandoEscuchar, escuchas]);
+  };
 
   // Qué ronda ya mandó a avanzarRonda: una sola vez por ronda, sin
   // importar si lo dispara el temporizador de salida o «Siguiente» de
@@ -251,7 +251,7 @@ export function useRondaColmena() {
   const avanzadaDesde = useRef(-1);
 
   /** Pasa a la ronda que sigue. Lo de la ronda que se deja se limpia junto con el cambio: la nueva no pinta ni un cuadro con ello. */
-  const avanzarRonda = useCallback(() => {
+  const avanzarRonda = () => {
     if (avanzadaDesde.current === idx) return;
     avanzadaDesde.current = idx;
     limpiar();
@@ -259,9 +259,9 @@ export function useRondaColmena() {
     setUsadas([]);
     despachar({ tipo: 'nuevaRonda' });
     setIdx((i) => i + 1);
-  }, [idx, limpiar]);
+  };
 
-  const siguiente = useCallback(() => {
+  const siguiente = () => {
     // Bloquea el botón ~400ms: sin esto, dos toques rápidos podían
     // procesar dos avances y disparar dos veces la lógica de abajo.
     if (candadoAvanzar.current) return;
@@ -301,7 +301,7 @@ export function useRondaColmena() {
         setAvanzando(false);
       }, AVANZAR_DEBOUNCE_MS);
     });
-  }, [idx, rounds.length, aciertos, nav, nivel, reducido, avanzarRonda]);
+  };
 
   /**
    * Resuelve la ronda con ayuda: «No me sale» o se acabó el tiempo. Se revela la palabra y se califica como
@@ -312,29 +312,26 @@ export function useRondaColmena() {
    * `user` la ronda se quedaba pegada para siempre (nunca aparecía «Siguiente»). Grabar la calificación sí
    * depende de `user`; resolver la ronda no.
    */
-  const resolverConAyuda = useCallback(
-    async (porTiempo: boolean) => {
-      if (!round || resuelta || resueltaEn.current === idx) return;
-      resueltaEn.current = idx;
-      despachar({ tipo: 'resolver', ayudaDesde: armado.length, seAcabo: porTiempo });
-      volarFaltantes(usadas, armado);
-      setArmado(round.objetivo);
-      if (porTiempo) haptics.failure();
-      void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
-      if (user) {
-        await applyGameGrade(
-          user.id,
-          round.entry.id,
-          false,
-          Date.now() - empezoEn.current,
-          'producir'
-        );
-      }
-    },
-    [user, round, resuelta, idx, armado, usadas, volarFaltantes]
-  );
-  const seAcaboElTiempo = useCallback(() => resolverConAyuda(true), [resolverConAyuda]);
-  const rendirse = useCallback(() => resolverConAyuda(false), [resolverConAyuda]);
+  const resolverConAyuda = async (porTiempo: boolean) => {
+    if (!round || resuelta || resueltaEn.current === idx) return;
+    resueltaEn.current = idx;
+    despachar({ tipo: 'resolver', ayudaDesde: armado.length, seAcabo: porTiempo });
+    volarFaltantes(usadas, armado);
+    setArmado(round.objetivo);
+    if (porTiempo) haptics.failure();
+    void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
+    if (user) {
+      await applyGameGrade(
+        user.id,
+        round.entry.id,
+        false,
+        Date.now() - empezoEn.current,
+        'producir'
+      );
+    }
+  };
+  const seAcaboElTiempo = () => resolverConAyuda(true);
+  const rendirse = () => resolverConAyuda(false);
 
   return {
     nav,

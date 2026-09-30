@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import * as audio from '@/services/audio';
 import type { Entry } from '@/types';
 
@@ -16,34 +16,31 @@ export function useVozMatch(autoAudio: boolean) {
   const ultimaVozMatch = useRef(0);
   const vozMatchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const reproducirVozMatch = useCallback(
-    (entry: Entry) => {
-      if (!autoAudio) return;
-      if (vozMatchTimer.current) {
-        clearTimeout(vozMatchTimer.current);
-        vozMatchTimer.current = null;
-      }
-      const ahora = Date.now();
-      const falta = VOZ_MATCH_THROTTLE_MS - (ahora - ultimaVozMatch.current);
-      if (falta <= 0) {
-        ultimaVozMatch.current = ahora;
+  const reproducirVozMatch = (entry: Entry) => {
+    if (!autoAudio) return;
+    if (vozMatchTimer.current) {
+      clearTimeout(vozMatchTimer.current);
+      vozMatchTimer.current = null;
+    }
+    const ahora = Date.now();
+    const falta = VOZ_MATCH_THROTTLE_MS - (ahora - ultimaVozMatch.current);
+    if (falta <= 0) {
+      ultimaVozMatch.current = ahora;
+      void audio.play(entry.audio_en);
+    } else {
+      vozMatchTimer.current = setTimeout(() => {
+        ultimaVozMatch.current = Date.now();
         void audio.play(entry.audio_en);
-      } else {
-        vozMatchTimer.current = setTimeout(() => {
-          ultimaVozMatch.current = Date.now();
-          void audio.play(entry.audio_en);
-        }, falta);
-      }
-    },
-    [autoAudio]
-  );
+      }, falta);
+    }
+  };
 
   /** La voz de match que se quedó esperando su turno ya no suena. */
-  const cancelarVozMatch = useCallback((soltar: boolean) => {
+  const cancelarVozMatch = (soltar: boolean) => {
     if (!vozMatchTimer.current) return;
     clearTimeout(vozMatchTimer.current);
     if (soltar) vozMatchTimer.current = null;
-  }, []);
+  };
 
   return { reproducirVozMatch, cancelarVozMatch };
 }

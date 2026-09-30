@@ -73,36 +73,30 @@ export function useMazo() {
   // Perder el foco (abrir el Detalle) corta todo el audio: el reproductor de frases es uno solo y compartido.
   useCortarAudioAlSalir();
 
-  const mostrar = useCallback(
-    (nuevo: AvisoSinId) => {
-      cuenta.current += 1;
-      setAviso({ ...nuevo, id: cuenta.current });
-      if (temporizador.current) clearTimeout(temporizador.current);
-      temporizador.current = setTimeout(() => setAviso(null), motionAviso.duracion);
-    },
-    []
-  );
+  const mostrar = (nuevo: AvisoSinId) => {
+    cuenta.current += 1;
+    setAviso({ ...nuevo, id: cuenta.current });
+    if (temporizador.current) clearTimeout(temporizador.current);
+    temporizador.current = setTimeout(() => setAviso(null), motionAviso.duracion);
+  };
 
-  const quitar = useCallback(
-    async (entry: Entry) => {
-      if (!user) return;
-      const r = quitarDeLista(itemsRef.current, entry.id);
-      if (r.indice < 0) return;
-      haptics.tapLight();
-      setLista(r.lista);
-      mostrar({ tipo: 'quitada', entry, indice: r.indice });
-      try {
-        await toggleFavorite(user.id, entry.id);
-      } catch {
-        // La base no guardó el cambio: la frase vuelve a su lugar y se avisa.
-        setLista((l) => reinsertar(l ?? [], entry, r.indice));
-        mostrar({ tipo: 'fallo' });
-      }
-    },
-    [user, mostrar]
-  );
+  const quitar = async (entry: Entry) => {
+    if (!user) return;
+    const r = quitarDeLista(itemsRef.current, entry.id);
+    if (r.indice < 0) return;
+    haptics.tapLight();
+    setLista(r.lista);
+    mostrar({ tipo: 'quitada', entry, indice: r.indice });
+    try {
+      await toggleFavorite(user.id, entry.id);
+    } catch {
+      // La base no guardó el cambio: la frase vuelve a su lugar y se avisa.
+      setLista((l) => reinsertar(l ?? [], entry, r.indice));
+      mostrar({ tipo: 'fallo' });
+    }
+  };
 
-  const deshacer = useCallback(async () => {
+  const deshacer = async () => {
     const a = avisoRef.current;
     if (!user || !a || a.tipo !== 'quitada') return;
     soltarTemporizadores();
@@ -116,12 +110,9 @@ export function useMazo() {
       setLista((l) => quitarDeLista(l ?? [], a.entry.id).lista);
       mostrar({ tipo: 'fallo' });
     }
-  }, [user, soltarTemporizadores, mostrar]);
+  };
 
-  const abrir = useCallback(
-    (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
-    [nav]
-  );
+  const abrir = (e: Entry) => nav.navigate('Detail', { entryId: e.id });
 
   return { nav, reducido, carga, items, aviso, reinsertada, quitar, deshacer, abrir };
 }

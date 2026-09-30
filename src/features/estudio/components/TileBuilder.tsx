@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   interpolateColor,
@@ -130,10 +130,7 @@ export function TileBuilder({ tiles, locked, onSubmit, respuesta, compacto = fal
   // ("the ... the") y con textos se apagarían las dos de un toque.
   const [usados, setUsados] = useState<number[]>([]);
 
-  const armado = useMemo(
-    () => usados.map((i) => tiles[i] ?? '').join(' '),
-    [usados, tiles]
-  );
+  const armado = usados.map((i) => tiles[i] ?? '').join(' ');
 
   // Al calificar, cada ficha puesta contra la palabra que le tocaba en ese lugar.
   const veredictos = useMemo<VeredictoFicha[]>(() => {
@@ -141,23 +138,17 @@ export function TileBuilder({ tiles, locked, onSubmit, respuesta, compacto = fal
     return usados.map((i, pos) => (normalizeAnswer(tiles[i] ?? '') === esperadas[pos] ? 'ok' : 'mal'));
   }, [respuesta, usados, tiles]);
 
-  const tomar = useCallback(
-    (i: number) => {
-      if (locked || usados.includes(i)) return;
-      haptics.tapLight();
-      setUsados((prev) => [...prev, i]);
-    },
-    [locked, usados]
-  );
+  const tomar = (i: number) => {
+    if (locked || usados.includes(i)) return;
+    haptics.tapLight();
+    setUsados((prev) => [...prev, i]);
+  };
 
-  const quitar = useCallback(
-    (pos: number) => {
-      if (locked) return;
-      haptics.tapLight();
-      setUsados((prev) => prev.filter((_, idx) => idx !== pos));
-    },
-    [locked]
-  );
+  const quitar = (pos: number) => {
+    if (locked) return;
+    haptics.tapLight();
+    setUsados((prev) => prev.filter((_, idx) => idx !== pos));
+  };
 
   return (
     <View style={styles.wrap}>
