@@ -455,7 +455,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/dulces/') || r === 'src/features/juegos/dulces/screens/DulcesScreen.tsx' ||
   r.startsWith('src/components/juegos/colmena/') || r === 'src/features/juegos/colmena/screens/ColmenaScreen.tsx' ||
   r.startsWith('src/components/juegos/cazala/') || r === 'src/features/juegos/cazala/screens/CazalaScreen.tsx' ||
-  r === 'src/screens/extras/EarModeScreen.tsx' ||
+  r === 'src/features/oido/screens/EarModeScreen.tsx' ||
   r.startsWith('src/components/sonidos/') || r === 'src/features/sonidos/screens/PronunciationScreen.tsx' ||
   r.startsWith('src/components/gramatica/') || r === 'src/features/gramatica/screens/GramaticaScreen.tsx' || r === 'src/features/gramatica/screens/GramaticaTemaScreen.tsx' ||
   r.startsWith('src/components/phrasal/') || r === 'src/features/phrasal/screens/PhrasalScreen.tsx' || r === 'src/features/phrasal/screens/PhrasalVerboScreen.tsx' ||

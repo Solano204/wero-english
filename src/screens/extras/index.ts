@@ -1,5 +1,5 @@
 export { PracticeScreen } from '@/features/practicar/screens/PracticeScreen';
-export { EarModeScreen } from './EarModeScreen';
+export { EarModeScreen } from '@/features/oido/screens/EarModeScreen';
 export { PronunciationScreen } from '@/features/sonidos/screens/PronunciationScreen';
 export { MinimalPairsScreen } from '@/features/sonidos/screens/MinimalPairsScreen';
 export { ContractionsScreen } from '@/features/sonidos/screens/ContractionsScreen';

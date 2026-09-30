@@ -84,7 +84,7 @@ export function RootNavigator() {
           no como navegar a otra sección. */}
       <Stack.Group screenOptions={{ animation: 'slide_from_bottom' }}>
         <Stack.Screen name="Study" getComponent={() => require('@/features/estudio/screens/StudyScreen').StudyScreen} />
-        <Stack.Screen name="EarMode" getComponent={() => require('@/screens/extras/EarModeScreen').EarModeScreen} />
+        <Stack.Screen name="EarMode" getComponent={() => require('@/features/oido/screens/EarModeScreen').EarModeScreen} />
         <Stack.Screen name="Cazala" getComponent={() => require('@/features/juegos/cazala/screens/CazalaScreen').CazalaScreen} />
         <Stack.Screen name="Colmena" getComponent={() => require('@/features/juegos/colmena/screens/ColmenaScreen').ColmenaScreen} />
         <Stack.Screen name="Pares" getComponent={() => require('@/features/juegos/pares/screens/ParesScreen').ParesScreen} />
