@@ -28,6 +28,9 @@ export const Input = forwardRef<TextInput, Props>(function Input(
         ]}
       >
         <TextInput
+          // Lo de la pantalla va primero: el borde de foco y el ojo de la contraseña (abajo) no se pierden si la
+          // pantalla pasa su propio onFocus, onBlur o secureTextEntry; los suyos se llaman desde los de aquí.
+          {...rest}
           ref={ref}
           style={[styles.input, style]}
           placeholderTextColor={color.textFaint}
@@ -41,7 +44,6 @@ export const Input = forwardRef<TextInput, Props>(function Input(
             setFocused(false);
             rest.onBlur?.(e);
           }}
-          {...rest}
         />
         {secureToggle ? (
           <Presionable
