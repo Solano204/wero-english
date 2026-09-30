@@ -63,7 +63,7 @@ const TIPO2_SE_QUEDAN = {
   'src/features/cuenta/screens/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/cuenta/screens/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
   'src/features/practicar/screens/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/features/juegos/colmena/screens/ColmenaScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/colmena/components/PieColmena.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/caida/components/FinCaida.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/fin/screens/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/fin/screens/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
