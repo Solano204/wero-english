@@ -60,6 +60,9 @@ export function CazalaScreen() {
   const [esperando, setEsperando] = useState(false);
   const [alturaHoja, setAlturaHoja] = useState(0);
   const esperaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // El candado de "Siguiente" de verdad: `esperando` solo deshabilita el
+  // botón, y dos toques en el mismo cuadro todavía lo ven en false.
+  const candadoAvanzar = useRef(false);
   const autoAudio = useSettingsStore((s) => s.autoAudio);
   const { height: alto } = useWindowDimensions();
   const compacta = alto < ALTO_COMPACTO;
@@ -153,19 +156,27 @@ export function CazalaScreen() {
   }, [item, picked, user, autoAudio]);
 
   const siguiente = useCallback(() => {
-    if (esperando) return;
+    if (candadoAvanzar.current) return;
+    candadoAvanzar.current = true;
     setEsperando(true);
-    if (esperaTimer.current) clearTimeout(esperaTimer.current);
-    esperaTimer.current = setTimeout(() => setEsperando(false), AVANZAR_DEBOUNCE_MS);
-    audio.stop();
-    if (idx + 1 >= items.length) {
-      nav.goBack();
-      return;
+    try {
+      audio.stop();
+      if (idx + 1 >= items.length) {
+        nav.goBack();
+        return;
+      }
+      setPicked([]);
+      setChecked(false);
+      setIdx((i) => i + 1);
+    } finally {
+      // El candado se suelta siempre, aunque el cambio de ronda fallara.
+      if (esperaTimer.current) clearTimeout(esperaTimer.current);
+      esperaTimer.current = setTimeout(() => {
+        candadoAvanzar.current = false;
+        setEsperando(false);
+      }, AVANZAR_DEBOUNCE_MS);
     }
-    setPicked([]);
-    setChecked(false);
-    setIdx((i) => i + 1);
-  }, [esperando, idx, items.length, nav]);
+  }, [idx, items.length, nav]);
 
   if (items.length === 0) {
     return (

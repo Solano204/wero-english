@@ -31,6 +31,91 @@ let reproduccionId = 0;
  */
 let colaFrase: Promise<void> = Promise.resolve();
 
+/* ---------- estado de cada player, por eventos ----------
+   En Android, leer `playing`, `currentTime` o `duration` de un player de
+   expo-audio NO es gratis: cada lectura hace runBlocking sobre el hilo
+   principal (ver AudioModule.kt, `runOnMain`), así que el hilo de JS se
+   queda parado hasta que el de UI le contesta. Al terminar una ronda de
+   Colmena se juntaban cinco bucles leyendo esas propiedades cada 30-60 ms
+   (la onda y el karaoke, la espera del efecto, dos esperas de la voz y la
+   del ducking) mientras el hilo de UI iba lleno de animaciones: JS pasaba
+   casi todo el tiempo esperando a UI, y un toque en «Siguiente» (que
+   necesita a JS) cerraba el círculo. La app se congelaba entera.
+
+   Ahora nadie lee esas propiedades en un bucle: cada player avisa su
+   estado con `playbackStatusUpdate` (asíncrono, no bloquea a nadie) y aquí
+   se guarda la última foto. La posición entre dos avisos se estima con el
+   reloj y la velocidad. */
+interface EstadoReproductor {
+  playing: boolean;
+  /** Segundos, en la última foto. */
+  currentTime: number;
+  /** Segundos; 0 hasta que el player la conoce. */
+  duration: number;
+  rate: number;
+  /** Se le dio play() y el player todavía no avisa que suena. */
+  arrancando: boolean;
+  /** Date.now() de la última foto. */
+  en: number;
+}
+
+/** Cada cuánto avisa el player de frases mientras suena: lo que usan la onda y el karaoke para no desfasarse. */
+const INTERVALO_ESTADO_MS = 100;
+
+const estados = new Map<AudioPlayer, EstadoReproductor>();
+const suscripciones = new Map<AudioPlayer, { remove: () => void }>();
+
+function vigilar(p: AudioPlayer): void {
+  if (suscripciones.has(p)) return;
+  estados.set(p, { playing: false, currentTime: 0, duration: 0, rate: 1, arrancando: false, en: Date.now() });
+  try {
+    const sub = p.addListener('playbackStatusUpdate', (s) => {
+      const playing = Boolean(s.playing);
+      estados.set(p, {
+        playing,
+        // Solo un aviso de "suena" termina el arranque: uno viejo de pausa
+        // que llegue tarde no lo da por terminado.
+        arrancando: (estados.get(p)?.arrancando ?? false) && !playing,
+        currentTime: Number.isFinite(s.currentTime) ? s.currentTime : 0,
+        duration: Number.isFinite(s.duration) && s.duration > 0 ? s.duration : 0,
+        rate: s.playbackRate > 0 ? s.playbackRate : 1,
+        en: Date.now(),
+      });
+    });
+    suscripciones.set(p, sub);
+  } catch {
+    // Sin eventos el player suena igual; las esperas terminan por su tope.
+  }
+}
+
+function soltar(p: AudioPlayer): void {
+  try {
+    suscripciones.get(p)?.remove();
+  } catch {
+    /* sin consecuencia */
+  }
+  suscripciones.delete(p);
+  estados.delete(p);
+}
+
+/** Dónde va el player según su última foto: si sonaba, lo que avanzó desde entonces. */
+function posicionDe(e: EstadoReproductor): number {
+  if (!e.playing) return e.currentTime;
+  const p = e.currentTime + ((Date.now() - e.en) / 1000) * e.rate;
+  return e.duration > 0 ? Math.min(p, e.duration) : p;
+}
+
+/** Corrige la foto desde aquí mismo (pausa, rebobinado) sin esperar a que llegue el aviso del player. */
+function marcar(p: AudioPlayer, cambios: Partial<Omit<EstadoReproductor, 'en'>>): void {
+  const e = estados.get(p);
+  if (!e) return;
+  estados.set(p, { ...e, currentTime: posicionDe(e), ...cambios, en: Date.now() });
+}
+
+function suena(p: AudioPlayer | null | undefined): boolean {
+  return p ? (estados.get(p)?.playing ?? false) : false;
+}
+
 /* ---------- efectos cortos ----------
    Canal separado del player de frases: uno reproduce catálogo (rutas
    variables, se resuelven con media.resolve), el otro sonidos fijos
@@ -145,6 +230,7 @@ export function setPaqueteSfx(id: SfxPackId): void {
   // Los players ya creados apuntan a los archivos del paquete anterior: se sueltan para que el
   // próximo playSfx() los cree de nuevo con la fuente correcta.
   for (const p of sfxPlayers.values()) {
+    soltar(p);
     try {
       p.remove();
     } catch {
@@ -248,10 +334,16 @@ function sfxPlayerPara(key: SfxKey, modulo: number, v: number, escalon: number):
   let p = sfxPlayers.get(cacheKey);
   if (!p) {
     p = createAudioPlayer(modulo);
+    vigilar(p);
     sfxPlayers.set(cacheKey, p);
   }
   return p;
 }
+
+/** Cuándo se le dio play() por última vez a cada player de efecto: stop() solo pausa los que pueden estar sonando. */
+const sfxTocadoEn = new Map<AudioPlayer, number>();
+/** Un efecto dura menos que esto; pasado este rato ya no hace falta pausarlo. */
+const SFX_VIVO_MS = 3000;
 
 export async function initAudio(): Promise<void> {
   if (ready) return;
@@ -320,7 +412,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
   const miId = ++reproduccionId;
   let resultado = false;
 
-  colaFrase = colaFrase.then(async () => {
+  const paso = async () => {
     // Todo el paso va en un solo try/catch: si algo truena (incluso
     // media.resolve), la cola sigue viva para la próxima reproducción.
     // Un solo throw sin atrapar aquí dejaría `colaFrase` rechazada para
@@ -336,7 +428,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
         return;
       }
 
-      await initAudio();
+      await conTope(initAudio(), TOPE_NATIVO_MS, undefined);
       if (miId !== reproduccionId) return; // se saltó durante initAudio
 
       if (player && currentPath === relPath) {
@@ -348,10 +440,13 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
           /* sin consecuencia */
         }
         try {
-          await player.seekTo(0);
+          // Con tope: un seekTo nativo que no vuelve dejaba la cola
+          // atorada y ninguna frase volvía a sonar en la sesión.
+          await conTope(player.seekTo(0), TOPE_NATIVO_MS, undefined);
         } catch {
           // Si el dispositivo no puede rebobinar, se reproduce igual.
         }
+        marcar(player, { playing: false, currentTime: 0, arrancando: false });
       } else {
         // Se pausa antes de soltarlo: remove() sin pausar puede dejar
         // el sonido anterior terminando de salir mientras el nuevo ya
@@ -361,6 +456,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
         } catch {
           /* sin consecuencia */
         }
+        if (player) soltar(player);
         try {
           player?.remove();
         } catch {
@@ -372,8 +468,10 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
         // fallaba en silencio: el player se creaba con la URL del bundler en
         // vez de un archivo local, y no sonaba nada.
         player = createAudioPlayer(
-          resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri }
+          resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri },
+          { updateInterval: INTERVALO_ESTADO_MS }
         );
+        vigilar(player);
         currentPath = relPath;
       }
 
@@ -388,6 +486,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
       }
 
       player.play();
+      marcar(player, { arrancando: true });
       resultado = true;
       avisarReproduccion(relPath, rate);
       // Ducking: la música se agacha mientras suena esta voz y se
@@ -398,11 +497,15 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
     } catch (err) {
       console.warn('[audio] no se pudo reproducir', relPath, err);
     }
-  });
+  };
 
-  // Tope absoluto: si `colaFrase` se atora en un await nativo que nunca
-  // resuelve, quien llamó a play()/playSlow()/playAndWait() igual recibe
-  // una respuesta en vez de quedarse esperando para siempre.
+  // Cada paso de la cola lleva su propio tope: si un await nativo no
+  // vuelve, la cola sigue con la próxima reproducción en vez de quedarse
+  // atorada el resto de la sesión.
+  colaFrase = colaFrase.then(() => conTope(paso(), TOPE_ABSOLUTO_MS, undefined));
+
+  // Y quien llamó a play()/playSlow()/playAndWait() recibe respuesta
+  // aunque la cola traiga pasos anteriores atorados.
   return conTope(colaFrase.then(() => resultado), TOPE_ABSOLUTO_MS, false);
 }
 
@@ -411,7 +514,7 @@ export function play(relPath: string | null): Promise<boolean> {
   return reproducir(relPath, 1.0);
 }
 
-/** El player que de verdad sonó la última vez para cada clave: lo que `sfxSuena`/`esperarSfx` miran (con variantes, no siempre es el mismo objeto `AudioPlayer`). */
+/** El player que de verdad sonó la última vez para cada clave: lo que `esperarSfx` mira (con variantes, no siempre es el mismo objeto `AudioPlayer`). */
 const ultimoPlayerPorClave = new Map<SfxKey, AudioPlayer>();
 
 async function playSfx(key: SfxKey): Promise<void> {
@@ -422,7 +525,7 @@ async function playSfx(key: SfxKey): Promise<void> {
   sfxUltimaVez.set(key, ahora);
 
   try {
-    await initAudio();
+    await conTope(initAudio(), TOPE_NATIVO_MS, undefined);
 
     // Nunca encimado con la frase: el efecto la corta, no suena junto a ella.
     stop();
@@ -431,10 +534,11 @@ async function playSfx(key: SfxKey): Promise<void> {
     const p = sfxPlayerPara(key, modulo, v, escalon);
     ultimoPlayerPorClave.set(key, p);
     try {
-      await p.seekTo(0);
+      await conTope(p.seekTo(0), TOPE_NATIVO_MS, undefined);
     } catch {
       // Si no puede rebobinar, suena desde donde iba.
     }
+    marcar(p, { playing: false, currentTime: 0, arrancando: false });
     try {
       // Sin 'high': a diferencia de la voz, aquí SÍ se quiere que el tono
       // se mueva un poco con la velocidad (es el detune de ±2 %).
@@ -443,27 +547,31 @@ async function playSfx(key: SfxKey): Promise<void> {
       // Si el dispositivo no lo permite, suena a tono fijo: solo varían timbre/nota.
     }
     p.play();
+    marcar(p, { arrancando: true });
+    sfxTocadoEn.set(p, Date.now());
   } catch (err) {
     console.warn('[audio] no se pudo reproducir el efecto', key, err);
   }
 }
 
-function sfxSuena(key: SfxKey): boolean {
-  try {
-    return Boolean(ultimoPlayerPorClave.get(key)?.playing);
-  } catch {
-    return false;
-  }
-}
+/** Lo que tarda como mucho un efecto en pasar de play() a sonando. */
+const SFX_ARRANQUE_MS = 400;
 
-/** Se resuelve cuando ese efecto termina, o de inmediato si no sonó. */
+/**
+ * Se resuelve cuando ese efecto termina, o de inmediato si no sonó. Mira
+ * el estado que avisa el player, nunca `.playing` (que bloquea a JS), y
+ * nunca pasa de `timeoutMs`.
+ */
 async function esperarSfx(key: SfxKey, timeoutMs = 2000): Promise<void> {
   const inicio = Date.now();
-  // Justo después de play() el estado "playing" puede tardar un
-  // instante en reflejarse: sin este margen, esperarSfx podría creer
-  // que ya terminó cuando en realidad apenas empezaba.
-  await new Promise((r) => setTimeout(r, 30));
-  while (sfxSuena(key) && Date.now() - inicio < timeoutMs) {
+  const p = ultimoPlayerPorClave.get(key);
+  if (!p) return;
+  // Justo después de play() el aviso de "sonando" tarda un instante:
+  // sin esta espera corta se creería que ya terminó cuando apenas empieza.
+  while (estados.get(p)?.arrancando && Date.now() - inicio < SFX_ARRANQUE_MS) {
+    await new Promise((r) => setTimeout(r, 30));
+  }
+  while (suena(p) && Date.now() - inicio < timeoutMs) {
     await new Promise((r) => setTimeout(r, 40));
   }
 }
@@ -576,11 +684,9 @@ export function playSlow(relPath: string | null, rate = 0.7): Promise<boolean> {
  * cuarta frase, que fue exactamente lo que pasó en pruebas.
  */
 export function isPlaying(): boolean {
-  try {
-    return Boolean(player?.playing);
-  } catch {
-    return false;
-  }
+  // Del último aviso del player, no de `player.playing`: esa lectura
+  // bloquea el hilo de JS hasta que contesta el de UI (ver `vigilar`).
+  return suena(player);
 }
 
 /**
@@ -602,14 +708,15 @@ const FIN_MARGEN_MS = 2000;
 // Si no se conoce la duración (duration <= 0), tope duro razonable.
 const FIN_TIMEOUT_SIN_DURACION_MS = 15000;
 const POLL_MS = 60;
+/** Tope de un await nativo suelto (initAudio, seekTo): si no vuelve, se sigue sin él. */
+const TOPE_NATIVO_MS = 1500;
 
 /**
- * Tope absoluto de una espera de audio de frase: pase lo que pase (un
+ * Tope absoluto de un paso de la cola de frases: pase lo que pase (un
  * await nativo que nunca resuelve, `colaFrase` atascada por una llamada
- * anterior), quien espera un play()/playAndWait()/waitUntilDone() SIEMPRE
- * recibe una respuesta en vez de quedarse colgado. Los juegos que avanzan
- * de ronda dependen de esto: nunca deben congelarse por una espera de
- * audio que no vuelve.
+ * anterior), quien espera un play()/playSlow() SIEMPRE recibe una
+ * respuesta en vez de quedarse colgado. Las esperas de fin (playAndWait,
+ * waitUntilDone) llevan además su propio tope por duración: ver topeEspera.
  */
 const TOPE_ABSOLUTO_MS = 20000;
 
@@ -622,16 +729,27 @@ function conTope<T>(promesa: Promise<T>, ms: number, siExpira: T): Promise<T> {
 }
 
 /**
- * ¿currentTime en 0 y sin sonar? Es la señal de "se le acaba de dar
- * play() y el nativo todavía no lo refleja", no de "ya terminó". Un
- * audio que YA terminó se queda con currentTime > 0 (reproducir() solo
- * rebobina a 0 al REUSAR el player para uno nuevo), así que esta
- * distinción es lo que evita meter una espera muerta de hasta
- * arranqueTimeoutMs en algo como "Siguiente" cuando el audio ya se
- * acabó hace rato.
+ * ¿Se le acaba de dar play() y el player todavía no avisa que suena? Es la
+ * señal de "está por arrancar", no de "ya terminó": un audio que YA
+ * terminó no queda marcado como arrancando, así que esto evita meter una
+ * espera muerta de hasta arranqueTimeoutMs en algo como "Siguiente"
+ * cuando el audio ya se acabó hace rato.
  */
 function pareceAPuntoDeArrancar(): boolean {
-  return !isPlaying() && (player?.currentTime ?? 0) === 0;
+  const e = player ? estados.get(player) : undefined;
+  return !isPlaying() && (e?.arrancando ?? false);
+}
+
+/**
+ * Cuánto se espera, como mucho, a que termine lo que suena: su duración
+ * (a la velocidad a la que va) más FIN_MARGEN_MS. Sin duración conocida,
+ * FIN_TIMEOUT_SIN_DURACION_MS.
+ */
+function topeFin(finTimeoutMs?: number): number {
+  if (finTimeoutMs !== undefined) return finTimeoutMs;
+  const e = player ? estados.get(player) : undefined;
+  if (!e || e.duration <= 0) return FIN_TIMEOUT_SIN_DURACION_MS;
+  return (e.duration * 1000) / e.rate + FIN_MARGEN_MS;
 }
 
 /**
@@ -656,22 +774,22 @@ async function esperaReproduccion(
   }
   if (!vigente()) return;
 
-  // player?.duration es un getter nativo: si el player queda en un
-  // estado raro puede tirar en vez de dar 0, y eso dejaría esta espera
-  // rechazada sin que nadie limpie su candado (ver waitUntilDone/
-  // playAndWait, que ya no dependen de esto porque van con conTope).
-  let duracionS = 0;
-  try {
-    duracionS = player?.duration ?? 0;
-  } catch {
-    /* sin duración conocida: se usa el tope sin duración de abajo */
-  }
-  const timeout =
-    finTimeoutMs ?? (duracionS > 0 ? duracionS * 1000 + FIN_MARGEN_MS : FIN_TIMEOUT_SIN_DURACION_MS);
+  // El tope se recalcula en cada vuelta: la duración puede llegar en un
+  // aviso del player después de que ya empezó a sonar.
   const t1 = Date.now();
-  while (isPlaying() && vigente() && Date.now() - t1 < timeout) {
+  while (isPlaying() && vigente() && Date.now() - t1 < topeFin(finTimeoutMs)) {
     await new Promise((r) => setTimeout(r, POLL_MS));
   }
+}
+
+/**
+ * Tope de toda una espera (arranque + fin) por si el bucle de arriba se
+ * quedara sin turno: arranque, duración (o el tope sin duración) y el
+ * margen. Es el Promise.race que garantiza que ninguna espera de audio de
+ * un juego se quede colgada.
+ */
+function topeEspera(arranqueTimeoutMs: number, finTimeoutMs?: number): number {
+  return arranqueTimeoutMs + topeFin(finTimeoutMs);
 }
 
 export interface OpcionesReproduccion {
@@ -698,11 +816,8 @@ export async function playAndWait(
 ): Promise<boolean> {
   const sonó = await reproducir(relPath, opciones.rate ?? 1.0);
   if (!sonó) return false;
-  await conTope(
-    esperaReproduccion(reproduccionId, opciones.arranqueTimeoutMs ?? ARRANQUE_TIMEOUT_MS),
-    TOPE_ABSOLUTO_MS,
-    undefined
-  );
+  const arranque = opciones.arranqueTimeoutMs ?? ARRANQUE_TIMEOUT_MS;
+  await conTope(esperaReproduccion(reproduccionId, arranque), topeEspera(arranque), undefined);
   return true;
 }
 
@@ -716,7 +831,7 @@ export async function waitUntilDone(timeoutMs?: number): Promise<void> {
   if (!player) return;
   await conTope(
     esperaReproduccion(reproduccionId, ARRANQUE_TIMEOUT_MS, timeoutMs),
-    TOPE_ABSOLUTO_MS,
+    topeEspera(ARRANQUE_TIMEOUT_MS, timeoutMs),
     undefined
   );
 }
@@ -731,6 +846,7 @@ export function pauseFrase(): void {
   } catch {
     /* sin consecuencia */
   }
+  if (player) marcar(player, { playing: false, arrancando: false });
   // La música vuelve mientras la voz está en pausa.
   void music.duck(false);
 }
@@ -746,6 +862,7 @@ export function resumeFrase(): boolean {
   } catch {
     return false;
   }
+  marcar(player, { arrancando: true });
   void music.duck(true);
   void esperarFinReanudado(reproduccionId).then(() => music.duck(false));
   return true;
@@ -784,11 +901,11 @@ export async function saltarFrase(seg: number): Promise<boolean> {
 
 /** Posición y duración de la frase actual, en segundos. */
 export function progresoFrase(): { pos: number; dur: number } {
-  try {
-    return { pos: player?.currentTime ?? 0, dur: player?.duration ?? 0 };
-  } catch {
-    return { pos: 0, dur: 0 };
-  }
+  // La onda, el karaoke y la lectura la leen cada 50 ms: sale del último
+  // aviso del player más lo que avanzó desde entonces, nunca de
+  // `currentTime`/`duration` (bloquean el hilo de JS, ver `vigilar`).
+  const e = player ? estados.get(player) : undefined;
+  return e ? { pos: posicionDe(e), dur: e.duration } : { pos: 0, dur: 0 };
 }
 
 /**
@@ -831,14 +948,20 @@ export function stop(): void {
   } catch {
     /* sin consecuencia */
   }
+  if (player) marcar(player, { playing: false, arrancando: false });
   // También corta los efectos: "avanzar" o salir de pantalla no debe
-  // dejar un SFX terminando de sonar de fondo.
+  // dejar un SFX terminando de sonar de fondo. Solo los que pueden estar
+  // sonando: cada pause() es una llamada síncrona al hilo de UI, y
+  // pausar una docena de players callados en cada toque no sirve de nada.
+  const ahora = Date.now();
   for (const p of sfxPlayers.values()) {
+    if (!suena(p) && ahora - (sfxTocadoEn.get(p) ?? 0) > SFX_VIVO_MS) continue;
     try {
       p.pause();
     } catch {
       /* sin consecuencia */
     }
+    marcar(p, { playing: false, arrancando: false });
   }
 }
 
@@ -851,12 +974,14 @@ export function releaseAudio(): void {
   } catch {
     /* sin consecuencia */
   }
+  if (player) soltar(player);
   try {
     player?.remove();
   } catch {
     /* sin consecuencia */
   }
   for (const p of sfxPlayers.values()) {
+    soltar(p);
     try {
       p.remove();
     } catch {
@@ -864,6 +989,8 @@ export function releaseAudio(): void {
     }
   }
   sfxPlayers.clear();
+  sfxTocadoEn.clear();
+  ultimoPlayerPorClave.clear();
   player = null;
   currentPath = null;
   media.invalidate();

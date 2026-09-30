@@ -70,6 +70,12 @@ const APLASTE = 0.92;
 const VUELO_MAXIMO_MS = 1200;
 /** Bloqueo de "Siguiente" en la pausa contra doble toque. */
 const AVANZAR_DEBOUNCE_MS = 400;
+/**
+ * Respaldo de la caída: si el aviso de fin de la animación no llega
+ * (cancelada, app en segundo plano, un cuadro perdido), este temporizador
+ * cierra la ronda igual este rato después de lo que debía durar.
+ */
+const RESPALDO_CAIDA_MS = 300;
 
 /**
  * P-26, Caída.
@@ -124,6 +130,15 @@ export function CaidaScreen() {
     null
   );
   const [avanzando, setAvanzando] = useState(false);
+  const candadoAvanzar = useRef(false);
+  // Qué ronda ya terminó (contestada o contra el piso): la animación y su
+  // respaldo no pueden cerrarla dos veces, ni después de una respuesta.
+  const cerradaEn = useRef(-1);
+  // La caída en curso: cuándo llega al piso y su temporizador de respaldo.
+  // Al ir a segundo plano se guarda cuánto le faltaba para retomarla.
+  const caidaFin = useRef(0);
+  const respaldoCaida = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const caidaRestante = useRef<number | null>(null);
   // La ficha acertada vuela al marcador: mientras tanto el marcador muestra el número de antes y la
   // pausa espera. `destino` es el centro del marcador en el espacio de la pista.
   const [volando, setVolando] = useState(false);
@@ -193,11 +208,21 @@ export function CaidaScreen() {
   useEffect(() => {
     montado.current = true;
     const sub = AppState.addEventListener('change', (estado) => {
-      if (estado === 'active') return;
-      // No se avanza de ronda estando en background: solo se corta la
-      // voz y se congela donde está. "Siguiente" sigue ahí al volver.
+      if (estado === 'active') {
+        // De vuelta: la caída sigue desde donde se quedó, con lo que le
+        // faltaba (ver retomarCaida).
+        retomarRef.current();
+        return;
+      }
+      // En segundo plano no se avanza de ronda: se corta la voz y la caída
+      // se congela donde está. El tope de la pausa NO se quita: si la voz
+      // no vuelve, al regresar la pausa se suelta igual.
       audio.stop();
-      if (limiteTimer.current) clearTimeout(limiteTimer.current);
+      if (respaldoCaida.current) {
+        clearTimeout(respaldoCaida.current);
+        respaldoCaida.current = null;
+        caidaRestante.current = Math.max(0, caidaFin.current - Date.now());
+      }
       cancelAnimation(y);
     });
     return () => {
@@ -207,6 +232,7 @@ export function CaidaScreen() {
       audio.stop();
       if (limiteTimer.current) clearTimeout(limiteTimer.current);
       if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
+      if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
       cancelAnimation(y);
     };
   }, [y]);
@@ -332,7 +358,11 @@ export function CaidaScreen() {
    * bandera es un cinturón extra por si algún callback viejo se cuela.
    */
   const seCayo = useCallback(() => {
-    if (enPausa || !round) return;
+    if (enPausa || !round || cerradaEn.current === idx) return;
+    cerradaEn.current = idx;
+    if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
+    respaldoCaida.current = null;
+    caidaRestante.current = null;
     setFallada(null);
     setAcertada(null);
     setFinRonda('piso');
@@ -340,7 +370,43 @@ export function CaidaScreen() {
     haptics.failure();
     estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
     void pausarConVoz(round.entry, false, terminarPartida);
-  }, [round, enPausa, pausarConVoz, terminarPartida, estela, reducido]);
+  }, [round, idx, enPausa, pausarConVoz, terminarPartida, estela, reducido]);
+
+  // El aviso de fin de la caída llega desde el hilo de UI: siempre corre la versión vigente de seCayo.
+  const seCayoRef = useRef(seCayo);
+  seCayoRef.current = seCayo;
+  const alLlegarAlPiso = useCallback(() => seCayoRef.current(), []);
+
+  /**
+   * Lanza la caída hasta el piso en `duracionMs`. La ronda la cierra el
+   * aviso de fin de la animación o, si ese no llega, el respaldo; nunca
+   * los dos (cerradaEn).
+   */
+  const lanzarCaida = useCallback(
+    (duracionMs: number) => {
+      if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
+      caidaRestante.current = null;
+      caidaFin.current = Date.now() + duracionMs;
+      y.value = withTiming(altoPista, { duration: duracionMs, easing: Easing.linear }, (terminada) => {
+        if (terminada) runOnJS(alLlegarAlPiso)();
+      });
+      respaldoCaida.current = setTimeout(alLlegarAlPiso, duracionMs + RESPALDO_CAIDA_MS);
+    },
+    [y, altoPista, alLlegarAlPiso]
+  );
+
+  /** Al volver de segundo plano: la caída que se congeló sigue con lo que le faltaba. */
+  const retomarCaida = useCallback(() => {
+    const restante = caidaRestante.current;
+    if (restante === null || !round || perdio || enPausa || cerradaEn.current === idx) return;
+    if (restante <= 0) {
+      seCayoRef.current();
+      return;
+    }
+    lanzarCaida(restante);
+  }, [round, perdio, enPausa, idx, lanzarCaida]);
+  const retomarRef = useRef(retomarCaida);
+  retomarRef.current = retomarCaida;
 
   // Arranca la caída de cada ronda.
   useEffect(() => {
@@ -352,20 +418,18 @@ export function CaidaScreen() {
     if (altoPista <= 0) return;
 
     estela.value = withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar });
-    y.value = withTiming(
-      altoPista,
-      { duration: round.duracionMs, easing: Easing.linear },
-      (terminada) => {
-        if (terminada) runOnJS(seCayo)();
-      }
-    );
+    lanzarCaida(round.duracionMs);
 
     // Aviso corto de que algo empieza a caer, antes de la frase.
     void audio.playCaidaPieza();
     if (autoAudio) void audio.play(round.entry.audio_en);
 
-    return () => cancelAnimation(y);
-  }, [round, perdio, enPausa, y, estela, autoAudio, seCayo, altoPista]);
+    return () => {
+      cancelAnimation(y);
+      if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
+      respaldoCaida.current = null;
+    };
+  }, [round, perdio, enPausa, y, estela, autoAudio, lanzarCaida, altoPista]);
 
   // Fin de una ronda perdida. Ficha equivocada: primero se ve el veredicto (`lento`) y luego las dos caen
   // suavemente al piso. Piso: las fichas ya llegaron y se aplastan un poco con rebote mientras el piso
@@ -404,20 +468,29 @@ export function CaidaScreen() {
 
   /** Botón "Siguiente ›" de la pausa: corta la voz y avanza ya. */
   const tocarSiguienteEnPausa = useCallback(() => {
-    if (avanzando) return;
+    if (candadoAvanzar.current) return;
+    candadoAvanzar.current = true;
     setAvanzando(true);
-    if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
-    avanzarDebounce.current = setTimeout(
-      () => setAvanzando(false),
-      AVANZAR_DEBOUNCE_MS
-    );
-    avanzarTrasPausa(pausaToken.current);
-  }, [avanzando, avanzarTrasPausa]);
+    try {
+      avanzarTrasPausa(pausaToken.current);
+    } finally {
+      // El candado se suelta siempre, pase lo que pase al avanzar.
+      if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
+      avanzarDebounce.current = setTimeout(() => {
+        candadoAvanzar.current = false;
+        setAvanzando(false);
+      }, AVANZAR_DEBOUNCE_MS);
+    }
+  }, [avanzarTrasPausa]);
 
   const responder = useCallback(
     (texto: string) => {
-      if (!round || perdio || enPausa) return;
+      if (!round || perdio || enPausa || cerradaEn.current === idx) return;
+      cerradaEn.current = idx;
       cancelAnimation(y);
+      if (respaldoCaida.current) clearTimeout(respaldoCaida.current);
+      respaldoCaida.current = null;
+      caidaRestante.current = null;
       estela.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir });
 
       const bien = texto === round.correcta;
@@ -525,6 +598,9 @@ export function CaidaScreen() {
               // El contador de aciertos vive también en un ref (la pausa lo lee sin esperar al render):
               // empezar de nuevo lo reinicia igual que el estado.
               aciertosRef.current = 0;
+              // La ronda 0 vuelve a empezar: su bandera de "ya terminó" también.
+              cerradaEn.current = -1;
+              caidaRestante.current = null;
               setIdx(0);
               setAciertos(0);
               setFallada(null);

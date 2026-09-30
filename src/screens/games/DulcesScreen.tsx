@@ -163,6 +163,9 @@ export function DulcesScreen() {
   const respuestaToken = useRef(0);
   const limiteRespuesta = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avanzarDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // El candado de "Seguir" de verdad: el estado `avanzando` solo deshabilita
+  // el botón, y dos toques en el mismo cuadro todavía lo ven en false.
+  const candadoAvanzar = useRef(false);
   const montado = useRef(true);
 
   // Throttle de la voz del match: entre toques muy seguidos, solo la
@@ -176,7 +179,8 @@ export function DulcesScreen() {
       if (estado === 'active') return;
       audio.stop();
       if (vozMatchTimer.current) clearTimeout(vozMatchTimer.current);
-      if (limiteRespuesta.current) clearTimeout(limiteRespuesta.current);
+      // El tope de la respuesta se queda: si la voz no vuelve, al regresar
+      // la pregunta se cierra igual en vez de quedarse abierta para siempre.
     });
     return () => {
       montado.current = false;
@@ -629,15 +633,20 @@ export function DulcesScreen() {
 
   /** Botón "Seguir ›" de la pregunta: corta la voz y avanza ya. */
   const seguirAhora = useCallback(() => {
-    if (avanzando || !pregunta) return;
+    if (candadoAvanzar.current || !pregunta) return;
+    candadoAvanzar.current = true;
     setAvanzando(true);
-    if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
-    avanzarDebounce.current = setTimeout(
-      () => setAvanzando(false),
-      AVANZAR_DEBOUNCE_MS
-    );
-    avanzarTrasRespuesta(respuestaToken.current, pregunta.objetivo);
-  }, [avanzando, pregunta, avanzarTrasRespuesta]);
+    try {
+      avanzarTrasRespuesta(respuestaToken.current, pregunta.objetivo);
+    } finally {
+      // El candado se suelta siempre, pase lo que pase al avanzar.
+      if (avanzarDebounce.current) clearTimeout(avanzarDebounce.current);
+      avanzarDebounce.current = setTimeout(() => {
+        candadoAvanzar.current = false;
+        setAvanzando(false);
+      }, AVANZAR_DEBOUNCE_MS);
+    }
+  }, [pregunta, avanzarTrasRespuesta]);
 
   useEffect(() => {
     if (jugadas <= 0 && !pregunta && !animando) {

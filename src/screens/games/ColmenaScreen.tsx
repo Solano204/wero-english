@@ -109,9 +109,17 @@ export function ColmenaScreen() {
   // letra): dos por ronda, se reinician con cada una.
   const [escuchas, setEscuchas] = useState(ESCUCHAS_POR_RONDA);
   const [sonandoEscuchar, setSonandoEscuchar] = useState(false);
-  // Evita doble toque en "Siguiente": se levanta solo a los 400ms.
+  // Evita doble toque en "Siguiente": se levanta solo a los 400ms. El
+  // estado solo deshabilita el botón; el candado de verdad es la ref, que
+  // cambia en el mismo toque (dos toques en el mismo cuadro veían el
+  // estado viejo y pasaban los dos).
   const [avanzando, setAvanzando] = useState(false);
+  const candadoAvanzar = useRef(false);
   const avanzandoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Qué ronda ya se resolvió. El reloj avisa desde el hilo de UI y puede
+  // llegar en el mismo instante que la última letra o «No me sale», con
+  // un `resuelta` todavía viejo: esta ref corta la segunda resolución.
+  const resueltaEn = useRef(-1);
   // Al pasar de ronda el panal se deshace primero; este es el reloj que espera a que salga.
   const [saliendo, setSaliendo] = useState(false);
   const salidaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -239,7 +247,7 @@ export function ColmenaScreen() {
 
   const tocarLetra = useCallback(
     (i: number, viaPista = false) => {
-      if (!round || resuelta || usadas.includes(i)) return;
+      if (!round || resuelta || resueltaEn.current === idx || usadas.includes(i)) return;
       const letra = round.letras[i] ?? '';
       const siguiente = armado + letra;
 
@@ -266,6 +274,7 @@ export function ColmenaScreen() {
       if (vuelo) setColocadas((prev) => [...prev, { ...vuelo, ficha: i, ranura: armado.length }]);
 
       if (estaCompleta(round.objetivo, siguiente)) {
+        resueltaEn.current = idx;
         setResuelta(true);
         setAciertos((a) => a + 1);
         haptics.success();
@@ -281,7 +290,7 @@ export function ColmenaScreen() {
         }
       }
     },
-    [round, resuelta, usadas, armado, vueloA, user]
+    [round, resuelta, idx, usadas, armado, vueloA, user]
   );
 
   // El panal no se vuelve a pintar entero con cada letra: las fichas reciben siempre la misma función.
@@ -354,32 +363,44 @@ export function ColmenaScreen() {
   const siguiente = useCallback(() => {
     // Bloquea el botón ~400ms: sin esto, dos toques rápidos podían
     // procesar dos avances y disparar dos veces la lógica de abajo.
-    if (avanzando) return;
+    if (candadoAvanzar.current) return;
+    candadoAvanzar.current = true;
     setAvanzando(true);
-    if (avanzandoTimer.current) clearTimeout(avanzandoTimer.current);
-    avanzandoTimer.current = setTimeout(() => setAvanzando(false), AVANZAR_DEBOUNCE_MS);
-
-    // Corta SFX y voz en camino: si no, la de la ronda que se deja
-    // atrás compite con el audio automático de la que entra.
-    audio.stop();
-    if (idx + 1 >= rounds.length) {
-      nav.replace('GameEnd', {
-        juego: 'colmena',
-        rondas: rounds.length,
-        aciertos,
-        nivel: nivel ?? undefined,
-      });
-      return;
+    try {
+      // Corta SFX y voz en camino: si no, la de la ronda que se deja
+      // atrás compite con el audio automático de la que entra.
+      audio.stop();
+      if (idx + 1 >= rounds.length) {
+        nav.replace('GameEnd', {
+          juego: 'colmena',
+          rondas: rounds.length,
+          aciertos,
+          nivel: nivel ?? undefined,
+        });
+        return;
+      }
+      // El panal se deshace hacia abajo y, cuando sale, entra la ronda que
+      // sigue. El cambio lo da un temporizador con la duración de esa
+      // salida, nunca el aviso de fin de una animación (que puede no
+      // llegar si se cancela o se salta); avanzarRonda solo corre una vez
+      // por ronda. Con «reducir movimiento» no se espera nada.
+      if (reducido) {
+        avanzarRonda();
+        return;
+      }
+      setSaliendo(true);
+      if (salidaTimer.current) clearTimeout(salidaTimer.current);
+      salidaTimer.current = setTimeout(avanzarRonda, motionColmena.salida);
+    } finally {
+      // Pase lo que pase arriba (un error, un retorno temprano), el
+      // candado se suelta solo.
+      if (avanzandoTimer.current) clearTimeout(avanzandoTimer.current);
+      avanzandoTimer.current = setTimeout(() => {
+        candadoAvanzar.current = false;
+        setAvanzando(false);
+      }, AVANZAR_DEBOUNCE_MS);
     }
-    // El panal se deshace hacia abajo y, cuando sale, entra la ronda que sigue. Con «reducir movimiento» no se espera.
-    if (reducido) {
-      avanzarRonda();
-      return;
-    }
-    setSaliendo(true);
-    if (salidaTimer.current) clearTimeout(salidaTimer.current);
-    salidaTimer.current = setTimeout(avanzarRonda, motionColmena.salida);
-  }, [avanzando, idx, rounds.length, aciertos, nav, nivel, reducido, avanzarRonda]);
+  }, [idx, rounds.length, aciertos, nav, nivel, reducido, avanzarRonda]);
 
   /**
    * Se acabó el tiempo.
@@ -393,7 +414,8 @@ export function ColmenaScreen() {
     // cubría toda la función, así que sin `user` el tiempo se agotaba y
     // la ronda se quedaba pegada para siempre (nunca aparecía «Siguiente»).
     // Grabar la calificación sí depende de `user`; resolver la ronda no.
-    if (!round || resuelta) return;
+    if (!round || resuelta || resueltaEn.current === idx) return;
+    resueltaEn.current = idx;
     setResuelta(true);
     setSeAcabo(true);
     setAyudaDesde(armado.length);
@@ -410,12 +432,13 @@ export function ColmenaScreen() {
         'producir'
       );
     }
-  }, [user, round, resuelta, armado, volarFaltantes]);
+  }, [user, round, resuelta, idx, armado, volarFaltantes]);
 
   const rendirse = useCallback(async () => {
     // Mismo arreglo que seAcaboElTiempo: "No me sale" tiene que resolver
     // la ronda aunque `user` no esté listo.
-    if (!round || resuelta) return;
+    if (!round || resuelta || resueltaEn.current === idx) return;
+    resueltaEn.current = idx;
     setResuelta(true);
     setAyudaDesde(armado.length);
     volarFaltantes();
@@ -430,7 +453,7 @@ export function ColmenaScreen() {
         'producir'
       );
     }
-  }, [user, round, resuelta, armado, volarFaltantes]);
+  }, [user, round, resuelta, idx, armado, volarFaltantes]);
 
   if (carga.estado === 'error') {
     return (

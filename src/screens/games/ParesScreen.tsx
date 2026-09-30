@@ -168,6 +168,10 @@ export function ParesScreen() {
   const pausaToken = useRef(0);
   const limiteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saltarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // El candado de "Saltar" de verdad: el estado `saltando` solo deshabilita
+  // el botón, y dos toques en el mismo cuadro todavía lo ven en false.
+  const candadoSaltar = useRef(false);
+  const falloTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Evita setState después de desmontar mientras una pausa sigue en
   // camino (los await de audio no se cancelan solos).
   const montado = useRef(true);
@@ -190,6 +194,7 @@ export function ParesScreen() {
       sub.remove();
       abortarPausa();
       if (saltarTimer.current) clearTimeout(saltarTimer.current);
+      if (falloTimer.current) clearTimeout(falloTimer.current);
     };
   }, [abortarPausa]);
 
@@ -242,12 +247,20 @@ export function ParesScreen() {
   );
 
   const saltarPausa = useCallback(() => {
-    if (saltando) return;
+    if (candadoSaltar.current) return;
+    candadoSaltar.current = true;
     setSaltando(true);
-    if (saltarTimer.current) clearTimeout(saltarTimer.current);
-    saltarTimer.current = setTimeout(() => setSaltando(false), SALTAR_DEBOUNCE_MS);
-    abortarPausa();
-  }, [saltando, abortarPausa]);
+    try {
+      abortarPausa();
+    } finally {
+      // El candado se suelta siempre, aunque cortar la pausa fallara.
+      if (saltarTimer.current) clearTimeout(saltarTimer.current);
+      saltarTimer.current = setTimeout(() => {
+        candadoSaltar.current = false;
+        setSaltando(false);
+      }, SALTAR_DEBOUNCE_MS);
+    }
+  }, [abortarPausa]);
 
   const tocar = useCallback(
     (f: ParFicha) => {
@@ -315,7 +328,8 @@ export function ParesScreen() {
           'reconocer'
         );
       }
-      setTimeout(() => {
+      if (falloTimer.current) clearTimeout(falloTimer.current);
+      falloTimer.current = setTimeout(() => {
         setFallando([]);
         setElegida(null);
       }, 520);
