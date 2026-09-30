@@ -1,15 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { type FormaRenglon } from '@/features/phrasal/components/RenglonVerbo';
-import { buscarGrupos, etiquetasParticulas } from '@/domain/phrasal';
+import { buscarGrupos, etiquetasParticulas, pajaresDe } from '@/domain/phrasal';
 import { loadContent } from '@/data/contenido';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import type { RootStackParams } from '@/types/rutas';
 import type { PhrasalVerb } from '@/types';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+
+const SIN_COINCIDENCIAS: number[] = [];
 
 export interface ItemVerbo {
   verbo: string;
@@ -45,17 +47,29 @@ export function usePhrasal() {
     return { grupos: gs, porId: mapa };
   }, [content, modoLimpio]);
 
+  // Lo que no depende de la búsqueda se arma una vez por lista: las formas de cada verbo (el mismo arreglo en
+  // cada tecla, así el renglón memo no se repinta por él) y el texto normalizado donde se busca.
+  const formasPorVerbo = useMemo(() => {
+    const out = new Map<string, FormaRenglon[]>();
+    for (const g of grupos) {
+      const etiquetas = etiquetasParticulas(g.ids.map((id) => porId.get(id)?.particula ?? ''));
+      out.set(g.verbo, g.ids.map((id, i) => ({ id, etiqueta: etiquetas[i] ?? '' })));
+    }
+    return out;
+  }, [grupos, porId]);
+  const pajares = useMemo(() => pajaresDe(porId), [porId]);
+
+  // El campo se actualiza al instante; la lista filtra con la consulta diferida (a menor prioridad que teclear).
+  const consultaDiferida = useDeferredValue(consulta);
   const items = useMemo<ItemVerbo[]>(
     () =>
-      buscarGrupos(grupos, porId, consulta).map((g) => {
-        const etiquetas = etiquetasParticulas(g.ids.map((id) => porId.get(id)?.particula ?? ''));
-        return {
-          verbo: g.verbo,
-          coinciden: g.coinciden,
-          formas: g.ids.map((id, i) => ({ id, etiqueta: etiquetas[i] ?? '' })),
-        };
-      }),
-    [grupos, porId, consulta]
+      buscarGrupos(grupos, porId, consultaDiferida, pajares).map((g) => ({
+        verbo: g.verbo,
+        // Sin búsqueda, todos comparten el mismo arreglo vacío: el renglón memo no se repinta.
+        coinciden: g.coinciden.length === 0 ? SIN_COINCIDENCIAS : g.coinciden,
+        formas: formasPorVerbo.get(g.verbo) ?? [],
+      })),
+    [grupos, porId, consultaDiferida, pajares, formasPorVerbo]
   );
 
   const abrir = (verbo: string, origen: Rect | null) => nav.navigate('PhrasalVerbo', { verbo, origen });

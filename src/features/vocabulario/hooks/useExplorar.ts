@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getWorldCounts } from '@/data/repos/estadisticas';
@@ -55,7 +55,8 @@ export function useExplorar() {
     espera.current = setTimeout(() => {
       searchEntries(t, filter(), 30)
         .then((r) => {
-          if (id === pedida.current) setResults(r);
+          // Los resultados entran como transición: si el usuario sigue tecleando, el campo no espera a la lista.
+          if (id === pedida.current) startTransition(() => setResults(r));
         })
         .catch(() => undefined);
     }, ESPERA_BUSQUEDA_MS);

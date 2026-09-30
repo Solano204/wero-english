@@ -34,6 +34,16 @@ export function normalizar(texto: string): string {
 }
 
 /**
+ * Las palabras en las que se busca cada forma (frase y significado, normalizados). Se calcula una vez por lista: la
+ * búsqueda de cada tecla solo compara.
+ */
+export function pajaresDe(porId: ReadonlyMap<number, FormaLista>): Map<number, string[]> {
+  const out = new Map<number, string[]>();
+  for (const [id, f] of porId) out.set(id, normalizar(`${f.frase} ${f.significado}`).split(' '));
+  return out;
+}
+
+/**
  * Los verbos con alguna forma que coincide con la búsqueda, en su orden. Cada palabra de la búsqueda tiene que ser el
  * principio de alguna palabra de la frase o del significado de la forma («lev» y «up» encuentran «get up»: levantarse de
  * la cama). Una búsqueda vacía los devuelve todos.
@@ -41,17 +51,16 @@ export function normalizar(texto: string): string {
 export function buscarGrupos<G extends GrupoLista>(
   grupos: readonly G[],
   porId: ReadonlyMap<number, FormaLista>,
-  consulta: string
+  consulta: string,
+  pajares: ReadonlyMap<number, readonly string[]> = pajaresDe(porId)
 ): GrupoBuscado<G>[] {
   const palabras = normalizar(consulta).split(' ').filter(Boolean);
   if (palabras.length === 0) return grupos.map((g) => ({ ...g, coinciden: [] }));
   const resultado: GrupoBuscado<G>[] = [];
   for (const g of grupos) {
     const coinciden = g.ids.filter((id) => {
-      const f = porId.get(id);
-      if (!f) return false;
-      const pajar = normalizar(`${f.frase} ${f.significado}`).split(' ');
-      return palabras.every((p) => pajar.some((w) => w.startsWith(p)));
+      const pajar = pajares.get(id);
+      return pajar ? palabras.every((p) => pajar.some((w) => w.startsWith(p))) : false;
     });
     if (coinciden.length > 0) resultado.push({ ...g, coinciden });
   }
