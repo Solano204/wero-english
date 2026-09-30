@@ -5,6 +5,7 @@ import type { RootStackParams } from '@/types/rutas';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { conFinalAsync } from '@/shared/utils/conFinal';
+import { useShallow } from 'zustand/react/shallow';
 
 type Vista = 'inicio' | 'usuario';
 
@@ -32,7 +33,21 @@ export function useEntrada() {
     busy,
     error,
     clearError,
-  } = useAuthStore();
+  } = useAuthStore(
+    useShallow((st) => ({
+      signIn: st.signIn,
+      continuarSinCuenta: st.continuarSinCuenta,
+      entrarConGoogle: st.entrarConGoogle,
+      resolverVinculo: st.resolverVinculo,
+      cancelarVinculo: st.cancelarVinculo,
+      vinculoPendiente: st.vinculoPendiente,
+      aviso: st.aviso,
+      limpiarAviso: st.limpiarAviso,
+      busy: st.busy,
+      error: st.error,
+      clearError: st.clearError,
+    }))
+  );
 
   useEffect(() => {
     clearError();

@@ -4,13 +4,24 @@ import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import * as notifications from '@/services/notificaciones';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
+import { useShallow } from 'zustand/react/shallow';
 
 /**
  * Los primeros pasos: el paso actual, lo que se elige en cada uno y cómo se guarda al terminar.
  */
 export function usePrimerosPasos() {
   const user = useAuthStore((s) => s.user);
-  const settings = useSettingsStore();
+  // Solo lo que usan las preguntas de bienvenida.
+  const settings = useSettingsStore(
+    useShallow((st) => ({
+      filter: st.filter,
+      horaNotificacion: st.horaNotificacion,
+      notifDesde: st.notifDesde,
+      notifHasta: st.notifHasta,
+      notifPorDia: st.notifPorDia,
+      set: st.set,
+    }))
+  );
   const [paso, setPaso] = useState(0);
   const [permisoNegado, setPermisoNegado] = useState(false);
   // En Expo Go no hay notificaciones desde el SDK 53. Se dice tal cual

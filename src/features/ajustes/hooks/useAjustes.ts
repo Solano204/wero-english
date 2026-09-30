@@ -8,6 +8,7 @@ import * as notifications from '@/services/notificaciones';
 import * as speech from '@/services/voz';
 import type { Nivel } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { useShallow } from 'zustand/react/shallow';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -18,7 +19,31 @@ export function useAjustes() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
-  const s = useSettingsStore();
+  // Solo los ajustes que pinta esta pantalla (y set): no se repinta por llaves que no muestra (los grupos de
+  // Practicar, `loaded`, las marcas de lecturas…).
+  const s = useSettingsStore(
+    useShallow((st) => ({
+      autoAudio: st.autoAudio,
+      filter: st.filter,
+      haptics: st.haptics,
+      horaNotificacion: st.horaNotificacion,
+      metaDiaria: st.metaDiaria,
+      modoLimpio: st.modoLimpio,
+      mostrarSeguidas: st.mostrarSeguidas,
+      musica: st.musica,
+      musicaJuegosDistinta: st.musicaJuegosDistinta,
+      niveles: st.niveles,
+      notifDesde: st.notifDesde,
+      notifHasta: st.notifHasta,
+      notifPorDia: st.notifPorDia,
+      notificaciones: st.notificaciones,
+      nuevasPorDia: st.nuevasPorDia,
+      set: st.set,
+      soloWifi: st.soloWifi,
+      sonidosFeedback: st.sonidosFeedback,
+      volumenMusica: st.volumenMusica,
+    }))
+  );
   const [cargaLenta, setCargaLenta] = useState(false);
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
   const micEstado = speech.isAvailable();

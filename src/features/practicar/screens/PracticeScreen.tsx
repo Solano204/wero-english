@@ -13,7 +13,7 @@ import { etiquetaCorregir } from '@/domain/consolaHoy';
 import { Destacados } from '@/features/practicar/components/Destacados';
 import { EncabezadoPracticar, ALTO_ENCABEZADO } from '@/features/practicar/components/EncabezadoPracticar';
 import { FilaModo } from '@/features/practicar/components/FilaModo';
-import { GrupoPlegable } from '@/features/practicar/components/GrupoPlegable';
+import { GrupoPracticar } from '@/features/practicar/components/GrupoPracticar';
 import { ICONO_GRUPO, ICONO_MODO } from '@/shared/navegacion/iconosModo';
 import { metaDe } from '@/features/practicar/logic/metadatos';
 import { RetoSemana } from '@/features/practicar/components/RetoSemana';
@@ -58,7 +58,7 @@ function etiquetaHoy(
  * el último modo usado o, sin historial, Estudiar.
  */
 export function PracticeScreen() {
-  const { nav, top, scrollY, primeraEntrada, estiloFundido, user, abiertos, metaDiaria, carga, listo, refrescos, refrescar, reto, niveles, hoyFrases, vencidas, nuevas, atoradas, racha, hoy, destacados, modoHoy, fuentesMeta, datoDe, alternar } = usePracticar();
+  const { nav, top, scrollY, primeraEntrada, estiloFundido, user, metaDiaria, carga, listo, refrescos, refrescar, reto, niveles, hoyFrases, vencidas, nuevas, atoradas, racha, hoy, destacados, modoHoy, fuentesMeta, datoDe } = usePracticar();
 
   return (
     <Screen
@@ -131,13 +131,12 @@ export function PracticeScreen() {
           {GRUPOS.map((g) => {
             const ids = ORDEN.filter((id) => MODOS[id].grupo === g.id && !destacados.includes(id));
             return (
-              <GrupoPlegable
+              <GrupoPracticar
                 key={g.id}
+                id={g.id}
                 titulo={g.titulo}
                 icono={ICONO_GRUPO[g.id]}
                 total={ids.length}
-                abierto={abiertos.includes(g.id)}
-                onAlternar={() => alternar(g.id)}
               >
                 {(avance) =>
                   ids.map((id, i) => (
@@ -154,7 +153,7 @@ export function PracticeScreen() {
                     />
                   ))
                 }
-              </GrupoPlegable>
+              </GrupoPracticar>
             );
           })}
         </View>

@@ -58,8 +58,6 @@ export function usePracticar() {
   const scrollY = useSharedValue(0);
   const { primera: primeraEntrada, estiloFundido } = useEntradaPantalla('practicar');
   const user = useAuthStore((s) => s.user);
-  const abiertos = useSettingsStore((s) => s.practicarGruposAbiertos);
-  const guardarAjuste = useSettingsStore((s) => s.set);
   const filter = useSettingsStore((s) => s.filter);
   const metaDiaria = useSettingsStore((s) => s.metaDiaria);
 
@@ -119,13 +117,5 @@ export function usePracticar() {
   /** El dato de un modo como línea de texto (la de una tarjeta destacada sin niveles). */
   const datoDe = (id: ModoId): string | null => textoMeta(metaDe(id, fuentesMeta));
 
-  const alternar = (grupo: string) => {
-    if (!user) return;
-    const siguiente = abiertos.includes(grupo)
-      ? abiertos.filter((g) => g !== grupo)
-      : [...abiertos, grupo];
-    void guardarAjuste(user.id, 'practicarGruposAbiertos', siguiente);
-  };
-
-  return { nav, top, scrollY, primeraEntrada, estiloFundido, user, abiertos, metaDiaria, carga, listo, refrescos, refrescar, reto, niveles, hoyFrases, vencidas, nuevas, atoradas, racha, hoy, destacados, modoHoy, fuentesMeta, datoDe, alternar };
+  return { nav, top, scrollY, primeraEntrada, estiloFundido, user, metaDiaria, carga, listo, refrescos, refrescar, reto, niveles, hoyFrases, vencidas, nuevas, atoradas, racha, hoy, destacados, modoHoy, fuentesMeta, datoDe };
 }
