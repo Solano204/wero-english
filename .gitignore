@@ -49,3 +49,5 @@ build/
 .tmp-*
 .gemini-progreso.json
 SOUNDS ENGLISH/
+prompts.txt
+.claude/skills/

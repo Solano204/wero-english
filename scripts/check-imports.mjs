@@ -27,6 +27,7 @@ function resolve(spec, from) {
   let base;
   if (spec.startsWith('@/')) base = path.join(SRC, spec.slice(2));
   else if (spec.startsWith('@data/')) base = path.join(ROOT, 'assets/data', spec.slice(6));
+  else if (spec.startsWith('@assets/')) base = path.join(ROOT, 'assets', spec.slice(8));
   else if (spec.startsWith('@modules/')) base = path.join(ROOT, 'modules', spec.slice(9));
   else if (spec.startsWith('.')) base = path.resolve(path.dirname(from), spec);
   else return null; // paquete de node_modules

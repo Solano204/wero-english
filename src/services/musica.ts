@@ -18,8 +18,8 @@ import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
  */
 
 const PISTAS = {
-  app: require('../../assets/music/app.mp3'),
-  juegos: require('../../assets/music/juegos.mp3'),
+  app: require('@assets/music/app.mp3'),
+  juegos: require('@assets/music/juegos.mp3'),
 } as const;
 
 export type Pista = keyof typeof PISTAS;
