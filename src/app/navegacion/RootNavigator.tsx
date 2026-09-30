@@ -83,7 +83,7 @@ export function RootNavigator() {
       {/* La sesión entra desde abajo: se siente como entrar a un modo,
           no como navegar a otra sección. */}
       <Stack.Group screenOptions={{ animation: 'slide_from_bottom' }}>
-        <Stack.Screen name="Study" getComponent={() => require('@/screens/study/StudyScreen').StudyScreen} />
+        <Stack.Screen name="Study" getComponent={() => require('@/features/estudio/screens/StudyScreen').StudyScreen} />
         <Stack.Screen name="EarMode" getComponent={() => require('@/screens/extras/EarModeScreen').EarModeScreen} />
         <Stack.Screen name="Cazala" getComponent={() => require('@/features/juegos/cazala/screens/CazalaScreen').CazalaScreen} />
         <Stack.Screen name="Colmena" getComponent={() => require('@/features/juegos/colmena/screens/ColmenaScreen').ColmenaScreen} />

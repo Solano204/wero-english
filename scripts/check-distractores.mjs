@@ -316,7 +316,7 @@ prueba('d) cada tipo de ejercicio tiene su instrucción y la tarjeta la muestra 
   for (const k of tipos) {
     assert.match(funcion, new RegExp(`case '${k}':\\s*return '[^']+';`), `falta la instrucción de ${k}`);
   }
-  const tarjeta = leer('src/components/card/StudyCardView.tsx');
+  const tarjeta = leer('src/features/estudio/components/StudyCardView.tsx');
   const arriba = tarjeta.indexOf('<View style={styles.top}>');
   const instruccion = tarjeta.indexOf('{instructionFor(card.kind)}');
   const escena = tarjeta.indexOf('<View style={[styles.stage');

@@ -40,7 +40,7 @@ const ACC1_NO_CONVIVEN = {
   'src/features/juegos/fin/screens/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
   'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
   'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
-  'src/components/estudio/FinDelDia.tsx': '`quedan ? Seguir repasando : sinNuevas ? Frases sueltas : Aprender frases nuevas`: un solo `primary` a la vez; Jugar es `secondary` y Volver `ghost`',
+  'src/features/estudio/components/FinDelDia.tsx': '`quedan ? Seguir repasando : sinNuevas ? Frases sueltas : Aprender frases nuevas`: un solo `primary` a la vez; Jugar es `secondary` y Volver `ghost`',
   'src/screens/entry/AuthScreen.tsx': 'tres vistas excluyentes (vincular tu avance, usuario y contraseña, inicio), cada una con un solo `primary`; en el inicio la acción principal es «Continuar con Google» (`BotonGoogle`, con la marca de Google) y lo demás es `secondary`/`ghost`',
 };
 
@@ -431,14 +431,14 @@ const ESTUDIO_SENAL = new Set([
   'src/features/estudio/components/PalabraVoladora.tsx',
   'src/features/estudio/components/DiffFrase.tsx',
   'src/features/estudio/components/BloqueVoz.tsx',
-  'src/screens/study/StudyScreen.tsx',
-  'src/components/card/StudyCardView.tsx',
+  'src/features/estudio/screens/StudyScreen.tsx',
+  'src/features/estudio/components/StudyCardView.tsx',
   'src/shared/ui/OptionButton.tsx',
-  'src/components/card/TileBuilder.tsx',
-  'src/components/card/FraseHueco.tsx',
-  'src/components/card/PalabraVoladora.tsx',
-  'src/components/card/DiffFrase.tsx',
-  'src/components/card/BloqueVoz.tsx',
+  'src/features/estudio/components/TileBuilder.tsx',
+  'src/features/estudio/components/FraseHueco.tsx',
+  'src/features/estudio/components/PalabraVoladora.tsx',
+  'src/features/estudio/components/DiffFrase.tsx',
+  'src/features/estudio/components/BloqueVoz.tsx',
 ]);
 const ALCANCE_SENAL = (r) =>
   esFx(r) || r === 'src/shared/ui/BarraFina.tsx' || r === 'src/shared/ui/BotonGuardar.tsx' || r === 'src/shared/ui/CorreccionFrase.tsx' ||

@@ -12,7 +12,7 @@ import {
   IconButton,
   Screen,
 } from '@/shared/ui';
-import { FinDelDia } from '@/components/estudio/FinDelDia';
+import { FinDelDia } from '@/features/estudio/components/FinDelDia';
 import { Confetti } from '@/shared/ui/feedback/Confetti';
 import { Trozos } from '@/shared/ui/feedback/Trozos';
 import { useReaccion } from '@/shared/hooks/useReaccion';
@@ -20,8 +20,8 @@ import { BarraSesion } from '@/shared/ui/fx/BarraSesion';
 import { ChipMarcador } from '@/features/estudio/components/ChipMarcador';
 import { HojaVeredicto } from '@/features/estudio/components/HojaVeredicto';
 import { publicarBarraEstudio } from '@/shared/ui/fx/estadoTransicion';
-import { DiffFrase } from '@/components/card/DiffFrase';
-import { StudyCardView } from '@/components/card/StudyCardView';
+import { DiffFrase } from '@/features/estudio/components/DiffFrase';
+import { StudyCardView } from '@/features/estudio/components/StudyCardView';
 import { Hueso, HuesoBoton, HuesoImagen, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { nivelSeguidas } from '@/domain/seguidas';
 import { sesionMerece } from '@/domain/session';
