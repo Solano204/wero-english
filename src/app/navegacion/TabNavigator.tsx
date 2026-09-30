@@ -13,9 +13,7 @@ import Animated, {
   useSharedValue,
   withSequence,
   withTiming } from 'react-native-reanimated';
-import { ExploreScreen } from '@/features/vocabulario/screens/ExploreScreen';
 import { PracticeScreen } from '@/features/practicar/screens/PracticeScreen';
-import { ProgressScreen } from '@/features/progreso/screens/ProgressScreen';
 import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motionEasing } from '@/theme';
 import { AdBar, Icon, Presionable, type IconName } from '@/shared/ui';
 import { PildoraLiquida } from '@/app/navegacion/PildoraLiquida';
@@ -191,9 +189,11 @@ export function TabNavigator() {
         ),
       })}
     >
+      {/* Solo Practicar (la inicial) se evalúa al abrir: Vocabulario y Progreso (con sus gráficas de Skia) cargan
+          su código la primera vez que se tocan. Las pestañas ya se montan perezosas (lazy, el default). */}
       <Tab.Screen
         name="Explore"
-        component={ExploreScreen}
+        getComponent={() => require('@/features/vocabulario/screens/ExploreScreen').ExploreScreen}
         options={{ title: 'Vocabulario' }}
       />
       <Tab.Screen
@@ -203,7 +203,7 @@ export function TabNavigator() {
       />
       <Tab.Screen
         name="Progress"
-        component={ProgressScreen}
+        getComponent={() => require('@/features/progreso/screens/ProgressScreen').ProgressScreen}
         options={{ title: 'Progreso' }}
       />
       </Tab.Navigator>
