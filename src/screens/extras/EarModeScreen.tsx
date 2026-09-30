@@ -10,8 +10,9 @@ import { AnilloRadio, BarraSesion, FraseKaraoke, PuntosRepeticion, useBolsillo, 
 import { getRandomEntries } from '@/data/repos/frases';
 import { analizar } from '@/domain/marcas';
 import { useCarga } from '@/hooks/useCarga';
-import { useAuthStore, useSettingsStore } from '@/store';
-import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useAuthStore } from '@/estado/useAuthStore';
+import { useSettingsStore } from '@/estado/useSettingsStore';
+import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { marcasDe } from '@/services/marcas';

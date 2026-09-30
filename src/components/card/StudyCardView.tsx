@@ -12,7 +12,7 @@ import { answerMode, imagenRevelaSignificado, instructionFor, promptFor } from '
 import { isCloseEnough } from '@/domain/texto';
 import { color, font, layout, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
 import type { RellenoHueco } from './FraseHueco';
-import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import type { StudyCard } from '@/types';
 import { useEfectoResultado } from '@/components/feedback';

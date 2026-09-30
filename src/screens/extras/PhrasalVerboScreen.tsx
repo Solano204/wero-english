@@ -14,7 +14,7 @@ import { limitarIndice } from '@/domain/ruleta';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as haptics from '@/services/haptics';
 import { loadContent } from '@/data/contenido';
-import { useSettingsStore } from '@/store';
+import { useSettingsStore } from '@/estado/useSettingsStore';
 import { color, font, layout, space, text } from '@/theme';
 import { useMovimientoReducido } from '@/utils/accessibility';
 import type { RootStackParams } from '@/navigation/routes';

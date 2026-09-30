@@ -36,7 +36,7 @@ if (!fs.existsSync(CONFIG)) {
 /* ── 2. Los puntos de control usan el interruptor de verdad ─────────────── */
 const PUNTOS_DE_CONTROL = [
   { archivo: 'src/components/base/Ads.tsx', que: 'AdBar, AdFullScreen, pedirRecompensa' },
-  { archivo: 'src/store/useUnlockStore.ts', que: 'abierto() — lo que decide el muro de MuroDesbloqueo' },
+  { archivo: 'src/estado/useUnlockStore.ts', que: 'abierto() — lo que decide el muro de MuroDesbloqueo' },
   { archivo: 'src/components/unlock/CandadoBadge.tsx', que: 'CandadoBadge' },
   { archivo: 'src/components/base/Screen.tsx', que: 'el padding inferior de toda pantalla con pestañas' },
   { archivo: 'src/screens/games/NivelesScreen.tsx', que: 'la celda «anuncio» y el texto de ayuda de Niveles' },
@@ -98,7 +98,7 @@ const PERMITIDOS = new Set(
     'src/screens/utility/DownloadsScreen.tsx',
     'src/screens/extras/GramaticaScreen.tsx',
     'src/screens/extras/GramaticaTemaScreen.tsx',
-    'src/store/useUnlockStore.ts',
+    'src/estado/useUnlockStore.ts',
     'src/data/repos/desbloqueos.ts',
     'src/data/repos/niveles.ts',
     'src/data/esquema.ts',

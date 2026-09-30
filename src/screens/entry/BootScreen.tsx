@@ -4,7 +4,7 @@ import { Screen, ProgressBar } from '@/components/base';
 import { seedCatalog } from '@/data/semilla/sembrar';
 import { getDb } from '@/data/cliente';
 import { loadContent } from '@/data/contenido';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import * as audio from '@/services/audio';
 import * as notifications from '@/services/notificaciones';
 import { color, font, space } from '@/theme';

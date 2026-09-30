@@ -1,6 +1,6 @@
 import { createAudioPlayer } from 'expo-audio';
-import * as media from '../media';
-import * as music from '../musica';
+import * as media from '@/services/media';
+import * as music from '@/services/musica';
 import { INTERVALO_ESTADO_MS, estados, marcar, posicionDe, soltar, suena, vigilar } from './estadoReproductor';
 import {
   ARRANQUE_TIMEOUT_MS,

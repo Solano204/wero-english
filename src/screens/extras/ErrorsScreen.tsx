@@ -17,7 +17,8 @@ import {
   type FiltroErrores,
   type OrdenErrores,
 } from '@/domain/errores';
-import { useAuthStore, useSettingsStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
+import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, desvaneceDerecha, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils/accessibility';

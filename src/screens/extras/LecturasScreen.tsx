@@ -12,7 +12,7 @@ import { getDominadasPorMundo } from '@/data/repos/estadisticas';
 import { getEntriesByIds } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { CardState, Entry } from '@/types';

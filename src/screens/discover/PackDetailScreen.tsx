@@ -12,7 +12,7 @@ import { ProveedorEsqueleto } from '@/components/esqueleto';
 import { EntryRow, EntryRowHueso } from '@/components/list';
 import { getPackEntries } from '@/data/repos/frases';
 import { useCarga } from '@/hooks/useCarga';
-import { useSettingsStore } from '@/store';
+import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { Entry } from '@/types';

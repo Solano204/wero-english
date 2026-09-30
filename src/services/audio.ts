@@ -1,6 +1,6 @@
 import * as media from './media';
-import { marcar, soltar } from './audio/estadoReproductor';
-import type { SfxKey } from './audio/paquetesSfx';
+import { marcar, soltar } from '@/services/audio/estadoReproductor';
+import type { SfxKey } from '@/services/audio/paquetesSfx';
 import {
   efectoPermitido,
   esperarSfx,
@@ -10,9 +10,9 @@ import {
   prepararEfecto,
   reiniciaRacha,
   tasaDetune,
-} from './audio/efectos';
-import { TOPE_NATIVO_MS, conTope, frase, initAudio } from './audio/estado';
-import { play, playAndWait } from './audio/reproductor';
+} from '@/services/audio/efectos';
+import { TOPE_NATIVO_MS, conTope, frase, initAudio } from '@/services/audio/estado';
+import { play, playAndWait } from '@/services/audio/reproductor';
 
 /**
  * Reproductor de audio.
@@ -268,15 +268,15 @@ function sleep(ms: number, shouldContinue: () => boolean): Promise<void> {
     }, step);
   });
 }
-export type { SfxPackId } from './audio/paquetesSfx';
+export type { SfxPackId } from '@/services/audio/paquetesSfx';
 export {
   guardaPaqueteDevPreferido,
   paqueteSfxActual,
   reiniciaRacha,
   setPaqueteSfx,
   setSfxEnabled,
-} from './audio/efectos';
-export { initAudio } from './audio/estado';
+} from '@/services/audio/efectos';
+export { initAudio } from '@/services/audio/estado';
 export {
   alReproducir,
   generacionActual,
@@ -291,4 +291,4 @@ export {
   waitUntilDone,
   type ArranqueFrase,
   type OpcionesReproduccion,
-} from './audio/reproductor';
+} from '@/services/audio/reproductor';

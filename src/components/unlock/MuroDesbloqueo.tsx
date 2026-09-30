@@ -4,7 +4,8 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated from 'react-native-reanimated';
 import { Button, Icon } from '@/components/base';
-import { useAuthStore, useUnlockStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
+import { useUnlockStore } from '@/estado/useUnlockStore';
 import type { TipoDesbloqueo } from '@/data/repos/desbloqueos';
 import { color, filoLuz, font, radius, shadow, sol, space, aparecer, aparecerSubiendo } from '@/theme';
 

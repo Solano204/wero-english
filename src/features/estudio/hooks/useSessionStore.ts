@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { guardarSinContestar, leerSinContestar } from '@/data/local/nuevasSinContestar';
 import { countDue, countNew, getProximoRepaso, getDueCards, getNewCards, upsertCardState } from '@/data/repos/tarjetas';
 import { getDistractors, getWordDecoys } from '@/data/repos/distractores';
 import { endSession, getNuevasHoy, startSession, touchStreak } from '@/data/repos/progreso';
@@ -15,27 +15,6 @@ import * as haptics from '@/services/haptics';
  * Ninguna de las dos deja a la pantalla sin qué mostrar: las dos tienen su estado final.
  */
 type Phase = 'idle' | 'loading' | 'active' | 'finished' | 'empty' | 'error';
-
-/** Dónde se guardan, por usuario, las nuevas que la última sesión mostró y no se contestaron. */
-const claveSinContestar = (usuarioId: number) => `wero:nuevas-sin-contestar:${usuarioId}`;
-
-async function leerSinContestar(usuarioId: number): Promise<Set<number>> {
-  try {
-    const crudo = await AsyncStorage.getItem(claveSinContestar(usuarioId));
-    const ids = crudo ? (JSON.parse(crudo) as unknown) : [];
-    return new Set(Array.isArray(ids) ? ids.filter((x): x is number => typeof x === 'number') : []);
-  } catch {
-    return new Set();
-  }
-}
-
-async function guardarSinContestar(usuarioId: number, ids: number[]): Promise<void> {
-  try {
-    await AsyncStorage.setItem(claveSinContestar(usuarioId), JSON.stringify(ids));
-  } catch {
-    // Sin esto la próxima sesión solo podría repetir alguna: no vale tumbar el cierre.
-  }
-}
 
 /** Lo que la pantalla necesita saber después de responder. */
 export interface Feedback {

@@ -12,7 +12,7 @@ import {
   pedirRecompensa,
   razonMuro,
 } from '@/components/base';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { useConsentimiento } from '@/components/legal';
 import * as downloads from '@/services/descargas';

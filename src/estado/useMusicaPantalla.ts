@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { useSettingsStore } from '@/store';
+import { useSettingsStore } from './useSettingsStore';
 import * as music from '@/services/musica';
 import type { Pista } from '@/services/musica';
 

@@ -18,7 +18,7 @@ import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
 import { MuroDesbloqueo } from '@/components/unlock';
 import { segmentos } from '@/domain/gramatica';
 import { loadContent } from '@/data/contenido';
-import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { color, font, layout, motionDuration, motionEasing, radius, space, text, aparecerSubiendo, escalon } from '@/theme';

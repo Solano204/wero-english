@@ -4,7 +4,7 @@ import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-n
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Header, Screen } from '@/components/base';
 import { BotonMantener } from '@/components/legal';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import { color, font, radius, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 

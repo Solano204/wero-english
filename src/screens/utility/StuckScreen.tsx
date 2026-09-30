@@ -19,7 +19,8 @@ import {
 } from '@/domain/atoradas';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
-import { useAuthStore, useSettingsStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
+import { useSettingsStore } from '@/estado/useSettingsStore';
 import { color, font, motionDesatorar, space } from '@/theme';
 import { conteo } from '@/domain/texto';
 import type { Entry } from '@/types';

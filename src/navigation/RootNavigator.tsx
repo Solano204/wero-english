@@ -7,7 +7,8 @@ import { NOTIF_TARGETS, type RootStackParams } from './routes';
 // primera vez que se abre (ver `diferida`), no en el arranque en frío.
 import { AuthScreen } from '@/screens/entry/AuthScreen';
 import { BootScreen } from '@/screens/entry/BootScreen';
-import { useAuthStore, useSettingsStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
+import { useSettingsStore } from '@/estado/useSettingsStore';
 import * as music from '@/services/musica';
 import { precargarDistractores } from '@/data/repos/distractores';
 import * as notifications from '@/services/notificaciones';

@@ -32,7 +32,7 @@ import { getEntry } from '@/data/repos/frases';
 import { isFavorite, toggleFavorite } from '@/data/repos/tarjetas';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, layout, motionDuration, motionEasing, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { useMovimientoReducido } from '@/utils/accessibility';

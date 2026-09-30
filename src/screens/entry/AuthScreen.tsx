@@ -7,7 +7,7 @@ import Animated from 'react-native-reanimated';
 import { Button, Card, Input, Screen, Presionable } from '@/components/base';
 import { BotonGoogle } from '@/components/entrada';
 import { useConsentimiento } from '@/components/legal';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import { color, font, layout, space, aparecer, desaparecer, motionDuration } from '@/theme';
 import * as googleAuth from '@modules/wero-google-auth';
 

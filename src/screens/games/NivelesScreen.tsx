@@ -37,7 +37,7 @@ import {
   type ItemLista,
 } from '@/domain/niveles';
 import { useCarga } from '@/hooks/useCarga';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { MuroDesbloqueo } from '@/components/unlock';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';

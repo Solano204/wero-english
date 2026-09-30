@@ -9,7 +9,7 @@ import { IndiceFonemas } from '@/components/sonidos/IndiceFonemas';
 import { PaginaFonema } from '@/components/sonidos/PaginaFonema';
 import { ViajeSimbolo, type Viaje } from '@/components/sonidos/ViajeSimbolo';
 import { sinBarras } from '@/domain/vocales';
-import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { loadContent } from '@/data/contenido';

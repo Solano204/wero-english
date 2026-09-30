@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { nivelDesbloqueado } from '@/data/repos/niveles';
 import { loadContent } from '@/data/contenido';
-import { useAuthStore } from '@/store';
+import { useAuthStore } from '@/estado/useAuthStore';
 import type { Entry, JuegoId, NivelJuego } from '@/types';
 
 /**
