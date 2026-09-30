@@ -157,6 +157,8 @@ Quién lo revisa:
 | colores, espacios, movimiento | `theme/` |
 | animaciones reutilizables | `shared/ui/fx/` |
 | lo que corre después de que Practicar es interactivo | `services/trasArranque.ts` (`trasArranque`, `listoParaDiferidos`) |
+| la «última versión» de algo sin ref en el render | `shared/hooks/useUltimo.ts` (estado ajustado en el render) |
+| try/finally dentro de hooks (el React Compiler no compila `finally`) | `shared/utils/conFinal.ts` |
 | marcas del arranque (medición) | `shared/utils/marcasArranque.ts`, `scripts/medir-arranque.sh` |
 
 ---

@@ -1,4 +1,55 @@
-# Plan de re-renders (prompt 4 de 6) — diagnóstico, espera OK
+# Plan de re-renders (prompt 4 de 6) — hecho
+
+Aprobado («ok») y aplicado en `perf/serie-rendimiento`, junto con los dos errores que salieron al leer (el borde de
+foco de `Input` y el filtro que no disparaba recargas). La tabla ANTES/DESPUÉS por interacción está en
+`docs/RENDIMIENTO.md`, «Después de re-renders»; los tiempos de commit se sacan en el Xiaomi.
+
+## Resultado
+
+| Arreglo | Commit | Qué quedó |
+|---|---|---|
+| A · React Compiler | `bd6abff`, `41210bd` | prendido; 418 funciones compiladas, 5 fuera a propósito (`'use no memo'`); 0 avisos de lint |
+| B · Selectores | `88fd297` | ningún store se lee completo; el grupo de Practicar lee solo si él está abierto |
+| C · Contextos | — | los 2 que hay ya tenían valor estable (índice de pestaña y un shared value) |
+| D · Estado derivado y efectos | `541118e` | reinicios de ronda y de rechazo en el mismo render; sin efectos que copien estado |
+| E · Keys y renglones | `1dbc6fe` | renglones de Cázala memo con props estables; metas de Dulces estables; claves del dato en CorreccionFrase |
+| F · Buscadores | `35a88a4` | Phrasal con useDeferredValue y búsqueda precalculada; Vocabulario con transición |
+| G · Navegación | `2035c3a` | opciones de pestañas y del stack fijas |
+| Errores aparte | `9182430`, `aea9006` | Input conserva su foco; las cargas se rehacen al cambiar Modo Limpio o niveles |
+
+### Fuera del compilador, a propósito
+
+`MazoCartas`, `TableroDulces`, `CableSenal`, `DeslizarQuitar` y `RuletaParticulas`: sus callbacks de gesto leen refs
+con los avisos más recientes para no rearmar el gesto a media partida (lo que cortaría un arrastre); el compilador no
+sabe que esos callbacks corren después del render. Llevan `'use no memo'` con el porqué y conservan su memorización a
+mano.
+
+### useMemo, useCallback y memo
+
+**Quitados: 280** (useMemo 141 → 65, useCallback 263 → 64): los que solo estabilizaban identidades que el compilador
+ya estabiliza con sus dependencias exactas.
+
+**Se quedan (131), por qué:**
+
+**61 · dependencia de un efecto o de otro memo que se queda**: `features/atoradas/components/Desatorar.tsx`, `features/errores/components/SecuenciaMalentendido.tsx` (4), `features/gramatica/hooks/useTemaGramatica.ts`, `features/juegos/caida/components/FichaCaida.tsx`, `features/juegos/caida/hooks/useMarcadorCaida.ts`, `features/juegos/caida/hooks/usePartidaCaida.ts` (5), `features/juegos/cazala/hooks/useRondaCazala.ts` (4), `features/juegos/cazala/hooks/useVozCaza.ts`, `features/juegos/colmena/hooks/useRondaColmena.ts`, `features/juegos/comun/useNivel.ts` (2), `features/juegos/dulces/components/HojaPregunta.tsx`, `features/juegos/dulces/hooks/usePartidaDulces.ts`, `features/juegos/fin/hooks/useFinJuego.ts`, `features/juegos/niveles/hooks/useNivelesJuego.tsx` (6), `features/juegos/niveles/hooks/useScrollNivel.ts` (2), `features/juegos/pares/components/TarjetaFusion.tsx`, `features/juegos/pares/hooks/usePartidaPares.ts` (2), `features/lecturas/hooks/useLectura.ts` (4), `features/lecturas/hooks/useLecturas.ts`, `features/lecturas/hooks/useReproductorCapitulo.ts` (2), `features/mazo/hooks/useMazo.ts`, `features/oido/hooks/useBolsillo.ts` (2), `features/oido/hooks/useModoOido.ts`, `features/phrasal/hooks/usePhrasal.ts`, `features/phrasal/hooks/usePhrasalVerbo.ts` (3), `features/practicar/components/MedidorVU.tsx`, `features/progreso/components/GraficaEspectrograma.tsx` (3), `features/sonidos/components/PaginaFonema.tsx`, `features/sonidos/hooks/useContracciones.ts` (2), `features/sonidos/hooks/usePronunciacion.ts`, `shared/hooks/useCarga.ts`, `shared/ui/CorreccionFrase.tsx` (2)
+
+**31 · componente fuera del compilador (use no memo)**: `features/frases-sueltas/components/MazoCartas.tsx` (8), `features/juegos/dulces/components/TableroDulces.tsx` (9), `features/juegos/pares/components/CableSenal.tsx` (10), `features/mazo/components/DeslizarQuitar.tsx` (2), `features/phrasal/components/RuletaParticulas.tsx` (2)
+
+**22 · cálculo con cuerpo de bloque**: `features/gramatica/hooks/useGramatica.ts`, `features/gramatica/hooks/useTemaGramatica.ts`, `features/juegos/caida/components/PistaCaida.tsx`, `features/juegos/cazala/hooks/useRondaCazala.ts`, `features/juegos/colmena/components/RanurasPalabra.tsx`, `features/juegos/colmena/hooks/useTableroColmena.ts` (2), `features/juegos/comun/useNivel.ts`, `features/juegos/fin/hooks/useFinJuego.ts`, `features/juegos/pares/hooks/usePartidaPares.ts`, `features/lecturas/components/EsqueletoTexto.tsx`, `features/lecturas/components/Oracion.tsx`, `features/lecturas/hooks/useLectura.ts`, `features/phrasal/components/DetalleForma.tsx`, `features/phrasal/hooks/usePhrasalVerbo.ts`, `features/practicar/components/MedidorVU.tsx`, `features/progreso/components/ArcoSenal.tsx` (3), `features/progreso/components/GraficaEspectrograma.tsx`, `features/sonidos/components/MapaBoca.tsx`, `shared/ui/fx/AnilloMeta.tsx`
+
+**11 · se pasa directo a otro hook (p. ej. useFocusEffect)**: `estado/useMusicaPantalla.ts`, `features/errores/components/SecuenciaMalentendido.tsx`, `features/frases-sueltas/components/CartaFrase.tsx`, `features/juegos/niveles/hooks/useNivelesJuego.tsx`, `features/phrasal/hooks/usePhrasal.ts`, `shared/hooks/useAudioFrase.ts`, `shared/hooks/useCarga.ts`, `shared/hooks/useCortarAudioAlSalir.ts`, `shared/hooks/useEntradaPantalla.ts`, `shared/ui/CorreccionFrase.tsx`, `shared/ui/HojaConsentimiento.tsx`
+
+**4 · tipo genérico explícito**: `features/estudio/components/TileBuilder.tsx`, `features/juegos/cazala/hooks/useRondaCazala.ts`, `features/lecturas/components/PieReproductor.tsx`, `features/phrasal/hooks/usePhrasal.ts`
+
+**3 · gesto de Gesture Handler**: `features/phrasal/hooks/usePhrasalVerbo.ts`, `features/practicar/components/TarjetaTilt.tsx`, `features/progreso/components/GraficaEspectrograma.tsx`
+
+**1 · worklet de Reanimated**: `features/lecturas/hooks/useLectura.ts`
+
+**memo() (26):** renglones de FlatList (la lista no está compilada y vuelve a llamar a `renderItem`), elementos de un
+`.map` (si cambia el arreglo se recrean todos; con memo solo se pintan los que cambiaron) e hijos de los componentes
+fuera del compilador (`CartaEnMazo`, `Pieza`). Se sumó `RenglonCaza`. Ninguno usa comparador propio.
+
+---
 
 ## Cómo se midió
 

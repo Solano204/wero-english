@@ -12,18 +12,18 @@ contenedor no trae `assets/aud` ni `assets/img` (el `bundled.ts` local está vac
 aquí **no incluyen** los ~7.9k medios del build real. Lo que depende del teléfono queda «pendiente» con el comando
 exacto para sacarlo (ver abajo).
 
-| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | DESPUÉS DE ARRANQUE | Cómo |
-|---|---|---|---|---|---|
-| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | **6,943,452 B (6.62 MiB), −755 KB contra la base (−9.8 %)** | `expo export`, medido aquí |
-| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | 10.31 MB (−19 %) | Expo Atlas |
-| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | 2,472 | Expo Atlas |
-| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | 100 archivos · 3.76 MB (salen las 5 fuentes, que van en el APK; entra `catalogo.db`, 1.1 MB) | `expo export` |
-| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | 10,710,095 B | `expo export` |
-| APK release (arm64) | pendiente | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
-| AAB release | pendiente | pendiente | pendiente | pendiente | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
-| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | pendiente | ver «Arranque» |
-| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
-| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | pendiente | ver «Flashlight» |
+| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | DESPUÉS DE ARRANQUE | DESPUÉS DE RE-RENDERS | Cómo |
+|---|---|---|---|---|---|---|
+| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | **6,943,452 B (6.62 MiB), −755 KB contra la base (−9.8 %)** | 7,258,665 B (6.92 MiB): +315 KB por las cachés del React Compiler; −440 KB contra la base | `expo export`, medido aquí |
+| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | 10.31 MB (−19 %) | — | Expo Atlas |
+| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | 2,472 | — | Expo Atlas |
+| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | 100 archivos · 3.76 MB (salen las 5 fuentes, que van en el APK; entra `catalogo.db`, 1.1 MB) | igual | `expo export` |
+| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | 10,710,095 B | 11,025,308 B | `expo export` |
+| APK release (arm64) | pendiente | pendiente | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
+| AAB release | pendiente | pendiente | pendiente | pendiente | pendiente | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
+| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Arranque» |
+| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
+| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Flashlight» |
 
 **Después de estructura.** El prompt 2 no busca bajar peso: parte pantallas en hooks y componentes y mueve archivos a
 capas. Eso suma 59 módulos, y cada módulo de Metro lleva su envoltura (`__d(function…)`, su tabla de dependencias),
@@ -51,6 +51,26 @@ después. Lo de aquí es el bundle y el costo aislado de cada pieza en Hermes CL
 **Arreglo de datos en C.** La siembra vieja hacía `DELETE FROM entrada` y `tarjeta` apunta a `entrada` con
 `ON DELETE CASCADE`: cada actualización que cambiaba el catálogo borraba el avance de todas las frases (probado con
 las migraciones de la app: 300 tarjetas → 0). La nueva es un upsert y las conserva.
+
+### Después de re-renders (prompt 4): por interacción
+
+Tiempos de commit: se miden en el Xiaomi con React Native DevTools → Profiler y «Highlight updates» (build de
+desarrollo o de perfilado) en el tag `antes-de-rendimiento` y en la rama; aquí no hay teléfono. Lo que sí se puede
+decir desde el código (y el React Compiler, que ahora compila 418 funciones y deja fuera 5 a propósito):
+
+| Interacción | ANTES: commits · qué se repinta | DESPUÉS: commits · qué se repinta | Commit más largo (Xiaomi) |
+|---|---|---|---|
+| Estudio: opción y siguiente tarjeta | ~6 · 5 de pantalla completa | ~6 · la raíz y solo los hijos cuyo dato cambió (el compilador conserva los elementos iguales) | pendiente |
+| Cázala: marcar | 1 (+1 por onLayout) · los 6 renglones y la pantalla | 1 · el renglón marcado (memo con props estables) | pendiente |
+| Colmena: colocar letra | 1 · pantalla completa; todas las ranuras en la 1.ª letra | 1 · el hexágono tocado y lo que cambió; letra equivocada 4 → 3 commits; cambio de ronda 2 → 1 | pendiente |
+| Dulces: intercambiar | 2 + ~3 por paso · todas las MetaFrase por paso | igual en commits · solo las metas que sumaron; el tablero sigue fuera del compilador con su memo a mano | pendiente |
+| Practicar: abrir/cerrar grupo | 1 · toda la pantalla con 4 lienzos de Skia | 1 · solo ese grupo (GrupoPracticar) | pendiente |
+| Phrasal: escribir | 1 por tecla, síncrono · todos los renglones montados | teclear no espera a la lista (useDeferredValue) · sin búsqueda ningún renglón se repinta; con búsqueda, solo los que cambian de marcas | pendiente |
+| Ajuste y volver a Practicar | 1 · Ajustes con cualquier llave | 1 · Ajustes solo con lo que muestra; Practicar solo si cambia algo que pinta (y ahora sí recarga con Modo Limpio o niveles) | pendiente |
+| Cambiar de pestaña | 1 · barra con opciones nuevas por pestaña | 1 · opciones fijas; la barra de la librería sigue pintando sus íconos | pendiente |
+
+Memorización a mano: useMemo 141 → 65 y useCallback 263 → 64 (280 quitados); memo() 25 → 26 (se sumó el renglón
+de Cázala). La lista de lo que se quedó y por qué está en `docs/PLAN-RERENDERS.md`.
 
 ### Top 15 módulos después de arranque (Expo Atlas)
 
