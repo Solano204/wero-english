@@ -107,8 +107,8 @@ export function RootNavigator() {
       <Stack.Screen name="WorldDetail" getComponent={() => require('@/features/vocabulario/screens/WorldDetailScreen').WorldDetailScreen} />
       <Stack.Screen name="Pronunciation" getComponent={() => require('@/features/sonidos/screens/PronunciationScreen').PronunciationScreen} />
       <Stack.Screen name="Contractions" getComponent={() => require('@/features/sonidos/screens/ContractionsScreen').ContractionsScreen} />
-      <Stack.Screen name="Errors" getComponent={() => require('@/screens/extras/ErrorsScreen').ErrorsScreen} />
-      <Stack.Screen name="ErrorDetail" getComponent={() => require('@/screens/extras/ErrorDetailScreen').ErrorDetailScreen} />
+      <Stack.Screen name="Errors" getComponent={() => require('@/features/errores/screens/ErrorsScreen').ErrorsScreen} />
+      <Stack.Screen name="ErrorDetail" getComponent={() => require('@/features/errores/screens/ErrorDetailScreen').ErrorDetailScreen} />
       <Stack.Screen name="Downloads" getComponent={() => require('@/screens/utility/DownloadsScreen').DownloadsScreen} />
       <Stack.Screen name="Settings" getComponent={() => require('@/screens/utility/SettingsScreen').SettingsScreen} />
       <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />

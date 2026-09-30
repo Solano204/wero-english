@@ -88,7 +88,7 @@ const TIPO4_NO_ES_TITULO = {
 
 /** Colecciones grandes pintadas con `.map` dentro de un ScrollView, sin virtualizar. Revisado a mano. */
 const LISTAS_SIN_VIRTUALIZAR = [
-  { archivo: 'src/screens/extras/ErrorsScreen.tsx', patron: /lista\.map\(/, motivo: 'hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render' },
+  { archivo: 'src/features/errores/screens/ErrorsScreen.tsx', patron: /lista\.map\(/, motivo: 'hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render' },
   { archivo: 'src/features/sonidos/screens/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
 ];
 
@@ -461,7 +461,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/phrasal/') || r === 'src/features/phrasal/screens/PhrasalScreen.tsx' || r === 'src/features/phrasal/screens/PhrasalVerboScreen.tsx' ||
   r.startsWith('src/components/lectura/') || r === 'src/features/lecturas/screens/LecturasScreen.tsx' || r === 'src/features/lecturas/screens/LecturaScreen.tsx' ||
   r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
-  r.startsWith('src/components/errores/') || r === 'src/screens/extras/ErrorsScreen.tsx' || r === 'src/screens/extras/ErrorDetailScreen.tsx' ||
+  r.startsWith('src/components/errores/') || r === 'src/features/errores/screens/ErrorsScreen.tsx' || r === 'src/features/errores/screens/ErrorDetailScreen.tsx' ||
   r.startsWith('src/components/atoradas/') || r === 'src/screens/utility/DeckScreen.tsx' || r === 'src/screens/utility/StuckScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/features/practicar/screens/PracticeScreen.tsx' ||
   r === 'src/features/progreso/screens/ProgressScreen.tsx' || r === 'src/app/navegacion/TabNavigator.tsx';

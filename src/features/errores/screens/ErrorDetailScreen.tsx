@@ -7,9 +7,9 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Badge, Button, Header, NotaInfo, Screen } from '@/shared/ui';
-import { DueloContraste } from '@/components/errores/DueloContraste';
-import { MedidorGravedad } from '@/components/errores/MedidorGravedad';
-import { SecuenciaMalentendido } from '@/components/errores/SecuenciaMalentendido';
+import { DueloContraste } from '@/features/errores/components/DueloContraste';
+import { MedidorGravedad } from '@/features/errores/components/MedidorGravedad';
+import { SecuenciaMalentendido } from '@/features/errores/components/SecuenciaMalentendido';
 import { textoParaCompartir } from '@/domain/errores';
 import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/data/contenido';

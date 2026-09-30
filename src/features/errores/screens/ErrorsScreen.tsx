@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { EmptyState, Header, Presionable, Screen } from '@/shared/ui';
-import { TarjetaError } from '@/components/errores/TarjetaError';
+import { TarjetaError } from '@/features/errores/components/TarjetaError';
 import { Marcador } from '@/shared/ui/fx/Marcador';
 import {
   CATEGORIAS_ERRORES,
