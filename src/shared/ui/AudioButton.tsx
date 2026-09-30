@@ -6,7 +6,7 @@ import { Presionable } from '@/shared/ui/Presionable';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import * as media from '@/services/media';
-import { isBundled } from '@/assets/bundled';
+import { isBundled } from '@/services/media';
 
 interface Props {
   path: string | null;

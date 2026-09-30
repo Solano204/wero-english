@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { isBundled } from '@/assets/bundled';
+import { isBundled } from '@/services/media';
 import Animated from 'react-native-reanimated';
 import { Badge, Button, Icon } from '@/shared/ui';
 import { SceneImage } from '@/shared/ui/SceneImage';

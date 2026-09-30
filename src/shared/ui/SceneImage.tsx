@@ -4,9 +4,8 @@ import {
   StyleSheet,
   type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { isBundled } from '@/assets/bundled';
 import * as media from '@/services/media';
-import { imageSource } from '@/services/media';
+import { imageSource, isBundled } from '@/services/media';
 import { color, radius, aparecer } from '@/theme';
 
 interface Props {

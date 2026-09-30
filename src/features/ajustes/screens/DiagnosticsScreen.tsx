@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card, Carga, Header, Icon, Screen } from '@/shared/ui';
-import { BUNDLED_COUNT } from '@/assets/bundled';
+import { BUNDLED_COUNT } from '@/services/media';
 import { color, font, space } from '@/theme';
 import { useDiagnostico } from '@/features/ajustes/hooks/useDiagnostico';
 

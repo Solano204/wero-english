@@ -3,6 +3,9 @@ import { Asset } from 'expo-asset';
 import type { ImageSourcePropType } from 'react-native';
 import { bundledModule } from '@/assets/bundled';
 
+// Lo empaquetado se pregunta aquí: features y shared no importan el mapa generado directo.
+export { BUNDLED_COUNT, isBundled } from '@/assets/bundled';
+
 /**
  * Resuelve una ruta relativa del JSON ("aud/18.mp3", "img/err/err_001.webp")
  * a algo que el teléfono pueda abrir.
