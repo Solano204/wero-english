@@ -28,3 +28,24 @@ assets/aud/fon/_prueba/
 
 # skills clonadas (stop-slop trae su propio .git)
 .claude/skills/
+
+# Llaves y firma (nunca en Git)
+*.keystore
+*.jks
+*.p12
+*.pem
+gradle.properties
+local.properties
+google-services.json
+GoogleService-Info.plist
+
+# Builds
+*.apk
+*.aab
+build/
+
+# Logs y basura de trabajo
+*.stackdump
+.tmp-*
+.gemini-progreso.json
+SOUNDS ENGLISH/
