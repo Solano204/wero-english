@@ -85,14 +85,14 @@ export function RootNavigator() {
       <Stack.Group screenOptions={{ animation: 'slide_from_bottom' }}>
         <Stack.Screen name="Study" getComponent={() => require('@/screens/study/StudyScreen').StudyScreen} />
         <Stack.Screen name="EarMode" getComponent={() => require('@/screens/extras/EarModeScreen').EarModeScreen} />
-        <Stack.Screen name="Cazala" getComponent={() => require('@/screens/games/CazalaScreen').CazalaScreen} />
-        <Stack.Screen name="Colmena" getComponent={() => require('@/screens/games/ColmenaScreen').ColmenaScreen} />
-        <Stack.Screen name="Pares" getComponent={() => require('@/screens/games/ParesScreen').ParesScreen} />
-        <Stack.Screen name="Caida" getComponent={() => require('@/screens/games/CaidaScreen').CaidaScreen} />
-        <Stack.Screen name="Dulces" getComponent={() => require('@/screens/games/DulcesScreen').DulcesScreen} />
+        <Stack.Screen name="Cazala" getComponent={() => require('@/features/juegos/cazala/screens/CazalaScreen').CazalaScreen} />
+        <Stack.Screen name="Colmena" getComponent={() => require('@/features/juegos/colmena/screens/ColmenaScreen').ColmenaScreen} />
+        <Stack.Screen name="Pares" getComponent={() => require('@/features/juegos/pares/screens/ParesScreen').ParesScreen} />
+        <Stack.Screen name="Caida" getComponent={() => require('@/features/juegos/caida/screens/CaidaScreen').CaidaScreen} />
+        <Stack.Screen name="Dulces" getComponent={() => require('@/features/juegos/dulces/screens/DulcesScreen').DulcesScreen} />
         <Stack.Screen
           name="GameEnd"
-          getComponent={() => require('@/screens/games/GameEndScreen').GameEndScreen}
+          getComponent={() => require('@/features/juegos/fin/screens/GameEndScreen').GameEndScreen}
           // Pares cierra su tablero con una ola de luz: el resumen entra con un fundido en vez de subir desde abajo.
           options={({ route }) => ({
             gestureEnabled: false,
@@ -115,7 +115,7 @@ export function RootNavigator() {
       <Stack.Screen name="Borrar" getComponent={() => require('@/screens/utility/BorrarScreen').BorrarScreen} />
       <Stack.Screen name="Stuck" getComponent={() => require('@/screens/utility/StuckScreen').StuckScreen} />
       <Stack.Screen name="Deck" getComponent={() => require('@/screens/utility/DeckScreen').DeckScreen} />
-      <Stack.Screen name="Niveles" getComponent={() => require('@/screens/games/NivelesScreen').NivelesScreen} />
+      <Stack.Screen name="Niveles" getComponent={() => require('@/features/juegos/niveles/screens/NivelesScreen').NivelesScreen} />
       <Stack.Screen name="Gramatica" getComponent={() => require('@/screens/extras/GramaticaScreen').GramaticaScreen} />
       <Stack.Screen name="GramaticaTema" getComponent={() => require('@/screens/extras/GramaticaTemaScreen').GramaticaTemaScreen} />
       <Stack.Screen name="Phrasal" getComponent={() => require('@/screens/extras/PhrasalScreen').PhrasalScreen} />

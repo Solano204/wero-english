@@ -17,7 +17,7 @@ const cargar = async (rel, sustituir = (s) => s) => {
   const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
-const G = await cargar('src/components/juegos/colmena/geometria.ts');
+const G = await cargar('src/features/juegos/colmena/logic/geometria.ts');
 const { formaPalabras } = await cargar('src/domain/texto.ts');
 const { normaliza } = await cargar('src/domain/colmena.ts', (s) => s.replace(/import \{ shuffle \} from '@\/domain\/arreglos';/, 'const shuffle = (a) => a;'));
 const { distribuirRanuras, disposicionPanal, ordenDesdeCentro, fichasParaCompletar, retrasoVuelo, etiquetaRanura, puntosHexagono } = G;

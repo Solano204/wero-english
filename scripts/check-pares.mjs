@@ -17,7 +17,7 @@ const cargar = async (rel) => {
   const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
-const G = await cargar('src/components/juegos/pares/geometria.ts');
+const G = await cargar('src/features/juegos/pares/logic/geometria.ts');
 const { columnasPara, distribuir, fichaEn, centroDe, ALTO_FICHA_MIN, ALTO_FICHA_MAX, HUECO_FICHAS } = G;
 
 let total = 0;

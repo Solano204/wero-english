@@ -16,7 +16,7 @@ const cargar = async (rel) => {
   const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
-const P = await cargar('src/components/juegos/dulces/piezas.ts');
+const P = await cargar('src/features/juegos/dulces/logic/piezas.ts');
 const { FORMAS, COLORES_MAX, NOMBRE_FORMA, NOMBRE_COLOR, TRAZOS, formaDe, nombreColor, etiquetaPieza, indiceMasCercana } = P;
 
 let total = 0;
@@ -357,7 +357,7 @@ prueba('rebarajar con la misma mezcla de colores nunca crea ni descarta piezas',
 });
 
 // ── la geometría del tablero ─────────────────────────────────────────────
-const T = await importar('src/components/juegos/dulces/tablero.ts');
+const T = await importar('src/features/juegos/dulces/logic/tablero.ts');
 const motion = fs.readFileSync(path.join(ROOT, 'src/theme/motion.ts'), 'utf8');
 
 prueba('los números de tablero.ts son los de motionDulces y escalon (no se desfasan)', () => {

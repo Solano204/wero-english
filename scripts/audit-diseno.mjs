@@ -36,8 +36,8 @@ const CONTENIDO = /(phrase|spanish|frase|traduc|titulo|title|nombre|palabra|ganc
  */
 const ACC1_NO_CONVIVEN = {
   'src/screens/extras/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
-  'src/components/juegos/cazala/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
-  'src/screens/games/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
+  'src/features/juegos/cazala/components/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
+  'src/features/juegos/fin/screens/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
   'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
   'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
   'src/components/estudio/FinDelDia.tsx': '`quedan ? Seguir repasando : sinNuevas ? Frases sueltas : Aprender frases nuevas`: un solo `primary` a la vez; Jugar es `secondary` y Volver `ghost`',
@@ -63,15 +63,15 @@ const TIPO2_SE_QUEDAN = {
   'src/screens/entry/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/screens/entry/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/extras/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/games/ColmenaScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/components/juegos/caida/FinCaida.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/games/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/games/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/components/juegos/dulces/PieDulces.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/colmena/screens/ColmenaScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/caida/components/FinCaida.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/fin/screens/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/fin/screens/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/dulces/components/PieDulces.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/screens/extras/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/screens/extras/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/utility/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/screens/games/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/features/juegos/pares/screens/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/components/list/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/features/progreso/components/Espectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
   'src/features/progreso/components/Espectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
@@ -102,7 +102,7 @@ const PASOS_ESCALA = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 /** MOT-1: curvas lineales válidas. Son relojes de la ronda, no animación de interfaz. */
 const MOT1_EXCEPCIONES = [
   { archivo: 'src/shared/ui/RoundTimer.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda' },
-  { archivo: 'src/screens/games/CaidaScreen.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
+  { archivo: 'src/features/juegos/caida/screens/CaidaScreen.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
 ];
 
 // ── utilidades ───────────────────────────────────────────────────────────
@@ -424,6 +424,13 @@ function auditaMovimiento(archivos) {
  */
 /** Estudio 5.0: las piezas de la tarjeta y la pantalla que animan (el resto de `card/` es anterior a la señal). */
 const ESTUDIO_SENAL = new Set([
+  'src/features/estudio/screens/StudyScreen.tsx',
+  'src/features/estudio/components/StudyCardView.tsx',
+  'src/features/estudio/components/TileBuilder.tsx',
+  'src/features/estudio/components/FraseHueco.tsx',
+  'src/features/estudio/components/PalabraVoladora.tsx',
+  'src/features/estudio/components/DiffFrase.tsx',
+  'src/features/estudio/components/BloqueVoz.tsx',
   'src/screens/study/StudyScreen.tsx',
   'src/components/card/StudyCardView.tsx',
   'src/shared/ui/OptionButton.tsx',
@@ -436,14 +443,18 @@ const ESTUDIO_SENAL = new Set([
 const ALCANCE_SENAL = (r) =>
   esFx(r) || r === 'src/shared/ui/BarraFina.tsx' || r === 'src/shared/ui/BotonGuardar.tsx' || r === 'src/shared/ui/CorreccionFrase.tsx' ||
   r === 'src/domain/resumenNiveles.ts' || r === 'src/data/local/celebracion.ts' ||
+  /^src\/features\/(progreso|detalle|oido|gramatica|phrasal|lecturas|frases-sueltas|errores|atoradas|practicar)\//.test(r) ||
+  /^src\/features\/juegos\/(niveles|pares|caida|dulces|colmena|cazala)\//.test(r) ||
+  r.startsWith('src/features/sonidos/components/') || r === 'src/features/sonidos/screens/PronunciationScreen.tsx' ||
+  r.startsWith('src/features/mazo/components/') || r === 'src/features/mazo/screens/DeckScreen.tsx' ||
   r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
   r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
-  r.startsWith('src/components/niveles/') || r === 'src/screens/games/NivelesScreen.tsx' ||
-  r.startsWith('src/components/juegos/pares/') || r === 'src/screens/games/ParesScreen.tsx' ||
-  r.startsWith('src/components/juegos/caida/') || r === 'src/screens/games/CaidaScreen.tsx' ||
-  r.startsWith('src/components/juegos/dulces/') || r === 'src/screens/games/DulcesScreen.tsx' ||
-  r.startsWith('src/components/juegos/colmena/') || r === 'src/screens/games/ColmenaScreen.tsx' ||
-  r.startsWith('src/components/juegos/cazala/') || r === 'src/screens/games/CazalaScreen.tsx' ||
+  r.startsWith('src/components/niveles/') || r === 'src/features/juegos/niveles/screens/NivelesScreen.tsx' ||
+  r.startsWith('src/components/juegos/pares/') || r === 'src/features/juegos/pares/screens/ParesScreen.tsx' ||
+  r.startsWith('src/components/juegos/caida/') || r === 'src/features/juegos/caida/screens/CaidaScreen.tsx' ||
+  r.startsWith('src/components/juegos/dulces/') || r === 'src/features/juegos/dulces/screens/DulcesScreen.tsx' ||
+  r.startsWith('src/components/juegos/colmena/') || r === 'src/features/juegos/colmena/screens/ColmenaScreen.tsx' ||
+  r.startsWith('src/components/juegos/cazala/') || r === 'src/features/juegos/cazala/screens/CazalaScreen.tsx' ||
   r === 'src/screens/extras/EarModeScreen.tsx' ||
   r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
   r.startsWith('src/components/gramatica/') || r === 'src/screens/extras/GramaticaScreen.tsx' || r === 'src/screens/extras/GramaticaTemaScreen.tsx' ||

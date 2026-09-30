@@ -236,8 +236,8 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
   assert.match(rota, /if \(reducido\) return <Text/, 'con reducir movimiento es solo el texto');
   const trazo = leer('src/shared/ui/fx/CableTrazo.tsx');
   assert.match(trazo, /desvio\?: SharedValue<number>;/);
-  assert.match(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx')), /<CableTrazo\b/, 'Pares usa el mismo dibujo');
-  assert.ok(!/Canvas/.test(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx'))));
+  assert.match(sinComentarios(leer('src/features/juegos/pares/components/CableSenal.tsx')), /<CableTrazo\b/, 'Pares usa el mismo dibujo');
+  assert.ok(!/Canvas/.test(sinComentarios(leer('src/features/juegos/pares/components/CableSenal.tsx'))));
   const gram = sinComentarios(leer('src/components/gramatica/ErrorQueSeCorrige.tsx'));
   assert.match(gram, /useCorreccion\(mal, bien\)/, 'Gramática usa el mismo núcleo');
   assert.ok(!/function Tacha|function FraseTransformada/.test(gram));
