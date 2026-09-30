@@ -13,7 +13,7 @@ import Animated, {
   useSharedValue,
   withSequence,
   withTiming } from 'react-native-reanimated';
-import { ExploreScreen } from '@/screens/discover/ExploreScreen';
+import { ExploreScreen } from '@/features/vocabulario/screens/ExploreScreen';
 import { PracticeScreen } from '@/features/practicar/screens/PracticeScreen';
 import { ProgressScreen } from '@/features/progreso/screens/ProgressScreen';
 import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motionEasing } from '@/theme';

@@ -9,8 +9,8 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Carga, Header, Screen } from '@/shared/ui';
 import { ProveedorEsqueleto } from '@/shared/ui/esqueleto';
-import { EntryRow } from '@/components/list/EntryRow';
-import { EntryRowHueso } from '@/components/list/EntryRowHueso';
+import { EntryRow } from '@/features/vocabulario/components/EntryRow';
+import { EntryRowHueso } from '@/features/vocabulario/components/EntryRowHueso';
 import { getPackEntries } from '@/data/repos/frases';
 import { useCarga } from '@/shared/hooks/useCarga';
 import { useSettingsStore } from '@/estado/useSettingsStore';

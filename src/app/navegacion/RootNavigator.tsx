@@ -103,8 +103,8 @@ export function RootNavigator() {
       </Stack.Group>
 
       <Stack.Screen name="Detail" getComponent={() => require('@/screens/discover/DetailScreen').DetailScreen} />
-      <Stack.Screen name="PackDetail" getComponent={() => require('@/screens/discover/PackDetailScreen').PackDetailScreen} />
-      <Stack.Screen name="WorldDetail" getComponent={() => require('@/screens/discover/WorldDetailScreen').WorldDetailScreen} />
+      <Stack.Screen name="PackDetail" getComponent={() => require('@/features/vocabulario/screens/PackDetailScreen').PackDetailScreen} />
+      <Stack.Screen name="WorldDetail" getComponent={() => require('@/features/vocabulario/screens/WorldDetailScreen').WorldDetailScreen} />
       <Stack.Screen name="Pronunciation" getComponent={() => require('@/screens/extras/PronunciationScreen').PronunciationScreen} />
       <Stack.Screen name="Contractions" getComponent={() => require('@/screens/extras/ContractionsScreen').ContractionsScreen} />
       <Stack.Screen name="Errors" getComponent={() => require('@/screens/extras/ErrorsScreen').ErrorsScreen} />

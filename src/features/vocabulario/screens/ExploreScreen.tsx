@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Input, ProgressBar, Screen } from '@/shared/ui';
 import { Hueso, HuesoCirculo, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
-import { EntryRow } from '@/components/list/EntryRow';
+import { EntryRow } from '@/features/vocabulario/components/EntryRow';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { getWorldCounts } from '@/data/repos/estadisticas';
