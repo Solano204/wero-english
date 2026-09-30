@@ -99,14 +99,14 @@ export function RootNavigator() {
             ...(route.params?.juego === 'pares' ? { animation: 'fade' as const, animationDuration: motionDuration.lento } : null),
           })}
         />
-        <Stack.Screen name="MinimalPairs" getComponent={() => require('@/screens/extras/MinimalPairsScreen').MinimalPairsScreen} />
+        <Stack.Screen name="MinimalPairs" getComponent={() => require('@/features/sonidos/screens/MinimalPairsScreen').MinimalPairsScreen} />
       </Stack.Group>
 
       <Stack.Screen name="Detail" getComponent={() => require('@/features/detalle/screens/DetailScreen').DetailScreen} />
       <Stack.Screen name="PackDetail" getComponent={() => require('@/features/vocabulario/screens/PackDetailScreen').PackDetailScreen} />
       <Stack.Screen name="WorldDetail" getComponent={() => require('@/features/vocabulario/screens/WorldDetailScreen').WorldDetailScreen} />
-      <Stack.Screen name="Pronunciation" getComponent={() => require('@/screens/extras/PronunciationScreen').PronunciationScreen} />
-      <Stack.Screen name="Contractions" getComponent={() => require('@/screens/extras/ContractionsScreen').ContractionsScreen} />
+      <Stack.Screen name="Pronunciation" getComponent={() => require('@/features/sonidos/screens/PronunciationScreen').PronunciationScreen} />
+      <Stack.Screen name="Contractions" getComponent={() => require('@/features/sonidos/screens/ContractionsScreen').ContractionsScreen} />
       <Stack.Screen name="Errors" getComponent={() => require('@/screens/extras/ErrorsScreen').ErrorsScreen} />
       <Stack.Screen name="ErrorDetail" getComponent={() => require('@/screens/extras/ErrorDetailScreen').ErrorDetailScreen} />
       <Stack.Screen name="Downloads" getComponent={() => require('@/screens/utility/DownloadsScreen').DownloadsScreen} />

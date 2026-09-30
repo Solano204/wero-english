@@ -89,7 +89,7 @@ const TIPO4_NO_ES_TITULO = {
 /** Colecciones grandes pintadas con `.map` dentro de un ScrollView, sin virtualizar. Revisado a mano. */
 const LISTAS_SIN_VIRTUALIZAR = [
   { archivo: 'src/screens/extras/ErrorsScreen.tsx', patron: /lista\.map\(/, motivo: 'hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render' },
-  { archivo: 'src/screens/extras/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
+  { archivo: 'src/features/sonidos/screens/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
 ];
 
 /** COLOR-1: usos de un color de mundo como relleno que sí se aceptan, con su motivo. */
@@ -456,7 +456,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/juegos/colmena/') || r === 'src/features/juegos/colmena/screens/ColmenaScreen.tsx' ||
   r.startsWith('src/components/juegos/cazala/') || r === 'src/features/juegos/cazala/screens/CazalaScreen.tsx' ||
   r === 'src/screens/extras/EarModeScreen.tsx' ||
-  r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
+  r.startsWith('src/components/sonidos/') || r === 'src/features/sonidos/screens/PronunciationScreen.tsx' ||
   r.startsWith('src/components/gramatica/') || r === 'src/features/gramatica/screens/GramaticaScreen.tsx' || r === 'src/features/gramatica/screens/GramaticaTemaScreen.tsx' ||
   r.startsWith('src/components/phrasal/') || r === 'src/features/phrasal/screens/PhrasalScreen.tsx' || r === 'src/features/phrasal/screens/PhrasalVerboScreen.tsx' ||
   r.startsWith('src/components/lectura/') || r === 'src/features/lecturas/screens/LecturasScreen.tsx' || r === 'src/features/lecturas/screens/LecturaScreen.tsx' ||

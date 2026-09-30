@@ -1,8 +1,8 @@
 export { PracticeScreen } from '@/features/practicar/screens/PracticeScreen';
 export { EarModeScreen } from './EarModeScreen';
-export { PronunciationScreen } from './PronunciationScreen';
-export { MinimalPairsScreen } from './MinimalPairsScreen';
-export { ContractionsScreen } from './ContractionsScreen';
+export { PronunciationScreen } from '@/features/sonidos/screens/PronunciationScreen';
+export { MinimalPairsScreen } from '@/features/sonidos/screens/MinimalPairsScreen';
+export { ContractionsScreen } from '@/features/sonidos/screens/ContractionsScreen';
 export { ErrorsScreen } from './ErrorsScreen';
 export { ErrorDetailScreen } from './ErrorDetailScreen';
 export { LecturasScreen } from '@/features/lecturas/screens/LecturasScreen';
