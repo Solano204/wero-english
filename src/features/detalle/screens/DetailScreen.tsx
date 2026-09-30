@@ -1,23 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, StyleSheet, Text, View } from 'react-native';
-import {
-  useNavigation,
-  useRoute,
-  type RouteProp,
-} from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Badge,
-  Carga,
-  EmptyState,
-  Header,
-  IconButton,
-  LevelBadge,
-  RiskBadge,
-  Screen,
-} from '@/shared/ui';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { Badge, Carga, EmptyState, Header, IconButton, LevelBadge, RiskBadge, Screen } from '@/shared/ui';
 import { MarcoImagen } from '@/shared/ui/MarcoImagen';
 import { Hueso, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { Aparece } from '@/features/detalle/components/Aparece';
@@ -26,22 +10,10 @@ import { CuandoNoDecirla } from '@/features/detalle/components/CuandoNoDecirla';
 import { EscalaRegistro } from '@/features/detalle/components/EscalaRegistro';
 import { FilaDondeVive } from '@/features/detalle/components/FilaDondeVive';
 import { HeroeFrase } from '@/features/detalle/components/HeroeFrase';
-import { getEntry } from '@/data/repos/frases';
-import { isFavorite, toggleFavorite } from '@/data/repos/tarjetas';
-import { useCarga } from '@/shared/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
-import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
-import { color, font, layout, motionDuration, motionEasing, motionEntrada, radius, space, type WorldId } from '@/theme';
-import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { color, font, layout, motionDuration, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { mismoTexto } from '@/domain/texto';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-type Rt = RouteProp<RootStackParams, 'Detail'>;
-
-/** De qué tamaño llega la ficha: crece hasta 1 mientras aparece. */
-const ESCALA_LLEGADA = 0.96;
+import { useDetalleFrase } from '@/features/detalle/hooks/useDetalleFrase';
 
 /**
  * P-12, la ficha completa de una frase.
@@ -50,54 +22,7 @@ const ESCALA_LLEGADA = 0.96;
  * traducción, la versión neutra, cuándo NO usarla y por qué.
  */
 export function DetailScreen() {
-  const nav = useNavigation<Nav>();
-  const { params } = useRoute<Rt>();
-  const user = useAuthStore((s) => s.user);
-  const { top } = useSafeAreaInsets();
-  useCortarAudioAlSalir();
-  const scrollY = useSharedValue(0);
-
-  const carga = useCarga(() => getEntry(params.entryId), [params.entryId], {
-    esVacio: (e) => e === null,
-  });
-  const entry = carga.datos;
-  const [fav, setFav] = useState(false);
-  // Sube cada vez que la frase pasa a guardada (la fiesta); quitarla no lo sube.
-  const [pulso, setPulso] = useState(0);
-  // Si el usuario ya tocó el botón, la lectura inicial de la base no lo pisa.
-  const tocado = useRef(false);
-
-  // La llegada: fundido y escala de 0.96 a 1 en `escena`. Con reducir movimiento, ya está.
-  const reducido = useMovimientoReducido();
-  const entrada = useSharedValue(reducido ? 1 : 0);
-  useEffect(() => {
-    entrada.value = reducido ? 1 : withTiming(1, { duration: motionDuration.escena, easing: motionEasing.entrar });
-  }, [reducido, entrada]);
-  const entradaAnim = useAnimatedStyle(() => ({
-    opacity: entrada.value,
-    transform: [{ scale: ESCALA_LLEGADA + (1 - ESCALA_LLEGADA) * entrada.value }],
-  }));
-
-  // El estado real: antes el botón arrancaba siempre en «Guardar», aunque la frase ya estuviera guardada.
-  useEffect(() => {
-    if (!user) return;
-    let vigente = true;
-    void isFavorite(user.id, params.entryId).then((guardada) => {
-      if (vigente && !tocado.current) setFav(guardada);
-    });
-    return () => {
-      vigente = false;
-    };
-  }, [user, params.entryId]);
-
-  const alternar = useCallback(async () => {
-    if (!user || !entry) return;
-    tocado.current = true;
-    const guardada = await toggleFavorite(user.id, entry.id);
-    setFav(guardada);
-    if (guardada) setPulso((n) => n + 1);
-    AccessibilityInfo.announceForAccessibility(guardada ? 'Guardada en Mi mazo' : 'Quitada de Mi mazo');
-  }, [user, entry]);
+  const { nav, top, scrollY, carga, entry, fav, pulso, entradaAnim, alternar } = useDetalleFrase();
 
   if (!entry) {
     return (
