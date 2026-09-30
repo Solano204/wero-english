@@ -14,10 +14,10 @@ import {
 } from '@/shared/ui';
 import { Hueso, HuesoCirculo, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
-import { Detalle } from '@/components/progreso/Detalle';
-import { FichaJuego } from '@/components/progreso/FichaJuego';
-import { FilaMundo } from '@/components/progreso/FilaMundo';
-import { PanelSenal } from '@/components/progreso/PanelSenal';
+import { Detalle } from '@/features/progreso/components/Detalle';
+import { FichaJuego } from '@/features/progreso/components/FichaJuego';
+import { FilaMundo } from '@/features/progreso/components/FilaMundo';
+import { PanelSenal } from '@/features/progreso/components/PanelSenal';
 import { Espectrograma } from '@/features/progreso/components/Espectrograma';
 import { useVisto } from '@/shared/hooks/useVisibilidad';
 import {
@@ -26,7 +26,7 @@ import {
   resumenJuego,
   ventana,
   type ProgresoMundo,
-} from '@/components/progreso/datos';
+} from '@/features/progreso/logic/datos';
 import { getGameRecords } from '@/data/repos/partidas';
 import { resumenTodos } from '@/data/repos/niveles';
 import { getProgresoPorMundo, getStats, type Stats } from '@/data/repos/estadisticas';

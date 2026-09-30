@@ -19,7 +19,7 @@ import {
   maximo,
   resumenAccesible,
   type DiaGrafica,
-} from '@/components/progreso/datos';
+} from '@/features/progreso/logic/datos';
 import * as haptics from '@/services/haptics';
 import { color, font, motionDuration, motionEasing, motionSenal, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';

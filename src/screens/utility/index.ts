@@ -1,4 +1,4 @@
-export { ProgressScreen } from './ProgressScreen';
+export { ProgressScreen } from '@/features/progreso/screens/ProgressScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { LegalDocScreen } from './LegalDocScreen';
 export { BorrarScreen } from './BorrarScreen';

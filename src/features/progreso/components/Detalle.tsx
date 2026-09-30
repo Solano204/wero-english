@@ -8,7 +8,7 @@ import { etiquetaCorregir } from '@/features/practicar/logic/consola';
 import { anillo, color, font, space } from '@/theme';
 import { conteo, plural } from '@/domain/texto';
 import { CuadroDato } from './CuadroDato';
-import { precisionPct } from './datos';
+import { precisionPct } from '@/features/progreso/logic/datos';
 
 interface Props {
   stats: Stats;

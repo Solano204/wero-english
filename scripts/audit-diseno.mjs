@@ -464,7 +464,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/errores/') || r === 'src/screens/extras/ErrorsScreen.tsx' || r === 'src/screens/extras/ErrorDetailScreen.tsx' ||
   r.startsWith('src/components/atoradas/') || r === 'src/screens/utility/DeckScreen.tsx' || r === 'src/screens/utility/StuckScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/features/practicar/screens/PracticeScreen.tsx' ||
-  r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/app/navegacion/TabNavigator.tsx';
+  r === 'src/features/progreso/screens/ProgressScreen.tsx' || r === 'src/app/navegacion/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
 const ANIMA = /\b(withTiming|withSpring|withRepeat|withSequence|withDelay|useFrameCallback)\(|entering=/;
 /** MOT-3: componentes que son el momento héroe animado de su pantalla. */

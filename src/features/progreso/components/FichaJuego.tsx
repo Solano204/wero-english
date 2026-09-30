@@ -4,7 +4,7 @@ import { Card, Icon, type IconName } from '@/shared/ui';
 import { color, escalon, font, radius, space } from '@/theme';
 import { conteo } from '@/domain/texto';
 import { BarraFina } from '@/shared/ui/BarraFina';
-import { textoJuego, type ResumenJuego } from './datos';
+import { textoJuego, type ResumenJuego } from '@/features/progreso/logic/datos';
 
 /** Lado de la ficha del ícono. */
 const FICHA = 40;

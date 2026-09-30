@@ -31,7 +31,7 @@ const cargarUrl = async (rel) => {
 };
 const cargar = async (rel) => import(await cargarUrl(rel));
 const { energiaOnda, progresoMeta, metaCumplida, etiquetaCorregir, ENERGIA_MIN } = await cargar('src/features/practicar/logic/consola.ts');
-const P = await cargar('src/components/progreso/datos.ts');
+const P = await cargar('src/features/progreso/logic/datos.ts');
 const { plural, conteo, miles, mismoTexto } = await cargar('src/domain/texto.ts');
 const { metaDe, textoMeta } = await cargar('src/features/practicar/logic/metadatos.ts');
 const { diasQueQuedan, textoDiasReto } = await cargar('src/features/practicar/logic/reto.ts');

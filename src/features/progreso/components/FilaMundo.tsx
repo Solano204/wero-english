@@ -5,7 +5,7 @@ import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { color, escalon, font, layout, space } from '@/theme';
 import { miles, plural } from '@/domain/texto';
 import { BarraFina } from '@/shared/ui/BarraFina';
-import { textoMundo } from './datos';
+import { textoMundo } from '@/features/progreso/logic/datos';
 
 interface Props {
   nombre: string;

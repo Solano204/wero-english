@@ -32,7 +32,7 @@ import {
   textoRacha,
   textoRecord,
   textoVistas,
-} from './datos';
+} from '@/features/progreso/logic/datos';
 
 /** Lo que dice el medidor cuando todavía no hay ninguna frase vista. */
 const TEXTO_VACIO = 'Una frase se domina cuando la sigues acertando semanas después.';
