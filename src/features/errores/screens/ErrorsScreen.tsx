@@ -1,35 +1,18 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { EmptyState, Header, Presionable, Screen } from '@/shared/ui';
 import { TarjetaError } from '@/features/errores/components/TarjetaError';
 import { Marcador } from '@/shared/ui/fx/Marcador';
-import {
-  CATEGORIAS_ERRORES,
-  ORDENES_ERRORES,
-  conteoPorCategoria,
-  encabezadoErrores,
-  filtrarYOrdenar,
-  normalizarOrden,
-  type FiltroErrores,
-  type OrdenErrores,
-} from '@/domain/errores';
-import { useAuthStore } from '@/estado/useAuthStore';
-import { useSettingsStore } from '@/estado/useSettingsStore';
-import { loadContent } from '@/data/contenido';
-import { color, desvaneceDerecha, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { CATEGORIAS_ERRORES, ORDENES_ERRORES } from '@/domain/errores';
+import { color, desvaneceDerecha, font, layout, radius, space } from '@/theme';
 import type { ErrorCard } from '@/types';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-type Vista = { cat: FiltroErrores; orden: OrdenErrores };
+import { useErrores } from '@/features/errores/hooks/useErrores';
 
 /** Cuántas tarjetas entran animadas al cambiar de filtro; el resto aparece directo. */
 const ANIMADAS = 8;
+
 /** Lo que ocupa el desvanecido del borde derecho de los chips, en dp. */
 const ANCHO_FADE = 32;
 
@@ -68,67 +51,8 @@ const Chip = memo(function Chip({ etiqueta, cuenta, activo, onPress }: ChipProps
  * ocho tarjetas entran escalonadas; con «reducir movimiento» cambia sin animar.
  */
 export function ErrorsScreen() {
-  const nav = useNavigation<Nav>();
-  const reducido = useMovimientoReducido();
-  const user = useAuthStore((s) => s.user);
-  const guardado = useSettingsStore((s) => s.ordenErrores);
-  const guardarAjuste = useSettingsStore((s) => s.set);
-  const content = useMemo(loadContent, []);
-  const todos = content.errores.errores;
-  const total = content.errores.total;
+  const { nav, todos, cat, orden, vista, salida, cuentas, lista, encabezado, elegirCategoria, elegirOrden, abrir } = useErrores();
 
-  const [cat, setCat] = useState<FiltroErrores>('todos');
-  const [orden, setOrden] = useState<OrdenErrores>(() => normalizarOrden(guardado));
-  // Lo que se ve en la lista: cambia cuando la lista anterior terminó de salir.
-  const [vista, setVista] = useState<Vista>({ cat: 'todos', orden: normalizarOrden(guardado) });
-  const salida = useSharedValue(1);
-
-  const cuentas = useMemo(() => conteoPorCategoria(todos), [todos]);
-  const lista = useMemo(() => filtrarYOrdenar(todos, vista.cat, vista.orden), [todos, vista]);
-  const encabezado = encabezadoErrores(cat, cuentas[cat], total);
-
-  useEffect(() => () => cancelAnimation(salida), [salida]);
-
-  const alCambiarVista = useCallback(
-    (sig: Vista) => {
-      setVista(sig);
-      salida.value = 1;
-    },
-    [salida]
-  );
-  const cambiarVista = useCallback(
-    (sigCat: FiltroErrores, sigOrden: OrdenErrores) => {
-      const sig: Vista = { cat: sigCat, orden: sigOrden };
-      if (reducido) {
-        setVista(sig);
-        return;
-      }
-      salida.value = withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }, (fin) => {
-        if (fin) runOnJS(alCambiarVista)(sig);
-      });
-    },
-    [reducido, salida, alCambiarVista]
-  );
-
-  const elegirCategoria = useCallback(
-    (id: FiltroErrores) => {
-      if (id === cat) return;
-      setCat(id);
-      cambiarVista(id, orden);
-    },
-    [cat, orden, cambiarVista]
-  );
-  const elegirOrden = useCallback(
-    (id: OrdenErrores) => {
-      if (id === orden) return;
-      setOrden(id);
-      if (user) void guardarAjuste(user.id, 'ordenErrores', id);
-      cambiarVista(cat, id);
-    },
-    [cat, orden, user, guardarAjuste, cambiarVista]
-  );
-
-  const abrir = useCallback((errorId: string) => nav.navigate('ErrorDetail', { errorId }), [nav]);
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<ErrorCard>) => (
       <TarjetaError error={item} indice={index} animar={index < ANIMADAS} onAbrir={abrir} />
