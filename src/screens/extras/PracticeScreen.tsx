@@ -180,6 +180,7 @@ export function PracticeScreen() {
               cargando={carga.estado === 'cargando' && carga.demora}
               entrada={primeraEntrada}
               refrescos={refrescos}
+              scrollY={scrollY}
               onIr={() => modoHoy.ir(nav)}
             />
           )}

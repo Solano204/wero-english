@@ -34,6 +34,12 @@ interface OpcionesReloj {
   visible?: SharedValue<number>;
   /** Una sola pasada y queda en el fotograma limpio, en vez de un bucle. */
   unaVez?: boolean;
+  /**
+   * Publica la fase cada tantos ms en vez de en cada cuadro. Para lo que se mueve tan lento que
+   * a 60 fps cada cuadro cambia menos de un píxel (la aurora): el lienzo se redibuja menos veces
+   * y el hilo de UI queda libre para el scroll.
+   */
+  cadaMs?: number;
 }
 
 /**
@@ -42,10 +48,11 @@ interface OpcionesReloj {
  */
 export function useReloj(
   periodo: number,
-  { activo, reducido, faseQuieta = 0, visible, unaVez = false }: OpcionesReloj
+  { activo, reducido, faseQuieta = 0, visible, unaVez = false, cadaMs = 0 }: OpcionesReloj
 ): SharedValue<number> {
   const fase = useSharedValue(unaVez ? 0 : faseQuieta);
   const acumulado = useSharedValue(0);
+  const pendiente = useSharedValue(0);
   const control = useFrameCallback((cuadro) => {
     'worklet';
     if (visible && visible.value === 0) return;
@@ -54,6 +61,13 @@ export function useReloj(
     acumulado.value += paso;
     if (unaVez && acumulado.value >= periodo) {
       fase.value = faseQuieta;
+      return;
+    }
+    if (cadaMs > 0) {
+      pendiente.value += paso;
+      if (pendiente.value < cadaMs) return;
+      fase.value = (fase.value + pendiente.value / periodo) % 1;
+      pendiente.value = 0;
       return;
     }
     fase.value = (fase.value + paso / periodo) % 1;

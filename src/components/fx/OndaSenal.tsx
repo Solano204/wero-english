@@ -19,11 +19,13 @@ interface Props {
   encendido: SharedValue<number>;
   /** 0 a 1: microruido de interferencia (120 ms al tocar la tarjeta). */
   interferencia: SharedValue<number>;
+  /** 1 mientras la consola está en pantalla: fuera de ella la onda no se redibuja (MOT-4). */
+  visible?: SharedValue<number>;
 }
 
-function Barras({ energia, encendido, interferencia }: Props) {
+function Barras({ energia, encendido, interferencia, visible }: Props) {
   const { activo, reducido } = useSenalActiva();
-  const fase = useReloj(motionSenal.respiro, { activo, reducido, faseQuieta: FASE_QUIETA });
+  const fase = useReloj(motionSenal.respiro, { activo, reducido, faseQuieta: FASE_QUIETA, visible });
   const nivel = useSharedValue(energia);
   const tam = useSharedValue<SkSize>({ width: 0, height: 0 });
 

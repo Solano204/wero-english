@@ -23,6 +23,11 @@ const REGION = 520;
 const SOL_X = 0.14;
 /** Fotograma de la aurora cuando no se mueve (reducir movimiento). */
 const FASE_QUIETA = 0.18;
+/**
+ * Cada cuánto avanza la aurora. Un ciclo dura 20 s: a 60 fps cada cuadro la movía menos de un
+ * píxel, y redibujar el shader en cada uno le quitaba al hilo de UI tiempo del scroll de Practicar.
+ */
+const PASO_AURORA_MS = 50;
 /** Muestreo del sensor de rotación. */
 const SENSOR_MS = 50;
 /** Inclinación (rad) que lleva el desplazamiento al máximo. */
@@ -121,7 +126,7 @@ function GranoFino() {
 function LuzAurora() {
   const { width } = useWindowDimensions();
   const { activo, reducido } = useSenalActiva();
-  const fase = useReloj(motionSenal.aurora, { activo, reducido, faseQuieta: FASE_QUIETA });
+  const fase = useReloj(motionSenal.aurora, { activo, reducido, faseQuieta: FASE_QUIETA, cadaMs: PASO_AURORA_MS });
   const dx = useSharedValue(0);
   const dy = useSharedValue(0);
 

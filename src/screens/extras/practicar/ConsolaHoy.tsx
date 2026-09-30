@@ -10,6 +10,7 @@ import Animated, {
   withDelay,
   withSequence,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { Skeleton } from '@/components/base';
 import { ProveedorEsqueleto } from '@/components/esqueleto';
@@ -20,6 +21,7 @@ import {
   OndaSenal,
   iniciarTransicionHoy,
 } from '@/components/fx';
+import { useVisibilidad } from '@/components/fx/useVisibilidad';
 import {
   anillo,
   aparecerSubiendo,
@@ -56,6 +58,8 @@ interface Props {
   entrada: boolean;
   /** Cuántas veces se refrescó la pantalla: cada una da un pulso de interferencia en la onda. */
   refrescos?: number;
+  /** El scroll de Practicar: fuera de la vista, la onda deja de redibujarse (MOT-4). */
+  scrollY?: SharedValue<number>;
   onIr: () => void;
 }
 
@@ -119,6 +123,7 @@ export function ConsolaHoy({
   cargando,
   entrada,
   refrescos = 0,
+  scrollY,
   onIr,
 }: Props) {
   const reducido = useMovimientoReducido();
@@ -129,6 +134,8 @@ export function ConsolaHoy({
   const encendido = useSharedValue(0);
   const interferencia = useSharedValue(0);
   const contenido = useSharedValue(0);
+  const sinScroll = useSharedValue(0);
+  const { ref: refOnda, visible: ondaVisible, alAcomodar: acomodarOnda } = useVisibilidad(scrollY ?? sinScroll);
 
   useEffect(() => {
     if (!listo) return;
@@ -200,10 +207,15 @@ export function ConsolaHoy({
         onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
         onTouchStart={interferir}
       >
-        <View style={styles.recorte} pointerEvents="none">
-          <OndaSenal energia={energiaOnda(pendientes)} encendido={encendido} interferencia={interferencia} />
+        <Animated.View ref={refOnda} collapsable={false} onLayout={acomodarOnda} style={styles.recorte} pointerEvents="none">
+          <OndaSenal
+            energia={energiaOnda(pendientes)}
+            encendido={encendido}
+            interferencia={interferencia}
+            visible={scrollY ? ondaVisible : undefined}
+          />
           <BarridoLuz ancho={ancho} activo={entrada && !reducido} />
-        </View>
+        </Animated.View>
         {cargando ? (
           <ProveedorEsqueleto etiqueta="Cargando tu resumen de hoy" style={StyleSheet.absoluteFill}>
             <Skeleton relleno style={styles.esqueleto} />
