@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Button, Icon, Presionable, ProgressBar } from '@/components/base';
-import { OndaVoz, type VozEnVivo } from '@/components/fx';
+import { Button, Icon, Presionable, ProgressBar } from '@/shared/ui';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { color, font, layout, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ReproductorCapitulo } from './useReproductorCapitulo';
 
 /** Alto de la onda mini, en dp. */

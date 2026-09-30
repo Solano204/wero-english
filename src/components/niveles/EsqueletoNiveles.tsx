@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { COLUMNAS } from '@/domain/niveles';
 import { color, layout, radius, space } from '@/theme';
 import { ALTO_TRAMO } from './EncabezadoTramo';

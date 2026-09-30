@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Presionable } from '@/components/base/Presionable';
-import { OndaVoz, useVozEnVivo } from '@/components/fx';
+import { Presionable } from '@/shared/ui/Presionable';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import * as audio from '@/services/audio';
 import { marcasDe } from '@/services/marcas';
 import { color, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { FonemaEjemplo } from '@/types';
 
 const ANCHO_ONDA = 56;

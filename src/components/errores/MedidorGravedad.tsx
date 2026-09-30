@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { anuncioGravedad, etiquetaGravedad } from '@/domain/errores';
 import { color, escalon, font, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 const BARRAS = [1, 2, 3] as const;
 const ANCHO_BARRA = 6;

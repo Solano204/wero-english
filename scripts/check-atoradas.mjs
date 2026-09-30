@@ -138,7 +138,7 @@ await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Españo
   const t = sinComentarios(leer('src/components/mazo/TarjetaGuardada.tsx'));
   assert.match(t, /export const TarjetaGuardada = memo\(/);
   assert.ok(t.includes("label: 'Quitar de mi mazo'"), 'acción «Quitar de mi mazo»');
-  const hook = sinComentarios(leer('src/components/card/useAudioFrase.ts'));
+  const hook = sinComentarios(leer('src/shared/hooks/useAudioFrase.ts'));
   for (const etiqueta of ['Escuchar en inglés', 'Escuchar en español']) assert.ok(hook.includes(`label: '${etiqueta}'`), etiqueta);
   assert.match(hook, /etiqueta: 'Inglés'/);
   assert.match(hook, /etiqueta: 'Español'/);

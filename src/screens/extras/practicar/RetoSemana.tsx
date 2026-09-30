@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedReaction, type SharedValue } from 'react-native-reanimated';
-import { Badge, Card, Icon } from '@/components/base';
-import { Marcador, MedidorVU } from '@/components/fx';
-import { useVisibilidad } from '@/components/fx/useVisibilidad';
+import { Badge, Card, Icon } from '@/shared/ui';
+import { Marcador } from '@/shared/ui/fx/Marcador';
+import { MedidorVU } from '@/features/practicar/components/MedidorVU';
+import { useVisibilidad } from '@/shared/hooks/useVisibilidad';
 import { aparecerZoom, color, font, motionSenal, space } from '@/theme';
 import { conteo, plural } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { celebrarSiToca } from '@/data/local/celebracion';
 import { diasQueQuedan, textoDiasReto } from './reto';
 

@@ -8,11 +8,12 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Card } from '@/components/base';
-import { AudioButton } from '@/components/card';
-import { OndaVoz, type VozEnVivo } from '@/components/fx';
+import { Card } from '@/shared/ui';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { aparecer, color, desaparecer, font, motionDuration, motionEasing, reacomodar, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 const ALTO_ONDA = 32;
 const GROSOR_MARCA = 2;

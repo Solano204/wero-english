@@ -9,11 +9,13 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { FraseKaraoke, OndaVoz, useVozEnVivo } from '@/components/fx';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry, ParFicha } from '@/types';
 import { FichaPar } from './FichaPar';
 import type { Rect } from './geometria';

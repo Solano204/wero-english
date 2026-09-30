@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
-import { EncabezadoComprimido, Icon } from '@/components/base';
+import { EncabezadoComprimido, Icon } from '@/shared/ui';
 import { color, font, radius, space } from '@/theme';
 import { conteo } from '@/domain/texto';
 
-export { ALTO_ENCABEZADO } from '@/components/base';
+export { ALTO_ENCABEZADO } from '@/shared/ui';
 
 interface Props {
   scrollY: SharedValue<number>;

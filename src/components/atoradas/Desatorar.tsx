@@ -9,10 +9,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { Card, Icon } from '@/components/base';
+import { Card, Icon } from '@/shared/ui';
 import { puntosEncendidos } from '@/domain/atoradas';
 import { color, font, motionDesatorar, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 import { MedidorAtasco } from './MedidorAtasco';
 

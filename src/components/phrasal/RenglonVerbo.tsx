@@ -1,8 +1,8 @@
 import React, { memo, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Badge, Presionable } from '@/components/base';
-import type { Rect } from '@/components/fx';
+import { Badge, Presionable } from '@/shared/ui';
+import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { color, font, layout, radius, space, text } from '@/theme';
 import { conteo } from '@/domain/texto';
 

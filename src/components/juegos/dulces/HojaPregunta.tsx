@@ -2,14 +2,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { StyleSheet, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Button } from '@/components/base/Button';
-import { AudioButton } from '@/components/card/AudioButton';
-import { OptionButton, type OptionState } from '@/components/card/OptionButton';
-import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
+import { Button } from '@/shared/ui/Button';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { OptionButton, type OptionState } from '@/shared/ui/OptionButton';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, filoLuz, font, motionDuration, motionEasing, motionSpring, radius, sol, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { DulceObjetivo } from '@/types';
 
 /** El velo nunca pasa de esto: el tablero, congelado, sigue viéndose. */

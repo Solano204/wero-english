@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Card, Presionable } from '@/components/base';
-import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
-import { FraseKaraoke, useVozEnVivo, useVozFrase } from '@/components/fx';
+import { Card, Presionable } from '@/shared/ui';
+import { GrupoAudio, type ControlAudio } from '@/shared/ui/GrupoAudio';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
+import { useVozFrase } from '@/shared/ui/fx/useVozFrase';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, layout, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { GramaticaTema } from '@/types';
 
 type Ejemplo = GramaticaTema['ejemplos'][number];

@@ -7,13 +7,13 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { AudioButton } from '@/components/card/AudioButton';
-import { Button } from '@/components/base/Button';
-import { Icon } from '@/components/base/Icon';
-import { Marcador } from '@/components/fx';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { Button } from '@/shared/ui/Button';
+import { Icon } from '@/shared/ui/Icon';
+import { Marcador } from '@/shared/ui/fx/Marcador';
 import { color, escalon, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
 import { plural } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 
 /** Cuánto suben de abajo el número, la tarjeta y los botones al entrar. */

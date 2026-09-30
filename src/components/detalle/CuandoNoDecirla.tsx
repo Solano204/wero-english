@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from '@/components/base/Icon';
+import { Icon } from '@/shared/ui/Icon';
 import { color, font, radius, space } from '@/theme';
 
 /** Grosor del filo izquierdo del bloque. */

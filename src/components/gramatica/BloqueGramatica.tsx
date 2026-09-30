@@ -7,10 +7,10 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Badge, Icon, Presionable } from '@/components/base';
+import { Badge, Icon, Presionable } from '@/shared/ui';
 import { color, font, layout, motionDuration, motionEasing, radius, space, text } from '@/theme';
 import { conteo } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** El despliegue del bloque: sus renglones entran escalonados al abrir y todos a la vez al cerrar. */
 export interface Avance {

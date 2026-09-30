@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
-import { useReloj, useSenalActiva } from '@/components/fx/useSenalActiva';
+import { useReloj, useSenalActiva } from '@/shared/ui/fx/useSenalActiva';
 import { color, motionSenal, radius } from '@/theme';
 
 /** A qué tamaño (respecto de la celda) se queda el anillo fijo alrededor del nivel actual. */

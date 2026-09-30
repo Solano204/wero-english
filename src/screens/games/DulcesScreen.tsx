@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
-import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/shared/ui';
+import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { TableroDulces, type Jugada, type TableroDulcesRef } from '@/components/juegos/dulces/TableroDulces';
 import { TROZOS_RETRASO_MS, azarFijo, trozosDelPaso, trozosPorPieza } from '@/components/juegos/dulces/tablero';
 import { Estallidos, type EstallidosRef, type Trozo } from '@/components/juegos/dulces/Estallidos';
@@ -11,7 +11,8 @@ import { FraseVoladora } from '@/components/juegos/dulces/FraseVoladora';
 import { HojaPregunta, type DestinoTitulo, type PreguntaDulces } from '@/components/juegos/dulces/HojaPregunta';
 import { TarjetaMetas } from '@/components/juegos/dulces/MetaFrase';
 import { NotaInicial, PieDulces } from '@/components/juegos/dulces/PieDulces';
-import { Trozos, useReaccion } from '@/components/feedback';
+import { Trozos } from '@/shared/ui/feedback/Trozos';
+import { useReaccion } from '@/shared/hooks/useReaccion';
 import {
   clone,
   createBoard,
@@ -23,19 +24,19 @@ import {
 import { resolverPorPasos, type Paso } from '@/domain/match3Pasos';
 import { applyGameGrade } from '@/data/repos/juegos';
 import { getRandomEntries } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { shuffle } from '@/domain/arreglos';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, motionDulces, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Dulces'>;

@@ -10,7 +10,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Line, Polygon } from 'react-native-svg';
-import type { VozEnVivo } from '@/components/fx';
+import type { VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import {
   INCLINACION,
   ORDEN_ES,
@@ -23,7 +23,7 @@ import {
   sinBarras,
 } from '@/domain/vocales';
 import { color, font, layout, motionDuration, motionSpring } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 const MARGEN_IZQ = 20;
 /** Arriba caben «anterior» y «posterior»; a la derecha, «cerrada» y «abierta». */

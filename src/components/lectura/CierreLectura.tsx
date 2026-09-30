@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
-import { Card, Icon } from '@/components/base';
+import { Card, Icon } from '@/shared/ui';
 import { aparecerSubiendo, color, font, motionDuration, motionEasing, space } from '@/theme';
 import { conteo } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Lado del círculo del ícono, en dp. */
 const LADO = 72;

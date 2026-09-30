@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { color, font, motionDuration, motionDulces, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Cuánto sube el chip mientras se desvanece. */
 const SUBE = 28;

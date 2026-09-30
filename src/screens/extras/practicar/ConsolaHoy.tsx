@@ -12,16 +12,14 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Skeleton } from '@/components/base';
-import { ProveedorEsqueleto } from '@/components/esqueleto';
-import {
-  AnilloMeta,
-  BotonSenal,
-  Marcador,
-  OndaSenal,
-  iniciarTransicionHoy,
-} from '@/components/fx';
-import { useVisibilidad } from '@/components/fx/useVisibilidad';
+import { Skeleton } from '@/shared/ui';
+import { ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { AnilloMeta } from '@/shared/ui/fx/AnilloMeta';
+import { BotonSenal } from '@/features/practicar/components/BotonSenal';
+import { Marcador } from '@/shared/ui/fx/Marcador';
+import { OndaSenal } from '@/features/practicar/components/OndaSenal';
+import { iniciarTransicionHoy } from '@/shared/ui/fx/estadoTransicion';
+import { useVisibilidad } from '@/shared/hooks/useVisibilidad';
 import {
   anillo,
   aparecerSubiendo,
@@ -37,7 +35,7 @@ import {
   space,
 } from '@/theme';
 import { conteo, plural } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { dayKey } from '@/domain/fechas';
 import { energiaOnda, metaCumplida } from './consola';
 import { celebrarSiToca } from '@/data/local/celebracion';

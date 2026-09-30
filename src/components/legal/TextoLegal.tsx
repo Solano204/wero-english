@@ -1,6 +1,6 @@
 import React from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
-import type { Bloque, Parte } from '@/legal/tipos';
+import type { Bloque, Parte } from '@/types/legal';
 import { color, font, radius, space } from '@/theme';
 
 /** Los trozos de un párrafo: negrita, cursiva y enlaces (los enlaces abren el navegador; el texto se lee sin internet). */

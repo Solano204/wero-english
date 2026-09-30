@@ -234,14 +234,14 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
     for (const k of claves) assert.ok(['opacity', 'transform', 'color', 'translateX'].includes(k), `el glitch solo mueve transform y opacity (color en la base), no ${k}`);
   }
   assert.match(rota, /if \(reducido\) return <Text/, 'con reducir movimiento es solo el texto');
-  const trazo = leer('src/components/fx/CableTrazo.tsx');
+  const trazo = leer('src/shared/ui/fx/CableTrazo.tsx');
   assert.match(trazo, /desvio\?: SharedValue<number>;/);
   assert.match(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx')), /<CableTrazo\b/, 'Pares usa el mismo dibujo');
   assert.ok(!/Canvas/.test(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx'))));
   const gram = sinComentarios(leer('src/components/gramatica/ErrorQueSeCorrige.tsx'));
   assert.match(gram, /useCorreccion\(mal, bien\)/, 'Gramática usa el mismo núcleo');
   assert.ok(!/function Tacha|function FraseTransformada/.test(gram));
-  assert.match(sinComentarios(leer('src/components/gramatica/CorreccionFrase.tsx')), /export function useCorreccion\(/);
+  assert.match(sinComentarios(leer('src/shared/ui/CorreccionFrase.tsx')), /export function useCorreccion\(/);
   const detalle = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
   assert.match(detalle, /<SecuenciaMalentendido key=\{err\.id\} error=\{err\} \/>/);
   assert.match(detalle, /useFocusEffect\(|useCortarAudioAlSalir\(/);

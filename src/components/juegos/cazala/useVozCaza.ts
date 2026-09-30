@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { cancelAnimation, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
-import { useVozEnVivo } from '@/components/fx';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { CazalaItem } from '@/types';
 
 /** Cuánto se espera a que arranque la voz de la revisión (suena después del efecto) antes de correr el reloj propio. */

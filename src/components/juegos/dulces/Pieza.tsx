@@ -8,9 +8,9 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Presionable } from '@/components/base/Presionable';
+import { Presionable } from '@/shared/ui/Presionable';
 import { color, motionDuration, motionDulces, motionEasing, motionSpring, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { CaraPieza } from './SimboloPieza';
 import { etiquetaPieza } from './piezas';
 import { REBOTE_DP, duracionCaida } from './tablero';

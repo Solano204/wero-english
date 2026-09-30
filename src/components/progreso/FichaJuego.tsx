@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Card, Icon, type IconName } from '@/components/base';
+import { Card, Icon, type IconName } from '@/shared/ui';
 import { color, escalon, font, radius, space } from '@/theme';
 import { conteo } from '@/domain/texto';
-import { BarraFina } from './BarraFina';
+import { BarraFina } from '@/shared/ui/BarraFina';
 import { textoJuego, type ResumenJuego } from './datos';
 
 /** Lado de la ficha del ícono. */

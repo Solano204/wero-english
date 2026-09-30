@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Presionable } from '@/components/base/Presionable';
+import { Presionable } from '@/shared/ui/Presionable';
 import * as haptics from '@/services/haptics';
 import { layout, marcaGoogle, radius, space } from '@/theme';
 

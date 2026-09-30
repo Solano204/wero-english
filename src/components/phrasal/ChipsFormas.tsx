@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Presionable } from '@/components/base';
+import { Presionable } from '@/shared/ui';
 import * as haptics from '@/services/haptics';
 import { color, font, layout, radius, space } from '@/theme';
 

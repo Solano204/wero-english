@@ -4,9 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { EmptyState, Header, Presionable, Screen } from '@/components/base';
+import { EmptyState, Header, Presionable, Screen } from '@/shared/ui';
 import { TarjetaError } from '@/components/errores/TarjetaError';
-import { Marcador } from '@/components/fx';
+import { Marcador } from '@/shared/ui/fx/Marcador';
 import {
   CATEGORIAS_ERRORES,
   ORDENES_ERRORES,
@@ -21,9 +21,9 @@ import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, desvaneceDerecha, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ErrorCard } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Vista = { cat: FiltroErrores; orden: OrdenErrores };

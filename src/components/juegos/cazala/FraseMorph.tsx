@@ -8,7 +8,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { aparecer, color, escalon, font, motionCaza, motionEasing, motionEscalon, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** El ancho de cada letra (dp): las letras van en celdas fijas para que el chip no cambie de tamaño al transformarse. */
 const CELDA = 10;

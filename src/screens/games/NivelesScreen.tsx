@@ -1,22 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDesbloqueo } from '@/estado/useDesbloqueo';
 import { StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Carga, Header, Screen, pedirRecompensa, razonMuro } from '@/components/base';
-import {
-  ALTO_TRAMO,
-  CONFIGURACION_VISTA,
-  EncabezadoNiveles,
-  EncabezadoTramo,
-  EsqueletoNiveles,
-  FilaNiveles,
-  HUECO_CELDAS,
-  RETRASO_LOGRO,
-  SIN_RECOMPENSA,
-  useRecompensaNiveles,
-  useScrollNivel,
-} from '@/components/niveles';
+import { Button, Card, Carga, Header, Screen, pedirRecompensa, razonMuro } from '@/shared/ui';
+import { ALTO_TRAMO, EncabezadoTramo } from '@/components/niveles/EncabezadoTramo';
+import { CONFIGURACION_VISTA, useScrollNivel } from '@/components/niveles/useScrollNivel';
+import { EncabezadoNiveles } from '@/components/niveles/EncabezadoNiveles';
+import { EsqueletoNiveles } from '@/components/niveles/EsqueletoNiveles';
+import { FilaNiveles, HUECO_CELDAS } from '@/components/niveles/FilaNiveles';
+import { RETRASO_LOGRO } from '@/components/niveles/CeldaNivel';
+import { SIN_RECOMPENSA, useRecompensaNiveles } from '@/components/niveles/useRecompensaNiveles';
 import {
   abrirConAnuncio,
   getNiveles,
@@ -36,14 +31,14 @@ import {
   type EstadoNivel,
   type ItemLista,
 } from '@/domain/niveles';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
-import { MuroDesbloqueo } from '@/components/unlock';
+import { MuroDesbloqueo } from '@/shared/ui/MuroDesbloqueo';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { aparecer, color, desaparecer, escalon, font, layout, motionDuration, motionLogro, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
-import type { RootStackParams } from '@/navigation/routes';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -83,6 +78,7 @@ export function NivelesScreen() {
   const { width, height } = useWindowDimensions();
 
   const juego = params.juego;
+  const muro = useDesbloqueo('juego', juego);
   const def = content.niveles.juegos[juego];
 
   const carga = useCarga(
@@ -391,8 +387,9 @@ export function NivelesScreen() {
   // lo que da ganas de abrirlo.
   return (
     <MuroDesbloqueo
-      tipo="juego"
-      id={juego}
+      abierto={muro.abierto}
+      puede={muro.puede}
+      onDesbloquear={muro.desbloquear}
       nombre={TITULOS[juego] ?? "Este juego"}
       detalle="200 niveles, todos con frases de tu catálogo."
       onVolver={() => nav.goBack()}

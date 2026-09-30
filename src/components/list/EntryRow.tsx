@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { AudioButton } from '@/components/card';
-import { Icon, RiskBadge, Presionable } from '@/components/base';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { Icon, RiskBadge, Presionable } from '@/shared/ui';
 import { color, font, radius, space, aparecerSubiendo, escalon, motionEscalon } from '@/theme';
 import type { Entry } from '@/types';
 

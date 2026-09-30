@@ -6,16 +6,16 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Header, ProgressBar, Screen } from '@/components/base';
-import { Hueso, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Card, Carga, Header, ProgressBar, Screen } from '@/shared/ui';
+import { Hueso, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { getPackCounts } from '@/data/repos/estadisticas';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, radius, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
-import { PuntoMundo } from '@/components/list';
+import type { RootStackParams } from '@/types/rutas';
+import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'WorldDetail'>;

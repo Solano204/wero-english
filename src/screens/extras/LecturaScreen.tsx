@@ -19,7 +19,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/shared/ui';
 import { CierreLectura } from '@/components/lectura/CierreLectura';
 import { EsqueletoTexto } from '@/components/lectura/EsqueletoTexto';
 import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
@@ -31,8 +31,8 @@ import { partirTexto, type Trozo } from '@/domain/lectura';
 import { dividirOraciones, inicioDeMarcas, inicioEstimado, trozosPorOracion } from '@/domain/oraciones';
 import { getCardStates } from '@/data/repos/tarjetas';
 import { getEntriesByIds } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCarga } from '@/shared/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
@@ -40,9 +40,9 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { marcasOracionesDe } from '@/services/marcas';
 import { aparecer, color, desaparecer, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { CardState, Entry } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Lectura'>;

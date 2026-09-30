@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Card, Icon, type IconName } from '@/components/base';
+import { Card, Icon, type IconName } from '@/shared/ui';
 import { color, font, radius, space, text } from '@/theme';
 
 interface Props {

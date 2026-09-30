@@ -3,20 +3,20 @@ import { BackHandler, ScrollView, StyleSheet, Text, View, useWindowDimensions } 
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { EmptyState, Header, IconButton, Screen } from '@/components/base';
-import type { Rect } from '@/components/fx';
+import { EmptyState, Header, IconButton, Screen } from '@/shared/ui';
+import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { IndiceFonemas } from '@/components/sonidos/IndiceFonemas';
 import { PaginaFonema } from '@/components/sonidos/PaginaFonema';
 import { ViajeSimbolo, type Viaje } from '@/components/sonidos/ViajeSimbolo';
 import { sinBarras } from '@/domain/vocales';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { loadContent } from '@/data/contenido';
 import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Fonema } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 /** Pausa entre vueltas del modo "Repetir". */
 const PAUSA_REPETIR_MS = 700;

@@ -2,13 +2,13 @@ import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Header, Icon, Screen } from '@/components/base';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { Button, Card, Header, Icon, Screen } from '@/shared/ui';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { SfxPackId } from '@/services/audio';
 import { color, font, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

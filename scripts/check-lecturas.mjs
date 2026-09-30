@@ -266,7 +266,7 @@ prueba('preguntas: tres por historia, una a la vez, marcadas como en Estudio, si
   assert.match(una, /if \(k === correcta\) return 'correct';\s*return k === respuesta \? 'wrong' : 'dimmed';/);
   assert.match(una, /entering=\{reducido \? undefined : aparecer\(\)\}\s+accessibilityLiveRegion="polite"/, 'la explicación entra con fade y se anuncia');
   assert.ok(!/puntaje|score|confeti|confetti/i.test(sinComentarios(una)), 'nada de puntaje ni confeti');
-  const puntos = leer('src/components/fx/PuntosRepeticion.tsx');
+  const puntos = leer('src/shared/ui/fx/PuntosRepeticion.tsx');
   assert.match(puntos, /accessibilityLabel=\{etiqueta \?\? `Repetición \$\{ronda\} de \$\{REPETICIONES\}`\}/, 'Estudio conserva su etiqueta');
 
   const cierre = leer('src/components/lectura/CierreLectura.tsx');

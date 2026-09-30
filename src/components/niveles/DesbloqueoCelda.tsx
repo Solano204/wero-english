@@ -7,10 +7,10 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
+import { Icon } from '@/shared/ui/Icon';
 import { color, motionDuration, motionEasing, radius } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
-import { BordePunteado } from '@/components/fx/BordePunteado';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
 
 /** Cuánto se inclina el candado al abrirse (grados) y cuánto sube. */
 const GIRO = -25;

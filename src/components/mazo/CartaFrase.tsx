@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Badge, Card, Presionable } from '@/components/base';
-import { MarcoImagen } from '@/components/card';
-import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
-import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
+import { Badge, Card, Presionable } from '@/shared/ui';
+import { MarcoImagen } from '@/shared/ui/MarcoImagen';
+import { GrupoAudio, type ControlAudio } from '@/shared/ui/GrupoAudio';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { DENSIDAD, alturaEstimada, alturaImagen, desborda, elegirDensidad, tamanoFrase } from '@/domain/mazo';
 import { marcasDe } from '@/services/marcas';

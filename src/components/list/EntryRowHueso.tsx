@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Hueso } from '@/components/esqueleto';
+import { Hueso } from '@/shared/ui/esqueleto';
 import { color, font, layout, radius, space } from '@/theme';
 
 /** Alto de una línea de `font.size.md` en el renglón (lo que ocupa la frase y la traducción). */

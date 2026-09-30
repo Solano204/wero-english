@@ -10,24 +10,24 @@ import {
   Header,
   ProgressBar,
   Screen,
-} from '@/components/base';
-import { AudioButton } from '@/components/card';
+} from '@/shared/ui';
+import { AudioButton } from '@/shared/ui/AudioButton';
 import { buildRounds, explicar, juzgar } from '@/domain/minimalPairs';
 import { logHabla } from '@/data/repos/partidas';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
-import { useConsentimiento } from '@/components/legal';
-import { MedidorMicrofono } from '@/components/voz/MedidorMicrofono';
-import { useEscucha } from '@/hooks/useEscucha';
+import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
+import { MedidorMicrofono } from '@/shared/ui/MedidorMicrofono';
+import { useEscucha } from '@/shared/hooks/useEscucha';
 import * as speech from '@/services/voz';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, radius, space, aparecer } from '@/theme';
 import type { HablaVeredicto, ParMinimoRound } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
-import { useEfectoResultado } from '@/components/feedback';
+import type { RootStackParams } from '@/types/rutas';
+import { useEfectoResultado } from '@/shared/hooks/useEfectoResultado';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'MinimalPairs'>;

@@ -9,8 +9,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
 import { etiquetaNivel, type EstadoNivel } from '@/domain/niveles';
 import {
   color,
@@ -24,9 +24,9 @@ import {
   senal,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { AnilloActual } from './AnilloActual';
-import { BordePunteado } from '@/components/fx/BordePunteado';
+import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
 import { DesbloqueoCelda } from './DesbloqueoCelda';
 import { EstrellasCelda } from './EstrellasCelda';
 import type { Logro } from './useRecompensaNiveles';

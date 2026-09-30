@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Presionable } from '@/components/base';
-import { PuntoMundo } from '@/components/list';
+import { Presionable } from '@/shared/ui';
+import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { color, escalon, font, layout, space } from '@/theme';
 import { miles, plural } from '@/domain/texto';
-import { BarraFina } from './BarraFina';
+import { BarraFina } from '@/shared/ui/BarraFina';
 import { textoMundo } from './datos';
 
 interface Props {

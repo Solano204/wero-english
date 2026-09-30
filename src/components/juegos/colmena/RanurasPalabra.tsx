@@ -9,10 +9,10 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { useReloj, useSenalActiva } from '@/components/fx/useSenalActiva';
+import { Icon } from '@/shared/ui/Icon';
+import { useReloj, useSenalActiva } from '@/shared/ui/fx/useSenalActiva';
 import { color, font, motionColmena, motionDuration, motionEasing, motionSenal, motionSpring, radius, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { etiquetaRanura, type DistribucionRanuras } from './geometria';
 
 /** Cómo terminó la ronda: la armó quien juega, o se completó con «No me sale» o al acabarse el tiempo. */

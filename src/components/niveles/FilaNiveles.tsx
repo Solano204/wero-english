@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import type { EstadoNivel, NivelVista } from '@/domain/niveles';
 import { aparecerSubiendo, layout, motionDuration } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { CeldaNivel } from './CeldaNivel';
 import type { Logro } from './useRecompensaNiveles';
 

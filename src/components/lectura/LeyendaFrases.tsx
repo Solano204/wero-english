@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { IconButton } from '@/components/base';
+import { IconButton } from '@/shared/ui';
 import { aparecer, font, layout, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ESTILO_FRASE_NUEVA, ESTILO_FRASE_VISTA } from './Oracion';
 
 interface Props {

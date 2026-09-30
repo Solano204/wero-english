@@ -1,4 +1,5 @@
 import { getDb } from '@/data/cliente';
+import type { TipoDesbloqueo } from '@/types';
 
 /**
  * Desbloqueo por anuncio.
@@ -26,7 +27,6 @@ import { getDb } from '@/data/cliente';
  * usar la app.
  */
 
-export type TipoDesbloqueo = 'pack' | 'juego' | 'lectura' | 'gramatica' | 'mundo';
 
 /** 'pack' + 'calle_01' -> 'pack:calle_01'. */
 export function claveDe(tipo: TipoDesbloqueo, id: string): string {

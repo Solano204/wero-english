@@ -8,8 +8,9 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Badge, Card } from '@/components/base';
-import { Marcador, MedidorSenal } from '@/components/fx';
+import { Badge, Card } from '@/shared/ui';
+import { Marcador } from '@/shared/ui/fx/Marcador';
+import { MedidorSenal } from '@/features/progreso/components/MedidorSenal';
 import type { Stats } from '@/data/repos/estadisticas';
 import { celebrarSiToca } from '@/data/local/celebracion';
 import {
@@ -22,7 +23,7 @@ import {
   radius,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import {
   esRecordActual,
   etiquetaMedidor,

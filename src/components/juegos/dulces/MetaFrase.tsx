@@ -10,7 +10,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { color, escalon, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { DulceObjetivo } from '@/types';
 import { CaraPieza, tinteDe } from './SimboloPieza';
 import { NOMBRE_FORMA, formaDe, indiceMasCercana, nombreColor } from './piezas';

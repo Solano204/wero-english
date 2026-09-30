@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TabNavigator } from './TabNavigator';
-import { navigate, navigationRef } from './navigationRef';
-import { NOTIF_TARGETS, type RootStackParams } from './routes';
+import { navigate, navigationRef } from '@/shared/navegacion/navigationRef';
+import { NOTIF_TARGETS, type RootStackParams } from '@/types/rutas';
 // Solo lo del arranque se importa aquí: el resto de las pantallas se evalúa la
 // primera vez que se abre (ver `diferida`), no en el arranque en frío.
 import { AuthScreen } from '@/screens/entry/AuthScreen';

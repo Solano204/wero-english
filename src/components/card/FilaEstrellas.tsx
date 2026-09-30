@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Icon, type IconSize } from '@/components/base/Icon';
+import { Icon, type IconSize } from '@/shared/ui/Icon';
 
 interface Props {
   /** Cuántas van encendidas. */

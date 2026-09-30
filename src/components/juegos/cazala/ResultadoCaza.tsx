@@ -9,9 +9,10 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Icon } from '@/components/base/Icon';
-import { AudioButton } from '@/components/card';
-import { FraseKaraoke, type VozEnVivo } from '@/components/fx';
+import { Icon } from '@/shared/ui/Icon';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import type { Palabra } from '@/domain/marcas';
 import {
   color,
@@ -26,7 +27,7 @@ import {
   sol,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { FraseMorph, type ItemMorph } from './FraseMorph';
 
 interface Props {

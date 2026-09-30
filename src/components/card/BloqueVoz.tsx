@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { AudioButton } from './AudioButton';
+import { AudioButton } from '@/shared/ui/AudioButton';
 import { PhraseBlock } from './PhraseBlock';
-import { FraseKaraoke, OndaVoz, useVozEnVivo } from '@/components/fx';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, font, space } from '@/theme';

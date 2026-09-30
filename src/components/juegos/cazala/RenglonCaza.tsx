@@ -8,9 +8,9 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
-import { BordePunteado } from '@/components/fx';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
+import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
 import {
   color,
   escalon,
@@ -25,7 +25,7 @@ import {
   tarjetaEntra,
   tarjetaSale,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { Reticulo } from './Reticulo';
 
 /**

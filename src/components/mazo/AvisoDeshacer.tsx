@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Button } from '@/components/base';
+import { Button } from '@/shared/ui';
 import {
   aparecerRapido,
   aparecerSubiendo,
@@ -15,7 +15,7 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 interface Props {
   texto: string;

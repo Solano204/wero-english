@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { AudioButton } from './AudioButton';
+import { AudioButton } from '@/shared/ui/AudioButton';
 import { color, font, space } from '@/theme';
 import type { Entry } from '@/types';
 

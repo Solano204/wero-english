@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
 import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 interface Props {
   titulo: string;

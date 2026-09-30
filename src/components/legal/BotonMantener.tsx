@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Presionable } from '@/components/base/Presionable';
+import { Presionable } from '@/shared/ui/Presionable';
 import * as haptics from '@/services/haptics';
 import { color, font, motionConfirmar, motionDuration, motionEasing, radius, space } from '@/theme';
 

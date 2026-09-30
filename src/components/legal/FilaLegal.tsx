@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon, type IconName } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
+import { Icon, type IconName } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
 import { color, font, layout, space } from '@/theme';
 
 interface Props {

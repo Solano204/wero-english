@@ -2,7 +2,7 @@
  * Verifica el interruptor de monetización (src/config/monetizacion.ts):
  *
  *   1. Los puntos que deciden si algo de anuncios se pinta (AdBar, AdFullScreen,
- *      MuroDesbloqueo vía useUnlockStore.abierto, CandadoBadge, pedirRecompensa,
+ *      MuroDesbloqueo vía useUnlockStore.abierto, pedirRecompensa,
  *      el padding de Screen) importan y usan ANUNCIOS_ACTIVOS de verdad.
  *   2. Ningún texto visible de anuncios ("PUBLICIDAD", "Ver anuncio", "Con
  *      anuncio"...) vive fuera de un archivo que ya pasa por el interruptor.
@@ -35,10 +35,9 @@ if (!fs.existsSync(CONFIG)) {
 
 /* ── 2. Los puntos de control usan el interruptor de verdad ─────────────── */
 const PUNTOS_DE_CONTROL = [
-  { archivo: 'src/components/base/Ads.tsx', que: 'AdBar, AdFullScreen, pedirRecompensa' },
+  { archivo: 'src/shared/ui/Ads.tsx', que: 'AdBar, AdFullScreen, pedirRecompensa' },
   { archivo: 'src/estado/useUnlockStore.ts', que: 'abierto() — lo que decide el muro de MuroDesbloqueo' },
-  { archivo: 'src/components/unlock/CandadoBadge.tsx', que: 'CandadoBadge' },
-  { archivo: 'src/components/base/Screen.tsx', que: 'el padding inferior de toda pantalla con pestañas' },
+  { archivo: 'src/shared/ui/Screen.tsx', que: 'el padding inferior de toda pantalla con pestañas' },
   { archivo: 'src/screens/games/NivelesScreen.tsx', que: 'la celda «anuncio» y el texto de ayuda de Niveles' },
   { archivo: 'src/screens/extras/GramaticaScreen.tsx', que: 'el candado de los temas de Gramática' },
   { archivo: 'src/screens/utility/DownloadsScreen.tsx', que: 'el botón de Descargas' },
@@ -87,13 +86,12 @@ const PERMITIDOS = new Set(
   [
     'src/config/monetizacion.ts',
     'src/services/anuncios.ts',
-    'src/components/base/Ads.tsx',
-    'src/components/unlock/MuroDesbloqueo.tsx',
-    'src/components/unlock/CandadoBadge.tsx',
+    'src/shared/ui/Ads.tsx',
+    'src/shared/ui/MuroDesbloqueo.tsx',
     'src/components/gramatica/RenglonTema.tsx',
     'src/components/niveles/CeldaNivel.tsx',
     'src/components/niveles/DesbloqueoCelda.tsx',
-    'src/components/fx/BordePunteado.tsx',
+    'src/shared/ui/fx/BordePunteado.tsx',
     'src/screens/games/NivelesScreen.tsx',
     'src/screens/utility/DownloadsScreen.tsx',
     'src/screens/extras/GramaticaScreen.tsx',

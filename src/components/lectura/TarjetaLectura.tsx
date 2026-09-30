@@ -2,12 +2,12 @@ import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated from 'react-native-reanimated';
-import { Badge, Icon, LevelBadge, Presionable } from '@/components/base';
-import { PuntoMundo } from '@/components/list';
+import { Badge, Icon, LevelBadge, Presionable } from '@/shared/ui';
+import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { etiquetaDificultad, nivelDificultad } from '@/domain/lectura';
 import { aparecerSubiendo, color, escalon, font, gradiente, radius, space, text } from '@/theme';
 import { conteo } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Lectura } from '@/types';
 import { AnilloFrases } from './AnilloFrases';
 

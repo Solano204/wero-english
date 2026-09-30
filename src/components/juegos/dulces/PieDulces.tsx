@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
-import { Button } from '@/components/base/Button';
-import { Marcador } from '@/components/fx';
+import { Button } from '@/shared/ui/Button';
+import { Marcador } from '@/shared/ui/fx/Marcador';
 import { color, font, motionDuration, motionEasing, radius, space } from '@/theme';
 import { plural } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { conteo } from '@/domain/texto';
 
 /** En las últimas jugadas la barra late una vez por jugada. */

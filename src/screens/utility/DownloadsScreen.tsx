@@ -11,14 +11,14 @@ import {
   Screen,
   pedirRecompensa,
   razonMuro,
-} from '@/components/base';
+} from '@/shared/ui';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
-import { useConsentimiento } from '@/components/legal';
+import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import * as downloads from '@/services/descargas';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { color, font, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

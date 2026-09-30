@@ -2,9 +2,9 @@ import React, { memo, useImperativeHandle, useRef, type Ref } from 'react';
 import { StyleSheet } from 'react-native';
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
-import { FxSeguro } from '@/components/fx/FxSeguro';
+import { FxSeguro } from '@/shared/ui/fx/FxSeguro';
 import { motionDuration, motionDulces, motionEasing, pieza } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { MAX_VIVAS, TROZOS_RETRASO_MS } from './tablero';
 
 /** Un trozo de una pieza que estalló: de dónde sale y a dónde va (en el espacio de la pantalla) y su retraso. */

@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
-import { Button } from '@/components/base/Button';
-import { Presionable } from '@/components/base/Presionable';
-import { useVozEnVivo } from '@/components/fx';
+import { Button } from '@/shared/ui/Button';
+import { Presionable } from '@/shared/ui/Presionable';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import * as audio from '@/services/audio';
 import { color, font, motionDuration, motionEasing, motionPulso, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ParMinimo } from '@/types';
 
 /** Pausa entre las dos palabras de «Escuchar las dos». */

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, type SharedValue } from 'react-native-reanimated';
 import { color, motionCaza, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 const LADO = 14;
 const GROSOR = 2;

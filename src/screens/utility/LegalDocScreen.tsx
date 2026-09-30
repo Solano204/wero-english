@@ -2,13 +2,13 @@ import React from 'react';
 import { Linking, StyleSheet, Text } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Header, Screen } from '@/components/base';
-import { TextoLegal } from '@/components/legal';
+import { Button, Header, Screen } from '@/shared/ui';
+import { TextoLegal } from '@/components/legal/TextoLegal';
 import { URL_ELIMINAR_CUENTA, URL_PRIVACIDAD, URL_TERMINOS, esUrlReal, fechaLegible } from '@/config/legal';
 import { TEXTOS } from '@/legal/textos';
-import type { DocLegal } from '@/legal/tipos';
+import type { DocLegal } from '@/types/legal';
 import { color, font, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'LegalDoc'>;

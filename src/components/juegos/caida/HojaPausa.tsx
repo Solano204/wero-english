@@ -8,9 +8,10 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Button } from '@/components/base/Button';
-import { Icon } from '@/components/base/Icon';
-import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
+import { Button } from '@/shared/ui/Button';
+import { Icon } from '@/shared/ui/Icon';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import {
@@ -25,7 +26,7 @@ import {
   sol,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 
 // Copias locales: un worklet captura estos colores, no el objeto de tema entero.

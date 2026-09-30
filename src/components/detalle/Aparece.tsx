@@ -6,9 +6,9 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { useVisto } from '@/components/fx/useVisibilidad';
+import { useVisto } from '@/shared/hooks/useVisibilidad';
 import { motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Cuánto sube un bloque al aparecer (dp). */
 const SUBE = 8;

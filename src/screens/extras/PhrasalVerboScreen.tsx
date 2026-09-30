@@ -4,20 +4,20 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
-import { EmptyState, Header, Screen } from '@/components/base';
+import { EmptyState, Header, Screen } from '@/shared/ui';
 import { ChipsFormas } from '@/components/phrasal/ChipsFormas';
 import { DetalleForma } from '@/components/phrasal/DetalleForma';
 import { RuletaParticulas } from '@/components/phrasal/RuletaParticulas';
 import { ViajeVerbo, type Viaje } from '@/components/phrasal/ViajeVerbo';
 import { anunciarForma, etiquetasParticulas } from '@/domain/phrasal';
 import { limitarIndice } from '@/domain/ruleta';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as haptics from '@/services/haptics';
 import { loadContent } from '@/data/contenido';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { color, font, layout, space, text } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
-import type { RootStackParams } from '@/navigation/routes';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import type { RootStackParams } from '@/types/rutas';
 import type { PhrasalVerb } from '@/types';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;

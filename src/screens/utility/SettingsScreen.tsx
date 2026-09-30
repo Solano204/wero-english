@@ -3,18 +3,19 @@ import { StyleSheet, Switch, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Header, Icon, Screen, Presionable } from '@/components/base';
-import { SectionTitle } from '@/components/list';
-import { FilaLegal, useConsentimiento } from '@/components/legal';
+import { Button, Card, Header, Icon, Screen, Presionable } from '@/shared/ui';
+import { SectionTitle } from '@/shared/ui/SectionTitle';
+import { FilaLegal } from '@/components/legal/FilaLegal';
+import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
-import { setSimularCargaLenta } from '@/hooks/useCarga';
+import { setSimularCargaLenta } from '@/shared/hooks/useCarga';
 import * as notifications from '@/services/notificaciones';
 import * as speech from '@/services/voz';
 import { color, font, layout, radius, space } from '@/theme';
 import type { Nivel } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

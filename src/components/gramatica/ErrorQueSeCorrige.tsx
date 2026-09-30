@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { type SharedValue } from 'react-native-reanimated';
-import { Button, Card } from '@/components/base';
-import { AudioButton } from '@/components/card';
-import { useVisto } from '@/components/fx/useVisibilidad';
+import { Button, Card } from '@/shared/ui';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { useVisto } from '@/shared/hooks/useVisibilidad';
 import { color, font, motionDuration, space } from '@/theme';
-import { VistaCorreccion, useCorreccion } from './CorreccionFrase';
+import { VistaCorreccion, useCorreccion } from '@/shared/ui/CorreccionFrase';
 
 interface Props {
   mal: string;

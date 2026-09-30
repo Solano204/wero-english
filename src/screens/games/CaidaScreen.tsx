@@ -14,10 +14,11 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
-import { Hueso, HuesoBoton, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
-import { Marcador } from '@/components/fx';
-import { Trozos, useReaccion } from '@/components/feedback';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/shared/ui';
+import { Hueso, HuesoBoton, HuesoCirculo, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { Marcador } from '@/shared/ui/fx/Marcador';
+import { Trozos } from '@/shared/ui/feedback/Trozos';
+import { useReaccion } from '@/shared/hooks/useReaccion';
 import { FichaCaida, type EstadoFicha } from '@/components/juegos/caida/FichaCaida';
 import { FinCaida, PieFinCaida } from '@/components/juegos/caida/FinCaida';
 import { FraseRonda } from '@/components/juegos/caida/FraseRonda';
@@ -30,11 +31,11 @@ import { useNivel } from './useNivel';
 import { applyGameGrade } from '@/data/repos/juegos';
 import { getNiveles } from '@/data/repos/niveles';
 import { getRandomEntries } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import {
@@ -48,9 +49,9 @@ import {
   shadow,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { CaidaRound, Entry, NivelCaida } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Caida'>;

@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { Header } from '@/components/base/Header';
-import { Presionable } from '@/components/base/Presionable';
-import type { Rect } from '@/components/fx';
+import { Header } from '@/shared/ui/Header';
+import { Presionable } from '@/shared/ui/Presionable';
+import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { sinBarras } from '@/domain/vocales';
 import { color, font, layout, radius, space } from '@/theme';
 import { conteo } from '@/domain/texto';

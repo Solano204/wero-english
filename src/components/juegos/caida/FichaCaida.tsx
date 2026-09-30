@@ -8,10 +8,10 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
 import { color, depth, font, motionDuration, motionEasing, radius, shadow, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ALTO_FICHA, MARGEN_ARRIBA } from './medidas';
 
 /** De qué tamaño aparece la ficha. */

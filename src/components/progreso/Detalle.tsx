@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Button } from '@/components/base';
-import { AnilloMeta } from '@/components/fx';
-import { SectionTitle } from '@/components/list';
+import { Button } from '@/shared/ui';
+import { AnilloMeta } from '@/shared/ui/fx/AnilloMeta';
+import { SectionTitle } from '@/shared/ui/SectionTitle';
 import type { Stats } from '@/data/repos/estadisticas';
 import { etiquetaCorregir } from '@/screens/extras/practicar/consola';
 import { anillo, color, font, space } from '@/theme';

@@ -1,10 +1,10 @@
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Badge, Card, Icon } from '@/components/base';
+import { Badge, Card, Icon } from '@/shared/ui';
 import { anuncioDeError, anuncioGravedad } from '@/domain/errores';
 import { aparecerSubiendo, color, escalon, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ErrorCard } from '@/types';
 import { MedidorGravedad } from './MedidorGravedad';
 

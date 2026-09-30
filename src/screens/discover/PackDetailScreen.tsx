@@ -7,16 +7,17 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Carga, Header, Screen } from '@/components/base';
-import { ProveedorEsqueleto } from '@/components/esqueleto';
-import { EntryRow, EntryRowHueso } from '@/components/list';
+import { Button, Carga, Header, Screen } from '@/shared/ui';
+import { ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { EntryRow } from '@/components/list/EntryRow';
+import { EntryRowHueso } from '@/components/list/EntryRowHueso';
 import { getPackEntries } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { Entry } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'PackDetail'>;

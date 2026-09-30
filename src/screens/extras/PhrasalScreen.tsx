@@ -2,14 +2,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { EmptyState, Header, Input, Screen } from '@/components/base';
-import type { Rect } from '@/components/fx';
+import { EmptyState, Header, Input, Screen } from '@/shared/ui';
+import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { RenglonVerbo, type FormaRenglon } from '@/components/phrasal/RenglonVerbo';
 import { buscarGrupos, etiquetasParticulas } from '@/domain/phrasal';
 import { loadContent } from '@/data/contenido';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { color, font, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 import type { PhrasalVerb } from '@/types';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;

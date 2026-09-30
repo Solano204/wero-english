@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
-import { BordePunteado } from '@/components/fx/BordePunteado';
-import { Icon } from '@/components/base/Icon';
+import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
+import { Icon } from '@/shared/ui/Icon';
 import { color, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Rect } from './geometria';
 
 interface Props {

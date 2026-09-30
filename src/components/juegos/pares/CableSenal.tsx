@@ -10,9 +10,9 @@ import {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { CableTrazo } from '@/components/fx/CableTrazo';
+import { CableTrazo } from '@/shared/ui/fx/CableTrazo';
 import { motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { centroDe, fichaEn, type Rect } from './geometria';
 
 /** Lo que hace el cable en cada momento. Va en un valor compartido: el hilo de UI decide sin pasar por React. */

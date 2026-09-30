@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useSharedValue, type SharedValue } from 'react-native-reanimated';
-import { hayAudio } from '@/components/card/AudioButton';
+import { hayAudio } from '@/shared/ui/AudioButton';
 import * as audio from '@/services/audio';
 
 export type EstadoCapitulo = 'idle' | 'cargando' | 'sonando' | 'pausado';

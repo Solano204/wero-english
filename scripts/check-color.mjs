@@ -26,7 +26,7 @@ const esColor = (l) => COLOR.test(l) || COLOR_SKSL.test(l);
  */
 const EXPLICITO = new Set([
   // Define el tono `strong` y RiskBadge («Solo con amigos»).
-  'src/components/base/Badge.tsx',
+  'src/shared/ui/Badge.tsx',
   // El paso explícito de la escala de registro.
   'src/components/detalle/EscalaRegistro.tsx',
   // El aviso «Fuerte» de una frase con vulgaridad 2.
@@ -204,7 +204,7 @@ function autoprueba() {
     ['src/screens/x.tsx', '/* tone="strong" */ const a = 1;', 0],
     ['src/screens/x.tsx', 'fontFamily: font.family.bodyStrong,', 0],
     ['src/components/detalle/EscalaRegistro.tsx', 'const c = color.riskStrong;', 0],
-    ['src/components/base/Badge.tsx', "tone={v === 2 ? 'strong' : 'warn'}", 0],
+    ['src/shared/ui/Badge.tsx', "tone={v === 2 ? 'strong' : 'warn'}", 0],
   ];
   for (const [rel, src, esperado] of rojo) {
     const real = rojoFueraDeLugar(rel, src).length;

@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Button } from '@/components/base';
+import { Button } from '@/shared/ui';
 import { color, font, layout, motionDuration, motionEasing, reflejo, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Alto del pie: el del botón grande, para que no cambie de tamaño al revisar. */
 const ALTO_PIE = 58;

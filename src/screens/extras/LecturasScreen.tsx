@@ -2,21 +2,21 @@ import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Header, Screen } from '@/components/base';
-import { Hueso, HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
-import { SectionTitle } from '@/components/list';
+import { Card, Carga, Header, Screen } from '@/shared/ui';
+import { Hueso, HuesoTarjeta, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { TarjetaLectura, type LecturaFila } from '@/components/lectura/TarjetaLectura';
 import { destacarLectura, dificultadPara, estadoDesbloqueo } from '@/domain/lectura';
 import { getCardStates } from '@/data/repos/tarjetas';
 import { getDominadasPorMundo } from '@/data/repos/estadisticas';
 import { getEntriesByIds } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCarga } from '@/shared/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, space } from '@/theme';
 import type { CardState, Entry } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

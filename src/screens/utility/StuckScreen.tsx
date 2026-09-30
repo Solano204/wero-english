@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Carga, EmptyState, Header, Screen } from '@/components/base';
-import { HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Carga, EmptyState, Header, Screen } from '@/shared/ui';
+import { HuesoTarjeta, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { Desatorar } from '@/components/atoradas/Desatorar';
 import { TarjetaAtorada } from '@/components/atoradas/TarjetaAtorada';
 import { getCardStates } from '@/data/repos/tarjetas';
@@ -17,14 +17,14 @@ import {
   vistasDe,
   type AtoradaVista,
 } from '@/domain/atoradas';
-import { useCarga } from '@/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCarga } from '@/shared/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { color, font, motionDesatorar, space } from '@/theme';
 import { conteo } from '@/domain/texto';
 import type { Entry } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Atorada = { entry: Entry; fallos: number };

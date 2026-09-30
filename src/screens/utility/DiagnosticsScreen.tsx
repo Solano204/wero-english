@@ -2,18 +2,18 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Header, Icon, Screen } from '@/components/base';
+import { Card, Carga, Header, Icon, Screen } from '@/shared/ui';
 import { contentHealth } from '@/data/contenido';
 import { BUNDLED_COUNT } from '@/assets/bundled';
 import { countEntries } from '@/data/semilla/sembrar';
 import { getDiagnosticoCola } from '@/data/repos/tarjetas';
 import { filtroEstudio } from '@/domain/cola';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import * as downloads from '@/services/descargas';
 import { color, font, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

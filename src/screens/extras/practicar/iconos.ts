@@ -1,4 +1,4 @@
-import type { IconName } from '@/components/base';
+import type { IconName } from '@/shared/ui';
 import type { ModoId } from './hoy';
 import type { GrupoId } from './modos';
 

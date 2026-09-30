@@ -1,10 +1,11 @@
 import React, { useEffect, type ComponentProps } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { FraseKaraoke, type VozEnVivo } from '@/components/fx';
+import { Icon } from '@/shared/ui/Icon';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { color, font, motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 
 /** La frase sube este poco mientras se aclara. */

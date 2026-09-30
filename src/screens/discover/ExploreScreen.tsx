@@ -2,18 +2,20 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Carga, Input, ProgressBar, Screen } from '@/components/base';
-import { Hueso, HuesoCirculo, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
-import { EntryRow, SectionTitle, PuntoMundo } from '@/components/list';
+import { Card, Carga, Input, ProgressBar, Screen } from '@/shared/ui';
+import { Hueso, HuesoCirculo, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { EntryRow } from '@/components/list/EntryRow';
+import { SectionTitle } from '@/shared/ui/SectionTitle';
+import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { getWorldCounts } from '@/data/repos/estadisticas';
 import { searchEntries } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
+import { useCarga } from '@/shared/hooks/useCarga';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { PORTADA_MUNDO, color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

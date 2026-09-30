@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import type { Oracion as OracionTexto } from '@/domain/oraciones';
 import { layout } from '@/theme';
 import { AIRE_ORACION, AIRE_PARRAFO, RENGLON_LECTURA, TAMANO_LECTURA } from './Oracion';

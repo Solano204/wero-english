@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDesbloqueo } from '@/estado/useDesbloqueo';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,19 +12,19 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, Card, EmptyState, Header, NotaInfo, Screen } from '@/components/base';
+import { Button, Card, EmptyState, Header, NotaInfo, Screen } from '@/shared/ui';
 import { EjemploFrase } from '@/components/gramatica/EjemploFrase';
 import { ErrorQueSeCorrige } from '@/components/gramatica/ErrorQueSeCorrige';
 import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
-import { MuroDesbloqueo } from '@/components/unlock';
+import { MuroDesbloqueo } from '@/shared/ui/MuroDesbloqueo';
 import { segmentos } from '@/domain/gramatica';
 import { loadContent } from '@/data/contenido';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { color, font, layout, motionDuration, motionEasing, radius, space, text, aparecerSubiendo, escalon } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
-import type { RootStackParams } from '@/navigation/routes';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import type { RootStackParams } from '@/types/rutas';
 import type { GramaticaTema } from '@/types';
 import { GRATIS_POR_BLOQUE } from './GramaticaScreen';
 
@@ -131,6 +132,7 @@ export function GramaticaTemaScreen() {
     () => gramatica.temas.find((t) => t.id === params.temaId) ?? null,
     [gramatica, params.temaId]
   );
+  const muro = useDesbloqueo('gramatica', params.temaId);
 
   const [ejemploActivo, setEjemploActivo] = useState<number | null>(null);
   const [reproduciendoTodos, setReproduciendoTodos] = useState(false);
@@ -289,8 +291,9 @@ export function GramaticaTemaScreen() {
 
   return (
     <MuroDesbloqueo
-      tipo="gramatica"
-      id={tema.id}
+      abierto={muro.abierto}
+      puede={muro.puede}
+      onDesbloquear={muro.desbloquear}
       nombre={tema.titulo}
       detalle={tema.gancho}
       onVolver={() => nav.goBack()}

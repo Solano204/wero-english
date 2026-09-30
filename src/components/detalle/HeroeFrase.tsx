@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { AudioButton } from '@/components/card/AudioButton';
-import { FraseKaraoke, OndaVoz, useVozEnVivo } from '@/components/fx';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import { color, font, space } from '@/theme';

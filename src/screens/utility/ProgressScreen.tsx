@@ -11,12 +11,15 @@ import {
   EncabezadoComprimido,
   IconButton,
   Screen,
-} from '@/components/base';
-import { Hueso, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
-import { SectionTitle } from '@/components/list';
-import { Detalle, FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
-import { Espectrograma } from '@/components/fx';
-import { useVisto } from '@/components/fx/useVisibilidad';
+} from '@/shared/ui';
+import { Hueso, HuesoCirculo, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { SectionTitle } from '@/shared/ui/SectionTitle';
+import { Detalle } from '@/components/progreso/Detalle';
+import { FichaJuego } from '@/components/progreso/FichaJuego';
+import { FilaMundo } from '@/components/progreso/FilaMundo';
+import { PanelSenal } from '@/components/progreso/PanelSenal';
+import { Espectrograma } from '@/features/progreso/components/Espectrograma';
+import { useVisto } from '@/shared/hooks/useVisibilidad';
 import {
   JUEGOS_PROGRESO,
   filasMundo,
@@ -32,14 +35,14 @@ import { ICONO_MODO } from '@/screens/extras/practicar/iconos';
 import { MODOS } from '@/screens/extras/practicar/modos';
 import type { Niveles } from '@/domain/resumenNiveles';
 import type { JuegoRecord } from '@/types';
-import { useCarga } from '@/hooks/useCarga';
-import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
+import { useCarga } from '@/shared/hooks/useCarga';
+import { useEntradaPantalla } from '@/shared/hooks/useEntradaPantalla';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { dayKey } from '@/domain/fechas';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

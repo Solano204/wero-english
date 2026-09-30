@@ -3,16 +3,16 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
-import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
-import { AudioButton } from '@/components/card';
+import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/shared/ui';
+import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { AudioButton } from '@/shared/ui/AudioButton';
 import { getEntriesByIds } from '@/data/repos/frases';
-import { useCarga } from '@/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCarga } from '@/shared/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/data/contenido';
 import { aparecer, color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

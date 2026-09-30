@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useVozEnVivo, type VozEnVivo } from '@/components/fx';
+import { useVozEnVivo, type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
 import type { Entry } from '@/types';

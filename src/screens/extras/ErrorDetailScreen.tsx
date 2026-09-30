@@ -6,15 +6,15 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Badge, Button, Header, NotaInfo, Screen } from '@/components/base';
+import { Badge, Button, Header, NotaInfo, Screen } from '@/shared/ui';
 import { DueloContraste } from '@/components/errores/DueloContraste';
 import { MedidorGravedad } from '@/components/errores/MedidorGravedad';
 import { SecuenciaMalentendido } from '@/components/errores/SecuenciaMalentendido';
 import { textoParaCompartir } from '@/domain/errores';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/data/contenido';
 import { color, font, motionMalentendido, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'ErrorDetail'>;

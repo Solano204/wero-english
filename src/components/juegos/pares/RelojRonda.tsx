@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedReaction, useAnimatedStyle } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { useCuentaRegresiva } from '@/components/base/RoundTimer';
-import { useReloj, useSenalActiva } from '@/components/fx/useSenalActiva';
+import { Icon } from '@/shared/ui/Icon';
+import { useCuentaRegresiva } from '@/shared/ui/RoundTimer';
+import { useReloj, useSenalActiva } from '@/shared/ui/fx/useSenalActiva';
 import { color, motionSenal, radius, space } from '@/theme';
 
 /** El último tramo del reloj: desde aquí late suave en `accent`. */

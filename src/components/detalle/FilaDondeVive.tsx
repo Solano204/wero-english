@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
-import { PuntoMundo } from '@/components/list';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
+import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { color, font, layout, radius, space } from '@/theme';
 
 interface Props {

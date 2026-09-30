@@ -1,5 +1,5 @@
 /* Generado por scripts/legal.mjs a partir de docs/*.md. No se edita a mano: npm run legal:generar */
-import type { DocLegal, TextoLegal } from './tipos';
+import type { DocLegal, TextoLegal } from '@/types/legal';
 
 export const TEXTOS: Record<DocLegal, TextoLegal> = {
   "privacidad": {

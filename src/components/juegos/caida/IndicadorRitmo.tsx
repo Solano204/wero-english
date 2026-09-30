@@ -1,9 +1,9 @@
 import React, { memo, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
+import { Icon } from '@/shared/ui/Icon';
 import { color, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { CHEVRONS } from './medidas';
 
 const Chevron = memo(function Chevron({ encendido }: { encendido: boolean }) {

@@ -2,7 +2,7 @@ import React, { useEffect, type RefObject } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { color, font, motionSpring, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Lo que dejó el usuario en el hueco al calificar. */
 export interface RellenoHueco {

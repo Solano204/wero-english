@@ -232,8 +232,8 @@ prueba('cada tema trae tres ejemplos con audio y su error con audio', () => {
 });
 
 prueba('«Detener»: el ícono stop existe y el botón se monta de nuevo al cambiar de variante', () => {
-  assert.match(leer('src/components/base/Icon.tsx'), /\bstop:\s*\{ Componente: StopIcon \}/);
-  assert.match(leer('src/components/base/Button.tsx'), /key=\{variant\}/);
+  assert.match(leer('src/shared/ui/Icon.tsx'), /\bstop:\s*\{ Componente: StopIcon \}/);
+  assert.match(leer('src/shared/ui/Button.tsx'), /key=\{variant\}/);
   assert.match(leer('src/screens/extras/GramaticaTemaScreen.tsx'), /'Detener'/);
 });
 

@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Badge, Card, NotaInfo, Presionable } from '@/components/base';
-import { AudioButton } from '@/components/card/AudioButton';
-import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
-import { FraseKaraoke, useVozEnVivo, useVozFrase } from '@/components/fx';
+import { Badge, Card, NotaInfo, Presionable } from '@/shared/ui';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { GrupoAudio, type ControlAudio } from '@/shared/ui/GrupoAudio';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
+import { useVozFrase } from '@/shared/ui/fx/useVozFrase';
 import { rangoEnFrase } from '@/domain/cazala';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { PhrasalVerb } from '@/types';
 
 /** Cuánto se desplaza el contenido al cambiar de forma, en dp. */

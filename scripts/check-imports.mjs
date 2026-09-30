@@ -34,8 +34,8 @@ function resolve(spec, from) {
 const files = [...walk(SRC), path.join(ROOT, 'App.tsx')];
 const graph = new Map();
 const broken = [];
-// Regla: los íconos entran solo por components/base/Icon.tsx.
-const PUERTA_ICONOS = path.join(SRC, 'components', 'base', 'Icon.tsx');
+// Regla: los íconos entran solo por shared/ui/Icon.tsx.
+const PUERTA_ICONOS = path.join(SRC, 'shared', 'ui', 'Icon.tsx');
 const iconosSueltos = [];
 
 for (const f of files) {

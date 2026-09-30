@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as haptics from '@/services/haptics';
 import { color, motionDuration, motionEasing, radius, resplandorPiso, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ALTO_PISO, AVISO_EN, MARGEN_PISO, avance, resplandor } from './medidas';
 
 /** Alto del resplandor sobre el piso. */

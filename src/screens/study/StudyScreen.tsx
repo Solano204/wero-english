@@ -11,28 +11,34 @@ import {
   Header,
   IconButton,
   Screen,
-} from '@/components/base';
+} from '@/shared/ui';
 import { FinDelDia } from '@/components/estudio/FinDelDia';
-import { Confetti, Trozos, useReaccion } from '@/components/feedback';
-import { BarraSesion, ChipMarcador, HojaVeredicto, publicarBarraEstudio } from '@/components/fx';
-import { DiffFrase, StudyCardView } from '@/components/card';
-import { Hueso, HuesoBoton, HuesoImagen, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Confetti } from '@/shared/ui/feedback/Confetti';
+import { Trozos } from '@/shared/ui/feedback/Trozos';
+import { useReaccion } from '@/shared/hooks/useReaccion';
+import { BarraSesion } from '@/shared/ui/fx/BarraSesion';
+import { ChipMarcador } from '@/features/estudio/components/ChipMarcador';
+import { HojaVeredicto } from '@/features/estudio/components/HojaVeredicto';
+import { publicarBarraEstudio } from '@/shared/ui/fx/estadoTransicion';
+import { DiffFrase } from '@/components/card/DiffFrase';
+import { StudyCardView } from '@/components/card/StudyCardView';
+import { Hueso, HuesoBoton, HuesoImagen, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { nivelSeguidas } from '@/domain/seguidas';
 import { sesionMerece } from '@/domain/session';
-import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/hooks/useCarga';
-import { useConsentimiento } from '@/components/legal';
+import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/shared/hooks/useCarga';
+import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useShallow } from 'zustand/react/shallow';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSessionStore } from '@/features/estudio/hooks/useSessionStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as notifications from '@/services/notificaciones';
 import { aparecerSubiendo, color, font, layout, radius, space } from '@/theme';
 import type { StudyCard } from '@/types';
-import { useMovimientoReducido } from '@/utils/accessibility';
-import type { RootStackParams } from '@/navigation/routes';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

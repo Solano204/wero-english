@@ -22,9 +22,9 @@ import {
   reacomodar,
 } from '@/theme';
 import * as haptics from '@/services/haptics';
-import { Presionable } from '@/components/base';
+import { Presionable } from '@/shared/ui';
 import { normalizeAnswer } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Reflow de las fichas armadas al agregar/quitar una. Respeta
  *  useMovimientoReducido por su cuenta: los presets de layout de

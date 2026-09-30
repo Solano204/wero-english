@@ -17,27 +17,25 @@ import {
   LevelBadge,
   RiskBadge,
   Screen,
-} from '@/components/base';
-import { MarcoImagen } from '@/components/card';
-import { Hueso, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
-import {
-  Aparece,
-  BotonGuardar,
-  CuandoNoDecirla,
-  EscalaRegistro,
-  FilaDondeVive,
-  HeroeFrase,
-} from '@/components/detalle';
+} from '@/shared/ui';
+import { MarcoImagen } from '@/shared/ui/MarcoImagen';
+import { Hueso, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { Aparece } from '@/components/detalle/Aparece';
+import { BotonGuardar } from '@/shared/ui/BotonGuardar';
+import { CuandoNoDecirla } from '@/components/detalle/CuandoNoDecirla';
+import { EscalaRegistro } from '@/components/detalle/EscalaRegistro';
+import { FilaDondeVive } from '@/components/detalle/FilaDondeVive';
+import { HeroeFrase } from '@/components/detalle/HeroeFrase';
 import { getEntry } from '@/data/repos/frases';
 import { isFavorite, toggleFavorite } from '@/data/repos/tarjetas';
-import { useCarga } from '@/hooks/useCarga';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCarga } from '@/shared/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, layout, motionDuration, motionEasing, motionEntrada, radius, space, type WorldId } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { mismoTexto } from '@/domain/texto';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Rt = RouteProp<RootStackParams, 'Detail'>;

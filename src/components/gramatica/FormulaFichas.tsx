@@ -8,10 +8,10 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { useVisto } from '@/components/fx/useVisibilidad';
+import { useVisto } from '@/shared/hooks/useVisibilidad';
 import { partirFormula, type Ficha, type Segmento } from '@/domain/gramatica';
 import { color, escalon, font, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Cuánto llega desde la izquierda cada pieza al entrar, en dp. */
 const DESLIZA = 8;

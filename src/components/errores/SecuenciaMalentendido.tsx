@@ -17,11 +17,12 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Button, Card } from '@/components/base';
-import { GrupoAudio, type ControlAudio } from '@/components/card/GrupoAudio';
-import { CableTrazo } from '@/components/fx/CableTrazo';
-import { FraseKaraoke, useVozEnVivo } from '@/components/fx';
-import { VistaCorreccion, useCorreccion } from '@/components/gramatica/CorreccionFrase';
+import { Button, Card } from '@/shared/ui';
+import { GrupoAudio, type ControlAudio } from '@/shared/ui/GrupoAudio';
+import { CableTrazo } from '@/shared/ui/fx/CableTrazo';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
+import { VistaCorreccion, useCorreccion } from '@/shared/ui/CorreccionFrase';
 import { analizar } from '@/domain/marcas';
 import { anuncioDeError, duracionCorreccion, inicioDeCorreccion, type TiemposMalentendido } from '@/domain/errores';
 import * as audio from '@/services/audio';
@@ -36,7 +37,7 @@ import {
   motionMalentendido,
   space,
 } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ErrorCard } from '@/types';
 import { SenalRota } from './SenalRota';
 

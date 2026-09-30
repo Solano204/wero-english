@@ -3,8 +3,8 @@ import { AccessibilityInfo, AppState, ScrollView, StyleSheet, View, useWindowDim
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
-import { EmptyState, Header, Screen } from '@/components/base';
-import { BarraSesion } from '@/components/fx';
+import { EmptyState, Header, Screen } from '@/shared/ui';
+import { BarraSesion } from '@/shared/ui/fx/BarraSesion';
 import { BloqueEscucha } from '@/components/juegos/cazala/BloqueEscucha';
 import type { ItemMorph } from '@/components/juegos/cazala/FraseMorph';
 import { PieCaza } from '@/components/juegos/cazala/PieCaza';
@@ -18,11 +18,11 @@ import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { shuffle } from '@/domain/arreglos';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
-import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
+import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { reacomodar, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

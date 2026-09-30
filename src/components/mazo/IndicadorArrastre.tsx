@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
-import { Icon, type IconName } from '@/components/base';
+import { Icon, type IconName } from '@/shared/ui';
 import { avanceGuardar, avanceSiguiente } from '@/domain/mazo';
 import { color, font, radius, space } from '@/theme';
 

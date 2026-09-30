@@ -9,10 +9,10 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Icon } from '@/components/base';
+import { Icon } from '@/shared/ui';
 import { QUITAR, amortiguarQuitar, avanceQuitar, decidirQuitar } from '@/domain/guardadas';
 import { color, font, motionDuration, motionEasing, motionSpring, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** Lo que sale de más una tarjeta que se va, en dp, para que quede del todo fuera de la pantalla. */
 const SALIDA_EXTRA = 96;

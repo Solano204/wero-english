@@ -2,13 +2,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { conteo } from '@/domain/texto';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Button, Card, ProgressBar, Screen, Presionable } from '@/components/base';
+import { Button, Card, ProgressBar, Screen, Presionable } from '@/shared/ui';
 import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import * as notifications from '@/services/notificaciones';
-import { useConsentimiento } from '@/components/legal';
+import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { color, font, layout, radius, space, aparecer } from '@/theme';
 
 /**

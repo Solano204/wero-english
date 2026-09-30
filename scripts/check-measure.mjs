@@ -77,9 +77,9 @@ for (const f of walk(SRC)) {
 }
 
 // useVisibilidad corta por foco y por segundo plano, sin medir.
-const archivoVisibilidad = path.join(SRC, 'components/fx/useVisibilidad.ts');
+const archivoVisibilidad = path.join(SRC, 'shared/hooks/useVisibilidad.ts');
 if (!fs.existsSync(archivoVisibilidad)) {
-  errores.push('falta src/components/fx/useVisibilidad.ts');
+  errores.push('falta src/shared/hooks/useVisibilidad.ts');
 } else {
   const src = fs.readFileSync(archivoVisibilidad, 'utf8');
   if (!/useIsFocused/.test(src)) errores.push('useVisibilidad.ts ya no corta por foco (useIsFocused)');

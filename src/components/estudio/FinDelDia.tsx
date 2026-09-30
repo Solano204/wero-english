@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Button } from '@/components/base';
+import { Button } from '@/shared/ui';
 import { etiquetaProximoRepaso } from '@/domain/session';
 import { aparecerSubiendo, color, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { conteo } from '@/domain/texto';
 
 interface Props {

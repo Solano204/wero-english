@@ -8,10 +8,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { Badge, Icon } from '@/components/base';
+import { Badge, Icon } from '@/shared/ui';
 import { color, font, motionDuration, motionEasing } from '@/theme';
 import { conteo } from '@/domain/texto';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { consumirPulsoNuevo, pulsoNuevoPendiente } from './entrada';
 import type { Avance } from './GrupoPlegable';
 import type { Meta } from './metadatos';

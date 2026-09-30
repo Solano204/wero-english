@@ -7,10 +7,10 @@ import Animated, {
   useAnimatedStyle,
   type SharedValue,
 } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { IconButton } from '@/components/base/IconButton';
-import { Marcador } from '@/components/fx/Marcador';
-import { BarraFina } from '@/components/progreso/BarraFina';
+import { Icon } from '@/shared/ui/Icon';
+import { IconButton } from '@/shared/ui/IconButton';
+import { Marcador } from '@/shared/ui/fx/Marcador';
+import { BarraFina } from '@/shared/ui/BarraFina';
 import { blur, color, font, layout, space, text } from '@/theme';
 import { miles } from '@/domain/texto';
 

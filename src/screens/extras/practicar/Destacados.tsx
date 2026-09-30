@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { type SharedValue } from 'react-native-reanimated';
-import { Presionable, ProgressBar } from '@/components/base';
-import { PortadaJuego, TarjetaTilt } from '@/components/fx';
-import { useVisibilidad } from '@/components/fx/useVisibilidad';
+import { Presionable, ProgressBar } from '@/shared/ui';
+import { PortadaJuego } from '@/features/practicar/components/PortadaJuego';
+import { TarjetaTilt } from '@/features/practicar/components/TarjetaTilt';
+import { useVisibilidad } from '@/shared/hooks/useVisibilidad';
 import {
   aparecerSubiendo,
   color,

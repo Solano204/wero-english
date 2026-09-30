@@ -36,3 +36,6 @@ export interface RetoSemanal {
   desde: string;
   cumplido: boolean;
 }
+
+/** Qué se puede desbloquear (ver data/repos/desbloqueos.ts). */
+export type TipoDesbloqueo = 'pack' | 'juego' | 'lectura' | 'gramatica' | 'mundo';

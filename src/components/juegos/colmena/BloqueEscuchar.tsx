@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Button } from '@/components/base/Button';
-import { OndaVoz, type VozEnVivo } from '@/components/fx';
+import { Button } from '@/shared/ui/Button';
+import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
+import { type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { motionDuration, motionEasing, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { plural } from '@/domain/texto';
 
 const ANCHO_ONDA = 88;

@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { BordePunteado } from '@/components/fx';
+import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
 import {
   MAZO,
   amortiguar,
@@ -26,7 +26,7 @@ import {
   opacidadDeProfundidad,
 } from '@/domain/mazo';
 import { aparecerRapido, color, font, motionDuration, motionEasing, motionMazo, motionSpring, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 import { CartaFrase, type Modo, type Sonando } from './CartaFrase';
 import { IndicadorArrastre } from './IndicadorArrastre';

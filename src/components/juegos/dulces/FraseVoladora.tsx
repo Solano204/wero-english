@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { color, font, motionDuration, motionEasing } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** La frase de la meta: fuente `md`; el título de la hoja: `xxl` de display. */
 const TAMANO_META = font.size.md;

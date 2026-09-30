@@ -3,7 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { diffLetras } from '@/domain/diff';
 import { aparecer, color, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 interface Props {
   /** Lo que escribió el usuario. */

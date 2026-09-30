@@ -3,11 +3,11 @@ import { Keyboard, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimen
 import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
 import { FraseHueco } from './FraseHueco';
-import { MarcoImagen } from './MarcoImagen';
-import { OptionButton, type OptionState } from './OptionButton';
+import { MarcoImagen } from '@/shared/ui/MarcoImagen';
+import { OptionButton, type OptionState } from '@/shared/ui/OptionButton';
 import { PalabraVoladora } from './PalabraVoladora';
 import { TileBuilder } from './TileBuilder';
-import { Button, RiskBadge } from '@/components/base';
+import { Button, RiskBadge } from '@/shared/ui';
 import { answerMode, imagenRevelaSignificado, instructionFor, promptFor } from '@/domain/exercise';
 import { isCloseEnough } from '@/domain/texto';
 import { color, font, layout, motionDuration, radius, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
@@ -15,9 +15,9 @@ import type { RellenoHueco } from './FraseHueco';
 import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import * as audio from '@/services/audio';
 import type { StudyCard } from '@/types';
-import { useEfectoResultado } from '@/components/feedback';
-import { useDesfaseVentana, type Rect } from '@/components/fx';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useEfectoResultado } from '@/shared/hooks/useEfectoResultado';
+import { useDesfaseVentana, type Rect } from '@/shared/ui/fx/useDesfaseVentana';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /**
  * La tarjeta que se va sale hacia la izquierda con un fundido (`base`) y la nueva

@@ -2,11 +2,11 @@ import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Card, Header, Screen } from '@/components/base';
-import { BotonMantener } from '@/components/legal';
+import { Card, Header, Screen } from '@/shared/ui';
+import { BotonMantener } from '@/components/legal/BotonMantener';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { color, font, radius, space } from '@/theme';
-import type { RootStackParams } from '@/navigation/routes';
+import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Borrar'>;

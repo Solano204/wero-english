@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { Screen, ProgressBar } from '@/components/base';
+import { Screen, ProgressBar } from '@/shared/ui';
 import { seedCatalog } from '@/data/semilla/sembrar';
 import { getDb } from '@/data/cliente';
 import { loadContent } from '@/data/contenido';

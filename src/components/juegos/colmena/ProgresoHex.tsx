@@ -3,7 +3,7 @@ import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import Svg, { Polygon } from 'react-native-svg';
 import { color, motionDuration, motionEasing, motionSpring, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { puntosHexagono } from './geometria';
 
 /** El hexágono más grande de la fila; con muchas rondas se encoge para que quepan todas. */

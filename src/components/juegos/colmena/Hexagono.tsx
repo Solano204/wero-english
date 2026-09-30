@@ -10,10 +10,10 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient, Polygon, Stop } from 'react-native-svg';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
 import { color, font, motionColmena, motionDuration, motionEasing, motionSpring, radius, senal } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { puntosHexagono } from './geometria';
 
 /** Lo que tarda una ficha en llegar a su ranura. */

@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Icon, Presionable } from '@/components/base';
-import { hayAudio } from '@/components/card/AudioButton';
-import { useVozEnVivo } from '@/components/fx';
+import { Icon, Presionable } from '@/shared/ui';
+import { hayAudio } from '@/shared/ui/AudioButton';
+import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import * as audio from '@/services/audio';
 import { color, font, motionDuration, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ErrorCard } from '@/types';
 
 interface MitadProps {

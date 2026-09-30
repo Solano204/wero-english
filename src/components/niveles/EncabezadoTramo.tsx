@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
-import { BarraFina } from '@/components/progreso/BarraFina';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
+import { BarraFina } from '@/shared/ui/BarraFina';
 import { avisoBloqueo, tituloTramo, type Tramo } from '@/domain/niveles';
 import { color, font, layout, space, text } from '@/theme';
 import { conteo, miles } from '@/domain/texto';

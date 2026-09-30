@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import type { Rect } from '@/components/fx';
+import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { color, font, motionDuration, motionEasing, text } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 /** El verbo del renglón de la lista (`h2`) y el del título de la página (`display`), en dp. */
 const VERBO_FILA = font.size.xl;

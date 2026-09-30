@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { claveDe, desbloquear, getDesbloqueos, type TipoDesbloqueo } from '@/data/repos/desbloqueos';
+import { claveDe, desbloquear, getDesbloqueos } from '@/data/repos/desbloqueos';
+import type { TipoDesbloqueo } from '@/types';
 import * as ads from '@/services/anuncios';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 

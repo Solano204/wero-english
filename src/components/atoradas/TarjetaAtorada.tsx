@@ -1,13 +1,13 @@
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Card, Presionable } from '@/components/base';
-import { GrupoAudio } from '@/components/card/GrupoAudio';
-import { useAudioFrase } from '@/components/card/useAudioFrase';
-import { FraseKaraoke } from '@/components/fx';
+import { Card, Presionable } from '@/shared/ui';
+import { GrupoAudio } from '@/shared/ui/GrupoAudio';
+import { useAudioFrase } from '@/shared/hooks/useAudioFrase';
+import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
 import { etiquetaFallos, tamanoAtorada } from '@/domain/atoradas';
 import { aparecerSubiendo, color, escalon, font, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 import { MedidorAtasco } from './MedidorAtasco';
 

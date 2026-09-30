@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
-import { Icon } from '@/components/base/Icon';
-import { Presionable } from '@/components/base/Presionable';
+import { Icon } from '@/shared/ui/Icon';
+import { Presionable } from '@/shared/ui/Presionable';
 import { color, font, motionDuration, motionEasing, motionSpring, radius, shadow, space } from '@/theme';
-import { useMovimientoReducido } from '@/utils/accessibility';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { ParFicha } from '@/types';
 import type { Rect } from './geometria';
 
