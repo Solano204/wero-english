@@ -1,15 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { conteo } from '@/domain/texto';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, ProgressBar, Screen, Presionable } from '@/shared/ui';
 import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
-import { useAuthStore } from '@/estado/useAuthStore';
-import { useSettingsStore } from '@/estado/useSettingsStore';
-import { loadContent } from '@/data/contenido';
-import * as notifications from '@/services/notificaciones';
-import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { color, font, layout, radius, space, aparecer } from '@/theme';
+import { usePrimerosPasos } from '@/features/cuenta/hooks/usePrimerosPasos';
 
 /**
  * P-01, la entrada.
@@ -29,66 +25,7 @@ import { color, font, layout, radius, space, aparecer } from '@/theme';
  * todo se guarda en la tabla ajuste del teléfono.
  */
 export function OnboardingScreen() {
-  const user = useAuthStore((s) => s.user);
-  const settings = useSettingsStore();
-  const [paso, setPaso] = useState(0);
-  const [permisoNegado, setPermisoNegado] = useState(false);
-  // En Expo Go no hay notificaciones desde el SDK 53. Se dice tal cual
-  // en vez de fingir que el usuario negó un permiso que nunca se pidió.
-  const notifEstado = useMemo(() => notifications.isAvailable(), []);
-
-  const avanzar = useCallback(() => setPaso((p) => p + 1), []);
-  const [slide, setSlide] = useState(0);
-
-  const terminar = useCallback(async () => {
-    if (!user) return;
-    await settings.set(user.id, 'onboardingHecho', true);
-  }, [user, settings]);
-
-  const saltarTodo = useCallback(async () => {
-    // Saltar deja los valores por omisión y entra. Nunca se atrapa a
-    // nadie en el onboarding.
-    await terminar();
-  }, [terminar]);
-
-  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
-
-  const pedirNotificaciones = useCallback(async () => {
-    if (!user) return;
-    if (!notifEstado.ok) {
-      await terminar();
-      return;
-    }
-    // Primero la hoja que explica cuáles y cada cuánto; «Ahora no» sigue sin recordatorios.
-    if (!(await pedirConsentimiento('notificaciones'))) {
-      await settings.set(user.id, 'notificaciones', false);
-      await terminar();
-      return;
-    }
-    const ok = await notifications.requestPermission();
-    if (!ok) {
-      setPermisoNegado(true);
-      await settings.set(user.id, 'notificaciones', false);
-      return;
-    }
-    await settings.set(user.id, 'notificaciones', true);
-    await notifications.setupChannel();
-    await notifications.scheduleNext({
-      usuarioId: user.id,
-      config: loadContent().notificaciones,
-      filter: settings.filter(),
-      hora: settings.horaNotificacion,
-      racha: 0,
-      porDia: settings.notifPorDia,
-      desde: settings.notifDesde,
-      hasta: settings.notifHasta,
-    });
-    await terminar();
-  }, [user, settings, terminar, notifEstado, pedirConsentimiento]);
-
-  // Presentación, groserías, recordatorios y cierre. El onboarding ya no pregunta nada que decida
-  // qué frases te tocan: esas llegan en un orden al azar propio de cada usuario.
-  const total = 4;
+  const { user, settings, paso, permisoNegado, notifEstado, avanzar, slide, setSlide, terminar, saltarTodo, hoja, pedirNotificaciones, total } = usePrimerosPasos();
 
   return (
     <Screen scroll>
