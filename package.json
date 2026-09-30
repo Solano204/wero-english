@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "build:assets": "node scripts/build-asset-map.mjs",
+    "build:resumen": "node scripts/build-resumen.mjs",
     "fonemas:importar": "node scripts/importar-fonemas.mjs",
     "audit:diseno": "node scripts/audit-diseno.mjs",
     "typecheck": "tsc --noEmit",

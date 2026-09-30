@@ -13,7 +13,7 @@ import { useCarga } from '@/shared/hooks/useCarga';
 import { useEntradaPantalla } from '@/shared/hooks/useEntradaPantalla';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
-import { loadContent } from '@/data/contenido';
+import { PHRASAL_VERBOS } from '@/data/resumenContenido';
 import { dayKey } from '@/domain/fechas';
 import { marcar, marcarPracticarInteractivo } from '@/shared/utils/marcasArranque';
 import type { JuegoRecord, RetoSemanal } from '@/types';
@@ -118,7 +118,7 @@ export function usePracticar() {
     paresLimpios: habla.dominados,
     atoradas,
     guardadas: stats?.favoritas ?? 0,
-    frasesPhrasal: loadContent().phrasal.verbos.length,
+    frasesPhrasal: PHRASAL_VERBOS,
   };
   /** El dato de un modo como línea de texto (la de una tarjeta destacada sin niveles). */
   const datoDe = (id: ModoId): string | null => textoMeta(metaDe(id, fuentesMeta));

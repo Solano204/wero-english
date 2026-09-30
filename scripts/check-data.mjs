@@ -4,6 +4,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { RUTA_RESUMEN, textoResumen } from './lib/resumenContenido.mjs';
 
 const DIR = path.join(process.cwd(), 'assets/data');
 
@@ -79,6 +80,18 @@ if (cat?.entries?.length && packs?.packs?.length) {
     console.log(
       `AVISO: los packs suman ${suma} y el catálogo tiene ${cat.entries.length}`
     );
+  }
+}
+
+// Lo que la app lee al abrir sin cargar los JSON grandes tiene que coincidir con ellos.
+{
+  const ruta = path.join(process.cwd(), RUTA_RESUMEN);
+  const actual = fs.existsSync(ruta) ? fs.readFileSync(ruta, 'utf8') : '';
+  if (actual !== textoResumen()) {
+    console.log(`ERROR: ${RUTA_RESUMEN} no coincide con assets/data. Corre:  npm run build:resumen`);
+    process.exitCode = 1;
+  } else {
+    console.log(`ok: ${RUTA_RESUMEN} coincide con assets/data`);
   }
 }
 
