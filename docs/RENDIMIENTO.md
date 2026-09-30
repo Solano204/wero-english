@@ -12,18 +12,18 @@ contenedor no trae `assets/aud` ni `assets/img` (el `bundled.ts` local está vac
 aquí **no incluyen** los ~7.9k medios del build real. Lo que depende del teléfono queda «pendiente» con el comando
 exacto para sacarlo (ver abajo).
 
-| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | DESPUÉS DE ARRANQUE | DESPUÉS DE RE-RENDERS | Cómo |
-|---|---|---|---|---|---|---|
-| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | **6,943,452 B (6.62 MiB), −755 KB contra la base (−9.8 %)** | 7,258,665 B (6.92 MiB): +315 KB por las cachés del React Compiler; −440 KB contra la base | `expo export`, medido aquí |
-| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | 10.31 MB (−19 %) | — | Expo Atlas |
-| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | 2,472 | — | Expo Atlas |
-| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | 100 archivos · 3.76 MB (salen las 5 fuentes, que van en el APK; entra `catalogo.db`, 1.1 MB) | igual | `expo export` |
-| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | 10,710,095 B | 11,025,308 B | `expo export` |
-| APK release (arm64) | pendiente | pendiente | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
-| AAB release | pendiente | pendiente | pendiente | pendiente | pendiente | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
-| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Arranque» |
-| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
-| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Flashlight» |
+| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | DESPUÉS DE ARRANQUE | DESPUÉS DE RE-RENDERS | DESPUÉS DE LISTAS, MEDIOS Y ANIMACIONES | Cómo |
+|---|---|---|---|---|---|---|---|
+| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | **6,943,452 B (6.62 MiB), −755 KB contra la base (−9.8 %)** | 7,258,665 B (6.92 MiB): +315 KB por las cachés del React Compiler; −440 KB contra la base | 7,259,533 B (6.92 MiB): +0.9 KB (Hoja, PrecargaImagen, rellenoBarra); −439 KB contra la base | `expo export`, medido aquí |
+| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | 10.31 MB (−19 %) | — | — | Expo Atlas |
+| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | 2,472 | — | — | Expo Atlas |
+| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | 100 archivos · 3.76 MB (salen las 5 fuentes, que van en el APK; entra `catalogo.db`, 1.1 MB) | igual | 100 archivos · **2.63 MB (−1.13 MB)**: música 689 → 517 KB, 80 efectos 1,872 → 941 KB | `expo export` |
+| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | 10,710,095 B | 11,025,308 B | **9,895,519 B (−1.13 MB)** | `expo export` |
+| APK release (arm64) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
+| AAB release | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente (con la voz a 32 kbps se espera ~−33 % de los ~6.3k MP3) | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
+| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Arranque» |
+| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
+| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente (recorrido de listas y animaciones: ver «Flashlight») | ver «Flashlight» |
 
 **Después de estructura.** El prompt 2 no busca bajar peso: parte pantallas en hooks y componentes y mueve archivos a
 capas. Eso suma 59 módulos, y cada módulo de Metro lleva su envoltura (`__d(function…)`, su tabla de dependencias),
@@ -71,6 +71,31 @@ decir desde el código (y el React Compiler, que ahora compila 418 funciones y d
 
 Memorización a mano: useMemo 141 → 65 y useCallback 263 → 64 (280 quitados); memo() 25 → 26 (se sumó el renglón
 de Cázala). La lista de lo que se quedó y por qué está en `docs/PLAN-RERENDERS.md`.
+
+### Después de listas, medios y animaciones (prompt 5)
+
+Los FPS se miden en el Xiaomi con Flashlight (recorrido abajo, en «Flashlight»); aquí no hay teléfono. Lo que cambió y
+lo que se midió aquí:
+
+| Qué | ANTES | DESPUÉS | Commit |
+|---|---|---|---|
+| Atoradas y Mi mazo: filas por tanda al hacer scroll | 10 (cada una con karaoke y grupo de audio) | 4 | `87e9ed6` |
+| Imágenes locales: caché de `expo-image` | `disk` (en Android se salta la memoria: decodifica en cada montaje y copia a disco) | `memory` + `recyclingKey` por ruta | `807f9bc` |
+| «¿Existe esta imagen/audio?» | `File.exists` síncrono en cada render (cada botón de audio y cada imagen) | una vez por ruta, con caché que se limpia al descargar o borrar un pack | `807f9bc` |
+| Estudio: imagen de la siguiente tarjeta | se decodifica al aparecer | se decodifica antes, invisible y al mismo tamaño (`Image.prefetch` en Android solo baja http) | `807f9bc` |
+| Música (2 MP3) | 128 kbps · 689 KB | 96 kbps · 517 KB (−25 %) | `f73699a` |
+| Efectos (80 WAV) | 44.1 kHz · 1,872 KB | 22,050 Hz mono · 941 KB (−50 %) | `f73699a` |
+| Voz (~6.3k MP3) | Polly, mono 22,050 Hz ~48 kbps | `node scripts/optimiza-audio.mjs --aplicar` (32 kbps) donde están los medios | `f73699a` |
+| Imágenes (~1.8k WebP) | 640×640 q80 (ffmpeg) | `node scripts/optimiza-imagenes.mjs` reporta; reemplaza solo si baja ≥ 5 % | `1326244` |
+| Barras de tiempo (4) | `width` cada cuadro (layout) | `translateX` (sin layout) | `acb8f75` |
+| Bucles fuera de la vista | reflejo del botón de HOY y onda del nivel actual seguían corriendo | se pausan | `acb8f75` |
+| Brillo de esqueletos | `withRepeat` sin cancelar ni pausa sin foco | se detiene sin foco o en segundo plano y se cancela al desmontar | `acb8f75` |
+| Paralaje del giroscopio | una animación nueva cada 50 ms aunque el teléfono esté quieto | solo si el destino cambia ≥ 0.25 dp | `acb8f75` |
+| Sombras | `elevation` 7 en cada fila de Errores, Atoradas y Mi mazo, y en la ficha que cae | sin sombra ahí (negra sobre #0B0C10–#040507: no se veía) | `5d3a48b` |
+| Hojas inferiores | 3 copias de la misma animación; consentimiento en `Modal` sin `navigationBarTranslucent` | una `Hoja` en `shared/ui`; el `Modal` que queda, translúcido arriba y abajo | `67de61f` |
+| Tocables | 0 `Touchable*` | 0, y ESLint los rechaza | `6b7c0a3` |
+
+Lo que quedó igual a propósito y las propuestas que esperan tu OK (cambiarían cómo se ve): `docs/PLAN-LISTAS-MEDIOS.md`.
 
 ### Top 15 módulos después de arranque (Expo Atlas)
 
@@ -159,6 +184,11 @@ revisado o sembrado), `splash` (oculto; las fuentes van incrustadas y no tienen 
 npm i -g @perf-profiler/flashlight   # o: curl https://get.flashlight.dev | bash
 flashlight measure                    # abrir la app y recorrer: Boot → Practicar → 10 tarjetas → Colmena → Estudio
 ```
+
+Recorrido de listas y animaciones (prompt 5), una medición por tramo: scroll rápido de arriba abajo en Errores, Se me
+atoran, Mi mazo, Phrasal y Niveles; Sonidos deslizando 10 fonemas; Practicar quieto 10 s con la consola a la vista
+(aurora, onda y portada héroe a la vez) y haciendo scroll; una ronda de Caída y una de Pares (barras de tiempo);
+Frases sueltas deslizando 10 cartas; Estudio con 5 tarjetas con imagen. Anotar cada caída por debajo de 55 FPS y dónde.
 
 Anotar: FPS medio, % CPU medio, RAM máxima y el puntaje.
 

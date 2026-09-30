@@ -1,7 +1,52 @@
-# Plan de listas, imágenes, medios y animaciones (prompt 5 de 6) — diagnóstico
+# Plan de listas, imágenes, medios y animaciones (prompt 5 de 6) — hecho
 
-Estado: **esperando OK**. No se cambió código de la app; solo se agregó `scripts/muestras-audio.mjs` (genera muestras,
-no toca `assets/`).
+Aprobado («ok») y aplicado en `perf/serie-rendimiento`: 8 commits (`87e9ed6` listas, `807f9bc` expo-image,
+`1326244` imágenes, `f73699a` audio, `acb8f75` animaciones, `5d3a48b` sombras, `67de61f` hojas, `6b7c0a3`
+Pressable). Tabla antes/después: `docs/RENDIMIENTO.md`, «Después de listas, medios y animaciones».
+
+## 0. Lo que falta y se corre fuera de aquí
+
+1. **Voz:** `node scripts/muestras-audio.mjs` (5 pares para oír) y, si suenan bien,
+   `node scripts/optimiza-audio.mjs --aplicar` donde están los MP3. Sin `--aplicar` solo reporta. Los originales van a
+   `medios-originales/` (fuera de Git y del bundle).
+2. **Imágenes:** `npm i --no-save sharp && node scripts/optimiza-imagenes.mjs` (reporta) y `--aplicar` si el ahorro
+   vale la pena. Solo reemplaza una imagen si baja ≥ 5 %.
+3. **FPS:** el recorrido de `RENDIMIENTO.md` → «Flashlight» en release en el Xiaomi.
+4. **APK/AAB:** `./gradlew assembleRelease` y `bundleRelease` antes y después de los dos scripts de medios.
+
+## 0.1 Lo que quedó igual y por qué
+
+- **FlatList afinado, no FlashList/Legend List:** las listas largas son cuatro y ya estaban virtualizadas;
+  `removeClippedSubviews` es el default en Android. Si una sigue bajo 55 FPS en el Xiaomi, se prueba FlashList v2 solo
+  en esa.
+- **Errores remonta la lista al cambiar de filtro** (`key`): a propósito, para que las primeras 8 entren escalonadas
+  con la lista nueva. El scroll vuelve arriba porque la lista es otra; al navegar y volver se conserva.
+- **Phrasal sin `getItemLayout`:** el encabezado es un párrafo de alto variable (cambia con el tamaño de letra), así
+  que los offsets no serían exactos.
+- **Frases sueltas sin precarga aparte:** el mazo ya monta las cartas de abajo con su imagen al mismo tamaño.
+- **Mi mazo sigue con `itemLayoutAnimation`:** es el reacomodo con resorte al quitar una frase (se ve).
+- **Acordeones que animan `height`** (GrupoPlegable, NotaPlegable, BloqueGramatica, Desatorar) y **el resaltado de
+  Lecturas**: son transiciones cortas al tocar, no bucles; con transform no se puede empujar lo de abajo igual.
+- **Karaoke:** el color por palabra ya va en el hilo de UI y Reanimated solo actualiza las 1–2 palabras que cambian;
+  el muestreo de 50 ms corre solo mientras suena la frase.
+- **BlurView** (barra de pestañas, muro, imagen desenfocada, encabezados): en Android sin `blurMethod` es un tinte
+  translúcido, barato. **La hoja de consentimiento sigue en `Modal`** (cubre el encabezado y responde al botón atrás).
+
+## 0.2 Propuestas que cambian cómo se ve (esperan tu OK)
+
+1. **Practicar tiene 3 lienzos de Skia animando a la vez** cuando se ve la consola: aurora (ya a 20 fps), onda de HOY
+   (60 fps) y portada héroe (60 fps). La regla es 2. Opciones: (a) la portada héroe queda quieta en su fotograma
+   limpio mientras la consola está a la vista y se anima al bajar; (b) la onda a 30 fps (respira en 4 s: el cambio
+   casi no se ve).
+2. **ArcoSenal (Progreso)** redibuja a 60 fps un temblor de ±0.4°: a 30 fps.
+3. **Sombra de las fichas de Colmena/Estudio (TileBuilder) y de Pares (FichaPar):** no son filas de lista, pero sobre
+   tinta tampoco se ven; quitarlas.
+4. Si Flashlight marca caídas en los acordeones o en el karaoke: acordeón que abre con fundido sin animar el alto;
+   karaoke con dos capas de texto (una encima que se revela con `opacity`).
+
+---
+
+Diagnóstico original (antes del OK):
 
 ## 1. Cómo se mide y qué se pudo medir aquí
 
@@ -135,10 +180,3 @@ No hay `Touchable*`; todo es `Presionable`/`Pressable`. Se revisa con un check q
 
 Cada uno con typecheck, lint, `check:media`, `check:data` y `audit:diseno` en verde, y columna «DESPUÉS DE LISTAS,
 MEDIOS Y ANIMACIONES» en `RENDIMIENTO.md`.
-
-## 4. Preguntas
-
-1. ¿OK al diagnóstico y al plan?
-2. ¿FlatList afinado en vez de FlashList v2 (y FlashList solo si alguna lista sigue lenta)?
-3. Música 96 kbps y SFX 22 kHz mono: ¿suenan bien las muestras?
-4. Voz 32 kbps: ¿corres `node scripts/muestras-audio.mjs` y me dices?

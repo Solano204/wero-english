@@ -97,7 +97,7 @@ Quién lo revisa:
 |---|---|
 | capas, features, domain puro, ciclos, íconos, imports que resuelven | `npm run check:imports` (sin dependencias) |
 | lo mismo con dependency-cruiser | `npm run check:capas` |
-| hooks (rules-of-hooks, exhaustive-deps), imports sin uso, `console` fuera de `__DEV__`, React Compiler | `npm run lint` |
+| hooks (rules-of-hooks, exhaustive-deps), imports sin uso, `console` fuera de `__DEV__`, React Compiler, `Touchable*` | `npm run lint` |
 | colores, duraciones y curvas fuera de `theme` | `npm run check:color`, `npm run audit:diseno` |
 | tipos estrictos | `npm run typecheck` |
 
@@ -156,6 +156,8 @@ Quién lo revisa:
 | cuenta, borrado y consentimientos | `services/cuenta/*`, `estado/useAuthStore.ts` |
 | colores, espacios, movimiento | `theme/` |
 | animaciones reutilizables | `shared/ui/fx/` |
+| la hoja inferior (veredicto, pausa, pregunta) | `shared/ui/Hoja.tsx` |
+| recomprimir audio e imágenes | `scripts/optimiza-audio.mjs`, `scripts/optimiza-imagenes.mjs` (originales en `medios-originales/`) |
 | lo que corre después de que Practicar es interactivo | `services/trasArranque.ts` (`trasArranque`, `listoParaDiferidos`) |
 | la «última versión» de algo sin ref en el render | `shared/hooks/useUltimo.ts` (estado ajustado en el render) |
 | try/finally dentro de hooks (el React Compiler no compila `finally`) | `shared/utils/conFinal.ts` |
