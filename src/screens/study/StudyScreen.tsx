@@ -2,16 +2,17 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { plural } from '@/utils/text';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
 import {
   Button,
-  EmptyState,
+  ErrorCarga,
   Header,
   IconButton,
   Screen,
 } from '@/components/base';
+import { FinDelDia } from '@/components/estudio/FinDelDia';
 import { Confetti, Trozos, useReaccion } from '@/components/feedback';
 import { BarraSesion, ChipMarcador, HojaVeredicto, publicarBarraEstudio } from '@/components/fx';
 import { DiffFrase, StudyCardView } from '@/components/card';
@@ -26,7 +27,7 @@ import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as notifications from '@/services/notifications';
-import { aparecerSubiendo, color, font, layout, motionDuration, radius, space } from '@/theme';
+import { aparecerSubiendo, color, font, layout, radius, space } from '@/theme';
 import type { StudyCard } from '@/types';
 import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
@@ -39,12 +40,6 @@ interface Cierre {
   total: number;
   merece: boolean;
 }
-
-/**
- * El momento del final: la barra se llena, la luz la recorre una vez y entra la
- * línea de resumen. Después se vuelve, sin pared entre el usuario y la salida.
- */
-const FIN_SESION_MS = motionDuration.escena + motionDuration.base;
 
 const lineaFinal = (c: Cierre) => `${c.aciertos} de ${c.total} ${plural(c.total, 'frase atinada', 'frases atinadas')}`;
 
@@ -60,6 +55,7 @@ export function StudyScreen() {
   useCortarAudioAlSalir();
   const reducido = useMovimientoReducido();
   const nav = useNavigation<Nav>();
+  const { params } = useRoute<RouteProp<RootStackParams, 'Study'>>();
   const barra = useRef<View>(null);
   const user = useAuthStore((s) => s.user);
   // Con selector y comparación superficial: sin ellos la pantalla entera se repintaba con
@@ -94,6 +90,9 @@ export function StudyScreen() {
     reset,
     aciertos,
     pendientes,
+    summary,
+    proximoRepaso,
+    nuevasCatalogo,
   } = useSessionStore(
     useShallow((s) => ({
       phase: s.phase,
@@ -111,6 +110,9 @@ export function StudyScreen() {
       reset: s.reset,
       aciertos: s.aciertos,
       pendientes: s.pendientes,
+      summary: s.summary,
+      proximoRepaso: s.proximoRepaso,
+      nuevasCatalogo: s.nuevasCatalogo,
     }))
   );
 
@@ -145,8 +147,8 @@ export function StudyScreen() {
 
   const [chosen, setChosen] = useState<string | null>(null);
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
-  // Al terminar una sesión completa con vencidas pendientes se ofrece seguir.
-  const [cierre, setCierre] = useState(false);
+  // Al terminar la sesión (sin salir con la flecha) se queda el estado final: «Terminaste por hoy».
+  const [mostrarFin, setMostrarFin] = useState(false);
   const [fin, setFin] = useState<Cierre | null>(null);
   // finish() ya se pidió (lo pide la flecha o, al llegar al final, esta pantalla) y la salida fue con la flecha.
   const cerrada = useRef(false);
@@ -164,7 +166,9 @@ export function StudyScreen() {
 
   useEffect(() => {
     if (!user) return;
-    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia);
+    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia, {
+      soloNuevas: params?.modo === 'nuevas',
+    });
     return () => reset();
     // Se arranca una sola vez al montar: las dependencias completas
     // reiniciarían la sesión cada vez que cambie un ajuste.
@@ -172,36 +176,30 @@ export function StudyScreen() {
   }, []);
 
   /*
-   * Al terminar se vuelve, y ya.
+   * Al terminar.
    *
-   * Antes esto abría "Listo por hoy": una pantalla entera para decir
-   * "0 respondidas, 0%". Cuando la sesión sí valió la pena, el número
-   * que importa ya está en Progreso, y cuando no, era una pared entre
-   * el usuario y la salida. Ahora es un momento corto: la barra se llena,
-   * la luz la recorre y una línea dice cuántas atinaste (con fiesta solo si
-   * la sesión fue buena). Con vencidas pendientes se ofrece seguir.
-   *
-   * Al llegar al final con «Siguiente» la sesión nunca se cerraba: no se
-   * guardaba la racha ni el fin de la sesión ni se programaba la próxima
-   * notificación (solo pasaba al salir con la flecha). Se cierra aquí.
+   * Al llegar al final con «Siguiente» la sesión se cierra aquí (racha, fin de la sesión y la
+   * próxima notificación). El efecto depende también de `summary`: antes solo dependía de la fase,
+   * y como `finish()` deja la fase igual ('finished') y solo agrega el resumen, el efecto no volvía
+   * a correr: sin tarjeta y sin resumen, la pantalla se quedaba vacía y congelada. Ahora, cuando
+   * llega el resumen, se muestra el estado final («Terminaste por hoy»); si se salió con la flecha,
+   * se vuelve.
    */
   useEffect(() => {
     if (phase !== 'finished') return;
 
-    const estado = useSessionStore.getState();
-    const resumen = estado.summary;
-
-    if (!resumen) {
+    if (!summary) {
       if (user && !cerrada.current) {
         cerrada.current = true;
         finish(user.id).catch(() => nav.goBack());
         return;
       }
-      nav.goBack();
+      // Sin sesión que cerrar (se salió antes de armarla): se vuelve.
+      if (!user || salidaManual.current) nav.goBack();
       return;
     }
 
-    if (user && resumen.total > 0 && settings.notificaciones && settings.notifPorDia > 0) {
+    if (user && summary.total > 0 && settings.notificaciones && settings.notifPorDia > 0) {
       // Se pide solo, sin que la persona toque nada: primero la hoja que explica los avisos, y
       // si ya dijo «Ahora no» a esta versión del aviso, no se le vuelve a insistir.
       void pedirConsentimiento('notificaciones', { sinInsistir: true })
@@ -213,7 +211,7 @@ export function StudyScreen() {
           config: loadContent().notificaciones,
           filter: settings.filter(),
           hora: settings.horaNotificacion,
-          racha: resumen.streak ?? 0,
+          racha: summary.streak ?? 0,
           porDia: settings.notifPorDia,
           desde: settings.notifDesde,
           hasta: settings.notifHasta,
@@ -222,33 +220,33 @@ export function StudyScreen() {
     }
 
     setFin(
-      resumen.total > 0
-        ? { aciertos: resumen.correct, total: resumen.total, merece: sesionMerece(resumen.correct, resumen.total) }
+      summary.total > 0
+        ? { aciertos: summary.correct, total: summary.total, merece: sesionMerece(summary.correct, summary.total) }
         : null
     );
 
-    if (estado.pendientes > 0) {
-      setCierre(true);
-      return;
-    }
-
-    // Salir con la flecha o no haber respondido nada: sin momento final.
-    if (salidaManual.current || resumen.total === 0) {
+    // Salir con la flecha: sin estado final, se vuelve.
+    if (salidaManual.current) {
       nav.goBack();
       return;
     }
-    const t = setTimeout(() => nav.goBack(), FIN_SESION_MS);
-    return () => clearTimeout(t);
-  }, [phase, nav, user, settings, finish, pedirConsentimiento]);
+    setMostrarFin(true);
+  }, [phase, summary, nav, user, settings, finish, pedirConsentimiento]);
 
-  const seguirRepasando = useCallback(() => {
-    if (!user) return;
-    setCierre(false);
-    setFin(null);
-    cerrada.current = false;
-    salidaManual.current = false;
-    void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia);
-  }, [user, start, settings]);
+  /** Otra sesión en la misma pantalla: la normal (seguir repasando) o la extra de solo nuevas. */
+  const otraSesion = useCallback(
+    (soloNuevas: boolean) => {
+      if (!user) return;
+      setMostrarFin(false);
+      setFin(null);
+      cerrada.current = false;
+      salidaManual.current = false;
+      void start(user.id, settings.filter(), settings.metaDiaria, settings.nuevasPorDia, { soloNuevas });
+    },
+    [user, start, settings]
+  );
+  const seguirRepasando = useCallback(() => otraSesion(false), [otraSesion]);
+  const aprenderNuevas = useCallback(() => otraSesion(true), [otraSesion]);
 
   // El botón físico de atrás cierra la sesión igual que la X.
   useEffect(() => {
@@ -261,8 +259,8 @@ export function StudyScreen() {
   }, [user, phase]);
 
   const handleClose = useCallback(async () => {
-    // Ya terminó y se está viendo el momento final: la flecha sale de una vez.
-    if (phase === 'finished') {
+    // Ya terminó, no había nada que armar o falló al armarse: la flecha sale de una vez.
+    if (phase !== 'active') {
       nav.goBack();
       return;
     }
@@ -310,42 +308,45 @@ export function StudyScreen() {
     );
   }
 
-  if (phase === 'empty') {
+  if (phase === 'error') {
     return (
       <Screen>
         <Header onClose={() => nav.goBack()} />
-        <EmptyState
-          icon="check"
-          title="Ya repasaste todo por hoy"
-          body="Vuelve mañana."
-          actionLabel="Ir a Practicar"
-          onAction={() => nav.popTo('Main', { screen: 'Practice' })}
+        <ErrorCarga onReintentar={() => otraSesion(params?.modo === 'nuevas')} />
+      </Screen>
+    );
+  }
+
+  // Sin nada que repasar, o la sesión ya terminó: el estado final. Nunca una pantalla vacía.
+  if (phase === 'empty' || (phase === 'finished' && mostrarFin)) {
+    return (
+      <Screen>
+        <Confetti active={phase === 'finished' && Boolean(fin?.merece)} />
+        <Header onClose={() => nav.goBack()} />
+        <FinDelDia
+          resumen={phase === 'finished' ? summary : null}
+          pendientes={phase === 'finished' ? pendientes : 0}
+          proximoRepaso={proximoRepaso}
+          nuevasCatalogo={nuevasCatalogo}
+          onSeguirRepasando={seguirRepasando}
+          onAprenderNuevas={aprenderNuevas}
+          onJugar={() => nav.popTo('Main', { screen: 'Practice' })}
+          onFrasesSueltas={() => nav.replace('Azar', undefined)}
+          onVolver={() => nav.goBack()}
         />
       </Screen>
     );
   }
 
-  if (phase === 'finished' && cierre) {
+  const terminada = phase === 'finished';
+  // Nunca en blanco: si por lo que sea no hay tarjeta y la sesión no terminó, queda la salida.
+  if (!card && !terminada) {
     return (
       <Screen>
-        <Confetti active={Boolean(fin?.merece)} />
-        <Animated.View entering={reducido ? undefined : aparecerSubiendo()} style={styles.cierre}>
-          <Text style={styles.cierreTitulo}>Sesión terminada</Text>
-          {fin ? <Text style={styles.cierreLinea}>{lineaFinal(fin)}</Text> : null}
-          <Button label="Terminar" full onPress={() => nav.goBack()} />
-          <Button
-            label={`Seguir repasando (${pendientes} restantes)`}
-            variant="secondary"
-            full
-            onPress={seguirRepasando}
-          />
-        </Animated.View>
+        <Header onClose={() => nav.goBack()} />
       </Screen>
     );
   }
-
-  const terminada = phase === 'finished';
-  if (!card && !terminada) return null;
 
   return (
     <Screen padded={false} transicionCarga={huboEsqueleto ? 'contenido' : undefined}>
@@ -456,7 +457,6 @@ export function StudyScreen() {
 }
 
 const styles = StyleSheet.create({
-  cierre: { flex: 1, justifyContent: 'center', padding: space.xl, gap: space.md },
   cierreTitulo: {
     fontFamily: font.family.heading,
     fontSize: font.size.xl,

@@ -44,7 +44,7 @@ const importar = (rel) => import(cargar(path.join(ROOT, rel)));
 
 const fecha = await importar('src/utils/date.ts');
 const sm2 = await importar('src/domain/sm2.ts');
-const { StudySession, etiquetaRepaso, sesionMerece } = await importar('src/domain/session.ts');
+const { StudySession, etiquetaRepaso, sesionMerece, etiquetaProximoRepaso } = await importar('src/domain/session.ts');
 const plan = await importar('src/domain/cola.ts');
 const sql = await importar('src/db/cola.ts');
 const plantillas = await importar('src/domain/plantillas.ts');
@@ -382,6 +382,14 @@ await prueba('estado final: próximo repaso (mañana si solo hay falladas de hoy
   assert.equal(proximo(db2), fecha.startOfDay(fecha.addDays(AHORA, 1)), 'la fallada de hoy vuelve mañana, no en un minuto');
   assert.equal(proximo(base({ entradas: 10 })), null, 'sin tarjetas estudiadas no hay próximo repaso');
   assert.equal(correr(db2, sql.consultaContarNuevas(1, FILTRO))[0].n, 8);
+});
+
+await prueba('etiquetaProximoRepaso: mañana, en N días o la fecha (días de calendario)', () => {
+  const noche = new Date(2026, 8, 19, 23, 30).getTime();
+  assert.equal(etiquetaProximoRepaso(new Date(2026, 8, 20, 0, 0).getTime(), noche), 'mañana', 'a media hora sigue siendo mañana');
+  assert.equal(etiquetaProximoRepaso(new Date(2026, 8, 22).getTime(), AHORA), 'en 3 días');
+  assert.equal(etiquetaProximoRepaso(new Date(2026, 9, 12).getTime(), AHORA), 'el 12 de octubre');
+  assert.equal(etiquetaProximoRepaso(AHORA + 60_000, AHORA), 'hoy');
 });
 
 // ── calificar ────────────────────────────────────────────────────────────

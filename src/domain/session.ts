@@ -300,3 +300,23 @@ export function etiquetaRepaso(intervalo: number, reinsertada: boolean): string 
   if (intervalo < 30) return `La vuelves a ver en ${conteo(Math.round(intervalo / 7), 'semana')}`;
   return `La vuelves a ver en ${conteo(Math.round(intervalo / 30), 'mes', 'meses')}`;
 }
+
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/**
+ * Cuándo vuelven los próximos repasos, para el estado final de Estudiar: «mañana», «en 3 días» o
+ * «el 12 de octubre». Cuenta días de calendario local (no bloques de 24 h), así que el horario de
+ * verano no lo mueve.
+ */
+export function etiquetaProximoRepaso(proximo: number, now: number = Date.now()): string {
+  const a = new Date(now);
+  const b = new Date(proximo);
+  const dias = Math.round(
+    (new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime() - new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime()) /
+      86_400_000
+  );
+  if (dias <= 0) return 'hoy';
+  if (dias === 1) return 'mañana';
+  if (dias < 7) return `en ${dias} días`;
+  return `el ${b.getDate()} de ${MESES[b.getMonth()]}`;
+}

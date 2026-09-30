@@ -191,7 +191,14 @@ export function CazalaScreen() {
     );
   }
 
-  if (!item) return null;
+  // Entre el último renglón y el resumen no hay renglón: la pantalla nunca queda en blanco, sale con su encabezado.
+  if (!item) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Cázala" />
+      </Screen>
+    );
+  }
 
   const estadoDe = (id: number): EstadoRenglon => {
     const marcada = picked.includes(id);

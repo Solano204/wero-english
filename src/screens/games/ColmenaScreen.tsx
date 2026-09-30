@@ -524,7 +524,14 @@ export function ColmenaScreen() {
     );
   }
 
-  if (!round) return null;
+  // Entre la última ronda y el resumen no hay ronda: la pantalla nunca queda en blanco, sale con su encabezado.
+  if (!round) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Colmena" />
+      </Screen>
+    );
+  }
 
   // Todos los niveles traen reloj (de 22 a 60 s por ronda); sin él no hay barra.
   const tieneReloj = nv !== null && nv.segundosRonda > 0;

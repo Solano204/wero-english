@@ -11,7 +11,7 @@ import { FondoAurora } from '@/components/fx';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
 import { resumenTodos } from '@/db/levels';
 import { getRecentDays } from '@/db/progress';
-import { countDue, getStats } from '@/db/queries';
+import { countDue, countNew, getStats } from '@/db/queries';
 import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
@@ -46,6 +46,8 @@ interface Datos {
   uso: Uso;
   hoyFrases: number;
   vencidas: number;
+  /** Frases nuevas que quedan en el catálogo (con el filtro): decide qué ofrece HOY sin repasos. */
+  nuevas: number;
 }
 
 const SIN_DATOS: Datos = {
@@ -57,7 +59,16 @@ const SIN_DATOS: Datos = {
   uso: {},
   hoyFrases: 0,
   vencidas: 0,
+  nuevas: 0,
 };
+
+/**
+ * ¿HOY lleva a Estudiar sin repasos pendientes? Entonces no ofrece «Repasar»: ofrece aprender
+ * frases nuevas (la sesión extra solo de nuevas) o dice que ya terminaste por hoy.
+ */
+function estudiarSinRepasos(motivo: MotivoHoy, modo: ModoId): boolean {
+  return motivo === 'ultimo' && modo === 'study';
+}
 
 /** El botón de HOY dice qué va a pasar al tocarlo. */
 function etiquetaHoy(
@@ -65,14 +76,16 @@ function etiquetaHoy(
   modo: ModoId,
   atoradas: number,
   vencidas: number,
-  meta: number
+  meta: number,
+  nuevas: number
 ): string {
   if (motivo === 'vencidas') {
-    // El botón lleva lo que cabe en una sesión; el total pendiente va aparte.
+    // El botón lleva lo que cabe en una sesión; el total pendiente va aparte. Nunca «Repasar 0»:
+    // este motivo solo sale con vencidas > 0 (elegirHoy).
     const n = Math.min(vencidas, meta);
     return `Repasar ${conteo(n, 'frase')}`;
   }
-  if (motivo === 'ultimo' && modo === 'study') return 'Seguir estudiando';
+  if (estudiarSinRepasos(motivo, modo)) return nuevas > 0 ? 'Aprender frases nuevas' : 'Ya terminaste por hoy';
   if (motivo === 'atoradas') return etiquetaCorregir(atoradas);
   if (motivo === 'ultimo') return `Seguir con ${MODOS[modo].titulo}`;
   return 'Empezar';
@@ -99,7 +112,7 @@ export function PracticeScreen() {
   const carga = useCarga(
     async (): Promise<Datos> => {
       if (!user) return SIN_DATOS;
-      const [records, reto, habla, niveles, stats, uso, dias, vencidas] = await Promise.all([
+      const [records, reto, habla, niveles, stats, uso, dias, vencidas, nuevas] = await Promise.all([
         getGameRecords(user.id),
         getRetoSemanal(user.id),
         getHablaResumen(user.id),
@@ -108,9 +121,10 @@ export function PracticeScreen() {
         getUsoModos(user.id),
         getRecentDays(user.id, 1),
         countDue(user.id, filtroEstudio(filter())),
+        countNew(user.id, filtroEstudio(filter())),
       ]);
       const hoyFrases = dias[0]?.dia === dayKey() ? dias[0].respuestas : 0;
-      return { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas };
+      return { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas, nuevas };
     },
     [user, filter],
     { alEnfocar: true }
@@ -125,7 +139,7 @@ export function PracticeScreen() {
     await carga.refrescar();
     setRefrescos((n) => n + 1);
   }, [carga.refrescar]);
-  const { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas } = carga.datos ?? SIN_DATOS;
+  const { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas, nuevas } = carga.datos ?? SIN_DATOS;
 
   const atoradas = stats?.atoradas ?? 0;
   const racha = stats?.racha ?? 0;
@@ -170,7 +184,7 @@ export function PracticeScreen() {
           ) : (
             <ConsolaHoy
               modo={modoHoy}
-              etiquetaBoton={etiquetaHoy(hoy.motivo, hoy.modo, atoradas, vencidas, metaDiaria)}
+              etiquetaBoton={etiquetaHoy(hoy.motivo, hoy.modo, atoradas, vencidas, metaDiaria, nuevas)}
               pendientes={vencidas}
               hoyFrases={hoyFrases}
               meta={metaDiaria}
@@ -181,7 +195,13 @@ export function PracticeScreen() {
               entrada={primeraEntrada}
               refrescos={refrescos}
               scrollY={scrollY}
-              onIr={() => modoHoy.ir(nav)}
+              onIr={() =>
+                // Sin repasos: «Aprender frases nuevas» abre la sesión de solo nuevas; «Ya terminaste
+                // por hoy» abre Estudiar, que muestra su estado final con lo que sí se puede hacer.
+                estudiarSinRepasos(hoy.motivo, hoy.modo) && nuevas > 0
+                  ? nav.navigate('Study', { modo: 'nuevas' })
+                  : modoHoy.ir(nav)
+              }
             />
           )}
         </View>

@@ -629,7 +629,14 @@ export function CaidaScreen() {
     );
   }
 
-  if (!round) return null;
+  // Entre la última ronda y el resumen no hay ronda: la pantalla nunca queda en blanco, sale con su encabezado.
+  if (!round) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Caída" />
+      </Screen>
+    );
+  }
 
   const izquierda = round.correctaIzquierda ? round.correcta : round.falsa;
   const derecha = round.correctaIzquierda ? round.falsa : round.correcta;

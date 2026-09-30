@@ -10,7 +10,8 @@ export type RootStackParams = {
   Onboarding: undefined;
   Main: NavigatorScreenParams<MainTabParams> | undefined;
 
-  Study: { packId?: string } | undefined;
+  /** `modo: 'nuevas'`: la sesión extra de «Aprender frases nuevas» (solo nuevas). */
+  Study: { packId?: string; modo?: 'nuevas' } | undefined;
 
   Detail: { entryId: number };
   PackDetail: { packId: string };
