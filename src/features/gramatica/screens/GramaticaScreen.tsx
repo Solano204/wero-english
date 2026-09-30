@@ -1,24 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated from 'react-native-reanimated';
 import { Header, Screen } from '@/shared/ui';
 import { BloqueGramatica } from '@/features/gramatica/components/BloqueGramatica';
 import { MedidorNivel } from '@/features/gramatica/components/MedidorNivel';
 import { RenglonTema } from '@/features/gramatica/components/RenglonTema';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
-import { nivelMaximo } from '@/domain/gramatica';
-import { loadContent } from '@/data/contenido';
-import { useUnlockStore } from '@/estado/useUnlockStore';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
-import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
 import { color, font, space, aparecerSubiendo, escalon } from '@/theme';
-import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
-import type { RootStackParams } from '@/types/rutas';
-import type { GramaticaTema } from '@/types';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
+import { useGramatica } from '@/features/gramatica/hooks/useGramatica';
 
 /**
  * Gramática, el índice.
@@ -38,37 +28,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export const GRATIS_POR_BLOQUE = 3;
 
 export function GramaticaScreen() {
-  const nav = useNavigation<Nav>();
-  const enfocada = useIsFocused();
-  const reducido = useMovimientoReducido();
-  const { gramatica } = loadContent();
-  const claves = useUnlockStore((s) => s.claves);
-  // Lo que se abre con un anuncio dentro del tema se refleja al volver a la lista, no antes: así el candado se ve abrirse.
-  const [clavesVistas, setClavesVistas] = useState(claves);
-  const [abierto, setAbierto] = useState<string | null>(null);
-  // Misma pista que el resto de la app, pero más baja: aquí se lee.
-  useMusicaPantalla('app', { volumenFactor: 0.4 });
-
-  useEffect(() => {
-    if (enfocada) setClavesVistas(claves);
-  }, [enfocada, claves]);
-
-  const porBloque = useMemo(() => {
-    const m = new Map<string, GramaticaTema[]>();
-    for (const t of gramatica.temas) {
-      const lista = m.get(t.bloque) ?? [];
-      lista.push(t);
-      m.set(t.bloque, lista);
-    }
-    return m;
-  }, [gramatica]);
-  const niveles = useMemo(() => nivelMaximo(gramatica.temas), [gramatica]);
-
-  const bloques = Object.entries(gramatica.bloques);
-  const abrirTema = useCallback(
-    (tema: GramaticaTema) => nav.navigate('GramaticaTema', { temaId: tema.id }),
-    [nav]
-  );
+  const { nav, reducido, gramatica, clavesVistas, abierto, setAbierto, porBloque, niveles, bloques, abrirTema } = useGramatica();
 
   return (
     <Screen scroll>
