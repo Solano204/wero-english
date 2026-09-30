@@ -1,5 +1,6 @@
 import { dayKey, startOfDay } from '@/utils/date';
 import type { CardState, Nivel } from '@/types';
+import { ORDEN_NUEVAS, type OrdenNuevas } from '@/config/aprendizaje';
 
 /**
  * La cola de repaso como SQL puro, sin nada de Expo, para que la misma
@@ -80,21 +81,78 @@ function sqlVencidas(filtro: string): string {
 }
 
 /**
- * Frases sin turno: sin fila en `tarjeta` o con fila que nunca se repasó
- * (una favorita). Por nivel y luego id. Params: usuario, ...filtro.args, límite.
+ * El orden de las frases nuevas, propio de cada usuario.
+ *
+ * Antes era `ORDER BY e.nivel, e.id`: el mismo para todos, así que dos personas nuevas
+ * estudiaban exactamente las mismas frases en el mismo orden. Ahora cada frase recibe una llave
+ * en dos pasos, todo con enteros de SQLite (sin funciones extra):
+ *
+ *  1. `k0 = (id · m + c) mod P`, con P = 4 294 967 291 (el primo más grande debajo de 2^32) y
+ *     `m`, `c` sacados de la semilla del usuario (`usuario.semilla`). Como la semilla
+ *     MULTIPLICA, cada usuario tiene una permutación distinta; si solo se sumara, todos tendrían
+ *     el mismo orden empezando en otro punto (una rotación) y compartirían tramos enteros.
+ *  2. `llave = mezcla(k0)`: el mezclador de 32 bits «xorshift-multiplica» (x ^= x >> 16;
+ *     x *= 0x45d9f3b; dos veces y un último x ^= x >> 16). Sin este paso el orden sale en
+ *     escalera (ids que avanzan de 574 en 574, por ejemplo): distinto por usuario, pero nada
+ *     al azar. SQLite no tiene XOR, así que `a ^ b` se escribe `(a | b) - (a & b)`.
+ *
+ * Las dos partes son biyecciones, así que nunca hay empates. Es estable: la misma semilla da
+ * siempre el mismo orden, y los conteos de Hoy, las pendientes y la sesión no se descuadran.
+ * Nada se sale de los 64 bits: id · m + c < 2^53 y x (< 2^32) · 0x45d9f3b (< 2^27) < 2^59.
  */
-function sqlNuevas(filtro: string): string {
-  return `SELECT e.*, NULL AS repeticiones, NULL AS intervalo,
-            NULL AS facilidad, NULL AS vence_en, NULL AS ultimo_repaso,
-            NULL AS fallos, NULL AS aciertos, NULL AS dominada,
-            t.favorito AS favorito
-       FROM entrada e
-       LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
-      WHERE ${filtro}
-        AND (t.entry_id IS NULL OR t.ultimo_repaso IS NULL)
-        AND ${SIN_REGLAS}
-      ORDER BY e.nivel ASC, e.id ASC
-      LIMIT ?;`;
+export const PRIMO_ORDEN = 4294967291;
+const MEZCLA = 0x45d9f3b;
+const MASCARA_32 = 4294967295;
+
+/** Mezcla de 32 bits (la de MurmurHash3): semillas parecidas dan números nada parecidos. */
+function mezclar32(x: number): number {
+  let h = x >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
+/**
+ * Multiplicador y suma del orden de un usuario. `m` nunca es chico (≥ 2^16): con m = 1 el paso
+ * lineal sería el orden de los ids.
+ */
+export function ordenDeSemilla(semilla: number): { m: number; c: number } {
+  const s = Math.trunc(Math.abs(semilla)) >>> 0;
+  const m = 65537 + (mezclar32(s) % (PRIMO_ORDEN - 65537));
+  const c = mezclar32(s ^ 0x9e3779b9) % PRIMO_ORDEN;
+  return { m, c };
+}
+
+/** `x ^ (x >> 16)` para un entero de 32 bits, sin operador XOR: (a | b) - (a & b). */
+function xorCorrido(x: string): string {
+  return `(((${x} >> 16) | ${x}) - ((${x} >> 16) & ${x}))`;
+}
+
+/**
+ * Frases sin turno: sin fila en `tarjeta` o con fila que nunca se repasó (una favorita), en el
+ * orden propio del usuario (ver arriba). Cada paso de la mezcla va en su propia subconsulta para
+ * que SQLite calcule cada valor una vez. Params: m, c, usuario, ...filtro.args, límite.
+ */
+function sqlNuevas(filtro: string, orden: OrdenNuevas): string {
+  const porNivel = orden === 'aleatorio_por_nivel' ? 'n2.nivel ASC, ' : '';
+  return `SELECT * FROM (
+       SELECT n1.*, ((${xorCorrido('n1.k1')} * ${MEZCLA}) & ${MASCARA_32}) AS k2 FROM (
+         SELECT n0.*, ((${xorCorrido('n0.k0')} * ${MEZCLA}) & ${MASCARA_32}) AS k1 FROM (
+           SELECT e.*, NULL AS repeticiones, NULL AS intervalo,
+                  NULL AS facilidad, NULL AS vence_en, NULL AS ultimo_repaso,
+                  NULL AS fallos, NULL AS aciertos, NULL AS dominada,
+                  t.favorito AS favorito,
+                  ((e.id * ? + ?) % ${PRIMO_ORDEN}) AS k0
+             FROM entrada e
+             LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+            WHERE ${filtro}
+              AND (t.entry_id IS NULL OR t.ultimo_repaso IS NULL)
+              AND ${SIN_REGLAS}
+         ) n0
+       ) n1
+     ) n2
+     ORDER BY ${porNivel}${xorCorrido('n2.k2')} ASC, n2.id ASC
+     LIMIT ?;`;
 }
 
 /**
@@ -181,10 +239,17 @@ export function consultaVencidas(usuarioId: number, filter: ContentFilter, limit
   return { sql: sqlVencidas(f.sql), params: [usuarioId, ...f.args, now, startOfDay(now), limite] };
 }
 
-/** Frases sin turno, hasta `limite`. */
-export function consultaNuevas(usuarioId: number, filter: ContentFilter, limite: number): Consulta {
+/** Frases sin turno, hasta `limite`, en el orden propio del usuario (su `semilla`). */
+export function consultaNuevas(
+  usuarioId: number,
+  semilla: number,
+  filter: ContentFilter,
+  limite: number,
+  orden: OrdenNuevas = ORDEN_NUEVAS
+): Consulta {
   const f = buildFilter(filter);
-  return { sql: sqlNuevas(f.sql), params: [usuarioId, ...f.args, limite] };
+  const { m, c } = ordenDeSemilla(semilla);
+  return { sql: sqlNuevas(f.sql, orden), params: [m, c, usuarioId, ...f.args, limite] };
 }
 
 /** Vencidas / de aprendizaje / fantasma. */

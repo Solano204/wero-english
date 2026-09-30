@@ -9,7 +9,6 @@ import { loadContent } from '@/store/content';
 import * as notifications from '@/services/notifications';
 import { useConsentimiento } from '@/components/legal';
 import { color, font, layout, radius, space, aparecer } from '@/theme';
-import type { Nivel } from '@/types';
 
 /**
  * P-01, la entrada.
@@ -86,7 +85,9 @@ export function OnboardingScreen() {
     await terminar();
   }, [user, settings, terminar, notifEstado, pedirConsentimiento]);
 
-  const total = 6;
+  // Presentación, groserías, recordatorios y cierre. El onboarding ya no pregunta nada que decida
+  // qué frases te tocan: esas llegan en un orden al azar propio de cada usuario.
+  const total = 4;
 
   return (
     <Screen scroll>
@@ -118,40 +119,6 @@ export function OnboardingScreen() {
 
       {paso === 1 ? (
         <Pregunta
-          titulo="¿Qué tanto inglés traes?"
-          bajada="Para no ahogarte con jerga el primer día"
-          opciones={[
-            { label: 'Entiendo poco', valor: [1] },
-            { label: 'Me defiendo', valor: [1, 2] },
-            { label: 'Entiendo casi todo, pero no todo', valor: [1, 2, 3] },
-          ]}
-          onPick={(v) => {
-            if (user) void settings.set(user.id, 'niveles', v as Nivel[]);
-            avanzar();
-          }}
-          nota="Lo puedes cambiar cuando quieras en Ajustes."
-        />
-      ) : null}
-
-      {paso === 2 ? (
-        <Pregunta
-          titulo="¿Dónde se te traba el inglés?"
-          bajada="Con eso decidimos con qué mundo empiezas"
-          opciones={[
-            { label: 'En series y streams', valor: 'media' },
-            { label: 'En el trabajo', valor: 'trabajo' },
-            { label: 'Con amigos gringos', valor: 'amigos' },
-            { label: 'En todos lados', valor: 'todo' },
-          ]}
-          onPick={(v) => {
-            if (user) void settings.set(user.id, 'dondeSeTraba', String(v));
-            avanzar();
-          }}
-        />
-      ) : null}
-
-      {paso === 3 ? (
-        <Pregunta
           titulo="¿Te enseñamos las groserías?"
           bajada="El catálogo trae lenguaje fuerte marcado. Tú decides si aparece."
           opciones={[
@@ -166,7 +133,7 @@ export function OnboardingScreen() {
         />
       ) : null}
 
-      {paso === 4 ? (
+      {paso === 2 ? (
         <PasoCuantas
           valor={settings.notifPorDia}
           onChange={(n) => {
@@ -183,7 +150,7 @@ export function OnboardingScreen() {
         />
       ) : null}
 
-      {paso === 5 ? (
+      {paso === 3 ? (
         <View style={styles.paso}>
           <Text style={styles.titulo}>Ya está</Text>
           <Text style={styles.bajada}>

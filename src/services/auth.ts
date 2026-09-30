@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDb } from '@/db/client';
 import { initProgress } from '@/db/progress';
+import { nuevaSemilla } from '@/db/semilla';
 import type { AuthError, Credentials, PerfilGoogle, User } from '@/types';
 
 /**
@@ -87,9 +88,9 @@ export async function signUp(c: Credentials): Promise<User> {
   const now = Date.now();
 
   const res = await db.runAsync(
-    `INSERT INTO usuario (username, pass_hash, pass_salt, created_at, last_login)
-     VALUES (?,?,?,?,?);`,
-    [username, pass, salt, now, now]
+    `INSERT INTO usuario (username, pass_hash, pass_salt, created_at, last_login, semilla)
+     VALUES (?,?,?,?,?,?);`,
+    [username, pass, salt, now, now, nuevaSemilla()]
   );
 
   const id = res.lastInsertRowId;
@@ -211,9 +212,9 @@ export async function continuarSinCuenta({ nuevo = false }: { nuevo?: boolean } 
   const now = Date.now();
 
   const res = await db.runAsync(
-    `INSERT INTO usuario (username, pass_hash, pass_salt, created_at, last_login)
-     VALUES (?,?,?,?,?);`,
-    [username, pass, salt, now, now]
+    `INSERT INTO usuario (username, pass_hash, pass_salt, created_at, last_login, semilla)
+     VALUES (?,?,?,?,?,?);`,
+    [username, pass, salt, now, now, nuevaSemilla()]
   );
   const id = res.lastInsertRowId;
   await initProgress(id);
@@ -293,9 +294,9 @@ export async function crearCuentaGoogle(perfil: PerfilGoogle): Promise<User> {
   const now = Date.now();
 
   const res = await db.runAsync(
-    `INSERT INTO usuario (username, pass_hash, pass_salt, google_sub, email, nombre, foto, created_at, last_login)
-     VALUES (?,?,?,?,?,?,?,?,?);`,
-    [`google:${perfil.sub}`, pass, salt, perfil.sub, perfil.email, perfil.nombre, perfil.foto, now, now]
+    `INSERT INTO usuario (username, pass_hash, pass_salt, google_sub, email, nombre, foto, created_at, last_login, semilla)
+     VALUES (?,?,?,?,?,?,?,?,?,?);`,
+    [`google:${perfil.sub}`, pass, salt, perfil.sub, perfil.email, perfil.nombre, perfil.foto, now, now, nuevaSemilla()]
   );
   const id = res.lastInsertRowId;
   await initProgress(id);

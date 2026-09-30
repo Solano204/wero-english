@@ -38,8 +38,6 @@ export interface Settings {
   micHabilitado: boolean;
   /** Onboarding contestado. Si es false se muestra al entrar. */
   onboardingHecho: boolean;
-  /** Respuesta a "dónde se te traba el inglés". Solo se guarda local. */
-  dondeSeTraba: string | null;
 
   /** Grupos de Practicar que el usuario dejó desplegados (ids de `GRUPOS`). */
   practicarGruposAbiertos: string[];
@@ -77,7 +75,6 @@ export const DEFAULT_SETTINGS: Settings = {
   mostrarSeguidas: true,
   micHabilitado: false,
   onboardingHecho: false,
-  dondeSeTraba: null,
   practicarGruposAbiertos: [],
   leyendaLecturaVista: false,
   ordenErrores: 'graves',

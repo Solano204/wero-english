@@ -44,7 +44,8 @@
     "check:esqueletos": "node scripts/check-esqueletos.mjs",
     "reinstala": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps",
     "legal:generar": "node scripts/legal.mjs",
-    "check:legal": "node scripts/legal.mjs --check"
+    "check:legal": "node scripts/legal.mjs --check",
+    "check:orden": "node scripts/check-orden.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

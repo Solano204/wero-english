@@ -3,7 +3,7 @@
  * NUNCA edites una migración ya publicada: agrega una nueva al final.
  */
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export const MIGRATIONS: { version: number; sql: string }[] = [
   {
@@ -330,6 +330,28 @@ export const MIGRATIONS: { version: number; sql: string }[] = [
     ALTER TABLE usuario ADD COLUMN nombre     TEXT;
     ALTER TABLE usuario ADD COLUMN foto       TEXT;
     CREATE UNIQUE INDEX IF NOT EXISTS ux_usuario_google_sub ON usuario(google_sub) WHERE google_sub IS NOT NULL;
+    `,
+  },
+  /* ------------------------------------------------------------------
+     v8: frases nuevas en orden al azar por usuario, sin «plan».
+     - `semilla`: de ella sale el orden propio de las frases nuevas de
+       cada usuario (ver `ordenDeSemilla` en db/cola.ts). Los usuarios
+       nuevos la reciben de expo-crypto al crearse; a los que ya existen
+       se les da aquí una al azar. Lo ya estudiado (tarjetas, SM-2,
+       racha, mazo) no cambia: solo el orden de las nuevas pendientes.
+     - El onboarding ya no pregunta el nivel: quien contestó «Entiendo
+       poco» quedó limitado a nivel 1 en Frases sueltas, Modo oído,
+       juegos y listas. Todos vuelven a los tres niveles; la Dificultad
+       de Ajustes sigue ahí para quien la quiera cambiar a mano.
+     - `dondeSeTraba` se guardaba y nada lo usaba.
+     ------------------------------------------------------------------ */
+  {
+    version: 8,
+    sql: `
+    ALTER TABLE usuario ADD COLUMN semilla INTEGER;
+    UPDATE usuario SET semilla = (random() & 4294967295) WHERE semilla IS NULL;
+    UPDATE ajuste SET valor = '[1,2,3]' WHERE clave = 'niveles';
+    DELETE FROM ajuste WHERE clave = 'dondeSeTraba';
     `,
   },
 ];

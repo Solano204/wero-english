@@ -95,7 +95,9 @@ const FILTRO = plan.filtroEstudio({ modoLimpio: false, niveles: [1, 2, 3] });
 const correr = (db, q) => consulta(db, q.sql, q.params);
 const contar = (db, now, filtro = FILTRO) => correr(db, sql.consultaContarVencidas(1, filtro, now))[0].n;
 const vencidas = (db, now, limite, filtro = FILTRO) => correr(db, sql.consultaVencidas(1, filtro, limite, now));
-const nuevas = (db, limite, filtro = FILTRO) => correr(db, sql.consultaNuevas(1, filtro, limite));
+// Semilla fija del usuario de prueba: su orden de nuevas es al azar, pero siempre el mismo.
+const SEMILLA = 123456789;
+const nuevas = (db, limite, filtro = FILTRO) => correr(db, sql.consultaNuevas(1, SEMILLA, filtro, limite));
 const nuevasHoy = (db, now) => correr(db, sql.consultaNuevasHoy(1, now))[0].n;
 const diagnostico = (db, now, filtro = FILTRO) => correr(db, sql.consultaDiagnosticoCola(1, filtro, now))[0];
 const estadoDe = (r) => ({ entry_id: r.id ?? r.entry_id, repeticiones: r.repeticiones ?? 0, intervalo: r.intervalo ?? 0, facilidad: r.facilidad ?? 2.5, vence_en: r.vence_en ?? 0, ultimo_repaso: r.ultimo_repaso ?? null, fallos: r.fallos ?? 0, aciertos: r.aciertos ?? 0, dominada: r.dominada ?? 0, favorito: r.favorito ?? 0 });
@@ -128,7 +130,8 @@ console.log('cola de repaso');
 await prueba('una favorita nunca estudiada no es vencida: es nueva', () => {
   const db = base({ entradas: 5, filas: [{ entry_id: 1, favorito: 1 }] });
   assert.equal(contar(db, AHORA), 0);
-  assert.deepEqual(ids(nuevas(db, 10)), [1, 2, 3, 4, 5]);
+  // Las cinco, en el orden propio del usuario (ya no por id): se comparan como conjunto.
+  assert.deepEqual(ids(nuevas(db, 10)).sort((a, b) => a - b), [1, 2, 3, 4, 5]);
 });
 
 await prueba('en aprendizaje y respondida hoy no vuelve hoy, vuelve mañana', () => {

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDb } from '@/db/client';
 import { initProgress } from '@/db/progress';
 import { saveSetting } from '@/db/settings';
+import { nuevaSemilla, olvidarSemilla } from '@/db/semilla';
 import * as downloads from './downloads';
 import * as consentimiento from './consentimiento';
 import { continuarSinCuenta, signOut } from './auth';
@@ -84,6 +85,7 @@ export async function borrarCuenta(usuarioId: number): Promise<void> {
   await vaciarUsuario(usuarioId);
   const db = await getDb();
   await db.runAsync('DELETE FROM usuario WHERE id = ?;', [usuarioId]);
+  olvidarSemilla(usuarioId);
   await consentimiento.borrarTodos();
   await signOut();
 }
@@ -99,11 +101,16 @@ export async function borrarMisDatos(usuario: User): Promise<User> {
     await vaciarUsuario(usuario.id);
     const db = await getDb();
     await db.runAsync('DELETE FROM usuario WHERE id = ?;', [usuario.id]);
+    olvidarSemilla(usuario.id);
     const nuevo = await continuarSinCuenta({ nuevo: true });
     await empezarLimpio(nuevo.id);
     return nuevo;
   }
   await vaciarUsuario(usuario.id);
+  // Semilla nueva: empieza como usuario nuevo, con otro orden de frases nuevas.
+  const db = await getDb();
+  await db.runAsync('UPDATE usuario SET semilla = ? WHERE id = ?;', [nuevaSemilla(), usuario.id]);
+  olvidarSemilla(usuario.id);
   await empezarLimpio(usuario.id);
   return usuario;
 }

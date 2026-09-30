@@ -11,6 +11,7 @@ import {
   type ContentFilter,
 } from './cola';
 import { toEntry, type EntryRow } from './rows';
+import { semillaDe } from './semilla';
 import { elegirDistractores, prepararPool, type Candidato } from '@/domain/distractores';
 import type { CardState, Entry, Nivel, Registro, Vulgaridad } from '@/types';
 
@@ -73,14 +74,18 @@ export async function getDueCards(
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
 }
 
-/** Frases sin turno: nunca vistas, o favoritas que nunca se estudiaron. Por nivel y luego id. */
+/**
+ * Frases sin turno: nunca vistas, o favoritas que nunca se estudiaron. En el orden al azar propio
+ * del usuario (su semilla; ver ORDEN_NUEVAS y `ordenDeSemilla`): dos personas no reciben las
+ * mismas, y la misma persona recibe siempre el mismo orden.
+ */
 export async function getNewCards(
   usuarioId: number,
   filter: ContentFilter,
   limit: number
 ): Promise<{ entry: Entry; state: CardState }[]> {
   const db = await getDb();
-  const q = consultaNuevas(usuarioId, filter, limit);
+  const q = consultaNuevas(usuarioId, await semillaDe(usuarioId), filter, limit);
   const rows = await db.getAllAsync<QueueRow>(q.sql, q.params);
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
 }
@@ -720,108 +725,3 @@ export async function getRandomSpellable(
   return rows.map(toEntry);
 }
 
-/**
- * Tarjetas nuevas al azar, ignorando el nivel del usuario.
- *
- * El filtro por nivel se quitó de la práctica a propósito. Encerraba al
- * usuario en un tercio del catálogo: con nivel 1 puesto, 1,245 de las
- * 1,524 frases no le salían nunca, y desde afuera eso se ve como que la
- * app tiene poco contenido y repite.
- *
- * Se conserva el modo limpio, porque esa sí es una decisión del usuario
- * sobre qué quiere ver, no una suposición de la app sobre qué puede.
- */
-export async function getRandomNewCards(
-  usuarioId: number,
-  modoLimpio: boolean,
-  limit: number
-): Promise<{ entry: Entry; state: CardState | null }[]> {
-  const db = await getDb();
-  const cond = modoLimpio ? 'AND e.vulgaridad < 2' : '';
-
-  const rows = await db.getAllAsync<EntryRow>(
-    `SELECT e.* FROM entrada e
-      WHERE e.is_canonical = 1 AND e.revisar = 0
-        AND e.tipo != 'regla_fonetica' ${cond}
-        AND NOT EXISTS (
-          SELECT 1 FROM tarjeta t
-           WHERE t.entry_id = e.id AND t.usuario_id = ?
-        )
-      ORDER BY RANDOM() LIMIT ?;`,
-    [usuarioId, limit]
-  );
-
-  return rows.map((r) => ({ entry: toEntry(r), state: null }));
-}
-
-/**
- * Las tarjetas de una sesión, elegidas al azar de todo el catálogo.
- *
- * Esto sustituye a la cola de vencidas. El plan diario desapareció: ya
- * no hay "tus 12 de hoy", hay frases al azar cada vez que se entra.
- *
- * Lo que NO desaparece es el registro. Si la entrada ya tiene tarjeta,
- * se trae su estado SM-2 para que el ejercicio siga escalando —
- * Reconocer la primera vez, Escribir a la sexta — y para que la
- * pantalla de Progreso y la dificultad de las lecturas sigan teniendo
- * de dónde salir. Se quitó la planeación, no la memoria.
- */
-export async function getSessionCards(
-  usuarioId: number,
-  modoLimpio: boolean,
-  limit: number
-): Promise<{ entry: Entry; state: CardState | null }[]> {
-  const db = await getDb();
-  const cond = modoLimpio ? 'AND e.vulgaridad < 2' : '';
-
-  const rows = await db.getAllAsync<
-    EntryRow & {
-      t_repeticiones: number | null;
-      t_intervalo: number | null;
-      t_facilidad: number | null;
-      t_vence_en: number | null;
-      t_ultimo_repaso: number | null;
-      t_fallos: number | null;
-      t_aciertos: number | null;
-      t_dominada: number | null;
-      t_favorito: number | null;
-    }
-  >(
-    `SELECT e.*,
-            t.repeticiones  AS t_repeticiones,
-            t.intervalo     AS t_intervalo,
-            t.facilidad     AS t_facilidad,
-            t.vence_en      AS t_vence_en,
-            t.ultimo_repaso AS t_ultimo_repaso,
-            t.fallos        AS t_fallos,
-            t.aciertos      AS t_aciertos,
-            t.dominada      AS t_dominada,
-            t.favorito      AS t_favorito
-       FROM entrada e
-       LEFT JOIN tarjeta t
-              ON t.entry_id = e.id AND t.usuario_id = ?
-      WHERE e.is_canonical = 1 AND e.revisar = 0
-        AND e.tipo != 'regla_fonetica' ${cond}
-      ORDER BY RANDOM() LIMIT ?;`,
-    [usuarioId, limit]
-  );
-
-  return rows.map((r) => ({
-    entry: toEntry(r),
-    state:
-      r.t_repeticiones === null
-        ? null
-        : {
-            entry_id: r.id,
-            repeticiones: r.t_repeticiones,
-            intervalo: r.t_intervalo ?? 0,
-            facilidad: r.t_facilidad ?? 2.5,
-            vence_en: r.t_vence_en ?? Date.now(),
-            ultimo_repaso: r.t_ultimo_repaso,
-            fallos: r.t_fallos ?? 0,
-            aciertos: r.t_aciertos ?? 0,
-            dominada: (r.t_dominada ?? 0) as 0 | 1,
-            favorito: (r.t_favorito ?? 0) as 0 | 1,
-          },
-  }));
-}
