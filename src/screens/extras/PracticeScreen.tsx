@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -20,6 +20,7 @@ import { loadContent } from '@/store/content';
 import { radius, space, tarjeta } from '@/theme';
 import { conteo } from '@/utils';
 import { dayKey } from '@/utils/date';
+import { marcarPracticarInteractivo } from '@/utils/medicion';
 import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 import { ConsolaHoy } from './practicar/ConsolaHoy';
@@ -132,6 +133,12 @@ export function PracticeScreen() {
   // Hasta que carga, HOY se maqueta pero no se ve ni se toca: si no, pintaría
   // el caso "usuario nuevo" un instante y luego saltaría a otro.
   const listo = carga.estado === 'listo';
+  // Medición del arranque (docs/RENDIMIENTO.md): el primer cuadro con los datos ya pintados.
+  useEffect(() => {
+    if (!listo) return undefined;
+    const id = requestAnimationFrame(marcarPracticarInteractivo);
+    return () => cancelAnimationFrame(id);
+  }, [listo]);
 
   // Jalar para refrescar: recarga sin esqueleto y la onda de HOY da un pulso al terminar.
   const [refrescos, setRefrescos] = useState(0);
