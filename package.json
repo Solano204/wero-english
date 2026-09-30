@@ -91,8 +91,19 @@
     "babel-plugin-module-resolver": "^5.0.3",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "~57.0.10",
+    "dependency-cruiser": "^18.4.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-compiler": "^19.1.0-rc.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "expo-atlas": "^0.4.0",
     "sql.js": "^1.14.2",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "overrides": {
+    "eslint-plugin-react-hooks": {
+      "zod-validation-error": "^4.0.2"
+    }
   }
 }
