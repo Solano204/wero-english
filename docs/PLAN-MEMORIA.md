@@ -1,6 +1,23 @@
-# Plan de memoria, fugas, estabilidad y candados (prompt 6 de 6) — diagnóstico
+# Plan de memoria, fugas, estabilidad y candados (prompt 6 de 6) — hecho
 
-Estado: **esperando OK**. No se cambió código de la app; solo se agregó `scripts/medir-memoria.sh`.
+Aprobado («ok») y aplicado: `5b7697c` listeners y temporizadores, `1fd3fe9` players de audio, `15a2fd0` animaciones y
+Skia, `e0f9f74` base y cachés, `f42fe86` ErrorBoundary y registro de errores, `a8db643` check:perf y presupuestos,
+`a7b196d` Maestro, `3290f59` checklist de release. Resumen de la serie: `docs/RESUMEN-RENDIMIENTO.md`.
+
+Decisiones y correcciones al aplicar:
+- Efectos: **2 players por archivo** (siguen encimándose como antes), tope de 16.
+- Aurora (2): el React Compiler ya evitaba compilar el shader en cada render; quedaba una vez por montaje. Ahora es
+  una vez por app.
+- Animaciones: `useSharedValue` de Reanimated 4 ya cancela sus animaciones al desmontar; no hizo falta tocar las
+  finitas. Los `Path.Make` por cuadro se quedan: son basura para el GC, no una fuga, y reutilizar el mismo objeto
+  puede dejar de redibujar.
+- Los JSON de contenido y marcas no se sueltan con memoria baja: Metro los retiene en su registro de módulos.
+- `usePartidaDulces.ts` y `TableroDulces.tsx` (406 y 404 líneas) quedan como excepciones documentadas de
+  `check:perf`; partirlos toca la lógica de turnos. `voz.ts` sí se partió (sus tipos a `voz/tipos.ts`).
+
+---
+
+Diagnóstico original:
 
 ## 1. Qué se mide y dónde
 
@@ -112,11 +129,3 @@ abajo es lo que el código dice que puede crecer o romperse, en orden de graveda
 
 Visible para el usuario: solo la pantalla de error (texto nuevo en el tono de PRODUCT.md) y el botón «Copiar reporte
 de errores» en Ajustes, que pide el prompt.
-
-## 4. Preguntas
-
-1. ¿OK al diagnóstico y al plan?
-2. Efectos: ¿**un player por archivo** (un `success` reinicia al anterior si suenan casi juntos) o **dos por archivo**
-   (se siguen encimando como hoy)?
-3. Memoria y resistencia: ¿corres `scripts/medir-memoria.sh` en el Xiaomi (antes de los cambios, en esta rama) y me
-   pasas `memoria.csv`?

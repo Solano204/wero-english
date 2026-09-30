@@ -12,18 +12,21 @@ contenedor no trae `assets/aud` ni `assets/img` (el `bundled.ts` local está vac
 aquí **no incluyen** los ~7.9k medios del build real. Lo que depende del teléfono queda «pendiente» con el comando
 exacto para sacarlo (ver abajo).
 
-| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | DESPUÉS DE ARRANQUE | DESPUÉS DE RE-RENDERS | DESPUÉS DE LISTAS, MEDIOS Y ANIMACIONES | Cómo |
-|---|---|---|---|---|---|---|---|
-| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | **6,943,452 B (6.62 MiB), −755 KB contra la base (−9.8 %)** | 7,258,665 B (6.92 MiB): +315 KB por las cachés del React Compiler; −440 KB contra la base | 7,259,533 B (6.92 MiB): +0.9 KB (Hoja, PrecargaImagen, rellenoBarra); −439 KB contra la base | `expo export`, medido aquí |
-| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | 10.31 MB (−19 %) | — | — | Expo Atlas |
-| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | 2,472 | — | — | Expo Atlas |
-| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | 100 archivos · 3.76 MB (salen las 5 fuentes, que van en el APK; entra `catalogo.db`, 1.1 MB) | igual | 100 archivos · **2.63 MB (−1.13 MB)**: música 689 → 517 KB, 80 efectos 1,872 → 941 KB | `expo export` |
-| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | 10,710,095 B | 11,025,308 B | **9,895,519 B (−1.13 MB)** | `expo export` |
-| APK release (arm64) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
-| AAB release | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente (con la voz a 32 kbps se espera ~−33 % de los ~6.3k MP3) | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
-| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Arranque» |
-| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
-| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente (recorrido de listas y animaciones: ver «Flashlight») | ver «Flashlight» |
+| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | DESPUÉS DE ARRANQUE | DESPUÉS DE RE-RENDERS | DESPUÉS DE LISTAS, MEDIOS Y ANIMACIONES | DESPUÉS DE MEMORIA Y CANDADOS | Cómo |
+|---|---|---|---|---|---|---|---|---|
+| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | **6,943,452 B (6.62 MiB), −755 KB contra la base (−9.8 %)** | 7,258,665 B (6.92 MiB): +315 KB por las cachés del React Compiler; −440 KB contra la base | 7,259,533 B (6.92 MiB): +0.9 KB (Hoja, PrecargaImagen, rellenoBarra); −439 KB contra la base | **7,288,838 B (6.95 MiB)**: +29 KB (registro de errores, ErrorBoundary, LRU, expo-clipboard); **−410 KB contra la base (−5.3 %)** | `expo export`, medido aquí |
+| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | 10.31 MB (−19 %) | — | — | — | Expo Atlas |
+| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | 2,472 | — | — | — | Expo Atlas |
+| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | 100 archivos · 3.76 MB (salen las 5 fuentes, que van en el APK; entra `catalogo.db`, 1.1 MB) | igual | 100 archivos · **2.63 MB (−1.13 MB)**: música 689 → 517 KB, 80 efectos 1,872 → 941 KB | igual (2.63 MB) | `expo export` |
+| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | 10,710,095 B | 11,025,308 B | **9,895,519 B (−1.13 MB)** | 9,924,824 B (**−1.46 MB contra la base**) | `expo export` |
+| APK release (arm64) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
+| AAB release | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente (con la voz a 32 kbps se espera ~−33 % de los ~6.3k MP3) | pendiente | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
+| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | ver «Arranque» |
+| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
+| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente (recorrido de listas y animaciones: ver «Flashlight») | pendiente | ver «Flashlight» |
+| Memoria (PSS) tras 15 min · cierres en 30 min | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | pendiente | `scripts/medir-memoria.sh` (ver `docs/PLAN-MEMORIA.md`) |
+| Players de audio vivos, máximo (por código) | 30 (31 en el fundido) | 30 | 30 | 30 | 30 | 30 | **18 (19 en el fundido)** | `services/audio/efectos.ts` |
+| Un error de render tumba… | toda la app | toda la app | toda la app | toda la app | toda la app | toda la app | **solo esa pantalla** («Algo se atoró.», se anota en el teléfono) | `ErrorBoundary` por pantalla |
 
 **Después de estructura.** El prompt 2 no busca bajar peso: parte pantallas en hooks y componentes y mueve archivos a
 capas. Eso suma 59 módulos, y cada módulo de Metro lleva su envoltura (`__d(function…)`, su tabla de dependencias),
@@ -160,7 +163,7 @@ primera medición en el Xiaomi (release) y se anotan aquí y, los de tamaño, en
 
 | Qué | Logrado | Presupuesto | Cómo se revisa |
 |---|---|---|---|
-| Bundle de JS (Hermes `.hbc`) | 7,259,533 B | **7,985,487 B (7.62 MB)** | `npm run presupuesto` (falla si se pasa) |
+| Bundle de JS (Hermes `.hbc`) | 7,288,838 B | **8,017,722 B (7.65 MB)** | `npm run presupuesto` (falla si se pasa) |
 | Assets empaquetados (sin aud/img) | 2,629,538 B | **2,892,492 B (2.76 MB)** | `npm run presupuesto` |
 | AAB release | pendiente | medido + 10 % (anotar `aabBytes`) | `npm run presupuesto -- --aab <ruta>` |
 | Arranque en frío (TotalTime, mediana de 5) | pendiente | medido + 10 %; meta de la serie < 2.0 s | `scripts/medir-arranque.sh 5` |
