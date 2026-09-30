@@ -32,7 +32,7 @@ mediana() { sort -n | awk '{a[NR]=$1} END {if (NR==0) {print "-"; exit} print (N
 echo
 echo "mediana TotalTime: $(mediana < "$tmp/total") ms"
 if [ -f "$tmp/marcas" ]; then
-  for m in app base catalogo fuentes splash primerRender interactivo; do
+  for m in app base catalogo splash primerRender interactivo; do
     v=$(grep -o "$m [0-9]*" "$tmp/marcas" | awk '{print $2}' | mediana)
     echo "mediana $m: $v ms"
   done

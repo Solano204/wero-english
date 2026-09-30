@@ -71,5 +71,4 @@ export {
   reacomodar,
 } from './motion';
 export { text } from './typography';
-export { fuentes } from './fuentes';
 export { PORTADA_MUNDO, PORTADA_JUEGO } from './portadas';

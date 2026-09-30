@@ -82,7 +82,7 @@ scripts/medir-arranque.sh 5
 
 Las marcas viven en `src/shared/utils/marcasArranque.ts`. Cada una es el tiempo desde que empezó el JS
 (`__BUNDLE_START_TIME__`): `app` (se evaluó App.tsx), `base` (SQLite abierta y migrada), `catalogo` (catálogo
-revisado o sembrado), `fuentes`, `splash` (oculto), `primerRender` (primer cuadro de Practicar) e `interactivo`
+revisado o sembrado), `splash` (oculto; las fuentes van incrustadas y no tienen marca), `primerRender` (primer cuadro de Practicar) e `interactivo`
 (Practicar con sus datos pintados). Un vigía cada 16 ms anota el bloqueo más largo del hilo de JS hasta 3 s después de
 `interactivo`. Sin `EXPO_PUBLIC_MEDIR=1` no hace nada en release.
 

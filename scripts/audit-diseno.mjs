@@ -797,6 +797,21 @@ function analizaTicks(r, src, out) {
   }
 }
 
+/** Las familias de `font.family` (tokens.ts) que el plugin de expo-font de app.json no incrusta en Android: caerían a Roboto. */
+function familiasSinIncrustar(tokens) {
+  const bloque = tokens.match(/family:\s*\{([^}]*)\}/)?.[1] ?? '';
+  const familias = [...bloque.matchAll(/:\s*'([^']+)'/g)].map((m) => m[1]);
+  let incrustadas = [];
+  try {
+    const plugins = JSON.parse(fs.readFileSync(path.join(ROOT, 'app.json'), 'utf8')).expo?.plugins ?? [];
+    const fuente = plugins.find((p) => Array.isArray(p) && p[0] === 'expo-font')?.[1];
+    incrustadas = (fuente?.android?.fonts ?? []).map((f) => (typeof f === 'string' ? path.basename(f).replace(/\.[^.]+$/, '') : f.fontFamily));
+  } catch {
+    /* sin app.json legible: todas cuentan como faltantes */
+  }
+  return familias.filter((f) => !incrustadas.includes(f));
+}
+
 /** El mapa de medios empaquetados completo: bundled.ts y sus módulos por paquete (src/assets/medios/). */
 function leerMapaMedios() {
   const dir = path.join(ROOT, 'src/assets/medios');
@@ -929,7 +944,7 @@ ${c.C.fallos.map((f) => `- \`${f.t}\` sobre \`${f.s}\`: ${f.v.toFixed(2)}`).join
 
 ## TIPOGRAFÍA
 
-**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), cargadas en \`src/app/App.tsx\` con \`useFonts\` (\`src/theme/fuentes.ts\`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
+**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), incrustadas en el APK por el plugin de \`expo-font\` en \`app.json\`: Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
 ${L(c.H.fuente)}
 
 **TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo \`font.size.md\` vale **16** (\`tokens.ts\`) y \`text.body\` y \`text.bodyMuted\` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (${c.H.cuerpoMd.length + c.H.cuerpoSm.length}):
@@ -1105,7 +1120,7 @@ function main() {
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/shared/ui/AudioButton.tsx')),
     K: auditaColorMarca(archivos), escalas: auditaEscalas(tokens),
-    tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.length,
+    tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + familiasSinIncrustar(tokens).length + H.fuente.length,
     sombras: coloreadas + H.sombra.length + H.propio.length + S.luz.length,
   };
   const previo = leePrevio();

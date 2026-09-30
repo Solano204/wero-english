@@ -5,8 +5,10 @@
  * primera línea del bundle con el mismo reloj que `nativePerformanceNow`). Al llegar a `interactivo` (Practicar ya
  * pintó sus datos) se imprime una sola línea con todos los tramos y el bloqueo más largo del hilo de JS:
  *
- *   [medir] app 180 · base 260 · catalogo 300 · fuentes 310 · splash 330 · primerRender 520 · interactivo 690 ms
+ *   [medir] app 180 · base 260 · catalogo 300 · splash 330 · primerRender 520 · interactivo 690 ms
  *           · bloqueo máx 140 ms (2 > 100 ms)
+ *
+ * Las fuentes no tienen marca: van incrustadas en el APK (plugin de expo-font) y no se cargan al abrir.
  *
  * Solo corre en __DEV__ o en un release armado con EXPO_PUBLIC_MEDIR=1 (la variable se inlinea al compilar: en el
  * release normal todo esto es código muerto). En release sale por console.error, el único console que Babel deja:
@@ -15,9 +17,9 @@
 
 declare const __BUNDLE_START_TIME__: number | undefined;
 
-export type Marca = 'app' | 'base' | 'catalogo' | 'fuentes' | 'splash' | 'primerRender' | 'interactivo';
+export type Marca = 'app' | 'base' | 'catalogo' | 'splash' | 'primerRender' | 'interactivo';
 
-const ORDEN: Marca[] = ['app', 'base', 'catalogo', 'fuentes', 'splash', 'primerRender', 'interactivo'];
+const ORDEN: Marca[] = ['app', 'base', 'catalogo', 'splash', 'primerRender', 'interactivo'];
 const ACTIVA = __DEV__ || process.env.EXPO_PUBLIC_MEDIR === '1';
 /** Cada cuánto mira el vigía si el hilo de JS se quedó trabado. */
 const PASO_VIGIA_MS = 16;

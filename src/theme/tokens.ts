@@ -219,7 +219,9 @@ export const font = {
   /**
    * Un nombre por peso: con fuentes propias, `fontWeight` no elige la cara
    * (en Android inventa un negrita sintético), así que el peso va en la
-   * familia. Los nombres son las llaves de `fuentes.ts`.
+   * familia. Los nombres son los de las fuentes incrustadas por el plugin de
+   * `expo-font` en app.json (en Android, una familia por archivo con ese nombre;
+   * en iOS, el nombre PostScript de cada archivo).
    *
    * Bricolage Grotesque para títulos y cifras grandes; Instrument Sans para
    * todo lo demás; Charis SIL solo para IPA.

@@ -5,7 +5,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from 'expo-font';
 import { RootNavigator } from '@/app/navegacion/RootNavigator';
 import { navTheme } from '@/app/navegacion/temaNavegacion';
 import { navigationRef } from '@/shared/navegacion/navigationRef';
@@ -16,7 +15,7 @@ import { TransicionHoy } from '@/app/navegacion/TransicionHoy';
 import { useBarraOculta } from '@/app/arranque/useBarraOculta';
 import { OCULTAR_BARRA_ESTADO } from '@/config/pantalla';
 import * as audio from '@/services/audio';
-import { color, fuentes, tema } from '@/theme';
+import { color, tema } from '@/theme';
 import { marcar } from '@/shared/utils/marcasArranque';
 
 marcar('app');
@@ -27,18 +26,14 @@ export default function App() {
   const user = useAuthStore((s) => s.user);
   const loadSettings = useSettingsStore((s) => s.load);
   const rutaPrevia = useRef<string | undefined>(undefined);
-  const [fuentesCargadas, fuentesError] = useFonts(fuentes);
   useBarraOculta();
-  // Si una fuente falla, la app arranca con la del sistema en vez de quedarse en el splash.
-  const fuentesListas = fuentesCargadas || fuentesError !== null;
 
-  // El splash se esconde cuando el arranque terminó y las fuentes están
-  // listas, no cuando React montó: si se esconde antes, se ve un parpadeo
-  // negro y luego el salto de fuente.
+  // El splash se esconde cuando el arranque terminó (base, catálogo y sesión), no cuando React montó: si se
+  // esconde antes, se ve un parpadeo negro. Las fuentes ya vienen dentro del APK (plugin de expo-font en
+  // app.json): no hay que esperarlas.
   useEffect(() => {
-    if (fuentesListas) marcar('fuentes');
-    if (status !== 'booting' && fuentesListas) void SplashScreen.hideAsync().then(() => marcar('splash'), () => undefined);
-  }, [status, fuentesListas]);
+    if (status !== 'booting') void SplashScreen.hideAsync().then(() => marcar('splash'), () => undefined);
+  }, [status]);
 
   // Los ajustes se cargan al entrar y al cambiar de usuario.
   useEffect(() => {
@@ -54,8 +49,6 @@ export default function App() {
     });
     return () => sub.remove();
   }, []);
-
-  if (!fuentesListas) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.bg }}>
