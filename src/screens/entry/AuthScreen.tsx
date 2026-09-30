@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-na
 import Animated from 'react-native-reanimated';
 import { Button, Card, Input, Screen, Presionable } from '@/components/base';
 import { BotonGoogle } from '@/components/entrada';
+import { useConsentimiento } from '@/components/legal';
 import { useAuthStore } from '@/store';
 import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';
 import * as googleAuth from '../../../modules/wero-google-auth';
@@ -52,7 +53,13 @@ export function AuthScreen() {
     }
   }, []);
 
-  const conGoogle = useCallback(() => correr('google', entrarConGoogle), [correr, entrarConGoogle]);
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
+
+  // Primero la hoja que dice qué se toma de Google; «Ahora no» deja la entrada como estaba.
+  const conGoogle = useCallback(async () => {
+    if (!(await pedirConsentimiento('google'))) return;
+    await correr('google', entrarConGoogle);
+  }, [correr, entrarConGoogle, pedirConsentimiento]);
   const sinCuenta = useCallback(() => correr('sin', continuarSinCuenta), [correr, continuarSinCuenta]);
   const conUsuario = useCallback(
     () => correr('usuario', () => signIn(username, password)),
@@ -184,6 +191,7 @@ export function AuthScreen() {
           que eres tú: no se sube nada a internet. Si desinstalas la app, tu avance se va con ella.
         </Text>
       </KeyboardAvoidingView>
+      {hoja}
     </Screen>
   );
 }

@@ -23,8 +23,8 @@
         "UIBackgroundModes": [
           "audio"
         ],
-        "NSMicrophoneUsageDescription": "Wero usa el microfono para oir la palabra que dices y decirte cual entendio. El audio no sale de tu telefono y no se guarda.",
-        "NSSpeechRecognitionUsageDescription": "El reconocimiento pasa en tu telefono para comparar la palabra que dijiste contra la que se te pidio. No se envia ni se guarda nada."
+        "NSMicrophoneUsageDescription": "Wero usa el micrófono para oír la palabra que dices y decirte cuál entendió. Wero no graba ni guarda el audio.",
+        "NSSpeechRecognitionUsageDescription": "El servicio de voz del teléfono entiende la palabra que dijiste para compararla con la que se pidió; puede procesarla en sus servidores. Wero no guarda el audio."
       }
     },
     "android": {
@@ -52,7 +52,7 @@
         "expo-speech-recognition",
         {
           "microphonePermission": "Wero necesita el micrófono para oírte decir la palabra.",
-          "speechRecognitionPermission": "El reconocimiento corre en tu teléfono, sin enviar audio.",
+          "speechRecognitionPermission": "El servicio de voz del teléfono entiende lo que dices y puede procesarlo en sus servidores. Wero no guarda el audio.",
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox"
           ]

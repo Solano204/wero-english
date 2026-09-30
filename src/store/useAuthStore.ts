@@ -3,6 +3,7 @@ import { useUnlockStore } from './useUnlockStore';
 import * as authService from '@/services/auth';
 import { AuthFailure } from '@/services/auth';
 import * as googleAuth from '../../modules/wero-google-auth';
+import * as consentimiento from '@/services/consentimiento';
 import * as audio from '@/services/audio';
 import * as music from '@/services/music';
 import { AUTH_MESSAGES, type AuthError, type PerfilGoogle, type User } from '@/types';
@@ -69,7 +70,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // directo y sin hoja. Cualquier motivo por el que no aplique
       // (nunca hubo cuenta, no está disponible) deja el status en 'anon'
       // y la pantalla de entrada se ve normal.
-      const perfil = await googleAuth.iniciarSesionAutomatica();
+      // Solo si en este teléfono ya se aceptó usar la cuenta de Google con la versión vigente del
+      // aviso: sin eso, nada de Google corre al abrir la app.
+      const perfil = (await consentimiento.vigente('google')) ? await googleAuth.iniciarSesionAutomatica() : null;
       if (!perfil) {
         set({ user: null, status: 'anon' });
         return;

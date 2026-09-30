@@ -19,6 +19,7 @@ import { Hueso, HuesoBoton, HuesoImagen, ProveedorEsqueleto } from '@/components
 import { nivelSeguidas } from '@/domain/seguidas';
 import { sesionMerece } from '@/domain/session';
 import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/hooks/useCarga';
+import { useConsentimiento } from '@/components/legal';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -109,6 +110,7 @@ export function StudyScreen() {
   }, [phase]);
 
   const [chosen, setChosen] = useState<string | null>(null);
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
   // Al terminar una sesión completa con vencidas pendientes se ofrece seguir.
   const [cierre, setCierre] = useState(false);
   const [fin, setFin] = useState<Cierre | null>(null);
@@ -166,7 +168,11 @@ export function StudyScreen() {
     }
 
     if (user && resumen.total > 0 && settings.notificaciones && settings.notifPorDia > 0) {
-      void notifications.requestPermission().then((ok) => {
+      // Se pide solo, sin que la persona toque nada: primero la hoja que explica los avisos, y
+      // si ya dijo «Ahora no» a esta versión del aviso, no se le vuelve a insistir.
+      void pedirConsentimiento('notificaciones', { sinInsistir: true })
+        .then((si) => (si ? notifications.requestPermission() : false))
+        .then((ok) => {
         if (!ok) return;
         void notifications.scheduleNext({
           usuarioId: user.id,
@@ -199,7 +205,7 @@ export function StudyScreen() {
     }
     const t = setTimeout(() => nav.goBack(), FIN_SESION_MS);
     return () => clearTimeout(t);
-  }, [phase, nav, user, settings, finish]);
+  }, [phase, nav, user, settings, finish, pedirConsentimiento]);
 
   const seguirRepasando = useCallback(() => {
     if (!user) return;
@@ -410,6 +416,7 @@ export function StudyScreen() {
           }}
         />
       ) : null}
+      {hoja}
     </Screen>
   );
 }

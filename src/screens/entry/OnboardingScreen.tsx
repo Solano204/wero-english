@@ -7,6 +7,7 @@ import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as notifications from '@/services/notifications';
+import { useConsentimiento } from '@/components/legal';
 import { color, font, layout, radius, space, aparecer } from '@/theme';
 import type { Nivel } from '@/types';
 
@@ -50,9 +51,17 @@ export function OnboardingScreen() {
     await terminar();
   }, [terminar]);
 
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
+
   const pedirNotificaciones = useCallback(async () => {
     if (!user) return;
     if (!notifEstado.ok) {
+      await terminar();
+      return;
+    }
+    // Primero la hoja que explica cuáles y cada cuánto; «Ahora no» sigue sin recordatorios.
+    if (!(await pedirConsentimiento('notificaciones'))) {
+      await settings.set(user.id, 'notificaciones', false);
       await terminar();
       return;
     }
@@ -75,7 +84,7 @@ export function OnboardingScreen() {
       hasta: settings.notifHasta,
     });
     await terminar();
-  }, [user, settings, terminar, notifEstado]);
+  }, [user, settings, terminar, notifEstado, pedirConsentimiento]);
 
   const total = 6;
 
@@ -228,6 +237,7 @@ export function OnboardingScreen() {
           </View>
         </View>
       ) : null}
+      {hoja}
     </Screen>
   );
 }

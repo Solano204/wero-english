@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Header, Icon, Screen, Presionable } from '@/components/base';
 import { SectionTitle } from '@/components/list';
+import { useConsentimiento } from '@/components/legal';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { setSimularCargaLenta } from '@/hooks/useCarga';
@@ -24,6 +25,7 @@ export function SettingsScreen() {
   const s = useSettingsStore();
   const [busy, setBusy] = useState(false);
   const [cargaLenta, setCargaLenta] = useState(false);
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
   const micEstado = useMemo(() => speech.isAvailable(), []);
   const notifEstado = useMemo(() => notifications.isAvailable(), []);
 
@@ -183,9 +185,15 @@ export function SettingsScreen() {
           hint="Cada aviso es una sola frase"
           value={s.notificaciones}
           onChange={async (v) => {
-            await cambiar('notificaciones', v as never);
-            if (!v) await notifications.cancelAll();
-            else await notifications.requestPermission();
+            if (!v) {
+              await cambiar('notificaciones', false as never);
+              await notifications.cancelAll();
+              return;
+            }
+            // Al prenderlos, primero la hoja que explica cuáles y cada cuánto; «Ahora no» los deja apagados.
+            if (!(await pedirConsentimiento('notificaciones'))) return;
+            await cambiar('notificaciones', true as never);
+            await notifications.requestPermission();
           }}
         />
 
@@ -327,6 +335,7 @@ export function SettingsScreen() {
           </Card>
         </>
       ) : null}
+      {hoja}
     </Screen>
   );
 }

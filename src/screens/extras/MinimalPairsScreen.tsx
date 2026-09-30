@@ -17,6 +17,7 @@ import { logHabla } from '@/db/economy';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
+import { useConsentimiento } from '@/components/legal';
 import * as speech from '@/services/speech';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
@@ -62,6 +63,7 @@ export function MinimalPairsScreen() {
   const [idx, setIdx] = useState(0);
   const [escuchando, setEscuchando] = useState(false);
   const [veredicto, setVeredicto] = useState<HablaVeredicto | null>(null);
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
   const efecto = useEfectoResultado();
   const { disparar } = efecto;
 
@@ -80,6 +82,15 @@ export function MinimalPairsScreen() {
 
   const escuchar = useCallback(async () => {
     if (!round || escuchando) return;
+
+    // Antes de tocar el micrófono, la hoja que dice adónde va la voz. «Ahora no» sigue sin micro.
+    if (!(await pedirConsentimiento('microfono'))) {
+      setVeredicto({
+        tipo: 'no_disponible',
+        razon: 'Sin el micrófono no hay forma de escuchar. Toca «Escuchar» cuando quieras activarlo.',
+      });
+      return;
+    }
 
     if (!micHabilitado) {
       const ok = await speech.requestPermission();
@@ -128,7 +139,7 @@ export function MinimalPairsScreen() {
         v.tipo === 'acierto'
       );
     }
-  }, [round, escuchando, micHabilitado, user, setSetting]);
+  }, [round, escuchando, micHabilitado, user, setSetting, pedirConsentimiento]);
 
   const siguiente = useCallback(() => {
     setVeredicto(null);
@@ -257,6 +268,7 @@ export function MinimalPairsScreen() {
           El audio no sale de tu teléfono. No se graba nada.
         </Text>
       </View>
+      {hoja}
     </Screen>
   );
 }

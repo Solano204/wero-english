@@ -14,6 +14,7 @@ import {
 } from '@/components/base';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
+import { useConsentimiento } from '@/components/legal';
 import * as downloads from '@/services/downloads';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { color, font, space } from '@/theme';
@@ -37,6 +38,7 @@ export function DownloadsScreen() {
   >({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const cancel = useRef<Record<string, boolean>>({});
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
 
   const descargar = useCallback(
     async (packId: string) => {
@@ -59,6 +61,8 @@ export function DownloadsScreen() {
        * descarga sin regaño y puede volver a intentar.
        */
       setErrors((e) => ({ ...e, [packId]: '' }));
+      // La primera vez, la hoja que dice qué ve el servidor de archivos. «Ahora no» no descarga.
+      if (!(await pedirConsentimiento('descargas'))) return;
       const trato = await pedirRecompensa();
       if (trato !== 'visto') {
         // Sin anuncio no hay pack. Es el único muro de la app y es
@@ -86,7 +90,7 @@ export function DownloadsScreen() {
         return next;
       });
     },
-    [user, content]
+    [user, content, pedirConsentimiento]
   );
 
   const packs = [...content.packs.packs].sort(
@@ -154,6 +158,7 @@ export function DownloadsScreen() {
           );
         })}
       </View>
+      {hoja}
     </Screen>
   );
 }
