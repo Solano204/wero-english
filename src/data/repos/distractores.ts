@@ -135,3 +135,44 @@ export function splitWords(phrase: string): string[] {
     .map((w) => w.replace(/^[^\p{L}\p{N}']+|[^\p{L}\p{N}']+$/gu, ''))
     .filter((w) => w.length > 0);
 }
+
+
+/**
+ * Los distractores de Reconocer y los señuelos de Construir de toda una sesión, de una vez: una consulta por
+ * tarjeta en medio de la sesión mete un salto perceptible entre tarjetas.
+ */
+export async function precargarOpcionesSesion(
+  all: { entry: Entry }[]
+): Promise<{ distractorMap: Map<number, string[]>; wordMap: Map<number, string[]> }> {
+  // Los distractores se precargan de golpe: una consulta por tarjeta
+  // en medio de la sesión mete un salto perceptible entre tarjetas.
+  const distractorMap = new Map<number, string[]>();
+  const wordMap = new Map<number, string[]>();
+
+  // Se eligen una tarjeta tras otra con la lista de los que ya salieron en
+  // esta sesión: dos tarjetas no comparten opciones falsas mientras haya
+  // otras disponibles. Cada elección es barata (el catálogo va en memoria),
+  // pero cada 8 se cede el hilo para que la pantalla de carga siga fluida.
+  const distractoresUsados = new Set<string>();
+  for (let i = 0; i < all.length; i++) {
+    const c = all[i];
+    if (!c) continue;
+    const falsos = await getDistractors(c.entry, 3, distractoresUsados);
+    distractorMap.set(c.entry.id, falsos);
+    for (const f of falsos) distractoresUsados.add(f);
+    if (i % 8 === 7) await new Promise((r) => setTimeout(r, 0));
+  }
+
+  // Los señuelos de palabra solo hacen falta si la frase es lo bastante
+  // larga para que Construir aparezca. Pedirlos para todas duplicaría las
+  // consultas del arranque sin necesidad.
+  await Promise.all(
+    all
+      .filter((c) => c.entry.word_count >= 3)
+      .map(async (c) => {
+        wordMap.set(c.entry.id, await getWordDecoys(c.entry, 3));
+      })
+  );
+
+  return { distractorMap, wordMap };
+}

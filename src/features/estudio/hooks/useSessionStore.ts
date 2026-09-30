@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { guardarSinContestar, leerSinContestar } from '@/data/local/nuevasSinContestar';
 import { countDue, countNew, getProximoRepaso, getDueCards, getNewCards, upsertCardState } from '@/data/repos/tarjetas';
-import { getDistractors, getWordDecoys } from '@/data/repos/distractores';
+import { precargarOpcionesSesion } from '@/data/repos/distractores';
 import { endSession, getNuevasHoy, startSession, touchStreak } from '@/data/repos/progreso';
 import { nuevaSemilla } from '@/data/semilla/semillaAleatoria';
 import { MAX_REINSERCIONES, armarSesion, filtroEstudio } from '@/domain/cola';
@@ -174,36 +174,9 @@ export const useSessionStore = create<SessionState>((set, get) => {
       return;
     }
 
-    // Los distractores se precargan de golpe: una consulta por tarjeta
-    // en medio de la sesión mete un salto perceptible entre tarjetas.
     const all = [...due, ...fresh];
-    const distractorMap = new Map<number, string[]>();
-    const wordMap = new Map<number, string[]>();
-
-    // Se eligen una tarjeta tras otra con la lista de los que ya salieron en
-    // esta sesión: dos tarjetas no comparten opciones falsas mientras haya
-    // otras disponibles. Cada elección es barata (el catálogo va en memoria),
-    // pero cada 8 se cede el hilo para que la pantalla de carga siga fluida.
-    const distractoresUsados = new Set<string>();
-    for (let i = 0; i < all.length; i++) {
-      const c = all[i];
-      if (!c) continue;
-      const falsos = await getDistractors(c.entry, 3, distractoresUsados);
-      distractorMap.set(c.entry.id, falsos);
-      for (const f of falsos) distractoresUsados.add(f);
-      if (i % 8 === 7) await new Promise((r) => setTimeout(r, 0));
-    }
-
-    // Los señuelos de palabra solo hacen falta si la frase es lo bastante
-    // larga para que Construir aparezca. Pedirlos para todas duplicaría las
-    // consultas del arranque sin necesidad.
-    await Promise.all(
-      all
-        .filter((c) => c.entry.word_count >= 3)
-        .map(async (c) => {
-          wordMap.set(c.entry.id, await getWordDecoys(c.entry, 3));
-        })
-    );
+    // Los distractores y los señuelos se precargan de golpe (ver precargarOpcionesSesion).
+    const { distractorMap, wordMap } = await precargarOpcionesSesion(all);
 
     engine = new StudySession({
       due,
