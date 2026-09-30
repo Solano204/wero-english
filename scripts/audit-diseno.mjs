@@ -75,9 +75,9 @@ const TIPO2_SE_QUEDAN = {
   'src/features/ajustes/components/ControlesAjustes.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
   'src/features/juegos/pares/screens/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/features/vocabulario/components/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
-  'src/features/progreso/components/Espectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
-  'src/features/progreso/components/Espectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/features/progreso/components/Espectrograma.tsx:listaTexto': 'texto alternativo de la gráfica: una línea por día, información secundaria',
+  'src/features/progreso/components/GraficaEspectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
+  'src/features/progreso/components/GraficaEspectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/progreso/components/GraficaEspectrograma.tsx:listaTexto': 'texto alternativo de la gráfica: una línea por día, información secundaria',
   'src/features/gramatica/components/BloqueGramatica.tsx:resumen': 'una línea de lo que reúne el bloque, como `FilaModo.corta` de Practicar: apoya al título, no es lo que se estudia',
   'src/features/gramatica/components/RenglonTema.tsx:gancho': 'una o dos líneas que apoyan al título del renglón, como `FilaModo.corta` de Practicar; el gancho del tema se lee en 16 px en su pantalla',
 };
@@ -331,6 +331,8 @@ const FX_EN_FEATURES = new Set([
   'src/features/practicar/components/TarjetaTilt.tsx',
   'src/features/progreso/components/Espectrograma.tsx',
   'src/features/progreso/components/MedidorSenal.tsx',
+  'src/features/progreso/components/GraficaEspectrograma.tsx',
+  'src/features/progreso/components/ArcoSenal.tsx',
   'src/features/oido/components/AnilloRadio.tsx',
   'src/features/oido/hooks/useBolsillo.ts',
   'src/features/estudio/components/HojaVeredicto.tsx',
@@ -478,7 +480,7 @@ const MOMENTOS_HEROE = ['ConsolaHoy', 'MedidorSenal'];
 /** MOT-3: los canvases de Skia en bucle que vive cada pantalla (máximo 3 a la vez). */
 const LOOPS_POR_PANTALLA = {
   Practicar: ['FondoAurora.tsx', 'OndaSenal.tsx', 'PortadaJuego.tsx'],
-  Progreso: ['MedidorSenal.tsx'],
+  Progreso: ['ArcoSenal.tsx'],
   // El héroe de Estudio (OndaVoz) no es un bucle: lo mueve la posición del audio y solo mientras suena.
   Estudio: [],
   // Detalle: el héroe es la frase con su onda (mismo OndaVoz, movida por el audio); ningún bucle.
@@ -516,6 +518,7 @@ const LOOPS_POR_PANTALLA = {
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
+  { archivo: 'src/features/frases-sueltas/components/CartaEnMazo.tsx', motivo: 'recibe `reducido` (useMovimientoReducido) de MazoCartas: con reducir movimiento no hay abanico de entrada' },
   { archivo: 'src/features/juegos/caida/hooks/useMarcadorCaida.ts', motivo: 'recibe `reducido` (useMovimientoReducido) de usePartidaCaida: con reducir movimiento el marcador no pulsa' },
   { archivo: 'src/features/juegos/caida/hooks/useChoqueCaida.ts', motivo: 'recibe `reducido` (useMovimientoReducido) de usePartidaCaida: con reducir movimiento no hay aplaste ni destello, solo cambian los colores' },
   { archivo: 'src/app/navegacion/TransicionHoy.tsx', motivo: 'solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento' },

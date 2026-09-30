@@ -95,7 +95,7 @@ export function usePartidaDulces() {
   const [destinoTitulo, setDestinoTitulo] = useState<DestinoTitulo | null>(null);
   const [vuelo, setVuelo] = useState<{ desde: DestinoTitulo; texto: string } | null>(null);
   const medidas = useMedidasDulces(objetivosRef, { COLS, LADO, PASO_CELDA });
-  const { cajaFrase } = medidas;
+  const { cajaFrase, medirPosiciones, alEstallar } = medidas;
   // Si el tablero no cabe la pantalla scrollea, y entonces solo los deslizamientos horizontales intercambian.
   const [vistaAlto, setVistaAlto] = useState(0);
   const [contenidoAlto, setContenidoAlto] = useState(0);
@@ -208,7 +208,6 @@ export function usePartidaDulces() {
   );
 
   /** Le pide al tablero que anime la jugada y no acepta toques hasta que termine. */
-  const { medirPosiciones, alEstallar } = medidas;
   const animar = useCallback((jugada: Omit<Jugada, 'onFin'>, alTerminar?: () => void) => {
     animandoRef.current = true;
     despachar({ tipo: 'animar' });
