@@ -200,8 +200,8 @@ await prueba('las más atoradas van arriba y más grandes; a igual número, por 
 await prueba('qué cuenta como atorada no cambió (fallos >= 3 y no dominada) y la pantalla no toca SM-2', () => {
   const q = leer('src/data/repos/frases.ts');
   assert.match(q, /WHERE t\.fallos >= \? AND t\.dominada = 0\s*ORDER BY t\.fallos DESC LIMIT \?;/);
-  assert.match(sinComentarios(leer('src/screens/utility/StuckScreen.tsx')), /getStuckEntries\(user\.id, 3, 30\)/, 'el mismo umbral de siempre');
-  const pantalla = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  assert.match(sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx')), /getStuckEntries\(user\.id, 3, 30\)/, 'el mismo umbral de siempre');
+  const pantalla = sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx'));
   assert.ok(!/upsertCardState|useSessionStore|calificar/.test(pantalla), 'Se me atoran no toca SM-2');
   assert.ok(!/<Button\b[^>]*variant="primary"|Corregir/.test(pantalla), 'sin botón principal: «Corregir N errores» lleva a esta misma pantalla');
   const hoy = leer('src/features/practicar/logic/hoy.ts');
@@ -211,20 +211,20 @@ await prueba('qué cuenta como atorada no cambió (fallos >= 3 y no dominada) y 
 });
 
 await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio con texto, medidor que anuncia y vacío en correct', () => {
-  const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  const p = sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx'));
   assert.match(p, /keyExtractor=\{claveAtorada\}/);
   assert.match(p, /Sin cronómetro ni calificación\. Léelas, escúchalas y ya\./, 'la nota se queda');
   assert.match(p, /ordenarAtoradas\(carga\.datos\?\.atoradas \?\? \[\]\)/);
   assert.match(p, /iconColor=\{color\.correct\}/, 'el vacío lleva el check en correct');
   assert.match(p, /body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma\."/, 'el texto vacío de siempre');
   assert.match(p, /useFocusEffect\(|useCortarAudioAlSalir\(/);
-  const t = sinComentarios(leer('src/components/atoradas/TarjetaAtorada.tsx'));
+  const t = sinComentarios(leer('src/features/atoradas/components/TarjetaAtorada.tsx'));
   assert.match(t, /export const TarjetaAtorada = memo\(/);
   assert.match(t, /<GrupoAudio controles=\{controles\}/, 'el grupo Inglés · Español en lugar de los dos plays');
   assert.match(t, /<MedidorAtasco fallos=\{fallos\} tamano=\{tamano\} \/>/, 'el medidor va dentro de la misma tarjeta');
   assert.match(t, /\$\{etiquetaFallos\(fallos\)\}/, 'el lector oye los fallos');
   assert.match(t, /tamano=\{tamano === 'grande' \? 'md' : 'h3'\}/, 'las más atoradas, más grandes');
-  const m = sinComentarios(leer('src/components/atoradas/MedidorAtasco.tsx'));
+  const m = sinComentarios(leer('src/features/atoradas/components/MedidorAtasco.tsx'));
   assert.match(m, /accessibilityLabel=\{etiquetaFallos\(fallos\)\}/, 'anuncia «4 fallos»');
   assert.match(m, /encendido: \{ backgroundColor: color\.wrong \}/);
   assert.ok(!/riskStrong|tone="strong"/.test(m + t + p));
@@ -286,7 +286,7 @@ await prueba('desatorar dura poco y una sola vez: una tarjeta ≤ 2.5 s, tres es
   assert.equal(A.duracionDesatorar(9, t), A.duracionDesatorar(5, t), 'el tope de puntos es cinco');
   for (let p = 0; p <= 5; p++) assert.ok(A.duracionDesatorar(p, t) <= 2500, `${p} puntos`);
   assert.ok(2 * 600 + A.duracionDesatorar(5, t) <= 4000, 'las tres escalonadas');
-  const d = sinComentarios(leer('src/components/atoradas/Desatorar.tsx'));
+  const d = sinComentarios(leer('src/features/atoradas/components/Desatorar.tsx'));
   assert.ok(!/withRepeat|skia|Shader/i.test(d), 'una sola vez, sin bucles ni shaders');
   assert.match(d, /if \(reducido\) \{\s*entra\.value = 1;\s*apagado\.value = encendidos;/, 'con reducir movimiento los puntos ya están apagados');
   assert.match(d, /etiqueta\.value = withTiming\(1, \{ duration: motionDuration\.base/, 'la etiqueta aparece con fade');
@@ -296,7 +296,7 @@ await prueba('desatorar dura poco y una sola vez: una tarjeta ≤ 2.5 s, tres es
   assert.match(d, /color: color\.correct|backgroundColor: color\.correct/, 'el destello y la etiqueta en correct');
   assert.match(d, /accessibilityLabel=\{`\$\{entry\.phrase\}\. Ya no se te atora`\}/);
   assert.ok(!/riskStrong|tone="strong"/.test(d));
-  const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  const p = sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx'));
   assert.match(p, /guardarAjuste\(user\.id, 'atoradasVistas', actuales\)/, 'guarda la lista de esta visita');
   assert.match(p, /normalizarVistas\(useSettingsStore\.getState\(\)\.atoradasVistas\)/, 'compara con la última visita');
   assert.match(p, /getCardStates\(user\.id, candidatas\.map/, 'le pregunta a la base si de verdad se destrabó');

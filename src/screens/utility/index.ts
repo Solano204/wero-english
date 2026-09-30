@@ -3,7 +3,7 @@ export { SettingsScreen } from './SettingsScreen';
 export { LegalDocScreen } from './LegalDocScreen';
 export { BorrarScreen } from './BorrarScreen';
 export { DownloadsScreen } from './DownloadsScreen';
-export { StuckScreen } from './StuckScreen';
+export { StuckScreen } from '@/features/atoradas/screens/StuckScreen';
 export { DeckScreen } from '@/features/mazo/screens/DeckScreen';
 export { DiagnosticsScreen } from './DiagnosticsScreen';
 export { SfxSamplerScreen } from './SfxSamplerScreen';

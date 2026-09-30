@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Carga, EmptyState, Header, Screen } from '@/shared/ui';
 import { HuesoTarjeta, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
-import { Desatorar } from '@/components/atoradas/Desatorar';
-import { TarjetaAtorada } from '@/components/atoradas/TarjetaAtorada';
+import { Desatorar } from '@/features/atoradas/components/Desatorar';
+import { TarjetaAtorada } from '@/features/atoradas/components/TarjetaAtorada';
 import { getCardStates } from '@/data/repos/tarjetas';
 import { getEntriesByIds, getStuckEntries } from '@/data/repos/frases';
 import {

@@ -462,7 +462,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/lectura/') || r === 'src/features/lecturas/screens/LecturasScreen.tsx' || r === 'src/features/lecturas/screens/LecturaScreen.tsx' ||
   r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
   r.startsWith('src/components/errores/') || r === 'src/features/errores/screens/ErrorsScreen.tsx' || r === 'src/features/errores/screens/ErrorDetailScreen.tsx' ||
-  r.startsWith('src/components/atoradas/') || r === 'src/features/mazo/screens/DeckScreen.tsx' || r === 'src/screens/utility/StuckScreen.tsx' ||
+  r.startsWith('src/components/atoradas/') || r === 'src/features/mazo/screens/DeckScreen.tsx' || r === 'src/features/atoradas/screens/StuckScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/features/practicar/screens/PracticeScreen.tsx' ||
   r === 'src/features/progreso/screens/ProgressScreen.tsx' || r === 'src/app/navegacion/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
