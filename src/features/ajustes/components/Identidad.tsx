@@ -14,6 +14,8 @@ export function Identidad({ user }: { user: User }) {
         {user.foto && !sinFoto ? (
           <Image
             source={{ uri: user.foto }}
+            // Foto de la cuenta (remota): memoria para volver a Ajustes sin decodificar, disco para verla sin red.
+            cachePolicy="memory-disk"
             style={styles.avatar}
             onError={() => setSinFoto(true)}
             accessibilityIgnoresInvertColors

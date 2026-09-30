@@ -138,16 +138,31 @@ export class StudySession {
     };
   }
 
+  /**
+   * La primera lista de `cola`. Si ninguna está lista pero quedan, se adelanta la más próxima:
+   * hacer esperar al usuario mirando una pantalla vacía es peor que mostrarle la tarjeta un
+   * minuto antes de lo ideal.
+   */
+  private elegir(cola: PendingCard[], now: number): PendingCard | undefined {
+    return cola.find((p) => p.readyAt <= now) ?? cola[0];
+  }
+
   /** La tarjeta que toca, o null si la sesión terminó. */
   current(now: number = Date.now()): StudyCard | null {
     if (this.queue.length === 0) return null;
-    const ready = this.queue.find((p) => p.readyAt <= now);
-    // Si ninguna está lista pero quedan, se adelanta la más próxima:
-    // hacer esperar al usuario mirando una pantalla vacía es peor que
-    // mostrarle la tarjeta un minuto antes de lo ideal.
-    const next = ready ?? this.queue[0];
+    const next = this.elegir(this.queue, now);
     if (next && this.freshIds.has(next.card.entry.id)) this.mostradas.add(next.card.entry.id);
     return next?.card ?? null;
+  }
+
+  /**
+   * La imagen de la tarjeta que probablemente sigue a la actual, para precargarla. Es una
+   * apuesta (si la actual se falla puede volver antes), así que no la marca como mostrada.
+   */
+  imagenSiguiente(now: number = Date.now()): string | null {
+    const actual = this.elegir(this.queue, now);
+    const siguiente = this.elegir(this.queue.filter((p) => p !== actual), now);
+    return siguiente?.card.entry.imagen ?? null;
   }
 
   /**

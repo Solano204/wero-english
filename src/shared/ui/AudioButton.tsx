@@ -5,8 +5,7 @@ import { Icon } from '@/shared/ui/Icon';
 import { Presionable } from '@/shared/ui/Presionable';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import * as media from '@/services/media';
-import { isBundled } from '@/services/media';
+import { hayArchivo } from '@/services/media';
 
 interface Props {
   path: string | null;
@@ -21,13 +20,7 @@ interface Props {
 
 /** Empaquetado o ya descargado a disco: lo mismo que acepta media.resolve(). */
 export function hayAudio(path: string | null): boolean {
-  if (!path) return false;
-  if (isBundled(path)) return true;
-  try {
-    return media.fileFor(path).exists;
-  } catch {
-    return false;
-  }
+  return hayArchivo(path);
 }
 
 /**
@@ -38,7 +31,8 @@ export function hayAudio(path: string | null): boolean {
 export function AudioButton({ path, size = 'md', slow = false, label, descripcion, onBeforePlay }: Props) {
   const [missing, setMissing] = useState(false);
   // Sin memo a propósito: un pack que se descarga con la pantalla abierta
-  // tiene que reactivar el botón en el siguiente render.
+  // tiene que reactivar el botón en el siguiente render (la descarga limpia
+  // la caché de `hayArchivo`).
   const sinAudio = !hayAudio(path);
   const apagado = missing || sinAudio;
   // El reloj de arena solo no dice "lento": en slow el texto siempre se ve.

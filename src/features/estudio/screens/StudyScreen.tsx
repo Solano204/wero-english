@@ -27,7 +27,7 @@ const lineaFinal = (c: Cierre) => `${c.aciertos} de ${c.total} ${plural(c.total,
  * apaga a media tarjeta.
  */
 export function StudyScreen() {
-  const { reducido, nav, params, barra, settings, phase, card, feedback, done, goal, seguidas, avanzando, skip, aciertos, pendientes, summary, proximoRepaso, nuevasCatalogo, demoraSesion, huboEsqueleto, chosen, setChosen, hoja, mostrarFin, fin, ultimaTarjeta, reaccion, origenTrozos, setOrigenTrozos, otraSesion, seguirRepasando, aprenderNuevas, handleClose, handleAnswer, handleContinue } = useSesionEstudio();
+  const { reducido, nav, params, barra, settings, phase, card, siguienteImagen, feedback, done, goal, seguidas, avanzando, skip, aciertos, pendientes, summary, proximoRepaso, nuevasCatalogo, demoraSesion, huboEsqueleto, chosen, setChosen, hoja, mostrarFin, fin, ultimaTarjeta, reaccion, origenTrozos, setOrigenTrozos, otraSesion, seguirRepasando, aprenderNuevas, handleClose, handleAnswer, handleContinue } = useSesionEstudio();
 
   if (phase === 'loading' || phase === 'idle' || demoraSesion) {
     return (
@@ -158,6 +158,7 @@ export function StudyScreen() {
             onChoose={setChosen}
             onAnswer={handleAnswer}
             onOrigenAcierto={setOrigenTrozos}
+            siguienteImagen={siguienteImagen}
           />
         ) : fin ? (
           <Animated.View

@@ -14,7 +14,7 @@ import { Icon } from '@/shared/ui/Icon';
 import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { PuntoMundo } from '@/shared/ui/PuntoMundo';
 import { hayImagen } from './SceneImage';
-import { imageSource } from '@/services/media';
+import { CACHE_IMAGEN, imageSource } from '@/services/media';
 import { blur, color, motionDuration, radius } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
@@ -120,6 +120,8 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
         <AnimatedImage
           source={source ?? undefined}
           contentFit="cover"
+          cachePolicy={CACHE_IMAGEN}
+          recyclingKey={path}
           onLoad={() => {
             setCargada(true);
             opacidadCarga.set(reducido ? 1 : withTiming(1, { duration: FADE_MS }));

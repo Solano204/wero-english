@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import { BloqueVoz } from './BloqueVoz';
 import { FraseHueco } from './FraseHueco';
 import { MarcoImagen } from '@/shared/ui/MarcoImagen';
+import { PrecargaImagen } from '@/shared/ui/PrecargaImagen';
 import { OptionButton, type OptionState } from '@/shared/ui/OptionButton';
 import { PalabraVoladora } from './PalabraVoladora';
 import { TileBuilder } from './TileBuilder';
@@ -48,6 +49,8 @@ interface Props {
   onChoose: (value: string) => void;
   /** Desde dónde (ventana, px) salen los cubitos si aciertas tocando una opción. */
   onOrigenAcierto?: (punto: { x: number; y: number }) => void;
+  /** La imagen de la tarjeta que probablemente sigue: se decodifica por adelantado, sin verse. */
+  siguienteImagen?: string | null;
 }
 
 /**
@@ -65,6 +68,7 @@ export function StudyCardView({
   onAnswer,
   onChoose,
   onOrigenAcierto,
+  siguienteImagen = null,
 }: Props) {
   const startedAt = useRef(Date.now());
   const ventana = useWindowDimensions();
@@ -240,6 +244,8 @@ export function StudyCardView({
           desenfocada={!locked && imagenRevelaSignificado(card.kind)}
           style={styles.marco}
         />
+        {/* Dentro del marco la imagen mide 1 dp menos por lado (su borde): la precarga usa ese tamaño. */}
+        <PrecargaImagen path={siguienteImagen} ancho={anchoImagen - 2} alto={altoImagen - 2} />
 
         {card.kind === 'escuchar' || card.kind === 'dictado' ? (
           <BloqueVoz entry={card.entry} variante="oido" dictado={card.kind === 'dictado'} compacto={compacto} />

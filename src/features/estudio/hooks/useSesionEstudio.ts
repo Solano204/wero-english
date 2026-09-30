@@ -59,6 +59,7 @@ export function useSesionEstudio() {
   const {
     phase,
     card,
+    siguienteImagen,
     feedback,
     done,
     goal,
@@ -79,6 +80,7 @@ export function useSesionEstudio() {
     useShallow((s) => ({
       phase: s.phase,
       card: s.card,
+      siguienteImagen: s.siguienteImagen,
       feedback: s.feedback,
       done: s.done,
       goal: s.goal,
@@ -261,5 +263,5 @@ export function useSesionEstudio() {
     next();
   };
 
-  return { reducido, nav, params, barra, settings, phase, card, feedback, done, goal, seguidas, avanzando, skip, aciertos, pendientes, summary, proximoRepaso, nuevasCatalogo, demoraSesion, huboEsqueleto, chosen, setChosen, hoja, mostrarFin, fin, ultimaTarjeta, reaccion, origenTrozos, setOrigenTrozos, otraSesion, seguirRepasando, aprenderNuevas, handleClose, handleAnswer, handleContinue };
+  return { reducido, nav, params, barra, settings, phase, card, siguienteImagen, feedback, done, goal, seguidas, avanzando, skip, aciertos, pendientes, summary, proximoRepaso, nuevasCatalogo, demoraSesion, huboEsqueleto, chosen, setChosen, hoja, mostrarFin, fin, ultimaTarjeta, reaccion, origenTrozos, setOrigenTrozos, otraSesion, seguirRepasando, aprenderNuevas, handleClose, handleAnswer, handleContinue };
 }

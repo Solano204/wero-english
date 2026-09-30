@@ -4,8 +4,7 @@ import {
   StyleSheet,
   type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
-import * as media from '@/services/media';
-import { imageSource, isBundled } from '@/services/media';
+import { CACHE_IMAGEN, hayArchivo, imageSource } from '@/services/media';
 import { color, radius, aparecer } from '@/theme';
 
 interface Props {
@@ -23,13 +22,7 @@ interface Props {
 
 /** ¿Hay archivo de esta imagen (empaquetado o ya descargado)? Sin él no se dibuja ni se reserva lugar. */
 export function hayImagen(path: string | null): boolean {
-  if (!path) return false;
-  if (isBundled(path)) return true;
-  try {
-    return media.fileFor(path).exists;
-  } catch {
-    return false;
-  }
+  return hayArchivo(path);
 }
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -65,6 +58,8 @@ export function SceneImage({ path, size = 200, round = true, style, ancha }: Pro
       ]}
       onError={() => setFailed(true)}
       contentFit="cover"
+      cachePolicy={CACHE_IMAGEN}
+      recyclingKey={path}
       accessible={false}
     />
   );

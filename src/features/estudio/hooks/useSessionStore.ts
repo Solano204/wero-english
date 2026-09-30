@@ -27,6 +27,8 @@ export interface Feedback {
 interface SessionState {
   phase: Phase;
   card: StudyCard | null;
+  /** La imagen de la tarjeta que probablemente sigue, para precargarla mientras se contesta la actual. */
+  siguienteImagen: string | null;
   feedback: Feedback | null;
   summary: SessionSummary | null;
   done: number;
@@ -195,6 +197,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
     set({
       phase: 'active',
       card,
+      siguienteImagen: engine.imagenSiguiente(),
       done: p.done,
       goal: p.goal,
       remaining: engine.remaining,
@@ -207,6 +210,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
   return {
   phase: 'idle',
   card: null,
+  siguienteImagen: null,
   feedback: null,
   summary: null,
   done: 0,
@@ -296,7 +300,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
       set({ phase: 'finished', card: null, feedback: null });
       return;
     }
-    set({ card, feedback: null, remaining: engine.remaining });
+    set({ card, siguienteImagen: engine.imagenSiguiente(), feedback: null, remaining: engine.remaining });
   },
 
   skip: () => {
@@ -310,7 +314,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
       set({ phase: 'finished', card: null, feedback: null, remaining: 0 });
       return;
     }
-    set({ card, feedback: null, remaining: engine.remaining });
+    set({ card, siguienteImagen: engine.imagenSiguiente(), feedback: null, remaining: engine.remaining });
   },
 
   finish: async (usuarioId) => {
@@ -368,6 +372,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
     set({
       phase: 'idle',
       card: null,
+      siguienteImagen: null,
       feedback: null,
       summary: null,
       done: 0,
