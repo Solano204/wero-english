@@ -3,43 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TabNavigator } from './TabNavigator';
 import { navigate, navigationRef } from './navigationRef';
 import { NOTIF_TARGETS, type RootStackParams } from './routes';
-import {
-  AuthScreen,
-  BootScreen,
-  CaidaScreen,
-  CazalaScreen,
-  ColmenaScreen,
-  DulcesScreen,
-  ContractionsScreen,
-  DeckScreen,
-  DetailScreen,
-  DiagnosticsScreen,
-  DownloadsScreen,
-  EarModeScreen,
-  ErrorDetailScreen,
-  ErrorsScreen,
-  GameEndScreen,
-  GramaticaScreen,
-  GramaticaTemaScreen,
-  LecturaScreen,
-  LecturasScreen,
-  AzarScreen,
-  MinimalPairsScreen,
-  NivelesScreen,
-  OnboardingScreen,
-  PackDetailScreen,
-  ParesScreen,
-  PhrasalScreen,
-  PhrasalVerboScreen,
-  PronunciationScreen,
-  BorrarScreen,
-  LegalDocScreen,
-  SettingsScreen,
-  SfxSamplerScreen,
-  StudyScreen,
-  StuckScreen,
-  WorldDetailScreen,
-} from '@/screens';
+// Solo lo del arranque se importa aquí: el resto de las pantallas se evalúa la
+// primera vez que se abre (ver `diferida`), no en el arranque en frío.
+import { AuthScreen } from '@/screens/entry/AuthScreen';
+import { BootScreen } from '@/screens/entry/BootScreen';
 import { useAuthStore, useSettingsStore } from '@/store';
 import * as music from '@/services/music';
 import * as notifications from '@/services/notifications';
@@ -79,7 +46,7 @@ export function RootNavigator() {
     return (
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
         <Stack.Screen name="Auth" component={AuthScreen} />
-        <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
+        <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
       </Stack.Navigator>
     );
   }
@@ -91,8 +58,8 @@ export function RootNavigator() {
   if (status === 'signed' && settingsLoaded && !onboardingHecho) {
     return (
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
+        <Stack.Screen name="Onboarding" getComponent={() => require('@/screens/entry/OnboardingScreen').OnboardingScreen} />
+        <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
       </Stack.Navigator>
     );
   }
@@ -104,53 +71,53 @@ export function RootNavigator() {
       {/* La sesión entra desde abajo: se siente como entrar a un modo,
           no como navegar a otra sección. */}
       <Stack.Group screenOptions={{ animation: 'slide_from_bottom' }}>
-        <Stack.Screen name="Study" component={StudyScreen} />
-        <Stack.Screen name="EarMode" component={EarModeScreen} />
-        <Stack.Screen name="Cazala" component={CazalaScreen} />
-        <Stack.Screen name="Colmena" component={ColmenaScreen} />
-        <Stack.Screen name="Pares" component={ParesScreen} />
-        <Stack.Screen name="Caida" component={CaidaScreen} />
-        <Stack.Screen name="Dulces" component={DulcesScreen} />
+        <Stack.Screen name="Study" getComponent={() => require('@/screens/study/StudyScreen').StudyScreen} />
+        <Stack.Screen name="EarMode" getComponent={() => require('@/screens/extras/EarModeScreen').EarModeScreen} />
+        <Stack.Screen name="Cazala" getComponent={() => require('@/screens/games/CazalaScreen').CazalaScreen} />
+        <Stack.Screen name="Colmena" getComponent={() => require('@/screens/games/ColmenaScreen').ColmenaScreen} />
+        <Stack.Screen name="Pares" getComponent={() => require('@/screens/games/ParesScreen').ParesScreen} />
+        <Stack.Screen name="Caida" getComponent={() => require('@/screens/games/CaidaScreen').CaidaScreen} />
+        <Stack.Screen name="Dulces" getComponent={() => require('@/screens/games/DulcesScreen').DulcesScreen} />
         <Stack.Screen
           name="GameEnd"
-          component={GameEndScreen}
+          getComponent={() => require('@/screens/games/GameEndScreen').GameEndScreen}
           // Pares cierra su tablero con una ola de luz: el resumen entra con un fundido en vez de subir desde abajo.
           options={({ route }) => ({
             gestureEnabled: false,
             ...(route.params?.juego === 'pares' ? { animation: 'fade' as const, animationDuration: motionDuration.lento } : null),
           })}
         />
-        <Stack.Screen name="MinimalPairs" component={MinimalPairsScreen} />
+        <Stack.Screen name="MinimalPairs" getComponent={() => require('@/screens/extras/MinimalPairsScreen').MinimalPairsScreen} />
       </Stack.Group>
 
-      <Stack.Screen name="Detail" component={DetailScreen} />
-      <Stack.Screen name="PackDetail" component={PackDetailScreen} />
-      <Stack.Screen name="WorldDetail" component={WorldDetailScreen} />
-      <Stack.Screen name="Pronunciation" component={PronunciationScreen} />
-      <Stack.Screen name="Contractions" component={ContractionsScreen} />
-      <Stack.Screen name="Errors" component={ErrorsScreen} />
-      <Stack.Screen name="ErrorDetail" component={ErrorDetailScreen} />
-      <Stack.Screen name="Downloads" component={DownloadsScreen} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
-      <Stack.Screen name="Borrar" component={BorrarScreen} />
-      <Stack.Screen name="Stuck" component={StuckScreen} />
-      <Stack.Screen name="Deck" component={DeckScreen} />
-      <Stack.Screen name="Niveles" component={NivelesScreen} />
-      <Stack.Screen name="Gramatica" component={GramaticaScreen} />
-      <Stack.Screen name="GramaticaTema" component={GramaticaTemaScreen} />
-      <Stack.Screen name="Phrasal" component={PhrasalScreen} />
+      <Stack.Screen name="Detail" getComponent={() => require('@/screens/discover/DetailScreen').DetailScreen} />
+      <Stack.Screen name="PackDetail" getComponent={() => require('@/screens/discover/PackDetailScreen').PackDetailScreen} />
+      <Stack.Screen name="WorldDetail" getComponent={() => require('@/screens/discover/WorldDetailScreen').WorldDetailScreen} />
+      <Stack.Screen name="Pronunciation" getComponent={() => require('@/screens/extras/PronunciationScreen').PronunciationScreen} />
+      <Stack.Screen name="Contractions" getComponent={() => require('@/screens/extras/ContractionsScreen').ContractionsScreen} />
+      <Stack.Screen name="Errors" getComponent={() => require('@/screens/extras/ErrorsScreen').ErrorsScreen} />
+      <Stack.Screen name="ErrorDetail" getComponent={() => require('@/screens/extras/ErrorDetailScreen').ErrorDetailScreen} />
+      <Stack.Screen name="Downloads" getComponent={() => require('@/screens/utility/DownloadsScreen').DownloadsScreen} />
+      <Stack.Screen name="Settings" getComponent={() => require('@/screens/utility/SettingsScreen').SettingsScreen} />
+      <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
+      <Stack.Screen name="Borrar" getComponent={() => require('@/screens/utility/BorrarScreen').BorrarScreen} />
+      <Stack.Screen name="Stuck" getComponent={() => require('@/screens/utility/StuckScreen').StuckScreen} />
+      <Stack.Screen name="Deck" getComponent={() => require('@/screens/utility/DeckScreen').DeckScreen} />
+      <Stack.Screen name="Niveles" getComponent={() => require('@/screens/games/NivelesScreen').NivelesScreen} />
+      <Stack.Screen name="Gramatica" getComponent={() => require('@/screens/extras/GramaticaScreen').GramaticaScreen} />
+      <Stack.Screen name="GramaticaTema" getComponent={() => require('@/screens/extras/GramaticaTemaScreen').GramaticaTemaScreen} />
+      <Stack.Screen name="Phrasal" getComponent={() => require('@/screens/extras/PhrasalScreen').PhrasalScreen} />
       {/* El verbo viaja del renglón a su título: la pantalla entra con un fundido y ese vuelo es la transición. */}
       <Stack.Screen
         name="PhrasalVerbo"
-        component={PhrasalVerboScreen}
+        getComponent={() => require('@/screens/extras/PhrasalVerboScreen').PhrasalVerboScreen}
         options={{ animation: 'fade', animationDuration: motionDuration.lento }}
       />
-      <Stack.Screen name="Azar" component={AzarScreen} />
-      <Stack.Screen name="Lecturas" component={LecturasScreen} />
-      <Stack.Screen name="Lectura" component={LecturaScreen} />
-      <Stack.Screen name="Diagnostics" component={DiagnosticsScreen} />
-      {__DEV__ ? <Stack.Screen name="SfxSampler" component={SfxSamplerScreen} /> : null}
+      <Stack.Screen name="Azar" getComponent={() => require('@/screens/extras/AzarScreen').AzarScreen} />
+      <Stack.Screen name="Lecturas" getComponent={() => require('@/screens/extras/LecturasScreen').LecturasScreen} />
+      <Stack.Screen name="Lectura" getComponent={() => require('@/screens/extras/LecturaScreen').LecturaScreen} />
+      <Stack.Screen name="Diagnostics" getComponent={() => require('@/screens/utility/DiagnosticsScreen').DiagnosticsScreen} />
+      {__DEV__ ? <Stack.Screen name="SfxSampler" getComponent={() => require('@/screens/utility/SfxSamplerScreen').SfxSamplerScreen} /> : null}
     </Stack.Navigator>
   );
 }

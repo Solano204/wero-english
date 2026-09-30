@@ -13,9 +13,9 @@ import Animated, {
   useSharedValue,
   withSequence,
   withTiming } from 'react-native-reanimated';
-import { ExploreScreen } from '@/screens/discover';
-import { PracticeScreen } from '@/screens/extras';
-import { ProgressScreen } from '@/screens/utility';
+import { ExploreScreen } from '@/screens/discover/ExploreScreen';
+import { PracticeScreen } from '@/screens/extras/PracticeScreen';
+import { ProgressScreen } from '@/screens/utility/ProgressScreen';
 import { color, filoLuz, font, radius, shadow, sol, space, motionDuration, motionEasing } from '@/theme';
 import { AdBar, Icon, Presionable, type IconName } from '@/components/base';
 import { PildoraLiquida } from '@/components/fx';
