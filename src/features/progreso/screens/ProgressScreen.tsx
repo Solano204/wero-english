@@ -12,7 +12,6 @@ import { Espectrograma } from '@/features/progreso/components/Espectrograma';
 import { JUEGOS_PROGRESO, filasMundo, resumenJuego } from '@/features/progreso/logic/datos';
 import { ICONO_MODO } from '@/features/practicar/logic/iconos';
 import { MODOS } from '@/features/practicar/logic/modos';
-import { loadContent } from '@/data/contenido';
 import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { useProgreso } from '@/features/progreso/hooks/useProgreso';
 
@@ -25,7 +24,7 @@ const FILAS_JUEGOS = [JUEGOS_PROGRESO.slice(0, 2), JUEGOS_PROGRESO.slice(2, 4), 
  * a la vista).
  */
 export function ProgressScreen() {
-  const { nav, top, user, scrollY, primera, estiloFundido, pulsos, carga, refrescar, dias, sinDias, espectro, seccionMundos, seccionJuegos, seccionDetalle } = useProgreso();
+  const { nav, top, user, scrollY, primera, estiloFundido, pulsos, carga, refrescar, dias, sinDias, espectro, seccionMundos, seccionJuegos, seccionDetalle, mundosCatalogo } = useProgreso();
 
   return (
     <Screen
@@ -83,7 +82,7 @@ export function ProgressScreen() {
           }
         >
           {({ stats, mundos, niveles, records }) => {
-            const filas = filasMundo(loadContent().packs.mundos, mundos);
+            const filas = filasMundo(mundosCatalogo(), mundos);
             return (
               <>
                 {stats ? (

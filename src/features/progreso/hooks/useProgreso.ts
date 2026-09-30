@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { loadContent } from '@/data/contenido';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSharedValue } from 'react-native-reanimated';
@@ -74,5 +75,8 @@ export function useProgreso() {
   const seccionJuegos = useVisto(scrollY);
   const seccionDetalle = useVisto(scrollY);
 
-  return { nav, top, user, scrollY, primera, estiloFundido, pulsos, carga, refrescar, dias, sinDias, espectro, seccionMundos, seccionJuegos, seccionDetalle };
+  // Los mundos del catálogo se leen cuando la pantalla los pide (loadContent es perezoso por archivo).
+  const mundosCatalogo = useCallback(() => loadContent().packs.mundos, []);
+
+  return { nav, top, user, scrollY, primera, estiloFundido, pulsos, carga, refrescar, dias, sinDias, espectro, seccionMundos, seccionJuegos, seccionDetalle, mundosCatalogo };
 }

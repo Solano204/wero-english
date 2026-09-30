@@ -10,7 +10,6 @@ import { CuandoNoDecirla } from '@/features/detalle/components/CuandoNoDecirla';
 import { EscalaRegistro } from '@/features/detalle/components/EscalaRegistro';
 import { FilaDondeVive } from '@/features/detalle/components/FilaDondeVive';
 import { HeroeFrase } from '@/features/detalle/components/HeroeFrase';
-import { loadContent } from '@/data/contenido';
 import { color, font, layout, motionDuration, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { mismoTexto } from '@/domain/texto';
 import { useDetalleFrase } from '@/features/detalle/hooks/useDetalleFrase';
@@ -22,7 +21,7 @@ import { useDetalleFrase } from '@/features/detalle/hooks/useDetalleFrase';
  * traducción, la versión neutra, cuándo NO usarla y por qué.
  */
 export function DetailScreen() {
-  const { nav, top, scrollY, carga, entry, fav, pulso, entradaAnim, alternar } = useDetalleFrase();
+  const { nav, top, scrollY, carga, entry, fav, pulso, entradaAnim, alternar, mundosCatalogo } = useDetalleFrase();
 
   if (!entry) {
     return (
@@ -56,7 +55,7 @@ export function DetailScreen() {
   const tieneVariantes = !mismoTexto(entry.spanish, entry.spanish_main);
   const tieneNeutro =
     entry.vulgaridad > 0 && !mismoTexto(entry.es_neutro, entry.spanish_main);
-  const mundo = loadContent().packs.mundos.find((m) => m.id === entry.mundo);
+  const mundo = mundosCatalogo().find((m) => m.id === entry.mundo);
   const tinteMundo = color.world[entry.mundo as WorldId] ?? color.accent;
 
   return (

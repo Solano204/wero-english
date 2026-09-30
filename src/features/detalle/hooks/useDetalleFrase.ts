@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { loadContent } from '@/data/contenido';
 import { AccessibilityInfo } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -73,5 +74,8 @@ export function useDetalleFrase() {
     AccessibilityInfo.announceForAccessibility(guardada ? 'Guardada en Mi mazo' : 'Quitada de Mi mazo');
   }, [user, entry]);
 
-  return { nav, top, scrollY, carga, entry, fav, pulso, entradaAnim, alternar };
+  // Los mundos del catálogo se leen cuando la pantalla los pide (loadContent es perezoso por archivo).
+  const mundosCatalogo = useCallback(() => loadContent().packs.mundos, []);
+
+  return { nav, top, scrollY, carga, entry, fav, pulso, entradaAnim, alternar, mundosCatalogo };
 }
