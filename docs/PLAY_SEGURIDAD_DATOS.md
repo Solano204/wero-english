@@ -14,7 +14,7 @@ Dos cosas salen del teléfono sin que Wero guarde ni reciba datos: la foto de pe
 |---|---|
 | ¿Tu app recopila o comparte alguno de los tipos de datos del usuario requeridos? | **Sí**, solo por el audio del micrófono (ver abajo) |
 | ¿Todos los datos del usuario que recopila tu app están encriptados en tránsito? | **Sí** (el audio va cifrado al servicio de voz) |
-| ¿Proporcionas una forma para que los usuarios soliciten que se borren sus datos? | **Sí**: dentro de la app (Ajustes, sección Legal: «Borrar cuenta y datos» y «Borrar todos mis datos») y la página web `eliminar-cuenta.html` (de `docs/ELIMINAR_CUENTA.md`) |
+| ¿Proporcionas una forma para que los usuarios soliciten que se borren sus datos? | **Sí**: dentro de la app (Ajustes, sección Legal: «Borrar cuenta y datos» y «Borrar todos mis datos») y la página web https://solano204.github.io/wero-legal/borrar-cuenta/ (de `docs/ELIMINAR_CUENTA.md`) |
 | Cuentas | La app permite crear una cuenta (con Google o sin cuenta). Método: **Sign in with Google** (y cuentas locales antiguas con usuario y contraseña) |
 
 ### Micrófono: se declara (el reconocimiento va en el teléfono solo cuando se puede)
@@ -30,7 +30,7 @@ Los textos de permiso de `app.json` y la hoja de consentimiento ya dicen esto mi
 
 | Sección | Respuesta |
 |---|---|
-| Política de privacidad | URL de la página publicada a partir de `docs/PRIVACIDAD.md` |
+| Política de privacidad | https://solano204.github.io/wero-legal/privacidad/ (de `docs/PRIVACIDAD.md`) |
 | Anuncios | **No** contiene anuncios (`ANUNCIOS_ACTIVOS = false`). Si se prenden, cambia esta respuesta y la política antes de publicar |
-| Eliminación de cuentas | URL de la página publicada a partir de `docs/ELIMINAR_CUENTA.md` |
+| Eliminación de cuentas | https://solano204.github.io/wero-legal/borrar-cuenta/ (de `docs/ELIMINAR_CUENTA.md`) |
 | Acceso a la app | «Todas las funciones están disponibles sin restricciones de acceso»: se puede entrar sin cuenta |

@@ -28,6 +28,12 @@ Si `wero.app` es tuyo (ya se usa `media.wero.app` para los paquetes), puedes sub
 
 ## Después de publicar
 
-1. Pon las tres URLs en `src/config/legal.ts` (`URL_PRIVACIDAD`, `URL_TERMINOS`, `URL_ELIMINAR_CUENTA`) y quita los `TODO`: con URLs reales aparece el botón «Ver en la web» dentro de la app.
-2. Google Cloud → Google Auth Platform → **Branding**: enlace a la política de privacidad y a los términos.
-3. Play Console → Contenido de la app: **Política de privacidad** (`privacidad.html`) y **Eliminación de cuentas** (`eliminar-cuenta.html`).
+Ya están publicadas y puestas en `src/config/legal.ts`:
+
+- Privacidad: https://solano204.github.io/wero-legal/privacidad/
+- Términos: https://solano204.github.io/wero-legal/terminos/
+- Borrar cuenta: https://solano204.github.io/wero-legal/borrar-cuenta/
+
+1. Con esas URLs, cada texto legal de la app muestra el botón «Ver en la web».
+2. Google Cloud → Google Auth Platform → **Branding**: enlace a la política de privacidad y a los términos (las dos de arriba).
+3. Play Console → Contenido de la app: **Política de privacidad** (la de privacidad) y **Eliminación de cuentas** (la de borrar cuenta).

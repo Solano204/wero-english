@@ -9,13 +9,13 @@
 export const VERSION_AVISO = 1;
 export const FECHA_AVISO = '2026-09-30';
 
-// TODO: poner las URLs públicas cuando estén publicadas (ver docs/web/LEEME.md). Mientras
-// sigan siendo de ejemplo, el botón «Ver en la web» no se muestra.
-export const URL_PRIVACIDAD = 'https://ejemplo.invalid/wero/privacidad.html';
-export const URL_TERMINOS = 'https://ejemplo.invalid/wero/terminos.html';
-export const URL_ELIMINAR_CUENTA = 'https://ejemplo.invalid/wero/eliminar-cuenta.html';
+// Las páginas públicas (GitHub Pages, ver docs/web/LEEME.md). Con URLs reales, cada texto legal de
+// la app ofrece «Ver en la web».
+export const URL_PRIVACIDAD = 'https://solano204.github.io/wero-legal/privacidad/';
+export const URL_TERMINOS = 'https://solano204.github.io/wero-legal/terminos/';
+export const URL_ELIMINAR_CUENTA = 'https://solano204.github.io/wero-legal/borrar-cuenta/';
 
-/** false para las URLs de ejemplo de arriba: la app no ofrece abrir algo que no existe. */
+/** false para una URL de ejemplo (`.invalid`): la app no ofrece abrir algo que no existe. */
 export function esUrlReal(url: string): boolean {
   return /^https:\/\//.test(url) && !url.includes('.invalid/');
 }
