@@ -56,7 +56,10 @@ export function HojaConsentimiento({ tipo, onAceptar, onAhoraNo, onLeerAviso }: 
     <Modal
       visible={tipo !== null}
       transparent
+      // Se queda en `Modal` (tiene que cubrir el encabezado y responder al botón atrás); translúcido arriba y abajo,
+      // para que no se vuelva a asomar la barra de navegación oculta ni cambie el color detrás de la hoja.
       statusBarTranslucent
+      navigationBarTranslucent
       animationType={reducido ? 'fade' : 'slide'}
       onRequestClose={onAhoraNo}
       onShow={alMostrar}

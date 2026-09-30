@@ -1,17 +1,14 @@
-import React, { useEffect, useState, type ReactNode } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
+import React, { useState, type ReactNode } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Gesture } from 'react-native-gesture-handler';
+import {
   runOnJS,
-  useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/shared/ui/Button';
+import { Hoja } from '@/shared/ui/Hoja';
 import { Icon } from '@/shared/ui/Icon';
 import * as audio from '@/services/audio';
 import {
@@ -20,18 +17,13 @@ import {
   filoWrong,
   font,
   motionDuration,
-  motionEasing,
   motionSpring,
-  radius,
-  sol,
   space,
 } from '@/theme';
 import { useUltimo } from '@/shared/hooks/useUltimo';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ACIERTO, elegirFrase } from '@/domain/frases';
 
-/** El velo nunca pasa de esto: lo de atrás sigue leyéndose. */
-const VELO_MAX = 0.5;
 /** Lo que hay que deslizar hacia arriba (dp), o la velocidad (dp/s), para que cuente como «Siguiente». */
 const UMBRAL_DESLIZAR = 48;
 const VELOCIDAD_DESLIZAR = 800;
@@ -86,7 +78,6 @@ export function HojaVeredicto({
   onDetail,
 }: Props) {
   const reducido = useMovimientoReducido();
-  const { height: alturaVentana } = useWindowDimensions();
   const { bottom } = useSafeAreaInsets();
   const [esperando, setEsperando] = useState(false);
 
@@ -110,35 +101,7 @@ export function HojaVeredicto({
     setFelicitacion({ clave: claveFelicitacion, texto: felicitacion });
   }
 
-  const y = useSharedValue(alturaVentana);
   const arrastre = useSharedValue(0);
-  const velo = useSharedValue(0);
-  const opacidad = useSharedValue(reducido ? 0 : 1);
-
-  useEffect(() => {
-    if (visible) {
-      // Espera a que el veredicto se vea en su sitio antes de subir.
-      const espera = motionDuration.lento;
-      velo.set(withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
-      if (reducido) {
-        y.set(0);
-        opacidad.set(withDelay(espera, withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar })));
-      } else {
-        opacidad.set(1);
-        y.set(withDelay(espera, withSpring(0, motionSpring.rebote)));
-      }
-    } else {
-      velo.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-      if (reducido) opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-      else y.set(withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-    }
-  }, [visible, reducido, alturaVentana, y, velo, opacidad]);
-
-  const hojaAnim = useAnimatedStyle(() => ({
-    opacity: opacidad.get(),
-    transform: [{ translateY: y.get() + arrastre.get() }],
-  }));
-  const veloAnim = useAnimatedStyle(() => ({ opacity: velo.get() * VELO_MAX }));
 
   const continuar = async () => {
     if (esperando || avanzando) return;
@@ -161,7 +124,8 @@ export function HojaVeredicto({
     })
     .onEnd((e) => {
       const sube = e.translationY < -UMBRAL_DESLIZAR || e.velocityY < -VELOCIDAD_DESLIZAR;
-      arrastre.set(withSpring(0, motionSpring.rebote));
+      // Con reducir movimiento la hoja vuelve a su lugar sin resorte.
+      arrastre.set(reducido ? 0 : withSpring(0, motionSpring.rebote));
       if (sube) runOnJS(continuar)();
     });
 
@@ -169,79 +133,52 @@ export function HojaVeredicto({
 
   const ok = c.correct;
   return (
-    <View
-      style={StyleSheet.absoluteFill}
-      pointerEvents={visible ? 'auto' : 'none'}
-      importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
-      accessibilityElementsHidden={!visible}
+    <Hoja
+      visible={visible}
+      filo={ok ? filoOk : filoWrong}
+      estiloCuerpo={[styles.contenido, ok ? styles.ok : styles.mal, { paddingBottom: bottom + space.lg }]}
+      velo="bloquea"
+      // Espera a que el veredicto se vea en su sitio antes de subir.
+      retraso={motionDuration.lento}
+      arrastre={arrastre}
+      gesto={gesto}
+      accessibilityLabel={`${felicitacion}. ${c.answer}${c.nota ? `. ${c.nota}` : ''}`}
     >
-      <Animated.View style={[StyleSheet.absoluteFill, styles.velo, veloAnim]} />
+      <View style={styles.cabeza}>
+        <View style={styles.titulo}>
+          <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.onHojaAcierto : color.wrong} />
+          <Text style={[styles.veredicto, ok ? styles.textoOk : styles.textoMal]}>
+            {ok ? 'Eso es' : 'Era esta'}
+          </Text>
+        </View>
+        {c.repaso ? <Text style={styles.repaso}>{c.repaso}</Text> : null}
+      </View>
 
-      <Animated.View style={[styles.hoja, hojaAnim]}>
-        <GestureDetector gesture={gesto}>
-          <Animated.View>
-            <LinearGradient colors={ok ? filoOk : filoWrong} start={sol.start} end={sol.end} style={styles.filo}>
-              <View
-                style={[styles.contenido, ok ? styles.ok : styles.mal, { paddingBottom: bottom + space.lg }]}
-                accessibilityLiveRegion="polite"
-                accessibilityLabel={`${felicitacion}. ${c.answer}${c.nota ? `. ${c.nota}` : ''}`}
-              >
-                <View style={styles.cabeza}>
-                  <View style={styles.titulo}>
-                    <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.onHojaAcierto : color.wrong} />
-                    <Text style={[styles.veredicto, ok ? styles.textoOk : styles.textoMal]}>
-                      {ok ? 'Eso es' : 'Era esta'}
-                    </Text>
-                  </View>
-                  {c.repaso ? <Text style={styles.repaso}>{c.repaso}</Text> : null}
-                </View>
+      {c.frase ?? <Text style={styles.frase}>{c.answer}</Text>}
 
-                {c.frase ?? <Text style={styles.frase}>{c.answer}</Text>}
+      {c.nota ? <Text style={styles.nota}>{c.nota}</Text> : null}
 
-                {c.nota ? <Text style={styles.nota}>{c.nota}</Text> : null}
-
-                <View style={styles.acciones}>
-                  {onDetail ? (
-                    <Button label="Ver detalle" variant="ghost" onPress={onDetail} style={styles.detalle} />
-                  ) : null}
-                  <Button
-                    label="Siguiente"
-                    icon="arrow-right"
-                    iconAlFinal
-                    size="lg"
-                    loading={esperando}
-                    disabled={esperando || avanzando}
-                    onPress={continuar}
-                    style={styles.siguiente}
-                  />
-                </View>
-              </View>
-            </LinearGradient>
-          </Animated.View>
-        </GestureDetector>
-      </Animated.View>
-    </View>
+      <View style={styles.acciones}>
+        {onDetail ? (
+          <Button label="Ver detalle" variant="ghost" onPress={onDetail} style={styles.detalle} />
+        ) : null}
+        <Button
+          label="Siguiente"
+          icon="arrow-right"
+          iconAlFinal
+          size="lg"
+          loading={esperando}
+          disabled={esperando || avanzando}
+          onPress={continuar}
+          style={styles.siguiente}
+        />
+      </View>
+    </Hoja>
   );
 }
 
 const styles = StyleSheet.create({
-  velo: { backgroundColor: color.velo },
-  hoja: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  // El filo de luz de 1 px, solo arriba: la hoja se apoya en el borde de la pantalla.
-  filo: {
-    padding: 1,
-    paddingBottom: 0,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-  },
-  contenido: {
-    padding: space.lg,
-    paddingTop: space.lg,
-    gap: space.sm,
-    borderTopLeftRadius: radius.xl - 1,
-    borderTopRightRadius: radius.xl - 1,
-    overflow: 'hidden',
-  },
+  contenido: { padding: space.lg, paddingTop: space.lg, gap: space.sm },
   ok: { backgroundColor: color.hojaAcierto },
   mal: { backgroundColor: color.wrongFondo },
   cabeza: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },

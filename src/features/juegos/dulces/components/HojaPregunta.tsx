@@ -1,23 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Button } from '@/shared/ui/Button';
+import { FILO_HOJA, Hoja } from '@/shared/ui/Hoja';
 import { AudioButton } from '@/shared/ui/AudioButton';
 import { OptionButton, type OptionState } from '@/shared/ui/OptionButton';
 import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
 import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
-import { color, filoLuz, font, motionDuration, motionEasing, motionSpring, radius, sol, space } from '@/theme';
+import { color, filoLuz, font, motionDuration, motionEasing, space } from '@/theme';
 import { useUltimo } from '@/shared/hooks/useUltimo';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { DulceObjetivo } from '@/types';
 
-/** El velo nunca pasa de esto: el tablero, congelado, sigue viéndose. */
-const VELO_MAX = 0.5;
-/** El grosor del filo de luz de la hoja. */
-const FILO = 1;
+/** El grosor del filo de luz de la hoja (el título se mide dentro de él). */
+const FILO = FILO_HOJA;
 
 export interface PreguntaDulces {
   objetivo: DulceObjetivo;
@@ -68,7 +66,6 @@ export function HojaPregunta({
   onSeguir,
 }: Props) {
   const reducido = useMovimientoReducido();
-  const { height: alturaVentana } = useWindowDimensions();
 
   // Al irse, la hoja se lleva su contenido: no se vacía a media salida.
   const p = useUltimo(pregunta);
@@ -81,28 +78,7 @@ export function HojaPregunta({
           analizar(entry.phrase, entry.phrase_tts || entry.phrase, marcasDe(entry.audio_en), vozEn.duracion)
         : null);
 
-  const y = useSharedValue(alturaVentana);
-  const velo = useSharedValue(0);
-  const opacidad = useSharedValue(reducido ? 0 : 1);
   const titulo = useSharedValue(0);
-
-  useEffect(() => {
-    if (visible) {
-      velo.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-      if (reducido) {
-        y.set(0);
-        opacidad.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-      } else {
-        opacidad.set(1);
-        // La barra destella un instante antes de que suba la hoja.
-        y.set(withDelay(motionDuration.rapido, withSpring(0, motionSpring.rebote)));
-      }
-    } else {
-      velo.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-      if (reducido) opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-      else y.set(withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-    }
-  }, [visible, reducido, alturaVentana, y, velo, opacidad]);
 
   // El título aparece cuando la frase de la meta llega a su lugar.
   useEffect(() => {
@@ -112,8 +88,6 @@ export function HojaPregunta({
     }));
   }, [tituloListo, reducido, titulo]);
 
-  const hojaAnim = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ translateY: y.get() }] }));
-  const veloAnim = useAnimatedStyle(() => ({ opacity: velo.get() * VELO_MAX }));
   const tituloAnim = useAnimatedStyle(() => ({ opacity: titulo.get() }));
 
   // Dónde quedará el título cuando la hoja termine de subir: la hoja va pegada al fondo de la capa.
@@ -143,64 +117,44 @@ export function HojaPregunta({
   };
 
   return (
-    <View
-      style={StyleSheet.absoluteFill}
-      pointerEvents={visible ? 'box-none' : 'none'}
-      importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
-      accessibilityElementsHidden={!visible}
+    <Hoja
+      visible={visible}
+      filo={filoLuz}
+      estiloCuerpo={styles.contenido}
+      velo="pasa"
+      // La barra destella un instante antes de que suba la hoja.
+      retrasoSubida={motionDuration.rapido}
+      onLayout={(e) => setAltoHoja(e.nativeEvent.layout.height)}
     >
-      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.velo, veloAnim]} />
-      <Animated.View style={[styles.hoja, hojaAnim]} onLayout={(e) => setAltoHoja(e.nativeEvent.layout.height)}>
-        <LinearGradient colors={filoLuz} start={sol.start} end={sol.end} style={styles.filo}>
-          <View style={styles.contenido} accessibilityLiveRegion="polite">
-            <Text style={styles.etiqueta}>Llenaste esta</Text>
-            <Animated.View onLayout={alMedirTitulo} style={tituloAnim}>
-              <FraseKaraoke palabras={en.palabras} voz={vozEn} tamano="lg" />
-            </Animated.View>
-            <Text style={styles.ayuda}>¿Qué significa?</Text>
-            <View style={styles.opciones}>
-              {p.opciones.map((o, i) => (
-                <OptionButton
-                  key={o}
-                  label={o}
-                  state={estadoDe(o)}
-                  index={i}
-                  compacta
-                  disabled={respondiendo}
-                  onPress={() => onResponder(o)}
-                />
-              ))}
-            </View>
-            {respondiendo ? (
-              <Button label="Siguiente" size="lg" full disabled={avanzando} onPress={onSeguir} />
-            ) : (
-              <AudioButton path={p.objetivo.entry.audio_en} size="sm" label="Escuchar" />
-            )}
-          </View>
-        </LinearGradient>
+      <Text style={styles.etiqueta}>Llenaste esta</Text>
+      <Animated.View onLayout={alMedirTitulo} style={tituloAnim}>
+        <FraseKaraoke palabras={en.palabras} voz={vozEn} tamano="lg" />
       </Animated.View>
-    </View>
+      <Text style={styles.ayuda}>¿Qué significa?</Text>
+      <View style={styles.opciones}>
+        {p.opciones.map((o, i) => (
+          <OptionButton
+            key={o}
+            label={o}
+            state={estadoDe(o)}
+            index={i}
+            compacta
+            disabled={respondiendo}
+            onPress={() => onResponder(o)}
+          />
+        ))}
+      </View>
+      {respondiendo ? (
+        <Button label="Siguiente" size="lg" full disabled={avanzando} onPress={onSeguir} />
+      ) : (
+        <AudioButton path={p.objetivo.entry.audio_en} size="sm" label="Escuchar" />
+      )}
+    </Hoja>
   );
 }
 
 const styles = StyleSheet.create({
-  velo: { backgroundColor: color.velo },
-  hoja: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  filo: {
-    padding: FILO,
-    paddingBottom: 0,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-  },
-  contenido: {
-    padding: space.lg,
-    gap: space.sm,
-    alignItems: 'stretch',
-    borderTopLeftRadius: radius.xl - FILO,
-    borderTopRightRadius: radius.xl - FILO,
-    backgroundColor: color.bg,
-    overflow: 'hidden',
-  },
+  contenido: { padding: space.lg, gap: space.sm, alignItems: 'stretch', backgroundColor: color.bg },
   etiqueta: {
     fontSize: font.size.xs,
     color: color.textFaint,

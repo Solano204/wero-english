@@ -1,14 +1,11 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  withSpring,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/shared/ui/Button';
+import { Hoja } from '@/shared/ui/Hoja';
 import { Icon } from '@/shared/ui/Icon';
 import { FraseKaraoke } from '@/shared/ui/fx/FraseKaraoke';
 import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
@@ -19,15 +16,9 @@ import {
   filoOk,
   filoWrong,
   font,
-  motionDuration,
-  motionEasing,
-  motionSpring,
-  radius,
-  sol,
   space,
 } from '@/theme';
 import { useUltimo } from '@/shared/hooks/useUltimo';
-import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
 
 // Copias locales: un worklet captura estos colores, no el objeto de tema entero.
@@ -63,8 +54,6 @@ interface Props {
  * Con «reducir movimiento» no sube: aparece con un fundido; el karaoke cambia de color igual.
  */
 export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: Props) {
-  const reducido = useMovimientoReducido();
-  const { height: alturaVentana } = useWindowDimensions();
 
   // Al irse, la hoja se lleva su contenido: no se vacía a media salida.
   const c = useUltimo<Contenido>(entry ? { entry, correct } : null, (a, b) => a.entry === b.entry && a.correct === b.correct);
@@ -77,26 +66,6 @@ export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: P
           analizar(c.entry.phrase, c.entry.phrase_tts || c.entry.phrase, marcasDe(c.entry.audio_en), vozEn.duracion)
         : null);
 
-  const y = useSharedValue(alturaVentana);
-  const opacidad = useSharedValue(reducido ? 0 : 1);
-
-  useEffect(() => {
-    if (visible) {
-      if (reducido) {
-        y.set(0);
-        opacidad.set(withTiming(1, { duration: motionDuration.base, easing: motionEasing.entrar }));
-      } else {
-        opacidad.set(1);
-        y.set(withSpring(0, motionSpring.rebote));
-      }
-    } else if (reducido) {
-      opacidad.set(withTiming(0, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-    } else {
-      y.set(withTiming(alturaVentana, { duration: motionDuration.rapido, easing: motionEasing.salir }));
-    }
-  }, [visible, reducido, alturaVentana, y, opacidad]);
-
-  const hoja = useAnimatedStyle(() => ({ opacity: opacidad.get(), transform: [{ translateY: y.get() }] }));
   // La traducción se enciende mientras suena el español.
   const traduccion = useAnimatedStyle(() => ({ color: interpolateColor(activaEs.get(), [0, 1], [TENUE, ENCENDIDA]) }));
 
@@ -104,54 +73,25 @@ export function HojaPausa({ entry, correct, visible, avanzando, onContinuar }: P
 
   const ok = c.correct;
   return (
-    <View
-      style={StyleSheet.absoluteFill}
-      pointerEvents={visible ? 'box-none' : 'none'}
-      importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
-      accessibilityElementsHidden={!visible}
-    >
-      <Animated.View style={[styles.hoja, hoja]}>
-        <LinearGradient colors={ok ? filoOk : filoWrong} start={sol.start} end={sol.end} style={styles.filo}>
-          <View
-            style={[styles.contenido, ok ? styles.ok : styles.mal, { paddingBottom: space.lg }]}
-            accessibilityLiveRegion="polite"
-          >
-            <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.correct : color.wrong} />
-            <FraseKaraoke palabras={en.palabras} voz={vozEn} tamano="md" />
-            <Animated.Text style={[styles.traduccion, traduccion]}>{c.entry.spanish_main}</Animated.Text>
-            <Button
-              label="Siguiente"
-              icon="arrow-right"
-              iconAlFinal
-              size="lg"
-              disabled={avanzando}
-              onPress={onContinuar}
-              full
-            />
-          </View>
-        </LinearGradient>
-      </Animated.View>
-    </View>
+    <Hoja visible={visible} filo={ok ? filoOk : filoWrong} estiloCuerpo={[styles.contenido, ok ? styles.ok : styles.mal]}>
+      <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.correct : color.wrong} />
+      <FraseKaraoke palabras={en.palabras} voz={vozEn} tamano="md" />
+      <Animated.Text style={[styles.traduccion, traduccion]}>{c.entry.spanish_main}</Animated.Text>
+      <Button
+        label="Siguiente"
+        icon="arrow-right"
+        iconAlFinal
+        size="lg"
+        disabled={avanzando}
+        onPress={onContinuar}
+        full
+      />
+    </Hoja>
   );
 }
 
 const styles = StyleSheet.create({
-  hoja: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  // El filo de luz de 1 px, solo arriba: la hoja se apoya en el borde de la pantalla.
-  filo: {
-    padding: 1,
-    paddingBottom: 0,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-  },
-  contenido: {
-    alignItems: 'center',
-    padding: space.lg,
-    gap: space.sm,
-    borderTopLeftRadius: radius.xl - 1,
-    borderTopRightRadius: radius.xl - 1,
-    overflow: 'hidden',
-  },
+  contenido: { alignItems: 'center', padding: space.lg, gap: space.sm },
   ok: { backgroundColor: color.correctFondo },
   mal: { backgroundColor: color.wrongFondo },
   traduccion: {
