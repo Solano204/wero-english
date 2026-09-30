@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParams } from '@/navigation/routes';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Input, Screen, Presionable } from '@/components/base';
 import { BotonGoogle } from '@/components/entrada';
 import { useConsentimiento } from '@/components/legal';
 import { useAuthStore } from '@/store';
-import { color, font, space, aparecer, desaparecer, motionDuration } from '@/theme';
+import { color, font, layout, space, aparecer, desaparecer, motionDuration } from '@/theme';
 import * as googleAuth from '../../../modules/wero-google-auth';
 
 type Vista = 'inicio' | 'usuario';
@@ -22,6 +25,7 @@ type Accion = 'google' | 'sin' | 'usuario' | 'vincular' | 'nueva' | null;
  * el aviso de abajo lo dice de frente, igual que antes.
  */
 export function AuthScreen() {
+  const nav = useNavigation<NativeStackNavigationProp<RootStackParams>>();
   const [vista, setVista] = useState<Vista>('inicio');
   const [accion, setAccion] = useState<Accion>(null);
   const [username, setUsername] = useState('');
@@ -172,6 +176,14 @@ export function AuthScreen() {
           full
         />
         <Enlace texto="Ya tengo usuario y contraseña" onPress={() => setVista('usuario')} />
+        <View style={styles.legal}>
+          <Text style={styles.legalTexto}>Al continuar aceptas los</Text>
+          <View style={styles.legalFila}>
+            <Enlace texto="Términos" onPress={() => nav.navigate('LegalDoc', { doc: 'terminos' })} />
+            <Text style={styles.legalTexto}>y el</Text>
+            <Enlace texto="Aviso de privacidad" onPress={() => nav.navigate('LegalDoc', { doc: 'privacidad' })} />
+          </View>
+        </View>
       </Animated.View>
     );
   }
@@ -198,7 +210,7 @@ export function AuthScreen() {
 
 function Enlace({ texto, onPress }: { texto: string; onPress: () => void }) {
   return (
-    <Presionable onPress={onPress} hitSlop={12} accessibilityRole="button">
+    <Presionable onPress={onPress} accessibilityRole="button" style={styles.enlaceToque}>
       <Text style={styles.enlace}>{texto}</Text>
     </Presionable>
   );
@@ -234,6 +246,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: font.size.md * 1.5,
   },
+  enlaceToque: { minHeight: layout.tapMin, justifyContent: 'center' },
+  legal: { alignItems: 'center' },
+  legalFila: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', columnGap: space.xs },
+  legalTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, textAlign: 'center' },
   enlace: {
     fontSize: font.size.sm,
     color: color.accent,

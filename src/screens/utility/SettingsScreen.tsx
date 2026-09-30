@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Header, Icon, Screen, Presionable } from '@/components/base';
 import { SectionTitle } from '@/components/list';
-import { useConsentimiento } from '@/components/legal';
+import { FilaLegal, useConsentimiento } from '@/components/legal';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { setSimularCargaLenta } from '@/hooks/useCarga';
@@ -303,6 +303,22 @@ export function SettingsScreen() {
           onPress={borrarCuenta}
           loading={busy}
           full
+        />
+      </Card>
+
+      <SectionTitle title="Legal" />
+      <Card style={styles.card}>
+        <FilaLegal
+          icono="info"
+          titulo="Aviso de privacidad"
+          detalle="Qué datos usa Wero, dónde se guardan y tus derechos"
+          onPress={() => nav.navigate('LegalDoc', { doc: 'privacidad' })}
+        />
+        <FilaLegal
+          icono="book"
+          titulo="Términos y condiciones"
+          detalle="Las reglas para usar la app"
+          onPress={() => nav.navigate('LegalDoc', { doc: 'terminos' })}
         />
       </Card>
 

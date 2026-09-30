@@ -1,5 +1,6 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { Entry, JuegoId } from '@/types';
+import type { DocLegal } from '@/legal/tipos';
 
 /** Todas las rutas en un solo lugar, tipadas. */
 
@@ -53,6 +54,8 @@ export type RootStackParams = {
 
   Downloads: undefined;
   Settings: undefined;
+  /** Un texto legal empaquetado; también existe fuera de la sesión (entrada y onboarding). */
+  LegalDoc: { doc: DocLegal };
   Stuck: undefined;
   Deck: undefined;
   Diagnostics: undefined;

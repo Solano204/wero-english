@@ -32,6 +32,7 @@ import {
   PhrasalScreen,
   PhrasalVerboScreen,
   PronunciationScreen,
+  LegalDocScreen,
   SettingsScreen,
   SfxSamplerScreen,
   StudyScreen,
@@ -77,6 +78,7 @@ export function RootNavigator() {
     return (
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
         <Stack.Screen name="Auth" component={AuthScreen} />
+        <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
       </Stack.Navigator>
     );
   }
@@ -89,6 +91,7 @@ export function RootNavigator() {
     return (
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
       </Stack.Navigator>
     );
   }
@@ -128,6 +131,7 @@ export function RootNavigator() {
       <Stack.Screen name="ErrorDetail" component={ErrorDetailScreen} />
       <Stack.Screen name="Downloads" component={DownloadsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
       <Stack.Screen name="Stuck" component={StuckScreen} />
       <Stack.Screen name="Deck" component={DeckScreen} />
       <Stack.Screen name="Niveles" component={NivelesScreen} />

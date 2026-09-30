@@ -9,6 +9,9 @@ import {
   findNodeHandle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParams } from '@/navigation/routes';
 import { Button } from '@/components/base/Button';
 import { Presionable } from '@/components/base/Presionable';
 import { CONSENTIMIENTOS } from '@/config/consentimientos';
@@ -137,10 +140,26 @@ interface OpcionesPedir {
  * `pedir(tipo)` resuelve true si ya hay consentimiento vigente o si la persona toca «Aceptar y
  * continuar»; false con «Ahora no». La respuesta se guarda (tipo, fecha y versión del aviso).
  * La pantalla pinta `hoja` en cualquier lugar de su árbol.
+ *
+ * «Leer el aviso de privacidad» esconde la hoja sin contestarla, abre el aviso y, al volver a
+ * esta pantalla, la hoja reaparece con la misma pregunta pendiente.
  */
-export function useConsentimiento(opciones: { onLeerAviso?: () => void } = {}) {
+export function useConsentimiento() {
+  const nav = useNavigation<NativeStackNavigationProp<RootStackParams>>();
   const [abierta, setAbierta] = useState<TipoConsentimiento | null>(null);
+  const [leyendo, setLeyendo] = useState(false);
   const resolver = useRef<((ok: boolean) => void) | null>(null);
+
+  const leerAviso = useCallback(() => {
+    setLeyendo(true);
+    nav.navigate('LegalDoc', { doc: 'privacidad' });
+  }, [nav]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLeyendo(false);
+    }, [])
+  );
 
   const pedir = useCallback(async (tipo: TipoConsentimiento, { sinInsistir = false }: OpcionesPedir = {}) => {
     if (await consentimiento.vigente(tipo)) return true;
@@ -169,10 +188,10 @@ export function useConsentimiento(opciones: { onLeerAviso?: () => void } = {}) {
 
   const hoja = (
     <HojaConsentimiento
-      tipo={abierta}
+      tipo={leyendo ? null : abierta}
       onAceptar={() => responder(true)}
       onAhoraNo={() => responder(false)}
-      onLeerAviso={opciones.onLeerAviso}
+      onLeerAviso={leerAviso}
     />
   );
   return { pedir, hoja };
