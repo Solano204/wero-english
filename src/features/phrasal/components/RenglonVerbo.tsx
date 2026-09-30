@@ -5,6 +5,7 @@ import { Badge, Presionable } from '@/shared/ui';
 import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
 import { color, font, layout, radius, space, text } from '@/theme';
 import { conteo } from '@/domain/texto';
+import { useTemporizador } from '@/shared/hooks/useTemporizador';
 
 /** Cuánto se espera la medida del verbo antes de abrir la página sin vuelo (ms). */
 const MEDIDA_MAX_MS = 250;
@@ -32,6 +33,7 @@ interface Props {
  */
 export const RenglonVerbo = memo(function RenglonVerbo({ verbo, formas, coinciden, onAbrir }: Props) {
   const verboRef = useRef<Text>(null);
+  const tiempo = useTemporizador();
 
   const abrir = () => {
     let enviado = false;
@@ -45,7 +47,7 @@ export const RenglonVerbo = memo(function RenglonVerbo({ verbo, formas, coincide
       return;
     }
     verboRef.current.measureInWindow((x, y, width, height) => ir({ x, y, width, height }));
-    setTimeout(() => ir(null), MEDIDA_MAX_MS);
+    tiempo.despues(() => ir(null), MEDIDA_MAX_MS);
   };
 
   return (

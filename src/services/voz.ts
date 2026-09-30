@@ -257,13 +257,20 @@ export async function listenOnce(opts: ListenOptions): Promise<ResultadoEscucha>
 
   opts.onEstado?.('preparando');
   detenerTodo();
+  // Después del corte (que también llama a `cancel`): si alguien cancela durante las esperas de abajo (la pantalla se
+  // fue), el micrófono no se abre.
+  const mia = generacionEscucha;
+  const cancelada = () => mia !== generacionEscucha;
   await espera(ESPERA_TRAS_CORTE_MS);
+  if (cancelada()) return vacio('cancelada');
 
   const enDispositivo = await reconoceEnDispositivo();
+  if (cancelada()) return vacio('cancelada');
   const primero = await escucharCon(m, opts, enDispositivo);
   // El reconocedor del teléfono dijo que no puede (paquete borrado, servicio apagado): se intenta con el del sistema.
   if (enDispositivo && primero.error && ERRORES_SIN_DISPOSITIVO.has(primero.error) && primero.origen === 'nada') {
     dispositivo = Promise.resolve(false);
+    if (cancelada()) return vacio('cancelada');
     return escucharCon(m, opts, false);
   }
   return primero;
@@ -384,7 +391,11 @@ function escucharCon(m: RecognitionModule, opts: ListenOptions, enDispositivo: b
   });
 }
 
+/** Sube con cada `cancel()`: una escucha que todavía no abrió el micrófono ve que cambió y ya no lo abre. */
+let generacionEscucha = 0;
+
 export function cancel(): void {
+  generacionEscucha++;
   const m = load();
   if (!m) return;
   try {

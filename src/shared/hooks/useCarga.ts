@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type DependencyList } from 'react';
+import { useTemporizador } from '@/shared/hooks/useTemporizador';
 import { NavigationRouteContext, useFocusEffect } from '@react-navigation/native';
 
 export type EstadoCarga = 'cargando' | 'listo' | 'vacio' | 'error';
@@ -60,6 +61,8 @@ export function useCarga<T>(
   const vivo = useRef(true);
   const pedido = useRef(0);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // El mínimo del esqueleto: se cancela solo al desmontar.
+  const tiempo = useTemporizador();
   // Cuándo se prendió el esqueleto (null si esta carga nunca llegó a pintarlo).
   const demoraDesde = useRef<number | null>(null);
   const cargarRef = useRef(cargar);
@@ -124,7 +127,7 @@ export function useCarga<T>(
         fn();
         return;
       }
-      setTimeout(() => {
+      tiempo.despues(() => {
         if (vigente()) fn();
       }, espera);
     };
@@ -155,7 +158,7 @@ export function useCarga<T>(
     }
     // Como un `finally` (el catch de arriba no deja salir errores), sin `finally`: el React Compiler no lo compila.
     if (vigente() && temporizador.current) clearTimeout(temporizador.current);
-  }, []);
+  }, [tiempo]);
 
   useEffect(() => {
     if (alEnfocar) return;

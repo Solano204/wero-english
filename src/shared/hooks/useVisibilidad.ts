@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { AppState, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
+import { usePrimerPlano } from '@/shared/hooks/usePrimerPlano';
 import Animated, {
   measure,
   runOnJS,
@@ -36,12 +37,7 @@ export function useVisibilidad(scrollY: SharedValue<number>) {
   const ref = useAnimatedRef<Animated.View>();
   const { height: pantalla } = useWindowDimensions();
   const enfocada = useIsFocused();
-  const [primerPlano, setPrimerPlano] = useState(AppState.currentState === 'active');
-
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', (estado) => setPrimerPlano(estado === 'active'));
-    return () => sub.remove();
-  }, []);
+  const primerPlano = usePrimerPlano();
 
   const activa = useSharedValue(enfocada && primerPlano);
   useEffect(() => {

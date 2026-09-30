@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { AppState } from 'react-native';
+import { useEffect } from 'react';
 import { useIsFocused } from '@react-navigation/native';
+import { usePrimerPlano } from '@/shared/hooks/usePrimerPlano';
 import { useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
@@ -15,12 +15,7 @@ const MAX_PASO_MS = 100;
 export function useSenalActiva(): { activo: boolean; reducido: boolean } {
   const enfocada = useIsFocused();
   const reducido = useMovimientoReducido();
-  const [primerPlano, setPrimerPlano] = useState(AppState.currentState === 'active');
-
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', (estado) => setPrimerPlano(estado === 'active'));
-    return () => sub.remove();
-  }, []);
+  const primerPlano = usePrimerPlano();
 
   return { activo: enfocada && primerPlano && !reducido, reducido };
 }

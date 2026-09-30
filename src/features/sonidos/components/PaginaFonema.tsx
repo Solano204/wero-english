@@ -17,6 +17,7 @@ import { DueloPar } from './DueloPar';
 import { MapaBoca } from './MapaBoca';
 import { RenglonPalabra } from './RenglonPalabra';
 import { SIMBOLO_GRANDE } from './ViajeSimbolo';
+import { useTemporizador } from '@/shared/hooks/useTemporizador';
 
 /** Cuántos cuadros se espera a que la página termine de acomodarse antes de dar por perdido el símbolo. */
 const INTENTOS_MEDIR = 10;
@@ -88,6 +89,7 @@ export function PaginaFonema({
 }: Props) {
   const { width: anchoVentana } = useWindowDimensions();
   const simbolo = useRef<View>(null);
+  const tiempo = useTemporizador();
 
   const medir = useCallback(
     (primerIntento: number) => {
@@ -96,12 +98,12 @@ export function PaginaFonema({
           // La página puede no estar todavía en su lugar (el pager se acomoda un cuadro después de montarse).
           const dentro = width > 0 && x > -width && x < anchoVentana;
           if (dentro) alSimboloMedido?.({ x, y, width, height });
-          else if (intento < INTENTOS_MEDIR) requestAnimationFrame(() => intentar(intento + 1));
+          else if (intento < INTENTOS_MEDIR) tiempo.cuadro(() => intentar(intento + 1));
         });
       };
       intentar(primerIntento);
     },
-    [alSimboloMedido, anchoVentana]
+    [alSimboloMedido, anchoVentana, tiempo]
   );
 
   useEffect(() => {

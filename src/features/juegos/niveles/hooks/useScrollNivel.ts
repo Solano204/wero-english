@@ -14,6 +14,7 @@ import { offsetCentrado, type ItemLista, type Medidas } from '@/domain/niveles';
 import { motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ALTO_TRAMO } from '@/features/juegos/niveles/components/EncabezadoTramo';
+import { useTemporizador } from '@/shared/hooks/useTemporizador';
 
 /** La primera vez por sesión el scroll al nivel actual es animado; las siguientes, directo. */
 let yaSeAnimo = false;
@@ -42,6 +43,7 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
   const reducido = useMovimientoReducido();
   const listaRef = useAnimatedRef<Animated.FlatList<ItemLista>>();
   const scrollY = useSharedValue(0);
+  const tiempo = useTemporizador();
   const posicion = useSharedValue(0);
   const animando = useSharedValue(0);
   /** 1 mientras la celda del nivel actual está a la vista: fuera de ella su onda no corre (MOT-4). */
@@ -105,8 +107,8 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
     if (animar) irA(Math.max(0, objetivo - viewport), objetivo, motionDuration.lento);
     else irA(objetivo, objetivo, 0);
     // Un cuadro después de mandar el scroll: sin esto se vería un destello de la lista arriba.
-    requestAnimationFrame(() => setPosicionada(true));
-  }, [hayDatos, viewport, indiceActual, medidas, reducido, irA]);
+    tiempo.cuadro(() => setPosicionada(true));
+  }, [hayDatos, viewport, indiceActual, medidas, reducido, irA, tiempo]);
 
   // Estable: FlatList no admite cambiar este callback en caliente.
   const [alVisibles] = useState(() => ({ viewableItems }: { viewableItems: ViewToken[] }) => {
