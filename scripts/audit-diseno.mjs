@@ -1080,7 +1080,7 @@ function main() {
     return { r: rel(f), src, lines: src.split('\n') };
   });
   const leer = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
-  const tokens = leer('src/theme/tokens.ts');
+  const tokens = leer('src/theme/paleta.ts') + '\n' + leer('src/theme/tokens.ts');
   const H = auditaEstatica(archivos);
   const S = auditaSenal(archivos);
   const coloreadas = (tokens.match(/shadowColor:\s*'#[0-9A-Fa-f]{6}'/g) || []).filter((s) => !/#000000/i.test(s)).length;

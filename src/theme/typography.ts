@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { color, font } from './tokens';
+import { color } from './paleta';
+import { font } from './tokens';
 
 /** Estilos de texto compartidos. Evita repetir fontSize/color por pantalla. */
 export const text = StyleSheet.create({

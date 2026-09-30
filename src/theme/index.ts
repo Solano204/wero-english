@@ -8,7 +8,6 @@ export {
   resplandorSol,
   resplandorPiso,
   pieza,
-  color,
   gradiente,
   iconoRedondo,
   iconoVisual,
@@ -29,9 +28,8 @@ export {
   medidor,
   inclinacion,
   marcaGoogle,
-  tema,
 } from './tokens';
-export type { WorldId } from './tokens';
+export { color, tema, type WorldId } from './paleta';
 export {
   motionDuration,
   motionEasing,

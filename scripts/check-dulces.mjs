@@ -27,7 +27,7 @@ const prueba = (nombre, fn) => {
 };
 
 const niveles = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/data/niveles.json'), 'utf8')).juegos.dulces.niveles;
-const tokens = fs.readFileSync(path.join(ROOT, 'src/theme/tokens.ts'), 'utf8');
+const tokens = fs.readFileSync(path.join(ROOT, 'src/theme/paleta.ts'), 'utf8') + '\n' + fs.readFileSync(path.join(ROOT, 'src/theme/tokens.ts'), 'utf8');
 
 prueba('cada color lleva su propia forma y su propio nombre', () => {
   assert.equal(COLORES_MAX, 6);

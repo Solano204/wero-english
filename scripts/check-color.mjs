@@ -4,7 +4,7 @@
  *   npm run check:color
  *
  * Busca hex (#rgb, #rgba, #rrggbb, #rrggbbaa) y rgb( / rgba( en src/,
- * sin contar comentarios. Todo color sale de src/theme/tokens.ts.
+ * sin contar comentarios. Todo color sale de src/theme/paleta.ts (y los derivados de src/theme/tokens.ts).
  * Sale con código 1 y lista archivo:línea si encuentra alguno.
  */
 import fs from 'node:fs';
@@ -51,7 +51,7 @@ const difTono = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
 
 /** COLOR-2: `senal` sale solo de tokens de `color` y sus pasos son del mismo tono. Devuelve los errores. */
 function revisaSenal() {
-  const tokens = fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8');
+  const tokens = (fs.readFileSync(path.join(TEMA, 'paleta.ts'), 'utf8') + '\n' + fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8'));
   const decl = tokens.match(/export const senal[^=]*=\s*\[([^\]]+)\]/);
   if (!decl) return ['senal no está definido en src/theme/tokens.ts'];
   const pasos = decl[1].split(',').map((p) => p.trim()).filter(Boolean);
@@ -117,7 +117,7 @@ const FONDOS = ['bg', 'bgFin', 'bgAlto', 'surface', 'surfaceAlt', 'surfaceHigh',
  *  - Los pares que sostienen la pantalla pasan AA: texto 4.5:1; el bloque del botón contra el fondo 3:1.
  */
 function revisaPaleta() {
-  const hex = hexDeColor(fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8'));
+  const hex = hexDeColor((fs.readFileSync(path.join(TEMA, 'paleta.ts'), 'utf8') + '\n' + fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8')));
   const errores = [];
   for (const [k, v] of Object.entries(hex)) {
     if (SEMANTICOS.test(k) || saturacion(v) < 0.2) continue;
