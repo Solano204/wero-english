@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { AudioButton } from '@/components/card';
 import { Icon, RiskBadge, Presionable } from '@/components/base';
-import { color, font, radius, space, aparecerSubiendo, escalon } from '@/theme';
+import { color, font, radius, space, aparecerSubiendo, escalon, motionEscalon } from '@/theme';
 import type { Entry } from '@/types';
 
 interface Props {
@@ -15,7 +15,9 @@ interface Props {
    *  Apagado por defecto: en una lista de 100+ renglones (Explorar, un
    *  pack) un segundo botón por fila es puro ruido. */
   showSpanishAudio?: boolean;
-  /** Posición en la lista, para la entrada escalonada. Sin ella, entra sin demora. */
+  /** Posición en la lista, para la entrada escalonada. Sin ella, entra sin demora. Solo los primeros
+   *  `motionEscalon.max` renglones se animan: los que la lista monta al hacer scroll aparecen quietos
+   *  (una animación de layout por renglón, a media lista, traba el scroll en gama media). */
   index?: number;
   /** 'compacta': renglón de una línea para listas largas. 'mazo': tarjeta
    *  con el texto a ancho completo y los audios etiquetados debajo; en
@@ -85,7 +87,7 @@ export const EntryRow = memo(function EntryRow({
   return (
     // La entrada va en un `Animated.View` aparte: `Presionable` anima su propio transform (la escala) y una
     // animación de layout en ese mismo nodo lo pisaría.
-    <Animated.View entering={aparecerSubiendo(escalon(index))}>
+    <Animated.View entering={index < motionEscalon.max ? aparecerSubiendo(escalon(index)) : undefined}>
     <Presionable
       onPress={() => onPress(entry)}
       accessibilityRole="button"

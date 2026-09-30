@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,6 +14,9 @@ import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+
+/** Cuánto se espera sin teclear antes de buscar. */
+const ESPERA_BUSQUEDA_MS = 150;
 
 /** P-03, los ocho mundos, con buscador encima. */
 export function ExploreScreen() {
@@ -32,19 +35,38 @@ export function ExploreScreen() {
     { alEnfocar: true }
   );
 
+  // Se busca cuando se deja de teclear (no en cada tecla), y una respuesta vieja nunca pisa a
+  // la de lo último que se escribió.
+  const pedida = useRef(0);
+  const espera = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (espera.current) clearTimeout(espera.current);
+    },
+    []
+  );
   const buscar = useCallback(
-    async (t: string) => {
+    (t: string) => {
       setTerm(t);
+      const id = ++pedida.current;
+      if (espera.current) clearTimeout(espera.current);
       if (t.trim().length < 2) {
         setResults([]);
         return;
       }
-      setResults(await searchEntries(t, filter(), 30));
+      espera.current = setTimeout(() => {
+        searchEntries(t, filter(), 30)
+          .then((r) => {
+            if (id === pedida.current) setResults(r);
+          })
+          .catch(() => undefined);
+      }, ESPERA_BUSQUEDA_MS);
     },
     [filter]
   );
+  const abrir = useCallback((e: Entry) => nav.navigate('Detail', { entryId: e.id }), [nav]);
 
-  const mundos = [...content.packs.mundos].sort((a, b) => a.orden - b.orden);
+  const mundos = useMemo(() => [...content.packs.mundos].sort((a, b) => a.orden - b.orden), [content]);
   const buscando = term.trim().length >= 2;
 
   return (
@@ -71,7 +93,7 @@ export function ExploreScreen() {
                 key={e.id}
                 entry={e}
                 index={i}
-                onPress={() => nav.navigate('Detail', { entryId: e.id })}
+                onPress={abrir}
               />
             ))
           )}

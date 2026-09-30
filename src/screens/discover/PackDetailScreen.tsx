@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { conteo } from '@/utils/text';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
 import {
   useNavigation,
   useRoute,
@@ -43,6 +43,10 @@ export function PackDetailScreen() {
     (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
     [nav]
   );
+  const renderItem = useCallback(
+    ({ item, index }: ListRenderItemInfo<Entry>) => <EntryRow entry={item} index={index} onPress={abrir} />,
+    [abrir]
+  );
 
   return (
     <Screen padded={false}>
@@ -72,10 +76,8 @@ export function PackDetailScreen() {
         {(entries) => (
           <FlatList
             data={entries}
-            keyExtractor={(e) => String(e.id)}
-            renderItem={({ item, index }) => (
-              <EntryRow entry={item} index={index} onPress={abrir} />
-            )}
+            keyExtractor={claveEntrada}
+            renderItem={renderItem}
             contentContainerStyle={styles.list}
             ItemSeparatorComponent={Separador}
             ListEmptyComponent={
@@ -93,6 +95,8 @@ export function PackDetailScreen() {
     </Screen>
   );
 }
+
+const claveEntrada = (e: Entry) => String(e.id);
 
 function Separador() {
   return <View style={styles.sep} />;
