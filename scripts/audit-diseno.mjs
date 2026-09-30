@@ -71,7 +71,7 @@ const TIPO2_SE_QUEDAN = {
   'src/features/juegos/dulces/components/PieDulces.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/lecturas/screens/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/lecturas/screens/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/features/ajustes/screens/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/ajustes/components/ControlesAjustes.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
   'src/features/juegos/pares/screens/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/features/vocabulario/components/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/features/progreso/components/Espectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',

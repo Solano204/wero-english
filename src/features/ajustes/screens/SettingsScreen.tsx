@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
-import { Image } from 'expo-image';
-import { Button, Card, Header, Icon, Screen, Presionable } from '@/shared/ui';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, Card, Header, Screen } from '@/shared/ui';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { FilaLegal } from '@/features/ajustes/components/FilaLegal';
-import { useAuthStore } from '@/estado/useAuthStore';
-import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
 import { setSimularCargaLenta } from '@/shared/hooks/useCarga';
-import * as notifications from '@/services/notificaciones';
-import { color, font, layout, radius, space } from '@/theme';
+import { color, font, space } from '@/theme';
 import type { Nivel } from '@/types';
 import { useAjustes } from '@/features/ajustes/hooks/useAjustes';
+import { Toggle } from '@/features/ajustes/components/ControlesAjustes';
+import { Identidad } from '@/features/ajustes/components/Identidad';
+import { SeccionRecordatorios } from '@/features/ajustes/components/SeccionRecordatorios';
+import { SeccionSesion } from '@/features/ajustes/components/SeccionSesion';
 
 /** P-11, ajustes. */
 export function SettingsScreen() {
@@ -48,147 +48,9 @@ export function SettingsScreen() {
         </View>
       </Card>
 
-      <SectionTitle title="Sesión" />
-      <Card style={styles.card}>
-        <Stepper
-          label="Frases por sesión"
-          value={s.metaDiaria}
-          min={5}
-          max={60}
-          step={5}
-          onChange={(v) => void cambiar('metaDiaria', v as never)}
-        />
-        <Stepper
-          label="Nuevas por día"
-          value={s.nuevasPorDia}
-          min={0}
-          max={30}
-          step={1}
-          onChange={(v) => void cambiar('nuevasPorDia', v as never)}
-        />
-        <Toggle
-          label="Audio automático"
-          hint="Suena la frase al aparecer la tarjeta"
-          value={s.autoAudio}
-          onChange={(v) => void cambiar('autoAudio', v as never)}
-        />
-        <Toggle
-          label="Vibración"
-          value={s.haptics}
-          onChange={(v) => void cambiar('haptics', v as never)}
-        />
-        <Toggle
-          label="Efectos de sonido"
-          hint="Acierto, fallo y los efectos de los juegos"
-          value={s.sonidosFeedback}
-          onChange={(v) => void cambiar('sonidosFeedback', v as never)}
-        />
-        <Toggle
-          label="Música"
-          hint="Suena de fondo en toda la app, más baja en estudio y gramática"
-          value={s.musica}
-          onChange={(v) => void cambiar('musica', v as never)}
-        />
-        {s.musica ? (
-          <>
-            <Stepper
-              label="Volumen de la música"
-              value={s.volumenMusica}
-              min={0}
-              max={100}
-              step={10}
-              onChange={(v) => void cambiar('volumenMusica', v as never)}
-            />
-            <Toggle
-              label="Música en juegos distinta"
-              hint="Apagado: los juegos usan la misma pista que el resto de la app"
-              value={s.musicaJuegosDistinta}
-              onChange={(v) => void cambiar('musicaJuegosDistinta', v as never)}
-            />
-          </>
-        ) : null}
-        <Toggle
-          label="Contador de seguidas"
-          hint="Cuántas llevas bien seguidas. Se borra al terminar la sesión."
-          value={s.mostrarSeguidas}
-          onChange={(v) => void cambiar('mostrarSeguidas', v as never)}
-        />
-      </Card>
+      <SeccionSesion s={s} cambiar={cambiar} />
 
-      <SectionTitle title="Recordatorios" />
-      <Card style={styles.card}>
-        {!notifEstado.ok ? (
-          <Text style={styles.hint}>{notifEstado.razon}</Text>
-        ) : null}
-        <Toggle
-          label="Frases durante el día"
-          hint="Cada aviso es una sola frase"
-          value={s.notificaciones}
-          onChange={async (v) => {
-            if (!v) {
-              await cambiar('notificaciones', false as never);
-              await notifications.cancelAll();
-              return;
-            }
-            // Al prenderlos, primero la hoja que explica cuáles y cada cuánto; «Ahora no» los deja apagados.
-            if (!(await pedirConsentimiento('notificaciones'))) return;
-            await cambiar('notificaciones', true as never);
-            await notifications.requestPermission();
-          }}
-        />
-
-        {s.notificaciones ? (
-          <>
-            <Stepper
-              label="Cuántas al día"
-              value={s.notifPorDia}
-              min={0}
-              max={NOTIF_MAX_POR_DIA}
-              step={1}
-              onChange={(v) => void cambiar('notifPorDia', v as never)}
-            />
-            {s.notifPorDia === 1 ? (
-              <>
-                <HoraFila
-                  label="A qué hora"
-                  value={s.horaNotificacion}
-                  opciones={['08:00', '13:00', '18:00', '20:00', '21:00']}
-                  onChange={(v) => void cambiar('horaNotificacion', v as never)}
-                />
-                <Text style={styles.hint}>
-                  Con una sola al día, llega a esa hora.
-                </Text>
-              </>
-            ) : s.notifPorDia > 1 ? (
-              <>
-                <HoraFila
-                  label="Desde las"
-                  value={s.notifDesde}
-                  opciones={['07:00', '08:00', '09:00', '10:00', '12:00']}
-                  onChange={(v) => void cambiar('notifDesde', v as never)}
-                />
-                <HoraFila
-                  label="Hasta las"
-                  value={s.notifHasta}
-                  opciones={['18:00', '20:00', '21:00', '22:00']}
-                  onChange={(v) => void cambiar('notifHasta', v as never)}
-                />
-                <Text style={styles.hint}>
-                  Se reparten dentro de esa ventana, nunca dos juntas.
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.hint}>
-                En cero no llega ninguna, pero el permiso se queda puesto por
-                si lo prendes otro día.
-              </Text>
-            )}
-            <Text style={styles.hint}>
-              Los cambios entran al terminar tu próxima sesión.
-            </Text>
-          </>
-        ) : null}
-      </Card>
+      <SeccionRecordatorios s={s} cambiar={cambiar} notifEstado={notifEstado} pedirConsentimiento={pedirConsentimiento} />
 
       <SectionTitle title="Micrófono" />
       <Card style={styles.card}>
@@ -308,197 +170,12 @@ export function SettingsScreen() {
   );
 }
 
-function Toggle({
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint?: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <View style={styles.toggle}>
-      <View style={styles.toggleText}>
-        <Text style={styles.label}>{label}</Text>
-        {hint ? <Text style={styles.hint}>{hint}</Text> : null}
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        trackColor={{ false: color.surfaceHigh, true: color.accentSoft }}
-        thumbColor={value ? color.accent : color.textFaint}
-      />
-    </View>
-  );
-}
-
-function Stepper({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <View style={styles.stepper}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.stepperControls}>
-        <Button
-          label="−"
-          variant="secondary"
-          onPress={() => onChange(Math.max(min, value - step))}
-          style={styles.stepBtn}
-        />
-        <Text style={styles.stepValue}>{value}</Text>
-        <Button
-          label="+"
-          variant="secondary"
-          onPress={() => onChange(Math.min(max, value + step))}
-          style={styles.stepBtn}
-        />
-      </View>
-    </View>
-  );
-}
-
-/**
- * Fila de hora con opciones fijas en vez de un selector de reloj.
- *
- * Un time picker nativo abre un modal por cada extremo de la ventana y
- * pide dos toques más. Con cinco horas comunes se resuelve el 95% de
- * los casos en un toque, y quien quiera algo raro puede vivir con la
- * hora más cercana.
- */
-function HoraFila({
-  label,
-  value,
-  opciones,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  opciones: string[];
-  onChange: (v: string) => void;
-}) {
-  return (
-    <View style={styles.hora}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.horaChips}>
-        {opciones.map((h) => (
-          <Presionable
-            key={h}
-            onPress={() => onChange(h)}
-            accessibilityRole="button"
-            accessibilityLabel={`${label} ${h}`}
-            style={[styles.horaChip, value === h && styles.horaChipOn]}
-          >
-            <Text
-              style={[styles.horaTexto, value === h && styles.horaTextoOn]}
-            >
-              {h}
-            </Text>
-          </Presionable>
-        ))}
-      </View>
-    </View>
-  );
-}
-
-/** Quién está usando la app: con Google, su foto, nombre y correo; si no, qué tipo de cuenta es. */
-function Identidad({ user }: { user: NonNullable<ReturnType<typeof useAuthStore.getState>['user']> }) {
-  const [sinFoto, setSinFoto] = useState(false);
-  if (user.google_sub) {
-    return (
-      <View style={styles.identidad}>
-        {user.foto && !sinFoto ? (
-          <Image
-            source={{ uri: user.foto }}
-            style={styles.avatar}
-            onError={() => setSinFoto(true)}
-            accessibilityIgnoresInvertColors
-            accessible={false}
-          />
-        ) : (
-          <View style={[styles.avatar, styles.avatarVacio]}>
-            <Icon name="smile" size="md" color={color.textMuted} />
-          </View>
-        )}
-        <View style={styles.identidadTexto}>
-          <Text style={styles.label}>{user.nombre ?? 'Tu cuenta de Google'}</Text>
-          {user.email ? <Text style={styles.hint}>{user.email}</Text> : null}
-        </View>
-      </View>
-    );
-  }
-  const sinCuenta = user.username.startsWith('invitado_');
-  return (
-    <View>
-      <Text style={styles.label}>{sinCuenta ? 'Sin cuenta' : user.username}</Text>
-      <Text style={styles.hint}>
-        {sinCuenta
-          ? 'Para ligar tu avance a Google, cierra sesión y entra con Google: te lo vamos a ofrecer.'
-          : 'Cuenta con usuario y contraseña, solo en este teléfono.'}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   card: { gap: space.lg },
-  identidad: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  identidadTexto: { flex: 1 },
-  avatar: { width: 48, height: 48, borderRadius: radius.pill },
-  avatarVacio: { backgroundColor: color.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
-  hora: { gap: space.sm },
-  horaChips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  horaChip: {
-    minHeight: layout.tapMin,
-    justifyContent: 'center',
-    paddingHorizontal: space.md,
-    borderRadius: radius.pill,
-    backgroundColor: color.surfaceAlt,
-    borderWidth: 1,
-    borderColor: color.border,
-  },
-  horaChipOn: { backgroundColor: color.accentSoft, borderColor: color.accent },
-  horaTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  horaTextoOn: { color: color.accent, fontFamily: font.family.bodyStrong },
   label: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, marginTop: space.xs },
-  toggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: space.md,
-  },
-  toggleText: { flex: 1 },
   levels: { flexDirection: 'row', gap: space.sm },
   level: { flex: 1 },
   levelOn: { flex: 1, backgroundColor: color.accentSoft, borderColor: color.accent },
-  stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  stepperControls: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  stepBtn: { minWidth: 48 },
-  stepValue: {
-    fontSize: font.size.lg,
-    color: color.text,
-    fontFamily: font.family.heading,
-    minWidth: 36,
-    textAlign: 'center',
-  },
   diag: { marginTop: space.xl },
 });
