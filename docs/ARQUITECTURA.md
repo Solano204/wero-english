@@ -168,5 +168,5 @@ Tres archivos nuevos concentran casi todo:
 - `src/db/economy.ts` — partidas, reto semanal y registro de habla. La
   economía de monedas se eliminó en la v3.5.
 - `src/db/games.ts` — el puente que hace que jugar califique en SM-2.
-- `src/services/speech.ts` — el reconocedor, con carga perezosa para
+- `src/services/voz.ts` — el reconocedor, con carga perezosa para
   que la app siga corriendo donde el módulo nativo no existe.
