@@ -1,7 +1,7 @@
 export { ProgressScreen } from '@/features/progreso/screens/ProgressScreen';
 export { SettingsScreen } from './SettingsScreen';
-export { LegalDocScreen } from './LegalDocScreen';
-export { BorrarScreen } from './BorrarScreen';
+export { LegalDocScreen } from '@/features/cuenta/screens/LegalDocScreen';
+export { BorrarScreen } from '@/features/cuenta/screens/BorrarScreen';
 export { DownloadsScreen } from './DownloadsScreen';
 export { StuckScreen } from '@/features/atoradas/screens/StuckScreen';
 export { DeckScreen } from '@/features/mazo/screens/DeckScreen';

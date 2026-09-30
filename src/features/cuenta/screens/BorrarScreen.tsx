@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { CommonActions, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Header, Screen } from '@/shared/ui';
-import { BotonMantener } from '@/components/legal/BotonMantener';
+import { BotonMantener } from '@/features/cuenta/components/BotonMantener';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { color, font, radius, space } from '@/theme';
 import type { RootStackParams } from '@/types/rutas';

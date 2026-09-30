@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParams } from '@/types/rutas';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Input, Screen, Presionable } from '@/shared/ui';
-import { BotonGoogle } from '@/components/entrada/BotonGoogle';
+import { BotonGoogle } from '@/features/cuenta/components/BotonGoogle';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { color, font, layout, space, aparecer, desaparecer, motionDuration } from '@/theme';

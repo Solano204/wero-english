@@ -39,9 +39,9 @@ const ACC1_NO_CONVIVEN = {
   'src/features/juegos/cazala/components/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
   'src/features/juegos/fin/screens/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
   'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
-  'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
+  'src/features/cuenta/screens/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
   'src/features/estudio/components/FinDelDia.tsx': '`quedan ? Seguir repasando : sinNuevas ? Frases sueltas : Aprender frases nuevas`: un solo `primary` a la vez; Jugar es `secondary` y Volver `ghost`',
-  'src/screens/entry/AuthScreen.tsx': 'tres vistas excluyentes (vincular tu avance, usuario y contraseña, inicio), cada una con un solo `primary`; en el inicio la acción principal es «Continuar con Google» (`BotonGoogle`, con la marca de Google) y lo demás es `secondary`/`ghost`',
+  'src/features/cuenta/screens/AuthScreen.tsx': 'tres vistas excluyentes (vincular tu avance, usuario y contraseña, inicio), cada una con un solo `primary`; en el inicio la acción principal es «Continuar con Google» (`BotonGoogle`, con la marca de Google) y lo demás es `secondary`/`ghost`',
 };
 
 /**
@@ -49,7 +49,7 @@ const ACC1_NO_CONVIVEN = {
  * sigue sus lineamientos de marca: Roboto Medium, la fuente del sistema en Android.
  */
 const TIPO1_EXCEPCIONES = {
-  'src/components/entrada/BotonGoogle.tsx': 'los lineamientos de marca de «Sign in with Google» piden Roboto Medium',
+  'src/features/cuenta/components/BotonGoogle.tsx': 'los lineamientos de marca de «Sign in with Google» piden Roboto Medium',
 };
 /** ACC-1 reales: la acción principal no es sólida, o hay varios sólidos a la vez. */
 const ACC1_REALES = [
@@ -58,10 +58,10 @@ const ACC1_REALES = [
 /** TIPO-2: textos de 12–13 px con nombre de cuerpo que se quedan así, revisados a mano. */
 const TIPO2_SE_QUEDAN = {
   'src/shared/ui/Ads.tsx:fullNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/entry/AuthScreen.tsx:legalTexto': 'nota al pie o leyenda: «Al continuar aceptas los Términos y el Aviso de privacidad», una línea bajo los botones',
-  'src/components/entrada/BotonGoogle.tsx:texto': 'la etiqueta del botón «Continuar con Google» va en 14 como piden los lineamientos de marca de Google',
-  'src/screens/entry/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/entry/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/cuenta/screens/AuthScreen.tsx:legalTexto': 'nota al pie o leyenda: «Al continuar aceptas los Términos y el Aviso de privacidad», una línea bajo los botones',
+  'src/features/cuenta/components/BotonGoogle.tsx:texto': 'la etiqueta del botón «Continuar con Google» va en 14 como piden los lineamientos de marca de Google',
+  'src/features/cuenta/screens/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/cuenta/screens/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
   'src/features/practicar/screens/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/colmena/screens/ColmenaScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/caida/components/FinCaida.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',

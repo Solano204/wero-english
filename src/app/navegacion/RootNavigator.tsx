@@ -5,7 +5,7 @@ import { navigate, navigationRef } from '@/shared/navegacion/navigationRef';
 import { NOTIF_TARGETS, type RootStackParams } from '@/types/rutas';
 // Solo lo del arranque se importa aquí: el resto de las pantallas se evalúa la
 // primera vez que se abre (ver `diferida`), no en el arranque en frío.
-import { AuthScreen } from '@/screens/entry/AuthScreen';
+import { AuthScreen } from '@/features/cuenta/screens/AuthScreen';
 import { BootScreen } from '@/app/arranque/BootScreen';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
@@ -58,7 +58,7 @@ export function RootNavigator() {
     return (
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
         <Stack.Screen name="Auth" component={AuthScreen} />
-        <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
+        <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
       </Stack.Navigator>
     );
   }
@@ -70,8 +70,8 @@ export function RootNavigator() {
   if (status === 'signed' && settingsLoaded && !onboardingHecho) {
     return (
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
-        <Stack.Screen name="Onboarding" getComponent={() => require('@/screens/entry/OnboardingScreen').OnboardingScreen} />
-        <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
+        <Stack.Screen name="Onboarding" getComponent={() => require('@/features/cuenta/screens/OnboardingScreen').OnboardingScreen} />
+        <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
       </Stack.Navigator>
     );
   }
@@ -111,8 +111,8 @@ export function RootNavigator() {
       <Stack.Screen name="ErrorDetail" getComponent={() => require('@/features/errores/screens/ErrorDetailScreen').ErrorDetailScreen} />
       <Stack.Screen name="Downloads" getComponent={() => require('@/screens/utility/DownloadsScreen').DownloadsScreen} />
       <Stack.Screen name="Settings" getComponent={() => require('@/screens/utility/SettingsScreen').SettingsScreen} />
-      <Stack.Screen name="LegalDoc" getComponent={() => require('@/screens/utility/LegalDocScreen').LegalDocScreen} />
-      <Stack.Screen name="Borrar" getComponent={() => require('@/screens/utility/BorrarScreen').BorrarScreen} />
+      <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
+      <Stack.Screen name="Borrar" getComponent={() => require('@/features/cuenta/screens/BorrarScreen').BorrarScreen} />
       <Stack.Screen name="Stuck" getComponent={() => require('@/features/atoradas/screens/StuckScreen').StuckScreen} />
       <Stack.Screen name="Deck" getComponent={() => require('@/features/mazo/screens/DeckScreen').DeckScreen} />
       <Stack.Screen name="Niveles" getComponent={() => require('@/features/juegos/niveles/screens/NivelesScreen').NivelesScreen} />
