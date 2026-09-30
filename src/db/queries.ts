@@ -166,6 +166,15 @@ function cargarPoolDistractores(): Promise<Candidato[]> {
 }
 
 /**
+ * Arma el pool de distractores en un momento tranquilo (poco después de entrar), para que la
+ * primera tarjeta de Estudiar no pague leer y preparar ~1,500 frases justo mientras entra la
+ * pantalla. Si falla, la primera tarjeta lo vuelve a intentar como siempre.
+ */
+export function precargarDistractores(): void {
+  cargarPoolDistractores().catch(() => undefined);
+}
+
+/**
  * Las opciones falsas de una tarjeta. `usados` son las que ya salieron en tarjetas anteriores de la sesión: no se
  * repiten mientras haya otras disponibles.
  */

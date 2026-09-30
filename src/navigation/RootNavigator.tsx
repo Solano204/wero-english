@@ -9,10 +9,14 @@ import { AuthScreen } from '@/screens/entry/AuthScreen';
 import { BootScreen } from '@/screens/entry/BootScreen';
 import { useAuthStore, useSettingsStore } from '@/store';
 import * as music from '@/services/music';
+import { precargarDistractores } from '@/db/queries';
 import * as notifications from '@/services/notifications';
 import { color, motionDuration } from '@/theme';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
+
+/** Cuánto después de entrar se precarga lo de Estudiar: pasada la entrada de Practicar. */
+const PRECARGA_MS = 2500;
 
 export function RootNavigator() {
   const status = useAuthStore((s) => s.status);
@@ -32,6 +36,13 @@ export function RootNavigator() {
   useEffect(() => {
     if (status === 'booting') return;
     void music.iniciar();
+  }, [status]);
+
+  // Ya dentro y con Practicar pintado, se prepara en segundo plano lo que Estudiar va a pedir.
+  useEffect(() => {
+    if (status !== 'signed') return;
+    const t = setTimeout(precargarDistractores, PRECARGA_MS);
+    return () => clearTimeout(t);
   }, [status]);
 
   if (status === 'booting') {
