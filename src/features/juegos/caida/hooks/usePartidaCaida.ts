@@ -4,7 +4,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Easing, cancelAnimation, runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
-import { PARTIDA_INICIAL, fasePartida, partidaCaida } from '../logic/partida';
+import { PARTIDA_INICIAL, fasePartida, partidaCaida } from '@/features/juegos/caida/logic/partida';
 import { useChoqueCaida } from './useChoqueCaida';
 import { useMarcadorCaida } from './useMarcadorCaida';
 import { usePausaCaida } from './usePausaCaida';

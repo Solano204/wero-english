@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Card } from '@/shared/ui';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { Stepper, Toggle } from './ControlesAjustes';
-import type { useAjustes } from '../hooks/useAjustes';
+import type { useAjustes } from '@/features/ajustes/hooks/useAjustes';
 import { space } from '@/theme';
 
 type Ajustes = ReturnType<typeof useAjustes>;

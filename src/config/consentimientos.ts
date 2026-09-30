@@ -1,4 +1,4 @@
-import type { TipoConsentimiento } from '@/services/cuenta/consentimiento';
+import type { TipoConsentimiento } from '@/types/consentimiento';
 
 /** Lo que dice cada hoja de consentimiento. Tiene que decir exactamente lo que hace la app: si el código cambia, esto cambia. */
 export interface TextoConsentimiento {

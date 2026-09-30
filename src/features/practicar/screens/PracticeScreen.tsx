@@ -9,16 +9,16 @@ import { radius, space, tarjeta } from '@/theme';
 import { conteo } from '@/domain/texto';
 import { dayKey } from '@/domain/fechas';
 import { ConsolaHoy } from '@/features/practicar/components/ConsolaHoy';
-import { etiquetaCorregir } from '@/features/practicar/logic/consola';
+import { etiquetaCorregir } from '@/domain/consolaHoy';
 import { Destacados } from '@/features/practicar/components/Destacados';
 import { EncabezadoPracticar, ALTO_ENCABEZADO } from '@/features/practicar/components/EncabezadoPracticar';
 import { FilaModo } from '@/features/practicar/components/FilaModo';
 import { GrupoPlegable } from '@/features/practicar/components/GrupoPlegable';
-import { ICONO_GRUPO, ICONO_MODO } from '@/features/practicar/logic/iconos';
+import { ICONO_GRUPO, ICONO_MODO } from '@/shared/navegacion/iconosModo';
 import { metaDe } from '@/features/practicar/logic/metadatos';
 import { RetoSemana } from '@/features/practicar/components/RetoSemana';
 import { ORDEN, type ModoId, type MotivoHoy } from '@/features/practicar/logic/hoy';
-import { GRUPOS, MODOS } from '@/features/practicar/logic/modos';
+import { GRUPOS, MODOS } from '@/shared/navegacion/modos';
 import { usePracticar } from '@/features/practicar/hooks/usePracticar';
 
 /**

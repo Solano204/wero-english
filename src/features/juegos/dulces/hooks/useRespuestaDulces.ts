@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from 'react';
-import type { EventoPartida } from '../logic/partida';
-import type { PreguntaDulces } from '../components/HojaPregunta';
+import type { EventoPartida } from '@/features/juegos/dulces/logic/partida';
+import type { PreguntaDulces } from '@/features/juegos/dulces/components/HojaPregunta';
 import { applyGameGrade } from '@/data/repos/juegos';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';

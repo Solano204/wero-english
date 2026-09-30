@@ -1,23 +1,8 @@
 import type { UsoModo } from '@/types';
 
-export type ModoId =
-  | 'study'
-  | 'gramatica'
-  | 'colmena'
-  | 'pares'
-  | 'caida'
-  | 'dulces'
-  | 'cazala'
-  | 'pares_minimos'
-  | 'oido'
-  | 'sonidos'
-  | 'suena'
-  | 'phrasal'
-  | 'azar'
-  | 'lecturas'
-  | 'errores'
-  | 'atoran'
-  | 'mazo';
+import type { ModoId } from '@/types/modos';
+
+export type { ModoId };
 
 /** El orden que tenía Practicar. Desempata los destacados y elige el modo de un usuario nuevo. */
 export const ORDEN: readonly ModoId[] = [

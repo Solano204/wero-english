@@ -1,6 +1,6 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParams } from '@/types/rutas';
-import type { ModoId } from './hoy';
+import type { ModoId } from '@/types/modos';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

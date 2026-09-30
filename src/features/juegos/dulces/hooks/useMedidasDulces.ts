@@ -1,7 +1,7 @@
 import { useCallback, useRef, type RefObject } from 'react';
 import type { View } from 'react-native';
-import type { EstallidosRef, Trozo } from '../components/Estallidos';
-import { TROZOS_RETRASO_MS, azarFijo, trozosDelPaso, trozosPorPieza } from '../logic/tablero';
+import type { EstallidosRef, Trozo } from '@/features/juegos/dulces/components/Estallidos';
+import { TROZOS_RETRASO_MS, azarFijo, trozosDelPaso, trozosPorPieza } from '@/features/juegos/dulces/logic/tablero';
 import type { Paso } from '@/domain/match3Pasos';
 import { motionDulces } from '@/theme';
 import type { DulceObjetivo } from '@/types';

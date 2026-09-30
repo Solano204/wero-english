@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, View } from 'react-native';
-import { distribuir } from '../logic/geometria';
+import { distribuir } from '@/features/juegos/pares/logic/geometria';
 import { escalon, motionDuration } from '@/theme';
 import type { ParesTablero } from '@/types';
 

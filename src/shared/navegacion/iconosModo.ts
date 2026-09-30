@@ -1,5 +1,5 @@
 import type { IconName } from '@/shared/ui';
-import type { ModoId } from './hoy';
+import type { ModoId } from '@/types/modos';
 import type { GrupoId } from './modos';
 
 /** Ícono de cada modo: la ficha de su renglón y la portada estática de un destacado (sin letras). */

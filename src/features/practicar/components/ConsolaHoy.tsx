@@ -37,9 +37,9 @@ import {
 import { conteo, plural } from '@/domain/texto';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { dayKey } from '@/domain/fechas';
-import { energiaOnda, metaCumplida } from '@/features/practicar/logic/consola';
+import { energiaOnda, metaCumplida } from '@/domain/consolaHoy';
 import { useCelebracion } from '@/estado/useCelebracion';
-import type { Modo } from '@/features/practicar/logic/modos';
+import type { Modo } from '@/shared/navegacion/modos';
 
 interface Props {
   modo: Modo;

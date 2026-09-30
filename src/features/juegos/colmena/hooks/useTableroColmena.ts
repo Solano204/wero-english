@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { DURACION_VUELO, type Vuelo } from '../components/Hexagono';
-import type { Colocada, RechazoFicha } from '../components/Panal';
-import { fuenteDeRanura } from '../components/RanurasPalabra';
-import { disposicionPanal, distribuirRanuras, fichasParaCompletar, retrasoVuelo } from '../logic/geometria';
+import { DURACION_VUELO, type Vuelo } from '@/features/juegos/colmena/components/Hexagono';
+import type { Colocada, RechazoFicha } from '@/features/juegos/colmena/components/Panal';
+import { fuenteDeRanura } from '@/features/juegos/colmena/components/RanurasPalabra';
+import { disposicionPanal, distribuirRanuras, fichasParaCompletar, retrasoVuelo } from '@/features/juegos/colmena/logic/geometria';
 import { formaPalabras } from '@/domain/texto';
 import { layout, space } from '@/theme';
 import type { ColmenaRound } from '@/types';

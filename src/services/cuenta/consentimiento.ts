@@ -8,7 +8,9 @@ import { VERSION_AVISO } from '@/config/legal';
  * exista cualquier cuenta. Cada uno guarda la versión del aviso con que se dio; si
  * VERSION_AVISO sube, deja de contar y se vuelve a pedir en el siguiente uso.
  */
-export type TipoConsentimiento = 'google' | 'microfono' | 'notificaciones' | 'descargas';
+import type { TipoConsentimiento } from '@/types/consentimiento';
+
+export type { TipoConsentimiento };
 
 export const TIPOS_CONSENTIMIENTO: TipoConsentimiento[] = ['google', 'microfono', 'notificaciones', 'descargas'];
 

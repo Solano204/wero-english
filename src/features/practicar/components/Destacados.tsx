@@ -23,8 +23,8 @@ import {
 } from '@/theme';
 import { TOTAL_NIVELES, resumenNivel, type Niveles } from '@/domain/resumenNiveles';
 import type { ModoId } from '@/features/practicar/logic/hoy';
-import { ICONO_MODO } from '@/features/practicar/logic/iconos';
-import { MODOS } from '@/features/practicar/logic/modos';
+import { ICONO_MODO } from '@/shared/navegacion/iconosModo';
+import { MODOS } from '@/shared/navegacion/modos';
 
 interface Props {
   /** El más usado primero: va de héroe. */

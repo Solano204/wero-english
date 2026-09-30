@@ -2,7 +2,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { AccessibilityInfo, AppState } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RONDA_INICIAL, faseColmena, rondaColmena } from '../logic/ronda';
+import { RONDA_INICIAL, faseColmena, rondaColmena } from '@/features/juegos/colmena/logic/ronda';
 import { useTableroColmena } from './useTableroColmena';
 import { useVozRonda } from './useVozRonda';
 import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';

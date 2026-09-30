@@ -1,6 +1,6 @@
 import { shuffle } from '@/domain/arreglos';
 import type { DulceObjetivo, Entry } from '@/types';
-import type { PreguntaDulces } from '../components/HojaPregunta';
+import type { PreguntaDulces } from '@/features/juegos/dulces/components/HojaPregunta';
 
 /**
  * La partida de Dulces como máquina de estados. Solo hay cuatro momentos y nunca se enciman:

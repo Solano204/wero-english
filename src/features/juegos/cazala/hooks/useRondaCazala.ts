@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { RONDA_INICIAL, alternarMarca, rondaCazala } from '../logic/ronda';
+import { RONDA_INICIAL, alternarMarca, rondaCazala } from '@/features/juegos/cazala/logic/ronda';
 import { AccessibilityInfo, AppState, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';

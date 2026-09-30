@@ -10,8 +10,8 @@ import { FilaMundo } from '@/features/progreso/components/FilaMundo';
 import { PanelSenal } from '@/features/progreso/components/PanelSenal';
 import { Espectrograma } from '@/features/progreso/components/Espectrograma';
 import { JUEGOS_PROGRESO, filasMundo, resumenJuego } from '@/features/progreso/logic/datos';
-import { ICONO_MODO } from '@/features/practicar/logic/iconos';
-import { MODOS } from '@/features/practicar/logic/modos';
+import { ICONO_MODO } from '@/shared/navegacion/iconosModo';
+import { MODOS } from '@/shared/navegacion/modos';
 import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { useProgreso } from '@/features/progreso/hooks/useProgreso';
 

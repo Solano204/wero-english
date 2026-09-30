@@ -3,7 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import { Card } from '@/shared/ui';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { HoraFila, Stepper, Toggle } from './ControlesAjustes';
-import type { useAjustes } from '../hooks/useAjustes';
+import type { useAjustes } from '@/features/ajustes/hooks/useAjustes';
 import { NOTIF_MAX_POR_DIA } from '@/config/notificaciones';
 import * as notifications from '@/services/notificaciones';
 import { color, font, space } from '@/theme';

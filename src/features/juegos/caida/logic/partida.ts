@@ -1,4 +1,4 @@
-import type { EstadoFicha } from '../components/FichaCaida';
+import type { EstadoFicha } from '@/features/juegos/caida/components/FichaCaida';
 import type { Entry } from '@/types';
 
 /**

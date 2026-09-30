@@ -20,7 +20,7 @@ import type { JuegoRecord, RetoSemanal } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 import { metaDe, textoMeta, type FuentesMeta } from '@/features/practicar/logic/metadatos';
 import { elegirDestacados, elegirHoy, type ModoId, type Uso } from '@/features/practicar/logic/hoy';
-import { MODOS } from '@/features/practicar/logic/modos';
+import { MODOS } from '@/shared/navegacion/modos';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 

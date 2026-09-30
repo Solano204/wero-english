@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, type Dispatch, type RefObject } from 'react';
-import type { EventoPartida } from '../logic/partida';
+import type { EventoPartida } from '@/features/juegos/caida/logic/partida';
 import * as audio from '@/services/audio';
 import type { Entry } from '@/types';
 

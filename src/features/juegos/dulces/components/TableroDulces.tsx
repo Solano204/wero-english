@@ -7,9 +7,9 @@ import { motionDuration, motionDulces } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ChipCascada } from './ChipCascada';
 import { Pieza, type Movimiento } from './Pieza';
-import { vistaInicial, type Jugada, type PiezaVista, type TableroDulcesRef } from '../logic/vistaTablero';
+import { vistaInicial, type Jugada, type PiezaVista, type TableroDulcesRef } from '@/features/juegos/dulces/logic/vistaTablero';
 
-export type { Jugada, TableroDulcesRef } from '../logic/vistaTablero';
+export type { Jugada, TableroDulcesRef } from '@/features/juegos/dulces/logic/vistaTablero';
 import {
   REBOTE_MS,
   TROZOS_RETRASO_MS,

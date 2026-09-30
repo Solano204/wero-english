@@ -1,5 +1,5 @@
 import type { Paso } from '@/domain/match3Pasos';
-import type { Entrada, Movimiento } from '../components/Pieza';
+import type { Entrada, Movimiento } from '@/features/juegos/dulces/components/Pieza';
 import { retrasoDeColumna } from './tablero';
 
 /** Lo que el tablero de Dulces anima y cómo arranca: los tipos de una jugada y la vista de un tablero nuevo. */

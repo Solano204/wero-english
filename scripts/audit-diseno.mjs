@@ -825,7 +825,7 @@ function auditaAudio(archivos, bundledSrc) {
 
 /** ACC-3: opciones visibles en Practicar con los grupos plegados = 1 acción de HOY + destacados + grupos. */
 function opcionesPracticar(leer) {
-  const modos = leer('src/features/practicar/logic/modos.ts');
+  const modos = leer('src/shared/navegacion/modos.ts');
   const grupos = modos.slice(modos.indexOf('GRUPOS = ['), modos.indexOf('] as const')).split("id: '").length - 1;
   const hoy = leer('src/features/practicar/logic/hoy.ts');
   const destacados = Number(hoy.slice(hoy.indexOf('NUM_DESTACADOS = ') + 17).split(';')[0]);
