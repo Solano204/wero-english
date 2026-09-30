@@ -307,6 +307,17 @@ export function LecturaScreen() {
     [respuestas, lectura]
   );
 
+  // Estable entre ticks del audio: si no, PieReproductor se repinta cada vez que la pantalla lo hace.
+  const hayBotonSiguiente = rep.terminado || alFinal;
+  const esUltimo = lectura ? cap + 1 >= lectura.capitulos.length : false;
+  const botonSiguiente = useMemo(
+    () =>
+      hayBotonSiguiente
+        ? { etiqueta: esUltimo ? 'Ver las preguntas' : `Capítulo ${cap + 2}`, onPress: siguiente }
+        : null,
+    [hayBotonSiguiente, esUltimo, cap, siguiente]
+  );
+
   if (!lectura) {
     return (
       <Screen>
@@ -393,11 +404,7 @@ export function LecturaScreen() {
       <PieReproductor
         rep={rep}
         texto={capitulo?.texto ?? ''}
-        siguiente={
-          rep.terminado || alFinal
-            ? { etiqueta: ultimo ? 'Ver las preguntas' : `Capítulo ${cap + 2}`, onPress: siguiente }
-            : null
-        }
+        siguiente={botonSiguiente}
       />
     </View>
   );

@@ -12,6 +12,8 @@ const MUESTREO_MS = 100;
 /** El player se queda un pelo antes de la duración al terminar. */
 const FIN_MARGEN_S = 0.3;
 const SIN_PROGRESO = { pos: 0, dur: 0 };
+/** Cada cuánto (s de audio) se publica el progreso a React: la barra y el reloj. */
+const PASO_PROGRESO_S = 0.5;
 
 export interface ReproductorCapitulo {
   estado: EstadoCapitulo;
@@ -101,7 +103,11 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
         return;
       }
       const p = audio.progresoFrase();
-      setProgreso(p);
+      // Solo cuando cambia algo que se ve (el reloj va en segundos; la barra se desliza sola entre
+      // pasos): repintar la pantalla de la lectura en cada tick era trabajo sin cambio visible.
+      setProgreso((antes) =>
+        antes.dur === p.dur && Math.floor(antes.pos / PASO_PROGRESO_S) === Math.floor(p.pos / PASO_PROGRESO_S) ? antes : p
+      );
       if (!audio.isPlaying() && p.dur > 0 && p.pos >= p.dur - FIN_MARGEN_S) {
         setTerminado(true);
         aReposo();
