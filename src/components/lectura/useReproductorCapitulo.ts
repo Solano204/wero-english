@@ -81,6 +81,17 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
     };
   }, [path, aReposo]);
 
+  // Se registra para que audio.detenerTodo() (corte global al navegar, al
+  // pasar a segundo plano, o el de la propia pantalla al perder el foco)
+  // también deje este estado en reposo al instante: sin esto, el player ya
+  // está cortado pero la barra se queda mostrando "sonando" hasta el
+  // siguiente tick del intervalo de progreso.
+  useEffect(() => {
+    return audio.registrarCorte(() => {
+      if (estadoRef.current !== 'idle') aReposo();
+    });
+  }, [aReposo]);
+
   // Avance de la barra y fin natural: solo mientras suena.
   useEffect(() => {
     if (estado !== 'sonando') return;

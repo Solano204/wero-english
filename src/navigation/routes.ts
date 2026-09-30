@@ -56,6 +56,7 @@ export type RootStackParams = {
   Stuck: undefined;
   Deck: undefined;
   Diagnostics: undefined;
+  SfxSampler: undefined;
 };
 
 export type MainTabParams = {

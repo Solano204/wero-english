@@ -11,6 +11,7 @@ import { SectionTitle } from '@/components/list';
 import { nivelMaximo } from '@/domain/gramatica';
 import { loadContent } from '@/store/content';
 import { useUnlockStore } from '@/store';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { color, font, space, aparecerSubiendo, escalon } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
@@ -96,7 +97,7 @@ export function GramaticaScreen() {
                       key={tema.id}
                       tema={tema}
                       niveles={niveles}
-                      cerrado={n >= GRATIS_POR_BLOQUE && !clavesVistas.has(`gramatica:${tema.id}`)}
+                      cerrado={ANUNCIOS_ACTIVOS && n >= GRATIS_POR_BLOQUE && !clavesVistas.has(`gramatica:${tema.id}`)}
                       primero={n === 0}
                       indice={n}
                       avance={avance}

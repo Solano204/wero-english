@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from '@/components/base';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { color, font, radius, space } from '@/theme';
 
 /**
@@ -10,6 +11,7 @@ import { color, font, radius, space } from '@/theme';
  * esconde justo lo que tiene que dar ganas de abrirlo.
  */
 export function CandadoBadge({ texto = 'Con anuncio' }: { texto?: string }) {
+  if (!ANUNCIOS_ACTIVOS) return null;
   return (
     <View style={styles.wrap}>
       <Icon name="lock" size="sm" color={color.accent} />

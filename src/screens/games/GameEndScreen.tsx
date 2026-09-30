@@ -12,6 +12,7 @@ import { estrellasPara, guardarNivel } from '@/db/levels';
 import { loadContent } from '@/store/content';
 import { useAuthStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { PARTIDA_PERFECTA, TRES_ESTRELLAS, elegirFrase } from '@/utils/frases';
 import { color, font, space, aparecer, aparecerSubiendo, motionDuration } from '@/theme';
@@ -45,6 +46,7 @@ export function GameEndScreen() {
   const { juego, rondas, aciertos, nivel } = params;
   const content = useMemo(loadContent, []);
   useMusicaPantalla('juegos');
+  useCortarAudioAlSalir();
 
   /**
    * Las estrellas salen de los umbrales del nivel, que ya vienen

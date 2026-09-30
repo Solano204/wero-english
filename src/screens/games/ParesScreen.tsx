@@ -4,6 +4,7 @@ import { AppState, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, t
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { CableSenal, type ParIndices } from '@/components/juegos/pares/CableSenal';
 import { FichaPar } from '@/components/juegos/pares/FichaPar';
@@ -20,9 +21,10 @@ import { getRandomEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, escalon, font, motionDuration, space } from '@/theme';
+import { color, escalon, font, motionDuration, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -76,6 +78,7 @@ export function ParesScreen() {
   // Se necesita oír bien las dos frases al acertar un par: la música,
   // aunque fuera baja, competiría justo en ese momento.
   useMusicaPantalla('silencio');
+  useCortarAudioAlSalir();
 
   const [tablero, setTablero] = useState<ParesTablero | null>(null);
   // Cara y cubitos. El numero se relanza en cada respuesta;
@@ -367,12 +370,22 @@ export function ParesScreen() {
   }
 
   if (loading) {
+    if (!carga.demora) return null;
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Pares" />
-        <View style={styles.center}>
-          <Text style={styles.loading}>Repartiendo fichas…</Text>
-        </View>
+        <ProveedorEsqueleto etiqueta="Repartiendo fichas" style={styles.esqueletoRaiz}>
+          <Hueso width="60%" height={4} radius={radius.pill} style={styles.esqueletoCentrado} />
+          <View style={styles.esqueletoColumnas}>
+            {[0, 1].map((col) => (
+              <View key={col} style={styles.esqueletoColumna}>
+                {Array.from({ length: 5 }, (_, i) => (
+                  <Hueso key={i} height={64} radius={radius.md} />
+                ))}
+              </View>
+            ))}
+          </View>
+        </ProveedorEsqueleto>
       </Screen>
     );
   }
@@ -558,6 +571,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   jugadasAlLado: { textAlign: 'right' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.xl },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoColumnas: { flexDirection: 'row', gap: space.md },
+  esqueletoColumna: { flex: 1, gap: space.sm },
 });

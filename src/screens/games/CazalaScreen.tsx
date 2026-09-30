@@ -17,6 +17,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { shuffle } from '@/utils/array';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { reacomodar, space } from '@/theme';
@@ -63,6 +64,7 @@ export function CazalaScreen() {
   const { height: alto } = useWindowDimensions();
   const compacta = alto < ALTO_COMPACTO;
   useMusicaPantalla('juegos');
+  useCortarAudioAlSalir();
 
   const item = items[idx];
   // Las seis opciones ya barajadas: una sola vez por ronda.

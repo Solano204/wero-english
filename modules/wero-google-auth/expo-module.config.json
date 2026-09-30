@@ -1,0 +1,6 @@
+{
+  "platforms": ["android"],
+  "android": {
+    "modules": ["app.wero.mobile.googleauth.WeroGoogleAuthModule"]
+  }
+}

@@ -306,6 +306,13 @@ export const reflejo: [string, string, string] = [
   'rgba(255, 255, 255, 0)',
 ];
 
+/** El brillo que cruza un hueso de esqueleto: un aclarado suave del mismo tono, nunca blanco puro. */
+export const brilloEsqueleto: [string, string, string] = [
+  'rgba(245, 238, 248, 0)',
+  'rgba(245, 238, 248, 0.08)',
+  'rgba(245, 238, 248, 0)',
+];
+
 /**
  * Degradados de portada. Tintados y oscuros, para que el texto claro
  * encima se lea sin necesidad de velo negro.

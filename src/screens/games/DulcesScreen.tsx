@@ -3,6 +3,7 @@ import { AppState, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
 import { TableroDulces, type Jugada, type TableroDulcesRef } from '@/components/juegos/dulces/TableroDulces';
 import { TROZOS_RETRASO_MS, azarFijo, trozosDelPaso, trozosPorPieza } from '@/components/juegos/dulces/tablero';
 import { Estallidos, type EstallidosRef, type Trozo } from '@/components/juegos/dulces/Estallidos';
@@ -26,9 +27,10 @@ import { useCarga } from '@/hooks/useCarga';
 import { shuffle } from '@/utils/array';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import { color, font, motionDulces, space } from '@/theme';
+import { color, font, motionDulces, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { useNivel } from './useNivel';
 import type { DulceObjetivo, Entry, NivelDulces } from '@/types';
@@ -93,6 +95,7 @@ export function DulcesScreen() {
   // Se necesita oír bien la voz del match y de la pregunta: la música
   // competiría justo en esos momentos.
   useMusicaPantalla('silencio');
+  useCortarAudioAlSalir();
 
   const COLS = nv?.cols ?? COLS_DEF;
   const ROWS = nv?.rows ?? ROWS_DEF;
@@ -654,12 +657,26 @@ export function DulcesScreen() {
   }
 
   if (loading) {
+    if (!carga.demora) return null;
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Dulces" />
-        <View style={styles.center}>
-          <Text style={styles.loading}>Llenando el tablero…</Text>
-        </View>
+        <ProveedorEsqueleto etiqueta="Llenando el tablero" style={styles.esqueletoRaiz}>
+          <View style={styles.esqueletoMetas}>
+            {Array.from({ length: 3 }, (_, i) => (
+              <Hueso key={i} width={72} height={72} radius={radius.md} />
+            ))}
+          </View>
+          <View style={styles.esqueletoTablero}>
+            {Array.from({ length: 6 }, (_, fila) => (
+              <View key={fila} style={styles.esqueletoFila}>
+                {Array.from({ length: 7 }, (_, col) => (
+                  <Hueso key={col} width={38} height={38} radius={radius.sm} />
+                ))}
+              </View>
+            ))}
+          </View>
+        </ProveedorEsqueleto>
       </Screen>
     );
   }
@@ -812,6 +829,8 @@ const styles = StyleSheet.create({
   medio: { flex: 1 },
   medioContenido: { paddingBottom: space.sm },
   metas: { paddingHorizontal: space.lg, marginBottom: space.md },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.xl, alignItems: 'center' },
+  esqueletoMetas: { flexDirection: 'row', gap: space.md },
+  esqueletoTablero: { gap: space.xs },
+  esqueletoFila: { flexDirection: 'row', gap: space.xs },
 });

@@ -14,6 +14,7 @@ import {
 import { AudioButton } from '@/components/card';
 import { buildRounds, explicar, juzgar } from '@/domain/minimalPairs';
 import { logHabla } from '@/db/economy';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as speech from '@/services/speech';
@@ -48,6 +49,7 @@ export function MinimalPairsScreen() {
 
   const content = useMemo(loadContent, []);
   const estado = useMemo(() => speech.isAvailable(), []);
+  useCortarAudioAlSalir();
 
   // Si llega `fonemaId` (desde el laboratorio de sonidos), las rondas salen de los pares de ese fonema; si no
   // tiene pares, o no se abrió desde ahí, salen de todos como siempre.

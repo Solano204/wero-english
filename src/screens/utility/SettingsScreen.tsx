@@ -6,6 +6,7 @@ import { Button, Card, Header, Screen, Presionable } from '@/components/base';
 import { SectionTitle } from '@/components/list';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
+import { setSimularCargaLenta } from '@/hooks/useCarga';
 import * as authService from '@/services/auth';
 import * as notifications from '@/services/notifications';
 import * as speech from '@/services/speech';
@@ -22,6 +23,7 @@ export function SettingsScreen() {
   const signOut = useAuthStore((s) => s.signOut);
   const s = useSettingsStore();
   const [busy, setBusy] = useState(false);
+  const [cargaLenta, setCargaLenta] = useState(false);
   const micEstado = useMemo(() => speech.isAvailable(), []);
   const notifEstado = useMemo(() => notifications.isAvailable(), []);
 
@@ -298,6 +300,28 @@ export function SettingsScreen() {
         style={styles.diag}
         full
       />
+
+      {__DEV__ ? (
+        <>
+          <Button
+            label="Muestrario de sonidos"
+            variant="ghost"
+            onPress={() => nav.navigate('SfxSampler', undefined)}
+            full
+          />
+          <Card style={styles.card}>
+            <Toggle
+              label="Simular carga lenta"
+              hint="Le suma 1.5 s a cada carga: para ver el esqueleto de cada pantalla"
+              value={cargaLenta}
+              onChange={(v) => {
+                setCargaLenta(v);
+                setSimularCargaLenta(v);
+              }}
+            />
+          </Card>
+        </>
+      ) : null}
     </Screen>
   );
 }

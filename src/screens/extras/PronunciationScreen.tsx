@@ -10,6 +10,7 @@ import { PaginaFonema } from '@/components/sonidos/PaginaFonema';
 import { ViajeSimbolo, type Viaje } from '@/components/sonidos/ViajeSimbolo';
 import { sinBarras } from '@/domain/vocales';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { loadContent } from '@/store/content';
 import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
@@ -135,6 +136,9 @@ export function PronunciationScreen() {
     repiteRef.current = false;
     setRepitiendo(null);
   }, []);
+
+  // Perder el foco apaga cualquier repetición en curso y corta todo el audio.
+  useCortarAudioAlSalir(cancelarRepetir);
 
   const alternarRepetir = useCallback(
     (fonema: Fonema) => {

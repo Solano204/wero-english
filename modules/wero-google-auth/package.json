@@ -1,0 +1,8 @@
+{
+  "name": "wero-google-auth",
+  "version": "1.0.0",
+  "description": "Inicio de sesión con Google para Wero: androidx.credentials, sin navegador y sin servidor.",
+  "main": "index.ts",
+  "license": "UNLICENSED",
+  "private": true
+}

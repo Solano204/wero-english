@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import * as media from './media';
 import * as music from './music';
@@ -43,23 +44,195 @@ type SfxKey =
   | 'success'
   | 'fail'
   | 'tap'
+  | 'match'
   | 'combo'
   | 'nivelCompleto'
   | 'caidaPieza'
   | 'pista';
 
-const SFX_SOURCES: Record<SfxKey, number> = {
-  success: require('../../assets/sfx/success.wav'),
-  fail: require('../../assets/sfx/fail.wav'),
-  tap: require('../../assets/sfx/tap.wav'),
+/** Los 4 juegos de sonido: D es el actual (sin variantes ni escalera); A/B/C son los nuevos. */
+export type SfxPackId = 'A' | 'B' | 'C' | 'D';
+
+/**
+ * `success` tiene 5 alturas (escalera de aciertos) × 3 variantes; `fail`/`tap`/`match` solo 3
+ * variantes; el resto, un solo archivo. Todos los `require()` son literales (Metro no permite
+ * una ruta calculada), así que este catálogo es largo mecánicamente, no complicado.
+ */
+interface FuentesPaquete {
+  success: readonly (readonly number[])[]; // [escalon 1..5][variante 0..2]
+  fail: readonly number[];
+  tap: readonly number[];
+  match: readonly number[];
+  combo: number;
+  nivelCompleto: number;
+  caidaPieza: number;
+  pista: number;
+}
+
+const unaVoz = (m: number): readonly number[] => [m, m, m];
+const unaAltura = (m: number): readonly number[] => [m, m, m];
+
+const PAQUETE_D: FuentesPaquete = {
+  // D no tenía variantes ni escalera: los 5×3 huecos de `success` apuntan al mismo archivo de siempre.
+  success: [1, 2, 3, 4, 5].map(() => unaAltura(require('../../assets/sfx/success.wav'))),
+  fail: unaVoz(require('../../assets/sfx/fail.wav')),
+  tap: unaVoz(require('../../assets/sfx/tap.wav')),
+  match: unaVoz(require('../../assets/sfx/match.wav')),
   combo: require('../../assets/sfx/combo.wav'),
   nivelCompleto: require('../../assets/sfx/nivel_completo.wav'),
   caidaPieza: require('../../assets/sfx/caida_pieza.wav'),
   pista: require('../../assets/sfx/pista.wav'),
 };
 
+const PAQUETE_A: FuentesPaquete = {
+  success: [
+    [require('../../assets/sfx/a/success_h1_v1.wav'), require('../../assets/sfx/a/success_h1_v2.wav'), require('../../assets/sfx/a/success_h1_v3.wav')],
+    [require('../../assets/sfx/a/success_h2_v1.wav'), require('../../assets/sfx/a/success_h2_v2.wav'), require('../../assets/sfx/a/success_h2_v3.wav')],
+    [require('../../assets/sfx/a/success_h3_v1.wav'), require('../../assets/sfx/a/success_h3_v2.wav'), require('../../assets/sfx/a/success_h3_v3.wav')],
+    [require('../../assets/sfx/a/success_h4_v1.wav'), require('../../assets/sfx/a/success_h4_v2.wav'), require('../../assets/sfx/a/success_h4_v3.wav')],
+    [require('../../assets/sfx/a/success_h5_v1.wav'), require('../../assets/sfx/a/success_h5_v2.wav'), require('../../assets/sfx/a/success_h5_v3.wav')],
+  ],
+  fail: [require('../../assets/sfx/a/fail_1.wav'), require('../../assets/sfx/a/fail_2.wav'), require('../../assets/sfx/a/fail_3.wav')],
+  tap: [require('../../assets/sfx/a/tap_1.wav'), require('../../assets/sfx/a/tap_2.wav'), require('../../assets/sfx/a/tap_3.wav')],
+  match: [require('../../assets/sfx/a/match_1.wav'), require('../../assets/sfx/a/match_2.wav'), require('../../assets/sfx/a/match_3.wav')],
+  combo: require('../../assets/sfx/a/combo.wav'),
+  nivelCompleto: require('../../assets/sfx/a/nivel_completo.wav'),
+  caidaPieza: require('../../assets/sfx/a/caida_pieza.wav'),
+  pista: require('../../assets/sfx/a/pista.wav'),
+};
+
+const PAQUETE_B: FuentesPaquete = {
+  success: [
+    [require('../../assets/sfx/b/success_h1_v1.wav'), require('../../assets/sfx/b/success_h1_v2.wav'), require('../../assets/sfx/b/success_h1_v3.wav')],
+    [require('../../assets/sfx/b/success_h2_v1.wav'), require('../../assets/sfx/b/success_h2_v2.wav'), require('../../assets/sfx/b/success_h2_v3.wav')],
+    [require('../../assets/sfx/b/success_h3_v1.wav'), require('../../assets/sfx/b/success_h3_v2.wav'), require('../../assets/sfx/b/success_h3_v3.wav')],
+    [require('../../assets/sfx/b/success_h4_v1.wav'), require('../../assets/sfx/b/success_h4_v2.wav'), require('../../assets/sfx/b/success_h4_v3.wav')],
+    [require('../../assets/sfx/b/success_h5_v1.wav'), require('../../assets/sfx/b/success_h5_v2.wav'), require('../../assets/sfx/b/success_h5_v3.wav')],
+  ],
+  fail: [require('../../assets/sfx/b/fail_1.wav'), require('../../assets/sfx/b/fail_2.wav'), require('../../assets/sfx/b/fail_3.wav')],
+  tap: [require('../../assets/sfx/b/tap_1.wav'), require('../../assets/sfx/b/tap_2.wav'), require('../../assets/sfx/b/tap_3.wav')],
+  match: [require('../../assets/sfx/b/match_1.wav'), require('../../assets/sfx/b/match_2.wav'), require('../../assets/sfx/b/match_3.wav')],
+  combo: require('../../assets/sfx/b/combo.wav'),
+  nivelCompleto: require('../../assets/sfx/b/nivel_completo.wav'),
+  caidaPieza: require('../../assets/sfx/b/caida_pieza.wav'),
+  pista: require('../../assets/sfx/b/pista.wav'),
+};
+
+const PAQUETE_C: FuentesPaquete = {
+  success: [
+    [require('../../assets/sfx/c/success_h1_v1.wav'), require('../../assets/sfx/c/success_h1_v2.wav'), require('../../assets/sfx/c/success_h1_v3.wav')],
+    [require('../../assets/sfx/c/success_h2_v1.wav'), require('../../assets/sfx/c/success_h2_v2.wav'), require('../../assets/sfx/c/success_h2_v3.wav')],
+    [require('../../assets/sfx/c/success_h3_v1.wav'), require('../../assets/sfx/c/success_h3_v2.wav'), require('../../assets/sfx/c/success_h3_v3.wav')],
+    [require('../../assets/sfx/c/success_h4_v1.wav'), require('../../assets/sfx/c/success_h4_v2.wav'), require('../../assets/sfx/c/success_h4_v3.wav')],
+    [require('../../assets/sfx/c/success_h5_v1.wav'), require('../../assets/sfx/c/success_h5_v2.wav'), require('../../assets/sfx/c/success_h5_v3.wav')],
+  ],
+  fail: [require('../../assets/sfx/c/fail_1.wav'), require('../../assets/sfx/c/fail_2.wav'), require('../../assets/sfx/c/fail_3.wav')],
+  tap: [require('../../assets/sfx/c/tap_1.wav'), require('../../assets/sfx/c/tap_2.wav'), require('../../assets/sfx/c/tap_3.wav')],
+  match: [require('../../assets/sfx/c/match_1.wav'), require('../../assets/sfx/c/match_2.wav'), require('../../assets/sfx/c/match_3.wav')],
+  combo: require('../../assets/sfx/c/combo.wav'),
+  nivelCompleto: require('../../assets/sfx/c/nivel_completo.wav'),
+  caidaPieza: require('../../assets/sfx/c/caida_pieza.wav'),
+  pista: require('../../assets/sfx/c/pista.wav'),
+};
+
+const PAQUETES: Record<SfxPackId, FuentesPaquete> = { A: PAQUETE_A, B: PAQUETE_B, C: PAQUETE_C, D: PAQUETE_D };
+
+let paqueteActivo: SfxPackId = 'D';
+/** Solo __DEV__: el Muestrario de sonidos la usa para probar un paquete sin reiniciar la app. */
+export function setPaqueteSfx(id: SfxPackId): void {
+  if (paqueteActivo === id) return;
+  paqueteActivo = id;
+  // Los players ya creados apuntan a los archivos del paquete anterior: se sueltan para que el
+  // próximo playSfx() los cree de nuevo con la fuente correcta.
+  for (const p of sfxPlayers.values()) {
+    try {
+      p.remove();
+    } catch {
+      /* sin consecuencia */
+    }
+  }
+  sfxPlayers.clear();
+}
+export function paqueteSfxActual(): SfxPackId {
+  return paqueteActivo;
+}
+
+/** Solo __DEV__: dónde el Muestrario de sonidos guarda qué paquete se probó por última vez. */
+const CLAVE_PAQUETE_DEV = 'wero:dev:paquete_sfx';
+
+async function cargaPaqueteDevGuardado(): Promise<void> {
+  if (!__DEV__) return;
+  try {
+    const guardado = await AsyncStorage.getItem(CLAVE_PAQUETE_DEV);
+    if (guardado === 'A' || guardado === 'B' || guardado === 'C' || guardado === 'D') paqueteActivo = guardado;
+  } catch {
+    // Sin lo guardado, se queda en D.
+  }
+}
+
+/** La usa el Muestrario al tocar "Usar este paquete": lo aplica ya mismo y lo deja guardado para el próximo arranque. */
+export async function guardaPaqueteDevPreferido(id: SfxPackId): Promise<void> {
+  setPaqueteSfx(id);
+  if (!__DEV__) return;
+  try {
+    await AsyncStorage.setItem(CLAVE_PAQUETE_DEV, id);
+  } catch {
+    // Se queda aplicado en esta sesión, aunque no se pudiera guardar.
+  }
+}
+
 let sfxEnabled = true;
-const sfxPlayers = new Map<SfxKey, AudioPlayer>();
+/** Cada variante activa (para no repetir la anterior) y, para `success`, el escalón de la racha. */
+const ultimaVariante = new Map<SfxKey, number>();
+let escalonRacha = 1;
+const MAX_ESCALON_RACHA = 5;
+
+/** Al fallar o al empezar una sesión nueva. */
+export function reiniciaRacha(): void {
+  escalonRacha = 1;
+}
+
+/** Una variante 0-2 distinta de la última usada para esa clave (si solo hay una, la repite: no hay de otra). */
+function variante(key: SfxKey, total: number): number {
+  if (total <= 1) return 0;
+  const anterior = ultimaVariante.get(key) ?? -1;
+  let v = Math.floor(Math.random() * total);
+  if (v === anterior) v = (v + 1) % total;
+  ultimaVariante.set(key, v);
+  return v;
+}
+
+/** Ajuste de tono ±2 % por variante: mismo `setPlaybackRate` que ya usa la voz, pero SIN
+ * corrección de tono ('high' es lo que la voz sí necesita para "Lento"): aquí queremos que el
+ * tono se mueva un poco con la velocidad, es justo el detune que pide el diseño. */
+const DETUNE_MAX = 0.02;
+function tasaDetune(): number {
+  return 1 + (Math.random() * 2 - 1) * DETUNE_MAX;
+}
+
+function fuenteSfx(key: SfxKey): { modulo: number; v: number; escalon: number } {
+  const f = PAQUETES[paqueteActivo];
+  if (key === 'success') {
+    // Este acierto usa el escalón actual; el SIGUIENTE acierto seguido sube uno (tope en el 5.º).
+    const escalon = escalonRacha;
+    escalonRacha = Math.min(MAX_ESCALON_RACHA, escalonRacha + 1);
+    const v = variante('success', 3);
+    return { modulo: f.success[escalon - 1]![v]!, v, escalon };
+  }
+  if (key === 'fail' || key === 'tap' || key === 'match') {
+    // Reiniciar aquí (no solo en playFail()) porque playRoundResult()/playRoundResultBilingue()
+    // llaman playSfx('fail') directo, sin pasar por playFail().
+    if (key === 'fail') reiniciaRacha();
+    const lista = f[key];
+    const v = variante(key, lista.length);
+    return { modulo: lista[v]!, v, escalon: 0 };
+  }
+  return { modulo: f[key] as number, v: 0, escalon: 0 };
+}
+
+// Un player por (clave, variante/escalón) posible, creado bajo demanda: como antes, máximo un
+// player nativo por sonido que de verdad se usó, nunca uno por reproducción.
+const sfxPlayers = new Map<string, AudioPlayer>();
 const sfxUltimaVez = new Map<SfxKey, number>();
 
 /** Toques rápidos no saturan: por debajo de esto, el toque se ignora. */
@@ -70,11 +243,12 @@ export function setSfxEnabled(v: boolean): void {
   sfxEnabled = v;
 }
 
-function sfxPlayerPara(key: SfxKey): AudioPlayer {
-  let p = sfxPlayers.get(key);
+function sfxPlayerPara(key: SfxKey, modulo: number, v: number, escalon: number): AudioPlayer {
+  const cacheKey = `${paqueteActivo}:${key}:${escalon}:${v}`;
+  let p = sfxPlayers.get(cacheKey);
   if (!p) {
-    p = createAudioPlayer(SFX_SOURCES[key]);
-    sfxPlayers.set(key, p);
+    p = createAudioPlayer(modulo);
+    sfxPlayers.set(cacheKey, p);
   }
   return p;
 }
@@ -86,19 +260,12 @@ export async function initAudio(): Promise<void> {
     shouldPlayInBackground: false,
     interruptionMode: 'doNotMix',
   });
+  await cargaPaqueteDevGuardado();
   ready = true;
-
-  // Precarga los SFX una sola vez: así el primer tap de una partida no
-  // paga el costo de crear el player nativo, solo los siguientes toques
-  // lo reutilizan. Un efecto que no carga no debe tumbar la precarga de
-  // los demás (ni dejar `ready` en true sin haber intentado el resto).
-  for (const key of Object.keys(SFX_SOURCES) as SfxKey[]) {
-    try {
-      sfxPlayerPara(key);
-    } catch (err) {
-      console.warn('[audio] no se pudo precargar el efecto', key, err);
-    }
-  }
+  // La precarga completa de los ~90 archivos de los 4 paquetes se dejó de hacer aquí: con
+  // variantes y escalera, precargar todo el catálogo al arrancar es carga de más que nadie
+  // pide de una. Cada efecto crea su player la primera vez que de verdad suena (mismo costo
+  // que antes tenía el primer toque de cada clave, ahora también el primero de cada variante).
 }
 
 /** Una frase acaba de arrancar. La usa la onda de voz de Estudio; el audio no depende de ella. */
@@ -233,13 +400,19 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
     }
   });
 
-  return colaFrase.then(() => resultado);
+  // Tope absoluto: si `colaFrase` se atora en un await nativo que nunca
+  // resuelve, quien llamó a play()/playSlow()/playAndWait() igual recibe
+  // una respuesta en vez de quedarse esperando para siempre.
+  return conTope(colaFrase.then(() => resultado), TOPE_ABSOLUTO_MS, false);
 }
 
 /** Reproduce siempre a velocidad normal (1.0). */
 export function play(relPath: string | null): Promise<boolean> {
   return reproducir(relPath, 1.0);
 }
+
+/** El player que de verdad sonó la última vez para cada clave: lo que `sfxSuena`/`esperarSfx` miran (con variantes, no siempre es el mismo objeto `AudioPlayer`). */
+const ultimoPlayerPorClave = new Map<SfxKey, AudioPlayer>();
 
 async function playSfx(key: SfxKey): Promise<void> {
   if (!sfxEnabled) return;
@@ -254,11 +427,20 @@ async function playSfx(key: SfxKey): Promise<void> {
     // Nunca encimado con la frase: el efecto la corta, no suena junto a ella.
     stop();
 
-    const p = sfxPlayerPara(key);
+    const { modulo, v, escalon } = fuenteSfx(key);
+    const p = sfxPlayerPara(key, modulo, v, escalon);
+    ultimoPlayerPorClave.set(key, p);
     try {
       await p.seekTo(0);
     } catch {
       // Si no puede rebobinar, suena desde donde iba.
+    }
+    try {
+      // Sin 'high': a diferencia de la voz, aquí SÍ se quiere que el tono
+      // se mueva un poco con la velocidad (es el detune de ±2 %).
+      p.setPlaybackRate(tasaDetune());
+    } catch {
+      // Si el dispositivo no lo permite, suena a tono fijo: solo varían timbre/nota.
     }
     p.play();
   } catch (err) {
@@ -268,7 +450,7 @@ async function playSfx(key: SfxKey): Promise<void> {
 
 function sfxSuena(key: SfxKey): boolean {
   try {
-    return Boolean(sfxPlayers.get(key)?.playing);
+    return Boolean(ultimoPlayerPorClave.get(key)?.playing);
   } catch {
     return false;
   }
@@ -299,6 +481,11 @@ export function playFail(): Promise<void> {
 /** Toque muy corto y discreto: fichas, letras, cartas. */
 export function playTap(): Promise<void> {
   return playSfx('tap');
+}
+
+/** Pareja encontrada: un "pop" satisfactorio (Pares, Dulces). */
+export function playMatch(): Promise<void> {
+  return playSfx('match');
 }
 
 /** Racha/combo: algo se está acumulando. */
@@ -417,6 +604,24 @@ const FIN_TIMEOUT_SIN_DURACION_MS = 15000;
 const POLL_MS = 60;
 
 /**
+ * Tope absoluto de una espera de audio de frase: pase lo que pase (un
+ * await nativo que nunca resuelve, `colaFrase` atascada por una llamada
+ * anterior), quien espera un play()/playAndWait()/waitUntilDone() SIEMPRE
+ * recibe una respuesta en vez de quedarse colgado. Los juegos que avanzan
+ * de ronda dependen de esto: nunca deben congelarse por una espera de
+ * audio que no vuelve.
+ */
+const TOPE_ABSOLUTO_MS = 20000;
+
+function conTope<T>(promesa: Promise<T>, ms: number, siExpira: T): Promise<T> {
+  let vencido: ReturnType<typeof setTimeout>;
+  const tope = new Promise<T>((resolve) => {
+    vencido = setTimeout(() => resolve(siExpira), ms);
+  });
+  return Promise.race([promesa, tope]).finally(() => clearTimeout(vencido));
+}
+
+/**
  * ¿currentTime en 0 y sin sonar? Es la señal de "se le acaba de dar
  * play() y el nativo todavía no lo refleja", no de "ya terminó". Un
  * audio que YA terminó se queda con currentTime > 0 (reproducir() solo
@@ -451,7 +656,16 @@ async function esperaReproduccion(
   }
   if (!vigente()) return;
 
-  const duracionS = player?.duration ?? 0;
+  // player?.duration es un getter nativo: si el player queda en un
+  // estado raro puede tirar en vez de dar 0, y eso dejaría esta espera
+  // rechazada sin que nadie limpie su candado (ver waitUntilDone/
+  // playAndWait, que ya no dependen de esto porque van con conTope).
+  let duracionS = 0;
+  try {
+    duracionS = player?.duration ?? 0;
+  } catch {
+    /* sin duración conocida: se usa el tope sin duración de abajo */
+  }
   const timeout =
     finTimeoutMs ?? (duracionS > 0 ? duracionS * 1000 + FIN_MARGEN_MS : FIN_TIMEOUT_SIN_DURACION_MS);
   const t1 = Date.now();
@@ -484,7 +698,11 @@ export async function playAndWait(
 ): Promise<boolean> {
   const sonó = await reproducir(relPath, opciones.rate ?? 1.0);
   if (!sonó) return false;
-  await esperaReproduccion(reproduccionId, opciones.arranqueTimeoutMs ?? ARRANQUE_TIMEOUT_MS);
+  await conTope(
+    esperaReproduccion(reproduccionId, opciones.arranqueTimeoutMs ?? ARRANQUE_TIMEOUT_MS),
+    TOPE_ABSOLUTO_MS,
+    undefined
+  );
   return true;
 }
 
@@ -496,7 +714,11 @@ export async function playAndWait(
  */
 export async function waitUntilDone(timeoutMs?: number): Promise<void> {
   if (!player) return;
-  await esperaReproduccion(reproduccionId, ARRANQUE_TIMEOUT_MS, timeoutMs);
+  await conTope(
+    esperaReproduccion(reproduccionId, ARRANQUE_TIMEOUT_MS, timeoutMs),
+    TOPE_ABSOLUTO_MS,
+    undefined
+  );
 }
 
 /**
@@ -569,6 +791,36 @@ export function progresoFrase(): { pos: number; dur: number } {
   }
 }
 
+/**
+ * Reproductores que viven fuera de este archivo (hoy, el capítulo de
+ * Lecturas) y necesitan enterarse de un corte total. Cada uno se registra
+ * con su propia función de corte al montar y se quita al desmontar;
+ * detenerTodo() las llama todas. audio.ts no necesita saber qué son.
+ */
+const otrosReproductores = new Set<() => void>();
+
+export function registrarCorte(cortar: () => void): () => void {
+  otrosReproductores.add(cortar);
+  return () => otrosReproductores.delete(cortar);
+}
+
+/**
+ * El corte total: frase, SFX, cualquier secuencia en curso (playSequence y
+ * sleep ya revisan reproduccionId, así que no esperan su duración completa)
+ * y todo lo que se haya registrado aparte con registrarCorte(). La música de
+ * fondo NO se toca aquí: tiene su propio volumen por pantalla en music.ts.
+ */
+export function detenerTodo(): void {
+  stop();
+  for (const cortar of otrosReproductores) {
+    try {
+      cortar();
+    } catch {
+      // Un reproductor roto no puede tumbar el corte de los demás.
+    }
+  }
+}
+
 export function stop(): void {
   // Invalida cualquier reproducción de frase en camino (en la cola o a
   // medio resolver): al llegar a su turno se va a encontrar con un id
@@ -590,8 +842,9 @@ export function stop(): void {
   }
 }
 
-/** Libera el player nativo. Se llama al salir de la sesión de estudio. */
+/** Libera el player nativo. Se llama al salir de la sesión de estudio: la próxima empieza con la racha en 1. */
 export function releaseAudio(): void {
+  reiniciaRacha();
   reproduccionId++;
   try {
     player?.pause();
@@ -637,19 +890,33 @@ export async function playSequence(
   for (let i = 0; i < steps.length; i++) {
     if (!shouldContinue()) return;
     onStep?.(i);
-    await playAndWait(steps[i]!.path);
-    if (!shouldContinue()) return;
+    const sonó = await playAndWait(steps[i]!.path);
+    // stop()/detenerTodo() ya cortó el player mientras sonaba este paso:
+    // no sigas a la pausa ni al siguiente paso.
+    if (!shouldContinue() || !sonó) return;
+    const generacionPaso = reproduccionId;
     await sleep(steps[i]!.pauseMs, shouldContinue);
+    // La pausa terminó por su cuenta, pero algo cortó el audio mientras
+    // esperaba (reproduccionId cambió): no avances al siguiente paso.
+    if (!shouldContinue() || reproduccionId !== generacionPaso) return;
   }
 }
 
+/**
+ * Espera `ms`, o menos si `shouldContinue()` se apaga o si algo más tocó el
+ * audio mientras tanto (reproduccionId cambió). Así una pausa entre pasos de
+ * playSequence no se queda esperando su duración completa después de un
+ * detenerTodo() que la pantalla que llamó a playSequence todavía no reflejó
+ * en su propio shouldContinue (por ejemplo, el corte global de App.tsx).
+ */
 function sleep(ms: number, shouldContinue: () => boolean): Promise<void> {
+  const miGeneracion = reproduccionId;
   return new Promise((resolve) => {
     const step = 100;
     let waited = 0;
     const tick = setInterval(() => {
       waited += step;
-      if (waited >= ms || !shouldContinue()) {
+      if (waited >= ms || !shouldContinue() || reproduccionId !== miGeneracion) {
         clearInterval(tick);
         resolve();
       }

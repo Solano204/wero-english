@@ -4,6 +4,7 @@ import Animated, { useAnimatedScrollHandler, type AnimatedRef, type SharedValue 
 import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-area-context';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { FONDO, color, layout, radius, resplandorSol, space } from '@/theme';
 
 interface Props {
@@ -120,7 +121,7 @@ export function Screen({
   const huecoAbajo = footer
     ? 0
     : altoPestanas > 0
-      ? altoPestanas + layout.adBar + insetAbajo + space.xl
+      ? altoPestanas + (ANUNCIOS_ACTIVOS ? layout.adBar : 0) + insetAbajo + space.xl
       : space.xxxl;
 
   return (

@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Share, StyleSheet, Text, View } from 'react-native';
 import {
-  useFocusEffect,
   useNavigation,
   useRoute,
   type RouteProp,
@@ -12,7 +11,7 @@ import { DueloContraste } from '@/components/errores/DueloContraste';
 import { MedidorGravedad } from '@/components/errores/MedidorGravedad';
 import { SecuenciaMalentendido } from '@/components/errores/SecuenciaMalentendido';
 import { textoParaCompartir } from '@/domain/errores';
-import * as audio from '@/services/audio';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/store/content';
 import { color, font, motionMalentendido, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
@@ -33,15 +32,8 @@ export function ErrorDetailScreen() {
 
   const err = content.errores.errores.find((e) => e.id === params.errorId);
 
-  // Perder el foco (salir, abrir la frase completa) corta la voz: el reproductor de frases es uno solo y compartido.
-  useFocusEffect(
-    useCallback(
-      () => () => {
-        audio.stop();
-      },
-      []
-    )
-  );
+  // Perder el foco (salir, abrir la frase completa) corta todo el audio: el reproductor de frases es uno solo y compartido.
+  useCortarAudioAlSalir();
 
   const compartir = useCallback(async () => {
     if (!err) return;

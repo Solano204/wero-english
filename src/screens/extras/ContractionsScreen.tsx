@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
+import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
 import { AudioButton } from '@/components/card';
 import { getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/store/content';
 import { color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
@@ -23,6 +25,7 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 export function ContractionsScreen() {
   const nav = useNavigation<Nav>();
   const content = useMemo(loadContent, []);
+  useCortarAudioAlSalir();
   // Memoizado: con un array nuevo en cada render, el efecto de carga se
   // volvía a disparar en cada render y no paraba nunca.
   const grupos = useMemo(
@@ -92,9 +95,17 @@ export function ContractionsScreen() {
       {carga.estado === 'error' ? (
         <ErrorCarga onReintentar={carga.reintentar} />
       ) : cargando ? (
-        <View style={styles.cargando}>
-          <ActivityIndicator color={color.accent} />
-        </View>
+        carga.demora ? (
+          <ProveedorEsqueleto etiqueta="Cargando las reducciones" style={styles.list}>
+            {Array.from({ length: 5 }, (_, i) => (
+              <Card key={i} style={styles.item}>
+                <Hueso width="60%" height={16} />
+                <Hueso width={40} height={12} />
+                <Hueso width="50%" height={16} />
+              </Card>
+            ))}
+          </ProveedorEsqueleto>
+        ) : null
       ) : (
         <>
           <View style={styles.list}>
@@ -154,7 +165,6 @@ const styles = StyleSheet.create({
 
   desc: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted, marginTop: space.xs },
   list: { gap: space.sm, marginTop: space.md },
-  cargando: { minHeight: 200, alignItems: 'center', justifyContent: 'center' },
   item: { gap: space.sm },
   itemHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   itemText: { flex: 1, gap: space.xs },

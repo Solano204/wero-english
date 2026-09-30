@@ -1,16 +1,17 @@
 import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Header, Screen } from '@/components/base';
+import { HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
 import { SectionTitle } from '@/components/list';
 import { TarjetaLectura, type LecturaFila } from '@/components/lectura/TarjetaLectura';
 import { destacarLectura, dificultadPara, estadoDesbloqueo } from '@/domain/lectura';
 import { getCardStates, getDominadasPorMundo, getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
-import * as audio from '@/services/audio';
 import { color, font, space } from '@/theme';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
@@ -65,12 +66,8 @@ export function LecturasScreen() {
     { alEnfocar: true, esVacio: (f) => f.length === 0 }
   );
 
-  // Red de seguridad: ninguna voz de lectura sobrevive a salir de aquí.
-  useFocusEffect(
-    useCallback(() => () => {
-      audio.stop();
-    }, [])
-  );
+  // Red de seguridad: ningún audio de lectura sobrevive a salir de aquí.
+  useCortarAudioAlSalir();
 
   const abrir = useCallback((lecturaId: string) => nav.navigate('Lectura', { lecturaId }), [nav]);
 
@@ -103,6 +100,13 @@ export function LecturasScreen() {
 
       <Carga
         carga={carga}
+        esqueleto={
+          <ProveedorEsqueleto etiqueta="Cargando las lecturas" style={styles.list}>
+            {Array.from({ length: 5 }, (_, i) => (
+              <HuesoTarjeta key={i} imagen lineas={1} />
+            ))}
+          </ProveedorEsqueleto>
+        }
         vacio={
           <Card>
             <Text style={styles.vacio}>

@@ -39,6 +39,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { aparecer, color, desaparecer, escalon, font, layout, motionDuration, motionLogro, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
@@ -173,10 +174,17 @@ export function NivelesScreen() {
     () => (def?.bandas ?? []).map((b) => ({ id: b.id, nombre: b.nombre, desde: b.desde, hasta: b.hasta, frases: b.ids.length })),
     [def]
   );
-  const tramos = useMemo(
-    () => armarTramos(bandas, { total: def?.total ?? 0, siguiente, pagados, estrellas }),
-    [bandas, def, siguiente, pagados, estrellas]
-  );
+  const tramos = useMemo(() => {
+    const t = armarTramos(bandas, { total: def?.total ?? 0, siguiente, pagados, estrellas });
+    if (ANUNCIOS_ACTIVOS) return t;
+    // Interruptor de monetización: sin anuncios no se ofrece abrir un nivel
+    // adelantado. La celda se ve bloqueada, como cualquier otra a la que
+    // todavía no le toca; la progresión real (`siguiente`, `pagados`) no cambia.
+    return t.map((tr) => ({
+      ...tr,
+      niveles: tr.niveles.map((v) => (v.estado === 'anuncio' ? { ...v, estado: 'bloqueado' as const } : v)),
+    }));
+  }, [bandas, def, siguiente, pagados, estrellas]);
   const items = useMemo(() => aplanar(tramos, expandidos), [tramos, expandidos]);
   const medidas = useMemo(() => medir(items, ALTO_TRAMO, altoFila), [items, altoFila]);
   const pegados = useMemo(() => indicesEncabezado(items), [items]);
@@ -320,8 +328,10 @@ export function NivelesScreen() {
               ListFooterComponent={
                 <Text style={styles.pie}>
                   Terminar un nivel abre el siguiente, saques una estrella o tres.
-                  El que sigue del último también se abre con «Ver anuncio y abrir».
-                  Rejugar nunca te baja lo que ya tenías.
+                  {ANUNCIOS_ACTIVOS
+                    ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
+                    : ''}
+                  {' '}Rejugar nunca te baja lo que ya tenías.
                 </Text>
               }
             />

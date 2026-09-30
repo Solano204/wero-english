@@ -33,6 +33,7 @@ import {
   PhrasalVerboScreen,
   PronunciationScreen,
   SettingsScreen,
+  SfxSamplerScreen,
   StudyScreen,
   StuckScreen,
   WorldDetailScreen,
@@ -143,6 +144,7 @@ export function RootNavigator() {
       <Stack.Screen name="Lecturas" component={LecturasScreen} />
       <Stack.Screen name="Lectura" component={LecturaScreen} />
       <Stack.Screen name="Diagnostics" component={DiagnosticsScreen} />
+      {__DEV__ ? <Stack.Screen name="SfxSampler" component={SfxSamplerScreen} /> : null}
     </Stack.Navigator>
   );
 }

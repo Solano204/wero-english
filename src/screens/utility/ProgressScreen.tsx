@@ -10,8 +10,8 @@ import {
   Carga,
   EncabezadoComprimido,
   Screen,
-  SkeletonLista,
 } from '@/components/base';
+import { Hueso, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
 import { SectionTitle } from '@/components/list';
 import { Detalle, FichaJuego, FilaMundo, PanelSenal } from '@/components/progreso';
 import { Espectrograma } from '@/components/fx';
@@ -110,7 +110,43 @@ export function ProgressScreen() {
       desfaseRefresco={top + ALTO_ENCABEZADO}
     >
       <Animated.View style={[styles.bloques, estiloFundido]}>
-        <Carga carga={carga} esqueleto={<SkeletonLista filas={3} alto={110} />}>
+        <Carga
+          carga={carga}
+          esqueleto={
+            <ProveedorEsqueleto etiqueta="Cargando tu progreso" style={styles.bloques}>
+              <HuesoCirculo diametro={160} style={styles.esqueletoCentrado} />
+              <View style={styles.bloque}>
+                <Hueso width="60%" height={16} />
+                <View style={styles.esqueletoEspectro}>
+                  {Array.from({ length: 21 }, (_, i) => (
+                    <Hueso key={i} width={8} height={24 + ((i * 13) % 40)} radius={2} />
+                  ))}
+                </View>
+              </View>
+              <View style={styles.bloque}>
+                <Hueso width="50%" height={16} />
+                <View style={styles.grupo}>
+                  {Array.from({ length: 4 }, (_, i) => (
+                    <Hueso key={i} height={56} radius={0} />
+                  ))}
+                </View>
+              </View>
+              <View style={styles.bloque}>
+                <Hueso width="45%" height={16} />
+                <View style={styles.cuadricula}>
+                  {FILAS_JUEGOS.map((par, r) => (
+                    <View key={r} style={styles.parFichas}>
+                      {par.map((_, c) => (
+                        <Hueso key={c} height={90} radius={radius.lg} style={styles.hueco} />
+                      ))}
+                      {par.length === 1 ? <View style={styles.hueco} /> : null}
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </ProveedorEsqueleto>
+          }
+        >
           {({ stats, mundos, niveles, records }) => {
             const filas = filasMundo(loadContent().packs.mundos, mundos);
             return (
@@ -198,6 +234,8 @@ const styles = StyleSheet.create({
   // Entre bloques 32; dentro de un bloque 16 (ESP-2).
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoEspectro: { flexDirection: 'row', alignItems: 'flex-end', gap: space.xs, height: 64 },
   noData: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
   cuadricula: { gap: space.md },
   parFichas: { flexDirection: 'row', gap: space.md },

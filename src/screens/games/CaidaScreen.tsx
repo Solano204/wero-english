@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Hueso, HuesoBoton, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
 import { Marcador } from '@/components/fx';
 import { Trozos, useReaccion } from '@/components/feedback';
 import { FichaCaida, type EstadoFicha } from '@/components/juegos/caida/FichaCaida';
@@ -32,6 +33,7 @@ import { getRandomEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import {
@@ -99,6 +101,7 @@ export function CaidaScreen() {
   // Se necesita oír bien la voz de la pausa al acertar: la música,
   // aunque fuera baja, competiría justo en ese momento.
   useMusicaPantalla('silencio');
+  useCortarAudioAlSalir();
 
   const [rounds, setRounds] = useState<CaidaRound[]>([]);
   // Cara y cubitos. El numero se relanza en cada respuesta;
@@ -474,12 +477,25 @@ export function CaidaScreen() {
   }
 
   if (loading) {
+    if (!carga.demora) return null;
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Caída" />
-        <View style={styles.center}>
-          <Text style={styles.loading}>Preparando la caída…</Text>
-        </View>
+        <ProveedorEsqueleto etiqueta="Preparando la caída" style={styles.esqueletoRaiz}>
+          <View style={styles.esqueletoTop}>
+            <Hueso width="70%" height={4} radius={radius.pill} />
+            <HuesoCirculo diametro={40} />
+          </View>
+          <View style={styles.esqueletoFrase}>
+            <Hueso width="80%" height={26} style={styles.esqueletoCentrado} />
+            <Hueso width="55%" height={26} style={styles.esqueletoCentrado} />
+          </View>
+          <View style={styles.esqueletoPistas}>
+            {Array.from({ length: 3 }, (_, i) => (
+              <HuesoBoton key={i} width={110} />
+            ))}
+          </View>
+        </ProveedorEsqueleto>
       </Screen>
     );
   }
@@ -662,6 +678,9 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: space.lg,
   },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.xxl },
+  esqueletoTop: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  esqueletoFrase: { gap: space.sm, alignItems: 'center', marginTop: space.xxl },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoPistas: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm },
 });

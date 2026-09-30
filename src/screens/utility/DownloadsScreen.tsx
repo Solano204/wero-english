@@ -15,6 +15,7 @@ import {
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as downloads from '@/services/downloads';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -132,7 +133,7 @@ export function DownloadsScreen() {
                   />
                 ) : (
                   <Button
-                    label="Ver anuncio y descargar"
+                    label={ANUNCIOS_ACTIVOS ? 'Ver anuncio y descargar' : 'Descargar'}
                     variant="secondary"
                     onPress={() => void descargar(p.id)}
                   />

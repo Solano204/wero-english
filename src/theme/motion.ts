@@ -218,6 +218,8 @@ export const motionMalentendido = {
 /** Bucles largos. */
 export const motionCiclo = {
   esqueleto: 700,
+  /** Cuánto tarda el brillo del esqueleto en cruzar un hueso de lado a lado. */
+  brilloEsqueleto: 1200,
   respiro: 900,
 } as const;
 

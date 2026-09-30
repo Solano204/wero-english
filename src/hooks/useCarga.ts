@@ -4,7 +4,18 @@ import { useFocusEffect } from '@react-navigation/native';
 export type EstadoCarga = 'cargando' | 'listo' | 'vacio' | 'error';
 
 /** Antes de esto no se pinta esqueleto: una carga corta no debe parpadear. */
-export const DEMORA_ESQUELETO_MS = 300;
+export const DEMORA_ESQUELETO_MS = 150;
+/** Una vez que el esqueleto ya se pintó, se queda al menos esto: si no, una carga que
+ * termina un instante después destella en vez de sentirse continua. */
+export const MINIMO_ESQUELETO_MS = 300;
+
+/** Solo __DEV__: cuánto se le suma a cada carga con "Simular carga lenta" prendido en Ajustes. */
+const RETRASO_SIMULADO_MS = 1500;
+let simularCargaLenta = false;
+/** La usa el interruptor de Ajustes: solo tiene efecto en __DEV__. */
+export function setSimularCargaLenta(v: boolean): void {
+  simularCargaLenta = v;
+}
 
 export interface ResultadoCarga<T> {
   estado: EstadoCarga;
@@ -43,6 +54,8 @@ export function useCarga<T>(
   const vivo = useRef(true);
   const pedido = useRef(0);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Cuándo se prendió el esqueleto (null si esta carga nunca llegó a pintarlo).
+  const demoraDesde = useRef<number | null>(null);
   const cargarRef = useRef(cargar);
   cargarRef.current = cargar;
   const esVacioRef = useRef(esVacio);
@@ -63,26 +76,54 @@ export function useCarga<T>(
     if (!silenciosa) {
       setEstado('cargando');
       setDemora(false);
+      demoraDesde.current = null;
       temporizador.current = setTimeout(() => {
-        if (vigente()) setDemora(true);
+        if (vigente()) {
+          demoraDesde.current = Date.now();
+          setDemora(true);
+        }
       }, DEMORA_ESQUELETO_MS);
     }
+
+    // Si el esqueleto ya se pintó, el resultado espera lo que falte de
+    // MINIMO_ESQUELETO_MS antes de aplicarse: sin esto, una carga que
+    // termina un instante después de aparecer el esqueleto lo hace
+    // destellar en vez de sentirse continua.
+    const aplicar = (fn: () => void) => {
+      if (!vigente()) return;
+      const espera =
+        demoraDesde.current !== null
+          ? Math.max(0, MINIMO_ESQUELETO_MS - (Date.now() - demoraDesde.current))
+          : 0;
+      if (espera === 0) {
+        fn();
+        return;
+      }
+      setTimeout(() => {
+        if (vigente()) fn();
+      }, espera);
+    };
+
     try {
       const resultado = await cargarRef.current();
-      if (!vigente()) return;
-      setDatos(resultado);
-      setError(null);
-      setEstado(esVacioRef.current?.(resultado) ? 'vacio' : 'listo');
-    } catch (err) {
-      if (!vigente()) return;
-      console.warn('[useCarga] no se pudo cargar', err);
-      setError(err);
-      setEstado('error');
-    } finally {
-      if (vigente()) {
-        if (temporizador.current) clearTimeout(temporizador.current);
-        setDemora(false);
+      if (__DEV__ && simularCargaLenta) {
+        await new Promise((r) => setTimeout(r, RETRASO_SIMULADO_MS));
       }
+      aplicar(() => {
+        setDatos(resultado);
+        setError(null);
+        setDemora(false);
+        setEstado(esVacioRef.current?.(resultado) ? 'vacio' : 'listo');
+      });
+    } catch (err) {
+      aplicar(() => {
+        console.warn('[useCarga] no se pudo cargar', err);
+        setError(err);
+        setDemora(false);
+        setEstado('error');
+      });
+    } finally {
+      if (vigente() && temporizador.current) clearTimeout(temporizador.current);
     }
   }, []);
 

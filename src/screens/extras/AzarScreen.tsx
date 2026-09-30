@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
 import { BotonGuardar } from '@/components/detalle';
 import type { Modo, Sonando } from '@/components/mazo/CartaFrase';
 import { MazoCartas, MazoVacio, type ManejadorMazo } from '@/components/mazo/MazoCartas';
 import { getRandomEntries, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import * as audio from '@/services/audio';
@@ -117,17 +119,11 @@ export function AzarScreen() {
     };
   }, []);
 
-  // Perder el foco también corta la voz: el reproductor de frases es uno solo y compartido.
-  useFocusEffect(
-    useCallback(
-      () => () => {
-        vozToken.current++;
-        audio.stop();
-        setSonando(null);
-      },
-      []
-    )
-  );
+  // Perder el foco también corta todo el audio: el reproductor de frases es uno solo y compartido.
+  useCortarAudioAlSalir(() => {
+    vozToken.current++;
+    setSonando(null);
+  });
 
   // El estado real de la frase de arriba: sin esto, «Guardar» quitaría de Mi mazo una que ya estaba guardada.
   const entryId = entry?.id;
@@ -279,6 +275,13 @@ export function AzarScreen() {
             alLanzar={alLanzar}
             alAvanzar={alAvanzar}
           />
+        ) : loading ? (
+          carga.demora ? (
+            <ProveedorEsqueleto etiqueta="Barajando frases" style={styles.esqueletoCarta}>
+              <HuesoImagen />
+              <HuesoTexto lineas={2} style={styles.esqueletoTexto} />
+            </ProveedorEsqueleto>
+          ) : null
         ) : (
           <MazoVacio />
         )}
@@ -314,6 +317,8 @@ export function AzarScreen() {
 
 const styles = StyleSheet.create({
   zona: { flex: 1 },
+  esqueletoCarta: { flex: 1, padding: space.xl, justifyContent: 'center', gap: space.lg },
+  esqueletoTexto: { alignItems: 'center' },
   pie: { flexDirection: 'row', gap: space.sm, marginTop: space.lg },
   pieApagado: { opacity: 0.45 },
   boton: { flex: 1 },

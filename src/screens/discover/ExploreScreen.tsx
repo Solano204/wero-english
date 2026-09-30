@@ -3,12 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Input, ProgressBar, Screen } from '@/components/base';
+import { Hueso, HuesoCirculo, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
 import { EntryRow, SectionTitle, PuntoMundo } from '@/components/list';
 import { getWorldCounts, searchEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { PORTADA_MUNDO, color, font, space } from '@/theme';
+import { PORTADA_MUNDO, color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -76,7 +77,26 @@ export function ExploreScreen() {
           )}
         </View>
       ) : (
-        <Carga carga={cargaMundos}>
+        <Carga
+          carga={cargaMundos}
+          esqueleto={
+            <ProveedorEsqueleto etiqueta="Cargando los mundos" style={styles.worlds}>
+              {Array.from({ length: mundos.length || 4 }, (_, i) => (
+                <View key={i} style={styles.esqueletoMundo}>
+                  <HuesoImagen />
+                  <View style={styles.esqueletoMundoTexto}>
+                    <View style={styles.esqueletoMundoTitulo}>
+                      <HuesoCirculo diametro={10} />
+                      <Hueso width="45%" height={18} />
+                    </View>
+                    <HuesoTexto lineas={1} anchos={['80%']} alto={13} />
+                    <Hueso width="100%" height={4} radius={2} />
+                  </View>
+                </View>
+              ))}
+            </ProveedorEsqueleto>
+          }
+        >
           {(counts) => (
             <View style={styles.worlds}>
               {mundos.map((m) => {
@@ -133,6 +153,9 @@ const styles = StyleSheet.create({
   },
   worlds: { gap: space.sm, marginTop: space.lg },
   world: { gap: space.sm },
+  esqueletoMundo: { backgroundColor: color.surface, borderRadius: radius.lg, overflow: 'hidden', gap: space.sm, paddingBottom: space.md },
+  esqueletoMundoTexto: { paddingHorizontal: space.lg, gap: space.sm },
+  esqueletoMundoTitulo: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   worldHead: {
     flexDirection: 'row',
     alignItems: 'center',

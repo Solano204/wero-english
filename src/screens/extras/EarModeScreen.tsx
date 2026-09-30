@@ -5,12 +5,14 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useKeepAwake } from 'expo-keep-awake';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, IconButton, Screen } from '@/components/base';
+import { Hueso, HuesoBoton, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
 import { AnilloRadio, BarraSesion, FraseKaraoke, PuntosRepeticion, useBolsillo, useVozEnVivo } from '@/components/fx';
 import { getRandomEntries } from '@/db/queries';
 import { analizar } from '@/domain/marcas';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { marcasDe } from '@/services/marcas';
 import { color, desaparecer, font, fraseEntra, fraseSale, layout, motionDuration, motionEasing, space } from '@/theme';
@@ -156,6 +158,10 @@ export function EarModeScreen() {
     audio.stop();
   }, []);
 
+  // Perder el foco apaga el bucle (playingRef/cicloRef) y corta todo el
+  // audio al instante, sin esperar a que el bucle note el cambio de ruta.
+  useCortarAudioAlSalir(detener);
+
   useEffect(() => {
     // Al salir de la pantalla o ir a background: corta la voz y el
     // bucle. stop() ya invalida cualquier playAndWait() en camino.
@@ -245,9 +251,18 @@ export function EarModeScreen() {
   }
 
   if (loading) {
+    if (!carga.demora) return null;
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Modo oído" />
+        <ProveedorEsqueleto etiqueta="Preparando el modo oído" style={styles.esqueletoRaiz}>
+          <HuesoCirculo diametro={176} style={styles.esqueletoCentrado} />
+          <View style={styles.esqueletoTexto}>
+            <Hueso width="80%" height={22} style={styles.esqueletoCentrado} />
+            <Hueso width="55%" height={16} style={styles.esqueletoCentrado} />
+          </View>
+          <HuesoBoton size="lg" style={styles.esqueletoCentrado} width={220} />
+        </ProveedorEsqueleto>
       </Screen>
     );
   }
@@ -340,6 +355,9 @@ export function EarModeScreen() {
 }
 
 const styles = StyleSheet.create({
+  esqueletoRaiz: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.xxl, paddingHorizontal: space.xl },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoTexto: { gap: space.sm, alignItems: 'center' },
   flex: { flex: 1 },
   cabeza: { paddingHorizontal: space.lg, paddingTop: space.sm },
   // El halo de la barra ocupa 24 dp; se le devuelve lo que sobra para que no separe el contenido.

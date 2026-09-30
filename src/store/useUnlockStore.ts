@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { claveDe, desbloquear, getDesbloqueos, type TipoDesbloqueo } from '@/db/unlock';
 import * as ads from '@/services/ads';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 
 /**
  * Qué está desbloqueado.
@@ -39,7 +40,10 @@ export const useUnlockStore = create<UnlockState>((set, get) => ({
     set({ claves, cargado: true });
   },
 
-  abierto: (tipo, id) => get().claves.has(claveDe(tipo, id)),
+  // Interruptor de monetización: sin anuncios, todo lo que se cerraba por
+  // anuncio queda abierto, sin escribir en la base (así no hay nada que
+  // migrar cuando el interruptor vuelva a `true`).
+  abierto: (tipo, id) => !ANUNCIOS_ACTIVOS || get().claves.has(claveDe(tipo, id)),
 
   abrir: async (usuarioId, tipo, id) => {
     const clave = claveDe(tipo, id);

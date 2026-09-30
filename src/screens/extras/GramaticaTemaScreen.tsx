@@ -19,6 +19,7 @@ import { MuroDesbloqueo } from '@/components/unlock';
 import { segmentos } from '@/domain/gramatica';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import { color, font, layout, motionDuration, motionEasing, radius, space, text, aparecerSubiendo, escalon } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
@@ -140,6 +141,12 @@ export function GramaticaTemaScreen() {
   // la ejecución vieja terminando mientras ya corre la nueva: cada una
   // solo manda si sigue siendo la vigente.
   const ejecucionRef = useRef(0);
+
+  // Perder el foco apaga "Escuchar todos" y corta todo el audio al instante.
+  useCortarAudioAlSalir(() => {
+    reproduciendoRef.current = false;
+    setReproduciendoTodos(false);
+  });
 
   useEffect(() => {
     // Al salir de la pantalla (o cambiar de tema, que remonta el

@@ -160,12 +160,14 @@ const ARRIBA_PILDORA = space.sm + space.xs + PADDING_BOTON_PESTANA - 1;
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
   /*
-   * La barra de anuncios va DEBAJO del navegador y ya absorbe el inset
-   * del teléfono, así que aquí no hace falta sumarlo otra vez: lo único
-   * que se necesita es aire entre las dos barras para que no se lean
-   * como una sola franja pegada.
+   * Con la barra de navegación de Android oculta (useBarraOculta), el
+   * inset inferior es 0 y la pestaña flotante se queda en el margen
+   * mínimo `space.md`, para que no quede pegada al borde donde se
+   * desliza para verla. Si algo la deja visible (el instante antes de
+   * ocultarse, un dispositivo donde falle), `insets.bottom` no es 0 y la
+   * pestaña sube por encima suyo en vez de quedar tapada.
    */
-  const abajo = space.md;
+  const abajo = insets.bottom > 0 ? insets.bottom + space.xs : space.md;
 
   return (
     <View style={{ flex: 1, backgroundColor: color.bg }}>

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View, type ListRenderItemInfo } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Carga, EmptyState, Header, Screen } from '@/components/base';
+import { HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
 import { Desatorar } from '@/components/atoradas/Desatorar';
 import { TarjetaAtorada } from '@/components/atoradas/TarjetaAtorada';
 import { getCardStates, getEntriesByIds, getStuckEntries } from '@/db/queries';
@@ -16,7 +17,7 @@ import {
   type AtoradaVista,
 } from '@/domain/atoradas';
 import { useCarga } from '@/hooks/useCarga';
-import * as audio from '@/services/audio';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { color, font, motionDesatorar, space } from '@/theme';
 import { conteo } from '@/utils/text';
@@ -97,15 +98,8 @@ export function StuckScreen() {
   }, [carga.datos]);
   const retirar = useCallback((id: number) => setMostrando((m) => m.filter((d) => d.entry.id !== id)), []);
 
-  // Perder el foco (abrir el Detalle) corta la voz: el reproductor de frases es uno solo y compartido.
-  useFocusEffect(
-    useCallback(
-      () => () => {
-        audio.stop();
-      },
-      []
-    )
-  );
+  // Perder el foco (abrir el Detalle) corta todo el audio: el reproductor de frases es uno solo y compartido.
+  useCortarAudioAlSalir();
 
   const abrir = useCallback(
     (e: Entry) => nav.navigate('Detail', { entryId: e.id }),
@@ -131,7 +125,17 @@ export function StuckScreen() {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Se me atoran" />
-        <Carga carga={carga} vacio={vacio}>
+        <Carga
+          carga={carga}
+          vacio={vacio}
+          esqueleto={
+            <ProveedorEsqueleto etiqueta="Cargando las atoradas" style={styles.list}>
+              {Array.from({ length: 6 }, (_, i) => (
+                <HuesoTarjeta key={i} lineas={1} />
+              ))}
+            </ProveedorEsqueleto>
+          }
+        >
           {() => null}
         </Carga>
       </Screen>

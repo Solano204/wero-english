@@ -7,11 +7,12 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Header, ProgressBar, Screen } from '@/components/base';
+import { Hueso, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
 import { getPackCounts } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { color, font, space } from '@/theme';
+import { color, font, radius, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 import { PuntoMundo } from '@/components/list';
 
@@ -49,7 +50,23 @@ export function WorldDetailScreen() {
         subtitle={mundo?.descripcion}
       />
 
-      <Carga carga={carga}>
+      <Carga
+        carga={carga}
+        esqueleto={
+          <ProveedorEsqueleto etiqueta="Cargando los packs" style={styles.list}>
+            {Array.from({ length: 4 }, (_, i) => (
+              <View key={i} style={styles.esqueletoPack}>
+                <View style={styles.head}>
+                  <Hueso width="55%" height={18} />
+                  <Hueso width={70} height={14} />
+                </View>
+                <HuesoTexto lineas={1} anchos={['90%']} alto={13} />
+                <Hueso width="100%" height={4} radius={2} />
+              </View>
+            ))}
+          </ProveedorEsqueleto>
+        }
+      >
         {(counts) => (
           <View style={styles.list}>
             {packs.map((p) => {
@@ -95,6 +112,7 @@ export function WorldDetailScreen() {
 const styles = StyleSheet.create({
   list: { gap: space.sm },
   pack: { gap: space.sm },
+  esqueletoPack: { backgroundColor: color.surface, borderRadius: radius.lg, padding: space.lg, gap: space.sm },
   head: {
     flexDirection: 'row',
     alignItems: 'center',

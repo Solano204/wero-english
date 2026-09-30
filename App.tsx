@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -9,13 +10,12 @@ import { RootNavigator, navTheme, navigationRef } from '@/navigation';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { ErrorBoundary } from '@/components/base/ErrorBoundary';
 import { TransicionHoy } from '@/components/fx';
+import { useBarraOculta } from '@/hooks/useBarraOculta';
+import { OCULTAR_BARRA_ESTADO } from '@/config/pantalla';
 import * as audio from '@/services/audio';
 import { color, fuentes } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
-
-/** Rutas de la sección Lecturas: salir de ellas corta la voz de frase. */
-const RUTAS_LECTURAS = new Set(['Lecturas', 'Lectura']);
 
 export default function App() {
   const status = useAuthStore((s) => s.status);
@@ -23,6 +23,7 @@ export default function App() {
   const loadSettings = useSettingsStore((s) => s.load);
   const rutaPrevia = useRef<string | undefined>(undefined);
   const [fuentesCargadas, fuentesError] = useFonts(fuentes);
+  useBarraOculta();
   // Si una fuente falla, la app arranca con la del sistema en vez de quedarse en el splash.
   const fuentesListas = fuentesCargadas || fuentesError !== null;
 
@@ -37,6 +38,16 @@ export default function App() {
   useEffect(() => {
     if (user) void loadSettings(user.id);
   }, [user, loadSettings]);
+
+  // Al pasar a segundo plano se corta todo el audio. Al volver no se
+  // reanuda nada solo: lo que tenga su propio "Reanudar" (Modo oído en
+  // pausa) sigue ahí, pero el usuario decide cuándo seguir.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (estado) => {
+      if (estado !== 'active') audio.detenerTodo();
+    });
+    return () => sub.remove();
+  }, []);
 
   if (!fuentesListas) return null;
 
@@ -53,17 +64,16 @@ export default function App() {
             onStateChange={() => {
               const actual = navigationRef.getCurrentRoute()?.name;
               const previa = rutaPrevia.current;
-              if (
-                previa &&
-                RUTAS_LECTURAS.has(previa) &&
-                (!actual || !RUTAS_LECTURAS.has(actual))
-              ) {
-                audio.stop();
-              }
+              // Cualquier cambio de ruta (pantalla nueva encima, atrás, el
+              // gesto de atrás o cambio de pestaña) corta TODO el audio antes
+              // de que la pantalla que entra reproduzca lo suyo: el corte va
+              // primero, el play automático de la nueva (p. ej. la primera
+              // tarjeta de Estudio) sigue sonando después, sin competir.
+              if (actual !== previa) audio.detenerTodo();
               rutaPrevia.current = actual;
             }}
           >
-            <StatusBar style="light" />
+            <StatusBar hidden={OCULTAR_BARRA_ESTADO} style="light" />
             <RootNavigator />
             <TransicionHoy />
           </NavigationContainer>

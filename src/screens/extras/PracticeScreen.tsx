@@ -5,6 +5,7 @@ import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ErrorCarga, Screen } from '@/components/base';
+import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
 import { SectionTitle } from '@/components/list';
 import { FondoAurora } from '@/components/fx';
 import { getGameRecords, getHablaResumen, getRetoSemanal, getUsoModos } from '@/db/economy';
@@ -16,7 +17,7 @@ import { useCarga } from '@/hooks/useCarga';
 import { useEntradaPantalla } from '@/hooks/useEntradaPantalla';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { space, tarjeta } from '@/theme';
+import { radius, space, tarjeta } from '@/theme';
 import { conteo } from '@/utils';
 import { dayKey } from '@/utils/date';
 import type { JuegoRecord, RetoSemanal } from '@/types';
@@ -187,7 +188,17 @@ export function PracticeScreen() {
         <View style={styles.bloque}>
           <SectionTitle title="Destacados" variante="bloque" />
           {carga.estado === 'cargando' ? (
-            <View style={styles.reservaDestacados} />
+            carga.demora ? (
+              <ProveedorEsqueleto etiqueta="Cargando destacados" style={styles.reservaDestacados}>
+                <Hueso height={tarjeta.heroe} radius={radius.lg} />
+                <View style={styles.esqueletoFilaDestacados}>
+                  <Hueso height={tarjeta.compacta} radius={radius.lg} style={styles.esqueletoCompacta} />
+                  <Hueso height={tarjeta.compacta} radius={radius.lg} style={styles.esqueletoCompacta} />
+                </View>
+              </ProveedorEsqueleto>
+            ) : (
+              <View style={styles.reservaDestacados} />
+            )
           ) : (
             <Destacados
               ids={destacados}
@@ -256,5 +267,7 @@ const styles = StyleSheet.create({
   // Entre bloques 32; dentro de un bloque 16 (ESP-2).
   bloques: { gap: space.xxl },
   bloque: { gap: space.lg },
-  reservaDestacados: { height: tarjeta.heroe + space.md + tarjeta.compacta },
+  reservaDestacados: { height: tarjeta.heroe + space.md + tarjeta.compacta, gap: space.md },
+  esqueletoFilaDestacados: { flexDirection: 'row', gap: space.md, flex: 1 },
+  esqueletoCompacta: { flex: 1 },
 });

@@ -11,6 +11,7 @@ import { RuletaParticulas } from '@/components/phrasal/RuletaParticulas';
 import { ViajeVerbo, type Viaje } from '@/components/phrasal/ViajeVerbo';
 import { anunciarForma, etiquetasParticulas } from '@/domain/phrasal';
 import { limitarIndice } from '@/domain/ruleta';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as haptics from '@/services/haptics';
 import { loadContent } from '@/store/content';
 import { useSettingsStore } from '@/store';
@@ -48,6 +49,7 @@ export function PhrasalVerboScreen() {
   const { params } = useRoute<R>();
   const reducido = useMovimientoReducido();
   const content = useMemo(loadContent, []);
+  useCortarAudioAlSalir();
   const modoLimpio = useSettingsStore((s) => s.modoLimpio);
   const verboRef = useRef<View>(null);
   const [cambio, setCambio] = useState<Cambio>({ indice: 0, direccion: 1, eje: 'y' });

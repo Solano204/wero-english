@@ -3,6 +3,7 @@ import { AccessibilityInfo, AppState, ScrollView, StyleSheet, Text, View, useWin
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
+import { Hueso, HuesoBoton, ProveedorEsqueleto } from '@/components/esqueleto';
 import { Marcador } from '@/components/fx';
 import { BloqueEscuchar } from '@/components/juegos/colmena/BloqueEscuchar';
 import { FraseResuelta } from '@/components/juegos/colmena/FraseResuelta';
@@ -22,6 +23,7 @@ import { useAuthStore, useSettingsStore } from '@/store';
 import { useMovimientoReducido } from '@/utils';
 import { formaPalabras } from '@/utils/text';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, layout, radius, space, motionColmena, motionDuration } from '@/theme';
@@ -77,6 +79,7 @@ export function ColmenaScreen() {
   // baja, estorba más de lo que ayuda. useMusicaPantalla('silencio') la
   // pausa con fundido al entrar y la retoma sola al salir.
   useMusicaPantalla('silencio');
+  useCortarAudioAlSalir();
 
   useEffect(() => {
     // Al salir de la pantalla o ir a background: corta voz y SFX. stop()
@@ -317,13 +320,26 @@ export function ColmenaScreen() {
     if (!round || resuelta || sonandoEscuchar || escuchas <= 0) return;
     setEscuchas((n) => n - 1);
     setSonandoEscuchar(true);
-    await audio.play(round.entry.audio_en);
-    await audio.waitUntilDone();
-    setSonandoEscuchar(false);
+    try {
+      await audio.play(round.entry.audio_en);
+      await audio.waitUntilDone();
+    } finally {
+      // Pase lo que pase (audio.ts ya pone su propio tope, pero el
+      // candado de este botón se libera aquí siempre): "Escuchar" nunca
+      // se queda deshabilitado el resto de la ronda.
+      setSonandoEscuchar(false);
+    }
   }, [round, resuelta, sonandoEscuchar, escuchas]);
+
+  // Qué ronda ya mandó a avanzarRonda: una sola vez por ronda, sin
+  // importar si lo dispara el temporizador de salida o «Siguiente» de
+  // nuevo mientras el primero seguía en camino.
+  const avanzadaDesde = useRef(-1);
 
   /** Pasa a la ronda que sigue. Lo de la ronda que se deja se limpia junto con el cambio: la nueva no pinta ni un cuadro con ello. */
   const avanzarRonda = useCallback(() => {
+    if (avanzadaDesde.current === idx) return;
+    avanzadaDesde.current = idx;
     setColocadas([]);
     setRechazo(null);
     setArmado('');
@@ -333,7 +349,7 @@ export function ColmenaScreen() {
     setSeAcabo(false);
     setSaliendo(false);
     setIdx((i) => i + 1);
-  }, []);
+  }, [idx]);
 
   const siguiente = useCallback(() => {
     // Bloquea el botón ~400ms: sin esto, dos toques rápidos podían
@@ -373,7 +389,11 @@ export function ColmenaScreen() {
    * convertiría el reloj en un castigo en vez de en presión.
    */
   const seAcaboElTiempo = useCallback(async () => {
-    if (!user || !round || resuelta) return;
+    // La ronda se resuelve siempre, tenga o no `user`: antes este guard
+    // cubría toda la función, así que sin `user` el tiempo se agotaba y
+    // la ronda se quedaba pegada para siempre (nunca aparecía «Siguiente»).
+    // Grabar la calificación sí depende de `user`; resolver la ronda no.
+    if (!round || resuelta) return;
     setResuelta(true);
     setSeAcabo(true);
     setAyudaDesde(armado.length);
@@ -381,29 +401,35 @@ export function ColmenaScreen() {
     setArmado(round.objetivo);
     haptics.failure();
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
-    await applyGameGrade(
-      user.id,
-      round.entry.id,
-      false,
-      Date.now() - empezoEn.current,
-      'producir'
-    );
+    if (user) {
+      await applyGameGrade(
+        user.id,
+        round.entry.id,
+        false,
+        Date.now() - empezoEn.current,
+        'producir'
+      );
+    }
   }, [user, round, resuelta, armado, volarFaltantes]);
 
   const rendirse = useCallback(async () => {
-    if (!user || !round || resuelta) return;
+    // Mismo arreglo que seAcaboElTiempo: "No me sale" tiene que resolver
+    // la ronda aunque `user` no esté listo.
+    if (!round || resuelta) return;
     setResuelta(true);
     setAyudaDesde(armado.length);
     volarFaltantes();
     setArmado(round.objetivo);
     void audio.playRoundResultBilingue(false, round.entry.audio_en, round.entry.audio_es);
-    await applyGameGrade(
-      user.id,
-      round.entry.id,
-      false,
-      Date.now() - empezoEn.current,
-      'producir'
-    );
+    if (user) {
+      await applyGameGrade(
+        user.id,
+        round.entry.id,
+        false,
+        Date.now() - empezoEn.current,
+        'producir'
+      );
+    }
   }, [user, round, resuelta, armado, volarFaltantes]);
 
   if (carga.estado === 'error') {
@@ -416,11 +442,42 @@ export function ColmenaScreen() {
   }
 
   if (loading) {
+    if (!carga.demora) return null;
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Colmena" />
-        <View style={styles.center}>
-          <Text style={styles.loading}>Armando el tablero…</Text>
+        <ProveedorEsqueleto etiqueta="Armando el tablero" style={styles.esqueletoRaiz}>
+          <View style={styles.esqueletoReloj}>
+            <Hueso height={4} radius={radius.pill} />
+          </View>
+          <View style={styles.esqueletoCentro}>
+            <Hueso width="70%" height={18} style={styles.esqueletoCentrado} />
+            <Hueso width="55%" height={26} style={styles.esqueletoCentrado} />
+          </View>
+          <View style={styles.esqueletoEscuchar}>
+            <HuesoBoton width={150} />
+            <Hueso width={88} height={32} />
+          </View>
+          <View style={styles.esqueletoRanuras}>
+            {Array.from({ length: 12 }, (_, i) => (
+              <Hueso key={i} width={28} height={36} />
+            ))}
+          </View>
+          <View style={styles.esqueletoPanal}>
+            {[6, 5, 6, 5].map((n, fila) => (
+              <View key={fila} style={[styles.esqueletoFilaPanal, fila % 2 === 1 && styles.esqueletoFilaCorrida]}>
+                {Array.from({ length: n }, (_, i) => (
+                  <Hueso key={i} width={48} height={48} radius={radius.md} />
+                ))}
+              </View>
+            ))}
+          </View>
+        </ProveedorEsqueleto>
+        <View style={styles.pie}>
+          <View style={styles.pieRow}>
+            <HuesoBoton />
+            <HuesoBoton />
+          </View>
         </View>
       </Screen>
     );
@@ -641,6 +698,13 @@ const styles = StyleSheet.create({
     color: color.textFaint,
     textAlign: 'center',
   },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.lg },
+  esqueletoReloj: { marginBottom: space.sm },
+  esqueletoCentro: { alignItems: 'center', gap: space.sm },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoEscuchar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
+  esqueletoRanuras: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.xs },
+  esqueletoPanal: { gap: space.xs, alignItems: 'center' },
+  esqueletoFilaPanal: { flexDirection: 'row', gap: space.xs },
+  esqueletoFilaCorrida: { marginLeft: space.xl },
 });

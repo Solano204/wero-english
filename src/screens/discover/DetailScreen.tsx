@@ -19,6 +19,7 @@ import {
   Screen,
 } from '@/components/base';
 import { MarcoImagen } from '@/components/card';
+import { Hueso, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
 import {
   Aparece,
   BotonGuardar,
@@ -29,9 +30,10 @@ import {
 } from '@/components/detalle';
 import { getEntry, isFavorite, toggleFavorite } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
-import { color, font, layout, motionDuration, motionEasing, motionEntrada, space, type WorldId } from '@/theme';
+import { color, font, layout, motionDuration, motionEasing, motionEntrada, radius, space, type WorldId } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { mismoTexto } from '@/utils/text';
 import type { RootStackParams } from '@/navigation/routes';
@@ -53,6 +55,7 @@ export function DetailScreen() {
   const { params } = useRoute<Rt>();
   const user = useAuthStore((s) => s.user);
   const { top } = useSafeAreaInsets();
+  useCortarAudioAlSalir();
   const scrollY = useSharedValue(0);
 
   const carga = useCarga(() => getEntry(params.entryId), [params.entryId], {
@@ -104,6 +107,20 @@ export function DetailScreen() {
         <Carga
           carga={carga}
           vacio={<EmptyState icon="warning" title="No se encontró la frase." />}
+          esqueleto={
+            <ProveedorEsqueleto etiqueta="Cargando la frase" style={styles.esqueletoRaiz}>
+              <HuesoImagen />
+              <View style={styles.esqueletoCuerpo}>
+                <Hueso width="85%" height={26} />
+                <Hueso width="60%" height={18} />
+                <View style={styles.esqueletoChips}>
+                  <Hueso width={70} height={24} radius={radius.pill} />
+                  <Hueso width={90} height={24} radius={radius.pill} />
+                </View>
+                <HuesoTexto lineas={3} style={styles.esqueletoTexto} />
+              </View>
+            </ProveedorEsqueleto>
+          }
         >
           {() => null}
         </Carga>
@@ -224,6 +241,10 @@ function Block({ title, body }: { title: string; body: string }) {
 }
 
 const styles = StyleSheet.create({
+  esqueletoRaiz: { flex: 1 },
+  esqueletoCuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.lg, gap: space.md },
+  esqueletoChips: { flexDirection: 'row', gap: space.sm },
+  esqueletoTexto: { marginTop: space.md },
   encabezado: {
     flexDirection: 'row',
     alignItems: 'center',

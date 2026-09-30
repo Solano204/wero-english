@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Skeleton } from '@/components/base';
+import { ProveedorEsqueleto } from '@/components/esqueleto';
 import {
   AnilloMeta,
   BotonSenal,
@@ -203,7 +204,11 @@ export function ConsolaHoy({
           <OndaSenal energia={energiaOnda(pendientes)} encendido={encendido} interferencia={interferencia} />
           <BarridoLuz ancho={ancho} activo={entrada && !reducido} />
         </View>
-        {cargando ? <Skeleton relleno style={styles.esqueleto} /> : null}
+        {cargando ? (
+          <ProveedorEsqueleto etiqueta="Cargando tu resumen de hoy" style={StyleSheet.absoluteFill}>
+            <Skeleton relleno style={styles.esqueleto} />
+          </ProveedorEsqueleto>
+        ) : null}
         <Animated.View
           style={[styles.contenido, estiloContenido, !listo && styles.oculto]}
           accessibilityElementsHidden={!listo}

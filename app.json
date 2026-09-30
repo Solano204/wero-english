@@ -57,6 +57,16 @@
             "com.google.android.googlequicksearchbox"
           ]
         }
+      ],
+      "expo-audio",
+      "expo-splash-screen",
+      "expo-sqlite",
+      [
+        "expo-navigation-bar",
+        {
+          "hidden": true,
+          "style": "light"
+        }
       ]
     ],
     "experiments": {

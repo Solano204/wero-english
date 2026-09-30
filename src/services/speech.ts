@@ -1,5 +1,6 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
+import { registrarCorte } from './audio';
 
 /**
  * Reconocimiento de voz.
@@ -203,6 +204,10 @@ export function cancel(): void {
     /* sin consecuencia */
   }
 }
+
+// Se registra una sola vez para que audio.detenerTodo() también corte el
+// reconocedor en curso (mic escuchando), no solo lo que suena.
+registrarCorte(cancel);
 
 /**
  * El payload del evento cambia de forma entre versiones de la librería

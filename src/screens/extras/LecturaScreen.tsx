@@ -20,6 +20,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, Carga, EmptyState, Header, Screen } from '@/components/base';
+import { Hueso, HuesoBoton, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
 import { CierreLectura } from '@/components/lectura/CierreLectura';
 import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
 import { PieReproductor } from '@/components/lectura/PieReproductor';
@@ -30,6 +31,7 @@ import { partirTexto, type Trozo } from '@/domain/lectura';
 import { dividirOraciones, inicioDeMarcas, inicioEstimado, trozosPorOracion } from '@/domain/oraciones';
 import { getCardStates, getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import * as audio from '@/services/audio';
@@ -101,14 +103,8 @@ export function LecturaScreen() {
   const estados = carga.datos?.estados ?? SIN_ESTADOS;
 
   // Perder el foco (salir, cambiar de pestaña, abrir la ficha de una
-  // frase) corta la voz: el player de frases es uno solo y compartido.
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        audio.stop();
-      };
-    }, [])
-  );
+  // frase) corta todo el audio: el player de frases es uno solo y compartido.
+  useCortarAudioAlSalir();
 
   // Red de seguridad por si se desmonta sin haber perdido el foco antes.
   useEffect(
@@ -302,7 +298,8 @@ export function LecturaScreen() {
         haptics.success();
         void audio.playSuccess();
       } else {
-        haptics.failure();
+        // Light, no Warning: el fallo informa, no regaña.
+        haptics.tapLight();
         void audio.playFail();
       }
       setRespuestas((r) => ({ ...r, [i]: opcion }));
@@ -328,7 +325,18 @@ export function LecturaScreen() {
     return (
       <Screen>
         <Header onBack={() => nav.goBack()} title="Lectura" />
-        <Carga carga={carga}>{() => null}</Carga>
+        <Carga
+          carga={carga}
+          esqueleto={
+            <ProveedorEsqueleto etiqueta="Cargando la lectura" style={styles.esqueletoRaiz}>
+              <Hueso width="70%" height={26} style={styles.esqueletoCentrado} />
+              <HuesoBoton width="100%" />
+              <HuesoTexto lineas={8} />
+            </ProveedorEsqueleto>
+          }
+        >
+          {() => null}
+        </Carga>
       </Screen>
     );
   }
@@ -450,6 +458,8 @@ export function LecturaScreen() {
 }
 
 const styles = StyleSheet.create({
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.lg },
+  esqueletoCentrado: { alignSelf: 'center' },
   capTitulo: {
     fontSize: font.size.xl,
     fontFamily: font.family.display,

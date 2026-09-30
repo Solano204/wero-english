@@ -21,6 +21,7 @@ export {
   depth,
   senal,
   reflejo,
+  brilloEsqueleto,
   aurora,
   grano,
   tarjeta,

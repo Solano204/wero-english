@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { color, font, layout, radius, space } from '@/theme';
 import * as ads from '@/services/ads';
+import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { Icon } from './Icon';
 import { Presionable } from './Presionable';
 
@@ -27,6 +28,8 @@ import { Presionable } from './Presionable';
    ============================================================ */
 
 export function AdBar({ bottomInset = 0 }: { bottomInset?: number }) {
+  // Interruptor de monetización: sin anuncios, ni se pinta ni reserva espacio.
+  if (!ANUNCIOS_ACTIVOS) return null;
   return (
     <View
       style={[styles.bar, { paddingBottom: bottomInset }]}
@@ -56,7 +59,7 @@ export function AdFullScreen({ visible, onClose, segundos = 3 }: FullProps) {
   const [restan, setRestan] = useState(segundos);
 
   useEffect(() => {
-    if (!visible) {
+    if (!ANUNCIOS_ACTIVOS || !visible) {
       setRestan(segundos);
       return;
     }
@@ -65,7 +68,7 @@ export function AdFullScreen({ visible, onClose, segundos = 3 }: FullProps) {
     return () => clearTimeout(t);
   }, [visible, restan, segundos]);
 
-  if (!visible) return null;
+  if (!ANUNCIOS_ACTIVOS || !visible) return null;
 
   return (
     <View style={styles.full}>
@@ -116,6 +119,8 @@ export type ResultadoMuro = 'visto' | 'cancelado' | 'sin_anuncio';
  * tampoco se regala. Se le dice al usuario que lo intente más tarde.
  */
 export async function pedirRecompensa(): Promise<ResultadoMuro> {
+  // Interruptor de monetización: sin anuncios, el trato ya está hecho.
+  if (!ANUNCIOS_ACTIVOS) return 'visto';
   if (!ads.isAvailable()) {
     // __DEV__ lo inyecta Metro; se lee así para que TypeScript no
     // necesite los tipos globales de React Native solo por esta línea.

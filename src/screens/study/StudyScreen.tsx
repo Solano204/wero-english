@@ -15,13 +15,16 @@ import {
 import { Confetti, Trozos, useReaccion } from '@/components/feedback';
 import { BarraSesion, ChipMarcador, HojaVeredicto, publicarBarraEstudio } from '@/components/fx';
 import { DiffFrase, StudyCardView } from '@/components/card';
+import { Hueso, HuesoBoton, HuesoImagen, ProveedorEsqueleto } from '@/components/esqueleto';
 import { nivelSeguidas } from '@/domain/seguidas';
 import { sesionMerece } from '@/domain/session';
+import { DEMORA_ESQUELETO_MS } from '@/hooks/useCarga';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
+import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import * as notifications from '@/services/notifications';
-import { aparecerSubiendo, color, font, layout, motionDuration, space } from '@/theme';
+import { aparecerSubiendo, color, font, layout, motionDuration, radius, space } from '@/theme';
 import type { StudyCard } from '@/types';
 import { useMovimientoReducido } from '@/utils';
 import type { RootStackParams } from '@/navigation/routes';
@@ -52,6 +55,7 @@ const lineaFinal = (c: Cierre) => `${c.aciertos} de ${c.total} ${plural(c.total,
  */
 export function StudyScreen() {
   useKeepAwake();
+  useCortarAudioAlSalir();
   const reducido = useMovimientoReducido();
   const nav = useNavigation<Nav>();
   const barra = useRef<View>(null);
@@ -74,6 +78,18 @@ export function StudyScreen() {
     aciertos,
     pendientes,
   } = useSessionStore();
+
+  // El esqueleto de "armando tu sesión" solo aparece si tarda más de
+  // DEMORA_ESQUELETO_MS: una sesión que arma rápido no debe parpadear.
+  const [demoraSesion, setDemoraSesion] = useState(false);
+  useEffect(() => {
+    if (phase !== 'loading' && phase !== 'idle') {
+      setDemoraSesion(false);
+      return undefined;
+    }
+    const t = setTimeout(() => setDemoraSesion(true), DEMORA_ESQUELETO_MS);
+    return () => clearTimeout(t);
+  }, [phase]);
 
   const [chosen, setChosen] = useState<string | null>(null);
   // Al terminar una sesión completa con vencidas pendientes se ofrece seguir.
@@ -215,12 +231,23 @@ export function StudyScreen() {
   }, [next]);
 
   if (phase === 'loading' || phase === 'idle') {
+    if (!demoraSesion) return null;
     return (
       <Screen>
         <Header onClose={() => nav.goBack()} />
-        <View style={styles.center}>
-          <Text style={styles.loading}>Armando tu sesión…</Text>
-        </View>
+        <ProveedorEsqueleto etiqueta="Armando tu sesión" style={styles.esqueletoRaiz}>
+          <Hueso width="100%" height={6} radius={radius.pill} />
+          <HuesoImagen style={styles.esqueletoImagen} />
+          <View style={styles.esqueletoTexto}>
+            <Hueso width="75%" height={24} style={styles.esqueletoCentrado} />
+            <Hueso width="45%" height={16} style={styles.esqueletoCentrado} />
+          </View>
+          <View style={styles.esqueletoOpciones}>
+            {Array.from({ length: 4 }, (_, i) => (
+              <HuesoBoton key={i} size="lg" />
+            ))}
+          </View>
+        </ProveedorEsqueleto>
       </Screen>
     );
   }
@@ -390,6 +417,9 @@ const styles = StyleSheet.create({
   chips: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.sm },
   barRow: { marginBottom: space.xs },
   body: { flex: 1, paddingHorizontal: space.lg, paddingBottom: space.md },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.md },
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.md, gap: space.xl },
+  esqueletoImagen: { marginTop: space.md },
+  esqueletoTexto: { gap: space.sm, alignItems: 'center' },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoOpciones: { gap: space.sm },
 });

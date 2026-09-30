@@ -3,7 +3,7 @@
  * NUNCA edites una migración ya publicada: agrega una nueva al final.
  */
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export const MIGRATIONS: { version: number; sql: string }[] = [
   {
@@ -312,6 +312,24 @@ export const MIGRATIONS: { version: number; sql: string }[] = [
       clave TEXT PRIMARY KEY,
       valor TEXT NOT NULL
     );
+    `,
+  },
+  /* ------------------------------------------------------------------
+     v7: cuentas de Google. `username`/`pass_hash`/`pass_salt` siguen
+     NOT NULL (rehacer esa tabla es riesgo que esta app no necesita);
+     una cuenta de Google o "sin cuenta" solo guarda ahí valores
+     sintéticos que nunca se usan para entrar. La identidad de una
+     cuenta de Google es `google_sub`, no el email (el email puede
+     cambiar o repetirse entre proveedores).
+     ------------------------------------------------------------------ */
+  {
+    version: 7,
+    sql: `
+    ALTER TABLE usuario ADD COLUMN google_sub TEXT;
+    ALTER TABLE usuario ADD COLUMN email      TEXT;
+    ALTER TABLE usuario ADD COLUMN nombre     TEXT;
+    ALTER TABLE usuario ADD COLUMN foto       TEXT;
+    CREATE UNIQUE INDEX IF NOT EXISTS ux_usuario_google_sub ON usuario(google_sub) WHERE google_sub IS NOT NULL;
     `,
   },
 ];
