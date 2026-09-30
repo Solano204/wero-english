@@ -38,6 +38,8 @@ export function AuthScreen() {
     resolverVinculo,
     cancelarVinculo,
     vinculoPendiente,
+    aviso: avisoEntrada,
+    limpiarAviso,
     busy,
     error,
     clearError,
@@ -49,13 +51,14 @@ export function AuthScreen() {
 
   // Cada botón muestra su propia carga: el resto solo se bloquea.
   const correr = useCallback(async (quien: Accion, fn: () => Promise<unknown>) => {
+    limpiarAviso();
     setAccion(quien);
     try {
       await fn();
     } finally {
       setAccion(null);
     }
-  }, []);
+  }, [limpiarAviso]);
 
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
 
@@ -158,6 +161,13 @@ export function AuthScreen() {
   } else {
     cuerpo = (
       <Animated.View entering={aparecer()} style={styles.form}>
+        {avisoEntrada ? (
+          <Card style={styles.avisoEntrada}>
+            <Text style={styles.avisoEntradaTexto} accessibilityLiveRegion="polite" accessibilityRole="alert">
+              {avisoEntrada}
+            </Text>
+          </Card>
+        ) : null}
         {googleAuth.disponible ? (
           <BotonGoogle onPress={() => void conGoogle()} cargando={busy && accion === 'google'} disabled={busy} />
         ) : (
@@ -245,6 +255,14 @@ const styles = StyleSheet.create({
     color: color.textMuted,
     textAlign: 'center',
     lineHeight: font.size.md * 1.5,
+  },
+  avisoEntrada: { paddingVertical: space.md },
+  avisoEntradaTexto: {
+    fontFamily: font.family.body,
+    fontSize: font.size.md,
+    lineHeight: font.size.md * 1.5,
+    color: color.text,
+    textAlign: 'center',
   },
   enlaceToque: { minHeight: layout.tapMin, justifyContent: 'center' },
   legal: { alignItems: 'center' },

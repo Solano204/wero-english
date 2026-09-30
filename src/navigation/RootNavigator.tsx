@@ -32,6 +32,7 @@ import {
   PhrasalScreen,
   PhrasalVerboScreen,
   PronunciationScreen,
+  BorrarScreen,
   LegalDocScreen,
   SettingsScreen,
   SfxSamplerScreen,
@@ -132,6 +133,7 @@ export function RootNavigator() {
       <Stack.Screen name="Downloads" component={DownloadsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="LegalDoc" component={LegalDocScreen} />
+      <Stack.Screen name="Borrar" component={BorrarScreen} />
       <Stack.Screen name="Stuck" component={StuckScreen} />
       <Stack.Screen name="Deck" component={DeckScreen} />
       <Stack.Screen name="Niveles" component={NivelesScreen} />

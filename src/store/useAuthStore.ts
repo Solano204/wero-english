@@ -6,6 +6,9 @@ import * as googleAuth from '../../modules/wero-google-auth';
 import * as consentimiento from '@/services/consentimiento';
 import * as audio from '@/services/audio';
 import * as music from '@/services/music';
+import * as notifications from '@/services/notifications';
+import * as borrado from '@/services/borrado';
+import { useSettingsStore } from './useSettingsStore';
 import { AUTH_MESSAGES, type AuthError, type PerfilGoogle, type User } from '@/types';
 
 type Status = 'booting' | 'anon' | 'signed';
@@ -23,6 +26,8 @@ interface AuthState {
   busy: boolean;
   /** Mientras esto no sea null, la pantalla de entrada muestra "Vincular tu avance a esta cuenta". */
   vinculoPendiente: VinculoPendiente | null;
+  /** Un aviso para la pantalla de entrada (p. ej. tras borrar la cuenta). */
+  aviso: string | null;
 
   restore: () => Promise<void>;
   signUp: (username: string, password: string) => Promise<boolean>;
@@ -36,6 +41,9 @@ interface AuthState {
   signOut: () => Promise<void>;
   /** Borra el usuario y todo su avance del teléfono, cierra la sesión de Google en la app y vuelve a la entrada. */
   eliminarCuenta: () => Promise<boolean>;
+  /** Borra todo el avance sin cerrar la sesión (sin cuenta: el perfil completo y se empieza uno nuevo). */
+  borrarMisDatos: () => Promise<boolean>;
+  limpiarAviso: () => void;
   clearError: () => void;
 }
 
@@ -56,6 +64,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
   busy: false,
   vinculoPendiente: null,
+  aviso: null,
 
   restore: async () => {
     try {
@@ -182,13 +191,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!user) return false;
     set({ busy: true, error: null });
     try {
+      audio.detenerTodo();
       audio.releaseAudio();
       music.liberar();
-      await authService.deleteAccount(user.id);
+      await notifications.cancelAll();
+      await borrado.borrarCuenta(user.id);
       // Sin esto, la próxima vez que se abra la app la entrada automática volvería a entrar con
       // la misma cuenta de Google y crearía un usuario nuevo sin que la persona lo pidiera.
       await googleAuth.cerrarSesion();
-      set({ user: null, status: 'anon', busy: false, vinculoPendiente: null });
+      // status 'anon' cambia la navegación entera a la pila de entrada: no hay atrás al que volver.
+      set({
+        user: null,
+        status: 'anon',
+        busy: false,
+        vinculoPendiente: null,
+        aviso: 'Tu cuenta y tus datos se borraron de este teléfono.',
+      });
       return true;
     } catch (err) {
       set({ error: messageFor(err), busy: false });
@@ -196,6 +214,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
   },
+
+  borrarMisDatos: async () => {
+    const user = get().user;
+    if (!user) return false;
+    set({ busy: true, error: null });
+    try {
+      audio.detenerTodo();
+      await notifications.cancelAll();
+      const usuario = await borrado.borrarMisDatos(user);
+      // Ajustes y desbloqueos vuelven a sus valores de fábrica antes de que se pinte nada.
+      await useSettingsStore.getState().load(usuario.id);
+      void alEntrar(usuario);
+      set({ user: { ...usuario }, busy: false });
+      return true;
+    } catch (err) {
+      set({ error: messageFor(err), busy: false });
+      if (__DEV__) console.warn('[auth] borrar mis datos', err);
+      return false;
+    }
+  },
+
+  limpiarAviso: () => set({ aviso: null }),
 
   clearError: () => set({ error: null }),
 }));

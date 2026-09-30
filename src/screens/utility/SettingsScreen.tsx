@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Image, StyleSheet, Switch, Text, View } from 'react-native';
+import { Image, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Header, Icon, Screen, Presionable } from '@/components/base';
@@ -21,9 +21,7 @@ export function SettingsScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
-  const eliminarCuenta = useAuthStore((s) => s.eliminarCuenta);
   const s = useSettingsStore();
-  const [busy, setBusy] = useState(false);
   const [cargaLenta, setCargaLenta] = useState(false);
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
   const micEstado = useMemo(() => speech.isAvailable(), []);
@@ -52,29 +50,6 @@ export function SettingsScreen() {
     [s.niveles, cambiar]
   );
 
-  const borrarCuenta = useCallback(() => {
-    Alert.alert(
-      'Eliminar tu cuenta',
-      'Se borra de este teléfono todo tu avance: tarjetas, rachas, juegos y frases guardadas. Wero no tiene servidor, así que no queda copia en ningún lado. No se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user) return;
-            setBusy(true);
-            try {
-              await notifications.cancelAll();
-              await eliminarCuenta();
-            } finally {
-              setBusy(false);
-            }
-          },
-        },
-      ]
-    );
-  }, [user, eliminarCuenta]);
 
   return (
     <Screen scroll>
@@ -293,17 +268,9 @@ export function SettingsScreen() {
           label="Cerrar sesión"
           variant="secondary"
           onPress={() => void signOut()}
-          disabled={busy}
           full
         />
         <Text style={styles.hint}>Al cerrar sesión, tu avance se queda en este teléfono.</Text>
-        <Button
-          label="Eliminar cuenta"
-          variant="danger"
-          onPress={borrarCuenta}
-          loading={busy}
-          full
-        />
       </Card>
 
       <SectionTitle title="Legal" />
@@ -319,6 +286,20 @@ export function SettingsScreen() {
           titulo="Términos y condiciones"
           detalle="Las reglas para usar la app"
           onPress={() => nav.navigate('LegalDoc', { doc: 'terminos' })}
+        />
+        <FilaLegal
+          icono="warning"
+          titulo="Borrar cuenta y datos"
+          detalle="Borra tu cuenta y todo tu avance de este teléfono y cierra la sesión"
+          onPress={() => nav.navigate('Borrar', { modo: 'cuenta' })}
+          borra
+        />
+        <FilaLegal
+          icono="repeat"
+          titulo="Borrar todos mis datos"
+          detalle="Tu avance vuelve a cero; sigues con tu sesión"
+          onPress={() => nav.navigate('Borrar', { modo: 'datos' })}
+          borra
         />
       </Card>
 

@@ -38,6 +38,7 @@ export {
   motionEscalon,
   motionEfecto,
   motionCiclo,
+  motionConfirmar,
   motionSenal,
   motionEntrada,
   motionPresion,

@@ -216,6 +216,12 @@ export const motionMalentendido = {
 } as const;
 
 /** Bucles largos. */
+/**
+ * Confirmación fuerte de lo que borra datos: se mantiene presionado el botón `mantener` ms mientras
+ * una barra se llena; si se suelta antes, la barra vuelve en `rapido`.
+ */
+export const motionConfirmar = { mantener: 2000 } as const;
+
 export const motionCiclo = {
   esqueleto: 700,
   /** Cuánto tarda el brillo del esqueleto en cruzar un hueso de lado a lado. */

@@ -173,32 +173,6 @@ export async function signOut(): Promise<void> {
   await AsyncStorage.removeItem(SESSION_KEY);
 }
 
-/**
- * Tablas con `usuario_id` que NO se borran en cascada al borrar el usuario (no tienen llave
- * foránea): se borran a mano para que no quede ni una fila de esa persona.
- */
-const TABLAS_SIN_CASCADA = ['pack_estado', 'notif_log', 'extra_visto'] as const;
-/** Adornos por usuario que viven en AsyncStorage y no en la base (ver practicar/celebracion.ts). */
-const CELEBRACIONES = ['meta', 'reto', 'record'] as const;
-
-/**
- * Borra la cuenta y TODO su avance del teléfono: el usuario (y en cascada tarjetas, progreso,
- * ajustes, sesiones, juegos, habla, niveles, cartera y desbloqueos), las tablas sin cascada y sus
- * marcas en AsyncStorage. No hay servidor, así que después de esto no queda nada en ningún lado.
- * El catálogo y los packs descargados (contenido de la app, no de la persona) se quedan.
- */
-export async function deleteAccount(userId: number): Promise<void> {
-  const db = await getDb();
-  await db.withTransactionAsync(async () => {
-    for (const tabla of TABLAS_SIN_CASCADA) {
-      await db.runAsync(`DELETE FROM ${tabla} WHERE usuario_id = ?;`, [userId]);
-    }
-    await db.runAsync('DELETE FROM usuario WHERE id = ?;', [userId]);
-  });
-  await AsyncStorage.multiRemove(CELEBRACIONES.map((t) => `wero:${t}-celebrada:${userId}`));
-  await signOut();
-}
-
 export async function listUsers(): Promise<string[]> {
   const db = await getDb();
   const rows = await db.getAllAsync<{ username: string }>(
@@ -216,9 +190,10 @@ export async function listUsers(): Promise<string[]> {
  * Google), vuelve a ese mismo usuario: cerrar sesión y entrar otra vez sin
  * cuenta no debe dejar su avance huérfano en la base.
  */
-export async function continuarSinCuenta(): Promise<User> {
+export async function continuarSinCuenta({ nuevo = false }: { nuevo?: boolean } = {}): Promise<User> {
   const db = await getDb();
-  const previo = await db.getFirstAsync<UsuarioRow>(
+  // `nuevo`: tras «Borrar todos mis datos» sin cuenta, un perfil en blanco aunque quede otro sin cuenta viejo.
+  const previo = nuevo ? null : await db.getFirstAsync<UsuarioRow>(
     `SELECT ${COLUMNAS_USUARIO} FROM usuario
      WHERE substr(username, 1, 9) = 'invitado_' AND google_sub IS NULL
      ORDER BY last_login DESC LIMIT 1;`

@@ -1,6 +1,7 @@
 export { ProgressScreen } from './ProgressScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { LegalDocScreen } from './LegalDocScreen';
+export { BorrarScreen } from './BorrarScreen';
 export { DownloadsScreen } from './DownloadsScreen';
 export { StuckScreen } from './StuckScreen';
 export { DeckScreen } from './DeckScreen';
