@@ -22,6 +22,11 @@ interface ProveedorProps {
   etiqueta?: string;
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Sale con fundido (por defecto). Con `false` se quita de golpe: para cuando el contenido
+   * ocupa exactamente su lugar y un fundido lo dejaría encimado sobre el texto que ya llegó.
+   */
+  salida?: boolean;
 }
 
 /**
@@ -31,7 +36,7 @@ interface ProveedorProps {
  * nunca anidado dentro de otro. Al quitarse sale con un fundido de `base`
  * (220 ms) mientras el contenido entra: el fundido cruzado, sin salto.
  */
-export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style }: ProveedorProps) {
+export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style, salida = true }: ProveedorProps) {
   const reducido = useMovimientoReducido();
   const brillo = useSharedValue(0);
 
@@ -46,7 +51,7 @@ export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style }: P
 
   return (
     <EsqueletoContexto.Provider value={reducido ? null : brillo}>
-      <Animated.View exiting={desaparecer()} style={style} accessibilityLabel={etiqueta} accessibilityRole="progressbar">
+      <Animated.View exiting={salida ? desaparecer() : undefined} style={style} accessibilityLabel={etiqueta} accessibilityRole="progressbar">
         {children}
       </Animated.View>
     </EsqueletoContexto.Provider>

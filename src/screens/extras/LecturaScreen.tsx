@@ -19,9 +19,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Button, Carga, EmptyState, Header, Screen } from '@/components/base';
-import { Hueso, HuesoBoton, HuesoTexto, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/components/base';
 import { CierreLectura } from '@/components/lectura/CierreLectura';
+import { EsqueletoTexto } from '@/components/lectura/EsqueletoTexto';
 import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
 import { PieReproductor } from '@/components/lectura/PieReproductor';
 import { PreguntaUnaAUna } from '@/components/lectura/PreguntaUnaAUna';
@@ -332,27 +332,8 @@ export function LecturaScreen() {
     );
   }
 
-  if (carga.estado !== 'listo') {
-    return (
-      <Screen>
-        <Header onBack={() => nav.goBack()} title="Lectura" />
-        <Carga
-          carga={carga}
-          esqueleto={
-            <ProveedorEsqueleto etiqueta="Cargando la lectura" style={styles.esqueletoRaiz}>
-              <Hueso width="70%" height={26} style={styles.esqueletoCentrado} />
-              <HuesoBoton width="100%" />
-              <HuesoTexto lineas={8} />
-            </ProveedorEsqueleto>
-          }
-        >
-          {() => null}
-        </Carga>
-      </Screen>
-    );
-  }
-
-  if (enPreguntas) {
+  // Las preguntas llegan solo después de leer (con los datos ya cargados).
+  if (enPreguntas && carga.estado === 'listo') {
     const total = lectura.preguntas.length;
     const preguntaActual = lectura.preguntas[pregunta];
     const cerrada = preguntaActual === undefined;
@@ -389,18 +370,20 @@ export function LecturaScreen() {
   }
 
   const ultimo = cap + 1 >= lectura.capitulos.length;
+  const listo = carga.estado === 'listo';
+  // «Volver a donde va el audio» flota encima del pie (Screen `flotante`): si ocupara lugar dentro del pie, el pie
+  // crecería y el texto brincaría. Entra y sale en su propio `Animated.View`: `Button` anima su escala en su propio nodo.
+  const volver = mostrarVolver ? (
+    <Animated.View
+      entering={reducido ? undefined : aparecer()}
+      exiting={reducido ? undefined : desaparecer(motionDuration.rapido)}
+      style={styles.volver}
+    >
+      <Button label="Volver a donde va el audio" icon="chevron-down" variant="secondary" onPress={volverAlAudio} />
+    </Animated.View>
+  ) : null;
   const pie = (
     <View onLayout={(e) => (altoPie.value = e.nativeEvent.layout.height)}>
-      {mostrarVolver ? (
-        // El botón entra y sale en su propio `Animated.View`: `Button` anima su escala en su propio nodo.
-        <Animated.View
-          entering={reducido ? undefined : aparecer()}
-          exiting={reducido ? undefined : desaparecer(motionDuration.rapido)}
-          style={styles.volver}
-        >
-          <Button label="Volver a donde va el audio" icon="chevron-down" variant="secondary" onPress={volverAlAudio} />
-        </Animated.View>
-      ) : null}
       <PieReproductor
         rep={rep}
         texto={capitulo?.texto ?? ''}
@@ -409,6 +392,9 @@ export function LecturaScreen() {
     </View>
   );
 
+  // Un solo árbol desde el primer cuadro: encabezado, título, leyenda y reproductor salen del JSON y no esperan a la
+  // base. Solo el texto espera (sus frases se marcan con lo que ya viste): mientras tanto, su esqueleto ocupa su lugar
+  // con el mismo interlineado y se quita de golpe cuando llega.
   return (
     <Screen
       scroll
@@ -416,6 +402,7 @@ export function LecturaScreen() {
       scrollRef={scrollRef}
       soltarScroll={siguiendo}
       footer={capitulo?.audio ? pie : undefined}
+      flotante={capitulo?.audio ? volver : undefined}
     >
       <Header
         onBack={() => nav.goBack()}
@@ -429,26 +416,34 @@ export function LecturaScreen() {
 
       {capitulo ? (
         <>
-          <Text style={styles.capTitulo} accessibilityRole="header">
+          <Text style={styles.capTitulo} accessibilityRole="header" numberOfLines={2}>
             {capitulo.titulo}
           </Text>
 
           <LeyendaFrases vista={leyendaVista} onVista={marcarLeyenda} />
 
-          <TextoAcompanado
-            key={cap}
-            oraciones={oraciones}
-            porOracion={porOracion}
-            actual={actual}
-            enCurso={rep.enCurso}
-            conAudio={Boolean(capitulo.audio) && !rep.apagado}
-            onFrase={abrirFrase}
-            onOracion={irAOracion}
-            alMedir={alMedirTexto}
-          />
+          {carga.estado === 'error' ? (
+            <ErrorCarga onReintentar={carga.reintentar} />
+          ) : !listo ? (
+            <View style={styles.textoPendiente}>
+              <EsqueletoTexto oraciones={oraciones} visible={carga.demora} />
+            </View>
+          ) : (
+            <TextoAcompanado
+              key={cap}
+              oraciones={oraciones}
+              porOracion={porOracion}
+              actual={actual}
+              enCurso={rep.enCurso}
+              conAudio={Boolean(capitulo.audio) && !rep.apagado}
+              onFrase={abrirFrase}
+              onOracion={irAOracion}
+              alMedir={alMedirTexto}
+            />
+          )}
 
           {/* Sin audio no hay pie: el botón de seguir va al final del texto. */}
-          {capitulo.audio ? null : (
+          {capitulo.audio || !listo ? null : (
             <Button
               label={ultimo ? 'Ver las preguntas' : `Capítulo ${cap + 2}`}
               icon="arrow-right"
@@ -465,13 +460,13 @@ export function LecturaScreen() {
 }
 
 const styles = StyleSheet.create({
-  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.lg },
-  esqueletoCentrado: { alignSelf: 'center' },
+  // Mismo margen de abajo que TextoAcompanado.
+  textoPendiente: { marginBottom: space.lg },
+  volver: { alignSelf: 'center' },
   capTitulo: {
     fontSize: font.size.xl,
     fontFamily: font.family.display,
     color: color.text,
     marginBottom: space.sm,
   },
-  volver: { alignSelf: 'center', marginBottom: space.sm },
 });

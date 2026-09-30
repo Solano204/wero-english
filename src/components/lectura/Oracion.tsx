@@ -12,6 +12,14 @@ import type { Trozo } from '@/domain/lectura';
 import { color, font, motionDuration, motionEasing, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
+/** Tamaño e interlineado del texto de la lectura. El esqueleto del lector usa los mismos. */
+export const TAMANO_LECTURA = font.size.lg;
+/** Una lectura pide más aire que una tarjeta: 1.6 de interlineado es la diferencia entre leer y descifrar. */
+export const RENGLON_LECTURA = font.size.lg * 1.6;
+/** Aire arriba y abajo de cada oración, y arriba de cada párrafo nuevo. */
+export const AIRE_ORACION = space.xs;
+export const AIRE_PARRAFO = space.md;
+
 // Copias locales: un worklet captura estos colores, no el objeto de tema entero.
 const TEXTO = color.text;
 const APAGADO = color.textMuted;
@@ -129,13 +137,12 @@ export const Oracion = memo(function Oracion({ indice, trozos, separada, actual,
 });
 
 const styles = StyleSheet.create({
-  bloque: { paddingVertical: space.xs },
-  separada: { marginTop: space.md },
+  bloque: { paddingVertical: AIRE_ORACION },
+  separada: { marginTop: AIRE_PARRAFO },
   oracion: {
     fontFamily: font.family.body,
-    fontSize: font.size.lg,
-    // Una lectura pide más aire que una tarjeta: 1.6 de interlineado es la diferencia entre leer y descifrar.
-    lineHeight: font.size.lg * 1.6,
+    fontSize: TAMANO_LECTURA,
+    lineHeight: RENGLON_LECTURA,
   },
   fraseVista: ESTILO_FRASE_VISTA,
   fraseNueva: ESTILO_FRASE_NUEVA,

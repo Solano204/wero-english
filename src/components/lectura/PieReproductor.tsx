@@ -12,6 +12,10 @@ const ALTO_ONDA = 24;
 /** Diámetro del botón circular, en dp. */
 const DIAMETRO = 56;
 
+/** Texto del botón mientras su lugar solo está reservado (no se ve). */
+const ETIQUETA_RESERVA = 'Capítulo';
+const nada = () => undefined;
+
 function mmss(s: number): string {
   const t = Math.max(0, Math.floor(s));
   return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
@@ -70,7 +74,9 @@ export function PieReproductor({ rep, texto, siguiente }: Props) {
               color={principal ? color.onAccent : color.text}
             />
           </View>
-          <Text style={styles.etiquetaAccion}>{etiqueta}</Text>
+          <Text style={styles.etiquetaAccion} numberOfLines={1}>
+            {etiqueta}
+          </Text>
         </Presionable>
         {activo ? <Button icon="stop" label="Detener" onPress={rep.detener} variant="ghost" /> : null}
       </View>
@@ -85,16 +91,32 @@ export function PieReproductor({ rep, texto, siguiente }: Props) {
         <Text style={styles.tiempo}>{`${mmss(progreso.pos)} / ${progreso.dur > 0 ? mmss(progreso.dur) : '—:—'}`}</Text>
       </View>
 
-      {siguiente ? (
-        <Button label={siguiente.etiqueta} icon="arrow-right" iconAlFinal onPress={siguiente.onPress} full size="lg" />
-      ) : null}
+      {/* El lugar de «Capítulo N» / «Ver las preguntas» está desde el primer cuadro: si apareciera y empujara, el pie
+          crecería y el texto de arriba brincaría (y al llegar al final, el cálculo de «al final» podía ir y volver). */}
+      <View
+        style={!siguiente && styles.reservado}
+        pointerEvents={siguiente ? 'auto' : 'none'}
+        accessibilityElementsHidden={!siguiente}
+        importantForAccessibility={siguiente ? 'auto' : 'no-hide-descendants'}
+      >
+        <Button
+          label={siguiente?.etiqueta ?? ETIQUETA_RESERVA}
+          icon="arrow-right"
+          iconAlFinal
+          onPress={siguiente?.onPress ?? nada}
+          disabled={!siguiente}
+          full
+          size="lg"
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   pie: { gap: space.sm },
-  controles: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md },
+  controles: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md, minHeight: DIAMETRO },
+  reservado: { opacity: 0 },
   accion: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: layout.tapMin, flexShrink: 1 },
   apagado: { opacity: 0.45 },
   circulo: { width: DIAMETRO, height: DIAMETRO, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },

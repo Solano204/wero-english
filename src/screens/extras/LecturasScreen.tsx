@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Header, Screen } from '@/components/base';
-import { HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
+import { Hueso, HuesoTarjeta, ProveedorEsqueleto } from '@/components/esqueleto';
 import { SectionTitle } from '@/components/list';
 import { TarjetaLectura, type LecturaFila } from '@/components/lectura/TarjetaLectura';
 import { destacarLectura, dificultadPara, estadoDesbloqueo } from '@/domain/lectura';
@@ -101,10 +101,16 @@ export function LecturasScreen() {
       <Carga
         carga={carga}
         esqueleto={
-          <ProveedorEsqueleto etiqueta="Cargando las lecturas" style={styles.list}>
-            {Array.from({ length: 5 }, (_, i) => (
-              <HuesoTarjeta key={i} imagen lineas={1} />
-            ))}
+          <ProveedorEsqueleto etiqueta="Cargando las lecturas">
+            {/* El mismo título de sección que trae la lista: sin él, al llegar todo bajaba un renglón. */}
+            <View style={styles.tituloHueso}>
+              <Hueso width="35%" height={font.size.lg} />
+            </View>
+            <View style={styles.list}>
+              {Array.from({ length: 5 }, (_, i) => (
+                <HuesoTarjeta key={i} imagen lineas={1} />
+              ))}
+            </View>
           </ProveedorEsqueleto>
         }
         vacio={
@@ -136,5 +142,7 @@ const styles = StyleSheet.create({
     marginBottom: space.lg,
   },
   list: { gap: space.sm, marginBottom: space.md },
+  // Mide lo que SectionTitle (título de 18 con su margen).
+  tituloHueso: { height: Math.round(font.size.lg * 1.35), justifyContent: 'center', marginTop: space.md, marginBottom: space.sm },
   vacio: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
 });

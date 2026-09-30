@@ -15,6 +15,13 @@ interface Props {
   style?: ViewStyle;
   /** Contenido fijo abajo, fuera del scroll. */
   footer?: ReactNode;
+  /**
+   * Flota sobre el contenido, justo encima del footer, sin ocupar lugar: aparecer o irse no
+   * mueve nada. Solo sus hijos reciben toques. Sin footer, se apoya en el borde de abajo.
+   * Pasa `null` (no `undefined`) mientras no haya nada que mostrar: así el lugar ya está medido
+   * para cuando aparezca.
+   */
+  flotante?: ReactNode;
   /** Luz de escena detrás del contenido (p. ej. la aurora de Practicar). No recibe toques. */
   fondo?: ReactNode;
   /** Encabezado que flota sobre el scroll (p. ej. el título que se comprime). Recibe toques solo en sus hijos. */
@@ -74,6 +81,7 @@ export function Screen({
   edges = ['top', 'bottom'],
   style,
   footer,
+  flotante,
   fondo,
   encabezado,
   scrollY,
@@ -84,6 +92,9 @@ export function Screen({
   transicionCarga,
 }: Props) {
   const inner: ViewStyle = padded ? { padding: layout.screenPad } : {};
+  // Para apoyar `flotante` en el borde de arriba del footer: alto de la pantalla menos dónde empieza el footer.
+  const [altoRaiz, setAltoRaiz] = useState(0);
+  const [inicioFooter, setInicioFooter] = useState<number | null>(null);
   const [refrescando, setRefrescando] = useState(false);
   const refrescar = useCallback(async () => {
     if (!alRefrescar) return;
@@ -133,7 +144,11 @@ export function Screen({
       : space.xxxl;
 
   return (
-    <SafeAreaView style={styles.safe} edges={edges}>
+    <SafeAreaView
+      style={styles.safe}
+      edges={edges}
+      onLayout={flotante !== undefined ? (e) => setAltoRaiz(e.nativeEvent.layout.height) : undefined}
+    >
       {/*
        * El degradado del fondo es deliberadamente sutil: no está para
        * verse, está para que las tarjetas blancas floten. Sobre un
@@ -208,7 +223,19 @@ export function Screen({
           {encabezado}
         </View>
       ) : null}
-      {footer ? <View style={styles.footer}>{footer}</View> : null}
+      {footer ? (
+        <View style={styles.footer} onLayout={flotante !== undefined ? (e) => setInicioFooter(e.nativeEvent.layout.y) : undefined}>
+          {footer}
+        </View>
+      ) : null}
+      {flotante && (!footer || (inicioFooter !== null && altoRaiz > 0)) ? (
+        <View
+          style={[styles.flotante, { bottom: footer && inicioFooter !== null ? altoRaiz - inicioFooter : 0 }]}
+          pointerEvents="box-none"
+        >
+          {flotante}
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -225,6 +252,7 @@ const styles = StyleSheet.create({
   },
   flex: { flex: 1 },
   encabezado: { position: 'absolute', top: 0, left: 0, right: 0 },
+  flotante: { position: 'absolute', left: 0, right: 0, alignItems: 'center', paddingBottom: space.sm },
   footer: {
     paddingHorizontal: layout.screenPad,
     paddingTop: space.md,
