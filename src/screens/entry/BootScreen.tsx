@@ -6,7 +6,7 @@ import { getDb } from '@/data/cliente';
 import { loadContent } from '@/data/contenido';
 import { useAuthStore } from '@/store';
 import * as audio from '@/services/audio';
-import * as notifications from '@/services/notifications';
+import * as notifications from '@/services/notificaciones';
 import { color, font, space } from '@/theme';
 
 /**

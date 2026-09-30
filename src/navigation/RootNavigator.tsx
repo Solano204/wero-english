@@ -8,9 +8,9 @@ import { NOTIF_TARGETS, type RootStackParams } from './routes';
 import { AuthScreen } from '@/screens/entry/AuthScreen';
 import { BootScreen } from '@/screens/entry/BootScreen';
 import { useAuthStore, useSettingsStore } from '@/store';
-import * as music from '@/services/music';
+import * as music from '@/services/musica';
 import { precargarDistractores } from '@/data/repos/distractores';
-import * as notifications from '@/services/notifications';
+import * as notifications from '@/services/notificaciones';
 import { color, motionDuration } from '@/theme';
 
 const Stack = createNativeStackNavigator<RootStackParams>();

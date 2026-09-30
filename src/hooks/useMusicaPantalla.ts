@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSettingsStore } from '@/store';
-import * as music from '@/services/music';
-import type { Pista } from '@/services/music';
+import * as music from '@/services/musica';
+import type { Pista } from '@/services/musica';
 
 /**
  * Declara qué música quiere esta pantalla mientras tenga el foco.

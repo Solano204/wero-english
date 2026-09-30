@@ -6,7 +6,7 @@ import { Button, Card, ProgressBar, Screen, Presionable } from '@/components/bas
 import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/data/contenido';
-import * as notifications from '@/services/notifications';
+import * as notifications from '@/services/notificaciones';
 import { useConsentimiento } from '@/components/legal';
 import { color, font, layout, radius, space, aparecer } from '@/theme';
 

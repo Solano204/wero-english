@@ -20,7 +20,7 @@ import { loadContent } from '@/data/contenido';
 import { useConsentimiento } from '@/components/legal';
 import { MedidorMicrofono } from '@/components/voz/MedidorMicrofono';
 import { useEscucha } from '@/hooks/useEscucha';
-import * as speech from '@/services/speech';
+import * as speech from '@/services/voz';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import { color, font, radius, space, aparecer } from '@/theme';

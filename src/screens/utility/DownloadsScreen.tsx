@@ -15,7 +15,7 @@ import {
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/data/contenido';
 import { useConsentimiento } from '@/components/legal';
-import * as downloads from '@/services/downloads';
+import * as downloads from '@/services/descargas';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';

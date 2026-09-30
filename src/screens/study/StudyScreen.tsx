@@ -26,7 +26,7 @@ import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/data/contenido';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
-import * as notifications from '@/services/notifications';
+import * as notifications from '@/services/notificaciones';
 import { aparecerSubiendo, color, font, layout, radius, space } from '@/theme';
 import type { StudyCard } from '@/types';
 import { useMovimientoReducido } from '@/utils/accessibility';

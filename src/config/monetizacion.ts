@@ -9,7 +9,7 @@
  * Antes de poner esto en `true`:
  *   - Declarar los anuncios en la Política de contenido de Google Play (sección
  *     Anuncios) antes de publicar esa versión.
- *   - Seguir sin SDK conectado (ver `src/services/ads.ts`) no rompe nada: sin un
+ *   - Seguir sin SDK conectado (ver `src/services/anuncios.ts`) no rompe nada: sin un
  *     `RewardedProvider` registrado, los muros vuelven a su comportamiento de "sin
  *     proveedor" (bloquean en producción, pasan en __DEV__), que ya es el
  *     comportamiento documentado ahí.

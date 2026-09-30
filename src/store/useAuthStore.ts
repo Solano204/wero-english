@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { useUnlockStore } from './useUnlockStore';
-import * as authService from '@/services/auth';
-import { AuthFailure } from '@/services/auth';
+import * as authService from '@/services/cuenta/auth';
+import { AuthFailure } from '@/services/cuenta/auth';
 import * as googleAuth from '@modules/wero-google-auth';
-import * as consentimiento from '@/services/consentimiento';
+import * as consentimiento from '@/services/cuenta/consentimiento';
 import * as audio from '@/services/audio';
-import * as music from '@/services/music';
-import * as notifications from '@/services/notifications';
-import * as borrado from '@/services/borrado';
+import * as music from '@/services/musica';
+import * as notifications from '@/services/notificaciones';
+import * as borrado from '@/services/cuenta/borrado';
 import { useSettingsStore } from './useSettingsStore';
 import { AUTH_MESSAGES, type AuthError, type PerfilGoogle, type User } from '@/types';
 

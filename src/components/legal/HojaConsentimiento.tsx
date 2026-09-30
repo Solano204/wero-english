@@ -15,8 +15,8 @@ import type { RootStackParams } from '@/navigation/routes';
 import { Button } from '@/components/base/Button';
 import { Presionable } from '@/components/base/Presionable';
 import { CONSENTIMIENTOS } from '@/config/consentimientos';
-import * as consentimiento from '@/services/consentimiento';
-import type { TipoConsentimiento } from '@/services/consentimiento';
+import * as consentimiento from '@/services/cuenta/consentimiento';
+import type { TipoConsentimiento } from '@/services/cuenta/consentimiento';
 import { color, font, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils/accessibility';
 

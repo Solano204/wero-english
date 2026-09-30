@@ -1,8 +1,8 @@
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getDb } from '@/data/cliente';
 import { initProgress } from '@/data/repos/progreso';
-import { nuevaSemilla } from '@/data/semilla/semillaAleatoria';
+import * as usuarios from '@/data/repos/usuarios';
+import { filaAUsuario } from '@/data/repos/usuarios';
 import type { AuthError, Credentials, PerfilGoogle, User } from '@/types';
 
 /**
@@ -18,33 +18,6 @@ import type { AuthError, Credentials, PerfilGoogle, User } from '@/types';
 const SESSION_KEY = 'wero.session.userId';
 const USER_RE = /^[a-zA-Z0-9._]{3,24}$/;
 const PASS_MIN = 6;
-
-interface UsuarioRow {
-  id: number;
-  username: string;
-  created_at: number;
-  last_login: number | null;
-  google_sub: string | null;
-  email: string | null;
-  nombre: string | null;
-  foto: string | null;
-}
-
-const COLUMNAS_USUARIO =
-  'id, username, created_at, last_login, google_sub, email, nombre, foto';
-
-function filaAUsuario(row: UsuarioRow): User {
-  return {
-    id: row.id,
-    username: row.username,
-    created_at: row.created_at,
-    last_login: row.last_login,
-    google_sub: row.google_sub,
-    email: row.email,
-    nombre: row.nombre,
-    foto: row.foto,
-  };
-}
 
 export class AuthFailure extends Error {
   constructor(public readonly code: AuthError) {
@@ -74,26 +47,15 @@ function validate(c: Credentials): void {
 
 export async function signUp(c: Credentials): Promise<User> {
   validate(c);
-  const db = await getDb();
   const username = c.username.trim();
 
-  const dupe = await db.getFirstAsync<{ id: number }>(
-    'SELECT id FROM usuario WHERE username = ? COLLATE NOCASE;',
-    [username]
-  );
-  if (dupe) throw new AuthFailure('usuario_ocupado');
+  if (await usuarios.existeNombre(username)) throw new AuthFailure('usuario_ocupado');
 
   const salt = makeSalt();
   const pass = await hash(c.password, salt);
   const now = Date.now();
 
-  const res = await db.runAsync(
-    `INSERT INTO usuario (username, pass_hash, pass_salt, created_at, last_login, semilla)
-     VALUES (?,?,?,?,?,?);`,
-    [username, pass, salt, now, now, nuevaSemilla()]
-  );
-
-  const id = res.lastInsertRowId;
+  const id = await usuarios.insertarUsuarioLocal(username, pass, salt, now);
   await initProgress(id);
   await persistSession(id);
 
@@ -101,13 +63,9 @@ export async function signUp(c: Credentials): Promise<User> {
 }
 
 export async function signIn(c: Credentials): Promise<User> {
-  const db = await getDb();
   const username = c.username.trim();
 
-  const row = await db.getFirstAsync<UsuarioRow & { pass_hash: string; pass_salt: string }>(
-    `SELECT ${COLUMNAS_USUARIO}, pass_hash, pass_salt FROM usuario WHERE username = ? COLLATE NOCASE;`,
-    [username]
-  );
+  const row = await usuarios.usuarioConCredencial(username);
 
   if (!row) throw new AuthFailure('credenciales_malas');
 
@@ -115,10 +73,7 @@ export async function signIn(c: Credentials): Promise<User> {
   if (attempt !== row.pass_hash) throw new AuthFailure('credenciales_malas');
 
   const now = Date.now();
-  await db.runAsync('UPDATE usuario SET last_login = ? WHERE id = ?;', [
-    now,
-    row.id,
-  ]);
+  await usuarios.marcarEntrada(row.id, now);
   await persistSession(row.id);
 
   return filaAUsuario({ ...row, last_login: now });
@@ -130,12 +85,8 @@ export async function changePassword(
   newPass: string
 ): Promise<void> {
   if (newPass.length < PASS_MIN) throw new AuthFailure('password_corto');
-  const db = await getDb();
 
-  const row = await db.getFirstAsync<{
-    pass_hash: string;
-    pass_salt: string;
-  }>('SELECT pass_hash, pass_salt FROM usuario WHERE id = ?;', [userId]);
+  const row = await usuarios.credencialDe(userId);
   if (!row) throw new AuthFailure('desconocido');
 
   const attempt = await hash(oldPass, row.pass_salt);
@@ -143,10 +94,7 @@ export async function changePassword(
 
   const salt = makeSalt();
   const pass = await hash(newPass, salt);
-  await db.runAsync(
-    'UPDATE usuario SET pass_hash = ?, pass_salt = ? WHERE id = ?;',
-    [pass, salt, userId]
-  );
+  await usuarios.guardarCredencial(userId, pass, salt);
 }
 
 /** Recupera la sesión guardada. Se llama en el arranque. */
@@ -157,11 +105,7 @@ export async function restoreSession(): Promise<User | null> {
   const id = Number(raw);
   if (!Number.isFinite(id)) return null;
 
-  const db = await getDb();
-  const row = await db.getFirstAsync<UsuarioRow>(
-    `SELECT ${COLUMNAS_USUARIO} FROM usuario WHERE id = ?;`,
-    [id]
-  );
+  const row = await usuarios.usuarioPorId(id);
 
   if (!row) {
     await AsyncStorage.removeItem(SESSION_KEY);
@@ -175,11 +119,7 @@ export async function signOut(): Promise<void> {
 }
 
 export async function listUsers(): Promise<string[]> {
-  const db = await getDb();
-  const rows = await db.getAllAsync<{ username: string }>(
-    'SELECT username FROM usuario ORDER BY last_login DESC;'
-  );
-  return rows.map((r) => r.username);
+  return usuarios.nombresDeUsuario();
 }
 
 /**
@@ -192,16 +132,11 @@ export async function listUsers(): Promise<string[]> {
  * cuenta no debe dejar su avance huérfano en la base.
  */
 export async function continuarSinCuenta({ nuevo = false }: { nuevo?: boolean } = {}): Promise<User> {
-  const db = await getDb();
   // `nuevo`: tras «Borrar todos mis datos» sin cuenta, un perfil en blanco aunque quede otro sin cuenta viejo.
-  const previo = nuevo ? null : await db.getFirstAsync<UsuarioRow>(
-    `SELECT ${COLUMNAS_USUARIO} FROM usuario
-     WHERE substr(username, 1, 9) = 'invitado_' AND google_sub IS NULL
-     ORDER BY last_login DESC LIMIT 1;`
-  );
+  const previo = nuevo ? null : await usuarios.invitadoMasReciente();
   if (previo) {
     const now = Date.now();
-    await db.runAsync('UPDATE usuario SET last_login = ? WHERE id = ?;', [now, previo.id]);
+    await usuarios.marcarEntrada(previo.id, now);
     await persistSession(previo.id);
     return filaAUsuario({ ...previo, last_login: now });
   }
@@ -211,12 +146,7 @@ export async function continuarSinCuenta({ nuevo = false }: { nuevo?: boolean } 
   const pass = await hash(makeSalt(), salt);
   const now = Date.now();
 
-  const res = await db.runAsync(
-    `INSERT INTO usuario (username, pass_hash, pass_salt, created_at, last_login, semilla)
-     VALUES (?,?,?,?,?,?);`,
-    [username, pass, salt, now, now, nuevaSemilla()]
-  );
-  const id = res.lastInsertRowId;
+  const id = await usuarios.insertarUsuarioLocal(username, pass, salt, now);
   await initProgress(id);
   await persistSession(id);
 
@@ -225,11 +155,7 @@ export async function continuarSinCuenta({ nuevo = false }: { nuevo?: boolean } 
 
 /** El usuario local (sin Google) que se usó más recientemente en este teléfono, si hay alguno. */
 export async function cuentaLocalParaVincular(): Promise<{ id: number; username: string } | null> {
-  const db = await getDb();
-  const row = await db.getFirstAsync<{ id: number; username: string }>(
-    `SELECT id, username FROM usuario WHERE google_sub IS NULL ORDER BY last_login DESC LIMIT 1;`
-  );
-  return row ?? null;
+  return usuarios.localSinGoogle();
 }
 
 export type ResultadoGoogle =
@@ -244,17 +170,10 @@ export type ResultadoGoogle =
  * crea una nueva de una vez: no hay nada que ofrecer vincular.
  */
 export async function resolverGoogle(perfil: PerfilGoogle): Promise<ResultadoGoogle> {
-  const db = await getDb();
-  const existente = await db.getFirstAsync<UsuarioRow>(
-    `SELECT ${COLUMNAS_USUARIO} FROM usuario WHERE google_sub = ?;`,
-    [perfil.sub]
-  );
+  const existente = await usuarios.usuarioPorGoogle(perfil.sub);
   if (existente) {
     const now = Date.now();
-    await db.runAsync(
-      'UPDATE usuario SET last_login = ?, email = ?, nombre = ?, foto = ? WHERE id = ?;',
-      [now, perfil.email, perfil.nombre, perfil.foto, existente.id]
-    );
+    await usuarios.actualizarPerfilGoogle(existente.id, perfil, now);
     await persistSession(existente.id);
     return { tipo: 'entro', usuario: filaAUsuario({ ...existente, last_login: now, email: perfil.email, nombre: perfil.nombre, foto: perfil.foto }) };
   }
@@ -267,38 +186,24 @@ export async function resolverGoogle(perfil: PerfilGoogle): Promise<ResultadoGoo
 
 /** Vincula el perfil de Google a una cuenta local que YA existe: todo su avance se queda igual, solo cambia cómo entra. */
 export async function vincularGoogle(usuarioId: number, perfil: PerfilGoogle): Promise<User> {
-  const db = await getDb();
-  const ocupado = await db.getFirstAsync<{ id: number }>(
-    'SELECT id FROM usuario WHERE google_sub = ? AND id != ?;',
-    [perfil.sub, usuarioId]
-  );
-  if (ocupado) throw new AuthFailure('google_vinculado_otro');
+  if (await usuarios.googleDeOtro(perfil.sub, usuarioId)) throw new AuthFailure('google_vinculado_otro');
 
   const now = Date.now();
-  await db.runAsync(
-    'UPDATE usuario SET google_sub = ?, email = ?, nombre = ?, foto = ?, last_login = ? WHERE id = ?;',
-    [perfil.sub, perfil.email, perfil.nombre, perfil.foto, now, usuarioId]
-  );
+  await usuarios.guardarVinculoGoogle(usuarioId, perfil, now);
   await persistSession(usuarioId);
 
-  const row = await db.getFirstAsync<UsuarioRow>(`SELECT ${COLUMNAS_USUARIO} FROM usuario WHERE id = ?;`, [usuarioId]);
+  const row = await usuarios.usuarioPorId(usuarioId);
   if (!row) throw new AuthFailure('desconocido');
   return filaAUsuario(row);
 }
 
 /** Cuenta nueva para un perfil de Google que nunca se había visto en este teléfono, sin vincular nada existente. */
 export async function crearCuentaGoogle(perfil: PerfilGoogle): Promise<User> {
-  const db = await getDb();
   const salt = makeSalt();
   const pass = await hash(makeSalt(), salt);
   const now = Date.now();
 
-  const res = await db.runAsync(
-    `INSERT INTO usuario (username, pass_hash, pass_salt, google_sub, email, nombre, foto, created_at, last_login, semilla)
-     VALUES (?,?,?,?,?,?,?,?,?,?);`,
-    [`google:${perfil.sub}`, pass, salt, perfil.sub, perfil.email, perfil.nombre, perfil.foto, now, now, nuevaSemilla()]
-  );
-  const id = res.lastInsertRowId;
+  const id = await usuarios.insertarUsuarioGoogle(perfil, pass, salt, now);
   await initProgress(id);
   await persistSession(id);
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { color, font, layout, radius, space } from '@/theme';
-import * as ads from '@/services/ads';
+import * as ads from '@/services/anuncios';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { Icon } from './Icon';
 import { Presionable } from './Presionable';
@@ -18,7 +18,7 @@ import { Presionable } from './Presionable';
  *   - NUNCA encima del botón principal.
  *   - La barra de abajo va DEBAJO del tab bar, nunca tapándolo.
  *
- * Mientras no haya un proveedor conectado en services/ads.ts, todo esto
+ * Mientras no haya un proveedor conectado en services/anuncios.ts, todo esto
  * se pinta como un espacio reservado y marcado. No hay anuncio falso:
  * un placeholder honesto deja ver el hueco real que va a ocupar.
  */

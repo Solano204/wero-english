@@ -10,7 +10,7 @@ import { getDiagnosticoCola } from '@/data/repos/tarjetas';
 import { filtroEstudio } from '@/domain/cola';
 import { useCarga } from '@/hooks/useCarga';
 import { useAuthStore, useSettingsStore } from '@/store';
-import * as downloads from '@/services/downloads';
+import * as downloads from '@/services/descargas';
 import { color, font, space } from '@/theme';
 import type { RootStackParams } from '@/navigation/routes';
 

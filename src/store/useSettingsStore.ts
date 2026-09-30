@@ -7,7 +7,7 @@ import {
 } from '@/data/repos/ajustes';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
-import * as music from '@/services/music';
+import * as music from '@/services/musica';
 import type { ContentFilter } from '@/types';
 
 interface SettingsState extends Settings {

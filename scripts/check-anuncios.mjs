@@ -86,7 +86,7 @@ const TEXTOS_DE_ANUNCIO = [
 const PERMITIDOS = new Set(
   [
     'src/config/monetizacion.ts',
-    'src/services/ads.ts',
+    'src/services/anuncios.ts',
     'src/components/base/Ads.tsx',
     'src/components/unlock/MuroDesbloqueo.tsx',
     'src/components/unlock/CandadoBadge.tsx',

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
-import * as speech from '@/services/speech';
-import type { ResultadoEscucha } from '@/services/speech';
+import * as speech from '@/services/voz';
+import type { ResultadoEscucha } from '@/services/voz';
 
 export type FaseEscucha = 'inactivo' | speech.EstadoEscucha;
 

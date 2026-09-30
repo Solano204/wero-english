@@ -319,7 +319,7 @@ prueba('marcas de oración y salto de audio: el índice es un objeto válido, ha
     assert.equal(m.n, texto.length, `${ruta}: las marcas son de otro texto`);
   }
   assert.match(leer('src/services/marcas.ts'), /export function marcasOracionesDe/);
-  assert.match(leer('src/services/audio.ts'), /export async function saltarFrase\(seg: number\)/);
+  assert.match(leer('src/services/audio/reproductor.ts'), /export async function saltarFrase\(seg: number\)/);
   const polly = leer('scripts/polly.mjs');
   assert.match(polly, /--marcas-oraciones/);
   assert.match(polly, /SpeechMarkTypes: \["sentence"\]/);
