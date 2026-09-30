@@ -153,6 +153,40 @@ Para regenerarlo: `EXPO_OFFLINE=1 EXPO_UNSTABLE_ATLAS=true npx expo export --pla
 
 Pendiente: necesita el teléfono. Ver «Profiler».
 
+## Presupuestos y candados
+
+Los topes: lo logrado al cerrar la serie **+ 10 %** (en FPS, −10 %). Los que dependen del teléfono se fijan con la
+primera medición en el Xiaomi (release) y se anotan aquí y, los de tamaño, en `scripts/presupuestos.json`.
+
+| Qué | Logrado | Presupuesto | Cómo se revisa |
+|---|---|---|---|
+| Bundle de JS (Hermes `.hbc`) | 7,259,533 B | **7,985,487 B (7.62 MB)** | `npm run presupuesto` (falla si se pasa) |
+| Assets empaquetados (sin aud/img) | 2,629,538 B | **2,892,492 B (2.76 MB)** | `npm run presupuesto` |
+| AAB release | pendiente | medido + 10 % (anotar `aabBytes`) | `npm run presupuesto -- --aab <ruta>` |
+| Arranque en frío (TotalTime, mediana de 5) | pendiente | medido + 10 %; meta de la serie < 2.0 s | `scripts/medir-arranque.sh 5` |
+| Bloqueo más largo del hilo de JS al arrancar | pendiente | < 100 ms | marca `[medir]` (mismo script) |
+| FPS de scroll (Errores, Mi mazo, Phrasal, Niveles) | pendiente | ≥ 55 (y ≥ medido − 10 %) | Flashlight, recorrido de abajo |
+| FPS de animaciones (Practicar, Caída, Pares, Frases sueltas) | pendiente | ≥ 55 | Flashlight |
+| Memoria (PSS) tras 15 min de uso | pendiente | medido + 10 %, y sin crecimiento sostenido en 30 min | `scripts/medir-memoria.sh` |
+| Cierres en 30 min de resistencia | pendiente | 0 | `scripts/medir-memoria.sh resistencia 30` |
+
+**Candados automáticos** (corren en `npm run verificar`, obligatorio antes de cada build):
+
+- `npm run check:perf`, que falla con cualquiera de estos:
+  - `.map()` en un ScrollView más allá de las listas revisadas;
+  - `TouchableOpacity`/`TouchableHighlight`;
+  - `Modal` fuera de `HojaConsentimiento`;
+  - `measure()` sin revisar null;
+  - `setInterval` o listeners sin su limpieza en el mismo efecto;
+  - `Image` de react-native;
+  - `console` fuera de `__DEV__`;
+  - JSON grandes o el mapa de medios arriba de un módulo del arranque;
+  - archivos de más de 400 líneas.
+
+  Las excepciones van en el propio script, con su motivo.
+- ESLint rechaza los `Touchable*` y el `Button` nativo; los hooks y el React Compiler, como siempre.
+- `npm run presupuesto` compara el tamaño del bundle y del AAB contra `scripts/presupuestos.json`.
+
 ## Cómo medir en el teléfono
 
 Siempre con el APK **release** instalado (`npx expo run:android --variant release`), el teléfono en carga y con la

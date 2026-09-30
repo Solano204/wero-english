@@ -100,6 +100,9 @@ Quién lo revisa:
 | hooks (rules-of-hooks, exhaustive-deps), imports sin uso, `console` fuera de `__DEV__`, React Compiler, `Touchable*` | `npm run lint` |
 | colores, duraciones y curvas fuera de `theme` | `npm run check:color`, `npm run audit:diseno` |
 | tipos estrictos | `npm run typecheck` |
+| candados de rendimiento (listas en ScrollView, Modal, measure, efectos sin limpieza, Image, console, JSON en el arranque, archivos largos) | `npm run check:perf` |
+| tamaño del bundle y del AAB contra el presupuesto | `npm run presupuesto` |
+| **todo lo anterior, en orden (obligatorio antes de cada build)** | `npm run verificar` |
 
 ---
 
