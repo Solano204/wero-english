@@ -10,5 +10,5 @@ export { LecturaScreen } from '@/features/lecturas/screens/LecturaScreen';
 export { PhrasalScreen } from './PhrasalScreen';
 export { PhrasalVerboScreen } from './PhrasalVerboScreen';
 export { AzarScreen } from './AzarScreen';
-export { GramaticaScreen } from './GramaticaScreen';
-export { GramaticaTemaScreen } from './GramaticaTemaScreen';
+export { GramaticaScreen } from '@/features/gramatica/screens/GramaticaScreen';
+export { GramaticaTemaScreen } from '@/features/gramatica/screens/GramaticaTemaScreen';

@@ -234,14 +234,14 @@ prueba('cada tema trae tres ejemplos con audio y su error con audio', () => {
 prueba('«Detener»: el ícono stop existe y el botón se monta de nuevo al cambiar de variante', () => {
   assert.match(leer('src/shared/ui/Icon.tsx'), /\bstop:\s*\{ Componente: StopIcon \}/);
   assert.match(leer('src/shared/ui/Button.tsx'), /key=\{variant\}/);
-  assert.match(leer('src/screens/extras/GramaticaTemaScreen.tsx'), /'Detener'/);
+  assert.match(leer('src/features/gramatica/screens/GramaticaTemaScreen.tsx'), /'Detener'/);
 });
 
 prueba('la regla de temas abiertos no cambió: 3 por bloque, y un tema con clave desbloqueada ya no es cerrado', () => {
-  const lista = leer('src/screens/extras/GramaticaScreen.tsx');
+  const lista = leer('src/features/gramatica/screens/GramaticaScreen.tsx');
   assert.match(lista, /export const GRATIS_POR_BLOQUE = 3;/);
   assert.match(lista, /n >= GRATIS_POR_BLOQUE && !clavesVistas\.has\(`gramatica:\$\{tema\.id\}`\)/);
-  assert.match(leer('src/screens/extras/GramaticaTemaScreen.tsx'), /GRATIS_POR_BLOQUE/);
+  assert.match(leer('src/features/gramatica/screens/GramaticaTemaScreen.tsx'), /GRATIS_POR_BLOQUE/);
   const porBloque = new Map();
   for (const t of temas) porBloque.set(t.bloque, [...(porBloque.get(t.bloque) ?? []), t]);
   assert.equal(porBloque.size, 9);
@@ -249,11 +249,11 @@ prueba('la regla de temas abiertos no cambió: 3 por bloque, y un tema con clave
 });
 
 prueba('el error que se corrige: se anuncia completo, se puede repetir y la pantalla ya no trae la sección vieja', () => {
-  const heroe = leer('src/components/gramatica/ErrorQueSeCorrige.tsx');
+  const heroe = leer('src/features/gramatica/components/ErrorQueSeCorrige.tsx');
   assert.match(heroe, /`Incorrecta: \$\{mal\}\. Correcta: \$\{bien\}\.`/);
   assert.match(heroe, /label="Ver otra vez"/);
   assert.match(heroe, /modo === 'estatico' \? null/);
-  const pantalla = leer('src/screens/extras/GramaticaTemaScreen.tsx');
+  const pantalla = leer('src/features/gramatica/screens/GramaticaTemaScreen.tsx');
   assert.match(pantalla, /titulo="El error que se corrige"/);
   assert.ok(!pantalla.includes('En qué te vas a equivocar'));
 });

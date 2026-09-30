@@ -116,8 +116,8 @@ export function RootNavigator() {
       <Stack.Screen name="Stuck" getComponent={() => require('@/screens/utility/StuckScreen').StuckScreen} />
       <Stack.Screen name="Deck" getComponent={() => require('@/screens/utility/DeckScreen').DeckScreen} />
       <Stack.Screen name="Niveles" getComponent={() => require('@/features/juegos/niveles/screens/NivelesScreen').NivelesScreen} />
-      <Stack.Screen name="Gramatica" getComponent={() => require('@/screens/extras/GramaticaScreen').GramaticaScreen} />
-      <Stack.Screen name="GramaticaTema" getComponent={() => require('@/screens/extras/GramaticaTemaScreen').GramaticaTemaScreen} />
+      <Stack.Screen name="Gramatica" getComponent={() => require('@/features/gramatica/screens/GramaticaScreen').GramaticaScreen} />
+      <Stack.Screen name="GramaticaTema" getComponent={() => require('@/features/gramatica/screens/GramaticaTemaScreen').GramaticaTemaScreen} />
       <Stack.Screen name="Phrasal" getComponent={() => require('@/screens/extras/PhrasalScreen').PhrasalScreen} />
       {/* El verbo viaja del renglón a su título: la pantalla entra con un fundido y ese vuelo es la transición. */}
       <Stack.Screen

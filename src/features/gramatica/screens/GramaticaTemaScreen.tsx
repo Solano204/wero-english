@@ -13,9 +13,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, Card, EmptyState, Header, NotaInfo, Screen } from '@/shared/ui';
-import { EjemploFrase } from '@/components/gramatica/EjemploFrase';
-import { ErrorQueSeCorrige } from '@/components/gramatica/ErrorQueSeCorrige';
-import { FormulaFichas } from '@/components/gramatica/FormulaFichas';
+import { EjemploFrase } from '@/features/gramatica/components/EjemploFrase';
+import { ErrorQueSeCorrige } from '@/features/gramatica/components/ErrorQueSeCorrige';
+import { FormulaFichas } from '@/features/gramatica/components/FormulaFichas';
 import { MuroDesbloqueo } from '@/shared/ui/MuroDesbloqueo';
 import { segmentos } from '@/domain/gramatica';
 import { loadContent } from '@/data/contenido';
