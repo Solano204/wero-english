@@ -101,7 +101,7 @@ const PERMITIDOS = new Set(
     'src/data/repos/niveles.ts',
     'src/data/esquema.ts',
     'src/domain/niveles.ts',
-    'src/navigation/TabNavigator.tsx',
+    'src/app/navegacion/TabNavigator.tsx',
   ].map((p) => path.join(ROOT, p))
 );
 

@@ -186,7 +186,7 @@ prueba('un toque lleva a la partícula tocada: la de arriba, la de abajo o la mi
 
 prueba('la ruta PhrasalVerbo existe y la lista ya no reacomoda tarjetas (era el bug de las tarjetas encimadas)', () => {
   assert.match(leer('src/types/rutas.ts'), /PhrasalVerbo:\s*\{\s*verbo: string/);
-  assert.match(leer('src/navigation/RootNavigator.tsx'), /name="PhrasalVerbo"/);
+  assert.match(leer('src/app/navegacion/RootNavigator.tsx'), /name="PhrasalVerbo"/);
   const lista = leer('src/screens/extras/PhrasalScreen.tsx');
   assert.match(lista, /<FlatList/);
   assert.match(lista, /Busca un verbo o una partícula/);

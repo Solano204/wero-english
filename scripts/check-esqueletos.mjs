@@ -42,7 +42,7 @@ const MARCAS_ESQUELETO = [
 
 /** Leen de la base sin que nadie las vea esperar. Cada una con su razón. */
 const SIN_PANTALLA_DE_CARGA = new Map([
-  ['src/screens/entry/BootScreen.tsx', 'corre bajo el splash: App.tsx no lo esconde hasta que el arranque termina'],
+  ['src/app/arranque/BootScreen.tsx', 'corre bajo el splash: src/app/App.tsx no lo esconde hasta que el arranque termina'],
 ]);
 
 const LECTURA = /^(get|leer|cargar|buscar|listar|obtener|contar)[A-Z]/;

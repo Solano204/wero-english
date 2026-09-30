@@ -3,7 +3,7 @@
  *
  *   npm run check:color
  *
- * Busca hex (#rgb, #rgba, #rrggbb, #rrggbbaa) y rgb( / rgba( en src/ y App.tsx,
+ * Busca hex (#rgb, #rgba, #rrggbb, #rrggbbaa) y rgb( / rgba( en src/,
  * sin contar comentarios. Todo color sale de src/theme/tokens.ts.
  * Sale con código 1 y lista archivo:línea si encuentra alguno.
  */
@@ -229,7 +229,7 @@ function archivos(dir, out = []) {
 if (process.argv.includes('--test')) {
   autoprueba();
 } else {
-  const lista = archivos(path.join(ROOT, 'src')).concat(path.join(ROOT, 'App.tsx'));
+  const lista = archivos(path.join(ROOT, 'src'));
   const hallazgos = [];
   const rojos = [];
   for (const f of lista) {

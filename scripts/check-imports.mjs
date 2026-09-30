@@ -31,7 +31,7 @@ function resolve(spec, from) {
   return false;
 }
 
-const files = [...walk(SRC), path.join(ROOT, 'App.tsx')];
+const files = walk(SRC);
 const graph = new Map();
 const broken = [];
 // Regla: los íconos entran solo por shared/ui/Icon.tsx.

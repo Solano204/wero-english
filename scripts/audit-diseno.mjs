@@ -3,7 +3,7 @@
  *
  *   npm run audit:diseno
  *
- * Es análisis estático de src/ y App.tsx: no ejecuta la app ni arregla nada.
+ * Es análisis estático de src/: no ejecuta la app ni arregla nada.
  * Al final imprime cuántos hallazgos hay por regla y los compara con la
  * corrida anterior, para ver el efecto de cada arreglo.
  *
@@ -298,7 +298,7 @@ function evaluaEstilo(e, r, enTema, H) {
   const alto = get('minHeight') || get('height');
   // El `icon` de la barra de pestañas (28 dp) es solo el dibujo: lo que se toca
   // es la pestaña entera, de 68 dp de alto. No es un objetivo táctil chico.
-  const esIconoDePestana = r === 'src/navigation/TabNavigator.tsx' && e.nombre === 'icon';
+  const esIconoDePestana = r === 'src/app/navegacion/TabNavigator.tsx' && e.nombre === 'icon';
   if (alto && INTERACTIVO.test(e.nombre) && !enTema && !esIconoDePestana) {
     const v = num(alto.v);
     if (v !== null && v > 4 && v < 48) H.tactil.push({ r, linea: alto.linea, txt: `${e.nombre}: ${alto.k} ${alto.v} = ${v} dp` });
@@ -453,7 +453,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/errores/') || r === 'src/screens/extras/ErrorsScreen.tsx' || r === 'src/screens/extras/ErrorDetailScreen.tsx' ||
   r.startsWith('src/components/atoradas/') || r === 'src/screens/utility/DeckScreen.tsx' || r === 'src/screens/utility/StuckScreen.tsx' ||
   r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
-  r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
+  r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/app/navegacion/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
 const ANIMA = /\b(withTiming|withSpring|withRepeat|withSequence|withDelay|useFrameCallback)\(|entering=/;
 /** MOT-3: componentes que son el momento héroe animado de su pantalla. */
@@ -896,7 +896,7 @@ ${c.C.fallos.map((f) => `- \`${f.t}\` sobre \`${f.s}\`: ${f.v.toFixed(2)}`).join
 
 ## TIPOGRAFÍA
 
-**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), cargadas en \`App.tsx\` con \`useFonts\` (\`src/theme/fuentes.ts\`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
+**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), cargadas en \`src/app/App.tsx\` con \`useFonts\` (\`src/theme/fuentes.ts\`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
 ${L(c.H.fuente)}
 
 **TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo \`font.size.md\` vale **16** (\`tokens.ts\`) y \`text.body\` y \`text.bodyMuted\` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (${c.H.cuerpoMd.length + c.H.cuerpoSm.length}):
@@ -1055,7 +1055,7 @@ ${L(c.LT)}
 };
 
 function main() {
-  const archivos = walk(path.join(ROOT, 'src')).concat([path.join(ROOT, 'App.tsx')]).map((f) => {
+  const archivos = walk(path.join(ROOT, 'src')).map((f) => {
     const src = fs.readFileSync(f, 'utf8');
     return { r: rel(f), src, lines: src.split('\n') };
   });
@@ -1082,7 +1082,7 @@ function main() {
   const encabezado = `# Auditoría de diseño
 
 Qué reglas de \`DESIGN.md\` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con \`npm run audit:diseno\` (análisis estático de ${archivos.length} archivos de \`src/\` y \`App.tsx\`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con \`npm run audit:diseno\` (análisis estático de ${archivos.length} archivos de \`src/\`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 ${plan}
 

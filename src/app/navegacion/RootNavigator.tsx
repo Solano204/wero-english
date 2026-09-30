@@ -6,7 +6,7 @@ import { NOTIF_TARGETS, type RootStackParams } from '@/types/rutas';
 // Solo lo del arranque se importa aquí: el resto de las pantallas se evalúa la
 // primera vez que se abre (ver `diferida`), no en el arranque en frío.
 import { AuthScreen } from '@/screens/entry/AuthScreen';
-import { BootScreen } from '@/screens/entry/BootScreen';
+import { BootScreen } from '@/app/arranque/BootScreen';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import * as music from '@/services/musica';

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { AppState, Keyboard, Platform } from 'react-native';
 import { NavigationBar } from 'expo-navigation-bar';
-import { navigationRef } from '@/navigation';
+import { navigationRef } from '@/shared/navegacion/navigationRef';
 import { tema } from '@/theme';
 
 /**
