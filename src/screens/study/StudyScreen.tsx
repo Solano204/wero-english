@@ -20,6 +20,7 @@ import { nivelSeguidas } from '@/domain/seguidas';
 import { sesionMerece } from '@/domain/session';
 import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/hooks/useCarga';
 import { useConsentimiento } from '@/components/legal';
+import { useShallow } from 'zustand/react/shallow';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -61,7 +62,22 @@ export function StudyScreen() {
   const nav = useNavigation<Nav>();
   const barra = useRef<View>(null);
   const user = useAuthStore((s) => s.user);
-  const settings = useSettingsStore();
+  // Con selector y comparación superficial: sin ellos la pantalla entera se repintaba con
+  // cualquier cambio de los stores, incluso de campos que no lee (remaining, dueCount, summary).
+  const settings = useSettingsStore(
+    useShallow((s) => ({
+      filter: s.filter,
+      metaDiaria: s.metaDiaria,
+      nuevasPorDia: s.nuevasPorDia,
+      notificaciones: s.notificaciones,
+      notifPorDia: s.notifPorDia,
+      horaNotificacion: s.horaNotificacion,
+      notifDesde: s.notifDesde,
+      notifHasta: s.notifHasta,
+      mostrarSeguidas: s.mostrarSeguidas,
+      autoAudio: s.autoAudio,
+    }))
+  );
   const {
     phase,
     card,
@@ -78,7 +94,25 @@ export function StudyScreen() {
     reset,
     aciertos,
     pendientes,
-  } = useSessionStore();
+  } = useSessionStore(
+    useShallow((s) => ({
+      phase: s.phase,
+      card: s.card,
+      feedback: s.feedback,
+      done: s.done,
+      goal: s.goal,
+      seguidas: s.seguidas,
+      avanzando: s.avanzando,
+      start: s.start,
+      answer: s.answer,
+      next: s.next,
+      skip: s.skip,
+      finish: s.finish,
+      reset: s.reset,
+      aciertos: s.aciertos,
+      pendientes: s.pendientes,
+    }))
+  );
 
   // El esqueleto de "armando tu sesión" solo aparece si tarda más de
   // DEMORA_ESQUELETO_MS (una sesión que arma rápido no debe parpadear) y,
