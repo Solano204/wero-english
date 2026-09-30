@@ -32,7 +32,7 @@ export function MedidorMicrofono({ nivel, activo }: Props) {
     <View style={styles.caja} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
       <Animated.View style={[styles.onda, onda]} />
       <View style={[styles.centro, activo && styles.centroActivo]}>
-        <Icon name="microphone" size="lg" color={activo ? color.onAccent : color.textMuted} />
+        <Icon name="microphone" size="lg" color={activo ? color.onPrimario : color.textMuted} />
       </View>
     </View>
   );
@@ -49,5 +49,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: color.surfaceAlt,
   },
-  centroActivo: { backgroundColor: color.accent },
+  centroActivo: { backgroundColor: color.primario },
 });

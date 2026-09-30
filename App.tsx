@@ -10,10 +10,11 @@ import { RootNavigator, navTheme, navigationRef } from '@/navigation';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { ErrorBoundary } from '@/components/base/ErrorBoundary';
 import { TransicionHoy } from '@/components/fx';
+import { CambiarPaletaDev } from '@/components/dev/CambiarPaletaDev';
 import { useBarraOculta } from '@/hooks/useBarraOculta';
 import { OCULTAR_BARRA_ESTADO } from '@/config/pantalla';
 import * as audio from '@/services/audio';
-import { color, fuentes } from '@/theme';
+import { color, fuentes, tema } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -73,9 +74,11 @@ export default function App() {
               rutaPrevia.current = actual;
             }}
           >
-            <StatusBar hidden={OCULTAR_BARRA_ESTADO} style="light" />
+            <StatusBar hidden={OCULTAR_BARRA_ESTADO} style={tema.claro ? 'dark' : 'light'} />
             <RootNavigator />
             <TransicionHoy />
+            {/* Solo en desarrollo: probar las paletas del muestrario recorriendo la app. */}
+            {__DEV__ ? <CambiarPaletaDev /> : null}
           </NavigationContainer>
         </ErrorBoundary>
       </SafeAreaProvider>

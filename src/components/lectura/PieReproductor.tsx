@@ -71,7 +71,7 @@ export function PieReproductor({ rep, texto, siguiente }: Props) {
             <Icon
               name={estado === 'sonando' ? 'pause' : 'play'}
               size="lg"
-              color={principal ? color.onAccent : color.text}
+              color={principal ? color.onPrimario : color.text}
             />
           </View>
           <Text style={styles.etiquetaAccion} numberOfLines={1}>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   accion: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: layout.tapMin, flexShrink: 1 },
   apagado: { opacity: 0.45 },
   circulo: { width: DIAMETRO, height: DIAMETRO, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  circuloPrincipal: { backgroundColor: color.accent },
+  circuloPrincipal: { backgroundColor: color.primario },
   circuloSecundario: { backgroundColor: color.surfaceAlt, borderWidth: 1, borderColor: color.borderStrong },
   etiquetaAccion: { flexShrink: 1, fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
   onda: { height: ALTO_ONDA },

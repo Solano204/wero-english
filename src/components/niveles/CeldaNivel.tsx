@@ -141,7 +141,7 @@ export const CeldaNivel = memo(function CeldaNivel({ n, estado, estrellas, lado,
       {conEstrellas ? (
         <EstrellasCelda
           llenas={actual ? 0 : estrellas}
-          colorVacia={actual ? color.onAccent : color.textFaint}
+          colorVacia={actual ? color.onPrimario : color.textFaint}
           // Un logro enciende solo las estrellas nuevas (con destello); la cascada de entrada, todas las que tiene.
           encenderDesde={logro ? logro.antes : cascada !== undefined && estrellas > 0 ? 0 : undefined}
           retraso={logro ? RETRASO_LOGRO : (cascada ?? 0)}
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   bloqueado: { backgroundColor: color.bg, borderWidth: StyleSheet.hairlineWidth, borderColor: color.border },
   actual: { transform: [{ scale: ESCALA_ACTUAL }] },
   numero: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
-  numeroActual: { color: color.onAccent },
+  numeroActual: { color: color.onPrimario },
   numeroApagado: { color: color.textFaint },
   play: { position: 'absolute', top: space.xs, right: space.xs },
   etiquetaAnuncio: { fontFamily: font.family.bodyStrong, fontSize: font.size.xs, color: color.accent },

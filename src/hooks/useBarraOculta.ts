@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { AppState, Keyboard, Platform } from 'react-native';
 import { NavigationBar } from 'expo-navigation-bar';
 import { navigationRef } from '@/navigation';
+import { tema } from '@/theme';
 
 /**
  * Oculta la barra de navegación de Android (modo inmersivo) y la vuelve a
@@ -18,7 +19,7 @@ import { navigationRef } from '@/navigation';
  */
 function ocultar(): void {
   if (Platform.OS !== 'android') return;
-  NavigationBar.setStyle('light');
+  NavigationBar.setStyle(tema.claro ? 'dark' : 'light');
   NavigationBar.setHidden(true);
 }
 

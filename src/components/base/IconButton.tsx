@@ -78,13 +78,13 @@ export function IconButton({
 
 const tonos: Record<Tono, ViewStyle> = {
   claro: { backgroundColor: color.surface, ...shadow.soft },
-  acento: { backgroundColor: color.accent, ...shadow.soft },
+  acento: { backgroundColor: color.primario, ...shadow.soft },
   contraste: { backgroundColor: color.contraste, ...shadow.soft },
 };
 
 const colores: Record<Tono, string> = {
   claro: color.text,
-  acento: color.onAccent,
+  acento: color.onPrimario,
   contraste: color.onContraste,
 };
 

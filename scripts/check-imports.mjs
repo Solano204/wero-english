@@ -49,8 +49,11 @@ for (const f of files) {
       iconosSueltos.push(`${path.relative(ROOT, f)} -> ${spec}`);
     }
     const target = resolve(spec, f);
+    // `import type` se borra al compilar: se revisa que resuelva, pero no cuenta para los ciclos.
+    const inicio = src.lastIndexOf('\n', m.index) + 1;
+    const soloTipos = /^\s*(?:import|export)\s+type\b/.test(src.slice(inicio, m.index));
     if (target === false) broken.push(`${path.relative(ROOT, f)} -> ${spec}`);
-    else if (target) deps.push(target);
+    else if (target && !soloTipos) deps.push(target);
   }
   graph.set(f, deps);
 }

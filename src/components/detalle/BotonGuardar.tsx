@@ -63,7 +63,7 @@ export function BotonGuardar({ guardada, pulso, onPress, variante = 'primary', s
         <Icon
           name={guardada ? 'star-filled' : 'star'}
           size="lg"
-          color={guardada ? color.star : variante === 'primary' ? color.onAccent : color.text}
+          color={guardada ? color.star : variante === 'primary' ? color.onPrimario : color.text}
         />
       </Animated.View>
     </View>

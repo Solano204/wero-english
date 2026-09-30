@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     height: ALTO,
     borderTopLeftRadius: RADIO,
     borderBottomLeftRadius: RADIO,
-    backgroundColor: color.accentSoft,
+    backgroundColor: color.pastilla,
   },
   tapaDerecha: {
     position: 'absolute',
@@ -82,13 +82,13 @@ const styles = StyleSheet.create({
     height: ALTO,
     borderTopRightRadius: RADIO,
     borderBottomRightRadius: RADIO,
-    backgroundColor: color.accentSoft,
+    backgroundColor: color.pastilla,
   },
   cuerpo: {
     position: 'absolute',
     width: 1,
     height: ALTO,
     transformOrigin: 'left center',
-    backgroundColor: color.accentSoft,
+    backgroundColor: color.pastilla,
   },
 });

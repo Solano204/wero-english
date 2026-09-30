@@ -27,6 +27,13 @@ import { SkipBackIcon } from 'phosphor-react-native/src/icons/SkipBack';
 import { SkipForwardIcon } from 'phosphor-react-native/src/icons/SkipForward';
 import { SpeakerHighIcon } from 'phosphor-react-native/src/icons/SpeakerHigh';
 import { SpeakerSlashIcon } from 'phosphor-react-native/src/icons/SpeakerSlash';
+import { SunIcon } from 'phosphor-react-native/src/icons/Sun';
+import { SignpostIcon } from 'phosphor-react-native/src/icons/Signpost';
+import { CurrencyDollarIcon } from 'phosphor-react-native/src/icons/CurrencyDollar';
+import { UsersThreeIcon } from 'phosphor-react-native/src/icons/UsersThree';
+import { MusicNotesIcon } from 'phosphor-react-native/src/icons/MusicNotes';
+import { CpuIcon } from 'phosphor-react-native/src/icons/Cpu';
+import { ScalesIcon } from 'phosphor-react-native/src/icons/Scales';
 import { StarIcon } from 'phosphor-react-native/src/icons/Star';
 import { StopIcon } from 'phosphor-react-native/src/icons/Stop';
 import { WarningIcon } from 'phosphor-react-native/src/icons/Warning';
@@ -118,6 +125,14 @@ const ICONOS = {
   shuffle: { Componente: ShuffleIcon },
   target: { Componente: TargetIcon },
   waveform: { Componente: WaveformIcon },
+  // Un ícono por mundo (color de mundo, opción a: el color ya no distingue al mundo, el ícono sí).
+  sun: { Componente: SunIcon },
+  signpost: { Componente: SignpostIcon },
+  money: { Componente: CurrencyDollarIcon },
+  users: { Componente: UsersThreeIcon },
+  music: { Componente: MusicNotesIcon },
+  cpu: { Componente: CpuIcon },
+  scales: { Componente: ScalesIcon },
   'arrow-down': { Componente: ArrowDownIcon },
   cube: { Componente: CubeIcon },
   game: { Componente: GameControllerIcon },

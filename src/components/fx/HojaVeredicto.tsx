@@ -176,7 +176,7 @@ export function HojaVeredicto({
               >
                 <View style={styles.cabeza}>
                   <View style={styles.titulo}>
-                    <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.correct : color.wrong} />
+                    <Icon name={ok ? 'check' : 'close'} size="md" color={ok ? color.onHojaAcierto : color.wrong} />
                     <Text style={[styles.veredicto, ok ? styles.textoOk : styles.textoMal]}>
                       {ok ? 'Eso es' : 'Era esta'}
                     </Text>
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radius.xl - 1,
     overflow: 'hidden',
   },
-  ok: { backgroundColor: color.correctFondo },
+  ok: { backgroundColor: color.hojaAcierto },
   mal: { backgroundColor: color.wrongFondo },
   cabeza: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   titulo: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
-  textoOk: { color: color.correct },
+  textoOk: { color: color.onHojaAcierto },
   textoMal: { color: color.wrong },
   repaso: { flexShrink: 1, fontFamily: font.family.body, fontSize: font.size.xs, color: color.textMuted, textAlign: 'right' },
   frase: {

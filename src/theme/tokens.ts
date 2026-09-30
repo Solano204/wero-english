@@ -34,7 +34,7 @@
  *    sola, o deja de resaltar.
  */
 
-export const color = {
+const colorBase = {
   // Fondos. Tinta magenta, no negro puro: el negro absoluto produce halo en
   // paneles OLED y hace que el texto claro vibre en sesiones largas.
   bg: '#0F0B14',
@@ -209,7 +209,48 @@ export const color = {
    * lo cambies para que combine.
    */
   notifAndroid: '#E8543F',
+
+  // ── Bloques (tokens que una paleta puede pintar distinto al acento) ──
+  /** Relleno de la acción principal (botón primario, botón de ícono de acento, el círculo del reproductor). */
+  primario: '#FF3DAA',
+  /** Texto e ícono sobre `primario`. */
+  onPrimario: '#1A0612',
+  /** Ícono y etiqueta de la pestaña activa, y de las inactivas. */
+  barraActivo: '#FF3DAA',
+  barraInactivo: '#968A9F',
+  /** Fondo de la pastilla de la pestaña activa. */
+  pastilla: 'rgba(255, 61, 170, 0.14)',
+  /** La hoja de veredicto de un acierto y su texto. */
+  hojaAcierto: '#081610',
+  onHojaAcierto: '#3DDC97',
+  /** Los tres pasos del degradado `senal` (del hondo a la luz). */
+  senalInicio: '#52002E',
+  senalMedio: '#FF3DAA',
+  senalFin: '#FFB8E0',
+  /** El degradado neutro de las portadas sin imagen (`gradiente.neutro`). */
+  portadaInicio: '#1B242F',
+  portadaFin: '#111820',
 } as const;
+
+/** Un color de la paleta, sin los literales de `as const`: otra paleta pone otros valores con la misma forma. */
+type Ensanchar<T> = { -readonly [K in keyof T]: T[K] extends string ? string : Ensanchar<T[K]> };
+export type Color = Ensanchar<typeof colorBase>;
+
+/** La paleta de `tokens.ts` tal cual (en desarrollo, `color` puede traer otra encima: ver paletaActiva.ts). */
+export const COLOR_BASE: Color = { ...colorBase, world: { ...colorBase.world }, dulce: { ...colorBase.dulce } };
+
+export const color: Color = { ...COLOR_BASE, world: { ...COLOR_BASE.world }, dulce: { ...COLOR_BASE.dulce } };
+
+/** Si la paleta es clara: las barras del sistema van con íconos oscuros. */
+export const tema = { claro: false };
+
+// Solo en desarrollo: el muestrario puede aplicar otra paleta a la app real (se elige en Ajustes y recarga). Tiene
+// que pasar aquí, antes de calcular FONDO, filoLuz, senal y los demás derivados, y antes de cualquier StyleSheet.
+if (__DEV__) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { aplicarPaletaDev } = require('./paletaActiva') as typeof import('./paletaActiva');
+  aplicarPaletaDev(color, tema);
+}
 
 /** rgba() de un hex de `color`, para que los degradados de luz de abajo sigan al acento y al veredicto en vez de quedar fijos en un tono viejo si vuelven a cambiar. */
 function conAlfa(hex: string, alfa: number): string {
@@ -297,7 +338,7 @@ export const resplandorSol: [string, string, string] = [
  * Señal (v5.0). Degradado dentro del mismo tono (COLOR-2): del magenta hondo a
  * la luz. Sale de la escala del acento, no de hex nuevos.
  */
-export const senal: [string, string, string] = [color.accent900, color.accent400, color.accent100];
+export const senal: [string, string, string] = [color.senalInicio, color.senalMedio, color.senalFin];
 
 /** Reflejo metálico que cruza el botón principal: blanco que aparece y se va. */
 export const reflejo: [string, string, string] = [
@@ -308,9 +349,9 @@ export const reflejo: [string, string, string] = [
 
 /** El brillo que cruza un hueso de esqueleto: un aclarado suave del mismo tono, nunca blanco puro. */
 export const brilloEsqueleto: [string, string, string] = [
-  'rgba(245, 238, 248, 0)',
-  'rgba(245, 238, 248, 0.08)',
-  'rgba(245, 238, 248, 0)',
+  conAlfa(color.text, 0),
+  conAlfa(color.text, 0.08),
+  conAlfa(color.text, 0),
 ];
 
 /**
@@ -323,7 +364,7 @@ export const brilloEsqueleto: [string, string, string] = [
  * `Card` cae aquí con cualquier clave de mundo o de modo.
  */
 export const gradiente: Record<string, [string, string]> = {
-  neutro: ['#1B242F', '#111820'],
+  neutro: [color.portadaInicio, color.portadaFin],
 };
 
 export const space = {

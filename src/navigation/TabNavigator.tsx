@@ -181,8 +181,8 @@ export function TabNavigator() {
         // pantalla; flotando, la app respira.
         tabBarStyle: [styles.bar, { bottom: abajo }],
         tabBarBackground: () => <FondoBarra />,
-        tabBarActiveTintColor: color.accent,
-        tabBarInactiveTintColor: color.textFaint,
+        tabBarActiveTintColor: color.barraActivo,
+        tabBarInactiveTintColor: color.barraInactivo,
         tabBarLabelStyle: styles.label,
         tabBarItemStyle: styles.item,
         tabBarButton: BotonPestana,

@@ -134,7 +134,7 @@ export function Button({
 }
 
 const textColor: Record<Variant, string> = {
-  primary: color.onAccent,
+  primary: color.onPrimario,
   secondary: color.text,
   ghost: color.textMuted,
   danger: color.onAccent,
@@ -148,7 +148,7 @@ const textColor: Record<Variant, string> = {
  */
 const variants: Record<Variant, ViewStyle> = {
   primary: {
-    backgroundColor: color.accent,
+    backgroundColor: color.primario,
     // Sin franja inferior ni halo de color: el cian sólido ya es lo más
     // encendido de la pantalla y una sombra tintada compite con él (IA-3).
     // La sombra negra `soft` solo lo despega del fondo.
