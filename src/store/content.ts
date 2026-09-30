@@ -115,69 +115,50 @@ function safeLoad<T>(loader: () => unknown, fallback: T, name: string): T {
   }
 }
 
+/** Cómo se carga cada archivo. Metro inlinea el JSON; el require() lo evalúa. */
+const CARGADORES: { [K in keyof ContentBundle]: [() => unknown, string] } = {
+  catalog: [() => require('@data/catalogo.json'), 'catalogo.json'],
+  packs: [() => require('@data/packs.json'), 'packs.json'],
+  situaciones: [() => require('@data/situaciones.json'), 'situaciones.json'],
+  contracciones: [() => require('@data/contracciones.json'), 'contracciones.json'],
+  errores: [() => require('@data/errores.json'), 'errores.json'],
+  fonemas: [() => require('@data/fonemas.json'), 'fonemas.json'],
+  notificaciones: [() => require('@data/notificaciones.json'), 'notificaciones.json'],
+  lecturas: [() => require('@data/lecturas.json'), 'lecturas.json'],
+  niveles: [() => require('@data/niveles.json'), 'niveles.json'],
+  phrasal: [() => require('@data/phrasal_verbs.json'), 'phrasal_verbs.json'],
+  gramatica: [() => require('@data/gramatica.json'), 'gramatica.json'],
+};
+
 let cache: ContentBundle | null = null;
 
+/**
+ * Todo el contenido, cada archivo cargado la primera vez que alguien lo lee.
+ *
+ * Evaluar un JSON grande bloquea el hilo de JS: antes los 11 archivos (~3 MB)
+ * se evaluaban juntos en el arranque aunque el arranque solo necesita el
+ * catálogo. Ahora cada propiedad es un getter que carga su archivo una vez.
+ */
 export function loadContent(): ContentBundle {
   if (cache) return cache;
 
-  cache = {
-    catalog: safeLoad(
-      () => require('@data/catalogo.json'),
-      EMPTY.catalog,
-      'catalogo.json'
-    ),
-    packs: safeLoad(
-      () => require('@data/packs.json'),
-      EMPTY.packs,
-      'packs.json'
-    ),
-    situaciones: safeLoad(
-      () => require('@data/situaciones.json'),
-      EMPTY.situaciones,
-      'situaciones.json'
-    ),
-    contracciones: safeLoad(
-      () => require('@data/contracciones.json'),
-      EMPTY.contracciones,
-      'contracciones.json'
-    ),
-    errores: safeLoad(
-      () => require('@data/errores.json'),
-      EMPTY.errores,
-      'errores.json'
-    ),
-    fonemas: safeLoad(
-      () => require('@data/fonemas.json'),
-      EMPTY.fonemas,
-      'fonemas.json'
-    ),
-    notificaciones: safeLoad(
-      () => require('@data/notificaciones.json'),
-      EMPTY.notificaciones,
-      'notificaciones.json'
-    ),
-    lecturas: safeLoad(
-      () => require('@data/lecturas.json'),
-      EMPTY.lecturas,
-      'lecturas.json'
-    ),
-    niveles: safeLoad(
-      () => require('@data/niveles.json'),
-      EMPTY.niveles,
-      'niveles.json'
-    ),
-    phrasal: safeLoad(
-      () => require('@data/phrasal_verbs.json'),
-      EMPTY.phrasal,
-      'phrasal_verbs.json'
-    ),
-    gramatica: safeLoad(
-      () => require('@data/gramatica.json'),
-      EMPTY.gramatica,
-      'gramatica.json'
-    ),
-  };
-
+  const bundle = {} as ContentBundle;
+  for (const clave of Object.keys(CARGADORES) as (keyof ContentBundle)[]) {
+    const [loader, name] = CARGADORES[clave];
+    let valor: unknown;
+    let listo = false;
+    Object.defineProperty(bundle, clave, {
+      enumerable: true,
+      get() {
+        if (!listo) {
+          valor = safeLoad(loader, EMPTY[clave], name);
+          listo = true;
+        }
+        return valor;
+      },
+    });
+  }
+  cache = bundle;
   return cache;
 }
 
