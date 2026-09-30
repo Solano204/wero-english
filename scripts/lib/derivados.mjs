@@ -109,7 +109,15 @@ export function textoCazala(root = process.cwd()) {
 
 /** Arma catalogo.db (necesita node:sqlite, Node 22.13 o más nuevo). */
 export async function construirDb(root = process.cwd()) {
-  const { DatabaseSync } = await import('node:sqlite');
+  let DatabaseSync;
+  try {
+    ({ DatabaseSync } = await import('node:sqlite'));
+  } catch {
+    throw new Error(
+      `catalogo.db necesita Node 22.13 o más nuevo (tienes ${process.version}). Instala Node 22 LTS (ver .nvmrc) y vuelve a correr npm run build:derivados. ` +
+        'Mientras tanto la copia de assets/data/catalogo.db que viene en Git sirve si no cambiaste catalogo.json.',
+    );
+  }
   const destino = path.join(root, RUTA_DB);
   fs.rmSync(destino, { force: true });
   const db = new DatabaseSync(destino);

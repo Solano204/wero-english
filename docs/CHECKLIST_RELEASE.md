@@ -2,6 +2,12 @@
 
 En orden. Si un paso falla, no se sigue: se arregla y se vuelve a empezar desde ese paso.
 
+## 0. Node 22
+
+`node -v` tiene que decir **v22.13 o más nuevo** (`.nvmrc`). Con Node 20 fallan `check:capas` (dependency-cruiser) y
+`build:derivados`/`check:data` (usan `node:sqlite`); `npm run verificar` lo revisa antes de empezar.
+En Windows: instalador de Node 22 LTS de nodejs.org, o `nvm install 22 && nvm use 22` con nvm-windows.
+
 ## 1. Verificar (obligatorio)
 
 ```bash
