@@ -1,47 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import {
-  useNavigation,
-  useRoute,
-  type RouteProp,
-} from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Header, ProgressBar, Screen } from '@/shared/ui';
 import { Hueso, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
-import { getPackCounts } from '@/data/repos/estadisticas';
-import { useCarga } from '@/shared/hooks/useCarga';
-import { useAuthStore } from '@/estado/useAuthStore';
-import { useSettingsStore } from '@/estado/useSettingsStore';
-import { loadContent } from '@/data/contenido';
 import { color, font, radius, space } from '@/theme';
-import type { RootStackParams } from '@/types/rutas';
 import { PuntoMundo } from '@/shared/ui/PuntoMundo';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-type Rt = RouteProp<RootStackParams, 'WorldDetail'>;
+import { useDetalleMundo } from '@/features/vocabulario/hooks/useDetalleMundo';
 
 /** P-04, los packs de un mundo. */
 export function WorldDetailScreen() {
-  const nav = useNavigation<Nav>();
-  const { params } = useRoute<Rt>();
-  const user = useAuthStore((s) => s.user);
-  const filter = useSettingsStore((s) => s.filter);
-  const content = useMemo(loadContent, []);
-
-  const carga = useCarga(
-    async (): Promise<Record<string, { total: number; vistas: number; dominadas: number }>> =>
-      user ? getPackCounts(user.id, filter()) : {},
-    [user, filter],
-    { alEnfocar: true }
-  );
-
-  const mundo = content.packs.mundos.find((m) => m.id === params.worldId);
-  const packs = content.packs.packs
-    .filter((p) => p.mundo === params.worldId)
-    .sort((a, b) => a.orden - b.orden);
-
-  const tint =
-    color.world[params.worldId as keyof typeof color.world] ?? color.accent;
+  const { nav, params, carga, mundo, packs, tint } = useDetalleMundo();
 
   return (
     <Screen scroll>
