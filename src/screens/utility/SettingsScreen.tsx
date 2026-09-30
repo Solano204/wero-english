@@ -320,6 +320,12 @@ export function SettingsScreen() {
             onPress={() => nav.navigate('SfxSampler', undefined)}
             full
           />
+          <Button
+            label="Probar reconocimiento"
+            variant="ghost"
+            onPress={() => nav.navigate('ProbarVoz', undefined)}
+            full
+          />
           <Card style={styles.card}>
             <Toggle
               label="Simular carga lenta"

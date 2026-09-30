@@ -3,7 +3,7 @@
  * NUNCA edites una migración ya publicada: agrega una nueva al final.
  */
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export const MIGRATIONS: { version: number; sql: string }[] = [
   {
@@ -352,6 +352,22 @@ export const MIGRATIONS: { version: number; sql: string }[] = [
     UPDATE usuario SET semilla = (random() & 4294967295) WHERE semilla IS NULL;
     UPDATE ajuste SET valor = '[1,2,3]' WHERE clave = 'niveles';
     DELETE FROM ajuste WHERE clave = 'dondeSeTraba';
+    `,
+  },
+
+  /* ------------------------------------------------------------------
+     v9 - «Di la palabra» guarda todas las alternativas del reconocedor
+     (JSON: [{ texto, confianza }]) y el veredicto, para revisar después
+     qué palabras fallan más. `veredicto` = 'acierto' | 'confusa' |
+     'no_entendi'; NULL en las filas viejas (eran aciertos o confusas).
+     Las filas 'no_entendi' no cuentan en los resúmenes: no son un error
+     de quien habla.
+     ------------------------------------------------------------------ */
+  {
+    version: 9,
+    sql: `
+    ALTER TABLE habla_log ADD COLUMN alternativas TEXT;
+    ALTER TABLE habla_log ADD COLUMN veredicto TEXT;
     `,
   },
 ];

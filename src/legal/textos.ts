@@ -124,7 +124,7 @@ export const TEXTOS: Record<DocLegal, TextoLegal> = {
         "t": "li",
         "partes": [
           {
-            "texto": "Tu voz, solo mientras dices la palabra. Wero no la graba ni la guarda: solo recibe el texto de lo que se entendió y guarda si acertaste."
+            "texto": "Tu voz, solo mientras dices la palabra. Wero no la graba ni la guarda: solo recibe el texto de lo que se entendió (las opciones que propone el reconocedor) y guarda ese texto y si acertaste."
           }
         ]
       },
@@ -276,7 +276,7 @@ export const TEXTOS: Record<DocLegal, TextoLegal> = {
             "negrita": true
           },
           {
-            "texto": " Tu voz la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla, bajo la política de privacidad de Google. Wero no graba ni guarda el audio."
+            "texto": " Si tu teléfono puede reconocer inglés sin conexión (Android 13 o más nuevo, con el paquete de inglés instalado), tu voz se procesa en el teléfono y no sale de él. Si no, la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla, bajo la política de privacidad de Google. En los dos casos, Wero no graba ni guarda el audio."
           }
         ]
       },

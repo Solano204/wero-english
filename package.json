@@ -45,7 +45,8 @@
     "reinstala": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps",
     "legal:generar": "node scripts/legal.mjs",
     "check:legal": "node scripts/legal.mjs --check",
-    "check:orden": "node scripts/check-orden.mjs"
+    "check:orden": "node scripts/check-orden.mjs",
+    "check:voz": "node scripts/check-voz.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

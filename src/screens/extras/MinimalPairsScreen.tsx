@@ -18,6 +18,8 @@ import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useConsentimiento } from '@/components/legal';
+import { MedidorMicrofono } from '@/components/voz/MedidorMicrofono';
+import { useEscucha } from '@/hooks/useEscucha';
 import * as speech from '@/services/speech';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
@@ -61,7 +63,18 @@ export function MinimalPairsScreen() {
     return propios.length > 0 ? propios : buildRounds(content.fonemas.fonemas);
   });
   const [idx, setIdx] = useState(0);
-  const [escuchando, setEscuchando] = useState(false);
+  const { fase, ocupado, sinVoz, nivel, escuchar: escucharVoz } = useEscucha();
+  // Dónde se reconoce la voz en este teléfono: lo dice la línea de privacidad de abajo.
+  const [enDispositivo, setEnDispositivo] = useState<boolean | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    void speech.reconoceEnDispositivo().then((v) => {
+      if (vivo) setEnDispositivo(v);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, []);
   const [veredicto, setVeredicto] = useState<HablaVeredicto | null>(null);
   const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
   const efecto = useEfectoResultado();
@@ -76,12 +89,8 @@ export function MinimalPairsScreen() {
 
   const round = rounds[idx];
 
-  useEffect(() => {
-    return () => speech.cancel();
-  }, []);
-
   const escuchar = useCallback(async () => {
-    if (!round || escuchando) return;
+    if (!round || ocupado) return;
 
     // Antes de tocar el micrófono, la hoja que dice adónde va la voz. «Ahora no» sigue sin micro.
     if (!(await pedirConsentimiento('microfono'))) {
@@ -104,15 +113,13 @@ export function MinimalPairsScreen() {
       if (user) await setSetting(user.id, 'micHabilitado', true);
     }
 
-    setEscuchando(true);
     setVeredicto(null);
 
-    const oido = await speech.listenOnce({
-      candidatos: [round.objetivo, round.confusa],
-    });
+    const oido = await escucharVoz([round.objetivo, round.confusa]);
+    // Ya había una escucha en curso (doble toque): esta no cuenta.
+    if (!oido) return;
 
-    const v = juzgar(round, oido);
-    setEscuchando(false);
+    const v = juzgar(round, oido.alternativas, content.confusionesVoz.pares);
     setVeredicto(v);
 
     if (v.tipo === 'acierto') {
@@ -126,20 +133,16 @@ export function MinimalPairsScreen() {
       setFallidos(0);
     } else {
       // Ni acierto ni error del usuario: el reconocedor no entendió.
-      // No se cuenta como fallo y no se escribe en el registro.
+      // No se cuenta como fallo: se pide repetir.
       setFallidos((f) => f + 1);
     }
 
-    if (user && (v.tipo === 'acierto' || v.tipo === 'confusa')) {
-      await logHabla(
-        user.id,
-        round.id,
-        round.objetivo,
-        v.oido,
-        v.tipo === 'acierto'
-      );
+    // Todo intento queda con sus alternativas (para ver después qué palabras fallan más). Los «no te entendí» no
+    // cuentan en los resúmenes (ver HABLA_CUENTA en db/economy.ts).
+    if (user && v.tipo !== 'no_disponible') {
+      await logHabla(user.id, round.id, round.objetivo, v.tipo, v.oido, v.alternativas);
     }
-  }, [round, escuchando, micHabilitado, user, setSetting, pedirConsentimiento]);
+  }, [round, ocupado, micHabilitado, user, setSetting, pedirConsentimiento, escucharVoz, content]);
 
   const siguiente = useCallback(() => {
     setVeredicto(null);
@@ -185,6 +188,18 @@ export function MinimalPairsScreen() {
 
   const exp = veredicto ? explicar(round, veredicto) : null;
   const acerto = veredicto?.tipo === 'acierto';
+  const noEntendi = veredicto?.tipo === 'no_entendi';
+  const oyo = veredicto && veredicto.tipo !== 'no_disponible' ? veredicto.oido : null;
+  const etiquetaBoton =
+    fase === 'preparando'
+      ? 'Preparando…'
+      : fase === 'escuchando'
+        ? 'Te escucho'
+        : fase === 'procesando'
+          ? 'Procesando…'
+          : noEntendi
+            ? 'Repetir'
+            : 'Toca para hablar';
 
   return (
     <Screen padded={false}>
@@ -226,12 +241,14 @@ export function MinimalPairsScreen() {
                 <Text
                   style={[
                     styles.resultadoTitulo,
-                    { color: acerto ? color.correct : color.wrong },
+                    { color: acerto ? color.correct : noEntendi ? color.text : color.wrong },
                   ]}
                 >
                   {exp.titulo}
                 </Text>
                 <Text style={styles.resultadoCuerpo}>{exp.cuerpo}</Text>
+                {/* Lo que escribió el reconocedor: así se aprende de la diferencia. */}
+                {oyo ? <Text style={styles.oyo}>{`Oí: «${oyo}»`}</Text> : null}
               </Card>
             </Animated.View>
 
@@ -246,10 +263,19 @@ export function MinimalPairsScreen() {
       </View>
 
       <View style={styles.pie}>
+        <View style={styles.medidor}>
+          <MedidorMicrofono nivel={nivel} activo={fase === 'escuchando'} />
+          {/* Siempre ocupa su renglón: aparecer o irse no mueve el botón. */}
+          <Text style={styles.sinVoz} accessibilityLiveRegion="polite">
+            {sinVoz ? 'No te escucho. Acércate al teléfono o habla un poco más fuerte.' : ' '}
+          </Text>
+        </View>
         <Button
-          label={escuchando ? 'Escuchando…' : 'Mantén para hablar'}
-          onPress={escuchar}
-          loading={escuchando}
+          label={etiquetaBoton}
+          onPress={() => void escuchar()}
+          loading={fase === 'preparando' || fase === 'procesando'}
+          disabled={ocupado}
+          variant={noEntendi || !veredicto ? 'primary' : 'secondary'}
           full
           size="lg"
         />
@@ -265,7 +291,9 @@ export function MinimalPairsScreen() {
           />
         ) : null}
         <Text style={styles.privacidad}>
-          El audio no sale de tu teléfono. No se graba nada.
+          {enDispositivo
+            ? 'Tu voz se reconoce en este teléfono. No se graba nada.'
+            : 'El servicio de voz del teléfono puede procesar tu voz en sus servidores. Wero no graba nada.'}
         </Text>
       </View>
       {hoja}
@@ -317,6 +345,16 @@ const styles = StyleSheet.create({
     fontFamily: font.family.bodyStrong,
   },
   resultadoCuerpo: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
+  oyo: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
+  medidor: { alignItems: 'center', gap: space.xs },
+  sinVoz: {
+    minHeight: font.size.sm * 1.5 * 2,
+    fontFamily: font.family.body,
+    fontSize: font.size.sm,
+    lineHeight: font.size.sm * 1.5,
+    color: color.textMuted,
+    textAlign: 'center',
+  },
   rendicion: {
     fontFamily: font.family.body,
     fontSize: font.size.xs,

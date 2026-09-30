@@ -62,6 +62,7 @@ export type RootStackParams = {
   Deck: undefined;
   Diagnostics: undefined;
   SfxSampler: undefined;
+  ProbarVoz: undefined;
 };
 
 export type MainTabParams = {

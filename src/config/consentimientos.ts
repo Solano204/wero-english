@@ -23,10 +23,10 @@ export const CONSENTIMIENTOS: Record<TipoConsentimiento, TextoConsentimiento> = 
     titulo: '¿Usar el micrófono?',
     toma: ['Tu voz, solo mientras dices la palabra'],
     paraQue: 'Para saber qué palabra entendió el teléfono y compararla con la que se pidió.',
-    // Verificado en src/services/speech.ts (requiresOnDeviceRecognition: false) y en
-    // expo-speech-recognition: se usa el reconocedor por defecto del sistema, sin pedir que sea sin conexión.
+    // Verificado en src/services/speech.ts (reconoceEnDispositivo) y en expo-speech-recognition: en Android 13+
+    // con en-US instalado se usa el reconocedor del dispositivo; si no, el del sistema, que puede usar la nube.
     donde:
-      'Tu voz la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla. Wero no graba ni guarda el audio: solo recibe el texto de lo que se entendió.',
+      'Si tu teléfono puede reconocer inglés sin conexión, tu voz se procesa en el teléfono y no sale de él. Si no, la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla. Wero no graba ni guarda el audio: solo recibe el texto de lo que se entendió.',
     despues: 'Después Android te pide el permiso del micrófono.',
   },
   notificaciones: {

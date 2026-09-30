@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "fuente": "CMU Pronouncing Dictionary (cmudict 1.1.3): palabras con exactamente los mismos fonemas que la palabra del par, sin contar el acento. Elegidas a mano: solo las comunes que un reconocedor de voz sí escribe. Se quitó cualquier variante que sea la otra palabra del par o que suene igual que ella (p. ej. caught/cot y walk/wok son iguales en el CMU, y son justo lo que el par enseña a distinguir).",
+  "nota": "Si el reconocedor escribe una de estas palabras, cuenta como la palabra del par a la que suena igual. No se agregan confusiones de pronunciación (p. ej. cheap por sheep): esas son justo el error que el ejercicio enseña a corregir.",
+  "pares": {
+    "air|ear": {
+      "air": [
+        "heir"
+      ]
+    },
+    "bear|beer": {
+      "bear": [
+        "bare"
+      ]
+    },
+    "berry|very": {
+      "very": [
+        "vary"
+      ],
+      "berry": [
+        "bury"
+      ]
+    },
+    "bin|pin": {
+      "bin": [
+        "been"
+      ]
+    },
+    "boy|buy": {
+      "buy": [
+        "by",
+        "bye"
+      ]
+    },
+    "ear|hear": {
+      "hear": [
+        "here"
+      ]
+    },
+    "eye|high": {
+      "high": [
+        "hi"
+      ],
+      "eye": [
+        "i",
+        "aye"
+      ]
+    },
+    "hair|here": {
+      "hair": [
+        "hare"
+      ],
+      "here": [
+        "hear"
+      ]
+    },
+    "ham|jam": {
+      "jam": [
+        "jamb"
+      ]
+    },
+    "heart|hurt": {
+      "heart": [
+        "hart"
+      ]
+    },
+    "hose|house": {
+      "hose": [
+        "hoes"
+      ]
+    },
+    "joke|yolk": {
+      "yolk": [
+        "yoke"
+      ]
+    },
+    "light|right": {
+      "right": [
+        "write",
+        "rite"
+      ],
+      "light": [
+        "lite"
+      ]
+    },
+    "no|now": {
+      "no": [
+        "know"
+      ]
+    },
+    "pain|pen": {
+      "pain": [
+        "pane"
+      ]
+    },
+    "peace|peas": {
+      "peace": [
+        "piece"
+      ]
+    },
+    "poor|pour": {
+      "pour": [
+        "pore"
+      ]
+    },
+    "see|she": {
+      "see": [
+        "sea",
+        "c"
+      ]
+    },
+    "some|sun": {
+      "some": [
+        "sum"
+      ],
+      "sun": [
+        "son"
+      ]
+    },
+    "sun|sung": {
+      "sun": [
+        "son"
+      ]
+    },
+    "vet|wet": {
+      "wet": [
+        "whet"
+      ]
+    },
+    "vice|voice": {
+      "vice": [
+        "vise"
+      ]
+    },
+    "vine|wine": {
+      "wine": [
+        "whine"
+      ]
+    }
+  }
+}

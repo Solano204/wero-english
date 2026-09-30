@@ -359,6 +359,18 @@ export interface PhrasalGrupo {
   ids: number[];
 }
 
+/**
+ * assets/data/confusiones_voz.json: palabras que suenan exactamente igual que una palabra de un par mínimo (homófonos
+ * del CMU Pronouncing Dictionary), por par. Si el reconocedor escribe una, cuenta como la palabra a la que suena igual.
+ */
+export interface ConfusionesVozFile {
+  version: number;
+  fuente: string;
+  nota: string;
+  /** Clave: las dos palabras del par en minúsculas, en orden alfabético, unidas con «|». Valor: palabra → variantes. */
+  pares: Record<string, Record<string, string[]>>;
+}
+
 export interface PhrasalFile {
   version: number;
   total: number;

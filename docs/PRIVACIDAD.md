@@ -32,7 +32,7 @@ Este aviso cumple con la Ley Federal de Protección de Datos Personales en Poses
 
 **Si usas el micrófono en «Di la palabra»:**
 
-- Tu voz, solo mientras dices la palabra. Wero no la graba ni la guarda: solo recibe el texto de lo que se entendió y guarda si acertaste.
+- Tu voz, solo mientras dices la palabra. Wero no la graba ni la guarda: solo recibe el texto de lo que se entendió (las opciones que propone el reconocedor) y guarda ese texto y si acertaste.
 
 **Si usas una cuenta con usuario y contraseña (versiones anteriores de la app):**
 
@@ -61,7 +61,7 @@ Wero no usa tus datos para publicidad, perfiles, analítica ni para entrenar mod
 Hay cuatro momentos, y antes de cada uno la app te lo explica y te pide que aceptes:
 
 - **Entrar con Google.** Android te muestra tus cuentas de Google y Google le da a Wero tu nombre, correo, foto e identificador, con los permisos básicos «openid», «email» y «profile». Wero no recibe tu contraseña ni tiene acceso a tu correo, tus contactos o tus archivos. Para mostrar tu foto en Ajustes, la app la carga de los servidores de Google.
-- **El micrófono.** Tu voz la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla, bajo la política de privacidad de Google. Wero no graba ni guarda el audio.
+- **El micrófono.** Si tu teléfono puede reconocer inglés sin conexión (Android 13 o más nuevo, con el paquete de inglés instalado), tu voz se procesa en el teléfono y no sale de él. Si no, la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla, bajo la política de privacidad de Google. En los dos casos, Wero no graba ni guarda el audio.
 - **Descargar audio e imágenes.** Los archivos se piden a nuestro servicio de archivos (media.wero.app). Como en cualquier descarga, ese servicio ve tu dirección de internet (IP) y qué paquete pides. No le mandamos ningún dato tuyo ni de tu avance.
 - **Compartir un error.** Si tocas «Compartir», el texto del error se manda a la app que tú elijas.
 

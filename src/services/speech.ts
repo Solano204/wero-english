@@ -1,13 +1,19 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
-import { registrarCorte } from './audio';
+import { detenerTodo, registrarCorte } from './audio';
+import { extraerAlternativas, ordenarPorConfianza } from '@/domain/voz';
+import type { AlternativaVoz } from '@/types';
 
 /**
  * Reconocimiento de voz.
  *
- * Usa el reconocedor que ya trae el teléfono: Google en Android, Apple
- * en iOS. No hay API de pago, no hay servidor, no hay llave que
- * proteger y el audio no sale del dispositivo.
+ * Usa el reconocedor que ya trae el teléfono (en Android, el de Google). No hay API de pago ni servidor de Wero.
+ *
+ * DÓNDE SE PROCESA LA VOZ: primero se intenta en el teléfono. En Android 13 o más nuevo, si el teléfono tiene el
+ * reconocimiento sin conexión y el paquete de inglés (en-US) ya instalado, se usa ese (`requiresOnDeviceRecognition`,
+ * que en expo-speech-recognition crea el reconocedor del dispositivo) y el audio no sale del teléfono. Si no, se usa
+ * el reconocedor normal del sistema, que puede mandar el audio a los servidores de Google para entenderlo. Wero no
+ * graba ni guarda el audio en ninguno de los dos casos: solo recibe el texto.
  *
  * Tres cosas que hay que tener claras antes de tocar este archivo:
  *
@@ -20,7 +26,7 @@ import { registrarCorte } from './audio';
  *    envuelto: si el módulo no está, la app sigue funcionando completa
  *    y el laboratorio de habla se muestra apagado con su explicación.
  *
- * 3. El audio nunca se guarda. Lo que se escribe en habla_log es la
+ * 3. El audio nunca se guarda (no se pide `recordingOptions.persist`). Lo que se escribe en habla_log es la
  *    transcripción, no el sonido.
  */
 
@@ -31,6 +37,11 @@ export type SpeechState =
 interface RecognitionModule {
   requestPermissionsAsync: () => Promise<{ granted: boolean }>;
   getPermissionsAsync?: () => Promise<{ granted: boolean }>;
+  supportsOnDeviceRecognition?: () => boolean;
+  getSupportedLocales?: (o: { androidRecognitionServicePackage?: string }) => Promise<{
+    locales: string[];
+    installedLocales: string[];
+  }>;
   start: (options: Record<string, unknown>) => void;
   stop: () => void;
   abort?: () => void;
@@ -117,6 +128,9 @@ export async function requestPermission(): Promise<boolean> {
   }
 }
 
+/** Lo que se ve mientras se escucha: preparando el micrófono → escuchando → procesando lo que oyó. */
+export type EstadoEscucha = 'preparando' | 'escuchando' | 'procesando';
+
 export interface ListenOptions {
   /**
    * Las dos palabras del par. Se le pasan al reconocedor como pistas de
@@ -124,31 +138,159 @@ export interface ListenOptions {
    * entre dos opciones es lo que sube la precisión de aceptable a útil.
    */
   candidatos: string[];
-  /** Cuánto esperar antes de rendirse. */
-  timeoutMs?: number;
+  /** Tope desde que el reconocedor YA escucha (evento `start`), no desde el toque. */
+  topeMs?: number;
+  onEstado?: (estado: EstadoEscucha) => void;
+  /** Volumen de la entrada, de -2 a 10 (debajo de 0 no se oye nada), unas 12 veces por segundo. */
+  onVolumen?: (valor: number) => void;
+  /** Lo que va entendiendo mientras hablas. */
+  onParcial?: (texto: string) => void;
+}
+
+export interface ResultadoEscucha {
+  /** Todas las alternativas, en orden (de confianza si el reconocedor la dio para todas). */
+  alternativas: AlternativaVoz[];
+  /** De dónde salieron: el resultado final, el último parcial (el final nunca llegó) o nada. */
+  origen: 'final' | 'parcial' | 'nada';
+  /** Los parciales que llegaron, en orden (para la pantalla de prueba). */
+  parciales: string[];
+  /** Se reconoció en el teléfono (sin mandar el audio a ningún lado). */
+  enDispositivo: boolean;
+  /** El código de error del reconocedor, si hubo ('no-speech', 'network', …). */
+  error: string | null;
+  /** El volumen más alto que se oyó (-2 a 10). */
+  volumenMax: number;
+}
+
+/** Tras cortar el audio de la app, cuánto esperar antes de abrir el micrófono (que no se cuele la cola del sonido). */
+const ESPERA_TRAS_CORTE_MS = 250;
+/** Si llega `end` sin resultado, cuánto esperar por un `result` tardío antes de cerrar. */
+const MARGEN_TRAS_END_MS = 400;
+/** Al llegar al tope se pide el resultado (`stop`); cuánto esperarlo. */
+const MARGEN_TRAS_STOP_MS = 700;
+/** Tope de escucha desde `start`. */
+const TOPE_MS = 8000;
+/** Si el reconocedor nunca avisa que ya escucha, se deja de esperar. */
+const TOPE_ARRANQUE_MS = 4000;
+/** Cada cuánto manda el volumen el reconocedor. */
+const INTERVALO_VOLUMEN_MS = 80;
+/** Alternativas que se piden. */
+const ALTERNATIVAS = 5;
+
+/**
+ * Silencios del reconocedor de Android (RecognizerIntent). Por omisión corta muy rápido una palabra de una sílaba o
+ * si tardas un instante en empezar. Con esto: no termina antes de 2 s (da tiempo a tomar aire y decir «ship»), y tras
+ * dejar de oír voz espera 1.2–1.5 s antes de dar por terminado. La documentación de Android advierte que, según el
+ * reconocedor, «estos valores pueden no tener efecto»: el de Google en algunas versiones los ignora. Por eso además
+ * hay margen tras `end` y respaldo con el último parcial.
+ */
+const SILENCIOS_ANDROID = {
+  EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS: 2000,
+  EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: 1500,
+  EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS: 1200,
+};
+
+/** Errores con los que el reconocedor del teléfono dice «así no puedo»: se vuelve a intentar con el del sistema. */
+const ERRORES_SIN_DISPOSITIVO = new Set(['language-not-supported', 'service-not-allowed', 'not-allowed']);
+
+let dispositivo: Promise<boolean> | null = null;
+
+/**
+ * ¿Se puede reconocer inglés en el teléfono, sin mandar el audio? Android 13+, reconocimiento en el dispositivo
+ * disponible y el paquete en-US ya instalado. Se decide una vez por sesión de la app.
+ */
+export function reconoceEnDispositivo(): Promise<boolean> {
+  if (!dispositivo) {
+    dispositivo = (async () => {
+      const m = load();
+      if (!m || Platform.OS !== 'android' || Number(Platform.Version) < 33) return false;
+      try {
+        if (!m.supportsOnDeviceRecognition?.()) return false;
+        const r = await m.getSupportedLocales?.({});
+        return (r?.installedLocales ?? []).some((l) => l.replace('_', '-').toLowerCase() === 'en-us');
+      } catch {
+        return false;
+      }
+    })();
+  }
+  return dispositivo;
 }
 
 /**
- * Escucha una vez y devuelve lo que entendió, o null si no entendió
- * nada. Nunca lanza: un fallo del reconocedor se trata como silencio,
- * porque el usuario no tiene forma de arreglar una excepción nativa.
+ * Pide descargar el paquete de inglés para reconocer sin conexión (Android 13+). En Android 13 abre el diálogo del
+ * sistema; en 14+ lo baja o lo agenda (p. ej. esperando wifi). Nunca lanza.
  */
-export async function listenOnce(
-  opts: ListenOptions
-): Promise<string | null> {
+export async function descargarInglesSinConexion(): Promise<string> {
+  const m = load() as (RecognitionModule & {
+    androidTriggerOfflineModelDownload?: (o: { locale: string }) => Promise<{ status: string }>;
+  }) | null;
+  if (!m?.androidTriggerOfflineModelDownload) return 'no_disponible';
+  try {
+    const r = await m.androidTriggerOfflineModelDownload({ locale: 'en-US' });
+    dispositivo = null;
+    return r.status;
+  } catch {
+    return 'error';
+  }
+}
+
+const espera = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Escucha una vez y devuelve TODO lo que entendió (las alternativas), o nada si no entendió. Nunca lanza: un fallo
+ * del reconocedor se trata como «no entendí», porque quien habla no tiene forma de arreglar una excepción nativa.
+ *
+ * Antes de abrir el micrófono se corta el audio de la app y se espera un instante, para que no se grabe la cola de
+ * un sonido. Si el final nunca llega se usa el último parcial; si `end` llega antes que `result`, se espera un margen.
+ */
+export async function listenOnce(opts: ListenOptions): Promise<ResultadoEscucha> {
   const m = load();
-  if (!m || !m.addListener) return null;
+  const vacio = (error: string | null, enDispositivo = false): ResultadoEscucha => ({
+    alternativas: [],
+    origen: 'nada',
+    parciales: [],
+    enDispositivo,
+    error,
+    volumenMax: -2,
+  });
+  if (!m || !m.addListener) return vacio('no_disponible');
 
-  const timeout = opts.timeoutMs ?? 5000;
+  opts.onEstado?.('preparando');
+  detenerTodo();
+  await espera(ESPERA_TRAS_CORTE_MS);
 
-  return new Promise<string | null>((resolve) => {
+  const enDispositivo = await reconoceEnDispositivo();
+  const primero = await escucharCon(m, opts, enDispositivo);
+  // El reconocedor del teléfono dijo que no puede (paquete borrado, servicio apagado): se intenta con el del sistema.
+  if (enDispositivo && primero.error && ERRORES_SIN_DISPOSITIVO.has(primero.error) && primero.origen === 'nada') {
+    dispositivo = Promise.resolve(false);
+    return escucharCon(m, opts, false);
+  }
+  return primero;
+}
+
+function escucharCon(m: RecognitionModule, opts: ListenOptions, enDispositivo: boolean): Promise<ResultadoEscucha> {
+  const tope = opts.topeMs ?? TOPE_MS;
+
+  return new Promise<ResultadoEscucha>((resolve) => {
     let terminado = false;
+    let final: AlternativaVoz[] | null = null;
+    let parcial: AlternativaVoz[] = [];
+    const parciales: string[] = [];
+    let error: string | null = null;
+    let volumenMax = -2;
+    const relojes: ReturnType<typeof setTimeout>[] = [];
     const subs: { remove: () => void }[] = [];
+    const escuchar = (evento: string, fn: (payload: unknown) => void) => {
+      const s = m.addListener?.(evento, fn);
+      if (s) subs.push(s);
+    };
+    const programar = (fn: () => void, ms: number) => relojes.push(setTimeout(fn, ms));
 
-    const cerrar = (valor: string | null) => {
+    const cerrar = () => {
       if (terminado) return;
       terminado = true;
-      clearTimeout(reloj);
+      for (const r of relojes) clearTimeout(r);
       for (const s of subs) {
         try {
           s.remove();
@@ -157,39 +299,87 @@ export async function listenOnce(
         }
       }
       try {
+        m.abort?.();
+      } catch {
+        /* sin consecuencia */
+      }
+      const alternativas = final && final.length > 0 ? final : parcial;
+      resolve({
+        alternativas: ordenarPorConfianza(alternativas),
+        origen: final && final.length > 0 ? 'final' : parcial.length > 0 ? 'parcial' : 'nada',
+        parciales,
+        enDispositivo,
+        error,
+        volumenMax,
+      });
+    };
+
+    // Se acabó el tiempo: se le pide al reconocedor su resultado y se le da un margen para mandarlo.
+    const alTope = () => {
+      if (terminado) return;
+      opts.onEstado?.('procesando');
+      try {
         m.stop();
       } catch {
         /* sin consecuencia */
       }
-      resolve(valor);
+      programar(cerrar, MARGEN_TRAS_STOP_MS);
     };
 
-    const reloj = setTimeout(() => cerrar(null), timeout);
+    let arranco = false;
+    programar(() => {
+      if (!arranco) cerrar();
+    }, TOPE_ARRANQUE_MS);
 
     try {
-      const onResult = m.addListener?.('result', (payload: unknown) => {
-        const texto = extraerTranscripcion(payload);
-        if (texto) cerrar(texto);
+      escuchar('start', () => {
+        if (arranco) return;
+        arranco = true;
+        opts.onEstado?.('escuchando');
+        programar(alTope, tope);
       });
-      if (onResult) subs.push(onResult);
-
-      const onError = m.addListener?.('error', () => cerrar(null));
-      if (onError) subs.push(onError);
-
-      const onEnd = m.addListener?.('end', () => cerrar(null));
-      if (onEnd) subs.push(onEnd);
+      escuchar('speechend', () => opts.onEstado?.('procesando'));
+      escuchar('volumechange', (payload) => {
+        const v = (payload as { value?: unknown } | null)?.value;
+        if (typeof v !== 'number') return;
+        if (v > volumenMax) volumenMax = v;
+        opts.onVolumen?.(v);
+      });
+      escuchar('result', (payload) => {
+        const alternativas = extraerAlternativas(payload);
+        if (alternativas.length === 0) return;
+        if ((payload as { isFinal?: unknown } | null)?.isFinal === false) {
+          parcial = alternativas;
+          parciales.push(alternativas[0]!.texto);
+          opts.onParcial?.(alternativas[0]!.texto);
+          return;
+        }
+        final = alternativas;
+        cerrar();
+      });
+      escuchar('error', (payload) => {
+        const codigo = (payload as { error?: unknown } | null)?.error;
+        error = typeof codigo === 'string' ? codigo : 'desconocido';
+        // Tras un error el reconocedor manda `end`; por si no, se cierra con margen (un `result` tardío aún cuenta).
+        programar(cerrar, MARGEN_TRAS_END_MS);
+      });
+      // `end` puede llegar antes que un `result` tardío: se espera un poco antes de cerrar con lo que haya.
+      escuchar('end', () => programar(cerrar, MARGEN_TRAS_END_MS));
 
       m.start({
         lang: 'en-US',
-        interimResults: false,
-        maxAlternatives: 3,
+        interimResults: true,
+        maxAlternatives: ALTERNATIVAS,
         continuous: false,
-        requiresOnDeviceRecognition: false,
+        requiresOnDeviceRecognition: enDispositivo,
         addsPunctuation: false,
         contextualStrings: opts.candidatos,
+        volumeChangeEventOptions: { enabled: true, intervalMillis: INTERVALO_VOLUMEN_MS },
+        ...(Platform.OS === 'android' ? { androidIntentOptions: SILENCIOS_ANDROID } : null),
       });
     } catch {
-      cerrar(null);
+      error = 'no_arranco';
+      cerrar();
     }
   });
 }
@@ -208,31 +398,3 @@ export function cancel(): void {
 // Se registra una sola vez para que audio.detenerTodo() también corte el
 // reconocedor en curso (mic escuchando), no solo lo que suena.
 registrarCorte(cancel);
-
-/**
- * El payload del evento cambia de forma entre versiones de la librería
- * y entre plataformas. Se leen las tres formas conocidas en vez de
- * confiar en una: una transcripción perdida se ve como "no te entendí",
- * que es el peor mensaje posible cuando el usuario sí habló.
- */
-function extraerTranscripcion(payload: unknown): string | null {
-  if (!payload || typeof payload !== 'object') return null;
-  const p = payload as Record<string, unknown>;
-
-  const results = p['results'];
-  if (Array.isArray(results) && results.length > 0) {
-    const first = results[0] as Record<string, unknown> | undefined;
-    const t = first?.['transcript'];
-    if (typeof t === 'string' && t.length > 0) return t;
-  }
-
-  const directo = p['transcript'];
-  if (typeof directo === 'string' && directo.length > 0) return directo;
-
-  const value = p['value'];
-  if (Array.isArray(value) && typeof value[0] === 'string') {
-    return value[0] as string;
-  }
-
-  return null;
-}

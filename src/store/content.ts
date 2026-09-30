@@ -1,5 +1,6 @@
 import type {
   Catalog,
+  ConfusionesVozFile,
   ContraccionesFile,
   ErroresFile,
   FonemasFile,
@@ -31,6 +32,7 @@ export interface ContentBundle {
   niveles: NivelesFile;
   phrasal: PhrasalFile;
   gramatica: GramaticaFile;
+  confusionesVoz: ConfusionesVozFile;
 }
 
 /** Estructura vacía por archivo, para que la app arranque sin datos. */
@@ -93,6 +95,7 @@ const EMPTY: ContentBundle = {
   niveles: { version: 0, nivelesPorJuego: 0, nota: '', juegos: {} },
   phrasal: { version: 0, total: 0, nota: '', grupos: [], verbos: [] },
   gramatica: { version: 0, bloques: {}, temas: [] },
+  confusionesVoz: { version: 0, fuente: '', nota: '', pares: {} },
 };
 
 /**
@@ -128,6 +131,7 @@ const CARGADORES: { [K in keyof ContentBundle]: [() => unknown, string] } = {
   niveles: [() => require('@data/niveles.json'), 'niveles.json'],
   phrasal: [() => require('@data/phrasal_verbs.json'), 'phrasal_verbs.json'],
   gramatica: [() => require('@data/gramatica.json'), 'gramatica.json'],
+  confusionesVoz: [() => require('@data/confusiones_voz.json'), 'confusiones_voz.json'],
 };
 
 let cache: ContentBundle | null = null;

@@ -129,6 +129,7 @@ export function RootNavigator() {
       <Stack.Screen name="Lectura" getComponent={() => require('@/screens/extras/LecturaScreen').LecturaScreen} />
       <Stack.Screen name="Diagnostics" getComponent={() => require('@/screens/utility/DiagnosticsScreen').DiagnosticsScreen} />
       {__DEV__ ? <Stack.Screen name="SfxSampler" getComponent={() => require('@/screens/utility/SfxSamplerScreen').SfxSamplerScreen} /> : null}
+      {__DEV__ ? <Stack.Screen name="ProbarVoz" getComponent={() => require('@/screens/utility/ProbarVozScreen').ProbarVozScreen} /> : null}
     </Stack.Navigator>
   );
 }

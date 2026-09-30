@@ -54,12 +54,24 @@ export interface ParMinimoRound {
   elErrorTipico: string;
 }
 
-/** Lo que devuelve el reconocedor después de un intento. */
+/** Una de las transcripciones que propone el reconocedor, en su orden. */
+export interface AlternativaVoz {
+  texto: string;
+  /** 0 a 1 si el reconocedor la da; null si no la da (en Android suele venir solo para la primera). */
+  confianza: number | null;
+}
+
+/**
+ * Lo que devuelve el reconocedor después de un intento. `oido` es la alternativa que decidió (o la primera, si
+ * ninguna decidió) y `alternativas` todas las que llegaron, para mostrarlas y guardarlas.
+ *
+ * `no_entendi` junta el silencio, el ruido y lo que no se parece a ninguna de las dos: NO es un error de quien habla,
+ * así que no cuenta como fallo; se pide repetir.
+ */
 export type HablaVeredicto =
-  | { tipo: 'acierto'; oido: string }
-  | { tipo: 'confusa'; oido: string }
-  | { tipo: 'otra_cosa'; oido: string }
-  | { tipo: 'silencio' }
+  | { tipo: 'acierto'; oido: string; alternativas: AlternativaVoz[] }
+  | { tipo: 'confusa'; oido: string; alternativas: AlternativaVoz[] }
+  | { tipo: 'no_entendi'; oido: string | null; alternativas: AlternativaVoz[] }
   | { tipo: 'no_disponible'; razon: string };
 
 /** Una ronda de Caída: dos tarjetas bajando y un reloj. */

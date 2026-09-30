@@ -1,6 +1,6 @@
 import { getDb } from './client';
 import { dayKey } from '@/utils/date';
-import type { JuegoId, JuegoRecord, RetoSemanal, UsoModo } from '@/types';
+import type { AlternativaVoz, JuegoId, JuegoRecord, RetoSemanal, UsoModo } from '@/types';
 
 /**
  * Registro de partidas, reto semanal y pronunciación.
@@ -115,20 +115,34 @@ export async function getRetoSemanal(
    Registro de pronunciación
    ============================================================ */
 
+/** Un intento de «Di la palabra»: lo que decidió, lo que se entendió y todas las alternativas del reconocedor. */
 export async function logHabla(
   usuarioId: number,
   parId: string,
   objetivo: string,
+  veredicto: 'acierto' | 'confusa' | 'no_entendi',
   oido: string | null,
-  acierto: boolean
+  alternativas: AlternativaVoz[]
 ): Promise<void> {
   const db = await getDb();
   await db.runAsync(
-    `INSERT INTO habla_log (usuario_id, par_id, objetivo, oido, acierto, creado_en)
-     VALUES (?,?,?,?,?,?);`,
-    [usuarioId, parId, objetivo, oido, acierto ? 1 : 0, Date.now()]
+    `INSERT INTO habla_log (usuario_id, par_id, objetivo, oido, acierto, creado_en, alternativas, veredicto)
+     VALUES (?,?,?,?,?,?,?,?);`,
+    [
+      usuarioId,
+      parId,
+      objetivo,
+      oido,
+      veredicto === 'acierto' ? 1 : 0,
+      Date.now(),
+      JSON.stringify(alternativas),
+      veredicto,
+    ]
   );
 }
+
+/** Las filas que cuentan en los resúmenes: un «no te entendí» no es un intento fallido de quien habla. */
+const HABLA_CUENTA = "(veredicto IS NULL OR veredicto <> 'no_entendi')";
 
 /** Cuántos pares mínimos ha acertado al menos una vez. Para el arcade. */
 export async function getHablaResumen(
@@ -138,7 +152,7 @@ export async function getHablaResumen(
   const row = await db.getFirstAsync<{ intentos: number; dominados: number }>(
     `SELECT COUNT(*) AS intentos,
             COUNT(DISTINCT CASE WHEN acierto = 1 THEN par_id END) AS dominados
-       FROM habla_log WHERE usuario_id = ?;`,
+       FROM habla_log WHERE usuario_id = ? AND ${HABLA_CUENTA};`,
     [usuarioId]
   );
   return {
@@ -171,7 +185,7 @@ export async function getUsoModos(
      SELECT 'pares_minimos',
             COUNT(DISTINCT date(creado_en / 1000, 'unixepoch', 'localtime')),
             MAX(creado_en)
-       FROM habla_log WHERE usuario_id = ?;`,
+       FROM habla_log WHERE usuario_id = ? AND ${HABLA_CUENTA};`,
     [usuarioId, usuarioId, usuarioId]
   );
 

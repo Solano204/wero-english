@@ -17,9 +17,9 @@ Dos cosas salen del teléfono sin que Wero guarde ni reciba datos: la foto de pe
 | ¿Proporcionas una forma para que los usuarios soliciten que se borren sus datos? | **Sí**: dentro de la app (Ajustes, sección Legal: «Borrar cuenta y datos» y «Borrar todos mis datos») y la página web `eliminar-cuenta.html` (de `docs/ELIMINAR_CUENTA.md`) |
 | Cuentas | La app permite crear una cuenta (con Google o sin cuenta). Método: **Sign in with Google** (y cuentas locales antiguas con usuario y contraseña) |
 
-### Micrófono: se declara (decisión: el reconocimiento no se fuerza en el teléfono)
+### Micrófono: se declara (el reconocimiento va en el teléfono solo cuando se puede)
 
-El reconocimiento de voz usa el servicio de voz del teléfono con `requiresOnDeviceRecognition: false` (`src/services/speech.ts`); ese servicio (normalmente Google) puede mandar el audio a sus servidores. Wero no recibe ni guarda el audio, pero la app sí lo entrega a un servicio que puede sacarlo del teléfono, así que se declara:
+`src/services/speech.ts` usa el reconocedor del dispositivo (sin conexión) cuando el teléfono tiene Android 13+ y el paquete de inglés en-US instalado; si no, usa el servicio de voz del sistema, que (normalmente Google) puede mandar el audio a sus servidores. Como en muchos teléfonos será el segundo caso, la app sí puede entregar el audio a un servicio que lo saca del teléfono (Wero no lo recibe ni lo guarda), así que se declara:
 
 - **Audio → Grabaciones de voz o sonido**: *Recopilados*: **Sí**. *Compartidos*: **No** (Google actúa como proveedor de servicios). *Procesamiento efímero*: **Sí**. *Obligatorio u opcional*: **Opcional** (solo «Di la palabra», con su hoja de consentimiento). *Finalidad*: **Funcionalidad de la app**.
 - Con eso, a «¿Tu app recopila o comparte alguno de los tipos de datos?» la respuesta es **Sí** (solo por el audio), y a «¿Están encriptados en tránsito?» **Sí** (el servicio de voz de Google usa conexiones cifradas).
