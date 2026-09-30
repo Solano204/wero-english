@@ -40,7 +40,7 @@ const PUNTOS_DE_CONTROL = [
   { archivo: 'src/shared/ui/Screen.tsx', que: 'el padding inferior de toda pantalla con pestañas' },
   { archivo: 'src/features/juegos/niveles/screens/NivelesScreen.tsx', que: 'la celda «anuncio» y el texto de ayuda de Niveles' },
   { archivo: 'src/features/gramatica/screens/GramaticaScreen.tsx', que: 'el candado de los temas de Gramática' },
-  { archivo: 'src/screens/utility/DownloadsScreen.tsx', que: 'el botón de Descargas' },
+  { archivo: 'src/features/ajustes/screens/DownloadsScreen.tsx', que: 'el botón de Descargas' },
 ];
 
 const IMPORT_RE = /import\s*\{\s*ANUNCIOS_ACTIVOS\s*\}\s*from\s*['"]@\/config\/monetizacion['"]/;
@@ -93,7 +93,7 @@ const PERMITIDOS = new Set(
     'src/features/juegos/niveles/components/DesbloqueoCelda.tsx',
     'src/shared/ui/fx/BordePunteado.tsx',
     'src/features/juegos/niveles/screens/NivelesScreen.tsx',
-    'src/screens/utility/DownloadsScreen.tsx',
+    'src/features/ajustes/screens/DownloadsScreen.tsx',
     'src/features/gramatica/screens/GramaticaScreen.tsx',
     'src/features/gramatica/screens/GramaticaTemaScreen.tsx',
     'src/estado/useUnlockStore.ts',

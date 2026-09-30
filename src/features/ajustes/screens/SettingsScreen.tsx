@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Header, Icon, Screen, Presionable } from '@/shared/ui';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
-import { FilaLegal } from '@/components/legal/FilaLegal';
+import { FilaLegal } from '@/features/ajustes/components/FilaLegal';
 import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';

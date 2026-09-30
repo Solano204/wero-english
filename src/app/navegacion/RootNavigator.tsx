@@ -109,8 +109,8 @@ export function RootNavigator() {
       <Stack.Screen name="Contractions" getComponent={() => require('@/features/sonidos/screens/ContractionsScreen').ContractionsScreen} />
       <Stack.Screen name="Errors" getComponent={() => require('@/features/errores/screens/ErrorsScreen').ErrorsScreen} />
       <Stack.Screen name="ErrorDetail" getComponent={() => require('@/features/errores/screens/ErrorDetailScreen').ErrorDetailScreen} />
-      <Stack.Screen name="Downloads" getComponent={() => require('@/screens/utility/DownloadsScreen').DownloadsScreen} />
-      <Stack.Screen name="Settings" getComponent={() => require('@/screens/utility/SettingsScreen').SettingsScreen} />
+      <Stack.Screen name="Downloads" getComponent={() => require('@/features/ajustes/screens/DownloadsScreen').DownloadsScreen} />
+      <Stack.Screen name="Settings" getComponent={() => require('@/features/ajustes/screens/SettingsScreen').SettingsScreen} />
       <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
       <Stack.Screen name="Borrar" getComponent={() => require('@/features/cuenta/screens/BorrarScreen').BorrarScreen} />
       <Stack.Screen name="Stuck" getComponent={() => require('@/features/atoradas/screens/StuckScreen').StuckScreen} />
@@ -128,9 +128,9 @@ export function RootNavigator() {
       <Stack.Screen name="Azar" getComponent={() => require('@/features/frases-sueltas/screens/AzarScreen').AzarScreen} />
       <Stack.Screen name="Lecturas" getComponent={() => require('@/features/lecturas/screens/LecturasScreen').LecturasScreen} />
       <Stack.Screen name="Lectura" getComponent={() => require('@/features/lecturas/screens/LecturaScreen').LecturaScreen} />
-      <Stack.Screen name="Diagnostics" getComponent={() => require('@/screens/utility/DiagnosticsScreen').DiagnosticsScreen} />
-      {__DEV__ ? <Stack.Screen name="SfxSampler" getComponent={() => require('@/screens/utility/SfxSamplerScreen').SfxSamplerScreen} /> : null}
-      {__DEV__ ? <Stack.Screen name="ProbarVoz" getComponent={() => require('@/screens/utility/ProbarVozScreen').ProbarVozScreen} /> : null}
+      <Stack.Screen name="Diagnostics" getComponent={() => require('@/features/ajustes/screens/DiagnosticsScreen').DiagnosticsScreen} />
+      {__DEV__ ? <Stack.Screen name="SfxSampler" getComponent={() => require('@/features/ajustes/screens/SfxSamplerScreen').SfxSamplerScreen} /> : null}
+      {__DEV__ ? <Stack.Screen name="ProbarVoz" getComponent={() => require('@/features/ajustes/screens/ProbarVozScreen').ProbarVozScreen} /> : null}
     </Stack.Navigator>
   );
 }

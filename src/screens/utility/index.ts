@@ -1,9 +1,9 @@
 export { ProgressScreen } from '@/features/progreso/screens/ProgressScreen';
-export { SettingsScreen } from './SettingsScreen';
+export { SettingsScreen } from '@/features/ajustes/screens/SettingsScreen';
 export { LegalDocScreen } from '@/features/cuenta/screens/LegalDocScreen';
 export { BorrarScreen } from '@/features/cuenta/screens/BorrarScreen';
-export { DownloadsScreen } from './DownloadsScreen';
+export { DownloadsScreen } from '@/features/ajustes/screens/DownloadsScreen';
 export { StuckScreen } from '@/features/atoradas/screens/StuckScreen';
 export { DeckScreen } from '@/features/mazo/screens/DeckScreen';
-export { DiagnosticsScreen } from './DiagnosticsScreen';
-export { SfxSamplerScreen } from './SfxSamplerScreen';
+export { DiagnosticsScreen } from '@/features/ajustes/screens/DiagnosticsScreen';
+export { SfxSamplerScreen } from '@/features/ajustes/screens/SfxSamplerScreen';
