@@ -2,6 +2,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import type { ImageSourcePropType } from 'react-native';
 import { bundledModule, isBundled } from '@/assets/bundled';
+import { Lru } from '@/domain/lru';
 
 // Lo empaquetado se pregunta aquí: features y shared no importan el mapa generado directo.
 export { BUNDLED_COUNT, isBundled } from '@/assets/bundled';
@@ -28,8 +29,14 @@ type Resolved =
   | { kind: 'file'; uri: string }
   | null;
 
+/**
+ * Tope de las dos cachés de rutas de abajo: más que las rutas que una sesión larga toca (una pantalla usa decenas), menos
+ * que todo el catálogo (~8k medios), para que no crezcan sin fin.
+ */
+const TOPE_CACHE_RUTAS = 1500;
+
 /** Caché de resolución. Evita un stat al disco por cada toque. */
-const cache = new Map<string, Resolved>();
+const cache = new Lru<string, Resolved>(TOPE_CACHE_RUTAS);
 
 export function fileFor(relPath: string): File {
   return new File(MEDIA_DIR, relPath);
@@ -105,7 +112,7 @@ export function imageSource(relPath: string | null): ImageSourcePropType | null 
 }
 
 /** Caché de «¿existe este archivo?»: `File.exists` es síncrono y las imágenes lo preguntaban en cada render. */
-const existe = new Map<string, boolean>();
+const existe = new Lru<string, boolean>(TOPE_CACHE_RUTAS);
 
 /** ¿Hay archivo en esta ruta (empaquetado o ya descargado)? Se pregunta al disco una vez por ruta. */
 export function hayArchivo(relPath: string | null): boolean {

@@ -17,19 +17,30 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
 
   opening = (async () => {
     const conn = await SQLite.openDatabaseAsync(DB_NAME);
+    try {
+      // WAL da lecturas concurrentes mientras se escribe: sin esto la UI
+      // se congela cuando se siembra el catálogo o se descarga un pack.
+      await conn.execAsync('PRAGMA journal_mode = WAL;');
+      await conn.execAsync('PRAGMA foreign_keys = ON;');
+      await conn.execAsync('PRAGMA synchronous = NORMAL;');
 
-    // WAL da lecturas concurrentes mientras se escribe: sin esto la UI
-    // se congela cuando se siembra el catálogo o se descarga un pack.
-    await conn.execAsync('PRAGMA journal_mode = WAL;');
-    await conn.execAsync('PRAGMA foreign_keys = ON;');
-    await conn.execAsync('PRAGMA synchronous = NORMAL;');
-
-    await migrate(conn);
+      await migrate(conn);
+    } catch (e) {
+      await conn.closeAsync().catch(() => undefined);
+      throw e;
+    }
     db = conn;
     return conn;
   })();
 
-  return opening;
+  try {
+    return await opening;
+  } catch (e) {
+    // Sin esto, un fallo al abrir o migrar se quedaba guardado y cada llamada siguiente fallaba igual hasta
+    // reiniciar la app: ahora la próxima llamada lo vuelve a intentar.
+    opening = null;
+    throw e;
+  }
 }
 
 async function migrate(conn: SQLite.SQLiteDatabase): Promise<void> {
@@ -40,10 +51,12 @@ async function migrate(conn: SQLite.SQLiteDatabase): Promise<void> {
 
   for (const m of MIGRATIONS) {
     if (m.version <= current) continue;
+    // La versión se escribe dentro de la misma transacción: si la app se cierra a la mitad, o quedan las dos cosas o
+    // ninguna (antes, un cierre entre las dos volvía a correr la migración al abrir).
     await conn.withTransactionAsync(async () => {
       await conn.execAsync(m.sql);
+      await conn.execAsync(`PRAGMA user_version = ${m.version};`);
     });
-    await conn.execAsync(`PRAGMA user_version = ${m.version};`);
   }
 
   if (current > SCHEMA_VERSION) {

@@ -51,6 +51,11 @@ function cargarPoolDistractores(): Promise<Candidato[]> {
   return poolDistractores;
 }
 
+/** Suelta el pool (~1,500 frases preparadas): se vuelve a armar en la próxima tarjeta. Al resembrar el catálogo y con poca memoria. */
+export function vaciarDistractores(): void {
+  poolDistractores = null;
+}
+
 /**
  * Arma el pool de distractores en un momento tranquilo (poco después de entrar), para que la
  * primera tarjeta de Estudiar no pague leer y preparar ~1,500 frases justo mientras entra la

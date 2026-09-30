@@ -17,6 +17,7 @@ import { OCULTAR_BARRA_ESTADO } from '@/config/pantalla';
 import * as audio from '@/services/audio';
 import { color, tema } from '@/theme';
 import { marcar } from '@/shared/utils/marcasArranque';
+import { vaciarConMemoriaBaja } from '@/services/memoria';
 
 marcar('app');
 void SplashScreen.preventAutoHideAsync();
@@ -49,6 +50,9 @@ export default function App() {
     });
     return () => sub.remove();
   }, []);
+
+  // Con poca memoria se sueltan las cachés que se vuelven a armar solas (services/memoria.ts).
+  useEffect(() => vaciarConMemoriaBaja(), []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.bg }}>

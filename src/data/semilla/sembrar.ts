@@ -1,6 +1,7 @@
 import { Asset } from 'expo-asset';
 import { getDb } from '@/data/cliente';
 import { getAppMeta, setAppMeta } from '@/data/repos/ajustes';
+import { vaciarDistractores } from '@/data/repos/distractores';
 import { ENTRADAS_CATALOGO, HUELLA_CATALOGO } from '@/data/resumenContenido';
 
 const CATALOG_VERSION_KEY = 'catalog_version';
@@ -68,6 +69,8 @@ export async function seedCatalog(
     await db.execAsync('DETACH DATABASE semilla;');
   }
 
+  // El pool de distractores se armó con el catálogo anterior: se vuelve a leer en la próxima tarjeta.
+  vaciarDistractores();
   onProgress?.({ done: ENTRADAS_CATALOGO, total: ENTRADAS_CATALOGO });
   return { inserted: ENTRADAS_CATALOGO, skipped: false };
 }
