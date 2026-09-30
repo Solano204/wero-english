@@ -170,9 +170,14 @@ if (faltan.length && wantList) {
   }
 }
 
-const mapa = path.join(ROOT, 'src/assets/bundled.ts');
-if (listos.length > 0 && fs.existsSync(mapa)) {
-  const enMapa = (fs.readFileSync(mapa, 'utf8').match(/require\(/g) ?? []).length;
+// El mapa está partido: src/assets/bundled.ts (el índice por paquete) y un módulo por paquete en src/assets/medios/.
+const mapaDir = path.join(ROOT, 'src/assets/medios');
+if (listos.length > 0 && fs.existsSync(path.join(ROOT, 'src/assets/bundled.ts'))) {
+  const modulos = fs.existsSync(mapaDir) ? fs.readdirSync(mapaDir).filter((n) => n.endsWith('.ts')) : [];
+  const enMapa = modulos.reduce(
+    (n, m) => n + (fs.readFileSync(path.join(mapaDir, m), 'utf8').match(/require\('@assets\//g) ?? []).length,
+    0
+  );
   if (enMapa !== tengo.size) {
     console.log(
       `\nEl mapa tiene ${enMapa} archivos y en assets/ hay ${tengo.size}.`

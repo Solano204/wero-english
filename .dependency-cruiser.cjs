@@ -50,7 +50,7 @@ module.exports = {
     doNotFollow: { path: 'node_modules' },
     tsPreCompilationDeps: true,
     tsConfig: { fileName: 'tsconfig.json' },
-    exclude: { path: '^src/assets/bundled\\.ts$' },
+    exclude: { path: '^src/assets/(bundled\\.ts$|medios/)' },
     enhancedResolveOptions: {
       exportsFields: ['exports'],
       conditionNames: ['import', 'require', 'node', 'default', 'types'],

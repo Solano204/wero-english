@@ -796,7 +796,15 @@ function analizaTicks(r, src, out) {
   }
 }
 
-/** d) Audio: rutas de los JSON que no están en bundled.ts, y botones que las usan. */
+/** El mapa de medios empaquetados completo: bundled.ts y sus módulos por paquete (src/assets/medios/). */
+function leerMapaMedios() {
+  const dir = path.join(ROOT, 'src/assets/medios');
+  const partes = fs.existsSync(dir) ? fs.readdirSync(dir).filter((n) => n.endsWith('.ts')).map((n) => fs.readFileSync(path.join(dir, n), 'utf8')) : [];
+  const base = path.join(ROOT, 'src/assets/bundled.ts');
+  return [fs.existsSync(base) ? fs.readFileSync(base, 'utf8') : '', ...partes].join('\n');
+}
+
+/** d) Audio: rutas de los JSON que no están en el mapa de medios (bundled.ts y medios/), y botones que las usan. */
 function auditaAudio(archivos, bundledSrc) {
   const bundled = new Set([...bundledSrc.matchAll(/^\s*'([^']+)':\s*(?:require|\d+,)/gm)].map((m) => m[1]));
   const refs = new Set();
@@ -1092,7 +1100,7 @@ function main() {
     H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos), S,
     LT: auditaLayoutTransform(archivos),
     FT: auditaFilaTexto(archivos),
-    A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
+    A: auditaAudio(archivos, leerMapaMedios()), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
     tokensBajos: tokensTactiles(tokens, leer('src/shared/ui/AudioButton.tsx')),
     K: auditaColorMarca(archivos), escalas: auditaEscalas(tokens),
