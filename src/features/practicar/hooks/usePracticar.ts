@@ -97,10 +97,11 @@ export function usePracticar() {
 
   // Jalar para refrescar: recarga sin esqueleto y la onda de HOY da un pulso al terminar.
   const [refrescos, setRefrescos] = useState(0);
+  const { refrescar: recargar } = carga;
   const refrescar = useCallback(async () => {
-    await carga.refrescar();
+    await recargar();
     setRefrescos((n) => n + 1);
-  }, [carga.refrescar]);
+  }, [recargar]);
   const { records, reto, habla, niveles, stats, uso, hoyFrases, vencidas, nuevas } = carga.datos ?? SIN_DATOS;
 
   const atoradas = stats?.atoradas ?? 0;

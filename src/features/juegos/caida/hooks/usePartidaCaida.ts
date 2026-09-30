@@ -63,6 +63,7 @@ export function usePartidaCaida() {
   // Cara y cubitos. El numero se relanza en cada respuesta;
   // no hace falta apagarlo con un temporizador.
   const reaccion = useReaccion();
+  const { celebra } = reaccion;
   const [idx, setIdx] = useState(0);
   const [aciertos, setAciertos] = useState(0);
   // cayendo, pausa o perdida: la pausa congela la caída y bloquea las fichas mientras se oye la frase.
@@ -303,7 +304,7 @@ export function usePartidaCaida() {
       setAcertada(`${idx}|${texto}`);
       setVolando(true);
       haptics.success();
-      reaccion.celebra();
+      celebra();
       const totalAciertos = aciertosRef.current + 1;
       aciertosRef.current = totalAciertos;
       setAciertos(totalAciertos);
@@ -328,7 +329,7 @@ export function usePartidaCaida() {
       // reemplace (stop() del combo corta el que ya estaba sonando).
       if (totalAciertos % 3 === 0) void audio.playCombo();
     },
-    [round, perdio, enPausa, y, estela, user, idx, rounds.length, nav, nivel, pausarConVoz, terminarPartida]
+    [round, perdio, enPausa, y, estela, user, idx, rounds.length, nav, nivel, pausarConVoz, terminarPartida, reducido, celebra]
   );
 
   /** «Otra vez» en la pantalla final: la misma partida desde la ronda 0. */

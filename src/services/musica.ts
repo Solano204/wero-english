@@ -108,7 +108,7 @@ export async function setPista(pista: Pista): Promise<void> {
     nuevo.volume = 0;
     nuevo.play();
   } catch (err) {
-    console.warn('[music] no se pudo reproducir', pista, err);
+    if (__DEV__) console.warn('[music] no se pudo reproducir', pista, err);
     nuevo = null;
   }
 

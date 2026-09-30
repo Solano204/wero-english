@@ -138,7 +138,7 @@ export function useCarga<T>(
       });
     } catch (err) {
       aplicar(() => {
-        console.warn('[useCarga] no se pudo cargar', err);
+        if (__DEV__) console.warn('[useCarga] no se pudo cargar', err);
         setError(err);
         setDemora(false);
         setEstado('error');

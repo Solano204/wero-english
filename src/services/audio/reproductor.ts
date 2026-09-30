@@ -61,7 +61,7 @@ function avisarReproduccion(ruta: string, rate: number): void {
  */
 function reproducir(relPath: string | null, rate: number): Promise<boolean> {
   if (!relPath) {
-    console.warn('[audio] play() llamado con relPath null');
+    if (__DEV__) console.warn('[audio] play() llamado con relPath null');
     return Promise.resolve(false);
   }
 
@@ -80,7 +80,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
       if (miId !== frase.reproduccionId) return; // se saltó mientras resolvía
 
       if (!resolved) {
-        console.warn('[audio] media.resolve() no encontró el archivo', relPath);
+        if (__DEV__) console.warn('[audio] media.resolve() no encontró el archivo', relPath);
         return;
       }
 
@@ -151,7 +151,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
       void music.duck(true);
       void waitUntilDone().then(() => music.duck(false));
     } catch (err) {
-      console.warn('[audio] no se pudo reproducir', relPath, err);
+      if (__DEV__) console.warn('[audio] no se pudo reproducir', relPath, err);
     }
   };
 

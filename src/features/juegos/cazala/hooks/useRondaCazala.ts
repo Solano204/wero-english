@@ -41,7 +41,7 @@ export function useRondaCazala() {
   const items = useMemo(
     () =>
       itemsCazalaValidos(content.contracciones.cazala, porId, (item, errores) => {
-        console.warn(`[Cázala] ronda "${item.id}" descartada: ${errores.join('; ')}`);
+        if (__DEV__) console.warn(`[Cázala] ronda "${item.id}" descartada: ${errores.join('; ')}`);
       }),
     [content, porId]
   );

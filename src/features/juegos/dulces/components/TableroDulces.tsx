@@ -90,6 +90,7 @@ export function TableroDulces({
     const pendientes = timers.current;
     return () => {
       montado.current = false;
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
       jugadaToken.current++;
       pendientes.forEach((t) => clearTimeout(t));
       pendientes.clear();

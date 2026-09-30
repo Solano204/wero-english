@@ -128,6 +128,7 @@ export function useModoOido() {
     });
     return () => {
       sub.remove();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
       cicloRef.current++;
       playingRef.current = false;
       audio.stop();

@@ -50,7 +50,7 @@ export function useChoqueCaida(
     }
     const t = setTimeout(() => setAnimandoFin(false), duracion);
     return () => clearTimeout(t);
-  }, [finRonda, reducido, altoPista, y, aplasta, golpe]);
+  }, [finRonda, reducido, altoPista, y, aplasta, golpe, setAnimandoFin]);
 
   // Con «reducir movimiento» las fichas no caen: se quedan arriba y una barra cuenta el tiempo.
   const anim = useAnimatedStyle(() => ({

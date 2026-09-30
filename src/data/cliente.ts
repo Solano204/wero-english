@@ -49,7 +49,7 @@ async function migrate(conn: SQLite.SQLiteDatabase): Promise<void> {
   if (current > SCHEMA_VERSION) {
     // La base es más nueva que el código: pasa si el usuario instala una
     // versión vieja encima. Mejor avisar que corromper datos en silencio.
-    console.warn(
+    if (__DEV__) console.warn(
       `[db] La base está en v${current} y el código espera v${SCHEMA_VERSION}.`
     );
   }

@@ -7,7 +7,6 @@ import { BloqueEscucha } from '@/features/juegos/cazala/components/BloqueEscucha
 import { PieCaza } from '@/features/juegos/cazala/components/PieCaza';
 import { RenglonCaza, type EstadoRenglon } from '@/features/juegos/cazala/components/RenglonCaza';
 import { ResultadoCaza } from '@/features/juegos/cazala/components/ResultadoCaza';
-import * as audio from '@/services/audio';
 import { reacomodar, space } from '@/theme';
 import { MARCAS, useRondaCazala } from '@/features/juegos/cazala/hooks/useRondaCazala';
 

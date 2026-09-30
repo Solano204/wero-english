@@ -37,7 +37,7 @@ export function BootScreen() {
         if (content.catalog.entries.length === 0) {
           // Sin datos la app arranca igual: la pantalla de diagnóstico
           // dice qué falta. Es preferible a una pantalla negra.
-          console.warn('[boot] catalogo.json vacío');
+          if (__DEV__) console.warn('[boot] catalogo.json vacío');
         } else {
           // seedCatalog decide si hace falta sembrar (conteo, audio
           // faltante o versión de catálogo); aquí solo se llama siempre.

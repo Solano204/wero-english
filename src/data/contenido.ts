@@ -110,7 +110,7 @@ function safeLoad<T>(loader: () => unknown, fallback: T, name: string): T {
     if (Array.isArray(raw) && raw.length === 0) return fallback;
     return raw as T;
   } catch {
-    console.warn(
+    if (__DEV__) console.warn(
       `[content] Falta o está vacío assets/data/${name}. ` +
         'Pega el contenido y recarga.'
     );

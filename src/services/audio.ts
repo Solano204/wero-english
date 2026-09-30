@@ -49,7 +49,7 @@ async function playSfx(key: SfxKey): Promise<void> {
     marcar(p, { arrancando: true });
     marcarEfectoTocado(p);
   } catch (err) {
-    console.warn('[audio] no se pudo reproducir el efecto', key, err);
+    if (__DEV__) console.warn('[audio] no se pudo reproducir el efecto', key, err);
   }
 }
 

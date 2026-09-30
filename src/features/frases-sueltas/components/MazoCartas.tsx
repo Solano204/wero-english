@@ -304,6 +304,8 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
   );
 
   const cartaActual = entradas[actual];
+  // Qué carta iba arriba al armar el mazo (antes del return de reducir movimiento: los hooks no van condicionados).
+  const actualAlArmar = useRef(actual).current;
   if (reducido) {
     return (
       <View style={styles.zona} onLayout={alMedir}>
@@ -327,7 +329,6 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
   }
 
   // La de arriba se dibuja al final: en React Native lo que va después queda encima.
-  const actualAlArmar = useRef(actual).current;
   const pila = listo ? indicesVisibles(actual, entradas.length).reverse() : [];
   return (
     <GestureDetector gesture={gesto}>

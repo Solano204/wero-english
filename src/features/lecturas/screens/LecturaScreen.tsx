@@ -8,8 +8,7 @@ import { LeyendaFrases } from '@/features/lecturas/components/LeyendaFrases';
 import { PieReproductor } from '@/features/lecturas/components/PieReproductor';
 import { PreguntaUnaAUna } from '@/features/lecturas/components/PreguntaUnaAUna';
 import { TextoAcompanado } from '@/features/lecturas/components/TextoAcompanado';
-import * as audio from '@/services/audio';
-import { aparecer, color, desaparecer, font, layout, motionDuration, space } from '@/theme';
+import { aparecer, color, desaparecer, font, motionDuration, space } from '@/theme';
 import { useLectura } from '@/features/lecturas/hooks/useLectura';
 
 /**

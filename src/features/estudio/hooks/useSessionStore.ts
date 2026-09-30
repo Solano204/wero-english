@@ -236,7 +236,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
       await armarYEmpezar(usuarioId, filter, meta, nuevasPorDia, soloNuevas);
     } catch (err) {
       // Sin esto una consulta que falla dejaba la pantalla en «Armando tu sesión» para siempre.
-      console.warn('[estudio] no se pudo armar la sesión', err);
+      if (__DEV__) console.warn('[estudio] no se pudo armar la sesión', err);
       engine = null;
       set({ phase: 'error', card: null, remaining: 0 });
     }

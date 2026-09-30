@@ -279,8 +279,8 @@ function plantillaValida(p: { id: string; texto: string }): boolean {
   const malos = tokensDesconocidos(p.texto);
   if (malos.length === 0) return true;
   const msg = `[notificaciones] la plantilla ${p.id} usa tokens que no existen: ${malos.join(', ')}`;
+  // En producción no hay consola (babel la quita): la plantilla solo se descarta.
   if (__DEV__) throw new Error(msg);
-  console.warn(msg);
   return false;
 }
 

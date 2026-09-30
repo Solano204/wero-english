@@ -104,6 +104,7 @@ export function useFrasesSueltas() {
     });
     return () => {
       sub.remove();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
       vozToken.current++;
       audio.stop();
     };
@@ -150,6 +151,7 @@ export function useFrasesSueltas() {
     }, RETRASO_AUTO_MS);
     return () => {
       clearTimeout(t);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- es un contador, no un nodo: subirlo al desmontar invalida lo que va en camino.
       vozToken.current++;
       audio.stop();
       setSonando(null);

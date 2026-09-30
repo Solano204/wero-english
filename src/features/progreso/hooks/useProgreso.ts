@@ -61,12 +61,14 @@ export function useProgreso() {
   );
 
   // Jalar para refrescar: recarga sin esqueleto y la aguja da un empujón al terminar.
+  const { refrescar: recargar } = carga;
   const refrescar = useCallback(async () => {
-    await carga.refrescar();
+    await recargar();
     setPulsos((n) => n + 1);
-  }, [carga.refrescar]);
+  }, [recargar]);
 
-  const registrados = carga.datos?.dias ?? [];
+  const diasCargados = carga.datos?.dias;
+  const registrados = useMemo(() => diasCargados ?? [], [diasCargados]);
   const dias = useMemo(() => ventana(registrados, dayKey()), [registrados]);
   // Sin días registrados, o ninguno dentro de las últimas tres semanas: nada de gráfica en ceros.
   const sinDias = registrados.length === 0 || dias.every((d) => d.respuestas === 0);

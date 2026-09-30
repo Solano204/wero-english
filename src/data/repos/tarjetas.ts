@@ -1,5 +1,5 @@
 import { getDb } from '@/data/cliente';
-import { buildFilter, consultaContarVencidas, consultaDiagnosticoCola, consultaNuevas, consultaContarNuevas, consultaProximoRepaso, semillaDeSesion, consultaVencidas, paramsUpsertTarjeta, SQL_UPSERT_TARJETA } from './cola';
+import { consultaContarVencidas, consultaDiagnosticoCola, consultaNuevas, consultaContarNuevas, consultaProximoRepaso, semillaDeSesion, consultaVencidas, paramsUpsertTarjeta, SQL_UPSERT_TARJETA } from './cola';
 import { toEntry, type EntryRow } from '@/data/filas';
 import { semillaDe } from '@/data/semilla/semillaAleatoria';
 import type { CardState, ContentFilter, Entry } from '@/types';

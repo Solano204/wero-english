@@ -17,7 +17,7 @@ function cargar(): IndiceMarcas {
     const datos = (crudo as { default?: unknown } | null)?.default ?? crudo;
     if (datos && typeof datos === 'object') leido = datos as IndiceMarcas;
   } catch (err) {
-    console.warn('[marcas] no se pudo leer marcas.json, se estimará', err);
+    if (__DEV__) console.warn('[marcas] no se pudo leer marcas.json, se estimará', err);
   }
   indice = leido;
   return leido;
@@ -43,7 +43,7 @@ function cargarOraciones(): Record<string, MarcasOraciones> {
     const datos = (crudo as { default?: unknown } | null)?.default ?? crudo;
     if (datos && typeof datos === 'object') leido = datos as Record<string, MarcasOraciones>;
   } catch (err) {
-    console.warn('[marcas] no se pudo leer marcas_oraciones.json, se estimará', err);
+    if (__DEV__) console.warn('[marcas] no se pudo leer marcas_oraciones.json, se estimará', err);
   }
   indiceOraciones = leido;
   return leido;

@@ -5,7 +5,7 @@ import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-ar
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
-import { FONDO, aparecer, color, desaparecer, layout, radius, resplandorSol, space } from '@/theme';
+import { FONDO, aparecer, color, desaparecer, layout, resplandorSol, space } from '@/theme';
 
 interface Props {
   children: ReactNode;

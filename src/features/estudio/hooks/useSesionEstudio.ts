@@ -140,6 +140,7 @@ export function useSesionEstudio() {
 
   // Cubitos al responder. Salen de la opción acertada; sin opción (armar, escribir) del centro.
   const reaccion = useReaccion();
+  const { celebra } = reaccion;
   const [origenTrozos, setOrigenTrozos] = useState<{ x: number; y: number } | null>(null);
 
   // Misma pista que el resto de la app, pero más baja: aquí se estudia.
@@ -254,10 +255,10 @@ export function useSesionEstudio() {
   const handleAnswer = useCallback(
     async (correct: boolean, elapsedMs: number, usedHint: boolean) => {
       if (!user) return;
-      if (correct) reaccion.celebra();
+      if (correct) celebra();
       await answer(user.id, correct, elapsedMs, usedHint);
     },
-    [user, answer]
+    [user, answer, celebra]
   );
 
   const handleContinue = useCallback(() => {

@@ -95,6 +95,8 @@ export function HojaVeredicto({
   const c = ultimo.current;
 
   // Una felicitación distinta cada vez (frases.ts): la oye el lector de pantalla; en pantalla manda «ESO ES».
+  // visible y answer no se leen, pero son el disparador: una frase nueva cada vez que la hoja sube con otra respuesta.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const felicitacion = useMemo(() => (correct ? elegirFrase(ACIERTO) : 'Era esta'), [visible, correct, answer]);
 
   const y = useSharedValue(alturaVentana);

@@ -1,5 +1,5 @@
 import type { Entry } from './catalog';
-import type { Arquetipo, Escenario, CazalaItem } from './content';
+import type { CazalaItem } from './content';
 
 /** Una ronda de "¿Lo digo o no?". */
 /** Una ronda de "Cázala". */
