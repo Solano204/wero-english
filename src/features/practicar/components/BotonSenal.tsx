@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { Button } from '@/shared/ui';
 import { color, motionEasing, motionSenal, reflejo } from '@/theme';
@@ -21,6 +22,8 @@ const INCLINACION = '-20deg';
 interface Props {
   label: string;
   onPress: () => void;
+  /** 1 mientras la consola está en pantalla: fuera de ella el reflejo no corre (MOT-4). */
+  visible?: SharedValue<number>;
 }
 
 /**
@@ -28,9 +31,9 @@ interface Props {
  * al presionar sale una onda azul desde el punto del dedo, con háptico medio.
  * Con "reducir movimiento" no hay reflejo ni onda: queda el botón de siempre.
  */
-export function BotonSenal({ label, onPress }: Props) {
+export function BotonSenal({ label, onPress, visible }: Props) {
   const { activo, reducido } = useSenalActiva();
-  const fase = useReloj(motionSenal.reflejo, { activo, reducido });
+  const fase = useReloj(motionSenal.reflejo, { activo, reducido, visible });
   const ancho = useSharedValue(0);
   const dedoX = useSharedValue(0);
   const dedoY = useSharedValue(0);

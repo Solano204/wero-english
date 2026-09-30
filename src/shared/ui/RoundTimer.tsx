@@ -10,6 +10,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { color, radius } from '@/theme';
+import { corrimientoRelleno, useAnchoRelleno } from '@/shared/ui/fx/rellenoBarra';
 
 interface OpcionesCuenta {
   /** Cuánto dura. Reiniciar el reloj se hace cambiando `llave`. */
@@ -97,16 +98,17 @@ interface Props extends OpcionesCuenta {
  */
 export function RoundTimer({ segundos, llave, onFin, pausado = false, tint }: Props) {
   const avance = useCuentaRegresiva({ segundos, llave, onFin, pausado });
+  const { ancho, alMedir } = useAnchoRelleno();
 
   const barra = useAnimatedStyle(() => ({
-    width: `${Math.max(0, (1 - avance.get()) * 100)}%`,
+    transform: [{ translateX: corrimientoRelleno(1 - avance.get(), ancho.get()) }],
     backgroundColor:
       avance.get() > 0.66 ? color.riskWarn : tint ?? color.accent,
   }));
 
   return (
     <View style={styles.pista}>
-      <Animated.View style={[styles.relleno, barra]} />
+      <Animated.View style={[styles.relleno, barra]} onLayout={alMedir} />
     </View>
   );
 }
@@ -118,5 +120,5 @@ const styles = StyleSheet.create({
     backgroundColor: color.surfaceAlt,
     overflow: 'hidden',
   },
-  relleno: { height: '100%', borderRadius: radius.pill },
+  relleno: { width: '100%', height: '100%', borderRadius: radius.pill },
 });

@@ -78,6 +78,9 @@ half4 main(float2 xy) {
 }
 `;
 
+/** Cambio mínimo (dp) del destino del paralaje para arrancar otra animación. */
+const UMBRAL_PARALAJE = 0.25;
+
 /** Mueve `dx` y `dy` con la inclinación del teléfono. Solo existe montado mientras la señal está activa. */
 function ParalajeGiro({ dx, dy }: { dx: SharedValue<number>; dy: SharedValue<number> }) {
   const sensor = useAnimatedSensor(SensorType.ROTATION, {
@@ -87,6 +90,8 @@ function ParalajeGiro({ dx, dy }: { dx: SharedValue<number>; dy: SharedValue<num
   const listo = useSharedValue(false);
   const baseRoll = useSharedValue(0);
   const basePitch = useSharedValue(0);
+  const destinoX = useSharedValue(0);
+  const destinoY = useSharedValue(0);
 
   useAnimatedReaction(
     () => sensor.sensor.get(),
@@ -98,14 +103,18 @@ function ParalajeGiro({ dx, dy }: { dx: SharedValue<number>; dy: SharedValue<num
         listo.set(true);
       }
       const opciones = { duration: motionDuration.rapido, easing: motionEasing.entrar };
-      dx.set(withTiming(
-        interpolate(v.roll - baseRoll.get(), [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP),
-        opciones
-      ));
-      dy.set(withTiming(
-        interpolate(v.pitch - basePitch.get(), [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP),
-        opciones
-      ));
+      const x = interpolate(v.roll - baseRoll.get(), [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP);
+      const y = interpolate(v.pitch - basePitch.get(), [-RANGO_INCLINACION, RANGO_INCLINACION], [-aurora.paralaje, aurora.paralaje], Extrapolation.CLAMP);
+      // Con el teléfono quieto el sensor solo trae ruido: no se arranca otra animación por menos de un cuarto de dp,
+      // que no se ve, en cada lectura (cada 50 ms).
+      if (Math.abs(x - destinoX.get()) >= UMBRAL_PARALAJE) {
+        destinoX.set(x);
+        dx.set(withTiming(x, opciones));
+      }
+      if (Math.abs(y - destinoY.get()) >= UMBRAL_PARALAJE) {
+        destinoY.set(y);
+        dy.set(withTiming(y, opciones));
+      }
     }
   );
   return null;

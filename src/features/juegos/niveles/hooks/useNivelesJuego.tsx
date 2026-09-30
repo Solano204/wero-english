@@ -168,7 +168,7 @@ export function useNivelesJuego() {
   // donde te quedaste es una molestia diaria. Sale de las medidas reales de la lista.
   const reducido = useMovimientoReducido();
   const indiceActual = useMemo(() => indiceDeNivel(items, siguiente), [items, siguiente]);
-  const { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual } = useScrollNivel({
+  const { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista } = useScrollNivel({
     medidas,
     indiceActual,
     hayDatos: Boolean(carga.datos),
@@ -234,5 +234,5 @@ export function useNivelesJuego() {
   // Sin esto la lista no repinta renglones ya montados cuando cambia la recompensa o termina la entrada.
   const extraData = ({ recompensa: recompensa.id, entrando });
 
-  return { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, cuenta, renderItem, extraData };
+  return { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista, cuenta, renderItem, extraData };
 }

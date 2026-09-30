@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, type ReactNode } from 'rea
 import { StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -9,7 +10,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { brilloEsqueleto, color, desaparecer, layout, motionCiclo, motionEasing, radius, space } from '@/theme';
-import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { useSenalActiva } from '@/shared/ui/fx/useSenalActiva';
 
 /** Con «reducir movimiento» el hueso se queda fijo a esta opacidad, sin brillo. */
 const OPACIDAD_REDUCIDA = 0.6;
@@ -37,17 +38,21 @@ interface ProveedorProps {
  * (220 ms) mientras el contenido entra: el fundido cruzado, sin salto.
  */
 export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style, salida = true }: ProveedorProps) {
-  const reducido = useMovimientoReducido();
+  // `activo`: con foco y en primer plano (MOT-4). Sin foco o en segundo plano el brillo se detiene donde va; al
+  // desmontarse se cancela, para que el bucle no siga corriendo en el hilo de UI.
+  const { activo, reducido } = useSenalActiva();
   const brillo = useSharedValue(0);
 
   useEffect(() => {
-    if (reducido) return;
+    if (!activo) return;
+    brillo.set(0);
     brillo.set(withRepeat(
       withTiming(1, { duration: motionCiclo.brilloEsqueleto, easing: motionEasing.lineal }),
       -1,
       false
     ));
-  }, [reducido, brillo]);
+    return () => cancelAnimation(brillo);
+  }, [activo, brillo]);
 
   return (
     <EsqueletoContexto.Provider value={reducido ? null : brillo}>

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { useReloj, useSenalActiva } from '@/shared/ui/fx/useSenalActiva';
 import { color, motionSenal, radius } from '@/theme';
 
@@ -12,6 +12,13 @@ const GROSOR = 2;
 /** La onda nace a esta opacidad y se apaga al crecer. */
 const OPACIDAD_ONDA = 0.6;
 
+/**
+ * 1 mientras la celda del nivel actual está a la vista (lo dice la lista con `onViewableItemsChanged`). Va por contexto
+ * y no por props: es un valor compartido estable, así que no repinta ningún renglón.
+ */
+const EnVista = createContext<SharedValue<number> | undefined>(undefined);
+export const AnilloEnVista = EnVista.Provider;
+
 interface Props {
   /** Lado de la celda (dp). */
   lado: number;
@@ -20,12 +27,13 @@ interface Props {
 /**
  * El anillo de señal del nivel actual: uno fijo alrededor de la celda y, encima, una onda
  * (el mismo contorno, que crece y se desvanece) cada 2.4 s. Es el único bucle de la
- * pantalla: se pausa sin foco o en segundo plano (MOT-4) y con reducir movimiento la
+ * pantalla: se pausa sin foco, en segundo plano o fuera de la vista (MOT-4) y con reducir movimiento la
  * onda no existe y queda el anillo fijo (MOT-5). Decorativo: el lector de pantalla no lo ve.
  */
 export function AnilloActual({ lado }: Props) {
   const { activo, reducido } = useSenalActiva();
-  const fase = useReloj(motionSenal.ondaNivel, { activo, reducido, faseQuieta: 0 });
+  const visible = useContext(EnVista);
+  const fase = useReloj(motionSenal.ondaNivel, { activo, reducido, faseQuieta: 0, visible });
 
   const onda = useAnimatedStyle(() => ({
     opacity: reducido ? 0 : OPACIDAD_ONDA * (1 - fase.get()),

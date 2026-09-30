@@ -5,6 +5,7 @@ import { Icon } from '@/shared/ui/Icon';
 import { useCuentaRegresiva } from '@/shared/ui/RoundTimer';
 import { useReloj, useSenalActiva } from '@/shared/ui/fx/useSenalActiva';
 import { color, motionSenal, radius, space } from '@/theme';
+import { corrimientoRelleno, useAnchoRelleno } from '@/shared/ui/fx/rellenoBarra';
 
 /** El último tramo del reloj: desde aquí late suave en `accent`. */
 const ULTIMO_TRAMO = 0.8;
@@ -44,11 +45,12 @@ export function RelojRonda({ segundos, llave, onFin, pausado = false, etiqueta =
   );
   const latido = useReloj(motionSenal.latido, { activo: enUltimoTramo && !pausado && activo, reducido });
 
+  const { ancho, alMedir } = useAnchoRelleno();
   const barra = useAnimatedStyle(() => {
     const final = avance.get() > ULTIMO_TRAMO;
     const pulso = final && !reducido ? OPACIDAD_MINIMA + (1 - OPACIDAD_MINIMA) * (0.5 - 0.5 * Math.cos(2 * Math.PI * latido.get())) : 1;
     return {
-      width: `${Math.max(0, (1 - avance.get()) * 100)}%`,
+      transform: [{ translateX: corrimientoRelleno(1 - avance.get(), ancho.get()) }],
       backgroundColor: final ? ACENTO : APAGADO,
       opacity: pulso,
     };
@@ -58,7 +60,7 @@ export function RelojRonda({ segundos, llave, onFin, pausado = false, etiqueta =
     <View style={styles.fila} accessible accessibilityRole="timer" accessibilityLabel={etiqueta}>
       <Icon name="clock" size="sm" color={color.textMuted} />
       <View style={styles.pista}>
-        <Animated.View style={[styles.relleno, barra]} />
+        <Animated.View style={[styles.relleno, barra]} onLayout={alMedir} />
       </View>
     </View>
   );
@@ -67,5 +69,5 @@ export function RelojRonda({ segundos, llave, onFin, pausado = false, etiqueta =
 const styles = StyleSheet.create({
   fila: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   pista: { flex: 1, height: 4, borderRadius: radius.pill, backgroundColor: color.trackFondo, overflow: 'hidden' },
-  relleno: { height: '100%', borderRadius: radius.pill },
+  relleno: { width: '100%', height: '100%', borderRadius: radius.pill },
 });

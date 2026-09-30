@@ -4,6 +4,7 @@ import Animated, { cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue, w
 import { Presionable } from '@/shared/ui/Presionable';
 import * as haptics from '@/services/haptics';
 import { color, font, motionConfirmar, motionDuration, motionEasing, radius, space } from '@/theme';
+import { corrimientoRelleno, useAnchoRelleno } from '@/shared/ui/fx/rellenoBarra';
 
 interface Props {
   /** Lo que dice el botón, p. ej. «Mantén presionado para borrar». */
@@ -57,7 +58,8 @@ export function BotonMantener({ etiqueta, onConfirmar, cargando = false, dialogo
     ]);
   };
 
-  const relleno = useAnimatedStyle(() => ({ width: `${progreso.get() * 100}%` }));
+  const { ancho, alMedir } = useAnchoRelleno();
+  const relleno = useAnimatedStyle(() => ({ transform: [{ translateX: corrimientoRelleno(progreso.get(), ancho.get()) }] }));
 
   return (
     <Presionable
@@ -71,7 +73,7 @@ export function BotonMantener({ etiqueta, onConfirmar, cargando = false, dialogo
       accessibilityState={{ disabled: cargando, busy: cargando }}
       style={styles.boton}
     >
-      <Animated.View style={[styles.relleno, relleno]} pointerEvents="none" />
+      <Animated.View style={[styles.relleno, relleno]} onLayout={alMedir} pointerEvents="none" />
       <View style={styles.contenido} pointerEvents="none">
         {cargando ? <ActivityIndicator color={color.wrong} size="small" /> : null}
         <Text style={styles.texto}>{cargando ? 'Borrando…' : etiqueta}</Text>
@@ -89,7 +91,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
   },
-  relleno: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: color.wrongSoft },
+  relleno: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: color.wrongSoft },
   contenido: {
     flexDirection: 'row',
     alignItems: 'center',

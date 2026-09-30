@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Carga, Header, Screen } from '@/shared/ui';
+import { AnilloEnVista } from '@/features/juegos/niveles/components/AnilloActual';
 import { CONFIGURACION_VISTA } from '@/features/juegos/niveles/hooks/useScrollNivel';
 import { EncabezadoNiveles } from '@/features/juegos/niveles/components/EncabezadoNiveles';
 import { EsqueletoNiveles } from '@/features/juegos/niveles/components/EsqueletoNiveles';
@@ -32,7 +33,7 @@ const TITULOS: Record<string, string> = {
 };
 
 export function NivelesScreen() {
-  const { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, cuenta, renderItem, extraData } = useNivelesJuego();
+  const { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista, cuenta, renderItem, extraData } = useNivelesJuego();
 
   if (!def) {
     return (
@@ -80,32 +81,34 @@ export function NivelesScreen() {
         {() => (
           // Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba.
           <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
-            <Animated.FlatList
-              ref={listaRef}
-              data={items}
-              renderItem={renderItem}
-              keyExtractor={claveItem}
-              getItemLayout={getItemLayout}
-              extraData={extraData}
-              stickyHeaderIndices={pegados}
-              onScroll={alScroll}
-              scrollEventThrottle={16}
-              onViewableItemsChanged={alVisibles}
-              viewabilityConfig={CONFIGURACION_VISTA}
-              initialNumToRender={12}
-              maxToRenderPerBatch={8}
-              windowSize={7}
-              showsVerticalScrollIndicator={false}
-              ListFooterComponent={
-                <Text style={styles.pie}>
-                  Terminar un nivel abre el siguiente, saques una estrella o tres.
-                  {ANUNCIOS_ACTIVOS
-                    ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
-                    : ''}
-                  {' '}Rejugar nunca te baja lo que ya tenías.
-                </Text>
-              }
-            />
+            <AnilloEnVista value={actualEnVista}>
+              <Animated.FlatList
+                ref={listaRef}
+                data={items}
+                renderItem={renderItem}
+                keyExtractor={claveItem}
+                getItemLayout={getItemLayout}
+                extraData={extraData}
+                stickyHeaderIndices={pegados}
+                onScroll={alScroll}
+                scrollEventThrottle={16}
+                onViewableItemsChanged={alVisibles}
+                viewabilityConfig={CONFIGURACION_VISTA}
+                initialNumToRender={12}
+                maxToRenderPerBatch={8}
+                windowSize={7}
+                showsVerticalScrollIndicator={false}
+                ListFooterComponent={
+                  <Text style={styles.pie}>
+                    Terminar un nivel abre el siguiente, saques una estrella o tres.
+                    {ANUNCIOS_ACTIVOS
+                      ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
+                      : ''}
+                    {' '}Rejugar nunca te baja lo que ya tenías.
+                  </Text>
+                }
+              />
+            </AnilloEnVista>
           </View>
         )}
       </Carga>

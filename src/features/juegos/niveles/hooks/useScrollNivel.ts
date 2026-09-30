@@ -44,6 +44,8 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
   const scrollY = useSharedValue(0);
   const posicion = useSharedValue(0);
   const animando = useSharedValue(0);
+  /** 1 mientras la celda del nivel actual está a la vista: fuera de ella su onda no corre (MOT-4). */
+  const actualEnVista = useSharedValue(1);
   const [viewport, setViewport] = useState(0);
   const [posicionada, setPosicionada] = useState(false);
   const [lejos, setLejos] = useState<'arriba' | 'abajo' | null>(null);
@@ -108,10 +110,12 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
 
   // Estable: FlatList no admite cambiar este callback en caliente.
   const [alVisibles] = useState(() => ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    if (enCurso.current || !yaPosicionada.current) return;
     const indices = viewableItems.map((v) => v.index).filter((i): i is number => i !== null);
-    if (indices.length === 0) return;
     const actual = indiceRef.current;
+    // La onda se pausa o sigue también durante un scroll programado: si no, podía quedarse quieta a la vista.
+    actualEnVista.set(actual < 0 || indices.includes(actual) ? 1 : 0);
+    if (enCurso.current || !yaPosicionada.current) return;
+    if (indices.length === 0) return;
     if (actual < 0 || indices.includes(actual)) setLejos(null);
     else setLejos(actual > Math.max(...indices) ? 'abajo' : 'arriba');
   });
@@ -122,5 +126,5 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
     irA(scrollY.get(), objetivo, reducido ? 0 : motionDuration.lento);
   };
 
-  return { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual };
+  return { listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista };
 }

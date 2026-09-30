@@ -147,9 +147,13 @@ export function EarModeScreen() {
         </Animated.View>
 
         {empezo ? null : (
-          <Animated.Text exiting={desaparecer()} style={[styles.hint, estiloBrillo]}>
-            Guarda el teléfono. Cada frase suena en inglés y en español, tres veces, para que la repitas en voz alta.
-          </Animated.Text>
+          // La salida va en su propia vista: el brillo anima la opacidad del texto y una animación de salida en el mismo
+          // nodo pelearía por esa misma propiedad.
+          <Animated.View exiting={desaparecer()}>
+            <Animated.Text style={[styles.hint, estiloBrillo]}>
+              Guarda el teléfono. Cada frase suena en inglés y en español, tres veces, para que la repitas en voz alta.
+            </Animated.Text>
+          </Animated.View>
         )}
       </ScrollView>
 

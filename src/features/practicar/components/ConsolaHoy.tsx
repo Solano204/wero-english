@@ -255,7 +255,7 @@ export function ConsolaHoy({
               />
             ) : null}
           </View>
-          <BotonSenal label={etiquetaBoton} onPress={alTocar} />
+          <BotonSenal label={etiquetaBoton} onPress={alTocar} visible={scrollY ? ondaVisible : undefined} />
         </Animated.View>
       </View>
     </Animated.View>
