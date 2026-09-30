@@ -102,7 +102,7 @@ const PASOS_ESCALA = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 /** MOT-1: curvas lineales válidas. Son relojes de la ronda, no animación de interfaz. */
 const MOT1_EXCEPCIONES = [
   { archivo: 'src/shared/ui/RoundTimer.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda' },
-  { archivo: 'src/features/juegos/caida/screens/CaidaScreen.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
+  { archivo: 'src/features/juegos/caida/hooks/usePartidaCaida.ts', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
 ];
 
 // ── utilidades ───────────────────────────────────────────────────────────
@@ -510,6 +510,8 @@ const LOOPS_POR_PANTALLA = {
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
+  { archivo: 'src/features/juegos/caida/hooks/useMarcadorCaida.ts', motivo: 'recibe `reducido` (useMovimientoReducido) de usePartidaCaida: con reducir movimiento el marcador no pulsa' },
+  { archivo: 'src/features/juegos/caida/hooks/useChoqueCaida.ts', motivo: 'recibe `reducido` (useMovimientoReducido) de usePartidaCaida: con reducir movimiento no hay aplaste ni destello, solo cambian los colores' },
   { archivo: 'src/app/navegacion/TransicionHoy.tsx', motivo: 'solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento' },
   { archivo: 'src/features/practicar/components/Destacados.tsx', motivo: '`entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)' },
   { archivo: 'src/features/practicar/components/EncabezadoPracticar.tsx', motivo: 'anima con el scroll (lo mueve el dedo, no es un bucle) y con `entering`, que salta al valor final con reducir movimiento' },
