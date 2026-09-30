@@ -44,4 +44,17 @@ for (const nombre of ['readFile', 'writeFile']) {
   };
 }
 
+// Inline requires: cada import se evalúa donde se usa por primera vez, no al cargar el
+// módulo que lo importa. Expo lo trae apagado; prendido, el arranque en frío solo evalúa lo
+// que Boot y Practicar tocan de verdad (el resto de cada archivo espera a que se use).
+// Los imports solo por efecto (`import 'x'`) no se tocan: siguen corriendo en su lugar.
+const transformOriginal = config.transformer.getTransformOptions;
+config.transformer.getTransformOptions = async (...args) => {
+  const opciones = transformOriginal ? await transformOriginal(...args) : {};
+  return {
+    ...opciones,
+    transform: { ...(opciones.transform ?? {}), inlineRequires: true },
+  };
+};
+
 module.exports = config;
