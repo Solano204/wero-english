@@ -40,6 +40,15 @@ const ACC1_NO_CONVIVEN = {
   'src/screens/games/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
   'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
   'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
+  'src/screens/entry/AuthScreen.tsx': 'tres vistas excluyentes (vincular tu avance, usuario y contraseña, inicio), cada una con un solo `primary`; en el inicio la acción principal es «Continuar con Google» (`BotonGoogle`, con la marca de Google) y lo demás es `secondary`/`ghost`',
+};
+
+/**
+ * TIPO-1: `fontFamily` fuera de `font.family` a propósito. El botón de Google
+ * sigue sus lineamientos de marca: Roboto Medium, la fuente del sistema en Android.
+ */
+const TIPO1_EXCEPCIONES = {
+  'src/components/entrada/BotonGoogle.tsx': 'los lineamientos de marca de «Sign in with Google» piden Roboto Medium',
 };
 /** ACC-1 reales: la acción principal no es sólida, o hay varios sólidos a la vez. */
 const ACC1_REALES = [
@@ -48,6 +57,7 @@ const ACC1_REALES = [
 /** TIPO-2: textos de 12–13 px con nombre de cuerpo que se quedan así, revisados a mano. */
 const TIPO2_SE_QUEDAN = {
   'src/components/base/Ads.tsx:fullNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/components/entrada/BotonGoogle.tsx:texto': 'la etiqueta del botón «Continuar con Google» va en 14 como piden los lineamientos de marca de Google',
   'src/screens/entry/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/screens/entry/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/extras/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
@@ -230,7 +240,7 @@ function auditaEstatica(archivos) {
       if (emojis.length) H.emoji.push({ r, linea: i + 1, txt: [...new Set(emojis)].join(' ') });
       const glifos = [...codigo.matchAll(/[←-⇿■-◿☀-➿⬀-⯿⌀-⏿\u{1D100}-\u{1D1FF}›‹]/gu)].map((m) => m[0]).filter((g) => !emojis.includes(g));
       if (glifos.length) H.glifo.push({ r, linea: i + 1, txt: [...new Set(glifos)].join(' ') });
-      if (/fontFamily/.test(l) && !/font\.family\./.test(l)) H.fuente.push({ r, linea: i + 1, txt: l.trim() });
+      if (/fontFamily/.test(l) && !/font\.family\./.test(l) && !TIPO1_EXCEPCIONES[r]) H.fuente.push({ r, linea: i + 1, txt: l.trim() });
       if (/<LinearGradient/.test(l)) H.gradiente.push({ r, linea: i + 1 });
     });
     if (!enTema && !r.startsWith('src/components/base/Button')) {

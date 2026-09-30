@@ -14,6 +14,7 @@ import { CellSignalSlashIcon } from 'phosphor-react-native/src/icons/CellSignalS
 import { ClockIcon } from 'phosphor-react-native/src/icons/Clock';
 import { CompassIcon } from 'phosphor-react-native/src/icons/Compass';
 import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
+import { GearSixIcon } from 'phosphor-react-native/src/icons/GearSix';
 import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMedium';
 import { InfoIcon } from 'phosphor-react-native/src/icons/Info';
 import { LightbulbIcon } from 'phosphor-react-native/src/icons/Lightbulb';
@@ -126,6 +127,8 @@ const ICONOS = {
   // La señal que se rompe de Errores que te delatan: lo que entienden no es lo que dijiste.
   'signal-broken': { Componente: CellSignalSlashIcon },
   share: { Componente: ShareNetworkIcon },
+  // La entrada a Ajustes (cuenta, recordatorios, contenido), en el encabezado de Progreso.
+  settings: { Componente: GearSixIcon },
 } satisfies Record<string, Definicion>;
 
 export type IconName = keyof typeof ICONOS;

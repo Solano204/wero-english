@@ -9,6 +9,7 @@ import {
   Card,
   Carga,
   EncabezadoComprimido,
+  IconButton,
   Screen,
 } from '@/components/base';
 import { Hueso, HuesoCirculo, ProveedorEsqueleto } from '@/components/esqueleto';
@@ -104,7 +105,14 @@ export function ProgressScreen() {
       scroll
       edges={['bottom']}
       scrollY={scrollY}
-      encabezado={<EncabezadoComprimido titulo="Tu progreso" scrollY={scrollY} entrada={primera} />}
+      encabezado={
+        <EncabezadoComprimido
+          titulo="Tu progreso"
+          scrollY={scrollY}
+          entrada={primera}
+          derecha={<IconButton icono="settings" etiqueta="Ajustes" onPress={() => nav.navigate('Settings')} />}
+        />
+      }
       style={{ paddingTop: top + ALTO_ENCABEZADO }}
       alRefrescar={refrescar}
       desfaseRefresco={top + ALTO_ENCABEZADO}

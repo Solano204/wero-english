@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: space.md - 2,
+    gap: space.md,
     paddingHorizontal: space.md,
     borderRadius: radius.pill,
     borderWidth: 1,

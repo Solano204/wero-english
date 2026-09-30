@@ -33,6 +33,8 @@ interface AuthState {
   resolverVinculo: (vincular: boolean) => Promise<boolean>;
   cancelarVinculo: () => void;
   signOut: () => Promise<void>;
+  /** Borra el usuario y todo su avance del teléfono, cierra la sesión de Google en la app y vuelve a la entrada. */
+  eliminarCuenta: () => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -170,6 +172,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await authService.signOut();
     await googleAuth.cerrarSesion();
     set({ user: null, status: 'anon', error: null });
+  },
+
+  eliminarCuenta: async () => {
+    const user = get().user;
+    if (!user) return false;
+    set({ busy: true, error: null });
+    try {
+      audio.releaseAudio();
+      music.liberar();
+      await authService.deleteAccount(user.id);
+      // Sin esto, la próxima vez que se abra la app la entrada automática volvería a entrar con
+      // la misma cuenta de Google y crearía un usuario nuevo sin que la persona lo pidiera.
+      await googleAuth.cerrarSesion();
+      set({ user: null, status: 'anon', busy: false, vinculoPendiente: null });
+      return true;
+    } catch (err) {
+      set({ error: messageFor(err), busy: false });
+      if (__DEV__) console.warn('[auth] eliminar cuenta', err);
+      return false;
+    }
   },
 
   clearError: () => set({ error: null }),

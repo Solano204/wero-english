@@ -1,13 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Image, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Header, Screen, Presionable } from '@/components/base';
+import { Button, Card, Header, Icon, Screen, Presionable } from '@/components/base';
 import { SectionTitle } from '@/components/list';
 import { useAuthStore, useSettingsStore } from '@/store';
 import { NOTIF_MAX_POR_DIA } from '@/db/settings';
 import { setSimularCargaLenta } from '@/hooks/useCarga';
-import * as authService from '@/services/auth';
 import * as notifications from '@/services/notifications';
 import * as speech from '@/services/speech';
 import { color, font, layout, radius, space } from '@/theme';
@@ -21,6 +20,7 @@ export function SettingsScreen() {
   const nav = useNavigation<Nav>();
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
+  const eliminarCuenta = useAuthStore((s) => s.eliminarCuenta);
   const s = useSettingsStore();
   const [busy, setBusy] = useState(false);
   const [cargaLenta, setCargaLenta] = useState(false);
@@ -52,24 +52,27 @@ export function SettingsScreen() {
 
   const borrarCuenta = useCallback(() => {
     Alert.alert(
-      'Borrar tu cuenta',
-      'Se va tu progreso, tus rachas y tus frases guardadas. Esto no se puede deshacer.',
+      'Eliminar tu cuenta',
+      'Se borra de este teléfono todo tu avance: tarjetas, rachas, juegos y frases guardadas. Wero no tiene servidor, así que no queda copia en ningún lado. No se puede deshacer.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Borrar',
+          text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
             if (!user) return;
             setBusy(true);
-            await notifications.cancelAll();
-            await authService.deleteAccount(user.id);
-            setBusy(false);
+            try {
+              await notifications.cancelAll();
+              await eliminarCuenta();
+            } finally {
+              setBusy(false);
+            }
           },
         },
       ]
     );
-  }, [user]);
+  }, [user, eliminarCuenta]);
 
   return (
     <Screen scroll>
@@ -277,15 +280,17 @@ export function SettingsScreen() {
 
       <SectionTitle title="Cuenta" />
       <Card style={styles.card}>
-        <Text style={styles.username}>{user?.username}</Text>
+        {user ? <Identidad user={user} /> : null}
         <Button
           label="Cerrar sesión"
           variant="secondary"
           onPress={() => void signOut()}
+          disabled={busy}
           full
         />
+        <Text style={styles.hint}>Al cerrar sesión, tu avance se queda en este teléfono.</Text>
         <Button
-          label="Borrar mi cuenta"
+          label="Eliminar cuenta"
           variant="danger"
           onPress={borrarCuenta}
           loading={busy}
@@ -433,8 +438,51 @@ function HoraFila({
   );
 }
 
+/** Quién está usando la app: con Google, su foto, nombre y correo; si no, qué tipo de cuenta es. */
+function Identidad({ user }: { user: NonNullable<ReturnType<typeof useAuthStore.getState>['user']> }) {
+  const [sinFoto, setSinFoto] = useState(false);
+  if (user.google_sub) {
+    return (
+      <View style={styles.identidad}>
+        {user.foto && !sinFoto ? (
+          <Image
+            source={{ uri: user.foto }}
+            style={styles.avatar}
+            onError={() => setSinFoto(true)}
+            accessibilityIgnoresInvertColors
+            accessible={false}
+          />
+        ) : (
+          <View style={[styles.avatar, styles.avatarVacio]}>
+            <Icon name="smile" size="md" color={color.textMuted} />
+          </View>
+        )}
+        <View style={styles.identidadTexto}>
+          <Text style={styles.label}>{user.nombre ?? 'Tu cuenta de Google'}</Text>
+          {user.email ? <Text style={styles.hint}>{user.email}</Text> : null}
+        </View>
+      </View>
+    );
+  }
+  const sinCuenta = user.username.startsWith('invitado_');
+  return (
+    <View>
+      <Text style={styles.label}>{sinCuenta ? 'Sin cuenta' : user.username}</Text>
+      <Text style={styles.hint}>
+        {sinCuenta
+          ? 'Para ligar tu avance a Google, cierra sesión y entra con Google: te lo vamos a ofrecer.'
+          : 'Cuenta con usuario y contraseña, solo en este teléfono.'}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   card: { gap: space.lg },
+  identidad: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  identidadTexto: { flex: 1 },
+  avatar: { width: 48, height: 48, borderRadius: radius.pill },
+  avatarVacio: { backgroundColor: color.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   hora: { gap: space.sm },
   horaChips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   horaChip: {
@@ -474,15 +522,6 @@ const styles = StyleSheet.create({
     fontFamily: font.family.heading,
     minWidth: 36,
     textAlign: 'center',
-  },
-  username: {
-    fontSize: font.size.lg,
-    color: color.text,
-    fontFamily: font.family.heading,
-    textAlign: 'center',
-    paddingVertical: space.sm,
-    backgroundColor: color.surfaceAlt,
-    borderRadius: radius.md,
   },
   diag: { marginTop: space.xl },
 });
