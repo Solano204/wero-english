@@ -5,7 +5,7 @@ import { SafeAreaView, useSafeAreaInsets, type Edge } from 'react-native-safe-ar
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
-import { FONDO, color, layout, radius, resplandorSol, space } from '@/theme';
+import { FONDO, aparecer, color, desaparecer, layout, radius, resplandorSol, space } from '@/theme';
 
 interface Props {
   children: ReactNode;
@@ -29,6 +29,13 @@ interface Props {
   alRefrescar?: () => Promise<unknown>;
   /** Dónde aparece el indicador desde el borde de arriba (debajo de un encabezado flotante). */
   desfaseRefresco?: number;
+  /**
+   * Fundido cruzado de una carga, para pantallas que pintan su propio esqueleto (no por
+   * `<Carga>`): `esqueleto` en la pantalla con huesos (su cuerpo sale con fundido) y
+   * `contenido` en la pantalla real (su cuerpo entra con fundido). Solo cuando el
+   * esqueleto sí se vio: una carga rápida no se anima. Solo aplica sin `scroll`.
+   */
+  transicionCarga?: 'esqueleto' | 'contenido';
 }
 
 interface PropsScrollAnimado extends ScrollViewProps {
@@ -74,6 +81,7 @@ export function Screen({
   soltarScroll,
   alRefrescar,
   desfaseRefresco = 0,
+  transicionCarga,
 }: Props) {
   const inner: ViewStyle = padded ? { padding: layout.screenPad } : {};
   const [refrescando, setRefrescando] = useState(false);
@@ -179,6 +187,17 @@ export function Screen({
             {children}
           </ScrollView>
         )
+      ) : transicionCarga ? (
+        // La llave fuerza a montar un cuerpo nuevo al pasar de esqueleto a contenido: así
+        // corren a la vez la salida del uno y la entrada del otro.
+        <Animated.View
+          key={transicionCarga}
+          entering={transicionCarga === 'contenido' ? aparecer() : undefined}
+          exiting={transicionCarga === 'esqueleto' ? desaparecer() : undefined}
+          style={[styles.flex, inner, { paddingBottom: huecoAbajo }, style]}
+        >
+          {children}
+        </Animated.View>
       ) : (
         <View style={[styles.flex, inner, { paddingBottom: huecoAbajo }, style]}>
           {children}

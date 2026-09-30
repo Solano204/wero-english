@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type DependencyList } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useContext, useEffect, useRef, useState, type DependencyList } from 'react';
+import { NavigationRouteContext, useFocusEffect } from '@react-navigation/native';
 
 export type EstadoCarga = 'cargando' | 'listo' | 'vacio' | 'error';
 
@@ -23,6 +23,11 @@ export interface ResultadoCarga<T> {
   error: unknown;
   /** true cuando la carga ya pasó de DEMORA_ESQUELETO_MS: recién ahí toca el esqueleto. */
   demora: boolean;
+  /**
+   * La última carga llegó a pintar el esqueleto (se queda en true ya con los datos). Lo usan
+   * las pantallas con esqueleto propio para hacer el fundido cruzado solo cuando hubo huesos.
+   */
+  huboEsqueleto: boolean;
   /** Vuelve a cargar mostrando el estado de carga (botón "Reintentar"). */
   reintentar: () => void;
   /** Recarga sin volver a 'cargando': lo que ya se ve se queda hasta que llegue lo nuevo (jalar para refrescar). */
@@ -50,6 +55,7 @@ export function useCarga<T>(
   const [datos, setDatos] = useState<T | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [demora, setDemora] = useState(false);
+  const [huboEsqueleto, setHuboEsqueleto] = useState(false);
 
   const vivo = useRef(true);
   const pedido = useRef(0);
@@ -60,6 +66,10 @@ export function useCarga<T>(
   cargarRef.current = cargar;
   const esVacioRef = useRef(esVacio);
   esVacioRef.current = esVacio;
+  // Solo __DEV__: de qué pantalla es esta carga, para el registro de tiempos de abajo.
+  const ruta = useContext(NavigationRouteContext)?.name ?? 'sin ruta';
+  const rutaRef = useRef(ruta);
+  rutaRef.current = ruta;
 
   useEffect(() => {
     vivo.current = true;
@@ -76,11 +86,13 @@ export function useCarga<T>(
     if (!silenciosa) {
       setEstado('cargando');
       setDemora(false);
+      setHuboEsqueleto(false);
       demoraDesde.current = null;
       temporizador.current = setTimeout(() => {
         if (vigente()) {
           demoraDesde.current = Date.now();
           setDemora(true);
+          setHuboEsqueleto(true);
         }
       }, DEMORA_ESQUELETO_MS);
     }
@@ -105,7 +117,14 @@ export function useCarga<T>(
     };
 
     try {
+      const inicio = Date.now();
       const resultado = await cargarRef.current();
+      if (__DEV__) {
+        // Cuánto tarda de verdad cada carga en el teléfono (sin el retraso simulado de abajo):
+        // lo que decide si una pantalla necesita esqueleto o no.
+        const ms = Date.now() - inicio;
+        console.log(`[carga] ${rutaRef.current}: ${ms} ms${ms > DEMORA_ESQUELETO_MS ? ' (pinta esqueleto)' : ''}`);
+      }
       if (__DEV__ && simularCargaLenta) {
         await new Promise((r) => setTimeout(r, RETRASO_SIMULADO_MS));
       }
@@ -147,5 +166,5 @@ export function useCarga<T>(
   const reintentar = useCallback(() => void ejecutar(false), [ejecutar]);
   const refrescar = useCallback(() => ejecutar(true), [ejecutar]);
 
-  return { estado, datos, error, demora, reintentar, refrescar };
+  return { estado, datos, error, demora, huboEsqueleto, reintentar, refrescar };
 }

@@ -3,12 +3,13 @@ import { StyleSheet, Text, View, useWindowDimensions, type ListRenderItemInfo } 
 import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Card, Carga, Header, Screen, SkeletonLista, pedirRecompensa, razonMuro } from '@/components/base';
+import { Button, Card, Carga, Header, Screen, pedirRecompensa, razonMuro } from '@/components/base';
 import {
   ALTO_TRAMO,
   CONFIGURACION_VISTA,
   EncabezadoNiveles,
   EncabezadoTramo,
+  EsqueletoNiveles,
   FilaNiveles,
   HUECO_CELDAS,
   RETRASO_LOGRO,
@@ -305,7 +306,7 @@ export function NivelesScreen() {
         onBack={() => nav.goBack()}
       />
 
-      <Carga carga={carga} esqueleto={<View style={styles.esqueleto}><SkeletonLista filas={6} alto={68} /></View>}>
+      <Carga carga={carga} esqueleto={<EsqueletoNiveles lado={lado} />}>
         {() => (
           // Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba.
           <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
@@ -394,7 +395,6 @@ const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
 };
 
 const styles = StyleSheet.create({
-  esqueleto: { paddingHorizontal: space.lg, paddingBottom: space.xxxl },
   lista: { flex: 1 },
   // Pegado abajo, sobre la lista y encima del footer (el footer queda fuera de este contenedor).
   flotante: { position: 'absolute', left: 0, right: 0, bottom: space.md, alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },

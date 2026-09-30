@@ -251,18 +251,19 @@ export function EarModeScreen() {
   }
 
   if (loading) {
-    if (!carga.demora) return null;
     return (
-      <Screen>
+      <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Modo oído" />
-        <ProveedorEsqueleto etiqueta="Preparando el modo oído" style={styles.esqueletoRaiz}>
-          <HuesoCirculo diametro={176} style={styles.esqueletoCentrado} />
-          <View style={styles.esqueletoTexto}>
-            <Hueso width="80%" height={22} style={styles.esqueletoCentrado} />
-            <Hueso width="55%" height={16} style={styles.esqueletoCentrado} />
-          </View>
-          <HuesoBoton size="lg" style={styles.esqueletoCentrado} width={220} />
-        </ProveedorEsqueleto>
+        {carga.demora ? (
+          <ProveedorEsqueleto etiqueta="Preparando el modo oído" style={styles.esqueletoRaiz}>
+            <HuesoCirculo diametro={176} style={styles.esqueletoCentrado} />
+            <View style={styles.esqueletoTexto}>
+              <Hueso width="80%" height={22} style={styles.esqueletoCentrado} />
+              <Hueso width="55%" height={16} style={styles.esqueletoCentrado} />
+            </View>
+            <HuesoBoton size="lg" style={styles.esqueletoCentrado} width={220} />
+          </ProveedorEsqueleto>
+        ) : null}
       </Screen>
     );
   }
@@ -291,7 +292,7 @@ export function EarModeScreen() {
   const envolvente = (sonandoEs ? analisisEs : analisisEn)?.envolvente ?? [];
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
       {/* Cualquier toque despierta la pantalla, sin quitárselo a quien lo recibe (devuelve false). */}
       <View
         style={styles.flex}

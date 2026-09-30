@@ -18,7 +18,7 @@ import { DiffFrase, StudyCardView } from '@/components/card';
 import { Hueso, HuesoBoton, HuesoImagen, ProveedorEsqueleto } from '@/components/esqueleto';
 import { nivelSeguidas } from '@/domain/seguidas';
 import { sesionMerece } from '@/domain/session';
-import { DEMORA_ESQUELETO_MS } from '@/hooks/useCarga';
+import { DEMORA_ESQUELETO_MS, MINIMO_ESQUELETO_MS } from '@/hooks/useCarga';
 import { useAuthStore, useSessionStore, useSettingsStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { useMusicaPantalla } from '@/hooks/useMusicaPantalla';
@@ -80,14 +80,31 @@ export function StudyScreen() {
   } = useSessionStore();
 
   // El esqueleto de "armando tu sesión" solo aparece si tarda más de
-  // DEMORA_ESQUELETO_MS: una sesión que arma rápido no debe parpadear.
+  // DEMORA_ESQUELETO_MS (una sesión que arma rápido no debe parpadear) y,
+  // si apareció, se queda al menos MINIMO_ESQUELETO_MS: las mismas reglas
+  // que useCarga.
   const [demoraSesion, setDemoraSesion] = useState(false);
+  const [huboEsqueleto, setHuboEsqueleto] = useState(false);
+  const esqueletoDesde = useRef<number | null>(null);
   useEffect(() => {
-    if (phase !== 'loading' && phase !== 'idle') {
+    if (phase === 'loading' || phase === 'idle') {
+      if (esqueletoDesde.current === null) setHuboEsqueleto(false);
+      const t = setTimeout(() => {
+        esqueletoDesde.current = Date.now();
+        setDemoraSesion(true);
+        setHuboEsqueleto(true);
+      }, DEMORA_ESQUELETO_MS);
+      return () => clearTimeout(t);
+    }
+    const desde = esqueletoDesde.current;
+    if (desde === null) {
       setDemoraSesion(false);
       return undefined;
     }
-    const t = setTimeout(() => setDemoraSesion(true), DEMORA_ESQUELETO_MS);
+    const t = setTimeout(() => {
+      esqueletoDesde.current = null;
+      setDemoraSesion(false);
+    }, Math.max(0, MINIMO_ESQUELETO_MS - (Date.now() - desde)));
     return () => clearTimeout(t);
   }, [phase]);
 
@@ -230,24 +247,25 @@ export function StudyScreen() {
     next();
   }, [next]);
 
-  if (phase === 'loading' || phase === 'idle') {
-    if (!demoraSesion) return null;
+  if (phase === 'loading' || phase === 'idle' || demoraSesion) {
     return (
-      <Screen>
+      <Screen transicionCarga={demoraSesion ? 'esqueleto' : undefined}>
         <Header onClose={() => nav.goBack()} />
-        <ProveedorEsqueleto etiqueta="Armando tu sesión" style={styles.esqueletoRaiz}>
-          <Hueso width="100%" height={6} radius={radius.pill} />
-          <HuesoImagen style={styles.esqueletoImagen} />
-          <View style={styles.esqueletoTexto}>
-            <Hueso width="75%" height={24} style={styles.esqueletoCentrado} />
-            <Hueso width="45%" height={16} style={styles.esqueletoCentrado} />
-          </View>
-          <View style={styles.esqueletoOpciones}>
-            {Array.from({ length: 4 }, (_, i) => (
-              <HuesoBoton key={i} size="lg" />
-            ))}
-          </View>
-        </ProveedorEsqueleto>
+        {demoraSesion ? (
+          <ProveedorEsqueleto etiqueta="Armando tu sesión" style={styles.esqueletoRaiz}>
+            <Hueso width="100%" height={6} radius={radius.pill} />
+            <HuesoImagen style={styles.esqueletoImagen} />
+            <View style={styles.esqueletoTexto}>
+              <Hueso width="75%" height={24} style={styles.esqueletoCentrado} />
+              <Hueso width="45%" height={16} style={styles.esqueletoCentrado} />
+            </View>
+            <View style={styles.esqueletoOpciones}>
+              {Array.from({ length: 4 }, (_, i) => (
+                <HuesoBoton key={i} size="lg" />
+              ))}
+            </View>
+          </ProveedorEsqueleto>
+        ) : null}
       </Screen>
     );
   }
@@ -290,7 +308,7 @@ export function StudyScreen() {
   if (!card && !terminada) return null;
 
   return (
-    <Screen padded={false}>
+    <Screen padded={false} transicionCarga={huboEsqueleto ? 'contenido' : undefined}>
       <Trozos disparo={reaccion.trozos} tinte={color.accent} y="46%" origen={origenTrozos ?? undefined} />
       <Confetti active={terminada && Boolean(fin?.merece)} />
       <View style={styles.top}>

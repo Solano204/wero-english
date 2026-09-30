@@ -465,43 +465,46 @@ export function ColmenaScreen() {
   }
 
   if (loading) {
-    if (!carga.demora) return null;
     return (
-      <Screen>
+      <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Colmena" />
-        <ProveedorEsqueleto etiqueta="Armando el tablero" style={styles.esqueletoRaiz}>
-          <View style={styles.esqueletoReloj}>
-            <Hueso height={4} radius={radius.pill} />
-          </View>
-          <View style={styles.esqueletoCentro}>
-            <Hueso width="70%" height={18} style={styles.esqueletoCentrado} />
-            <Hueso width="55%" height={26} style={styles.esqueletoCentrado} />
-          </View>
-          <View style={styles.esqueletoEscuchar}>
-            <HuesoBoton width={150} />
-            <Hueso width={88} height={32} />
-          </View>
-          <View style={styles.esqueletoRanuras}>
-            {Array.from({ length: 12 }, (_, i) => (
-              <Hueso key={i} width={28} height={36} />
-            ))}
-          </View>
-          <View style={styles.esqueletoPanal}>
-            {[6, 5, 6, 5].map((n, fila) => (
-              <View key={fila} style={[styles.esqueletoFilaPanal, fila % 2 === 1 && styles.esqueletoFilaCorrida]}>
-                {Array.from({ length: n }, (_, i) => (
-                  <Hueso key={i} width={48} height={48} radius={radius.md} />
+        {carga.demora ? (
+          <>
+            <ProveedorEsqueleto etiqueta="Armando el tablero" style={styles.esqueletoRaiz}>
+              <View style={styles.esqueletoReloj}>
+                <Hueso height={4} radius={radius.pill} />
+              </View>
+              <View style={styles.esqueletoCentro}>
+                <Hueso width="70%" height={18} style={styles.esqueletoCentrado} />
+                <Hueso width="55%" height={26} style={styles.esqueletoCentrado} />
+              </View>
+              <View style={styles.esqueletoEscuchar}>
+                <HuesoBoton width={150} />
+                <Hueso width={88} height={32} />
+              </View>
+              <View style={styles.esqueletoRanuras}>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <Hueso key={i} width={28} height={36} />
                 ))}
               </View>
-            ))}
-          </View>
-        </ProveedorEsqueleto>
-        <View style={styles.pie}>
-          <View style={styles.pieRow}>
-            <HuesoBoton />
-            <HuesoBoton />
-          </View>
-        </View>
+              <View style={styles.esqueletoPanal}>
+                {[6, 5, 6, 5].map((n, fila) => (
+                  <View key={fila} style={[styles.esqueletoFilaPanal, fila % 2 === 1 && styles.esqueletoFilaCorrida]}>
+                    {Array.from({ length: n }, (_, i) => (
+                      <Hueso key={i} width={48} height={48} radius={radius.md} />
+                    ))}
+                  </View>
+                ))}
+              </View>
+            </ProveedorEsqueleto>
+            <View style={styles.pie}>
+              <View style={styles.pieRow}>
+                <HuesoBoton />
+                <HuesoBoton />
+              </View>
+            </View>
+          </>
+        ) : null}
       </Screen>
     );
   }
@@ -535,6 +538,7 @@ export function ColmenaScreen() {
 
   return (
     <Screen
+      transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}
       padded={false}
       footer={
         // Zona 3, fija: nunca se mueve ni se tapa, sin importar cuánto

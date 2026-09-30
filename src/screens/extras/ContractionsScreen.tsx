@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
@@ -9,7 +10,7 @@ import { getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/store/content';
-import { color, font, radius, space } from '@/theme';
+import { aparecer, color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
@@ -108,7 +109,7 @@ export function ContractionsScreen() {
         ) : null
       ) : (
         <>
-          <View style={styles.list}>
+          <Animated.View entering={carga.huboEsqueleto ? aparecer() : undefined} style={styles.list}>
             {entries.map((e) => (
               <Card key={e.id} style={styles.item}>
                 <View style={styles.itemHead}>
@@ -135,7 +136,7 @@ export function ContractionsScreen() {
                 ) : null}
               </Card>
             ))}
-          </View>
+          </Animated.View>
 
           <Button
             label="Probar con Cázala"

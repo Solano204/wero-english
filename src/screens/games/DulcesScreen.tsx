@@ -666,26 +666,27 @@ export function DulcesScreen() {
   }
 
   if (loading) {
-    if (!carga.demora) return null;
     return (
-      <Screen>
+      <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Dulces" />
-        <ProveedorEsqueleto etiqueta="Llenando el tablero" style={styles.esqueletoRaiz}>
-          <View style={styles.esqueletoMetas}>
-            {Array.from({ length: 3 }, (_, i) => (
-              <Hueso key={i} width={72} height={72} radius={radius.md} />
-            ))}
-          </View>
-          <View style={styles.esqueletoTablero}>
-            {Array.from({ length: 6 }, (_, fila) => (
-              <View key={fila} style={styles.esqueletoFila}>
-                {Array.from({ length: 7 }, (_, col) => (
-                  <Hueso key={col} width={38} height={38} radius={radius.sm} />
-                ))}
-              </View>
-            ))}
-          </View>
-        </ProveedorEsqueleto>
+        {carga.demora ? (
+          <ProveedorEsqueleto etiqueta="Llenando el tablero" style={styles.esqueletoRaiz}>
+            <View style={styles.esqueletoMetas}>
+              {Array.from({ length: 3 }, (_, i) => (
+                <Hueso key={i} width={72} height={72} radius={radius.md} />
+              ))}
+            </View>
+            <View style={styles.esqueletoTablero}>
+              {Array.from({ length: 6 }, (_, fila) => (
+                <View key={fila} style={styles.esqueletoFila}>
+                  {Array.from({ length: 7 }, (_, col) => (
+                    <Hueso key={col} width={38} height={38} radius={radius.sm} />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ProveedorEsqueleto>
+        ) : null}
       </Screen>
     );
   }
@@ -705,7 +706,7 @@ export function DulcesScreen() {
   }
 
   return (
-    <Screen padded={false} style={styles.sinHueco}>
+    <Screen padded={false} style={styles.sinHueco} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
       <View ref={capaRef} style={styles.capa} onLayout={(e) => setCapaAlto(e.nativeEvent.layout.height)}>
         <Trozos disparo={reaccion.trozos} tinte={color.world.cultura} />
         <View style={styles.top}>

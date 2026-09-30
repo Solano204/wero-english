@@ -1,6 +1,7 @@
 export { AnilloActual } from './AnilloActual';
 export { CeldaNivel, ESCALA_ACTUAL, RETRASO_LOGRO } from './CeldaNivel';
 export { EncabezadoNiveles } from './EncabezadoNiveles';
+export { EsqueletoNiveles } from './EsqueletoNiveles';
 export { ALTO_TRAMO, EncabezadoTramo } from './EncabezadoTramo';
 export { FilaNiveles, HUECO_CELDAS } from './FilaNiveles';
 export { DesbloqueoCelda } from './DesbloqueoCelda';

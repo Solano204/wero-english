@@ -384,22 +384,23 @@ export function ParesScreen() {
   }
 
   if (loading) {
-    if (!carga.demora) return null;
     return (
-      <Screen>
+      <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Pares" />
-        <ProveedorEsqueleto etiqueta="Repartiendo fichas" style={styles.esqueletoRaiz}>
-          <Hueso width="60%" height={4} radius={radius.pill} style={styles.esqueletoCentrado} />
-          <View style={styles.esqueletoColumnas}>
-            {[0, 1].map((col) => (
-              <View key={col} style={styles.esqueletoColumna}>
-                {Array.from({ length: 5 }, (_, i) => (
-                  <Hueso key={i} height={64} radius={radius.md} />
-                ))}
-              </View>
-            ))}
-          </View>
-        </ProveedorEsqueleto>
+        {carga.demora ? (
+          <ProveedorEsqueleto etiqueta="Repartiendo fichas" style={styles.esqueletoRaiz}>
+            <Hueso width="60%" height={4} radius={radius.pill} style={styles.esqueletoCentrado} />
+            <View style={styles.esqueletoColumnas}>
+              {[0, 1].map((col) => (
+                <View key={col} style={styles.esqueletoColumna}>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <Hueso key={i} height={64} radius={radius.md} />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ProveedorEsqueleto>
+        ) : null}
       </Screen>
     );
   }
@@ -436,7 +437,7 @@ export function ParesScreen() {
     segmentos && meta ? { x: segmentos.x + meta.x, y: segmentos.y + meta.y } : { x: capa.ancho - space.xl, y: space.xl };
 
   return (
-    <Screen padded={false} style={styles.sinHueco}>
+    <Screen padded={false} style={styles.sinHueco} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
       <View ref={capaRef} style={styles.capa} onLayout={alMedirCapa}>
         <Trozos disparo={reaccion.trozos} tinte={color.world.dia_a_dia} x="50%" y="50%" />
         <View style={styles.top}>

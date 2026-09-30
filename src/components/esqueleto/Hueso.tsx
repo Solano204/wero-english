@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { brilloEsqueleto, color, layout, motionCiclo, motionEasing, radius, space } from '@/theme';
+import { brilloEsqueleto, color, desaparecer, layout, motionCiclo, motionEasing, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 /** Con «reducir movimiento» el hueso se queda fijo a esta opacidad, sin brillo. */
@@ -28,7 +28,8 @@ interface ProveedorProps {
  * Un solo valor compartido de Reanimated maneja el brillo de TODOS los huesos
  * que cuelgan de aquí: brillan sincronizados y cuesta un bucle, no uno por
  * hueso. Un `ProveedorEsqueleto` por pantalla (o por sección independiente),
- * nunca anidado dentro de otro.
+ * nunca anidado dentro de otro. Al quitarse sale con un fundido de `base`
+ * (220 ms) mientras el contenido entra: el fundido cruzado, sin salto.
  */
 export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style }: ProveedorProps) {
   const reducido = useMovimientoReducido();
@@ -45,9 +46,9 @@ export function ProveedorEsqueleto({ etiqueta = 'Cargando', children, style }: P
 
   return (
     <EsqueletoContexto.Provider value={reducido ? null : brillo}>
-      <View style={style} accessibilityLabel={etiqueta} accessibilityRole="progressbar">
+      <Animated.View exiting={desaparecer()} style={style} accessibilityLabel={etiqueta} accessibilityRole="progressbar">
         {children}
-      </View>
+      </Animated.View>
     </EsqueletoContexto.Provider>
   );
 }

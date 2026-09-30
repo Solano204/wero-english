@@ -10,6 +10,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { Icon } from '@/components/base/Icon';
+import { Hueso, ProveedorEsqueleto } from '@/components/esqueleto';
 import { PuntoMundo } from '@/components/list/PuntoMundo';
 import { hayImagen } from './SceneImage';
 import { imageSource } from '@/services/media';
@@ -17,7 +18,7 @@ import { blur, color, motionDuration, radius } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 
 const RAZON = 16 / 9;
-const FADE_MS = 220;
+const FADE_MS = motionDuration.base;
 const REVELA_MS = 320;
 /** Al entrar en Detalle, la imagen se aleja un poco: de 1.06 a 1. */
 const ZOOM_INICIAL = 1.06;
@@ -51,8 +52,9 @@ interface Props {
  * Frases sueltas.
  *
  * Sin archivo: fondo sobrio (degradado + patrón diagonal al 4 %) y un ícono chico, nunca
- * iniciales. Con archivo: fundido de 220 ms al cargar, sobre ese mismo fondo (sin
- * parpadeo); si falla, se queda el estado vacío. `desenfocada` la muestra con blur fuerte
+ * iniciales. Con archivo: mientras la foto carga, un hueso con brillo (del mismo
+ * `surfaceAlt` que el fondo del marco, así que no hay salto de color) y luego un fundido
+ * de 220 ms; si falla, el estado vacío. `desenfocada` la muestra con blur fuerte
  * y la imagen a mitad de opacidad; al quitarse, sube a opacidad completa en 320 ms.
  * `scrollY`/`zoomEntrada` son solo de Detalle. Con reducir movimiento no hay fundido,
  * paralaje ni zoom, y el desenfoque se quita de golpe.
@@ -100,7 +102,12 @@ export function MarcoImagen({ path, tinte, ancho, alto, desenfocada = false, scr
 
   return (
     <View style={[styles.marco, caja, style]} accessible={false} importantForAccessibility="no-hide-descendants">
-      <EstadoVacio tinte={tinte} visible={!conImagen || !cargada} />
+      <EstadoVacio tinte={tinte} visible={!conImagen} />
+      {conImagen && !cargada ? (
+        <ProveedorEsqueleto etiqueta="Cargando la imagen" style={StyleSheet.absoluteFill}>
+          <Hueso radius={0} style={StyleSheet.absoluteFill} />
+        </ProveedorEsqueleto>
+      ) : null}
       {conImagen ? (
         <AnimatedImage
           source={source ?? undefined}

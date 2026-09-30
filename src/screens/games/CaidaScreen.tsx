@@ -550,25 +550,26 @@ export function CaidaScreen() {
   }
 
   if (loading) {
-    if (!carga.demora) return null;
     return (
-      <Screen>
+      <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
         <Header onBack={() => nav.goBack()} title="Caída" />
-        <ProveedorEsqueleto etiqueta="Preparando la caída" style={styles.esqueletoRaiz}>
-          <View style={styles.esqueletoTop}>
-            <Hueso width="70%" height={4} radius={radius.pill} />
-            <HuesoCirculo diametro={40} />
-          </View>
-          <View style={styles.esqueletoFrase}>
-            <Hueso width="80%" height={26} style={styles.esqueletoCentrado} />
-            <Hueso width="55%" height={26} style={styles.esqueletoCentrado} />
-          </View>
-          <View style={styles.esqueletoPistas}>
-            {Array.from({ length: 3 }, (_, i) => (
-              <HuesoBoton key={i} width={110} />
-            ))}
-          </View>
-        </ProveedorEsqueleto>
+        {carga.demora ? (
+          <ProveedorEsqueleto etiqueta="Preparando la caída" style={styles.esqueletoRaiz}>
+            <View style={styles.esqueletoTop}>
+              <Hueso width="70%" height={4} radius={radius.pill} />
+              <HuesoCirculo diametro={40} />
+            </View>
+            <View style={styles.esqueletoFrase}>
+              <Hueso width="80%" height={26} style={styles.esqueletoCentrado} />
+              <Hueso width="55%" height={26} style={styles.esqueletoCentrado} />
+            </View>
+            <View style={styles.esqueletoPistas}>
+              {Array.from({ length: 3 }, (_, i) => (
+                <HuesoBoton key={i} width={110} />
+              ))}
+            </View>
+          </ProveedorEsqueleto>
+        ) : null}
       </Screen>
     );
   }
@@ -640,7 +641,7 @@ export function CaidaScreen() {
   );
 
   return (
-    <Screen padded={false} style={styles.sinHueco}>
+    <Screen padded={false} style={styles.sinHueco} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
       <View ref={capaRef} style={styles.capa}>
         <Trozos disparo={reaccion.trozos} tinte={color.correct} x="50%" y="62%" />
         <View style={styles.top}>

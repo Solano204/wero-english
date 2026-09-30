@@ -22,7 +22,7 @@ export function ErrorCarga({ onReintentar }: ErrorProps) {
 
 interface Props<T> {
   carga: ResultadoCarga<T>;
-  /** Solo se pinta si la carga pasa de 300 ms; antes no aparece nada. */
+  /** Solo se pinta si la carga pasa de DEMORA_ESQUELETO_MS (150 ms); antes no aparece nada. Ya pintado, se queda al menos MINIMO_ESQUELETO_MS (300 ms). */
   esqueleto?: ReactNode;
   vacio?: ReactNode;
   children: (datos: T) => ReactNode;

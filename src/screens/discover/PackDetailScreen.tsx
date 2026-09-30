@@ -7,8 +7,9 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Carga, Header, Screen, SkeletonLista } from '@/components/base';
-import { EntryRow } from '@/components/list';
+import { Button, Carga, Header, Screen } from '@/components/base';
+import { ProveedorEsqueleto } from '@/components/esqueleto';
+import { EntryRow, EntryRowHueso } from '@/components/list';
 import { getPackEntries } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useSettingsStore } from '@/store';
@@ -61,9 +62,11 @@ export function PackDetailScreen() {
       <Carga
         carga={carga}
         esqueleto={
-          <View style={styles.list}>
-            <SkeletonLista />
-          </View>
+          <ProveedorEsqueleto etiqueta="Cargando las frases" style={[styles.list, styles.esqueleto]}>
+            {Array.from({ length: 6 }, (_, i) => (
+              <EntryRowHueso key={i} />
+            ))}
+          </ProveedorEsqueleto>
         }
       >
         {(entries) => (
@@ -99,6 +102,8 @@ const styles = StyleSheet.create({
   head: { paddingHorizontal: space.lg, paddingTop: space.sm, gap: space.sm },
   list: { padding: space.lg, paddingBottom: space.xxxl },
   sep: { height: space.sm },
+  // El mismo separador que la lista real.
+  esqueleto: { gap: space.sm },
   empty: {
     color: color.textMuted,
     fontFamily: font.family.body,
