@@ -1,0 +1,1 @@
+export { BotonGoogle } from './BotonGoogle';

@@ -440,6 +440,23 @@ export const font = {
   },
 } as const;
 
+/**
+ * El botón «Continuar con Google» sigue los lineamientos de marca de Google
+ * (Sign in with Google Branding Guidelines), no la paleta de Wero: variante
+ * oscura (fondo, borde y texto de esa guía), la «G» con sus cuatro colores sin
+ * alterar y Roboto Medium, que en Android es la fuente del sistema.
+ */
+export const marcaGoogle = {
+  fondo: '#131314',
+  borde: '#8E918F',
+  texto: '#E3E3E3',
+  azul: '#4285F4',
+  verde: '#34A853',
+  amarillo: '#FBBC05',
+  rojo: '#EA4335',
+  fuente: 'sans-serif-medium',
+} as const;
+
 export const layout = {
   tapMin: 48,
   cardMaxWidth: 520,

@@ -194,9 +194,25 @@ export async function listUsers(): Promise<string[]> {
  * "Entrar sin cuenta": crea una cuenta local igual que signUp, pero sin
  * pedir usuario ni contraseña (se generan y nunca se usan para entrar).
  * Guarda en el teléfono exactamente igual que hoy.
+ *
+ * Si en este teléfono ya hubo alguien "sin cuenta" (y no se vinculó a
+ * Google), vuelve a ese mismo usuario: cerrar sesión y entrar otra vez sin
+ * cuenta no debe dejar su avance huérfano en la base.
  */
 export async function continuarSinCuenta(): Promise<User> {
   const db = await getDb();
+  const previo = await db.getFirstAsync<UsuarioRow>(
+    `SELECT ${COLUMNAS_USUARIO} FROM usuario
+     WHERE substr(username, 1, 9) = 'invitado_' AND google_sub IS NULL
+     ORDER BY last_login DESC LIMIT 1;`
+  );
+  if (previo) {
+    const now = Date.now();
+    await db.runAsync('UPDATE usuario SET last_login = ? WHERE id = ?;', [now, previo.id]);
+    await persistSession(previo.id);
+    return filaAUsuario({ ...previo, last_login: now });
+  }
+
   const username = `invitado_${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`;
   const salt = makeSalt();
   const pass = await hash(makeSalt(), salt);

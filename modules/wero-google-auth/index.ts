@@ -36,14 +36,17 @@ export const disponible = nativo !== null && SERVER_CLIENT_ID !== '';
 
 /** Sube la hoja de Credential Manager con las cuentas de Google del teléfono. */
 export function iniciarSesion(): Promise<PerfilGoogle> {
-  if (!nativo) return Promise.reject(new Error('ERR_NO_DISPONIBLE'));
+  if (!nativo || !disponible) {
+    return Promise.reject(Object.assign(new Error('ERR_NO_DISPONIBLE'), { code: 'ERR_NO_DISPONIBLE' }));
+  }
   return nativo.iniciarSesion(SERVER_CLIENT_ID);
 }
 
 /** Sin hoja: solo si ya hay una cuenta de Google autorizada en este teléfono. Null si no hay ninguna. */
 export function iniciarSesionAutomatica(): Promise<PerfilGoogle | null> {
-  if (!nativo) return Promise.resolve(null);
-  return nativo.iniciarSesionAutomatica(SERVER_CLIENT_ID);
+  if (!nativo || !disponible) return Promise.resolve(null);
+  // Al abrir la app nunca debe fallar hacia afuera: cualquier problema es "no hay cuenta".
+  return nativo.iniciarSesionAutomatica(SERVER_CLIENT_ID).catch(() => null);
 }
 
 /** Limpia el estado de Credential Manager (ClearCredentialStateRequest). */

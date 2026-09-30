@@ -28,6 +28,7 @@ export {
   anillo,
   medidor,
   inclinacion,
+  marcaGoogle,
 } from './tokens';
 export type { WorldId } from './tokens';
 export {

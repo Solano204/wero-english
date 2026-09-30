@@ -44,11 +44,14 @@ class WeroGoogleAuthModule : Module() {
     // El botón «Continuar con Google»: GetSignInWithGoogleOption muestra todas las cuentas del
     // teléfono (y deja agregar una), que es lo que Google recomienda para un botón explícito.
     AsyncFunction("iniciarSesion") Coroutine { serverClientId: String ->
-      val opcion = GetSignInWithGoogleOption.Builder(serverClientId).build()
       try {
+        val opcion = GetSignInWithGoogleOption.Builder(serverClientId).build()
         perfilDe(pedir(opcion))
       } catch (e: GetCredentialException) {
         throw traducir(e)
+      } catch (e: IllegalArgumentException) {
+        // serverClientId vacío o mal escrito: es configuración, no algo que la persona pueda arreglar.
+        throw CodedException("ERR_CONFIGURACION", e.message, e)
       }
     }
 
@@ -65,8 +68,9 @@ class WeroGoogleAuthModule : Module() {
       } catch (e: GetCredentialException) {
         Log.d(TAG, "Sin entrada automática: ${e.type} ${e.message}")
         null
-      } catch (e: CodedException) {
-        Log.d(TAG, "Sin entrada automática: ${e.code} ${e.message}")
+      } catch (e: Exception) {
+        // Cualquier otra cosa (ID de cliente vacío, sin Activity, credencial rara) tampoco molesta.
+        Log.d(TAG, "Sin entrada automática: ${e.message}")
         null
       }
     }
