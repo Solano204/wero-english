@@ -22,6 +22,7 @@ import { layout, motionDuration, motionEasing, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { CardState, Entry } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -241,7 +242,7 @@ export function useLectura() {
   };
 
   const marcarLeyenda = () => {
-    if (user) void guardarAjuste(user.id, 'leyendaLecturaVista', true);
+    if (user) sinEsperar(guardarAjuste(user.id, 'leyendaLecturaVista', true), 'ajustes:lectura');
   };
 
   const abrirFrase = (entryId: number) => nav.navigate('Detail', { entryId });

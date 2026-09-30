@@ -7,6 +7,7 @@ import { usePrimerosPasos } from '@/features/cuenta/hooks/usePrimerosPasos';
 import { PasoCuantas } from '@/features/cuenta/components/PasoCuantas';
 import { Pregunta } from '@/features/cuenta/components/Pregunta';
 import { PRESENTACION, Presentacion } from '@/features/cuenta/components/Presentacion';
+import { sinEsperar } from '@/services/fallas';
 
 /**
  * P-01, la entrada.
@@ -65,7 +66,7 @@ export function OnboardingScreen() {
             { label: 'No, déjalo limpio', valor: true },
           ]}
           onPick={(v) => {
-            if (user) void settings.set(user.id, 'modoLimpio', Boolean(v));
+            if (user) sinEsperar(settings.set(user.id, 'modoLimpio', Boolean(v)), 'ajustes:bienvenida');
             avanzar();
           }}
           nota="Aunque salgan, cada frase trae su aviso de dónde no decirla."
@@ -76,14 +77,14 @@ export function OnboardingScreen() {
         <PasoCuantas
           valor={settings.notifPorDia}
           onChange={(n) => {
-            if (user) void settings.set(user.id, 'notifPorDia', n);
+            if (user) sinEsperar(settings.set(user.id, 'notifPorDia', n), 'ajustes:bienvenida');
           }}
           desde={settings.notifDesde}
           hasta={settings.notifHasta}
           onVentana={(d, h) => {
             if (!user) return;
-            void settings.set(user.id, 'notifDesde', d);
-            void settings.set(user.id, 'notifHasta', h);
+            sinEsperar(settings.set(user.id, 'notifDesde', d), 'ajustes:bienvenida');
+            sinEsperar(settings.set(user.id, 'notifHasta', h), 'ajustes:bienvenida');
           }}
           onSiguiente={avanzar}
         />

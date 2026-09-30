@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TabNavigator } from './TabNavigator';
+import { limitePorPantalla } from './limitePantalla';
 import { navigate, navigationRef } from '@/shared/navegacion/navigationRef';
 import { NOTIF_TARGETS, type RootStackParams } from '@/types/rutas';
 // Solo lo del arranque se importa aquí: el resto de las pantallas se evalúa la
@@ -54,7 +55,7 @@ export function RootNavigator() {
 
   if (status === 'booting') {
     return (
-      <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
+      <Stack.Navigator screenOptions={SCREEN_OPTIONS} screenLayout={limitePorPantalla}>
         <Stack.Screen name="Boot" component={BootScreen} />
       </Stack.Navigator>
     );
@@ -62,7 +63,7 @@ export function RootNavigator() {
 
   if (status === 'anon') {
     return (
-      <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
+      <Stack.Navigator screenOptions={SCREEN_OPTIONS} screenLayout={limitePorPantalla}>
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
       </Stack.Navigator>
@@ -75,7 +76,7 @@ export function RootNavigator() {
   // mostrarlo un instante a quien ya lo contestó.
   if (status === 'signed' && settingsLoaded && !onboardingHecho) {
     return (
-      <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
+      <Stack.Navigator screenOptions={SCREEN_OPTIONS} screenLayout={limitePorPantalla}>
         <Stack.Screen name="Onboarding" getComponent={() => require('@/features/cuenta/screens/OnboardingScreen').OnboardingScreen} />
         <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
       </Stack.Navigator>
@@ -83,7 +84,7 @@ export function RootNavigator() {
   }
 
   return (
-    <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
+    <Stack.Navigator screenOptions={SCREEN_OPTIONS} screenLayout={limitePorPantalla}>
       <Stack.Screen name="Main" component={TabNavigator} />
 
       {/* La sesión entra desde abajo: se siente como entrar a un modo,

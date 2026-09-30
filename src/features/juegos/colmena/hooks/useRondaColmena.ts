@@ -21,6 +21,7 @@ import { motionColmena, motionDuration } from '@/theme';
 import type { ColmenaRound, NivelColmena } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 import { conFinal, conFinalAsync } from '@/shared/utils/conFinal';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Colmena'>;
@@ -174,13 +175,13 @@ export function useRondaColmena() {
         haptics.success();
         void audio.playRoundResultBilingue(true, round.entry.audio_en, round.entry.audio_es);
         if (user) {
-          void applyGameGrade(
+          sinEsperar(applyGameGrade(
             user.id,
             round.entry.id,
             true,
             Date.now() - empezoEn.current,
             'producir'
-          );
+          ), 'juego:colmena');
         }
       }
     },
@@ -325,8 +326,8 @@ export function useRondaColmena() {
       );
     }
   };
-  const seAcaboElTiempo = () => resolverConAyuda(true);
-  const rendirse = () => resolverConAyuda(false);
+  const seAcaboElTiempo = () => sinEsperar(resolverConAyuda(true), 'juego:colmena');
+  const rendirse = () => sinEsperar(resolverConAyuda(false), 'juego:colmena');
 
   return {
     nav,

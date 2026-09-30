@@ -13,6 +13,7 @@ import { useAuthStore } from '@/estado/useAuthStore';
 import { motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { RootStackParams } from '@/types/rutas';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -57,9 +58,9 @@ export function useDetalleFrase() {
   useEffect(() => {
     if (!user) return;
     let vigente = true;
-    void isFavorite(user.id, params.entryId).then((guardada) => {
+    sinEsperar(isFavorite(user.id, params.entryId).then((guardada) => {
       if (vigente && !tocado.current) setFav(guardada);
-    });
+    }), 'detalle:guardada');
     return () => {
       vigente = false;
     };

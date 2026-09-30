@@ -25,6 +25,7 @@ import * as haptics from '@/services/haptics';
 import { motionDuration, motionEasing } from '@/theme';
 import type { CaidaRound, NivelCaida } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Caida'>;
@@ -293,7 +294,7 @@ export function usePartidaCaida() {
     const ms = Date.now() - empezoEn.current;
 
     if (user) {
-      void applyGameGrade(user.id, round.entry.id, bien, ms, 'reconocer');
+      sinEsperar(applyGameGrade(user.id, round.entry.id, bien, ms, 'reconocer'), 'juego:caida');
     }
 
     if (!bien) {

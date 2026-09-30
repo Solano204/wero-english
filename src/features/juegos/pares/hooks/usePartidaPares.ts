@@ -24,6 +24,7 @@ import { escalon, motionDuration, space } from '@/theme';
 import type { Entry, NivelPares, ParFicha, ParesTablero } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 import { conFinal, conFinalAsync } from '@/shared/utils/conFinal';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Pares'>;
@@ -259,13 +260,13 @@ export function usePartidaPares() {
         void audio.playSuccess();
       }
       if (user) {
-        void applyGameGrade(
+        sinEsperar(applyGameGrade(
           user.id,
           f.entryId,
           true,
           Date.now() - empezoEn.current,
           'reconocer'
-        );
+        ), 'juego:pares');
       }
       return;
     }
@@ -277,13 +278,13 @@ export function usePartidaPares() {
     void audio.playFail();
     setFallando([elegida.id, f.id]);
     if (user) {
-      void applyGameGrade(
+      sinEsperar(applyGameGrade(
         user.id,
         elegida.entryId,
         false,
         Date.now() - empezoEn.current,
         'reconocer'
-      );
+      ), 'juego:pares');
     }
     if (falloTimer.current) clearTimeout(falloTimer.current);
     falloTimer.current = setTimeout(() => {

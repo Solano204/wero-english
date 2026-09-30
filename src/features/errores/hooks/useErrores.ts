@@ -9,6 +9,7 @@ import { loadContent } from '@/data/contenido';
 import { motionDuration, motionEasing } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { RootStackParams } from '@/types/rutas';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -62,7 +63,7 @@ export function useErrores() {
   const elegirOrden = (id: OrdenErrores) => {
     if (id === orden) return;
     setOrden(id);
-    if (user) void guardarAjuste(user.id, 'ordenErrores', id);
+    if (user) sinEsperar(guardarAjuste(user.id, 'ordenErrores', id), 'ajustes:errores');
     cambiarVista(cat, id);
   };
 

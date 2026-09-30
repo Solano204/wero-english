@@ -26,6 +26,18 @@ Dos cosas salen del teléfono sin que Wero guarde ni reciba datos: la foto de pe
 
 Los textos de permiso de `app.json` y la hoja de consentimiento ya dicen esto mismo.
 
+### Registro de errores: no se declara (no sale del teléfono)
+
+Desde el prompt 6 de rendimiento, la app guarda en el teléfono los últimos 50 errores (pantalla, mensaje, pila y fecha;
+`src/services/fallas.ts`, en AsyncStorage). **No se manda a ningún servidor**: el usuario puede copiarlo a mano desde
+Ajustes → Acerca de → «Copiar reporte de errores» y mandarlo él mismo si soporte se lo pide. Como no se transmite desde
+la app, no es «recopilación» para Play ni cambia el aviso de privacidad.
+
+**Si algún día se agrega Sentry, Crashlytics u otro servicio que envíe errores**, antes de publicar esa versión se
+actualizan: el aviso de privacidad (`docs/legal/`, que genera `features/cuenta/legal/textos.ts`), esta sección de
+Seguridad de los datos («Información y rendimiento de la app → Registros de fallos / Diagnóstico»: recopilados) y la
+hoja de consentimiento si hiciera falta.
+
 ## Otras secciones de Contenido de la app
 
 | Sección | Respuesta |

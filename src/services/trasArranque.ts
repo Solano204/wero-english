@@ -1,4 +1,5 @@
 import { InteractionManager } from 'react-native';
+import { registrarFalla } from './fallas';
 
 /**
  * Lo que no hace falta para mostrar Practicar y tocarlo: se anota aquí y corre después del primer cuadro
@@ -15,11 +16,14 @@ let tope: ReturnType<typeof setTimeout> | null = null;
 
 function correr(tarea: () => unknown): void {
   InteractionManager.runAfterInteractions(() => {
+    // Una tarea diferida que falla no tumba a las demás, pero queda anotada.
     try {
       const r = tarea();
-      if (r && typeof (r as Promise<unknown>).catch === 'function') (r as Promise<unknown>).catch(() => undefined);
-    } catch {
-      /* una tarea diferida que falla no tumba a las demás */
+      if (r && typeof (r as Promise<unknown>).catch === 'function') {
+        (r as Promise<unknown>).catch((e: unknown) => registrarFalla(e, 'tras-arranque'));
+      }
+    } catch (e) {
+      void registrarFalla(e, 'tras-arranque');
     }
   });
 }

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import * as notifications from '@/services/notificaciones';
 import * as speech from '@/services/voz';
+import { copiarReporteDeFallas } from '@/services/fallas';
 import type { Nivel } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
 import { useShallow } from 'zustand/react/shallow';
@@ -66,5 +67,9 @@ export function useAjustes() {
     void cambiar('niveles', next as never);
   };
 
-  return { nav, user, signOut, s, cargaLenta, setCargaLenta, pedirConsentimiento, hoja, micEstado, notifEstado, cambiar, alternarNivel };
+  // Ajustes → Acerca de: el reporte de errores guardado en el teléfono, al portapapeles.
+  const [reporte, setReporte] = useState<'listo' | 'copiado' | 'fallo'>('listo');
+  const copiarReporte = async () => setReporte((await copiarReporteDeFallas()) ? 'copiado' : 'fallo');
+
+  return { nav, user, signOut, s, cargaLenta, setCargaLenta, pedirConsentimiento, hoja, micEstado, notifEstado, cambiar, alternarNivel, reporte, copiarReporte };
 }

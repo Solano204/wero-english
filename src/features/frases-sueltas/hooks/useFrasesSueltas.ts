@@ -15,6 +15,7 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { sinEsperar } from '@/services/fallas';
 
 /** Sube la «vigencia» (invalida lo que va en camino). Función aparte: la limpieza de un efecto no toca
  *  `.current` de frente, que la regla de hooks confunde con una ref a un nodo. */
@@ -133,9 +134,9 @@ export function useFrasesSueltas() {
     if (!user || entryId === undefined) return;
     let vigente = true;
     setGuardada(false);
-    void isFavorite(user.id, entryId).then((v) => {
+    sinEsperar(isFavorite(user.id, entryId).then((v) => {
       if (vigente) setGuardada(v);
-    });
+    }), 'frases:guardada');
     return () => {
       vigente = false;
     };

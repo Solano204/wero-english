@@ -17,6 +17,7 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { RootStackParams } from '@/types/rutas';
 import { conFinal } from '@/shared/utils/conFinal';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -146,7 +147,7 @@ export function useRondaCazala() {
      */
     if (user) {
       for (const id of item.reducciones) {
-        void applyGameGrade(user.id, id, picked.includes(id), 0, 'reconocer');
+        sinEsperar(applyGameGrade(user.id, id, picked.includes(id), 0, 'reconocer'), 'juego:cazala');
       }
     }
   };

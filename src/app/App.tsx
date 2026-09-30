@@ -18,6 +18,10 @@ import * as audio from '@/services/audio';
 import { color, tema } from '@/theme';
 import { marcar } from '@/shared/utils/marcasArranque';
 import { vaciarConMemoriaBaja } from '@/services/memoria';
+import { instalarManejadoresDeFallas, setPantallaActual, sinEsperar } from '@/services/fallas';
+
+// Antes de cualquier render: un error sin atrapar o una promesa rechazada queda anotado en el teléfono.
+instalarManejadoresDeFallas();
 
 marcar('app');
 void SplashScreen.preventAutoHideAsync();
@@ -38,7 +42,7 @@ export default function App() {
 
   // Los ajustes se cargan al entrar y al cambiar de usuario.
   useEffect(() => {
-    if (user) void loadSettings(user.id);
+    if (user) sinEsperar(loadSettings(user.id), 'ajustes:cargar');
   }, [user, loadSettings]);
 
   // Al pasar a segundo plano se corta todo el audio. Al volver no se
@@ -57,12 +61,13 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.bg }}>
       <SafeAreaProvider>
-        <ErrorBoundary>
+        <ErrorBoundary alcance="app">
           <NavigationContainer
             ref={navigationRef}
             theme={navTheme}
             onReady={() => {
               rutaPrevia.current = navigationRef.getCurrentRoute()?.name;
+              setPantallaActual(rutaPrevia.current);
             }}
             onStateChange={() => {
               const actual = navigationRef.getCurrentRoute()?.name;
@@ -74,6 +79,7 @@ export default function App() {
               // tarjeta de Estudio) sigue sonando después, sin competir.
               if (actual !== previa) audio.detenerTodo();
               rutaPrevia.current = actual;
+              setPantallaActual(actual);
             }}
           >
             <StatusBar hidden={OCULTAR_BARRA_ESTADO} style={tema.claro ? 'dark' : 'light'} />

@@ -363,8 +363,8 @@ async function esperarFinReanudado(miId: number): Promise<void> {
 export async function saltarFrase(seg: number): Promise<boolean> {
   if (!frase.player) return false;
   try {
-    await frase.player.seekTo(Math.max(0, seg));
-    return true;
+    // Con tope, como el resto de las llamadas nativas: si el player no contesta, la lectura sigue sin moverse.
+    return await conTope(frase.player.seekTo(Math.max(0, seg)).then(() => true), TOPE_NATIVO_MS, false);
   } catch {
     return false;
   }

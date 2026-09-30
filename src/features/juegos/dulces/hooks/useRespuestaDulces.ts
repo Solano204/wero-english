@@ -6,6 +6,7 @@ import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 import type { DulceObjetivo, Entry, User } from '@/types';
 import { conFinal } from '@/shared/utils/conFinal';
+import { sinEsperar } from '@/services/fallas';
 
 /** Tope duro de la secuencia de la pregunta: si el audio no carga, se suelta igual. */
 const RESPUESTA_MAXIMA_MS = 6000;
@@ -159,13 +160,13 @@ export function useRespuestaDulces(p: Params) {
 
     despachar({ tipo: 'responder', opcion });
 
-    void applyGameGrade(
+    sinEsperar(applyGameGrade(
       user.id,
       objetivo.entry.id,
       bien,
       msDesdeInicio(),
       'reconocer'
-    );
+    ), 'juego:dulces');
 
     if (bien) {
       haptics.success();

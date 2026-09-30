@@ -11,6 +11,7 @@ import { useSettingsStore } from '@/estado/useSettingsStore';
 import { motionDesatorar } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/types/rutas';
+import { sinEsperar } from '@/services/fallas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
@@ -61,7 +62,7 @@ export function useAtoradas() {
     const d = carga.datos;
     if (!d || !user) return;
     const actuales = vistasDe(d.atoradas);
-    if (!mismasVistas(d.previas, actuales)) void guardarAjuste(user.id, 'atoradasVistas', actuales);
+    if (!mismasVistas(d.previas, actuales)) sinEsperar(guardarAjuste(user.id, 'atoradasVistas', actuales), 'ajustes:atoradas');
   }, [carga.datos, user, guardarAjuste]);
 
   // Las desatoradas se muestran una sola vez, aunque la pantalla vuelva a cargar al recuperar el foco.

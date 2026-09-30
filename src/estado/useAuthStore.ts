@@ -10,6 +10,7 @@ import * as notifications from '@/services/notificaciones';
 import * as borrado from '@/services/cuenta/borrado';
 import { useSettingsStore } from './useSettingsStore';
 import { AUTH_MESSAGES, type AuthError, type PerfilGoogle, type User } from '@/types';
+import { registrarFalla } from '@/services/fallas';
 
 type Status = 'booting' | 'anon' | 'signed';
 
@@ -99,7 +100,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // a mano que vincular solo, sin que la persona lo haya pedido.
         set({ user: null, status: 'anon' });
       }
-    } catch {
+    } catch (e) {
+      // Sin sesión se puede seguir (la entrada pide iniciar otra vez); el fallo queda anotado para no confundirlo con
+      // un cierre de sesión.
+      void registrarFalla(e, 'cuenta:restaurar');
       set({ user: null, status: 'anon' });
     }
   },

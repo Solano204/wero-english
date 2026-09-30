@@ -9,6 +9,7 @@ import { StudySession, etiquetaRepaso, gradeFrom } from '@/domain/session';
 import type { ContentFilter, SessionSummary, StudyCard } from '@/types';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
+import { registrarFalla } from '@/services/fallas';
 
 /**
  * `empty`: no hubo nada que armar (sin vencidas ni nuevas); `error`: no se pudo armar la sesión.
@@ -127,7 +128,9 @@ export const useSessionStore = create<SessionState>((set, get) => {
         countNew(usuarioId, filtro),
       ]);
       return { proximoRepaso, nuevasCatalogo };
-    } catch {
+    } catch (e) {
+      // El cierre se muestra igual, sin «próximo repaso» ni conteo; el fallo queda anotado.
+      void registrarFalla(e, 'estudio:cierre');
       return { proximoRepaso: null, nuevasCatalogo: 0 };
     }
   }

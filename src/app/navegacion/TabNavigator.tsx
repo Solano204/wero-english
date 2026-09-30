@@ -21,6 +21,7 @@ import * as haptics from '@/services/haptics';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { MainTabParams } from '@/types/rutas';
+import { limitePorPantalla } from './limitePantalla';
 
 const Tab = createBottomTabNavigator<MainTabParams>();
 
@@ -186,6 +187,7 @@ export function TabNavigator() {
     <View style={{ flex: 1, backgroundColor: color.bg }}>
       <Tab.Navigator
       initialRouteName="Practice"
+      screenLayout={limitePorPantalla}
       tabBar={barraDePestanas}
       screenOptions={({ route }) => ({
         headerShown: false,

@@ -206,7 +206,11 @@ export function reconoceEnDispositivo(): Promise<boolean> {
       if (!m || Platform.OS !== 'android' || Number(Platform.Version) < 33) return false;
       try {
         if (!m.supportsOnDeviceRecognition?.()) return false;
-        const r = await m.getSupportedLocales?.({});
+        // Con tope: si el servicio de voz no contesta, se usa el reconocedor del sistema en vez de esperar sin fin.
+        const r = await Promise.race([
+          m.getSupportedLocales?.({}),
+          espera(TOPE_IDIOMAS_MS).then(() => undefined),
+        ]);
         return (r?.installedLocales ?? []).some((l) => l.replace('_', '-').toLowerCase() === 'en-us');
       } catch {
         return false;
@@ -235,6 +239,8 @@ export async function descargarInglesSinConexion(): Promise<string> {
 }
 
 const espera = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+/** Lo más que se espera a que el teléfono diga qué idiomas reconoce sin conexión. */
+const TOPE_IDIOMAS_MS = 3000;
 
 /**
  * Escucha una vez y devuelve TODO lo que entendió (las alternativas), o nada si no entendió. Nunca lanza: un fallo

@@ -3,6 +3,7 @@ import { nivelDesbloqueado } from '@/data/repos/niveles';
 import { loadContent } from '@/data/contenido';
 import { useAuthStore } from '@/estado/useAuthStore';
 import type { Entry, JuegoId, NivelJuego } from '@/types';
+import { sinEsperar } from '@/services/fallas';
 
 /**
  * Resuelve qué nivel se va a jugar y qué entradas le tocan.
@@ -24,9 +25,9 @@ export function useNivel(juego: JuegoId, pedido?: number) {
   useEffect(() => {
     if (pedido || !user || !def) return;
     let vivo = true;
-    void nivelDesbloqueado(user.id, juego).then((n) => {
+    sinEsperar(nivelDesbloqueado(user.id, juego).then((n) => {
       if (vivo) setDesbloqueado(Math.min(n, def.total));
-    });
+    }), 'juego:nivel');
     return () => {
       vivo = false;
     };

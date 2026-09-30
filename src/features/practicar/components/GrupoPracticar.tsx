@@ -2,6 +2,7 @@ import React, { type ComponentProps } from 'react';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { useSettingsStore } from '@/estado/useSettingsStore';
 import { GrupoPlegable } from '@/features/practicar/components/GrupoPlegable';
+import { sinEsperar } from '@/services/fallas';
 
 type Props = Omit<ComponentProps<typeof GrupoPlegable>, 'abierto' | 'onAlternar'> & { id: string };
 
@@ -17,7 +18,7 @@ export function GrupoPracticar({ id, ...resto }: Props) {
     if (!user) return;
     const { practicarGruposAbiertos: abiertos, set } = useSettingsStore.getState();
     const siguiente = abiertos.includes(id) ? abiertos.filter((g) => g !== id) : [...abiertos, id];
-    void set(user.id, 'practicarGruposAbiertos', siguiente);
+    sinEsperar(set(user.id, 'practicarGruposAbiertos', siguiente), 'ajustes:practicar');
   };
 
   return <GrupoPlegable {...resto} abierto={abierto} onAlternar={alternar} />;

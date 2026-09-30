@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { celebrarSiToca, type TemaCelebracion } from '@/data/local/celebracion';
+import { sinEsperar } from '@/services/fallas';
 
 /**
  * true la primera vez que toca celebrar `tema` con esa `marca` (el día, el lunes de la semana o el récord) para
@@ -24,9 +25,9 @@ export function useCelebracion(
   useEffect(() => {
     if (!activa || usuarioId === null) return;
     let vivo = true;
-    void celebrarSiToca(usuarioId, tema, marcaActual.current).then((toca) => {
+    sinEsperar(celebrarSiToca(usuarioId, tema, marcaActual.current).then((toca) => {
       if (vivo && toca) setCelebrar(true);
-    });
+    }), 'celebracion');
     return () => {
       vivo = false;
     };

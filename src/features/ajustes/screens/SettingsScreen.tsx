@@ -14,7 +14,7 @@ import { SeccionSesion } from '@/features/ajustes/components/SeccionSesion';
 
 /** P-11, ajustes. */
 export function SettingsScreen() {
-  const { nav, user, signOut, s, cargaLenta, setCargaLenta, pedirConsentimiento, hoja, micEstado, notifEstado, cambiar, alternarNivel } = useAjustes();
+  const { nav, user, signOut, s, cargaLenta, setCargaLenta, pedirConsentimiento, hoja, micEstado, notifEstado, cambiar, alternarNivel, reporte, copiarReporte } = useAjustes();
 
   return (
     <Screen scroll>
@@ -127,6 +127,22 @@ export function SettingsScreen() {
           detalle="Tu avance vuelve a cero; sigues con tu sesión"
           onPress={() => nav.navigate('Borrar', { modo: 'datos' })}
           borra
+        />
+      </Card>
+
+      <SectionTitle title="Acerca de" />
+      <Card style={styles.card}>
+        <FilaLegal
+          icono="share"
+          titulo="Copiar reporte de errores"
+          detalle={
+            reporte === 'copiado'
+              ? 'Copiado. Pégalo en el mensaje para quien te lo pidió.'
+              : reporte === 'fallo'
+                ? 'No se pudo copiar. Vuelve a intentar.'
+                : 'Los últimos errores de la app, para mandarlos si te lo piden. No sale nada del teléfono solo.'
+          }
+          onPress={() => void copiarReporte()}
         />
       </Card>
 
