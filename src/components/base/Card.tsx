@@ -2,7 +2,7 @@ import React, { type ReactNode } from 'react';
 import { Platform, StyleSheet, View, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 import { imageSource } from '@/services/media';
 import { blur, color, filoLuz, gradiente, radius, shadow, sol, space } from '@/theme';
 import { Presionable } from './Presionable';
@@ -116,7 +116,7 @@ export function Card({
         <Image
           source={fuente}
           style={StyleSheet.absoluteFill}
-          resizeMode="cover"
+          contentFit="cover"
           onError={() => setImagenFallo(true)}
         />
       ) : colores ? (

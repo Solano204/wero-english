@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Defs, Line, Pattern, Rect } from 'react-native-svg';
@@ -111,7 +112,7 @@ export function MarcoImagen({ path, tinte, ancho, alto, desenfocada = false, scr
       {conImagen ? (
         <AnimatedImage
           source={source ?? undefined}
-          resizeMode="cover"
+          contentFit="cover"
           onLoad={() => {
             setCargada(true);
             opacidadCarga.value = reducido ? 1 : withTiming(1, { duration: FADE_MS });

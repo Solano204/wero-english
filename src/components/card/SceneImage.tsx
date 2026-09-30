@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
+import { Image, type ImageStyle } from 'expo-image';
 import {
-  Image,
   StyleSheet,
-  type ImageStyle,
   type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { isBundled } from '@/assets/bundled';
@@ -66,7 +65,7 @@ export function SceneImage({ path, size = 200, round = true, style, ancha }: Pro
         style as ImageStyle,
       ]}
       onError={() => setFailed(true)}
-      resizeMode="cover"
+      contentFit="cover"
       accessible={false}
     />
   );
