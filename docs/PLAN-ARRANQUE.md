@@ -1,4 +1,14 @@
-# Plan de arranque (prompt 3 de 6) — propuesta, espera OK
+# Plan de arranque (prompt 3 de 6) — hecho
+
+Aprobado («OK») y aplicado en `perf/serie-rendimiento`. La música se quedó como estaba (empieza al salir de Boot).
+Resultados por arreglo y lo que no se pudo: `docs/RENDIMIENTO.md`, «Después de arranque». Lo que falta es medirlo en
+el Xiaomi: `scripts/medir-arranque.sh 5` sobre un release con `EXPO_PUBLIC_MEDIR=1`, en el tag
+`antes-de-rendimiento` y en la rama.
+
+Además se encontró y arregló un borrado de avance: la siembra vieja hacía `DELETE FROM entrada` y las tarjetas se
+iban en cascada (ver C en RENDIMIENTO.md).
+
+---
 
 Principio: al abrir, la app solo hace lo necesario para mostrar Practicar y que se pueda tocar. Lo demás, cuando se pide
 o después del primer cuadro interactivo.

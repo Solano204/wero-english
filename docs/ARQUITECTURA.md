@@ -156,6 +156,8 @@ Quién lo revisa:
 | cuenta, borrado y consentimientos | `services/cuenta/*`, `estado/useAuthStore.ts` |
 | colores, espacios, movimiento | `theme/` |
 | animaciones reutilizables | `shared/ui/fx/` |
+| lo que corre después de que Practicar es interactivo | `services/trasArranque.ts` (`trasArranque`, `listoParaDiferidos`) |
+| marcas del arranque (medición) | `shared/utils/marcasArranque.ts`, `scripts/medir-arranque.sh` |
 
 ---
 
