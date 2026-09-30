@@ -31,7 +31,7 @@ const EXPLICITO = new Set([
   'src/features/detalle/components/EscalaRegistro.tsx',
   // El aviso «Fuerte» de una frase con vulgaridad 2.
   'src/components/mazo/CartaFrase.tsx',
-  'src/components/phrasal/DetalleForma.tsx',
+  'src/features/phrasal/components/DetalleForma.tsx',
 ]);
 const ROJO = /\briskStrong(?:Soft)?\b|['"]strong['"]/;
 const rojoFueraDeLugar = (rel, src) => (EXPLICITO.has(rel) ? [] : sinComentarios(src).split('\n').flatMap((l, i) => (ROJO.test(l) ? [i + 1] : [])));

@@ -118,11 +118,11 @@ export function RootNavigator() {
       <Stack.Screen name="Niveles" getComponent={() => require('@/features/juegos/niveles/screens/NivelesScreen').NivelesScreen} />
       <Stack.Screen name="Gramatica" getComponent={() => require('@/features/gramatica/screens/GramaticaScreen').GramaticaScreen} />
       <Stack.Screen name="GramaticaTema" getComponent={() => require('@/features/gramatica/screens/GramaticaTemaScreen').GramaticaTemaScreen} />
-      <Stack.Screen name="Phrasal" getComponent={() => require('@/screens/extras/PhrasalScreen').PhrasalScreen} />
+      <Stack.Screen name="Phrasal" getComponent={() => require('@/features/phrasal/screens/PhrasalScreen').PhrasalScreen} />
       {/* El verbo viaja del renglón a su título: la pantalla entra con un fundido y ese vuelo es la transición. */}
       <Stack.Screen
         name="PhrasalVerbo"
-        getComponent={() => require('@/screens/extras/PhrasalVerboScreen').PhrasalVerboScreen}
+        getComponent={() => require('@/features/phrasal/screens/PhrasalVerboScreen').PhrasalVerboScreen}
         options={{ animation: 'fade', animationDuration: motionDuration.lento }}
       />
       <Stack.Screen name="Azar" getComponent={() => require('@/screens/extras/AzarScreen').AzarScreen} />

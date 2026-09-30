@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { EmptyState, Header, Input, Screen } from '@/shared/ui';
 import type { Rect } from '@/shared/ui/fx/useDesfaseVentana';
-import { RenglonVerbo, type FormaRenglon } from '@/components/phrasal/RenglonVerbo';
+import { RenglonVerbo, type FormaRenglon } from '@/features/phrasal/components/RenglonVerbo';
 import { buscarGrupos, etiquetasParticulas } from '@/domain/phrasal';
 import { loadContent } from '@/data/contenido';
 import { useSettingsStore } from '@/estado/useSettingsStore';
