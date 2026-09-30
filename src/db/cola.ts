@@ -1,4 +1,4 @@
-import { dayKey, startOfDay } from '@/utils/date';
+import { addDays, dayKey, startOfDay } from '@/utils/date';
 import type { CardState, Nivel } from '@/types';
 import { ORDEN_NUEVAS, type OrdenNuevas } from '@/config/aprendizaje';
 
@@ -121,6 +121,17 @@ export function ordenDeSemilla(semilla: number): { m: number; c: number } {
   const m = 65537 + (mezclar32(s) % (PRIMO_ORDEN - 65537));
   const c = mezclar32(s ^ 0x9e3779b9) % PRIMO_ORDEN;
   return { m, c };
+}
+
+/**
+ * La semilla de UNA sesión: la del usuario mezclada con una sal al azar que se saca al armar cada
+ * sesión (expo-crypto). Así cada vez que se entra a Estudiar las frases nuevas salen en otro orden
+ * (y otras, porque la sesión toma solo las primeras), y dos usuarios nunca comparten orden: la
+ * semilla del usuario sigue siendo parte de la mezcla.
+ */
+export function semillaDeSesion(semillaUsuario: number, sal: number): number {
+  const u = Math.trunc(Math.abs(semillaUsuario)) >>> 0;
+  return mezclar32((u ^ mezclar32(Math.trunc(Math.abs(sal)) >>> 0)) >>> 0);
 }
 
 /** `x ^ (x >> 16)` para un entero de 32 bits, sin operador XOR: (a | b) - (a & b). */
@@ -250,6 +261,45 @@ export function consultaNuevas(
   const f = buildFilter(filter);
   const { m, c } = ordenDeSemilla(semilla);
   return { sql: sqlNuevas(f.sql, orden), params: [m, c, usuarioId, ...f.args, limite] };
+}
+
+/**
+ * Cuántas frases nuevas quedan en el catálogo con este filtro (sin límite de hoy): para decir
+ * «ya viste todas» cuando es cierto y no ofrecer aprender nuevas si no hay.
+ */
+export function consultaContarNuevas(usuarioId: number, filter: ContentFilter): Consulta {
+  const f = buildFilter(filter);
+  return {
+    sql: `SELECT COUNT(*) AS n
+            FROM entrada e
+            LEFT JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+           WHERE ${f.sql}
+             AND (t.entry_id IS NULL OR t.ultimo_repaso IS NULL)
+             AND ${SIN_REGLAS};`,
+    params: [usuarioId, ...f.args],
+  };
+}
+
+/**
+ * Cuándo vuelve el próximo repaso (ms epoch), o null si no hay ninguno programado. Solo cuenta las
+ * que NO están vencidas ahora. Una de aprendizaje contestada hoy (intervalo 0: la fallada) no
+ * vuelve hasta mañana aunque su `vence_en` sea en minutos (ver SQL_VENCIDA), así que cuenta como
+ * mañana. Params: inicioDelDia, inicioDeMañana, usuario, ...filtro.args, ahora, inicioDelDia.
+ */
+export function consultaProximoRepaso(usuarioId: number, filter: ContentFilter, now: number): Consulta {
+  const f = buildFilter(filter);
+  const hoy = startOfDay(now);
+  const manana = startOfDay(addDays(now, 1));
+  return {
+    sql: `SELECT MIN(CASE WHEN t.intervalo = 0 AND t.ultimo_repaso >= ? THEN ? ELSE t.vence_en END) AS proximo
+            FROM entrada e
+            JOIN tarjeta t ON t.entry_id = e.id AND t.usuario_id = ?
+           WHERE ${f.sql}
+             AND t.ultimo_repaso IS NOT NULL
+             AND NOT (${SQL_VENCIDA})
+             AND ${SIN_REGLAS};`,
+    params: [hoy, manana, usuarioId, ...f.args, now, hoy],
+  };
 }
 
 /** Vencidas / de aprendizaje / fantasma. */

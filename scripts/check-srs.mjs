@@ -258,6 +258,132 @@ await prueba('las nuevas solo cuentan al responderse', () => {
   assert.equal(s.summary(0).newCards, 1);
 });
 
+// ── cada sesión, otras frases y otro orden ─────────────────────────────────
+const nuevasDeSesion = (db, limite, sal, usuario = SEMILLA) => correr(db, sql.consultaNuevas(1, sql.semillaDeSesion(usuario, sal), FILTRO, limite));
+/** Un azar fijo (LCG) para que las pruebas del orden al azar se repitan igual. */
+const azarFijo = (semilla) => () => ((semilla = (semilla * 1664525 + 1013904223) % 4294967296) / 4294967296);
+/** Guarda en la base lo que el motor devolvió al contestar (como upsertCardState). */
+const persistir = (db, estado) => db.run(sql.SQL_UPSERT_TARJETA, sql.paramsUpsertTarjeta(1, estado));
+
+await prueba('entrar 3 veces seguidas sin contestar: cada sesión sortea otras nuevas y en otro orden', () => {
+  const db = base({ entradas: 300 });
+  const listas = [0x1234, 0xbeef, 0x51ab].map((sal) => ids(nuevasDeSesion(db, 10, sal)));
+  for (let i = 0; i < listas.length; i++) {
+    for (let j = i + 1; j < listas.length; j++) {
+      const comunes = listas[i].filter((id) => listas[j].includes(id)).length;
+      assert.ok(comunes <= 2, `las sesiones ${i + 1} y ${j + 1} comparten ${comunes} de 10 (al azar se esperan ~0.3)`);
+    }
+  }
+  // La misma sal da la misma lista (el conteo y la sesión no se descuadran dentro de una sesión).
+  assert.deepEqual(ids(nuevasDeSesion(db, 10, 0x1234)), listas[0]);
+});
+
+await prueba('dos usuarios nuevos: frases distintas entre ellos aunque la sal coincida', () => {
+  const db = base({ entradas: 300 });
+  const a = ids(nuevasDeSesion(db, 10, 7, 111));
+  const b = ids(nuevasDeSesion(db, 10, 7, 222));
+  assert.ok(a.filter((id) => b.includes(id)).length <= 2);
+});
+
+await prueba('las nuevas mostradas y no contestadas se evitan en la siguiente sesión, mientras haya otras', async () => {
+  const db = base({ entradas: 40 });
+  const primera = await plan.armarSesion({ size: 20, nuevasPorDia: 10, yaHoy: 0, traerNuevas: async (n) => nuevasDeSesion(db, n, 1), traerVencidas: async () => [] });
+  const s = new StudySession({ due: [], fresh: pares(primera.fresh), meta: 20, distractorsFor: () => [] });
+  const vista = s.current().entry.id;
+  s.skip();
+  const segunda = s.current().entry.id;
+  s.answer({ grade: 3, correct: true, elapsedMs: 5000, usedHint: false });
+  s.current();
+  const sinContestar = s.nuevasSinContestar();
+  assert.ok(sinContestar.includes(vista), 'la saltada cuenta como mostrada sin contestar');
+  assert.ok(!sinContestar.includes(segunda), 'la contestada no');
+  const excluir = new Set(sinContestar);
+  // Sal que la pondría primero: aun así no entra, porque hay otras.
+  const traerPrimero = async (n) => {
+    const todas = nuevasDeSesion(db, 40, 1);
+    return [...todas.filter((r) => excluir.has(r.id)), ...todas.filter((r) => !excluir.has(r.id))].slice(0, n);
+  };
+  const otra = await plan.armarSesion({ size: 20, nuevasPorDia: 10, yaHoy: 0, traerNuevas: traerPrimero, traerVencidas: async () => [], excluir, idDe: (r) => r.id });
+  assert.ok(ids(otra.fresh).every((id) => !excluir.has(id)), 'ninguna de las no contestadas vuelve');
+  assert.equal(otra.fresh.length, 10);
+  // Sin otras disponibles, sí vuelven.
+  const unaSola = await plan.armarSesion({ size: 20, nuevasPorDia: 10, yaHoy: 0, traerNuevas: async () => [{ id: vista }], traerVencidas: async () => [], excluir, idDe: (r) => r.id });
+  assert.deepEqual(ids(unaSola.fresh), [vista]);
+});
+
+await prueba('contestar 5, salir y volver: las 5 no vuelven hoy (salvo las falladas) y el resto se re-sortea', async () => {
+  const db = base({ entradas: 200 });
+  const armarCon = (sal, yaHoy, excluir) =>
+    plan.armarSesion({
+      size: 20, nuevasPorDia: 20, yaHoy,
+      traerNuevas: async (n) => nuevasDeSesion(db, n, sal),
+      traerVencidas: async (n) => vencidas(db, AHORA, n),
+      excluir, idDe: (r) => r.id,
+    });
+  const uno = await armarCon(11, 0, new Set());
+  const s = new StudySession({ due: pares(uno.due), fresh: pares(uno.fresh), meta: 20, distractorsFor: () => [], maxReinserciones: 1, intercalar: true, azar: azarFijo(3) }, AHORA);
+  const contestadas = [];
+  let fallada = null;
+  for (let i = 0; i < 5; i++) {
+    const id = s.current(AHORA).entry.id;
+    const mal = i === 2;
+    const r = s.answer({ grade: mal ? 1 : 3, correct: !mal, elapsedMs: 5000, usedHint: false }, AHORA);
+    persistir(db, r.state);
+    contestadas.push(id);
+    if (mal) fallada = id;
+  }
+  const dos = await armarCon(99, 4, new Set(s.nuevasSinContestar()));
+  const todas = [...ids(dos.due), ...ids(dos.fresh)];
+  assert.ok(contestadas.filter((id) => id !== fallada).every((id) => !todas.includes(id)), 'las 4 acertadas no vuelven hoy');
+  assert.ok(!todas.includes(fallada), 'la fallada tampoco vuelve hoy (ya se reinsertó en su sesión; vuelve mañana)');
+  const pendientesAntes = ids(uno.fresh).filter((id) => !contestadas.includes(id));
+  assert.notDeepEqual(ids(dos.fresh).slice(0, pendientesAntes.length), pendientesAntes, 'lo no contestado no sale en el mismo orden');
+  assert.equal(contar(db, AHORA), 0, 'el conteo de HOY no cambia por cuáles salgan: ninguna vence hoy');
+});
+
+await prueba('las vencidas van en orden al azar e intercaladas con las nuevas, nunca todas las nuevas al final', () => {
+  const due = pares(Array.from({ length: 12 }, (_, i) => ({ id: i + 1, ...graduada(i + 1, 12 - i) })));
+  const fresh = pares([101, 102, 103, 104].map((id) => ({ id })));
+  const orden = (sem) => {
+    const s = new StudySession({ due, fresh, meta: 20, distractorsFor: () => [], intercalar: true, azar: azarFijo(sem) });
+    const out = [];
+    while (!s.terminada) {
+      out.push(s.current().entry.id);
+      s.skip();
+    }
+    return out;
+  };
+  const a = orden(1);
+  const b = orden(2);
+  assert.equal(a.length, 16);
+  assert.notDeepEqual(a, b, 'otro azar, otro orden');
+  const posNuevas = a.map((id, i) => (id > 100 ? i : -1)).filter((i) => i >= 0);
+  assert.ok(posNuevas[0] < 8, 'las nuevas no esperan a que se acaben las vencidas');
+  assert.ok(Math.max(...posNuevas) - Math.min(...posNuevas) >= 6, 'repartidas, no amontonadas');
+  const soloVencidas = a.filter((id) => id <= 100);
+  assert.notDeepEqual(soloVencidas, [...soloVencidas].sort((x, y) => x - y), 'las vencidas no van en su orden de siempre');
+});
+
+await prueba('sesión vacía: el motor no tiene tarjeta, ya está terminada y no deja nada pendiente', () => {
+  const s = new StudySession({ due: [], fresh: [], meta: 20, distractorsFor: () => [], intercalar: true });
+  assert.equal(s.current(), null);
+  assert.equal(s.terminada, true);
+  assert.deepEqual(s.nuevasSinContestar(), []);
+  assert.deepEqual(s.progress, { done: 0, goal: 0 });
+});
+
+await prueba('estado final: próximo repaso (mañana si solo hay falladas de hoy) y nuevas que quedan en el catálogo', () => {
+  const enDos = { ...graduada(1, 0), vence_en: fecha.startOfDay(AHORA + 2 * DIA) };
+  const db = base({ entradas: 10, filas: [enDos] });
+  const proximo = (d) => correr(d, sql.consultaProximoRepaso(1, FILTRO, AHORA))[0].proximo;
+  assert.equal(proximo(db), fecha.startOfDay(AHORA + 2 * DIA));
+  const fallada = { entry_id: 2, repeticiones: 0, intervalo: 0, vence_en: AHORA + 60_000, ultimo_repaso: AHORA - 1000, fallos: 1 };
+  const db2 = base({ entradas: 10, filas: [enDos, fallada] });
+  assert.equal(proximo(db2), fecha.startOfDay(fecha.addDays(AHORA, 1)), 'la fallada de hoy vuelve mañana, no en un minuto');
+  assert.equal(proximo(base({ entradas: 10 })), null, 'sin tarjetas estudiadas no hay próximo repaso');
+  assert.equal(correr(db2, sql.consultaContarNuevas(1, FILTRO))[0].n, 8);
+});
+
 // ── calificar ────────────────────────────────────────────────────────────
 await prueba('calificar una frase la saca de vencidas y le pone fecha futura', () => {
   const db = base({ entradas: 5, filas: [graduada(1, 2)] });
@@ -378,13 +504,19 @@ await prueba('`reinsertada` dice lo que hizo la sesión: la fallada vuelve una v
   assert.ok(resultados.filter(([id]) => id !== 1).every(([, re]) => re === false), 'las acertadas no vuelven');
 });
 
-await prueba('un acierto en aprendizaje pide volver a SM-2 (requeue) pero la sesión no lo reinserta', () => {
-  const s = new StudySession({ due: [], fresh: pares([{ id: 1 }, { id: 2 }]), meta: 50, distractorsFor: () => [], maxReinserciones: 1, azar: () => 0 });
-  const r = s.answer({ grade: 3, correct: true, elapsedMs: 5000, usedHint: false });
+await prueba('un acierto en aprendizaje: SM-2 pide volver (requeue), la sesión no lo reinserta y queda para mañana (intervalo ≥ 1)', () => {
+  const s = new StudySession({ due: [], fresh: pares([{ id: 1 }, { id: 2 }]), meta: 50, distractorsFor: () => [], maxReinserciones: 1, azar: () => 0 }, AHORA);
+  const r = s.answer({ grade: 3, correct: true, elapsedMs: 5000, usedHint: false }, AHORA);
   assert.equal(r.requeue, true, 'SM-2 la deja en un paso de aprendizaje');
-  assert.equal(r.state.intervalo, 0);
   assert.equal(r.reinsertada, false, 'pero la sesión no la vuelve a mostrar');
+  assert.equal(r.state.intervalo, 1, 'una nueva acertada nunca queda con intervalo 0');
+  assert.equal(r.state.vence_en, fecha.startOfDay(fecha.addDays(AHORA, 1)), 'vence al inicio de mañana');
+  assert.equal(r.state.repeticiones, 1, 'SM-2 no cambia: la repetición cuenta igual');
   assert.equal(s.remaining, 1);
+  // Y la fallada sigue como siempre: intervalo 0, vuelve en la sesión.
+  const f = s.answer({ grade: 1, correct: false, elapsedMs: 5000, usedHint: false }, AHORA);
+  assert.equal(f.state.intervalo, 0);
+  assert.equal(f.reinsertada, true);
 });
 
 await prueba('sesionMerece: la regla de las partidas, 5 respuestas y 70%', () => {

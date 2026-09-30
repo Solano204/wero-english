@@ -1,6 +1,9 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   countDue,
+  countNew,
+  getProximoRepaso,
   getDistractors,
   getDueCards,
   getNewCards,
@@ -9,13 +12,39 @@ import {
   type ContentFilter,
 } from '@/db/queries';
 import { endSession, getNuevasHoy, startSession, touchStreak } from '@/db/progress';
+import { nuevaSemilla } from '@/db/semilla';
 import { MAX_REINSERCIONES, armarSesion, filtroEstudio } from '@/domain/cola';
 import { StudySession, etiquetaRepaso, gradeFrom } from '@/domain/session';
 import type { SessionSummary, StudyCard } from '@/types';
 import * as audio from '@/services/audio';
 import * as haptics from '@/services/haptics';
 
-type Phase = 'idle' | 'loading' | 'active' | 'finished' | 'empty';
+/**
+ * `empty`: no hubo nada que armar (sin vencidas ni nuevas); `error`: no se pudo armar la sesión.
+ * Ninguna de las dos deja a la pantalla sin qué mostrar: las dos tienen su estado final.
+ */
+type Phase = 'idle' | 'loading' | 'active' | 'finished' | 'empty' | 'error';
+
+/** Dónde se guardan, por usuario, las nuevas que la última sesión mostró y no se contestaron. */
+const claveSinContestar = (usuarioId: number) => `wero:nuevas-sin-contestar:${usuarioId}`;
+
+async function leerSinContestar(usuarioId: number): Promise<Set<number>> {
+  try {
+    const crudo = await AsyncStorage.getItem(claveSinContestar(usuarioId));
+    const ids = crudo ? (JSON.parse(crudo) as unknown) : [];
+    return new Set(Array.isArray(ids) ? ids.filter((x): x is number => typeof x === 'number') : []);
+  } catch {
+    return new Set();
+  }
+}
+
+async function guardarSinContestar(usuarioId: number, ids: number[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(claveSinContestar(usuarioId), JSON.stringify(ids));
+  } catch {
+    // Sin esto la próxima sesión solo podría repetir alguna: no vale tumbar el cierre.
+  }
+}
 
 /** Lo que la pantalla necesita saber después de responder. */
 export interface Feedback {
@@ -48,13 +77,20 @@ interface SessionState {
   aciertos: number;
   /** Un salto o un continuar ya está en curso: ignora toques extra. */
   avanzando: boolean;
+  /** Para el estado final: cuándo vuelve el próximo repaso (ms epoch) o null si no hay. */
+  proximoRepaso: number | null;
+  /** Para el estado final: frases nuevas que quedan en el catálogo con el filtro. */
+  nuevasCatalogo: number;
+  /** La sesión en curso es la extra de «Aprender frases nuevas» (solo nuevas). */
+  soloNuevas: boolean;
 
   refreshCounts: (usuarioId: number, filter: ContentFilter) => Promise<void>;
   start: (
     usuarioId: number,
     filter: ContentFilter,
     meta: number,
-    nuevasPorDia: number
+    nuevasPorDia: number,
+    opciones?: { soloNuevas?: boolean }
   ) => Promise<void>;
   answer: (
     usuarioId: number,
@@ -108,31 +144,30 @@ export const useSessionStore = create<SessionState>((set, get) => {
     }, AVANZAR_COOLDOWN_MS);
   }
 
-  return {
-  phase: 'idle',
-  card: null,
-  feedback: null,
-  summary: null,
-  done: 0,
-  goal: 0,
-  remaining: 0,
-  dueCount: 0,
-  pendientes: 0,
-  seguidas: 0,
-  aciertos: 0,
-  avanzando: false,
+  /** Lo que dice el estado final: cuándo vuelve el próximo repaso y cuántas nuevas quedan en el catálogo. */
+  async function datosDeCierre(
+    usuarioId: number,
+    filtro: ContentFilter
+  ): Promise<{ proximoRepaso: number | null; nuevasCatalogo: number }> {
+    try {
+      const [proximoRepaso, nuevasCatalogo] = await Promise.all([
+        getProximoRepaso(usuarioId, filtro),
+        countNew(usuarioId, filtro),
+      ]);
+      return { proximoRepaso, nuevasCatalogo };
+    } catch {
+      return { proximoRepaso: null, nuevasCatalogo: 0 };
+    }
+  }
 
-  refreshCounts: async (usuarioId, filter) => {
-    const n = await countDue(usuarioId, filter);
-    set({ dueCount: n });
-  },
-
-  // `nuevas` se conserva en la firma para no tocar a los cuatro
-  // llamadores, pero ya no se usa: sin plan diario no hay reparto entre
-  // repaso y contenido nuevo.
-  start: async (usuarioId, filter, meta, nuevasPorDia) => {
-    set({ phase: 'loading', feedback: null, summary: null, pendientes: 0 });
-
+  /** Arma la sesión y la deja lista (o en `empty`). La llama `start`, que atrapa cualquier error. */
+  async function armarYEmpezar(
+    usuarioId: number,
+    filter: ContentFilter,
+    meta: number,
+    nuevasPorDia: number,
+    soloNuevas: boolean
+  ): Promise<void> {
     // El modo limpio sí se respeta; el nivel no (ver filtroEstudio): uno es
     // una decisión del usuario sobre qué quiere ver, el otro era una
     // suposición de la app sobre qué puede.
@@ -140,21 +175,32 @@ export const useSessionStore = create<SessionState>((set, get) => {
     filtroSesion = filtro;
 
     /*
-     * La sesión (ver domain/cola.ts): tamaño = meta. Primero las vencidas,
-     * las más atrasadas primero, y luego nuevas hasta el límite de hoy.
-     * Hasta 3 lugares se reservan para nuevas aunque la cola sea larga, y
-     * si quedan lugares de sobra se llenan con más nuevas.
+     * La sesión (ver domain/cola.ts): tamaño = meta. Entran las vencidas
+     * más atrasadas y nuevas hasta el límite de hoy (hasta 3 lugares se
+     * reservan para nuevas aunque la cola sea larga).
+     *
+     * Cada sesión es distinta: las nuevas salen de un sorteo nuevo (una sal
+     * de expo-crypto por sesión, `semillaDeSesion`), se evitan las que la
+     * sesión anterior mostró y no se contestaron, y las vencidas van en orden
+     * al azar intercaladas con las nuevas.
+     *
+     * «Aprender frases nuevas» (`soloNuevas`) es una sesión extra: solo
+     * nuevas, hasta la meta, aunque ya se haya llegado al límite de hoy.
      */
+    const sal = nuevaSemilla();
+    const excluir = await leerSinContestar(usuarioId);
     const { due, fresh } = await armarSesion({
       size: meta,
-      nuevasPorDia,
-      yaHoy: await getNuevasHoy(usuarioId),
-      traerNuevas: (n) => getNewCards(usuarioId, filtro, n),
-      traerVencidas: (n) => getDueCards(usuarioId, filtro, n),
+      nuevasPorDia: soloNuevas ? meta : nuevasPorDia,
+      yaHoy: soloNuevas ? 0 : await getNuevasHoy(usuarioId),
+      traerNuevas: (n) => getNewCards(usuarioId, filtro, n, sal),
+      traerVencidas: soloNuevas ? async () => [] : (n) => getDueCards(usuarioId, filtro, n),
+      excluir,
+      idDe: (c) => c.entry.id,
     });
 
     if (due.length + fresh.length === 0) {
-      set({ phase: 'empty', card: null, remaining: 0 });
+      set({ phase: 'empty', card: null, remaining: 0, ...(await datosDeCierre(usuarioId, filtro)) });
       return;
     }
 
@@ -194,6 +240,7 @@ export const useSessionStore = create<SessionState>((set, get) => {
       fresh,
       meta,
       maxReinserciones: MAX_REINSERCIONES,
+      intercalar: true,
       distractorsFor: (e) => distractorMap.get(e.id) ?? [],
       wordDecoysFor: (e) => wordMap.get(e.id) ?? [],
     });
@@ -212,6 +259,44 @@ export const useSessionStore = create<SessionState>((set, get) => {
       seguidas: 0,
       aciertos: 0,
     });
+  }
+
+  return {
+  phase: 'idle',
+  card: null,
+  feedback: null,
+  summary: null,
+  done: 0,
+  goal: 0,
+  remaining: 0,
+  dueCount: 0,
+  pendientes: 0,
+  seguidas: 0,
+  aciertos: 0,
+  avanzando: false,
+  proximoRepaso: null,
+  nuevasCatalogo: 0,
+  soloNuevas: false,
+
+  refreshCounts: async (usuarioId, filter) => {
+    const n = await countDue(usuarioId, filter);
+    set({ dueCount: n });
+  },
+
+  // `nuevas` se conserva en la firma para no tocar a los cuatro
+  // llamadores, pero ya no se usa: sin plan diario no hay reparto entre
+  // repaso y contenido nuevo.
+  start: async (usuarioId, filter, meta, nuevasPorDia, opciones) => {
+    const soloNuevas = Boolean(opciones?.soloNuevas);
+    set({ phase: 'loading', feedback: null, summary: null, pendientes: 0, soloNuevas });
+    try {
+      await armarYEmpezar(usuarioId, filter, meta, nuevasPorDia, soloNuevas);
+    } catch (err) {
+      // Sin esto una consulta que falla dejaba la pantalla en «Armando tu sesión» para siempre.
+      console.warn('[estudio] no se pudo armar la sesión', err);
+      engine = null;
+      set({ phase: 'error', card: null, remaining: 0 });
+    }
   },
 
   answer: async (usuarioId, correct, elapsedMs, usedHint) => {
@@ -316,11 +401,15 @@ export const useSessionStore = create<SessionState>((set, get) => {
         });
       }
 
+      // Las nuevas que se vieron y no se contestaron: la próxima sesión las evita (ver armarSesion).
+      await guardarSinContestar(usuarioId, engine.nuevasSinContestar());
+
       // Solo si la sesión se terminó de verdad: al salir a medias no se ofrece seguir.
       const pendientes =
         completa && filtroSesion ? await countDue(usuarioId, filtroSesion) : 0;
+      const cierre = completa && filtroSesion ? await datosDeCierre(usuarioId, filtroSesion) : {};
 
-      set({ phase: 'finished', summary, card: null, feedback: null, pendientes });
+      set({ phase: 'finished', summary, card: null, feedback: null, pendientes, ...cierre });
       engine = null;
       sesionId = null;
     } finally {
@@ -345,6 +434,9 @@ export const useSessionStore = create<SessionState>((set, get) => {
       seguidas: 0,
       aciertos: 0,
       avanzando: false,
+      proximoRepaso: null,
+      nuevasCatalogo: 0,
+      soloNuevas: false,
     });
   },
   };

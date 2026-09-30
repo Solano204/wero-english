@@ -67,7 +67,11 @@ async function vaciarUsuario(usuarioId: number): Promise<void> {
       await db.runAsync(`DELETE FROM "${tabla}" WHERE usuario_id = ?;`, [usuarioId]);
     }
   });
-  await AsyncStorage.multiRemove(CELEBRACIONES.map((t) => `wero:${t}-celebrada:${usuarioId}`));
+  await AsyncStorage.multiRemove([
+    ...CELEBRACIONES.map((t) => `wero:${t}-celebrada:${usuarioId}`),
+    // Las nuevas que la última sesión de Estudiar dejó sin contestar (useSessionStore).
+    `wero:nuevas-sin-contestar:${usuarioId}`,
+  ]);
 }
 
 /** Tras un borrado de datos se vuelve a Practicar, no al onboarding: la persona ya lo conoce. */

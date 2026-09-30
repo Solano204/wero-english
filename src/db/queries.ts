@@ -4,6 +4,9 @@ import {
   consultaContarVencidas,
   consultaDiagnosticoCola,
   consultaNuevas,
+  consultaContarNuevas,
+  consultaProximoRepaso,
+  semillaDeSesion,
   consultaProgresoPorMundo,
   consultaVencidas,
   paramsUpsertTarjeta,
@@ -75,19 +78,38 @@ export async function getDueCards(
 }
 
 /**
- * Frases sin turno: nunca vistas, o favoritas que nunca se estudiaron. En el orden al azar propio
- * del usuario (su semilla; ver ORDEN_NUEVAS y `ordenDeSemilla`): dos personas no reciben las
- * mismas, y la misma persona recibe siempre el mismo orden.
+ * Frases sin turno: nunca vistas, o favoritas que nunca se estudiaron, en orden al azar (ver
+ * ORDEN_NUEVAS y `ordenDeSemilla`). Con `sal` (Estudiar) cada sesión sortea otro orden; sin ella,
+ * el orden fijo del usuario. Dos personas nunca reciben el mismo.
  */
 export async function getNewCards(
   usuarioId: number,
   filter: ContentFilter,
-  limit: number
+  limit: number,
+  /** Una sal al azar por sesión (Estudiar): cada sesión sortea otro orden. Sin ella, el orden fijo del usuario. */
+  sal?: number
 ): Promise<{ entry: Entry; state: CardState }[]> {
   const db = await getDb();
-  const q = consultaNuevas(usuarioId, await semillaDe(usuarioId), filter, limit);
+  const semilla = await semillaDe(usuarioId);
+  const q = consultaNuevas(usuarioId, sal === undefined ? semilla : semillaDeSesion(semilla, sal), filter, limit);
   const rows = await db.getAllAsync<QueueRow>(q.sql, q.params);
   return rows.map((r) => ({ entry: toEntry(r), state: rowToState(r) }));
+}
+
+/** Frases nuevas que quedan en el catálogo con este filtro. */
+export async function countNew(usuarioId: number, filter: ContentFilter): Promise<number> {
+  const db = await getDb();
+  const q = consultaContarNuevas(usuarioId, filter);
+  const row = await db.getFirstAsync<{ n: number }>(q.sql, q.params);
+  return row?.n ?? 0;
+}
+
+/** Cuándo vuelve el próximo repaso (ms epoch), o null si no hay ninguno programado. */
+export async function getProximoRepaso(usuarioId: number, filter: ContentFilter, now = Date.now()): Promise<number | null> {
+  const db = await getDb();
+  const q = consultaProximoRepaso(usuarioId, filter, now);
+  const row = await db.getFirstAsync<{ proximo: number | null }>(q.sql, q.params);
+  return row?.proximo ?? null;
 }
 
 export async function countDue(

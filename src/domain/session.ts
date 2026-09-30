@@ -1,7 +1,8 @@
 import { buildCard } from './exercise';
-import { REINSERCION_MAX, REINSERCION_MIN } from './cola';
+import { REINSERCION_MAX, REINSERCION_MIN, intercalar } from './cola';
 import { review, gradeFrom, newCardState } from './sm2';
 import { conteo } from '@/utils/text';
+import { addDays, startOfDay } from '@/utils/date';
 import type {
   AnswerResult,
   CardState,
@@ -35,8 +36,13 @@ export interface SessionInput {
    * 0 = nunca vuelve. Las acertadas no vuelven, estén o no en aprendizaje.
    */
   maxReinserciones?: number;
-  /** Azar para elegir a cuántas tarjetas vuelve (3 a 5). Se inyecta en las pruebas. */
+  /** Azar para elegir a cuántas tarjetas vuelve (3 a 5) y para intercalar. Se inyecta en las pruebas. */
   azar?: () => number;
+  /**
+   * Vencidas en orden al azar y nuevas repartidas entre ellas (ver `intercalar`), en vez de todas
+   * las vencidas y luego las nuevas. Estudiar lo usa siempre; sin él, el orden de siempre.
+   */
+  intercalar?: boolean;
 }
 
 export interface PendingCard {
@@ -67,6 +73,8 @@ export class StudySession {
   private reinserciones = 0;
   /** Las que entraron como nuevas; solo cuentan como vistas si se responden. */
   private freshIds = new Set<number>();
+  /** Las nuevas que llegaron a mostrarse (fueron la tarjeta actual). */
+  private mostradas = new Set<number>();
 
   constructor(input: SessionInput, now: number = Date.now()) {
     this.startedAt = now;
@@ -105,7 +113,10 @@ export class StudySession {
     // Primero las vencidas (ya vienen de la más atrasada a la menos), luego
     // las nuevas. La cola se recorta a la meta; el total arranca fijo y solo
     // crece con cada reinserción, para que la barra siempre llegue al final.
-    this.queue = [...dueCards, ...freshCards].slice(0, input.meta);
+    this.queue = (input.intercalar ? intercalar(dueCards, freshCards, this.azar) : [...dueCards, ...freshCards]).slice(
+      0,
+      input.meta
+    );
     this.total = this.queue.length;
   }
 
@@ -135,7 +146,16 @@ export class StudySession {
     // hacer esperar al usuario mirando una pantalla vacía es peor que
     // mostrarle la tarjeta un minuto antes de lo ideal.
     const next = ready ?? this.queue[0];
+    if (next && this.freshIds.has(next.card.entry.id)) this.mostradas.add(next.card.entry.id);
     return next?.card ?? null;
+  }
+
+  /**
+   * Las nuevas que se mostraron y no se contestaron (se saltaron o se salió antes). La próxima
+   * sesión las evita mientras haya otras, para no ver las mismas frases al volver a entrar.
+   */
+  nuevasSinContestar(): number[] {
+    return [...this.mostradas].filter((id) => !this.newSeen.has(id));
   }
 
   get remaining(): number {
@@ -175,11 +195,16 @@ export class StudySession {
     if (!pending) return null;
 
     const grade = result.grade;
-    const { state, requeue } = review(
-      pending.card.state,
-      grade,
-      now
-    );
+    const sm2 = review(pending.card.state, grade, now);
+    const { requeue } = sm2;
+    let state = sm2.state;
+    // Una acertada que SM-2 deja en un paso de aprendizaje (intervalo 0, «vuelve en 1 o 10 min»)
+    // no vuelve en esta sesión: solo las falladas se reinsertan. Se programa para mañana con
+    // intervalo 1, que es cuando de verdad la vuelve a ver, en vez de quedar con intervalo 0. SM-2
+    // no cambia: `repeticiones` y `facilidad` siguen igual, así que la frase gradúa al mismo paso.
+    if (grade !== 1 && state.intervalo === 0) {
+      state = { ...state, intervalo: 1, vence_en: startOfDay(addDays(now, 1)) };
+    }
 
     this.answered++;
     if (this.freshIds.has(pending.card.entry.id)) this.newSeen.add(pending.card.entry.id);
