@@ -34,6 +34,8 @@ interface Props {
   path: string | null;
   /** El punto de color del mundo, esquina inferior izquierda del estado vacío. */
   tinte?: string;
+  /** Id del mundo, para el ícono del estado vacío. */
+  mundo?: string;
   /** Ancho fijo (p. ej. el de la carta del mazo o el tope de alto de Estudio, ya convertido a ancho). */
   ancho?: number;
   /** Alto fijo. Solo tiene efecto junto con `ancho`; sin él, se estira al contenedor con 16:9. */
@@ -60,7 +62,7 @@ interface Props {
  * `scrollY`/`zoomEntrada` son solo de Detalle. Con reducir movimiento no hay fundido,
  * paralaje ni zoom, y el desenfoque se quita de golpe.
  */
-export function MarcoImagen({ path, tinte, ancho, alto, desenfocada = false, scrollY, zoomEntrada = false, style }: Props) {
+export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = false, scrollY, zoomEntrada = false, style }: Props) {
   const reducido = useMovimientoReducido();
   const [cargada, setCargada] = useState(false);
   const [fallo, setFallo] = useState(false);
@@ -103,7 +105,7 @@ export function MarcoImagen({ path, tinte, ancho, alto, desenfocada = false, scr
 
   return (
     <View style={[styles.marco, caja, style]} accessible={false} importantForAccessibility="no-hide-descendants">
-      <EstadoVacio tinte={tinte} visible={!conImagen} />
+      <EstadoVacio tinte={tinte} mundo={mundo} visible={!conImagen} />
       {conImagen && !cargada ? (
         <ProveedorEsqueleto etiqueta="Cargando la imagen" style={StyleSheet.absoluteFill}>
           <Hueso radius={0} style={StyleSheet.absoluteFill} />
@@ -130,7 +132,7 @@ export function MarcoImagen({ path, tinte, ancho, alto, desenfocada = false, scr
   );
 }
 
-function EstadoVacio({ tinte, visible }: { tinte?: string; visible: boolean }) {
+function EstadoVacio({ tinte, mundo, visible }: { tinte?: string; mundo?: string; visible: boolean }) {
   if (!visible) return null;
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -148,7 +150,7 @@ function EstadoVacio({ tinte, visible }: { tinte?: string; visible: boolean }) {
       </View>
       {tinte ? (
         <View style={styles.puntoWrap}>
-          <PuntoMundo tinte={tinte} />
+          <PuntoMundo tinte={tinte} mundo={mundo} />
         </View>
       ) : null}
     </View>

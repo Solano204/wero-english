@@ -9,8 +9,10 @@ import { textoMundo } from './datos';
 
 interface Props {
   nombre: string;
-  /** El color del mundo: un punto y la barra fina (COLOR-1). */
+  /** El color del mundo: su ícono y la barra fina (COLOR-1). */
   tinte: string;
+  /** Id del mundo, para su ícono. */
+  mundo?: string;
   dominadas: number;
   total: number;
   fraccion: number;
@@ -26,7 +28,7 @@ interface Props {
  * color. Con 0 dominadas la barra queda vacía, pero la fila se queda. Toda la fila lleva
  * a la pantalla del mundo.
  */
-export function FilaMundo({ nombre, tinte, dominadas, total, fraccion, primera, indice, activo, onPress }: Props) {
+export function FilaMundo({ nombre, tinte, mundo, dominadas, total, fraccion, primera, indice, activo, onPress }: Props) {
   return (
     <Presionable
       onPress={onPress}
@@ -36,7 +38,7 @@ export function FilaMundo({ nombre, tinte, dominadas, total, fraccion, primera, 
     >
       <View style={styles.cabeza}>
         <View style={styles.nombre}>
-          <PuntoMundo tinte={tinte} />
+          <PuntoMundo tinte={tinte} mundo={mundo} />
           <Text style={styles.titulo}>{nombre}</Text>
         </View>
         <Text style={styles.cuenta}>{textoMundo({ dominadas, total })}</Text>

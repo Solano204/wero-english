@@ -2,12 +2,13 @@
  * Tokens de diseño. Ningún componente define colores ni medidas propias:
  * todo sale de aquí para que un cambio de paleta sea un cambio de archivo.
  *
- * v5.1: magenta nocturno.
+ * v6.0: Cobalto nocturno.
  *
  * Wero enseña el inglés que no está en los libros: jerga de calle, AAVE,
- * hip-hop, oficina. Ese idioma se aprende de oído y vive de noche, en
- * letreros y bocinas. De ahí sale la dirección: tinta magenta profunda y
- * un rosa neón que suena a synthwave, la misma noche urbana en otra llave.
+ * hip-hop, oficina. Ese idioma se aprende de oído y vive de noche. La
+ * identidad son tres colores y nada más: negro (una tinta casi negra, no
+ * #000), blanco (un blanco frío, no #FFF) y un solo azul cobalto. Sobria,
+ * premium y sin arcoíris: el azul es lo único que brilla.
  *
  * Cinco decisiones que sostienen todo lo demás:
  *
@@ -20,7 +21,7 @@
  *    del opuesto (`filoLuz`). Un borde parejo convierte una lista en una
  *    reja; el filo la convierte en capas de vidrio.
  *
- * 3. El acento es magenta, no ámbar. Y es una restricción del producto,
+ * 3. El acento es azul, no ámbar. Y es una restricción del producto,
  *    no un gusto: el ámbar ya está ocupado por el FALLO, y por muy buena
  *    razón (ver `wrong`). Si la marca fuera ámbar, el color de "te
  *    equivocaste" sería el color de la app.
@@ -30,89 +31,97 @@
  *    es verse, es que las tarjetas floten.
  *
  * 5. Hay una sola superficie de color en toda la app, y es de contraste,
- *    no de tema: la tarjeta de "tu sesión de hoy" (`contraste`). Una
- *    sola, o deja de resaltar.
+ *    no de tema: la tarjeta de "tu sesión de hoy" (`contraste`, un azul
+ *    marino hondo). Una sola, o deja de resaltar.
+ *
+ * El azul tiene DOS versiones, porque ningún azul sirve para las dos cosas:
+ * `primario` (#1F5BFF, relleno de botón con texto claro encima: 4.85:1) y
+ * `accent` (#6D9BFF, texto e ícono sobre el fondo oscuro: 6.04:1 o más). La
+ * tabla de contrastes completa está en DESIGN.md.
  */
 
-const colorBase = {
-  // Fondos. Tinta magenta, no negro puro: el negro absoluto produce halo en
-  // paneles OLED y hace que el texto claro vibre en sesiones largas.
-  bg: '#0F0B14',
+export const color = {
+  // Fondos. Tinta casi negra con un punto de azul, no negro puro: el negro
+  // absoluto produce halo en paneles OLED y hace que el texto claro vibre en
+  // sesiones largas.
+  bg: '#07080B',
   /** Abajo del degradado. La parte honda. */
-  bgFin: '#0A0710',
-  bgAlto: '#181220',
-  surface: '#1A1422',
-  surfaceAlt: '#231B2E',
-  surfaceHigh: '#2C2338',
-  surfaceSolida: '#1A1422',
+  bgFin: '#040507',
+  bgAlto: '#0B0C10',
+  surface: '#0F1116',
+  surfaceAlt: '#161A21',
+  surfaceHigh: '#1C202A',
+  surfaceSolida: '#0F1116',
   /** `surface` sin opacidad: el extremo transparente de un degradado que se funde con ella (el final de una fila recortada). */
-  surfaceSinAlfa: 'rgba(26, 20, 34, 0)',
+  surfaceSinAlfa: 'rgba(15, 17, 22, 0)',
 
-  // Texto. Hueso violeta, no blanco puro: el #FFF sobre tinta vibra y
-  // cansa igual que el negro sobre papel blanco.
+  // Texto. Blanco frío, no blanco puro: el #FFF sobre tinta vibra y cansa
+  // igual que el negro sobre papel blanco.
   //
-  // textFaint se aclaró de #8C7F96 (fallaba AA sobre surfaceAlt, surfaceHigh
-  // y contraste) a #968A9F. Todos los pares de texto pasan 4.5:1 sobre las
-  // ocho superficies; ver la tabla de contrastes en DESIGN.md.
-  text: '#F5EEF8',
-  textMuted: '#C3B6CC',
-  textFaint: '#968A9F',
+  // textFaint se aclaró de #717A8A (daba 3.76:1 sobre surfaceHigh) a #7F8899
+  // (4.56:1). Todos los pares de texto pasan 4.5:1 sobre las superficies; ver
+  // la tabla de contrastes en DESIGN.md.
+  text: '#F4F6FA',
+  textMuted: '#A9B1BF',
+  textFaint: '#7F8899',
 
-  // Escala 50–900 de los neutros (COLOR-3), tinta violeta. Los pasos 50, 200,
+  // Escala 50–900 de los neutros (COLOR-3), grises fríos. Los pasos 50, 200,
   // 300, 700, 800 y 900 son `text`, `textMuted`, `textFaint`, `surfaceHigh`,
   // `surface` y `bg`; el resto está interpolado entre ellos.
-  neutral50: '#F5EEF8',
-  neutral100: '#DDCFE5',
-  neutral200: '#C3B6CC',
-  neutral300: '#968A9F',
-  neutral400: '#7C6B8B',
-  neutral500: '#615171',
-  neutral600: '#463955',
-  neutral700: '#2C2338',
-  neutral800: '#1A1422',
-  neutral900: '#0F0B14',
+  neutral50: '#F4F6FA',
+  neutral100: '#CED3DC',
+  neutral200: '#A9B1BF',
+  neutral300: '#7F8899',
+  neutral400: '#5E6574',
+  neutral500: '#4E5462',
+  neutral600: '#3D434F',
+  neutral700: '#1C202A',
+  neutral800: '#0F1116',
+  neutral900: '#07080B',
 
-  border: '#2E2438',
-  borderStrong: '#523D67',
+  border: '#222733',
+  borderStrong: '#434957',
 
-  // Magenta eléctrico (synthwave). Sobre tinta se lee como una señal
-  // encendida, y deja libres el ámbar para el fallo y el verde para el acierto.
-  accent: '#FF3DAA',
-  accentSoft: 'rgba(255, 61, 170, 0.14)',
-  // Aclarado de #D1167F: no pasaba 4.5:1 contra varias superficies (no es
-  // texto en la app hoy, pero se deja pasando AA para no dejar cabos sueltos).
-  accentDeep: '#ED51A8',
-  // Escala 50–900 del acento (COLOR-3). El 400 es `accent`; los demás salen de
-  // la misma familia en OKLCH, con luminosidad pareja entre pasos.
-  accent50: '#FFE0F2',
-  accent100: '#FFB8E0',
-  accent200: '#FF8FCE',
-  accent300: '#FF66BC',
-  accent400: '#FF3DAA',
-  accent500: '#FF0E95',
-  accent600: '#DE007D',
-  accent700: '#AF0063',
-  accent800: '#800048',
-  accent900: '#52002E',
+  // Azul cobalto, la versión para texto e íconos sobre el fondo oscuro (el
+  // relleno de botón es `primario`, más hondo). Deja libres el ámbar para el
+  // fallo y el verde para el acierto.
+  accent: '#6D9BFF',
+  accentSoft: 'rgba(31, 91, 255, 0.16)',
+  // La línea de abajo de una ficha elegida (TileBuilder). Igual que `accent`:
+  // pasa 4.5:1 sobre todas las superficies.
+  accentDeep: '#6D9BFF',
+  // Escala 50–900 del acento (COLOR-3). El 400 es el azul de relleno
+  // (`primario`), el 900 y el 100 los extremos de `senal`; los demás salen de
+  // la misma familia en OKLCH.
+  accent50: '#DCE6FE',
+  accent100: '#BFD2FF',
+  accent200: '#8DAEFE',
+  accent300: '#5989FC',
+  accent400: '#1F5BFF',
+  accent500: '#1B4DD5',
+  accent600: '#1740AC',
+  accent700: '#133385',
+  accent800: '#0F2760',
+  accent900: '#0B1A3D',
 
-  // Texto encima del magenta: tinta, no blanco. Blanco sobre magenta no pasa
-  // contraste y se ve lavado.
-  onAccent: '#1A0612',
+  // Texto encima de `accent` (el azul claro, en rellenos chicos: una ficha, una
+  // casilla): tinta, 7.42:1. Sobre el azul de relleno va `onPrimario`.
+  onAccent: '#07080B',
 
-  /** La única superficie de color. De contraste, no de tema. */
-  contraste: '#3A1640',
-  onContraste: '#F5EEF8',
+  /** La única superficie de color, la tarjeta HOY: azul marino hondo. De contraste, no de tema. */
+  contraste: '#0B1A3D',
+  onContraste: '#F4F6FA',
   // Escala 50–900 del primario (COLOR-3). El 800 es `contraste`.
-  contraste50: '#F5E8F7',
-  contraste100: '#E5C4EB',
-  contraste200: '#D59FDE',
-  contraste300: '#C57AD1',
-  contraste400: '#B556C5',
-  contraste500: '#9D3CAE',
-  contraste600: '#7C2F89',
-  contraste700: '#5B2365',
-  contraste800: '#3A1640',
-  contraste900: '#250E29',
+  contraste50: '#E0E8FA',
+  contraste100: '#C9D6F2',
+  contraste200: '#92A8D6',
+  contraste300: '#5E7BBA',
+  contraste400: '#2D4E9C',
+  contraste500: '#244081',
+  contraste600: '#1B3267',
+  contraste700: '#13254E',
+  contraste800: '#0B1A3D',
+  contraste900: '#050D21',
 
   correct: '#3DDC97',
   correctSoft: 'rgba(61, 220, 151, 0.12)',
@@ -124,8 +133,7 @@ const colorBase = {
   wrongSoft: 'rgba(245, 185, 66, 0.12)',
   wrongDeep: '#D99A1E',
 
-  // Estrellas y aciertos seguidos. Dorado, nunca menos de 10.37:1 sobre las
-  // ocho superficies.
+  // Estrellas y aciertos seguidos. Dorado, 11.30:1 o más sobre las superficies.
   star: '#FFD166',
   // El filo de las celdas con las tres estrellas: `star` al 32 %. Es un borde fijo, no un
   // degradado: son hasta doscientas celdas en una lista y cada capa cuesta al hacer scroll.
@@ -138,23 +146,22 @@ const colorBase = {
   riskStrong: '#F37B68',
   riskStrongSoft: 'rgba(243, 123, 104, 0.12)',
 
-  // Colores de mundo (COLOR-1). Una familia: misma luminosidad (OKLCH L 0.73) y
-  // misma saturación (C 0.12); solo cambia el tono. Ninguno queda a menos de
-  // 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan
-  // 4.5:1 sobre las ocho superficies (el más bajo, `tech`, da 5.53). Van en
-  // chico: un punto, una etiqueta y una barra fina; nunca en fondos grandes
-  // ni en botones. `calle` y `gente` se recalcularon de tono: chocaban con
-  // el acento (a 1° y 24°) y, tras separarse de él, entre sí. Las piezas de
-  // Dulces no llevan estos tintes: usan `dulce` (ver más abajo).
+  // Colores de mundo (COLOR-1). Con una identidad de tres colores los mundos
+  // no pueden ser un arcoíris: son una escala de azules (el tono del acento,
+  // de OKLCH L 0.64 a 0.92), y lo que distingue a un mundo de otro es su
+  // ícono (`ICONO_MUNDO`, lo pinta `PuntoMundo`), no el color. Todos pasan
+  // 4.5:1 sobre las superficies. Van en chico: el ícono, una etiqueta y una
+  // barra fina; nunca en fondos grandes ni en botones. Las piezas de Dulces
+  // no llevan estos tintes: usan `dulce` (ver más abajo).
   world: {
-    dia_a_dia: '#87ADDC',
-    calle: '#CAD368',
-    dinero: '#80CE55',
-    gente: '#88DD89',
-    cultura: '#AEA3E4',
-    tech: '#32AEAA',
-    legal: '#C98BDD',
-    fonetica: '#BEC539',
+    dia_a_dia: '#5686F2',
+    calle: '#6794F6',
+    dinero: '#79A2F9',
+    gente: '#8BB0FD',
+    cultura: '#9EBDFD',
+    tech: '#B2CBFD',
+    legal: '#C4D8FF',
+    fonetica: '#D8E5FE',
   },
 
   /**
@@ -177,80 +184,63 @@ const colorBase = {
   },
 
   /** Velo de la respuesta. Opaco de verdad: tapa lo de atrás. */
-  velo: 'rgba(10, 7, 16, 0.94)',
+  velo: 'rgba(7, 8, 11, 0.94)',
 
   /** Filo iluminado: el canto de arriba de una superficie. */
-  filo: 'rgba(255, 255, 255, 0.16)',
+  filo: 'rgba(255, 255, 255, 0.14)',
 
   // Fondos de banda de FeedbackBand: una versión hundida del color de
   // veredicto, para que el texto de acierto/fallo no vaya sobre `surface`.
-  correctFondo: '#081610',
-  wrongFondo: '#181205',
+  correctFondo: '#0B1715',
+  wrongFondo: '#18140F',
 
   /** Letra grande de un marcador de imagen/portada pendiente. */
-  textSobrePortada: 'rgba(245, 238, 248, 0.22)',
+  textSobrePortada: 'rgba(244, 246, 250, 0.22)',
   /** Oscurece una portada con imagen o degradado para que el texto lea. */
-  veloPortada: 'rgba(10, 7, 16, 0.42)',
+  veloPortada: 'rgba(7, 8, 11, 0.42)',
   /** Carril vacío de ProgressBar: más oscuro que la superficie que lo trae. */
-  trackFondo: 'rgba(0, 0, 0, 0.38)',
+  trackFondo: 'rgba(0, 0, 0, 0.42)',
   /** Velo del muro de desbloqueo, sobre el BlurView. */
-  veloMuro: 'rgba(10, 7, 16, 0.72)',
+  veloMuro: 'rgba(7, 8, 11, 0.74)',
   /** Velo de la barra de pestañas, sobre su BlurView. */
-  veloBarra: 'rgba(26, 20, 34, 0.72)',
+  veloBarra: 'rgba(15, 17, 22, 0.74)',
   /** Borde de la pastilla de pestaña activa. */
-  accentBorde: 'rgba(255, 61, 170, 0.32)',
+  accentBorde: 'rgba(109, 155, 255, 0.32)',
   /** Canto inferior de una pieza de juego, para el efecto de relieve. */
   biselSombra: 'rgba(0, 0, 0, 0.45)',
   /** shadowColor genérico: mismo negro que ya usa `shadow`, con nombre. */
   shadow: '#000000',
   /**
-   * Verde-naranja del icono de notificación en Android (`lightColor` del
-   * canal). Es un requisito del sistema operativo, no de la paleta: no
-   * lo cambies para que combine.
+   * Tinte del ícono de notificación en Android (el `color` del plugin de
+   * expo-notifications en app.json y el `lightColor` del canal): el azul de
+   * relleno. Si cambia, cambia también en app.json.
    */
-  notifAndroid: '#E8543F',
+  notifAndroid: '#1F5BFF',
 
-  // ── Bloques (tokens que una paleta puede pintar distinto al acento) ──
+  // ── Bloques: lo que se pinta con el azul de relleno o con el de texto ──
   /** Relleno de la acción principal (botón primario, botón de ícono de acento, el círculo del reproductor). */
-  primario: '#FF3DAA',
+  primario: '#1F5BFF',
   /** Texto e ícono sobre `primario`. */
-  onPrimario: '#1A0612',
+  onPrimario: '#F4F6FA',
   /** Ícono y etiqueta de la pestaña activa, y de las inactivas. */
-  barraActivo: '#FF3DAA',
-  barraInactivo: '#968A9F',
+  barraActivo: '#6D9BFF',
+  barraInactivo: '#747E8E',
   /** Fondo de la pastilla de la pestaña activa. */
-  pastilla: 'rgba(255, 61, 170, 0.14)',
+  pastilla: 'rgba(109, 155, 255, 0.18)',
   /** La hoja de veredicto de un acierto y su texto. */
-  hojaAcierto: '#081610',
+  hojaAcierto: '#0B1715',
   onHojaAcierto: '#3DDC97',
   /** Los tres pasos del degradado `senal` (del hondo a la luz). */
-  senalInicio: '#52002E',
-  senalMedio: '#FF3DAA',
-  senalFin: '#FFB8E0',
+  senalInicio: '#0B1A3D',
+  senalMedio: '#1F5BFF',
+  senalFin: '#BFD2FF',
   /** El degradado neutro de las portadas sin imagen (`gradiente.neutro`). */
-  portadaInicio: '#1B242F',
-  portadaFin: '#111820',
+  portadaInicio: '#131B2B',
+  portadaFin: '#0C0F15',
 } as const;
 
-/** Un color de la paleta, sin los literales de `as const`: otra paleta pone otros valores con la misma forma. */
-type Ensanchar<T> = { -readonly [K in keyof T]: T[K] extends string ? string : Ensanchar<T[K]> };
-export type Color = Ensanchar<typeof colorBase>;
-
-/** La paleta de `tokens.ts` tal cual (en desarrollo, `color` puede traer otra encima: ver paletaActiva.ts). */
-export const COLOR_BASE: Color = { ...colorBase, world: { ...colorBase.world }, dulce: { ...colorBase.dulce } };
-
-export const color: Color = { ...COLOR_BASE, world: { ...COLOR_BASE.world }, dulce: { ...COLOR_BASE.dulce } };
-
-/** Si la paleta es clara: las barras del sistema van con íconos oscuros. */
-export const tema = { claro: false };
-
-// Solo en desarrollo: el muestrario puede aplicar otra paleta a la app real (se elige en Ajustes y recarga). Tiene
-// que pasar aquí, antes de calcular FONDO, filoLuz, senal y los demás derivados, y antes de cualquier StyleSheet.
-if (__DEV__) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { aplicarPaletaDev } = require('./paletaActiva') as typeof import('./paletaActiva');
-  aplicarPaletaDev(color, tema);
-}
+/** Paleta oscura: las barras del sistema van con íconos claros. */
+export const tema = { claro: false } as const;
 
 /** rgba() de un hex de `color`, para que los degradados de luz de abajo sigan al acento y al veredicto en vez de quedar fijos en un tono viejo si vuelven a cambiar. */
 function conAlfa(hex: string, alfa: number): string {
@@ -335,8 +325,8 @@ export const resplandorSol: [string, string, string] = [
 ];
 
 /**
- * Señal (v5.0). Degradado dentro del mismo tono (COLOR-2): del magenta hondo a
- * la luz. Sale de la escala del acento, no de hex nuevos.
+ * Señal. Degradado dentro del mismo tono (COLOR-2): del azul marino hondo al
+ * cobalto y a la luz. Sale de tokens de `color`, no de hex nuevos.
  */
 export const senal: [string, string, string] = [color.senalInicio, color.senalMedio, color.senalFin];
 
@@ -509,7 +499,7 @@ export const layout = {
 } as const;
 
 /**
- * Luz de escena de la señal (v5.0). No es sombra de color (IA-3): es luz que
+ * Luz de escena de la señal. No es sombra de color (IA-3): es luz que
  * vive detrás del contenido. `opacidadMax` es el techo de la aurora; `paralaje`
  * lo que se desplaza con el giroscopio; `resolucion` la escala a la que se
  * pinta el shader (media resolución, sube a pantalla sin costo perceptible).

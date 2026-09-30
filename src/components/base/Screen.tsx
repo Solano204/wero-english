@@ -165,7 +165,7 @@ export function Screen({
         pointerEvents="none"
       />
       {/*
-       * El sol del sistema, hecho visible. Un resplandor cian arriba a
+       * El sol del sistema, hecho visible. Un resplandor azul arriba a
        * la izquierda que da profundidad al fondo y justifica que todos
        * los filos de las tarjetas brillen hacia ese lado.
        */}

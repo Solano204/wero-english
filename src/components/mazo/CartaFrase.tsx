@@ -83,7 +83,7 @@ export function CartaFrase({ entry, activa, alto, ancho, sonando, onSonar, guard
   return (
     <Card llena compacta={densidad !== 'normal'} style={{ height: alto }}>
       <View style={styles.marcoZona}>
-        <MarcoImagen path={entry.imagen} tinte={tinte} ancho={ancho} alto={altoImagen} />
+        <MarcoImagen path={entry.imagen} tinte={tinte} mundo={entry.mundo} ancho={ancho} alto={altoImagen} />
       </View>
 
       <ScrollView

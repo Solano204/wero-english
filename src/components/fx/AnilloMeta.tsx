@@ -107,7 +107,7 @@ function Arco({ valor, total, diametro, trazo, retraso = 0, celebrar = false }: 
 
 /**
  * Anillo de progreso: el arco se llena de 0 a su valor real (900 ms, ease-out)
- * y, si `celebrar`, suelta un destello cian una sola vez. El número real va en
+ * y, si `celebrar`, suelta un destello azul una sola vez. El número real va en
  * `accessibilityLabel`; el lienzo es decorativo. `children` va centrado.
  */
 export function AnilloMeta({ etiqueta, children, ...arco }: Props) {

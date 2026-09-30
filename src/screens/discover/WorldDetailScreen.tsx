@@ -79,7 +79,7 @@ export function WorldDetailScreen() {
                 >
                   <View style={styles.head}>
                     <View style={styles.titulo}>
-                    <PuntoMundo tinte={tint} />
+                    <PuntoMundo tinte={tint} mundo={params.worldId} />
                     <Text style={styles.name}>{p.nombre}</Text>
                   </View>
                     {p.empaquetado ? (

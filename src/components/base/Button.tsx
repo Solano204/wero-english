@@ -88,7 +88,7 @@ export function Button({
     <Presionable
       // Al cambiar de variante con el botón ya en pantalla (Escuchar todos / Detener, Guardar / Guardada) el
       // contenido tomaba los colores de la nueva y el fondo se quedaba con los de la anterior: texto e ícono claros
-      // sobre cian, a 1.47:1, es decir invisibles. Con la variante en la `key` el botón se monta de nuevo y las dos
+      // sobre el relleno de otra variante, casi invisibles. Con la variante en la `key` el botón se monta de nuevo y las dos
       // cosas salen siempre de la misma.
       key={variant}
       accessibilityRole="button"
@@ -149,7 +149,7 @@ const textColor: Record<Variant, string> = {
 const variants: Record<Variant, ViewStyle> = {
   primary: {
     backgroundColor: color.primario,
-    // Sin franja inferior ni halo de color: el cian sólido ya es lo más
+    // Sin franja inferior ni halo de color: el azul sólido ya es lo más
     // encendido de la pantalla y una sombra tintada compite con él (IA-3).
     // La sombra negra `soft` solo lo despega del fondo.
     ...shadow.soft,

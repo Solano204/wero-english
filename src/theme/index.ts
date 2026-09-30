@@ -30,9 +30,8 @@ export {
   inclinacion,
   marcaGoogle,
   tema,
-  COLOR_BASE,
 } from './tokens';
-export type { WorldId, Color } from './tokens';
+export type { WorldId } from './tokens';
 export {
   motionDuration,
   motionEasing,

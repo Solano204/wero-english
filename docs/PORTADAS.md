@@ -31,11 +31,16 @@ imágenes bonitas sueltas. Lo que las une son cuatro reglas, y van en
    legible. El texto lo pone la app y dos textos encimados se ven a
    error, no a diseño.
 
+5. **Solo negro, blanco y azul cobalto.** La identidad de la app son esos
+   tres colores (ver `DESIGN.md`, COLOR-1). Una portada con otro color
+   dominante rompe la familia. Lo que distingue a un mundo o un juego es
+   el sujeto, no el color.
+
 **Estilo base** (pégalo al final de cada prompt):
 
 > Ilustración digital editorial, 3D suave con acabado mate, iluminación
 > cinematográfica lateral, fondo muy oscuro, sombras profundas, paleta
-> reducida a dos o tres colores, sujeto desplazado a la derecha del
+> reducida a negro, blanco frío y azul cobalto (#1F5BFF), sujeto desplazado a la derecha del
 > encuadre con el tercio izquierdo casi vacío, sin texto ni letras, sin
 > logotipos, relación de aspecto 3:1.
 
@@ -45,91 +50,89 @@ imágenes bonitas sueltas. Lo que las une son cuatro reglas, y van en
 
 **calle.webp** — Calle y jerga
 > Una banqueta de ciudad de noche vista de cerca: tenis desgastados, una
-> lata aplastada, luz de neón naranja rebotando en el concreto mojado.
+> lata aplastada, luz de neón azul rebotando en el concreto mojado.
 > Nadie de cuerpo entero, solo el detalle a nivel del piso. Dominante
-> naranja rojizo sobre negro.
+> azul cobalto sobre negro.
 
 **dinero.webp** — Dinero y trabajo
 > Un escritorio de noche visto en diagonal desde arriba: una taza fría, un
 > teclado, una libreta cerrada, la luz azulada de un monitor fuera de
-> cuadro. Sin manos, sin caras. Dominante verde profundo sobre carbón.
+> cuadro. Sin manos, sin caras. Dominante azul cobalto sobre negro.
 
 **dia_a_dia.webp** — Día a día
 > Una cocina chica al amanecer: una jarra, dos tazas, un trapo colgado,
 > la luz entrando de lado por una ventana que no se ve. Íntimo y en
-> calma. Dominante azul con un punto de luz cálida.
+> calma. Dominante azul cobalto sobre negro.
 
 **gente.webp** — Gente y vínculos
 > Dos sillas viejas juntas en una azotea de noche, vacías, con las luces
 > de la ciudad borrosas al fondo. La ausencia de personas es el punto.
-> Dominante rosa magenta sobre azul muy oscuro.
+> Dominante azul cobalto sobre negro.
 
 **cultura.webp** — Cultura y escuela
 > Una pila de libros usados y un cuaderno abierto en blanco sobre una
 > mesa de madera, luz de lámpara de escritorio en diagonal. Dominante
-> violeta sobre café oscuro.
+> azul cobalto sobre negro.
 
 **tech.webp** — Tecnología
 > Un cable de red y una placa de circuito fotografiada muy de cerca, con
-> profundidad de campo corta y una luz cian pasando por encima. Abstracto,
-> casi textura. Dominante cian sobre negro azulado.
+> profundidad de campo corta y una luz azul pasando por encima. Abstracto,
+> casi textura. Dominante azul cobalto sobre negro.
 
 **legal.webp** — Legal y trámites
 > Un fólder de papel manila abierto con hojas parejas, un sello sin tinta
 > y la sombra de una persiana atravesando la mesa. Frío y burocrático.
-> Dominante gris azulado sobre gris muy oscuro.
+> Dominante azul cobalto sobre negro.
 
 **fonetica.webp** — Pronunciación
 > Una onda de sonido tridimensional en material dorado mate flotando
 > sobre un fondo negro, iluminada desde un costado. Sin micrófono, sin
-> bocina, sin letras. Dominante ámbar dorado sobre negro.
+> bocina, sin letras. Dominante azul cobalto sobre negro.
 
 ---
 
 ## Los diez juegos
 
 **colmena.webp**
-> Celdas hexagonales de panal en relieve, en tono ámbar mate, con una de
+> Celdas hexagonales de panal en relieve, en tono azul mate, con una de
 > ellas levantada un poco sobre las demás. Luz rasante que marca los
-> bordes. Dominante ámbar sobre negro.
+> bordes. Dominante azul cobalto sobre negro.
 
 **pares.webp**
 > Fichas rectangulares apiladas en desorden sobre una superficie oscura,
-> dos de ellas alineadas una junto a la otra. Dominante azul sobre negro.
+> dos de ellas alineadas una junto a la otra. Dominante azul cobalto sobre negro.
 
 **caida.webp**
 > Dos bloques cayendo con estela de movimiento hacia una línea roja al
-> pie del encuadre. Sensación de velocidad. Dominante rojo sobre gris
-> muy oscuro.
+> pie del encuadre. Sensación de velocidad. Dominante azul cobalto sobre negro.
 
 **dulces.webp**
 > Piezas redondeadas de vidrio de colores apiladas en cuadrícula, una de
-> ellas rompiéndose en destellos. Dominante violeta y rosa sobre negro.
+> ellas rompiéndose en destellos. Dominante azul cobalto sobre negro.
 
 **judge.webp** — ¿Lo digo o no?
 > Un bocadillo de diálogo tridimensional partido a la mitad, una mitad
-> verde y la otra ámbar, flotando sobre fondo negro. Sin texto adentro.
+> azul y la otra blanca, flotando sobre fondo negro. Sin texto adentro.
 
 **cazala.webp** — Cázala
 > Una red de pescar hecha de líneas de luz atrapando pequeñas esferas
-> brillantes en el aire. Dominante violeta sobre negro.
+> brillantes en el aire. Dominante azul cobalto sobre negro.
 
 **habla.webp** — Di la palabra
 > Una silueta de onda de voz saliendo de un punto de luz, en material
-> naranja mate, sobre fondo negro. Sin micrófono visible.
+> azul mate, sobre fondo negro. Sin micrófono visible.
 
 **lecturas.webp**
 > Un libro abierto de canto, iluminado desde adentro, con las páginas
-> curvándose. Cálido y quieto. Dominante gris azulado con luz cálida.
+> curvándose. Cálido y quieto. Dominante azul cobalto sobre negro.
 
 **phrasal.webp**
 > Dos piezas de rompecabezas separándose, una más grande y una chica, con
-> luz cian entre ellas. La partícula que cambia todo. Dominante cian
-> sobre negro.
+> luz azul entre ellas. La partícula que cambia todo. Dominante azul cobalto sobre negro.
 
 **azar.webp**
 > Dados de vidrio esmerilado cayendo en el aire, congelados a media
-> caída, con destellos rosados. Dominante rosa sobre negro.
+> caída, con destellos blancos. Dominante azul cobalto sobre negro.
 
 ---
 

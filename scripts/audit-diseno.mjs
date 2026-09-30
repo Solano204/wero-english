@@ -860,7 +860,7 @@ ${L(c.K.rellenos)}
 **Excepción revisada a mano (no cuenta):**
 ${L(c.K.exentos)}
 
-**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (\`gradiente.neutro\`). El degradado de la señal (\`senal\`) va de \`accent900\` a \`accent100\`, sin hex nuevos, y \`npm run check:color\` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: \`filoLuz\` mezcla blanco y cian, y \`FONDO\`. Usos de \`<LinearGradient\`:
+**COLOR-2 · Degradados dentro de un mismo tono.** Las portadas usan un solo degradado neutro (\`gradiente.neutro\`). El degradado de la señal (\`senal\`) va de \`senalInicio\` a \`senalFin\` (azul marino hondo, cobalto y luz), sin hex nuevos, y \`npm run check:color\` verifica que sus tres pasos no se separen más de 8° de tono. Para revisar: \`filoLuz\` mezcla blanco y el azul del acento, y \`FONDO\`. Usos de \`<LinearGradient\`:
 ${L(c.H.gradiente)}
 
 **COLOR-3 · Cada color de marca con escala 50–900.** Se exige a \`accent\`, \`contraste\` (primario) y \`neutral\`, con los diez pasos en \`tokens.ts\`. Sin escala completa: ${c.escalas.length ? c.escalas.map((n) => '\`' + n + '\`').join(', ') : 'ninguno'}. Los colores de estado y los de mundo no llevan escala.
@@ -900,7 +900,7 @@ ${L(c.H.espacioExento)}
 
 ## JERARQUÍA Y ACCIÓN
 
-**ACC-1 · Una sola acción principal, botón sólido de alto contraste.** \`Button\` tiene 4 variantes: \`primary\` (cian sólido), \`secondary\` (con borde), \`ghost\` y \`danger\` (\`Button.tsx:143-158\`). Revisado leyendo cada render, **los hallazgos reales son:**
+**ACC-1 · Una sola acción principal, botón sólido de alto contraste.** \`Button\` tiene 4 variantes: \`primary\` (\`primario\`, azul sólido), \`secondary\` (con borde), \`ghost\` y \`danger\` (\`Button.tsx:143-158\`). Revisado leyendo cada render, **los hallazgos reales son:**
 ${L(c.acc1.reales)}
 ${c.acc1.candidatos.length ? '\nArchivos nuevos con 2 o más `primary` por verificar:\n' + L(c.acc1.candidatos.map((b) => ({ r: b.r, linea: b.tags[0].linea, txt: b.tags.map((t) => `:${t.linea} ${t.variant}`).join('; ') }))) : ''}
 
@@ -925,7 +925,7 @@ ${L(c.H.emoji)}
 **IA-1b · Íconos de un solo set y un solo grosor.** Glifos de texto (▶ ► ■ ✓ ✕ › → ☆…) usados como íconos, mezclados con emojis y con \`IconButton\`:
 ${L(c.H.glifo)}
 
-**IA-3 · Sombras discretas y consistentes; ninguna de color.** El halo cian (\`glow\`) se eliminó: \`primary\` usa \`shadow.soft\` (negra) y la barra de pestañas usa \`shadow.card\`. \`shadow.card\` (opacidad 0.55, radio 20) y \`shadow.raised\` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
+**IA-3 · Sombras discretas y consistentes; ninguna de color.** El halo de color (\`glow\`) se eliminó: \`primary\` usa \`shadow.soft\` (negra) y la barra de pestañas usa \`shadow.card\`. \`shadow.card\` (opacidad 0.55, radio 20) y \`shadow.raised\` (0.7, radio 32) no son discretas. Sombras definidas fuera de los tokens:
 ${L(c.H.propio)}
 
 **Excepción (v5.0):** la luz de la señal (aurora, onda, anillo y destello de \`src/components/fx/\`) es luz de escena, no sombra de color. El audit solo exige que ningún archivo de \`fx/\` use \`shadowColor\`:

@@ -138,7 +138,7 @@ export function ExploreScreen() {
                   >
                     <View style={styles.worldHead}>
                       <View style={styles.worldTitulo}>
-                        <PuntoMundo tinte={tint} />
+                        <PuntoMundo tinte={tint} mundo={m.id} />
                         <Text style={styles.worldName}>{m.nombre}</Text>
                       </View>
                       <Text style={styles.worldCount}>

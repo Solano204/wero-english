@@ -60,7 +60,7 @@ const UMBRAL_SCROLL = space.lg;
  * El lector.
  *
  * Las frases del catálogo van subrayadas y se pueden tocar: subrayada en gris
- * si ya las viste, punteada y en cian si son nuevas. Tocar abre la ficha
+ * si ya las viste, punteada y en azul si son nuevas. Tocar abre la ficha
  * completa. Mientras suena el capítulo, la oración que se escucha se
  * ilumina; el reproductor va fijo abajo, en la zona del pulgar.
  *

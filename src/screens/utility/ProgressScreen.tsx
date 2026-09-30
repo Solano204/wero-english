@@ -183,6 +183,7 @@ export function ProgressScreen() {
                           key={m.id}
                           nombre={m.nombre}
                           tinte={color.world[m.id as WorldId] ?? color.accent}
+                          mundo={m.id}
                           dominadas={m.dominadas}
                           total={m.total}
                           fraccion={m.fraccion}

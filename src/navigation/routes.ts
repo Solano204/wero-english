@@ -63,7 +63,6 @@ export type RootStackParams = {
   Diagnostics: undefined;
   SfxSampler: undefined;
   ProbarVoz: undefined;
-  Muestrario: undefined;
 };
 
 export type MainTabParams = {

@@ -10,6 +10,8 @@ interface Props {
   bloque: string;
   /** El color del mundo: solo el punto (COLOR-1). */
   tinte: string;
+  /** Id del mundo, para su ícono. */
+  mundo?: string;
   onPress: () => void;
 }
 
@@ -18,7 +20,7 @@ interface Props {
  * y un chevron. Toda la fila abre la pantalla del mundo. Es la misma fila de «Por
  * mundo» en Progreso (punto y nombre), sin el avance: aquí lo que importa es a dónde lleva.
  */
-export function FilaDondeVive({ nombre, bloque, tinte, onPress }: Props) {
+export function FilaDondeVive({ nombre, bloque, tinte, mundo, onPress }: Props) {
   return (
     <Presionable
       onPress={onPress}
@@ -27,7 +29,7 @@ export function FilaDondeVive({ nombre, bloque, tinte, onPress }: Props) {
       accessibilityHint="Abre el mundo"
       style={styles.fila}
     >
-      <PuntoMundo tinte={tinte} />
+      <PuntoMundo tinte={tinte} mundo={mundo} />
       <View style={styles.textos}>
         <Text style={styles.nombre}>{nombre}</Text>
         <Text style={styles.bloque}>{bloque}</Text>

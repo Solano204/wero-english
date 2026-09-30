@@ -237,6 +237,7 @@ export function StudyCardView({
         <MarcoImagen
           path={card.entry.imagen}
           tinte={color.world[card.entry.mundo as WorldId]}
+          mundo={card.entry.mundo}
           ancho={anchoImagen}
           alto={altoImagen}
           desenfocada={!locked && imagenRevelaSignificado(card.kind)}

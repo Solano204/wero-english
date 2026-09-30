@@ -108,7 +108,7 @@ export const TarjetaLectura = memo(function TarjetaLectura({ fila, destacada, in
 
         <View style={styles.cuerpo}>
           <View style={styles.titulo}>
-            <PuntoMundo tinte={tinte} />
+            <PuntoMundo tinte={tinte} mundo={l.mundo} />
             <Text style={[destacada ? text.h2 : text.h3, styles.tituloTexto]}>{l.titulo}</Text>
           </View>
           <Text style={destacada ? styles.subtituloGrande : styles.subtitulo}>{l.subtitulo}</Text>

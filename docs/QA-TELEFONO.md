@@ -62,8 +62,8 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 
 - [ ] Gramática, un tema: "Escuchar todos los ejemplos" suena EN y ES en orden y "Detener" corta todo al instante
 - [ ] Gramática: Inglés, Lento y Español de cada ejemplo suenan; tocar otro corta el que sonaba
-- [ ] Gramática, «Escuchar todos los ejemplos»: al tocarlo el botón dice «Detener» con su ícono y el texto se lee (no una píldora cian vacía); al terminar o al tocar «Detener» vuelve a «Escuchar todos los ejemplos». Es el fallo reportado y la causa no se pudo reproducir sin teléfono: confirmar aquí y, si sigue vacío, mandar captura
-- [ ] Gramática, «Escuchar todos»: cada ejemplo enciende su tarjeta (filo cian) y su karaoke, y la pantalla baja sola para mantenerlo a la vista; tocar la pantalla con el dedo suelta ese scroll
+- [ ] Gramática, «Escuchar todos los ejemplos»: al tocarlo el botón dice «Detener» con su ícono y el texto se lee (no una píldora azul vacía); al terminar o al tocar «Detener» vuelve a «Escuchar todos los ejemplos». Es el fallo reportado y la causa no se pudo reproducir sin teléfono: confirmar aquí y, si sigue vacío, mandar captura
+- [ ] Gramática, «Escuchar todos»: cada ejemplo enciende su tarjeta (filo azul) y su karaoke, y la pantalla baja sola para mantenerlo a la vista; tocar la pantalla con el dedo suelta ese scroll
 - [ ] Phrasal verbs: Escuchar y Lento de frase y ejemplo suenan; el ejemplo lento del verbo 5 suena si ya lo regeneraste, o el botón se ve apagado sin fallar
 - [ ] Cázala con audio automático: tras revisar suena la frase en inglés y luego en español
 - [ ] Pares: al acertar un par suenan las dos frases aunque "Audio automático" esté apagado
@@ -81,13 +81,13 @@ Marca cada casilla al probarla. Si algo falla, anótalo en "Cómo reportar".
 - [ ] Pack: lista con "N frases" y "Estudiar este pack"; el scroll de 100 o más filas es fluido
 - [ ] Gramática, lista: 9 bloques como tarjetas (solo uno abierto a la vez), los renglones entran escalonados; cada uno con su medidor de barras y, del cuarto de cada bloque en adelante, con candado y «Anuncio»; el lector dice «Nivel 2 de 5»
 - [ ] Gramática, tema cerrado: ver el anuncio (o que falle) y volver a la lista; con éxito el candado gira y se desvanece y el renglón queda como los demás; con fallo sigue cerrado
-- [ ] Gramática, tema: título grande y gancho en gris; «Cómo se arma» en fichas (una fila por cada «·») y la de «adjetivos» como texto; «Ojo» con ícono y filo cian
+- [ ] Gramática, tema: título grande y gancho en gris; «Cómo se arma» en fichas (una fila por cada «·») y la de «adjetivos» como texto; «Ojo» con ícono y filo azul
 - [ ] Gramática, «El error que se corrige»: al llegar a la vista la frase incorrecta se tacha de izquierda a derecha y se transforma en la correcta (probar «He work in a bank» y «There is three options»); «Ver otra vez» y «Escuchar» la repiten; con frases muy distintas («I come for tourism») se ve un fundido; el lector dice «Incorrecta: … Correcta: …»
 - [ ] Gramática con Reducir movimiento: las fichas aparecen ya en su lugar, el candado no gira, el karaoke solo cambia de color y el error muestra las dos frases a la vez, sin «Ver otra vez»
 - [ ] Phrasal verbs, lista (360 px): los 55 verbos se mueven sin tirones; cada renglón con el verbo, «N formas» y sus partículas en una fila que se funde al final (nada de «…» a media palabra); el buscador filtra por verbo («take»), por partícula («away with») y por significado («levantarse», sin acentos ni mayúsculas); un texto sin resultados dice «Ningún verbo coincide…» y «Borrar búsqueda» la limpia
 - [ ] Phrasal verbs, abrir un verbo: el verbo viaja del renglón a su lugar grande y la página entra con un fundido; abrir varios seguidos no deja tarjetas encimadas (el fallo de antes) y atrás vuelve a la lista donde estaba
 - [ ] Phrasal verbs, `get` (14 formas): girar la ruleta despacio (se asienta en la que queda al centro, con un háptico) y rápido de un golpe (avanza varias y frena sin pasarse de la primera ni de la última); tocar una vecina la trae al centro; el significado da un giro vertical y la tarjeta cambia con un leve desplazamiento hacia donde giras; el scroll de abajo no se mueve al girar
-- [ ] Phrasal verbs, audio: en una sesión nueva la ruleta no habla sola; después de tocar «Escuchar» (o cualquier botón de audio) cada partícula nueva suena al aparecer y su karaoke se enciende; el ejemplo resalta la partícula en cian y tocar la frase suena
+- [ ] Phrasal verbs, audio: en una sesión nueva la ruleta no habla sola; después de tocar «Escuchar» (o cualquier botón de audio) cada partícula nueva suena al aparecer y su karaoke se enciende; el ejemplo resalta la partícula en azul y tocar la frase suena
 - [ ] Phrasal verbs, chips y deslizar: los chips (48 dp) cambian de forma y la ruleta gira hasta ella; deslizar la tarjeta a los lados pasa a la anterior o la siguiente sin mover el scroll vertical; «N de 14» arriba a la derecha siempre coincide
 - [ ] Phrasal verbs, pocas formas: `catch` (dos) funciona igual; `figure` (una) no lleva ruleta, chips ni «N de M»; `check` muestra «out (1)» y «out (2)» y `make`, «up (1)» y «up (2)», en la ruleta y en los chips
 - [ ] Phrasal verbs, «Cuidado» y «Fuerte»: `put down` (dentro de `put`) lleva «Cuidado» junto a la frase; `piss off` lleva «Fuerte» y, con Modo limpio, el verbo `piss` desaparece de la lista
@@ -141,11 +141,11 @@ Marcas de oración de Polly: sin ellas el seguimiento del audio es una estimaci�
 - [ ] Lector, scroll manual: con el audio sonando, arrastrar el texto con el dedo; el seguimiento se detiene y aparece «Volver a donde va el audio»; tocarlo devuelve el texto a la oración que suena y el botón se va
 - [ ] Lector, atrás: con el audio sonando, la flecha y el botón atrás del sistema cortan la voz al instante; al volver a entrar el capítulo empieza arriba
 - [ ] Lector, tocar una oración: con el audio sonando o en pausa, salta a ella y sigue desde ahí (en pausa, se reanuda); sin haber empezado el audio no hace nada
-- [ ] Frase vista y frase nueva: «ya la viste» (gris, subrayada) y «nueva» (cian, más peso; en Android el subrayado no es punteado); tocar una frase hace pulsar su oración un instante y abre su ficha; la leyenda sale abierta la primera vez y plegada las siguientes
+- [ ] Frase vista y frase nueva: «ya la viste» (gris, subrayada) y «nueva» (azul, más peso; en Android el subrayado no es punteado); tocar una frase hace pulsar su oración un instante y abre su ficha; la leyenda sale abierta la primera vez y plegada las siguientes
 - [ ] Capítulo 2 antes de que cargue el audio: en una historia de varios capítulos, pasar al 2 y tocar «Escuchar» enseguida; no suena el capítulo 1, el tiempo dice «—:—» hasta conocer la duración (nunca «0:00 / 0:00») y el texto empieza arriba
 - [ ] Al final del capítulo: al terminar el audio, o al llegar al final del texto, aparece «Capítulo N» o «Ver las preguntas» y el botón circular queda en secundario (nunca dos principales)
 - [ ] Preguntas: una a la vez, con tres puntos arriba y la nota «No se guarda calificación…»; al responder, la correcta se enciende en verde con palomita, la elegida mal queda en ámbar con equis, las otras bajan y la explicación entra con fade; «Siguiente» (en la tercera, «Terminar») aparece en el pie; «Salir sin contestar» lleva al cierre
-- [ ] Cierre: «Terminaste la historia» y «Tenía N frases nuevas para ti» (N igual a las frases en cian que había en el texto); contestando las tres, un solo destello suave; «Volver a las lecturas» regresa a la lista
+- [ ] Cierre: «Terminaste la historia» y «Tenía N frases nuevas para ti» (N igual a las frases en azul que había en el texto); contestando las tres, un solo destello suave; «Volver a las lecturas» regresa a la lista
 - [ ] Reducir movimiento: el resaltado cambia de oración sin deslizarse, el scroll salta, no hay pulso al tocar una frase, la explicación aparece sin fade y el cierre no da destello
 - [ ] TalkBack en el lector: cada frase dice «ya la viste» o «nueva, abre su ficha»; las acciones personalizadas de cada oración son «Abrir la ficha de …» y «Escuchar desde aquí»; en las preguntas se oye «Pregunta 2 de 3», la correcta dice «Correcta», la mal elegida «No era esta» y la explicación se anuncia sola
 - [ ] 360 px de ancho y fuente grande: el pie no tapa el texto, las cuatro opciones caben o scrollean y «Siguiente» queda a la vista en el pie
@@ -172,7 +172,7 @@ Marcas de oración de Polly: sin ellas el seguimiento del audio es una estimaci�
 
 ## l) Errores que te delatan
 
-- [ ] Lista sin filtro: arriba «194 errores» con el número rodando; los chips dicen su cuenta («Calcos 40» y así) y scrollean con un desvanecido a la derecha; el chip activo en `accentSoft` con borde cian
+- [ ] Lista sin filtro: arriba «194 errores» con el número rodando; los chips dicen su cuenta («Calcos 40» y así) y scrollean con un desvanecido a la derecha; el chip activo en `accentSoft` con borde azul
 - [ ] Lista con filtro: al tocar «Calcos» el número pasa a «N de 194» rodando, la lista sale junta y entran las primeras 8 tarjetas escalonadas; el resto aparece directo; cambiar de filtro rápido varias veces no deja la lista a medias
 - [ ] Orden: «Más graves primero» deja arriba los de «Cambia el significado»; «En orden» los pone como vienen; cambia el orden, sal de la app y vuelve: el orden se conserva; el orden nunca cambia cuántos hay
 - [ ] Tarjeta: ✕ y lo dicho tachado, lo que entienden en ámbar cursiva con el ícono de señal rota, ✓ y lo correcto, «Para contar» en los que se pueden contar y a la derecha el medidor de 3 barras con su etiqueta en texto (sin rojo en ninguna parte)

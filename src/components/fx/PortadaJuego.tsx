@@ -29,7 +29,7 @@ interface EscenaProps {
   alto: number;
 }
 
-/** Pares: dos fichas se deslizan, se unen con una línea cian y hacen «clic». */
+/** Pares: dos fichas se deslizan, se unen con una línea azul y hacen «clic». */
 function EscenaPares({ fase, ancho, alto }: EscenaProps) {
   const fichaAncho = alto * 0.46;
   const fichaAlto = alto * 0.34;

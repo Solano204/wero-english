@@ -125,7 +125,7 @@ const ICONOS = {
   shuffle: { Componente: ShuffleIcon },
   target: { Componente: TargetIcon },
   waveform: { Componente: WaveformIcon },
-  // Un ícono por mundo (color de mundo, opción a: el color ya no distingue al mundo, el ícono sí).
+  // Un ícono por mundo: los mundos son una escala de azules y lo que los distingue es el ícono (ver PuntoMundo).
   sun: { Componente: SunIcon },
   signpost: { Componente: SignpostIcon },
   money: { Componente: CurrencyDollarIcon },

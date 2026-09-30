@@ -2,7 +2,7 @@ import type { IconName } from '@/components/base/Icon';
 
 /**
  * El ícono de cada mundo (colores de mundo, opción a): con una escala de azules el color ya no distingue a un mundo
- * de otro; el ícono sí. Por ahora solo lo usa el muestrario de paletas.
+ * de otro; el ícono sí. Lo pinta `PuntoMundo`.
  */
 export const ICONO_MUNDO: Record<string, IconName> = {
   dia_a_dia: 'sun',

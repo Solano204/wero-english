@@ -321,12 +321,6 @@ export function SettingsScreen() {
             full
           />
           <Button
-            label="Muestrario de color"
-            variant="ghost"
-            onPress={() => nav.navigate('Muestrario', undefined)}
-            full
-          />
-          <Button
             label="Probar reconocimiento"
             variant="ghost"
             onPress={() => nav.navigate('ProbarVoz', undefined)}

@@ -25,7 +25,7 @@ interface Props {
 
 /**
  * El botón principal de HOY. Un reflejo metálico diagonal lo cruza cada 6 s y
- * al presionar sale una onda cian desde el punto del dedo, con háptico medio.
+ * al presionar sale una onda azul desde el punto del dedo, con háptico medio.
  * Con "reducir movimiento" no hay reflejo ni onda: queda el botón de siempre.
  */
 export function BotonSenal({ label, onPress }: Props) {

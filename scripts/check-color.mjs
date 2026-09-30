@@ -32,8 +32,6 @@ const EXPLICITO = new Set([
   // El aviso «Fuerte» de una frase con vulgaridad 2.
   'src/components/mazo/CartaFrase.tsx',
   'src/components/phrasal/DetalleForma.tsx',
-  // Solo __DEV__: el muestrario de paletas mide el contraste de `riskStrong`, no lo usa.
-  'src/screens/utility/MuestrarioScreen.tsx',
 ]);
 const ROJO = /\briskStrong(?:Soft)?\b|['"]strong['"]/;
 const rojoFueraDeLugar = (rel, src) => (EXPLICITO.has(rel) ? [] : sinComentarios(src).split('\n').flatMap((l, i) => (ROJO.test(l) ? [i + 1] : [])));
@@ -67,6 +65,84 @@ function revisaSenal() {
   const dif = Math.max(...tonos.flatMap((a) => tonos.map((b) => difTono(a, b))));
   console.log(`senal: ${pasos.length} pasos, separación de tono ${dif.toFixed(1)}° (máximo ${MAX_DIF_TONO}°)`);
   return dif > MAX_DIF_TONO ? [`senal: los pasos se separan ${dif.toFixed(1)}° de tono (máximo ${MAX_DIF_TONO}°): COLOR-2`] : [];
+}
+
+/** Los #rrggbb del bloque `color` de tokens.ts (los de mundo como `world.x`; los de Dulces no: son contenido de juego). */
+function hexDeColor(tokens) {
+  const bloque = tokens.slice(tokens.indexOf('export const color = {'), tokens.indexOf('} as const;'));
+  const hex = {};
+  let grupo = '';
+  for (const l of bloque.split('\n')) {
+    const g = l.match(/^\s*(world|dulce):\s*\{/);
+    if (g) { grupo = g[1]; continue; }
+    if (grupo && /^\s*\},/.test(l)) { grupo = ''; continue; }
+    const m = l.match(/^\s*(\w+):\s*'(#[0-9A-Fa-f]{6})'/);
+    if (m && grupo !== 'dulce') hex[(grupo ? `${grupo}.` : '') + m[1]] = m[2].toUpperCase();
+  }
+  return hex;
+}
+
+/** Saturación HSL (0 a 1) de un #rrggbb. */
+function saturacion(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  return max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+}
+
+function luminancia(hex) {
+  const [r, g, b] = [1, 3, 5]
+    .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+export const contraste = (a, b) => {
+  const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+};
+
+/** El tono permitido de la identidad (Cobalto nocturno): azul. Todo lo que no es neutro ni semántico cae aquí. */
+const TONO_AZUL = [205, 240];
+/** Tokens que son de estado (verde, ámbar, dorado, rojo) o del sistema: no son de la identidad y no se revisan de tono. */
+const SEMANTICOS = /^(correct|wrong|star|riskWarn|riskStrong|hojaAcierto|onHojaAcierto|shadow)/;
+/** Fondos grandes: nunca negro ni blanco puros. */
+const FONDOS = ['bg', 'bgFin', 'bgAlto', 'surface', 'surfaceAlt', 'surfaceHigh', 'surfaceSolida', 'contraste'];
+
+/**
+ * COLOR-4: la identidad es negro, blanco y azul (Cobalto nocturno).
+ *  - Ningún color de la paleta (fuera de los semánticos y de Dulces) con saturación es de otro tono que el azul:
+ *    ni morado, ni magenta, ni cian.
+ *  - Sin #000 ni #FFF en los fondos grandes.
+ *  - Los pares que sostienen la pantalla pasan AA: texto 4.5:1; el bloque del botón contra el fondo 3:1.
+ */
+function revisaPaleta() {
+  const hex = hexDeColor(fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8'));
+  const errores = [];
+  for (const [k, v] of Object.entries(hex)) {
+    if (SEMANTICOS.test(k) || saturacion(v) < 0.2) continue;
+    const t = tono(v);
+    if (t < TONO_AZUL[0] || t > TONO_AZUL[1]) errores.push(`COLOR-4: ${k} ${v} tiene tono ${t.toFixed(0)}° (la identidad es azul: ${TONO_AZUL[0]}–${TONO_AZUL[1]}°)`);
+  }
+  for (const f of FONDOS) if (hex[f] === '#000000' || hex[f] === '#FFFFFF') errores.push(`COLOR-4: ${f} es ${hex[f]} (negro o blanco puro en un fondo grande)`);
+  const superficies = ['bg', 'bgAlto', 'surface', 'surfaceAlt', 'surfaceHigh'];
+  const pares = [
+    ...['text', 'textMuted', 'textFaint', 'accent', 'correct', 'wrong', 'star', 'riskStrong'].flatMap((t) => superficies.map((s) => [t, s, 4.5])),
+    ['onPrimario', 'primario', 4.5],
+    ['primario', 'bg', 3],
+    ['onAccent', 'accent', 4.5],
+    ['onContraste', 'contraste', 4.5],
+    ['onHojaAcierto', 'hojaAcierto', 4.5],
+    ['barraActivo', 'surface', 3],
+    ['barraInactivo', 'surface', 4.5],
+  ];
+  for (const [a, b, min] of pares) {
+    if (!hex[a] || !hex[b]) { errores.push(`COLOR-4: falta ${hex[a] ? b : a} en tokens.ts`); continue; }
+    const v = contraste(hex[a], hex[b]);
+    if (v < min) errores.push(`COLOR-4: ${a} sobre ${b} da ${v.toFixed(2)}:1 (mínimo ${min}:1)`);
+  }
+  console.log(`paleta (COLOR-4): ${Object.keys(hex).length} colores, ${pares.length} pares de contraste`);
+  return errores;
 }
 
 /** Quita comentarios de línea y de bloque sin tocar las cadenas ni el número de líneas. */
@@ -172,7 +248,7 @@ if (process.argv.includes('--test')) {
   for (const h of hallazgos) console.log(`  ${h}`);
   console.log(`rojo fuera de lenguaje explícito (COLOR-3): ${rojos.length}`);
   for (const r of rojos) console.log(`  ${r}`);
-  const errores = revisaSenal();
+  const errores = [...revisaSenal(), ...revisaPaleta()];
   for (const e of errores) console.log(`  ${e}`);
   if (hallazgos.length || rojos.length || errores.length) process.exit(1);
 }

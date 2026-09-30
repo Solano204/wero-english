@@ -14,78 +14,105 @@ Fuente de verdad de los valores: `src/theme/` (`tokens.ts`, `typography.ts`, `mo
 
 ## 1.1 Dirección visual
 
-"Magenta nocturno" (v5.1): tinta magenta profunda y un rosa neón eléctrico, synthwave. Reemplaza a "Neón nocturno" (v4.0, tinta azul y cian): mismas cinco decisiones estructurales de `tokens.ts`, otro tono de acento. Una sola fuente de luz arriba a la izquierda (`sol`), tarjetas sin borde parejo (llevan un **filo de luz** de 1 px en degradado), fondo en degradado que se aclara arriba, y una única superficie de color (`contraste`). Un solo tema, oscuro.
+"Cobalto nocturno" (v6.0): tres colores y nada más. **Negro** (una tinta casi negra con un punto de azul, `#07080B`, nunca `#000`), **blanco** (un blanco frío, `#F4F6FA`, nunca `#FFF`) y **un solo azul cobalto**. Oscura, sobria y premium: el azul es lo único que brilla. Reemplaza a la paleta anterior (v5.1), que en la app real no convenció; se eligió probando tres candidatas (E, F y G) sobre las pantallas reales, no en miniatura. Mismas cinco decisiones estructurales de `tokens.ts`: una sola fuente de luz arriba a la izquierda (`sol`), tarjetas sin borde parejo (llevan un **filo de luz** de 1 px en degradado), fondo en degradado que se aclara arriba, y una única superficie de color (`contraste`, la tarjeta HOY en azul marino hondo). Un solo tema, oscuro.
 
-**Señal en vivo (v5.0).** Wero se aprende de oído, así que Practicar se comporta como una consola de audio encendida: ondas, medidores y luz magenta que responden al progreso real. Solo la señal usa luz de color; todo lo demás sigue sobrio. La luz vive detrás del contenido (una aurora que nace del `sol`, un ecualizador que respira, un anillo que se llena) y se apaga cuando no se ve, no tiene foco o el sistema pide menos movimiento.
+**Por qué así.** Wero se aprende de oído y de noche: la tinta casi negra deja que el texto y el azul carguen toda la atención, y un solo color de marca se reconoce en cualquier pantalla. El ámbar sigue reservado para el fallo y el verde para el acierto, así que el acento no podía ser ninguno de los dos; el azul no choca con ninguno y se lee como «señal encendida» sin volverse neón.
+
+**Señal en vivo.** Practicar se comporta como una consola de audio encendida: ondas, medidores y luz azul que responden al progreso real. Solo la señal usa luz de color; todo lo demás sigue sobrio. La luz vive detrás del contenido (una aurora que nace del `sol`, un ecualizador que respira, un anillo que se llena) y se apaga cuando no se ve, no tiene foco o el sistema pide menos movimiento.
 
 ## 1.2 Color
 
-Todo en `src/theme/tokens.ts`.
+Todo en `src/theme/tokens.ts`. `npm run check:color` (COLOR-4) revisa que no entre otro tono, que no haya negro ni blanco puros en fondos grandes y que los pares de la tabla de abajo pasen AA.
 
-**Fondos y superficies**
+**Fondos y superficies** (el 60 %)
 
 | Token | Valor | Uso |
 |---|---|---|
-| `bg` | `#0F0B14` | Fondo base |
-| `bgFin` | `#0A0710` | Final del degradado de fondo; footer |
-| `bgAlto` | `#181220` | Fondo elevado |
-| `surface` / `surfaceSolida` | `#1A1422` | Tarjetas |
-| `surfaceAlt` | `#231B2E` | Superficie alta; botón `secondary`; fichas |
-| `surfaceHigh` | `#2C2338` | Superficie máxima |
-| `contraste` | `#3A1640` | La única superficie de color |
+| `bg` | `#07080B` | Fondo base |
+| `bgFin` | `#040507` | Final del degradado de fondo; footer |
+| `bgAlto` | `#0B0C10` | Arriba del degradado; encabezados sólidos |
+| `surface` / `surfaceSolida` | `#0F1116` | Tarjetas |
+| `surfaceAlt` | `#161A21` | Superficie alta; botón `secondary`; fichas |
+| `surfaceHigh` | `#1C202A` | Superficie máxima |
+| `contraste` | `#0B1A3D` | La única superficie de color: la tarjeta HOY, azul marino hondo |
 
-**Texto y bordes**
-
-| Token | Valor |
-|---|---|
-| `text` | `#F5EEF8` |
-| `textMuted` | `#C3B6CC` |
-| `textFaint` | `#968A9F` |
-| `onContraste` | `#F5EEF8` |
-| `border` | `#2E2438` |
-| `borderStrong` | `#523D67` |
-| `filo` | `rgba(255,255,255,0.16)` |
-
-**Acento (magenta)**
+**Texto y bordes** (el 30 %)
 
 | Token | Valor |
 |---|---|
-| `accent` | `#FF3DAA` |
-| `accentSoft` | `rgba(255,61,170,0.14)` |
-| `accentDeep` | `#ED51A8` |
-| `accent50`…`accent900` | Escala del acento; el `400` es `accent` (`#FFE0F2`, `#FFB8E0`, `#FF8FCE`, `#FF66BC`, `#FF3DAA`, `#FF0E95`, `#DE007D`, `#AF0063`, `#800048`, `#52002E`) |
-| `contraste50`…`contraste900` | Escala del primario; el `800` es `contraste` (`#3A1640`) |
-| `neutral50`…`neutral900` | Escala de los neutros (tinta violeta); `50`, `200`, `300`, `700`, `800` y `900` son `text`, `textMuted`, `textFaint`, `surfaceHigh`, `surface` y `bg` |
-| `star` | `#FFD166`, dorado para estrellas y aciertos seguidos; 10.37:1 sobre las superficies |
-| `accentBorde` | `rgba(255,61,170,0.32)` |
-| `onAccent` | `#1A0612` (texto sobre el magenta: nunca blanco) |
+| `text` | `#F4F6FA` (blanco frío) |
+| `textMuted` | `#A9B1BF` |
+| `textFaint` | `#7F8899` (aclarado de `#717A8A`, que daba 3.76:1 sobre `surfaceHigh`) |
+| `onContraste` | `#F4F6FA` |
+| `border` | `#222733` |
+| `borderStrong` | `#434957` |
+| `filo` | `rgba(255,255,255,0.14)` |
 
-**Estado**
+**Azul** (el 10 %). Dos versiones, porque ningún azul sirve para las dos cosas:
+
+| Token | Valor | Uso |
+|---|---|---|
+| `primario` | `#1F5BFF` | Relleno de la acción principal (botón `primary`, botón de ícono de acento, el círculo del reproductor, el micrófono). Con `onPrimario` `#F4F6FA` encima: 4.85:1 |
+| `accent` | `#6D9BFF` | Texto, íconos, trazos y rellenos chicos sobre el fondo oscuro: 6.04:1 o más. `onAccent` `#07080B` sobre él (una ficha o casilla elegida): 7.42:1 |
+| `accentSoft` | `rgba(31,91,255,0.16)` | Fondos tenues del acento |
+| `accentDeep` | `#6D9BFF` | Borde inferior de una ficha elegida |
+| `accentBorde` | `rgba(109,155,255,0.32)` | Borde de la pastilla activa |
+| `accent50`…`accent900` | `#DCE6FE`, `#BFD2FF`, `#8DAEFE`, `#5989FC`, `#1F5BFF`, `#1B4DD5`, `#1740AC`, `#133385`, `#0F2760`, `#0B1A3D` | Escala del azul en OKLCH; el `400` es `primario` |
+| `contraste50`…`contraste900` | escala del marino; el `800` es `contraste` (`#0B1A3D`) | |
+| `neutral50`…`neutral900` | grises fríos; `50`, `200`, `300`, `700`, `800` y `900` son `text`, `textMuted`, `textFaint`, `surfaceHigh`, `surface` y `bg` | |
+| `barraActivo` / `barraInactivo` | `#6D9BFF` / `#747E8E` | Ícono y etiqueta de la pestaña activa e inactivas; `pastilla` `rgba(109,155,255,0.18)` detrás de la activa |
+
+No hay blanco puro en la app: el texto sobre el azul es el blanco frío `#F4F6FA`, que ya pasa AA.
+
+**Estado** (sin cambios de valor; se revisaron contra el azul y siguen pasando AA)
 
 | Token | Valor | Semántica |
 |---|---|---|
-| `correct` (+`Soft`, `Deep` `#1FAC6F`, `Fondo` `#081610`) | `#3DDC97` | Acierto |
-| `wrong` (+`Soft`, `Deep` `#D99A1E`, `Fondo` `#181205`) | `#F5B942` | Fallo: ámbar, nunca rojo |
+| `correct` (+`Soft`, `Deep` `#1FAC6F`, `Fondo` `#0B1715`) | `#3DDC97` | Acierto. `hojaAcierto` (`#0B1715`) y `onHojaAcierto` (`#3DDC97`) pintan la hoja de veredicto |
+| `wrong` (+`Soft`, `Deep` `#D99A1E`, `Fondo` `#18140F`) | `#F5B942` | Fallo: ámbar, nunca rojo |
+| `star` | `#FFD166` | Estrellas y aciertos seguidos |
 | `riskWarn` | `#F5B942` | Advertencia de contenido |
-| `riskStrong` (+`Soft`) | `#F37B68` | Único rojo: lenguaje explícito. Un fallo, un error o una gravedad van en `wrong`; `npm run check:color` (COLOR-3) falla si `riskStrong`, `riskStrongSoft` o el tono `strong` del `Badge` salen de `Badge`, `EscalaRegistro`, `CartaFrase` y `DetalleForma` |
+| `riskStrong` (+`Soft`) | `#F37B68` | Único rojo: lenguaje explícito. `npm run check:color` (COLOR-3) falla si sale de `Badge`, `EscalaRegistro`, `CartaFrase` y `DetalleForma` |
 
-**Mundos** (`color.world`, categorías de contenido): una familia con la misma luminosidad (OKLCH L 0.73) y saturación (C 0.12); solo cambia el tono. `dia_a_dia #87ADDC` (213°), `calle #CAD368` (65°), `dinero #80CE55` (99°), `gente #88DD89` (121°), `cultura #AEA3E4` (250°), `tech #32AEAA` (178°), `legal #C98BDD` (285°), `fonetica #BEC539` (63°). Ninguno queda a menos de 24° del acento, de `correct`, de `wrong` ni de `riskStrong`, y todos pasan 4.5:1 sobre las ocho superficies (el más bajo, `tech`, da 5.53). `calle` y `gente` se recalcularon de tono al pasar a esta paleta: la semilla de la lista original chocaba con el nuevo acento (a 1° y 24°) y, tras separarse de él, entre sí. **Se usan en chico**: un punto junto al nombre (`PuntoMundo`), una etiqueta y una barra fina (`ProgressBar` de 4 a 5 px). Nunca en fondos grandes ni en botones.
+**Mundos** (`color.world`): con una identidad de tres colores los mundos no pueden ser un arcoíris. Son una escala de azules del mismo tono que el acento (OKLCH 264°, L de 0.64 a 0.92) y lo que distingue a un mundo de otro es su **ícono** (`ICONO_MUNDO`, lo pinta `PuntoMundo`): `dia_a_dia #5686F2` (sol), `calle #6794F6` (poste), `dinero #79A2F9` ($), `gente #8BB0FD` (personas), `cultura #9EBDFD` (notas), `tech #B2CBFD` (chip), `legal #C4D8FF` (balanza), `fonetica #D8E5FE` (onda). Todos pasan 4.5:1 sobre las superficies (el más bajo, `dia_a_dia`, da 4.72). Van en chico: el ícono junto al nombre, una etiqueta y una barra fina. Nunca en fondos grandes ni en botones.
 
-**Dulces** (`color.dulce`, COLOR-1, excepción): las piezas del juego de tres en línea no usan `color.world` ni ninguna otra paleta de marca — son contenido de juego, no marca, y no cambian si cambia la paleta de la app. Seis colores de la paleta Okabe-Ito (pensada para distinguirse con daltonismo): `amarillo #F0E442`, `naranja #F5A900`, `celeste #50B2E9`, `verde #00956D`, `rosa #CE7DA9`, `azul #006EAC` (`naranja`, `celeste`, `verde` y `rosa` se afinaron de brillo, mismo matiz, para separarse en escala de grises; `azul` es el sexto de Okabe-Ito, para los niveles de 6 colores). Ninguno de los 15 pares queda a menos de 0.08 de luminancia relativa entre sí. `pieza.tintes` deriva de cada uno un degradado de cara (`claro`/`medio`/`oscuro`, COLOR-2) y un `simbolo` (la forma al centro, un 70 % más oscura que la cara, a 3:1 de contraste como mínimo: nunca blanco, se perdería sobre `amarillo` o `celeste`).
+**Dulces** (`color.dulce`, COLOR-1, excepción): las piezas del juego de tres en línea no usan `color.world` ni ninguna otra paleta de marca — son contenido de juego, no marca, y no cambian si cambia la paleta de la app. Seis colores de la paleta Okabe-Ito (pensada para distinguirse con daltonismo): `amarillo #F0E442`, `naranja #F5A900`, `celeste #50B2E9`, `verde #00956D`, `rosa #CE7DA9`, `azul #006EAC`. Ninguno de los 15 pares queda a menos de 0.08 de luminancia relativa entre sí. `pieza.tintes` deriva de cada uno un degradado de cara (`claro`/`medio`/`oscuro`, COLOR-2) y un `simbolo` a 3:1 de contraste como mínimo.
 
-**Velos y auxiliares:** `velo` (0.94), `veloPortada` (0.42), `veloMuro` (0.72), `veloBarra` (0.72), `trackFondo` (negro 0.38), `biselSombra` (negro 0.45), `textSobrePortada` (0.22), `shadow` `#000000`, `notifAndroid` `#E8543F` (requisito del sistema operativo).
+**Velos y auxiliares:** `velo` (0.94), `veloPortada` (0.42), `veloMuro` (0.74), `veloBarra` (0.74), `trackFondo` (negro 0.42), `biselSombra` (negro 0.45), `textSobrePortada` (0.22), `shadow` `#000000`, `notifAndroid` `#1F5BFF` (el tinte del ícono de notificación; es el mismo `color` del plugin de expo-notifications en `app.json`).
 
 **Degradados**
 
 - `FONDO`: `bgAlto` → `bgFin`, de pantalla. Dirección `sol`: inicio `(0,0)`, fin `(0.9,1)`.
-- `gradiente`: un solo par neutro (`neutro: #1B242F → #111820`) para todas las tarjetas con portada, sea de mundo o de modo. Deliberadamente sin teñir (COLOR-1): no sale de `color.accent` ni cambia con la paleta. **Si al verlo en el teléfono Practicar se ve plano, probar un tinte del mundo con croma ≤ 0.03.** No está aplicado.
-- `filoLuz`: blanco 0.28 → blanco 0.04 → magenta 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
-- `resplandorSol`: magenta 0.16 → 0.04 → 0, el halo de `Screen`.
-- `senal`: `accent900` → `accent400` → `accent100`. Un solo tono (magenta, separación de 0.1°), sin hex nuevos. Pinta las barras de la onda de HOY y la luz de la señal.
+- `gradiente`: un solo par neutro (`portadaInicio #131B2B → portadaFin #0C0F15`) para todas las tarjetas con portada. Deliberadamente sin teñir (COLOR-1).
+- `filoLuz`: blanco 0.28 → blanco 0.04 → azul del acento 0.18. `filoOk` y `filoWrong` son sus versiones de veredicto (verde y ámbar).
+- `resplandorSol`: azul del acento 0.16 → 0.04 → 0, el halo de `Screen`.
+- `senal`: `senalInicio #0B1A3D` → `senalMedio #1F5BFF` → `senalFin #BFD2FF`. Un solo tono (separación de 1.9°). Pinta las barras de la onda de HOY y la luz de la señal.
 - `reflejo`: blanco 0 → 0.38 → 0, el reflejo metálico que cruza el botón principal de HOY.
-- `aurora`: `opacidadMax 0.18`, `paralaje 8` px y `resolucion 0.25` (el shader se pinta a un cuarto de resolución). `grano`: `opacidad 0.03`, estático.
+- `brilloEsqueleto`: `text` 0 → 0.08 → 0.
+- `aurora`: `opacidadMax 0.18`, `paralaje 8` px y `resolucion 0.25`. `grano`: `opacidad 0.03`, estático.
 
-**Contraste medido** (WCAG, calculado de los tokens): `text` ≥ 13.15:1 sobre cualquier superficie; `textMuted` ≥ 7.75; `textFaint` ≥ 4.58; `accent` ≥ 4.63; `onAccent` sobre `accent` 6.03; `text` sobre `accent` 2.84. Todos los pares de texto pasan AA (mínimo 4.5:1) sobre las ocho superficies, `contraste` incluida. Para lograrlo se aclararon `textFaint` (de `#8C7F96`) y `accentDeep` (de `#D1167F`), lo mínimo para cruzar el umbral. `accentDeep` solo se usa como borde inferior de fichas (no como texto) y `wrongDeep` no se usa fuera de los tokens.
+**Contraste medido** (WCAG 2.x, calculado de los tokens; peor caso sobre `bg`, `bgAlto`, `surface`, `surfaceAlt` y `surfaceHigh`):
+
+| Par | Contraste | Mínimo |
+|---|---|---|
+| `text` | 15.05:1 | 4.5 |
+| `textMuted` | 7.54:1 | 4.5 |
+| `textFaint` | 4.56:1 | 4.5 |
+| `accent` (texto e íconos) | 6.04:1 | 4.5 |
+| `correct` / `wrong` / `star` / `riskStrong` | 9.22 / 9.23 / 11.30 / 6.08:1 | 4.5 |
+| `onPrimario` sobre `primario` (botón) | 4.85:1 | 4.5 |
+| `primario` contra `bg` (el bloque se distingue del fondo) | 3.81:1 | 3 |
+| `onAccent` sobre `accent` | 7.42:1 | 4.5 |
+| `onContraste` sobre `contraste` (HOY) | 15.79:1 | 4.5 |
+| `accent` sobre `contraste` (detalles de HOY) | 6.33:1 | 4.5 |
+| `onHojaAcierto` sobre `hojaAcierto` | 10.35:1 | 4.5 |
+| `wrong` sobre `wrongFondo` | 10.39:1 | 4.5 |
+| `barraActivo` / `barraInactivo` sobre la barra | 7.00 / 4.60:1 | 3 / 4.5 |
+| Colores de mundo (el más bajo, `dia_a_dia`) | 4.72:1 | 4.5 |
+
+Ajuste respecto a los valores de partida: solo `textFaint` (`#717A8A` → `#7F8899`) y, con él, `barraInactivo` (`#747E8E`).
+
+**Ícono y splash.** `app.json` pone el fondo del splash y del ícono adaptable en `#07080B` y el tinte de las notificaciones en `#1F5BFF`. La app no trae arte propio de ícono ni de splash (usa el de Expo). Cuando se haga, va sobre `#07080B` con la marca en `#1F5BFF` y `#F4F6FA`: `assets/icon.png` (1024×1024), `assets/adaptive-icon.png` (primer plano de 1024×1024 con fondo transparente y la marca dentro del círculo seguro de 66 %) y `assets/splash-icon.png`, y sus rutas en `app.json` (`icon`, `android.adaptiveIcon.foregroundImage`, `splash.image`).
 
 ## 1.3 Tipografía
 
@@ -143,7 +170,7 @@ No hay sombras de color: el botón `primary` usa `soft` y la barra de pestañas 
 |---|---|
 | `Screen` | Fondo `bg` con el degradado `FONDO` y el resplandor del sol. Props `scroll`, `padded`, `footer` (fijo abajo, con borde superior fino y fondo `bgFin`), `fondo`, `encabezado` y `scrollY`. En las pestañas el scroll termina con un hueco de barra de pestañas + franja de anuncios + safe area + `space.xl`. Ninguna pantalla redefine fondo ni safe area |
 | `Header` | Fila de mínimo 48 dp. Flecha atrás a la izquierda (ancho fijo 56), título `lg` semibold centrado de hasta 2 líneas, subtítulo `sm` muted de 1 línea, lado derecho que crece con su contenido |
-| `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (cian sólido + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`wrong`, ámbar: no hay rojo fuera del lenguaje explícito). Bloqueado: opacidad 0.45. Vibración ligera al tocar Ícono opcional (`icon`, 20 px en `md` y 24 en `lg`, gap 8, antes del texto o con `iconAlFinal`); un botón solo con ícono exige `accessibilityLabel` |
+| `Button` | Píldora. `md`: alto mínimo 48, padding `lg`. `lg`: alto mínimo 58, padding `xl`. Etiqueta `md` o `lg` semibold. Variantes: `primary` (`primario` azul sólido, texto `onPrimario`, + sombra `soft`), `secondary` (`surfaceAlt`, borde `borderStrong`, sombra `soft`), `ghost` (transparente), `danger` (`wrong`, ámbar: no hay rojo fuera del lenguaje explícito). Bloqueado: opacidad 0.45. Vibración ligera al tocar Ícono opcional (`icon`, 20 px en `md` y 24 en `lg`, gap 8, antes del texto o con `iconAlFinal`); un botón solo con ícono exige `accessibilityLabel` |
 | `IconButton` | Círculo `iconoVisual` (36, 44 o 52) dentro de un área táctil `iconoRedondo` (48, 48 o 52), con un `Icon` de 24 px (`icono`). Sin `hitSlop` |
 | `Card` | Filo de luz de 1 px sobre `surface`, radio `lg`, padding `lg`, `gap md`. Props: `elevated`, `portada` (degradado o imagen con alto reservado), `onLongPress` |
 | `Badge` | Píldora, texto `sm` semibold (`xs` en `small`). Opcionales: un punto de color, un ícono antes del texto y contenido extra después (las estrellas de un nivel) |
@@ -223,10 +250,10 @@ Serán la ley para todo cambio futuro. Donde una regla choque con `docs/DISENO.m
 
 ## COLOR
 
-- **COLOR-1.** Máximo 3 colores de marca: primario (`contraste`), acento (`accent`) y neutro. Los de estado (correcto, error, advertencia) aparte y solo para estado. Los colores de mundo son una familia que va en chico (punto, etiqueta, barra fina), nunca en fondos grandes. Las piezas de Dulces no son colores de mundo ni de marca: usan su propia paleta fija (`color.dulce`, ver 1.2), que no cambia si cambia la paleta de la app.
+- **COLOR-1.** La identidad son tres colores: negro (la tinta de los fondos), blanco (el texto) y azul (`primario` y `accent`). Ningún otro tono de marca fuera del azul, y nada de neón. 60/30/10: fondos y superficies, texto, azul. Los de estado (correcto, error, advertencia, estrellas, explícito) aparte, solo para estado y con moderación. Los colores de mundo son una escala de azules que va en chico (ícono, etiqueta, barra fina) y los distingue su ícono, nunca en fondos grandes. Las piezas de Dulces no son colores de mundo ni de marca: usan su propia paleta fija (`color.dulce`), que no cambia si cambia la paleta de la app.
 - **COLOR-2.** Degradados, si existen, dentro de un mismo tono. Nunca entre colores no relacionados.
-- **COLOR-3.** Cada color de marca (acento, primario y neutro) con escala de tonos (50–900), en `tokens.ts`; el audit la exige.
-- **COLOR-4.** Contraste texto/fondo mínimo 4.5:1 (WCAG AA); texto grande 3:1.
+- **COLOR-3.** Cada color de marca (azul, primario y neutro) con escala de tonos (50–900), en `tokens.ts`; el audit la exige.
+- **COLOR-4.** Contraste texto/fondo mínimo 4.5:1 (WCAG AA); texto grande, íconos y un bloque contra su fondo 3:1. El azul de relleno (`primario`, con texto claro encima) y el de texto (`accent`, sobre el fondo oscuro) son dos tokens: no se usa uno donde va el otro. Sin `#000` ni `#FFF` en fondos grandes. `npm run check:color` lo revisa sobre `tokens.ts`.
 
 ## TIPOGRAFÍA
 

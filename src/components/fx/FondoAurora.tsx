@@ -190,7 +190,7 @@ function LuzAurora() {
 }
 
 /**
- * Fondo vivo de Practicar: una aurora cian que nace del sol (arriba a la
+ * Fondo vivo de Practicar: una aurora azul que nace del sol (arriba a la
  * izquierda), un ciclo de 20 s, con parallax del giroscopio y grano fino.
  *
  * Solo la aurora se anima, y a un cuarto de resolución. Se apaga con "reducir

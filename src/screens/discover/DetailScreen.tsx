@@ -160,6 +160,7 @@ export function DetailScreen() {
           <MarcoImagen
             path={entry.imagen}
             tinte={tinteMundo}
+            mundo={entry.mundo}
             scrollY={scrollY}
             zoomEntrada
           />
@@ -221,6 +222,7 @@ export function DetailScreen() {
                 nombre={mundo?.nombre ?? entry.mundo}
                 bloque={entry.block}
                 tinte={tinteMundo}
+                mundo={entry.mundo}
                 onPress={() => nav.navigate('WorldDetail', { worldId: entry.mundo })}
               />
             </View>
