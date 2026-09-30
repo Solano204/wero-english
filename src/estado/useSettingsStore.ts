@@ -18,8 +18,16 @@ interface SettingsState extends Settings {
     key: K,
     value: Settings[K]
   ) => Promise<void>;
-  /** El filtro que consumen todas las consultas de contenido. */
+  /**
+   * El filtro que consumen todas las consultas de contenido. Es una función nueva cada vez que cambian el Modo
+   * Limpio o los niveles (y solo entonces): las cargas que dependen de `filter` se rehacen al cambiarlos.
+   */
   filter: () => ContentFilter;
+}
+
+/** Un filtro con los valores de ahora: una función nueva por cada cambio de Modo Limpio o niveles. */
+function filtroDe(modoLimpio: boolean, niveles: Settings['niveles']): () => ContentFilter {
+  return () => ({ modoLimpio, niveles });
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -32,11 +40,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     audio.setSfxEnabled(s.sonidosFeedback);
     music.setVolumen(s.volumenMusica / 100);
     music.setActiva(s.musica);
-    set({ ...s, loaded: true });
+    set({ ...s, loaded: true, filter: filtroDe(s.modoLimpio, s.niveles) });
   },
 
   set: async (usuarioId, key, value) => {
     set({ [key]: value } as Partial<SettingsState>);
+    if (key === 'modoLimpio' || key === 'niveles') set({ filter: filtroDe(get().modoLimpio, get().niveles) });
     if (key === 'haptics') haptics.setHapticsEnabled(Boolean(value));
     if (key === 'sonidosFeedback') audio.setSfxEnabled(Boolean(value));
     if (key === 'volumenMusica') music.setVolumen(Number(value) / 100);
@@ -44,8 +53,5 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await saveSetting(usuarioId, key, value);
   },
 
-  filter: () => {
-    const s = get();
-    return { modoLimpio: s.modoLimpio, niveles: s.niveles };
-  },
+  filter: filtroDe(DEFAULT_SETTINGS.modoLimpio, DEFAULT_SETTINGS.niveles),
 }));
