@@ -12,7 +12,7 @@ import path from 'node:path';
 import ts from 'typescript';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const fuente = fs.readFileSync(path.join(ROOT, 'src/screens/extras/practicar/hoy.ts'), 'utf8');
+const fuente = fs.readFileSync(path.join(ROOT, 'src/features/practicar/logic/hoy.ts'), 'utf8');
 const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
 const { elegirHoy, elegirDestacados, ORDEN, NUM_DESTACADOS } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 
@@ -30,11 +30,11 @@ const cargarUrl = async (rel) => {
   return `data:text/javascript;base64,${Buffer.from(out).toString('base64')}`;
 };
 const cargar = async (rel) => import(await cargarUrl(rel));
-const { energiaOnda, progresoMeta, metaCumplida, etiquetaCorregir, ENERGIA_MIN } = await cargar('src/screens/extras/practicar/consola.ts');
+const { energiaOnda, progresoMeta, metaCumplida, etiquetaCorregir, ENERGIA_MIN } = await cargar('src/features/practicar/logic/consola.ts');
 const P = await cargar('src/components/progreso/datos.ts');
 const { plural, conteo, miles, mismoTexto } = await cargar('src/domain/texto.ts');
-const { metaDe, textoMeta } = await cargar('src/screens/extras/practicar/metadatos.ts');
-const { diasQueQuedan, textoDiasReto } = await cargar('src/screens/extras/practicar/reto.ts');
+const { metaDe, textoMeta } = await cargar('src/features/practicar/logic/metadatos.ts');
+const { diasQueQuedan, textoDiasReto } = await cargar('src/features/practicar/logic/reto.ts');
 const { resumenNivel, TOTAL_NIVELES } = await cargar('src/domain/resumenNiveles.ts');
 
 const uso = (o) => Object.fromEntries(Object.entries(o).map(([k, [dias, ultimo]]) => [k, { dias, ultimo }]));

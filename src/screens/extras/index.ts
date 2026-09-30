@@ -1,4 +1,4 @@
-export { PracticeScreen } from './PracticeScreen';
+export { PracticeScreen } from '@/features/practicar/screens/PracticeScreen';
 export { EarModeScreen } from './EarModeScreen';
 export { PronunciationScreen } from './PronunciationScreen';
 export { MinimalPairsScreen } from './MinimalPairsScreen';

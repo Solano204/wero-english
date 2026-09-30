@@ -12,9 +12,9 @@ import { Badge, Icon } from '@/shared/ui';
 import { color, font, motionDuration, motionEasing } from '@/theme';
 import { conteo } from '@/domain/texto';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
-import { consumirPulsoNuevo, pulsoNuevoPendiente } from './entrada';
+import { consumirPulsoNuevo, pulsoNuevoPendiente } from '@/features/practicar/logic/entrada';
 import type { Avance } from './GrupoPlegable';
-import type { Meta } from './metadatos';
+import type { Meta } from '@/features/practicar/logic/metadatos';
 
 /** Hasta dónde baja la opacidad en el único pulso de «nuevo». */
 const PULSO_MIN = 0.35;

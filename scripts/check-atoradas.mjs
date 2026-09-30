@@ -204,10 +204,10 @@ await prueba('qué cuenta como atorada no cambió (fallos >= 3 y no dominada) y 
   const pantalla = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
   assert.ok(!/upsertCardState|useSessionStore|calificar/.test(pantalla), 'Se me atoran no toca SM-2');
   assert.ok(!/<Button\b[^>]*variant="primary"|Corregir/.test(pantalla), 'sin botón principal: «Corregir N errores» lleva a esta misma pantalla');
-  const hoy = leer('src/screens/extras/practicar/hoy.ts');
+  const hoy = leer('src/features/practicar/logic/hoy.ts');
   assert.match(hoy, /if \(atoradas > 0\) return \{ modo: 'atoran', motivo: 'atoradas' \};/, 'hoy.ts manda a esta pantalla');
-  assert.match(leer('src/screens/extras/practicar/modos.ts'), /ir: \(nav\) => nav\.navigate\('Stuck'\),/);
-  assert.match(leer('src/screens/extras/practicar/consola.ts'), /return `Corregir \$\{conteo\(atoradas, 'error', 'errores'\)\}`;/, 'el verbo de Hoy es el de siempre');
+  assert.match(leer('src/features/practicar/logic/modos.ts'), /ir: \(nav\) => nav\.navigate\('Stuck'\),/);
+  assert.match(leer('src/features/practicar/logic/consola.ts'), /return `Corregir \$\{conteo\(atoradas, 'error', 'errores'\)\}`;/, 'el verbo de Hoy es el de siempre');
 });
 
 await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio con texto, medidor que anuncia y vacío en correct', () => {

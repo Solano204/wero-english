@@ -14,7 +14,7 @@ import { color, escalon, font, layout, motionDuration, motionEasing, radius, spa
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Avance } from './GrupoPlegable';
 import { MetaModo } from './MetaModo';
-import { textoMeta, type Meta } from './metadatos';
+import { textoMeta, type Meta } from '@/features/practicar/logic/metadatos';
 
 /** Lado de la ficha del ícono. */
 const FICHA = 40;

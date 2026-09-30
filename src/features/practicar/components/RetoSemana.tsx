@@ -9,7 +9,7 @@ import { aparecerZoom, color, font, motionSenal, space } from '@/theme';
 import { conteo, plural } from '@/domain/texto';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { celebrarSiToca } from '@/data/local/celebracion';
-import { diasQueQuedan, textoDiasReto } from './reto';
+import { diasQueQuedan, textoDiasReto } from '@/features/practicar/logic/reto';
 
 interface Props {
   llevas: number;
