@@ -1,17 +1,7 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { useSharedValue } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  ALTO_ENCABEZADO,
-  Card,
-  Carga,
-  EncabezadoComprimido,
-  IconButton,
-  Screen,
-} from '@/shared/ui';
+import Animated from 'react-native-reanimated';
+import { ALTO_ENCABEZADO, Card, Carga, EncabezadoComprimido, IconButton, Screen } from '@/shared/ui';
 import { Hueso, HuesoCirculo, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { Detalle } from '@/features/progreso/components/Detalle';
@@ -19,42 +9,12 @@ import { FichaJuego } from '@/features/progreso/components/FichaJuego';
 import { FilaMundo } from '@/features/progreso/components/FilaMundo';
 import { PanelSenal } from '@/features/progreso/components/PanelSenal';
 import { Espectrograma } from '@/features/progreso/components/Espectrograma';
-import { useVisto } from '@/shared/hooks/useVisibilidad';
-import {
-  JUEGOS_PROGRESO,
-  filasMundo,
-  resumenJuego,
-  ventana,
-  type ProgresoMundo,
-} from '@/features/progreso/logic/datos';
-import { getGameRecords } from '@/data/repos/partidas';
-import { resumenTodos } from '@/data/repos/niveles';
-import { getProgresoPorMundo, getStats, type Stats } from '@/data/repos/estadisticas';
-import { getRecentDays } from '@/data/repos/progreso';
+import { JUEGOS_PROGRESO, filasMundo, resumenJuego } from '@/features/progreso/logic/datos';
 import { ICONO_MODO } from '@/features/practicar/logic/iconos';
 import { MODOS } from '@/features/practicar/logic/modos';
-import type { Niveles } from '@/domain/resumenNiveles';
-import type { JuegoRecord } from '@/types';
-import { useCarga } from '@/shared/hooks/useCarga';
-import { useEntradaPantalla } from '@/shared/hooks/useEntradaPantalla';
-import { useAuthStore } from '@/estado/useAuthStore';
-import { useSettingsStore } from '@/estado/useSettingsStore';
 import { loadContent } from '@/data/contenido';
 import { color, font, motionEntrada, radius, space, type WorldId } from '@/theme';
-import { dayKey } from '@/domain/fechas';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-
-interface Datos {
-  stats: Stats | null;
-  dias: { dia: string; respuestas: number; aciertos: number }[];
-  mundos: Record<string, ProgresoMundo>;
-  niveles: Record<string, Niveles>;
-  records: Record<string, JuegoRecord>;
-}
-
-const SIN_DATOS: Datos = { stats: null, dias: [], mundos: {}, niveles: {}, records: {} };
+import { useProgreso } from '@/features/progreso/hooks/useProgreso';
 
 /** Las fichas de «Por juego», de dos en dos. */
 const FILAS_JUEGOS = [JUEGOS_PROGRESO.slice(0, 2), JUEGOS_PROGRESO.slice(2, 4), JUEGOS_PROGRESO.slice(4)];
@@ -65,44 +25,7 @@ const FILAS_JUEGOS = [JUEGOS_PROGRESO.slice(0, 2), JUEGOS_PROGRESO.slice(2, 4), 
  * a la vista).
  */
 export function ProgressScreen() {
-  const nav = useNavigation<Nav>();
-  const { top } = useSafeAreaInsets();
-  const user = useAuthStore((s) => s.user);
-  const scrollY = useSharedValue(0);
-  const { primera, estiloFundido } = useEntradaPantalla('progreso');
-  const [pulsos, setPulsos] = useState(0);
-  const filter = useSettingsStore((s) => s.filter);
-
-  const carga = useCarga(
-    async (): Promise<Datos> => {
-      if (!user) return SIN_DATOS;
-      const [stats, dias, mundos, niveles, records] = await Promise.all([
-        getStats(user.id),
-        getRecentDays(user.id, 21),
-        getProgresoPorMundo(user.id, filter()),
-        resumenTodos(user.id),
-        getGameRecords(user.id),
-      ]);
-      return { stats, dias, mundos, niveles, records };
-    },
-    [user, filter],
-    { alEnfocar: true }
-  );
-
-  // Jalar para refrescar: recarga sin esqueleto y la aguja da un empujón al terminar.
-  const refrescar = useCallback(async () => {
-    await carga.refrescar();
-    setPulsos((n) => n + 1);
-  }, [carga.refrescar]);
-
-  const registrados = carga.datos?.dias ?? [];
-  const dias = useMemo(() => ventana(registrados, dayKey()), [registrados]);
-  // Sin días registrados, o ninguno dentro de las últimas tres semanas: nada de gráfica en ceros.
-  const sinDias = registrados.length === 0 || dias.every((d) => d.respuestas === 0);
-  const espectro = useVisto(scrollY);
-  const seccionMundos = useVisto(scrollY);
-  const seccionJuegos = useVisto(scrollY);
-  const seccionDetalle = useVisto(scrollY);
+  const { nav, top, user, scrollY, primera, estiloFundido, pulsos, carga, refrescar, dias, sinDias, espectro, seccionMundos, seccionJuegos, seccionDetalle } = useProgreso();
 
   return (
     <Screen
