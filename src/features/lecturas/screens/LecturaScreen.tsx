@@ -20,13 +20,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/shared/ui';
-import { CierreLectura } from '@/components/lectura/CierreLectura';
-import { EsqueletoTexto } from '@/components/lectura/EsqueletoTexto';
-import { LeyendaFrases } from '@/components/lectura/LeyendaFrases';
-import { PieReproductor } from '@/components/lectura/PieReproductor';
-import { PreguntaUnaAUna } from '@/components/lectura/PreguntaUnaAUna';
-import { TextoAcompanado, useOracionActual, type MedidasTexto } from '@/components/lectura/TextoAcompanado';
-import { useReproductorCapitulo } from '@/components/lectura/useReproductorCapitulo';
+import { CierreLectura } from '@/features/lecturas/components/CierreLectura';
+import { EsqueletoTexto } from '@/features/lecturas/components/EsqueletoTexto';
+import { LeyendaFrases } from '@/features/lecturas/components/LeyendaFrases';
+import { PieReproductor } from '@/features/lecturas/components/PieReproductor';
+import { PreguntaUnaAUna } from '@/features/lecturas/components/PreguntaUnaAUna';
+import { TextoAcompanado, useOracionActual, type MedidasTexto } from '@/features/lecturas/components/TextoAcompanado';
+import { useReproductorCapitulo } from '@/features/lecturas/hooks/useReproductorCapitulo';
 import { partirTexto, type Trozo } from '@/domain/lectura';
 import { dividirOraciones, inicioDeMarcas, inicioEstimado, trozosPorOracion } from '@/domain/oraciones';
 import { getCardStates } from '@/data/repos/tarjetas';

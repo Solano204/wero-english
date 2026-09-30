@@ -126,8 +126,8 @@ export function RootNavigator() {
         options={{ animation: 'fade', animationDuration: motionDuration.lento }}
       />
       <Stack.Screen name="Azar" getComponent={() => require('@/screens/extras/AzarScreen').AzarScreen} />
-      <Stack.Screen name="Lecturas" getComponent={() => require('@/screens/extras/LecturasScreen').LecturasScreen} />
-      <Stack.Screen name="Lectura" getComponent={() => require('@/screens/extras/LecturaScreen').LecturaScreen} />
+      <Stack.Screen name="Lecturas" getComponent={() => require('@/features/lecturas/screens/LecturasScreen').LecturasScreen} />
+      <Stack.Screen name="Lectura" getComponent={() => require('@/features/lecturas/screens/LecturaScreen').LecturaScreen} />
       <Stack.Screen name="Diagnostics" getComponent={() => require('@/screens/utility/DiagnosticsScreen').DiagnosticsScreen} />
       {__DEV__ ? <Stack.Screen name="SfxSampler" getComponent={() => require('@/screens/utility/SfxSamplerScreen').SfxSamplerScreen} /> : null}
       {__DEV__ ? <Stack.Screen name="ProbarVoz" getComponent={() => require('@/screens/utility/ProbarVozScreen').ProbarVozScreen} /> : null}

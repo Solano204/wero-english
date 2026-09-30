@@ -6,7 +6,7 @@ import { type VozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { color, font, layout, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
-import type { ReproductorCapitulo } from './useReproductorCapitulo';
+import type { ReproductorCapitulo } from '@/features/lecturas/hooks/useReproductorCapitulo';
 
 /** Alto de la onda mini, en dp. */
 const ALTO_ONDA = 24;

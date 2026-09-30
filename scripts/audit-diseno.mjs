@@ -35,7 +35,7 @@ const CONTENIDO = /(phrase|spanish|frase|traduc|titulo|title|nombre|palabra|ganc
  * `primary`, pero nunca conviven en pantalla (vistas o estados excluyentes).
  */
 const ACC1_NO_CONVIVEN = {
-  'src/screens/extras/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
+  'src/features/lecturas/screens/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
   'src/features/juegos/cazala/components/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
   'src/features/juegos/fin/screens/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
   'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
@@ -68,8 +68,8 @@ const TIPO2_SE_QUEDAN = {
   'src/features/juegos/fin/screens/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/fin/screens/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
   'src/features/juegos/dulces/components/PieDulces.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/extras/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/extras/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/lecturas/screens/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/lecturas/screens/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
   'src/screens/utility/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
   'src/features/juegos/pares/screens/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
   'src/features/vocabulario/components/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
@@ -459,7 +459,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
   r.startsWith('src/components/gramatica/') || r === 'src/screens/extras/GramaticaScreen.tsx' || r === 'src/screens/extras/GramaticaTemaScreen.tsx' ||
   r.startsWith('src/components/phrasal/') || r === 'src/screens/extras/PhrasalScreen.tsx' || r === 'src/screens/extras/PhrasalVerboScreen.tsx' ||
-  r.startsWith('src/components/lectura/') || r === 'src/screens/extras/LecturasScreen.tsx' || r === 'src/screens/extras/LecturaScreen.tsx' ||
+  r.startsWith('src/components/lectura/') || r === 'src/features/lecturas/screens/LecturasScreen.tsx' || r === 'src/features/lecturas/screens/LecturaScreen.tsx' ||
   r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
   r.startsWith('src/components/errores/') || r === 'src/screens/extras/ErrorsScreen.tsx' || r === 'src/screens/extras/ErrorDetailScreen.tsx' ||
   r.startsWith('src/components/atoradas/') || r === 'src/screens/utility/DeckScreen.tsx' || r === 'src/screens/utility/StuckScreen.tsx' ||

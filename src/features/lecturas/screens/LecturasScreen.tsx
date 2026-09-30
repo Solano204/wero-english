@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Carga, Header, Screen } from '@/shared/ui';
 import { Hueso, HuesoTarjeta, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
-import { TarjetaLectura, type LecturaFila } from '@/components/lectura/TarjetaLectura';
+import { TarjetaLectura, type LecturaFila } from '@/features/lecturas/components/TarjetaLectura';
 import { destacarLectura, dificultadPara, estadoDesbloqueo } from '@/domain/lectura';
 import { getCardStates } from '@/data/repos/tarjetas';
 import { getDominadasPorMundo } from '@/data/repos/estadisticas';
