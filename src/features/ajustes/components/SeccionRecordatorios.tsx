@@ -4,7 +4,7 @@ import { Card } from '@/shared/ui';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { HoraFila, Stepper, Toggle } from './ControlesAjustes';
 import type { useAjustes } from '../hooks/useAjustes';
-import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
+import { NOTIF_MAX_POR_DIA } from '@/config/notificaciones';
 import * as notifications from '@/services/notificaciones';
 import { color, font, space } from '@/theme';
 

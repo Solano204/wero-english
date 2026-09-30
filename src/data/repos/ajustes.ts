@@ -81,9 +81,6 @@ export const DEFAULT_SETTINGS: Settings = {
   atoradasVistas: [],
 };
 
-/** Tope de notificaciones diarias. Más allá el sistema las agrupa igual. */
-export const NOTIF_MAX_POR_DIA = 12;
-
 export async function loadSettings(usuarioId: number): Promise<Settings> {
   const db = await getDb();
   const rows = await db.getAllAsync<{ clave: string; valor: string }>(

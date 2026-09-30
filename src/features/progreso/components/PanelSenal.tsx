@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -11,8 +11,8 @@ import Animated, {
 import { Badge, Card } from '@/shared/ui';
 import { Marcador } from '@/shared/ui/fx/Marcador';
 import { MedidorSenal } from '@/features/progreso/components/MedidorSenal';
-import type { Stats } from '@/data/repos/estadisticas';
-import { celebrarSiToca } from '@/data/local/celebracion';
+import type { Stats } from '@/types';
+import { useCelebracion } from '@/estado/useCelebracion';
 import {
   aparecerSubiendo,
   color,
@@ -80,21 +80,11 @@ function ChipRecord({ texto, actual, celebrar, retraso }: { texto: string; actua
  * explicación en vez de una cifra en cero.
  */
 export function PanelSenal({ stats, usuarioId, entrada, scrollY, pulsos }: Props) {
-  const [celebrar, setCelebrar] = useState(false);
   const actual = esRecordActual(stats.racha, stats.rachaMax);
   const racha = textoRacha(stats.racha);
   const record = textoRecord(stats.racha, stats.rachaMax);
 
-  useEffect(() => {
-    if (!actual || usuarioId === null) return;
-    let vivo = true;
-    void celebrarSiToca(usuarioId, 'record', String(stats.rachaMax)).then((toca) => {
-      if (vivo && toca) setCelebrar(true);
-    });
-    return () => {
-      vivo = false;
-    };
-  }, [actual, usuarioId, stats.rachaMax]);
+  const celebrar = useCelebracion(actual, usuarioId, 'record', String(stats.rachaMax));
 
   const retrasoChips = entrada ? motionEntrada.chipsProgreso : 0;
 

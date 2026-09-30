@@ -1,21 +1,10 @@
 import { getDb } from '@/data/cliente';
 import { buildFilter, consultaProgresoPorMundo } from './cola';
-import type { ContentFilter } from '@/types';
+import type { ContentFilter, Stats } from '@/types';
 
 /* ============================================================
    Progreso
    ============================================================ */
-
-export interface Stats {
-  vistas: number;
-  dominadas: number;
-  favoritas: number;
-  atoradas: number;
-  total: number;
-  racha: number;
-  rachaMax: number;
-  precision: number;
-}
 
 export async function getStats(usuarioId: number): Promise<Stats> {
   const db = await getDb();

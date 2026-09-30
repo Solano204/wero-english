@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/shared/ui';
 import { AnilloMeta } from '@/shared/ui/fx/AnilloMeta';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
-import type { Stats } from '@/data/repos/estadisticas';
+import type { Stats } from '@/types';
 import { etiquetaCorregir } from '@/features/practicar/logic/consola';
 import { anillo, color, font, space } from '@/theme';
 import { conteo, plural } from '@/domain/texto';

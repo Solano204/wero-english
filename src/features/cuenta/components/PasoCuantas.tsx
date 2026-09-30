@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, Presionable } from '@/shared/ui';
-import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
+import { NOTIF_MAX_POR_DIA } from '@/config/notificaciones';
 import { aparecer, color, font, layout, radius, space } from '@/theme';
 
 /**

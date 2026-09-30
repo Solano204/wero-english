@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedReaction, type SharedValue } from 'react-native-reanimated';
 import { Badge, Card, Icon } from '@/shared/ui';
@@ -8,7 +8,7 @@ import { useVisibilidad } from '@/shared/hooks/useVisibilidad';
 import { aparecerZoom, color, font, motionSenal, space } from '@/theme';
 import { conteo, plural } from '@/domain/texto';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
-import { celebrarSiToca } from '@/data/local/celebracion';
+import { useCelebracion } from '@/estado/useCelebracion';
 import { diasQueQuedan, textoDiasReto } from '@/features/practicar/logic/reto';
 
 interface Props {
@@ -33,7 +33,6 @@ export function RetoSemana({ llevas, meta, cumplido, desde, hoy, usuarioId, scro
   const reducido = useMovimientoReducido();
   const { ref, visible, alAcomodar } = useVisibilidad(scrollY);
   const [visto, setVisto] = useState(false);
-  const [celebrar, setCelebrar] = useState(false);
 
   useAnimatedReaction(
     () => visible.value,
@@ -42,16 +41,7 @@ export function RetoSemana({ llevas, meta, cumplido, desde, hoy, usuarioId, scro
     }
   );
 
-  useEffect(() => {
-    if (!visto || !cumplido || usuarioId === null) return;
-    let vivo = true;
-    void celebrarSiToca(usuarioId, 'reto', desde).then((toca) => {
-      if (vivo && toca) setCelebrar(true);
-    });
-    return () => {
-      vivo = false;
-    };
-  }, [visto, cumplido, usuarioId, desde]);
+  const celebrar = useCelebracion(visto && cumplido, usuarioId, 'reto', desde);
 
   return (
     <Animated.View ref={ref} collapsable={false} onLayout={alAcomodar}>

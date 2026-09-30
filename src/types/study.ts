@@ -68,3 +68,15 @@ export interface SessionSummary {
   /** La racha de aciertos seguidos más larga de esta sesión. */
   mejorRacha: number;
 }
+
+/** Los números de Progreso (data/repos/estadisticas.ts). */
+export interface Stats {
+  vistas: number;
+  dominadas: number;
+  favoritas: number;
+  atoradas: number;
+  total: number;
+  racha: number;
+  rachaMax: number;
+  precision: number;
+}

@@ -38,7 +38,7 @@ import { conteo, plural } from '@/domain/texto';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { dayKey } from '@/domain/fechas';
 import { energiaOnda, metaCumplida } from '@/features/practicar/logic/consola';
-import { celebrarSiToca } from '@/data/local/celebracion';
+import { useCelebracion } from '@/estado/useCelebracion';
 import type { Modo } from '@/features/practicar/logic/modos';
 
 interface Props {
@@ -128,7 +128,6 @@ export function ConsolaHoy({
   const reducido = useMovimientoReducido();
   const tarjeta = useRef<View>(null);
   const [ancho, setAncho] = useState(0);
-  const [celebrar, setCelebrar] = useState(false);
 
   const encendido = useSharedValue(0);
   const interferencia = useSharedValue(0);
@@ -149,16 +148,7 @@ export function ConsolaHoy({
   }, [listo, entrada, reducido, encendido, contenido]);
 
   const cumplida = metaCumplida(hoyFrases, meta);
-  useEffect(() => {
-    if (!listo || !cumplida || usuarioId === null) return;
-    let vivo = true;
-    void celebrarSiToca(usuarioId, 'meta', dayKey()).then((toca) => {
-      if (vivo && toca) setCelebrar(true);
-    });
-    return () => {
-      vivo = false;
-    };
-  }, [listo, cumplida, usuarioId]);
+  const celebrar = useCelebracion(listo && cumplida, usuarioId, 'meta', dayKey(), false);
 
   const estiloContenido = useAnimatedStyle(() => ({ opacity: contenido.value }));
 
