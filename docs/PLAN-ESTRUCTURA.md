@@ -1,4 +1,120 @@
-# Plan de estructura (prompt 2 de 6) — propuesta, espera OK
+# Plan de estructura (prompt 2 de 6) — hecho
+
+La propuesta de abajo se aprobó («ok a todo») y ya está aplicada en `perf/serie-rendimiento`. El árbol y las reglas
+vigentes están en `docs/ARQUITECTURA.md`; esta sección es el resultado.
+
+## Resultado
+
+| Regla | Estado | Quién la revisa |
+|---|---|---|
+| Capas (app → features → estado → shared/services → data → domain; theme, config y types abajo) | 0 violaciones | `check:imports`, `check:capas` |
+| Una feature no importa internos de otra | 0 | `check:imports`, `check:capas` |
+| domain puro (sin React, RN, Expo ni paquetes) | 0 | `check:imports`, `check:capas` |
+| Ciclos | 0 | `check:imports`, `check:capas` |
+| Pantallas ≤ 250 líneas, archivos ≤ 400 | sí, salvo `features/cuenta/legal/textos.ts` (1,066, lo genera `scripts/legal.mjs`) | a mano (`wc -l`) |
+| Pantallas y componentes sin SQL, AsyncStorage ni `loadContent` | 0 | `grep` sobre `screens/` y `components/` |
+| Juegos con máquina de estados | Dulces, Caída, Colmena, Cázala (reducers) y Pares (`fasePares`) | `check:dulces`, `check:caida`… |
+| Un componente de más de 80 líneas por archivo | sí (los de al lado son piezas chicas de ≤ 80) | a mano |
+| Solo `Presionable`/`Pressable` | 0 `Touchable*` | `audit:diseno` (MOT-2) |
+| Barrels solo en `shared/ui` (+ `theme` y `types`, hojas documentadas) | sí | a mano |
+| Aliases, sin `../../` | 0 (alias nuevo `@assets/`) | `grep` |
+| TypeScript estricto | sí | `typecheck` |
+| ESLint (rules-of-hooks y exhaustive-deps como error, imports sin uso, console fuera de `__DEV__`) | 0 errores | `lint` |
+
+Tamaño: 368 → 433 archivos `.ts/.tsx` en `src/` (sin `bundled.ts`), 54,487 líneas. El bundle de Hermes subió
+49 KB (+0.6 %) por los módulos nuevos (2,425 → 2,484); ver `docs/RENDIMIENTO.md`.
+
+### Archivos grandes: antes y después
+
+| Antes (tag `antes-de-rendimiento`) | Líneas | Ahora (líneas) |
+|---|---|---|
+| `legal/textos.ts` | 1066 | `features/cuenta/legal/textos.ts` (1066) |
+| `services/audio.ts` | 1052 | `services/audio.ts` (294) |
+| `screens/games/DulcesScreen.tsx` | 846 | `features/juegos/dulces/screens/DulcesScreen.tsx` (179) |
+| `screens/games/CaidaScreen.tsx` | 770 | `features/juegos/caida/screens/CaidaScreen.tsx` (235) |
+| `db/queries.ts` | 758 | partido en `data/repos/*` (15 archivos, el mayor `cola.ts` con 309) |
+| `screens/games/ColmenaScreen.tsx` | 744 | `features/juegos/colmena/screens/ColmenaScreen.tsx` (233) |
+| `screens/games/ParesScreen.tsx` | 593 | `features/juegos/pares/screens/ParesScreen.tsx` (236) |
+| `screens/utility/SettingsScreen.tsx` | 540 | `features/ajustes/screens/SettingsScreen.tsx` (181) |
+| `theme/tokens.ts` | 524 | `theme/tokens.ts` (284) |
+| `screens/entry/OnboardingScreen.tsx` | 498 | `features/cuenta/screens/OnboardingScreen.tsx` (176) |
+| `services/notifications.ts` | 493 | `services/notificaciones.ts` (330) |
+| `screens/study/StudyScreen.tsx` | 484 | `features/estudio/screens/StudyScreen.tsx` (228) |
+| `screens/extras/LecturaScreen.tsx` | 472 | `features/lecturas/screens/LecturaScreen.tsx` (180) |
+| `components/juegos/dulces/TableroDulces.tsx` | 455 | `features/juegos/dulces/components/TableroDulces.tsx` (397) |
+| `store/useSessionStore.ts` | 443 | `features/estudio/hooks/useSessionStore.ts` (386) |
+| `screens/games/NivelesScreen.tsx` | 434 | `features/juegos/niveles/screens/NivelesScreen.tsx` (183) |
+| `types/content.ts` | 427 | `types/content.ts` (211) |
+| `components/card/StudyCardView.tsx` | 422 | `features/estudio/components/StudyCardView.tsx` (381) |
+| `components/juegos/colmena/Hexagono.tsx` | 412 | `features/juegos/colmena/components/Hexagono.tsx` (352) |
+| `screens/extras/EarModeScreen.tsx` | 403 | `features/oido/screens/EarModeScreen.tsx` (223) |
+| `services/speech.ts` | 400 | `services/voz.ts` (400) |
+| `components/mazo/MazoCartas.tsx` | 393 | `features/frases-sueltas/components/MazoCartas.tsx` (260) |
+| `theme/motion.ts` | 381 | `theme/motion.ts` (381) |
+| `screens/extras/MinimalPairsScreen.tsx` | 375 | `features/sonidos/screens/MinimalPairsScreen.tsx` (240) |
+| `db/schema.ts` | 373 | `data/esquema.ts` (373) |
+| `screens/extras/GramaticaTemaScreen.tsx` | 370 | `features/gramatica/screens/GramaticaTemaScreen.tsx` (205) |
+| `components/errores/SecuenciaMalentendido.tsx` | 367 | `features/errores/components/SecuenciaMalentendido.tsx` (368) |
+| `components/juegos/pares/CableSenal.tsx` | 353 | `features/juegos/pares/components/CableSenal.tsx` (353) |
+| `screens/extras/PronunciationScreen.tsx` | 340 | `features/sonidos/screens/PronunciationScreen.tsx` (158) |
+| `screens/extras/practicar/ConsolaHoy.tsx` | 339 | `features/practicar/components/ConsolaHoy.tsx` (328) |
+| `components/juegos/colmena/RanurasPalabra.tsx` | 338 | `features/juegos/colmena/components/RanurasPalabra.tsx` (338) |
+| `screens/extras/AzarScreen.tsx` | 334 | `features/frases-sueltas/screens/AzarScreen.tsx` (127) |
+| `domain/session.ts` | 322 | `domain/session.ts` (322) |
+| `components/card/TileBuilder.tsx` | 321 | `features/estudio/components/TileBuilder.tsx` (321) |
+| `services/auth.ts` | 319 | `services/cuenta/auth.ts` (224) |
+| `db/cola.ts` | 316 | `data/repos/cola.ts` (309), `domain/cola.ts` (127) |
+| `domain/marcas.ts` | 305 | `domain/marcas.ts` (305) |
+| `screens/games/CazalaScreen.tsx` | 304 | `features/juegos/cazala/screens/CazalaScreen.tsx` (146) |
+| `components/gramatica/CorreccionFrase.tsx` | 296 | `shared/ui/CorreccionFrase.tsx` (296) |
+| `screens/entry/AuthScreen.tsx` | 295 | `features/cuenta/screens/AuthScreen.tsx` (242) |
+| `screens/extras/PracticeScreen.tsx` | 294 | `features/practicar/screens/PracticeScreen.tsx` (188) |
+| `components/fx/Espectrograma.tsx` | 289 | `features/progreso/components/Espectrograma.tsx` (25) |
+| `domain/distractores.ts` | 281 | `domain/distractores.ts` (281) |
+| `screens/discover/DetailScreen.tsx` | 277 | `features/detalle/screens/DetailScreen.tsx` (200) |
+| `services/music.ts` | 272 | `services/musica.ts` (272) |
+| `components/fx/PortadaJuego.tsx` | 266 | `features/practicar/components/PortadaJuego.tsx` (266) |
+| `components/sonidos/PaginaFonema.tsx` | 264 | `features/sonidos/components/PaginaFonema.tsx` (266) |
+| `components/base/Screen.tsx` | 264 | `shared/ui/Screen.tsx` (264) |
+| `components/fx/HojaVeredicto.tsx` | 261 | `features/estudio/components/HojaVeredicto.tsx` (263) |
+| `screens/utility/ProgressScreen.tsx` | 259 | `features/progreso/screens/ProgressScreen.tsx` (185) |
+| `screens/games/GameEndScreen.tsx` | 259 | `features/juegos/fin/screens/GameEndScreen.tsx` (192) |
+| `store/useAuthStore.ts` | 256 | `estado/useAuthStore.ts` (256) |
+| `navigation/TabNavigator.tsx` | 252 | `app/navegacion/TabNavigator.tsx` (252) |
+| `components/legal/HojaConsentimiento.tsx` | 252 | `shared/ui/HojaConsentimiento.tsx` (252) |
+| `components/juegos/pares/TarjetaFusion.tsx` | 252 | `features/juegos/pares/components/TarjetaFusion.tsx` (254) |
+| `domain/match3.ts` | 251 | `domain/match3.ts` (251) |
+
+Los que siguen arriba de 250 no son pantallas y están bajo 400: lógica pura (`domain/session.ts`, `match3.ts`,
+`marcas.ts`, `distractores.ts`), tokens (`theme/motion.ts`), el esquema de la base y componentes de una sola pieza
+animada (tablero, panal, cable).
+
+### Avisos del React Compiler (para el prompt 4)
+
+`npm run lint` los muestra como warning (`react-compiler/react-compiler`); son 60 y ninguno cambia lo que hace la app
+hoy: dicen dónde el compilador no podría optimizar.
+
+**39 · Se salta el componente o hook porque tiene un `eslint-disable` de las reglas de hooks**
+
+`estado/useMusicaPantalla.ts:41`, `features/estudio/components/HojaVeredicto.tsx:99`, `features/estudio/components/PalabraVoladora.tsx:45`, `features/estudio/components/StudyCardView.tsx:122`, `features/estudio/components/StudyCardView.tsx:154`, `features/estudio/hooks/useSesionEstudio.ts:157`, `features/estudio/hooks/useSesionEstudio.ts:240`, `features/frases-sueltas/components/CartaEnMazo.tsx:77`, `features/frases-sueltas/hooks/useFrasesSueltas.ts:107`, `features/frases-sueltas/hooks/useFrasesSueltas.ts:154`, `features/frases-sueltas/hooks/useFrasesSueltas.ts:159`, `features/juegos/cazala/components/ResultadoCaza.tsx:88`, `features/juegos/colmena/components/Hexagono.tsx:134`, `features/juegos/colmena/components/Hexagono.tsx:178`, `features/juegos/colmena/components/Hexagono.tsx:203`, `features/juegos/colmena/hooks/useRondaColmena.ts:141`, `features/juegos/dulces/components/ChipCascada.tsx:49`, `features/juegos/dulces/components/FraseVoladora.tsx:48`, `features/juegos/dulces/components/MetaFrase.tsx:98`, `features/juegos/dulces/components/Pieza.tsx:132`, `features/juegos/dulces/components/Pieza.tsx:170`, `features/juegos/dulces/components/TableroDulces.tsx:93`, `features/juegos/dulces/hooks/usePartidaDulces.ts:356`, `features/juegos/fin/hooks/useFinJuego.ts:55`, `features/juegos/fin/hooks/useFinJuego.ts:75`, `features/juegos/pares/components/CableSenal.tsx:256`, `features/juegos/pares/components/CableSenal.tsx:264`, `features/juegos/pares/components/FichaPar.tsx:55`, `features/juegos/pares/components/TarjetaFusion.tsx:162`, `features/oido/hooks/useModoOido.ts:131`, `features/practicar/components/ConsolaHoy.tsx:171`, `features/sonidos/hooks/usePronunciacion.ts:67`, `features/sonidos/hooks/usePronunciacion.ts:117`, `features/sonidos/hooks/usePronunciacion.ts:125`, `shared/hooks/useCarga.ts:154`, `shared/hooks/useCarga.ts:164`, `shared/hooks/useCortarAudioAlSalir.ts:26`, `shared/ui/MarcoImagen.tsx:91`, `shared/ui/RoundTimer.tsx:75`
+
+**14 · `useCarga` (y `useCallback`/`useMemo`) reciben una función que no está escrita en línea**
+
+`features/ajustes/hooks/useDescargas.ts:19`, `features/errores/hooks/useDetalleError.ts:20`, `features/errores/hooks/useErrores.ts:26`, `features/juegos/comun/useNivel.ts:17`, `features/juegos/niveles/hooks/useNivelesJuego.tsx:48`, `features/lecturas/hooks/useLectura.ts:56`, `features/lecturas/hooks/useLecturas.ts:24`, `features/phrasal/hooks/usePhrasal.ts:25`, `features/phrasal/hooks/usePhrasalVerbo.ts:45`, `features/sonidos/hooks/useContracciones.ts:18`, `features/sonidos/hooks/useParesMinimos.ts:33`, `features/vocabulario/hooks/useDetalleMundo.ts:24`, `features/vocabulario/hooks/useDetallePack.ts:22`, `features/vocabulario/hooks/useExplorar.ts:25`
+
+**3 · Muta un valor que devolvió un hook (p. ej. `.value` o `.current` de algo que no es ref ni shared value propio)**
+
+`features/ajustes/screens/DownloadsScreen.tsx:53`, `features/juegos/colmena/screens/ColmenaScreen.tsx:146`, `features/lecturas/screens/LecturaScreen.tsx:94`
+
+**3 · Muta una variable que React considera inmutable (props, estado o algo capturado en render)**
+
+`features/juegos/caida/hooks/usePartidaCaida.ts:232`, `features/lecturas/hooks/useReproductorCapitulo.ts:73`, `shared/ui/CorreccionFrase.tsx:215`
+
+**1 · Muta props o argumentos de un hook**
+
+`shared/ui/Screen.tsx:58`
+
+---
 
 ## 1. Diagnóstico del árbol actual
 

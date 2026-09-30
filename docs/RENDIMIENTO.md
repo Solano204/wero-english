@@ -12,18 +12,23 @@ contenedor no trae `assets/aud` ni `assets/img` (el `bundled.ts` local está vac
 aquí **no incluyen** los ~7.9k medios del build real. Lo que depende del teléfono queda «pendiente» con el comando
 exacto para sacarlo (ver abajo).
 
-| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | Cómo |
-|---|---|---|---|
-| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | `expo export`, medido aquí |
-| Salida JS antes de Hermes | 12.71 MB | — | Expo Atlas |
-| Módulos en el bundle | 2,425 | 2,425 | Expo Atlas |
-| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | `expo export` |
-| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | `expo export` |
-| APK release (arm64) | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
-| AAB release | pendiente | pendiente | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
-| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | ver «Arranque» |
-| Arranque JS → Practicar interactivo | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
-| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | ver «Flashlight» |
+| Métrica | LÍNEA BASE | DESPUÉS DE LIMPIEZA | DESPUÉS DE ESTRUCTURA | Cómo |
+|---|---|---|---|---|
+| Bundle JS Hermes (`.hbc`) | 7,698,751 B (7.34 MiB) | 7,678,696 B (7.32 MiB), −20 KB | 7,727,907 B (7.37 MiB), +49 KB (+0.6 %) | `expo export`, medido aquí |
+| Salida JS antes de Hermes | 12.71 MB | — | 12.72 MB | Expo Atlas |
+| Módulos en el bundle | 2,425 | 2,425 | 2,484 (+59: hooks y componentes partidos) | Expo Atlas |
+| Assets empaquetados (sin aud/img) | 104 archivos · 3.68 MB | igual (el borrado de assets espera OK) | 104 archivos (los 12 sfx duplicados ya venían deduplicados por hash) | `expo export` |
+| Export completo (sin aud/img) | 11,386,071 B | 11,366,016 B | 11,415,227 B | `expo export` |
+| APK release (arm64) | pendiente | pendiente | pendiente | `cd android && ./gradlew assembleRelease` → `app/build/outputs/apk/release/` |
+| AAB release | pendiente | pendiente | pendiente | `./gradlew bundleRelease` → `app/build/outputs/bundle/release/` |
+| TTI frío (`am start -W`, TotalTime) | pendiente | pendiente | pendiente | ver «Arranque» |
+| Arranque JS → Practicar interactivo | pendiente | pendiente | pendiente | cronómetro `[medir]` (ver «Arranque») |
+| FPS medio / CPU / RAM (Flashlight) | pendiente | pendiente | pendiente | ver «Flashlight» |
+
+**Después de estructura.** El prompt 2 no busca bajar peso: parte pantallas en hooks y componentes y mueve archivos a
+capas. Eso suma 59 módulos, y cada módulo de Metro lleva su envoltura (`__d(function…)`, su tabla de dependencias),
+de ahí los +49 KB de Hermes (+0.6 %) con la misma salida de código (12.72 MB). El orden de los hooks y efectos de
+cada pantalla no cambió, así que no se espera diferencia de arranque ni de FPS; se confirma en el teléfono.
 
 ### Top 15 módulos (Expo Atlas, tamaño de salida)
 
