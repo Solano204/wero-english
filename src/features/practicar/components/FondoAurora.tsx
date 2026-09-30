@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import { Canvas, Fill, Shader, Skia } from '@shopify/react-native-skia';
+import { Canvas, Fill, Shader, Skia, type SkRuntimeEffect } from '@shopify/react-native-skia';
 import Animated, {
   Extrapolation,
   SensorType,
@@ -120,8 +120,29 @@ function ParalajeGiro({ dx, dy }: { dx: SharedValue<number>; dy: SharedValue<num
   return null;
 }
 
+/**
+ * Los dos shaders y el tinte, compilados una sola vez para toda la app (no por montaje ni por render): Practicar se
+ * vuelve a montar al cerrar sesión o al volver de Boot. Si Skia no puede compilarlos, quedan en null y el fondo se
+ * queda como estaba.
+ */
+let compilados: { aurora: SkRuntimeEffect | null; grano: SkRuntimeEffect | null; tinte: number[] } | null = null;
+function recursos() {
+  if (!compilados) {
+    try {
+      compilados = {
+        aurora: Skia.RuntimeEffect.Make(AURORA),
+        grano: Skia.RuntimeEffect.Make(GRANO),
+        tinte: Array.from(Skia.Color(color.accent)),
+      };
+    } catch {
+      compilados = { aurora: null, grano: null, tinte: [0, 0, 0, 0] };
+    }
+  }
+  return compilados;
+}
+
 function GranoFino() {
-  const fuente = Skia.RuntimeEffect.Make(GRANO);
+  const fuente = recursos().grano;
   if (!fuente) return null;
   return (
     <Canvas style={StyleSheet.absoluteFill} pointerEvents="none" accessible={false}>
@@ -139,8 +160,7 @@ function LuzAurora() {
   const dx = useSharedValue(0);
   const dy = useSharedValue(0);
 
-  const fuente = Skia.RuntimeEffect.Make(AURORA);
-  const tinte = Array.from(Skia.Color(color.accent));
+  const { aurora: fuente, tinte } = recursos();
 
   const sangre = aurora.paralaje;
   const ancho = Math.round((width + sangre * 2) * aurora.resolucion);
