@@ -1,23 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Share, StyleSheet, Text, View } from 'react-native';
-import {
-  useNavigation,
-  useRoute,
-  type RouteProp,
-} from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { Badge, Button, Header, NotaInfo, Screen } from '@/shared/ui';
 import { DueloContraste } from '@/features/errores/components/DueloContraste';
 import { MedidorGravedad } from '@/features/errores/components/MedidorGravedad';
 import { SecuenciaMalentendido } from '@/features/errores/components/SecuenciaMalentendido';
-import { textoParaCompartir } from '@/domain/errores';
-import { useCortarAudioAlSalir } from '@/shared/hooks/useCortarAudioAlSalir';
-import { loadContent } from '@/data/contenido';
 import { color, font, motionMalentendido, space } from '@/theme';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
-type Rt = RouteProp<RootStackParams, 'ErrorDetail'>;
+import { useDetalleError } from '@/features/errores/hooks/useDetalleError';
 
 /**
  * Ficha de un error. Arriba, la señal que se rompe: lo que dices, lo que entienden y lo correcto en tres pasos. Los de
@@ -25,25 +13,7 @@ type Rt = RouteProp<RootStackParams, 'ErrorDetail'>;
  * en ámbar) y, si se puede contar, «Para contar» y el botón «Compartir», que abre el menú del sistema con un texto armado.
  */
 export function ErrorDetailScreen() {
-  const nav = useNavigation<Nav>();
-  const { params } = useRoute<Rt>();
-  const content = useMemo(loadContent, []);
-  const [falloCompartir, setFalloCompartir] = useState(false);
-
-  const err = content.errores.errores.find((e) => e.id === params.errorId);
-
-  // Perder el foco (salir, abrir la frase completa) corta todo el audio: el reproductor de frases es uno solo y compartido.
-  useCortarAudioAlSalir();
-
-  const compartir = useCallback(async () => {
-    if (!err) return;
-    setFalloCompartir(false);
-    try {
-      await Share.share({ message: textoParaCompartir(err) });
-    } catch {
-      setFalloCompartir(true);
-    }
-  }, [err]);
+  const { nav, falloCompartir, err, compartir } = useDetalleError();
 
   if (!err) {
     return (
