@@ -1,58 +1,20 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { Image } from 'expo-image';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, Header, Icon, Screen, Presionable } from '@/shared/ui';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { FilaLegal } from '@/features/ajustes/components/FilaLegal';
-import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
 import { useAuthStore } from '@/estado/useAuthStore';
-import { useSettingsStore } from '@/estado/useSettingsStore';
 import { NOTIF_MAX_POR_DIA } from '@/data/repos/ajustes';
 import { setSimularCargaLenta } from '@/shared/hooks/useCarga';
 import * as notifications from '@/services/notificaciones';
-import * as speech from '@/services/voz';
 import { color, font, layout, radius, space } from '@/theme';
 import type { Nivel } from '@/types';
-import type { RootStackParams } from '@/types/rutas';
-
-type Nav = NativeStackNavigationProp<RootStackParams>;
+import { useAjustes } from '@/features/ajustes/hooks/useAjustes';
 
 /** P-11, ajustes. */
 export function SettingsScreen() {
-  const nav = useNavigation<Nav>();
-  const user = useAuthStore((s) => s.user);
-  const signOut = useAuthStore((s) => s.signOut);
-  const s = useSettingsStore();
-  const [cargaLenta, setCargaLenta] = useState(false);
-  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
-  const micEstado = useMemo(() => speech.isAvailable(), []);
-  const notifEstado = useMemo(() => notifications.isAvailable(), []);
-
-  const cambiar = useCallback(
-    async <K extends keyof typeof s>(key: K, value: (typeof s)[K]) => {
-      if (!user) return;
-      // El cast es necesario: el tipo del store incluye métodos además
-      // de los ajustes, y set() solo acepta las claves de Settings.
-      await s.set(user.id, key as never, value as never);
-    },
-    [user, s]
-  );
-
-  const alternarNivel = useCallback(
-    (n: Nivel) => {
-      const tiene = s.niveles.includes(n);
-      // Nunca se pueden apagar los tres: quedaría una app sin contenido.
-      if (tiene && s.niveles.length === 1) return;
-      const next = tiene
-        ? s.niveles.filter((x) => x !== n)
-        : [...s.niveles, n].sort();
-      void cambiar('niveles', next as never);
-    },
-    [s.niveles, cambiar]
-  );
-
+  const { nav, user, signOut, s, cargaLenta, setCargaLenta, pedirConsentimiento, hoja, micEstado, notifEstado, cambiar, alternarNivel } = useAjustes();
 
   return (
     <Screen scroll>
