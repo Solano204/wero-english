@@ -102,7 +102,7 @@ export function RootNavigator() {
         <Stack.Screen name="MinimalPairs" getComponent={() => require('@/screens/extras/MinimalPairsScreen').MinimalPairsScreen} />
       </Stack.Group>
 
-      <Stack.Screen name="Detail" getComponent={() => require('@/screens/discover/DetailScreen').DetailScreen} />
+      <Stack.Screen name="Detail" getComponent={() => require('@/features/detalle/screens/DetailScreen').DetailScreen} />
       <Stack.Screen name="PackDetail" getComponent={() => require('@/features/vocabulario/screens/PackDetailScreen').PackDetailScreen} />
       <Stack.Screen name="WorldDetail" getComponent={() => require('@/features/vocabulario/screens/WorldDetailScreen').WorldDetailScreen} />
       <Stack.Screen name="Pronunciation" getComponent={() => require('@/screens/extras/PronunciationScreen').PronunciationScreen} />

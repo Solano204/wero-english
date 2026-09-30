@@ -28,7 +28,7 @@ const EXPLICITO = new Set([
   // Define el tono `strong` y RiskBadge («Solo con amigos»).
   'src/shared/ui/Badge.tsx',
   // El paso explícito de la escala de registro.
-  'src/components/detalle/EscalaRegistro.tsx',
+  'src/features/detalle/components/EscalaRegistro.tsx',
   // El aviso «Fuerte» de una frase con vulgaridad 2.
   'src/components/mazo/CartaFrase.tsx',
   'src/components/phrasal/DetalleForma.tsx',
@@ -203,7 +203,7 @@ function autoprueba() {
     ['src/screens/x.tsx', '// color.riskStrong', 0],
     ['src/screens/x.tsx', '/* tone="strong" */ const a = 1;', 0],
     ['src/screens/x.tsx', 'fontFamily: font.family.bodyStrong,', 0],
-    ['src/components/detalle/EscalaRegistro.tsx', 'const c = color.riskStrong;', 0],
+    ['src/features/detalle/components/EscalaRegistro.tsx', 'const c = color.riskStrong;', 0],
     ['src/shared/ui/Badge.tsx', "tone={v === 2 ? 'strong' : 'warn'}", 0],
   ];
   for (const [rel, src, esperado] of rojo) {

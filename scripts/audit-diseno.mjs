@@ -448,7 +448,7 @@ const ALCANCE_SENAL = (r) =>
   r.startsWith('src/features/sonidos/components/') || r === 'src/features/sonidos/screens/PronunciationScreen.tsx' ||
   r.startsWith('src/features/mazo/components/') || r === 'src/features/mazo/screens/DeckScreen.tsx' ||
   r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
-  r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
+  r.startsWith('src/components/detalle/') || r === 'src/features/detalle/screens/DetailScreen.tsx' ||
   r.startsWith('src/components/niveles/') || r === 'src/features/juegos/niveles/screens/NivelesScreen.tsx' ||
   r.startsWith('src/components/juegos/pares/') || r === 'src/features/juegos/pares/screens/ParesScreen.tsx' ||
   r.startsWith('src/components/juegos/caida/') || r === 'src/features/juegos/caida/screens/CaidaScreen.tsx' ||

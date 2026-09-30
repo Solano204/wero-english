@@ -20,12 +20,12 @@ import {
 } from '@/shared/ui';
 import { MarcoImagen } from '@/shared/ui/MarcoImagen';
 import { Hueso, HuesoImagen, HuesoTexto, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
-import { Aparece } from '@/components/detalle/Aparece';
+import { Aparece } from '@/features/detalle/components/Aparece';
 import { BotonGuardar } from '@/shared/ui/BotonGuardar';
-import { CuandoNoDecirla } from '@/components/detalle/CuandoNoDecirla';
-import { EscalaRegistro } from '@/components/detalle/EscalaRegistro';
-import { FilaDondeVive } from '@/components/detalle/FilaDondeVive';
-import { HeroeFrase } from '@/components/detalle/HeroeFrase';
+import { CuandoNoDecirla } from '@/features/detalle/components/CuandoNoDecirla';
+import { EscalaRegistro } from '@/features/detalle/components/EscalaRegistro';
+import { FilaDondeVive } from '@/features/detalle/components/FilaDondeVive';
+import { HeroeFrase } from '@/features/detalle/components/HeroeFrase';
 import { getEntry } from '@/data/repos/frases';
 import { isFavorite, toggleFavorite } from '@/data/repos/tarjetas';
 import { useCarga } from '@/shared/hooks/useCarga';
