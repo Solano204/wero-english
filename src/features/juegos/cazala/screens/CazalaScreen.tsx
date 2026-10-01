@@ -97,10 +97,9 @@ export function CazalaScreen() {
             ]}
             showsVerticalScrollIndicator={false}
           >
-            {order.map((id, i) => (
+            {order.map((id) => (
               <RenglonCaza
                 key={`${item.id}-${id}`}
-                indice={i}
                 compacta={compacta}
                 label={porId.get(id)?.phrase_tts ?? `#${id}`}
                 estado={estadoDe(id)}

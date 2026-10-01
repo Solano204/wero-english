@@ -89,6 +89,10 @@ export function TableroDulces({
   const montado = useRef(true);
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
   const [chip, setChip] = useState<{ id: number; texto: string } | null>(null);
+  // Sube cada vez que el tablero queda quieto: todas las piezas se plantan en su celda (`Pieza`, `asiento`).
+  const [asiento, setAsiento] = useState(0);
+  const piezasRef = useRef(piezas);
+  piezasRef.current = piezas;
   const chipId = useRef(0);
 
   // Lo último que trae la pantalla, para que ni el gesto ni la jugada en curso usen valores viejos.
@@ -131,7 +135,10 @@ export function TableroDulces({
   useEffect(() => {
     setEntrando(true);
     const espera = reducido ? motionDuration.rapido : retrasoDeColumna(cols - 1) + duracionCaida(rows) + REBOTE_MS;
-    const t = setTimeout(() => setEntrando(false), espera);
+    const t = setTimeout(() => {
+      setEntrando(false);
+      setAsiento((n) => n + 1);
+    }, espera);
     return () => clearTimeout(t);
   }, [llave, cols, rows, reducido]);
 
@@ -301,10 +308,16 @@ export function TableroDulces({
         if (falta > 0) await dormir(falta);
         if (!vive()) return;
 
-        if (!celdasRef.current.every((v, i) => v === j.final[i])) {
+        // Una pieza por celda, la que dicen los ids, y del color del dominio. Si no, se corrige.
+        const ids = idsRef.current;
+        const ps = piezasRef.current;
+        const piezaPorCelda =
+          ps.length === ids.length && ps.every((v) => !v.explota && ids[v.fila * columnas + v.col] === v.id);
+        if (!piezaPorCelda || !celdasRef.current.every((v, i) => v === j.final[i])) {
           if (__DEV__) console.warn('[dulces] el tablero animado no coincide con el del dominio: se corrige');
           reiniciar(j.final, columnas, datos.current.rows, false);
         }
+        setAsiento((n) => n + 1);
         j.onFin();
       })();
     },
@@ -370,6 +383,7 @@ export function TableroDulces({
               mov={p.mov}
               entrada={p.entrada}
               rechazo={p.rechazo}
+              asiento={asiento}
               onTocar={alTocar}
             />
           ))}

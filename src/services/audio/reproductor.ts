@@ -1,4 +1,4 @@
-import { createAudioPlayer } from 'expo-audio';
+import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
 import * as media from '@/services/media';
 import * as music from '@/services/musica';
 import { INTERVALO_ESTADO_MS, estados, marcar, posicionDe, soltar, suena, vigilar } from './estadoReproductor';
@@ -123,10 +123,8 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
         // (como hacía antes) depende de bajar el archivo desde el packager y
         // fallaba en silencio: el player se creaba con la URL del bundler en
         // vez de un archivo local, y no sonaba nada.
-        frase.player = createAudioPlayer(
-          resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri },
-          { updateInterval: INTERVALO_ESTADO_MS }
-        );
+        frase.fuente = resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri };
+        frase.player = createAudioPlayer(frase.fuente, { updateInterval: INTERVALO_ESTADO_MS });
         vigilar(frase.player);
         frase.currentPath = relPath;
       }
@@ -143,6 +141,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
 
       frase.player.play();
       marcar(frase.player, { arrancando: true });
+      vigilarArranque(frase.player, miId, rate, 0);
       resultado = true;
       avisarReproduccion(relPath, rate);
       // Ducking: la música se agacha mientras suena esta voz y se
@@ -163,6 +162,61 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
   // Y quien llamó a play()/playSlow()/playAndWait() recibe respuesta
   // aunque la cola traiga pasos anteriores atorados.
   return conTope(frase.colaFrase.then(() => resultado), TOPE_ABSOLUTO_MS, false);
+}
+
+/**
+ * Un player que recibió play() y no arranca nunca (perdió el foco de audio, quedó en error tras ir a segundo plano, un
+ * seek nativo que no volvió) se seguía reutilizando para el mismo audio: desde ahí nada sonaba hasta reiniciar la app.
+ * Si a ARRANQUE_TIMEOUT_MS sigue sin sonar y nadie más tomó el player, se tira y se rehace desde la misma fuente, en la
+ * misma posición, una sola vez. No cambia `reproduccionId`: para quien escucha es la misma reproducción.
+ */
+function vigilarArranque(p: AudioPlayer, miId: number, rate: number, desde: number): void {
+  setTimeout(() => {
+    const e = estados.get(p);
+    if (miId !== frase.reproduccionId || frase.player !== p || suena(p) || !e?.arrancando) return;
+    frase.colaFrase = frase.colaFrase.then(() =>
+      conTope(
+        (async () => {
+          // Otra vez dentro de la cola: mientras esperaba turno pudo arrancar o cambiar todo.
+          if (miId !== frase.reproduccionId || frase.player !== p || suena(p) || !frase.fuente) return;
+          if (__DEV__) console.warn('[audio] el player no arrancó: se rehace');
+          try {
+            p.pause();
+          } catch {
+            /* sin consecuencia */
+          }
+          soltar(p);
+          try {
+            p.remove();
+          } catch {
+            /* sin consecuencia */
+          }
+          const nuevo = createAudioPlayer(frase.fuente, { updateInterval: INTERVALO_ESTADO_MS });
+          frase.player = nuevo;
+          vigilar(nuevo);
+          try {
+            nuevo.setPlaybackRate(rate, 'high');
+          } catch {
+            /* suena a velocidad normal */
+          }
+          if (desde > 0) {
+            try {
+              await conTope(nuevo.seekTo(desde), TOPE_NATIVO_MS, undefined);
+            } catch {
+              /* desde el principio */
+            }
+          }
+          if (miId !== frase.reproduccionId || frase.player !== nuevo) return;
+          nuevo.play();
+          marcar(nuevo, { arrancando: true });
+        })().catch((err) => {
+          if (__DEV__) console.warn('[audio] no se pudo rehacer el player', err);
+        }),
+        TOPE_ABSOLUTO_MS,
+        undefined
+      )
+    );
+  }, ARRANQUE_TIMEOUT_MS);
 }
 
 /** Reproduce siempre a velocidad normal (1.0). */
@@ -328,12 +382,15 @@ export function pauseFrase(): void {
  */
 export function resumeFrase(): boolean {
   if (!frase.player) return false;
+  const e = estados.get(frase.player);
+  const desde = e ? posicionDe(e) : 0;
   try {
     frase.player.play();
   } catch {
     return false;
   }
   marcar(frase.player, { arrancando: true });
+  vigilarArranque(frase.player, frase.reproduccionId, e?.rate ?? 1, desde);
   void music.duck(true);
   void esperarFinReanudado(frase.reproduccionId).then(() => music.duck(false));
   return true;

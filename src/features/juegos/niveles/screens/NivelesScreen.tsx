@@ -33,7 +33,7 @@ const TITULOS: Record<string, string> = {
 };
 
 export function NivelesScreen() {
-  const { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista, cuenta, renderItem, extraData } = useNivelesJuego();
+  const { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista, cuenta, renderItem, extraData, esqueletoEncima } = useNivelesJuego();
 
   if (!def) {
     return (
@@ -77,38 +77,49 @@ export function NivelesScreen() {
         onBack={() => nav.goBack()}
       />
 
-      <Carga carga={carga} esqueleto={<EsqueletoNiveles lado={lado} />}>
+      <Carga carga={carga} style={styles.lista} esqueleto={<EsqueletoNiveles lado={lado} />}>
         {() => (
-          // Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba.
-          <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
-            <AnilloEnVista value={actualEnVista}>
-              <Animated.FlatList
-                ref={listaRef}
-                data={items}
-                renderItem={renderItem}
-                keyExtractor={claveItem}
-                getItemLayout={getItemLayout}
-                extraData={extraData}
-                stickyHeaderIndices={pegados}
-                onScroll={alScroll}
-                scrollEventThrottle={16}
-                onViewableItemsChanged={alVisibles}
-                viewabilityConfig={CONFIGURACION_VISTA}
-                initialNumToRender={12}
-                maxToRenderPerBatch={8}
-                windowSize={7}
-                showsVerticalScrollIndicator={false}
-                ListFooterComponent={
-                  <Text style={styles.pie}>
-                    Terminar un nivel abre el siguiente, saques una estrella o tres.
-                    {ANUNCIOS_ACTIVOS
-                      ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
-                      : ''}
-                    {' '}Rejugar nunca te baja lo que ya tenías.
-                  </Text>
-                }
-              />
-            </AnilloEnVista>
+          <View style={styles.lista}>
+            {/* Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba. */}
+            <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
+              <AnilloEnVista value={actualEnVista}>
+                <Animated.FlatList
+                  ref={listaRef}
+                  data={items}
+                  renderItem={renderItem}
+                  keyExtractor={claveItem}
+                  getItemLayout={getItemLayout}
+                  extraData={extraData}
+                  stickyHeaderIndices={pegados}
+                  onScroll={alScroll}
+                  scrollEventThrottle={16}
+                  onViewableItemsChanged={alVisibles}
+                  viewabilityConfig={CONFIGURACION_VISTA}
+                  initialNumToRender={12}
+                  maxToRenderPerBatch={8}
+                  windowSize={7}
+                  showsVerticalScrollIndicator={false}
+                  ListFooterComponent={
+                    <Text style={styles.pie}>
+                      Terminar un nivel abre el siguiente, saques una estrella o tres.
+                      {ANUNCIOS_ACTIVOS
+                        ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
+                        : ''}
+                      {' '}Rejugar nunca te baja lo que ya tenías.
+                    </Text>
+                  }
+                />
+              </AnilloEnVista>
+            </View>
+            {esqueletoEncima ? (
+              <Animated.View
+                exiting={reducido ? undefined : desaparecer()}
+                style={[StyleSheet.absoluteFill, styles.esqueletoEncima]}
+                pointerEvents="none"
+              >
+                <EsqueletoNiveles lado={lado} />
+              </Animated.View>
+            ) : null}
           </View>
         )}
       </Carga>
@@ -163,6 +174,7 @@ export function NivelesScreen() {
 
 const styles = StyleSheet.create({
   lista: { flex: 1 },
+  esqueletoEncima: { backgroundColor: color.bg },
   // Pegado abajo, sobre la lista y encima del footer (el footer queda fuera de este contenedor).
   flotante: { position: 'absolute', left: 0, right: 0, bottom: space.md, alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
   aviso: {

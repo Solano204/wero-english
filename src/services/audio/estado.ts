@@ -1,4 +1,4 @@
-import { setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import { setAudioModeAsync, type AudioPlayer, type AudioSource } from 'expo-audio';
 import { cargaPaqueteDevGuardado } from './efectos';
 
 /**
@@ -10,6 +10,8 @@ export const frase: {
   player: AudioPlayer | null;
   ready: boolean;
   currentPath: string | null;
+  /** De dónde se creó `player`: para rehacerlo igual si deja de responder (ver `vigilarArranque`). */
+  fuente: AudioSource | null;
   /**
    * Token de reproducción vigente. Cada play()/playSlow() de frase saca
    * uno nuevo; si al llegar a tocar el player el suyo ya no es el vigente
@@ -28,6 +30,7 @@ export const frase: {
   player: null,
   ready: false,
   currentPath: null,
+  fuente: null,
   reproduccionId: 0,
   colaFrase: Promise.resolve(),
 };

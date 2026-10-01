@@ -19,7 +19,7 @@ export interface ReproductorCapitulo {
   estado: EstadoCapitulo;
   /** Posición y duración en segundos. `dur` es 0 hasta que el reproductor la conoce. */
   progreso: { pos: number; dur: number };
-  /** No hay audio, no existe el archivo o falló al pedirlo. */
+  /** El capítulo no tiene audio o no existe el archivo. Un intento fallido no lo apaga: se puede volver a tocar. */
   apagado: boolean;
   /** El audio llegó a su fin solo (no lo detuvo el usuario). Se apaga al volver a escuchar. */
   terminado: boolean;
@@ -48,7 +48,6 @@ export interface ReproductorCapitulo {
 export function useReproductorCapitulo(path: string | null): ReproductorCapitulo {
   const [estado, setEstado] = useState<EstadoCapitulo>('idle');
   const [progreso, setProgreso] = useState(SIN_PROGRESO);
-  const [fallo, setFallo] = useState(false);
   const [terminado, setTerminado] = useState(false);
   // El cleanup y los intervalos no ven el state nuevo: necesitan refs.
   const estadoRef = useRef<EstadoCapitulo>('idle');
@@ -76,7 +75,6 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
   // Otro capítulo (otro audio) o salir de la pantalla: se corta lo suyo y se vuelve a reposo.
   useEffect(() => {
     aReposo();
-    setFallo(false);
     setTerminado(false);
     return () => {
       if (estadoRef.current !== 'idle') audio.stop();
@@ -141,7 +139,8 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
     setTerminado(false);
     const ok = await audio.play(path);
     if (!ok) {
-      setFallo(true);
+      // No sonó (lo interrumpió otro audio o un corte, o el player falló): a reposo, con el botón listo para
+      // intentar otra vez. Antes esto apagaba el audio del capítulo hasta salir de la pantalla.
       aReposo();
       return;
     }
@@ -177,7 +176,7 @@ export function useReproductorCapitulo(path: string | null): ReproductorCapitulo
   return {
     estado,
     progreso,
-    apagado: fallo || !hayAudio(path),
+    apagado: !hayAudio(path),
     terminado,
     escuchar,
     pausar,

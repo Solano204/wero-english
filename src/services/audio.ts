@@ -211,6 +211,7 @@ export function releaseAudio(): void {
   liberarEfectos();
   frase.player = null;
   frase.currentPath = null;
+  frase.fuente = null;
   media.invalidate();
 }
 

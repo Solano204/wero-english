@@ -11,7 +11,7 @@ import { RETRASO_LOGRO } from '@/features/juegos/niveles/components/CeldaNivel';
 import { SIN_RECOMPENSA, useRecompensaNiveles } from '@/features/juegos/niveles/hooks/useRecompensaNiveles';
 import { abrirConAnuncio, getNiveles, nivelDesbloqueado, nivelesPagados, type NivelEstado } from '@/data/repos/niveles';
 import { COLUMNAS, aplanar, armarTramos, indiceDeNivel, indicesEncabezado, medir, totalEstrellas, type BandaDef, type EstadoNivel, type ItemLista } from '@/domain/niveles';
-import { useCarga } from '@/shared/hooks/useCarga';
+import { DEMORA_ESQUELETO_MS, useCarga } from '@/shared/hooks/useCarga';
 import { useAuthStore } from '@/estado/useAuthStore';
 import { loadContent } from '@/data/contenido';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
@@ -179,6 +179,16 @@ export function useNivelesJuego() {
   const recompensaHallada = useRecompensaNiveles(juego, estrellas, siguiente, Boolean(carga.datos));
   const recompensa = posicionada ? recompensaHallada : SIN_RECOMPENSA;
 
+  // Si la lista tarda en quedar en su lugar, el esqueleto se queda encima mientras tanto: nunca
+  // una pantalla vacía. Una espera corta no lo pinta (no parpadea).
+  const [esperaLarga, setEsperaLarga] = useState(false);
+  useEffect(() => {
+    if (!carga.datos || posicionada) return;
+    const t = setTimeout(() => setEsperaLarga(true), DEMORA_ESQUELETO_MS);
+    return () => clearTimeout(t);
+  }, [carga.datos, posicionada]);
+  const esqueletoEncima = !posicionada && (carga.huboEsqueleto || esperaLarga);
+
   // El contador del encabezado arranca en la cifra de antes y rueda hasta la nueva cuando las
   // estrellas nuevas terminan de encenderse.
   const total = totalEstrellas(estrellas);
@@ -234,5 +244,5 @@ export function useNivelesJuego() {
   // Sin esto la lista no repinta renglones ya montados cuando cambia la recompensa o termina la entrada.
   const extraData = ({ recompensa: recompensa.id, entrando });
 
-  return { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista, cuenta, renderItem, extraData };
+  return { nav, juego, muro, def, carga, siguiente, aviso, lado, items, pegados, getItemLayout, reducido, listaRef, scrollY, alScroll, alMedir, posicionada, lejos, alVisibles, irAlActual, actualEnVista, cuenta, renderItem, extraData, esqueletoEncima };
 }

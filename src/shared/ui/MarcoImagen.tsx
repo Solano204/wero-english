@@ -28,8 +28,6 @@ const PARALAJE = 0.3;
 /** Tope del desplazamiento que cuenta para el paralaje (dp): más que esto no suma nada más. */
 const TOPE_PARALAJE = 400;
 
-const AnimatedImage = Animated.createAnimatedComponent(Image);
-
 interface Props {
   path: string | null;
   /** El punto de color del mundo, esquina inferior izquierda del estado vacío. */
@@ -117,18 +115,23 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
         </ProveedorEsqueleto>
       ) : null}
       {conImagen ? (
-        <AnimatedImage
-          source={source ?? undefined}
-          contentFit="cover"
-          cachePolicy={CACHE_IMAGEN}
-          recyclingKey={path}
-          onLoad={() => {
-            setCargada(true);
-            opacidadCarga.set(reducido ? 1 : withTiming(1, { duration: FADE_MS }));
-          }}
-          onError={() => setFallo(true)}
-          style={[StyleSheet.absoluteFill, imagenAnim]}
-        />
+        // Se anima la vista, no la imagen: el Image de expo-image envuelto con
+        // createAnimatedComponent lleva onLoad/onError al hilo de UI y revienta con
+        // "Tried to synchronously call a Remote Function".
+        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, imagenAnim]}>
+          <Image
+            source={source ?? undefined}
+            contentFit="cover"
+            cachePolicy={CACHE_IMAGEN}
+            recyclingKey={path}
+            onLoad={() => {
+              setCargada(true);
+              opacidadCarga.set(reducido ? 1 : withTiming(1, { duration: FADE_MS }));
+            }}
+            onError={() => setFallo(true)}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
       ) : null}
       {conImagen && desenfocada && !reducido ? (
         <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, blurAnim]}>

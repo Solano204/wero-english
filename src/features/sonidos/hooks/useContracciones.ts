@@ -10,6 +10,25 @@ import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
+const SIN_ENTRADAS: Entry[] = [];
+
+/**
+ * Las entradas de todos los grupos, de una sola consulta y guardadas para toda la sesión: son 75 frases fijas del
+ * catálogo. Cambiar de pestaña o volver a la pantalla ya no consulta la base ni espera nada.
+ */
+let porGrupoCache: Map<string, Entry[]> | null = null;
+
+async function entradasPorGrupo(grupos: readonly { id: string; entradas: number[] }[]): Promise<Map<string, Entry[]>> {
+  if (porGrupoCache) return porGrupoCache;
+  const todas = await getEntriesByIds([...new Set(grupos.flatMap((g) => g.entradas))]);
+  const porId = new Map(todas.map((e) => [e.id, e]));
+  const mapa = new Map(
+    grupos.map((g) => [g.id, g.entradas.map((id) => porId.get(id)).filter((e): e is Entry => Boolean(e))])
+  );
+  porGrupoCache = mapa;
+  return mapa;
+}
+
 /**
  * Contracciones: la lista y su voz.
  */
@@ -25,15 +44,9 @@ export function useContracciones() {
   );
 
   const [activo, setActivo] = useState<string>(grupos[0]?.id ?? '');
-  const carga = useCarga(
-    async (): Promise<Entry[]> => {
-      const g = grupos.find((x) => x.id === activo);
-      return g ? getEntriesByIds(g.entradas) : [];
-    },
-    [activo, grupos]
-  );
-  const entries = carga.datos ?? [];
-  // El giro de carga sale de inmediato, sin el retraso del esqueleto: es lo que ya se veía.
+  // Una sola carga para todos los grupos: la pestaña solo elige cuál se muestra.
+  const carga = useCarga(() => entradasPorGrupo(grupos), [grupos]);
+  const entries = carga.datos?.get(activo) ?? SIN_ENTRADAS;
   const cargando = carga.estado === 'cargando';
 
   return { nav, content, grupos, activo, setActivo, carga, entries, cargando };

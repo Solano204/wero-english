@@ -13,7 +13,6 @@ import { Presionable } from '@/shared/ui/Presionable';
 import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
 import {
   color,
-  escalon,
   font,
   layout,
   motionCaza,
@@ -22,8 +21,6 @@ import {
   motionPulso,
   radius,
   space,
-  tarjetaEntra,
-  tarjetaSale,
 } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { Reticulo } from './Reticulo';
@@ -61,7 +58,6 @@ const etiquetaA11y = (label: string, estado: EstadoRenglon): string => {
 
 interface Props {
   label: string;
-  indice: number;
   estado: EstadoRenglon;
   /** Ya hay tres marcadas: este renglón no lo está y baja de opacidad (sigue tocable). */
   bajada: boolean;
@@ -81,7 +77,7 @@ interface Props {
  * retículo, pulsos ni sacudida: solo el borde, el fondo y el ícono.
  */
 /** Memo: al marcar uno, los otros cinco reciben las mismas props y no se repintan. */
-export const RenglonCaza = memo(function RenglonCaza({ label, indice, estado, bajada, compacta, id, onPress, caceria }: Props) {
+export const RenglonCaza = memo(function RenglonCaza({ label, estado, bajada, compacta, id, onPress, caceria }: Props) {
   const reducido = useMovimientoReducido();
   const [tam, setTam] = useState({ ancho: 0, alto: 0 });
   const marcada = estado === 'marcada' || estado === 'cazada' || estado === 'noIba';
@@ -130,10 +126,9 @@ export const RenglonCaza = memo(function RenglonCaza({ label, indice, estado, ba
   const { fondo, borde } = APARIENCIA[estado];
 
   return (
-    <Animated.View
-      entering={tarjetaEntra().delay(escalon(indice))}
-      exiting={tarjetaSale().delay(escalon(indice))}
-    >
+    // Sin animación de entrada ni de salida: el renglón arrancaba en opacidad 0 y, si su keyframe no llegaba a
+    // correr (seis a la vez, escalonados), se quedaba invisible ocupando su lugar y no se podía elegir.
+    <View>
       <Presionable
         onPress={() => onPress(id)}
         disabled={!interactivo}
@@ -175,7 +170,7 @@ export const RenglonCaza = memo(function RenglonCaza({ label, indice, estado, ba
           </View>
         </Animated.View>
       </Presionable>
-    </Animated.View>
+    </View>
   );
 });
 

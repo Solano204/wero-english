@@ -21,7 +21,7 @@ const ENTRADA_PASO_MS = 20;
 const ENTRADA_TOPE_MS = 300;
 /** Los señuelos caen de uno en uno, sin pasar de 150 ms en total. */
 const CAE_PASO_MS = 15;
-const CAE_TOPE_MS = 150;
+export const CAE_TOPE_MS = 150;
 
 interface Props {
   letras: readonly string[];

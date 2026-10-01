@@ -8,6 +8,7 @@ import { Panal } from '@/features/juegos/colmena/components/Panal';
 import { PieColmena } from '@/features/juegos/colmena/components/PieColmena';
 import { ProgresoHex } from '@/features/juegos/colmena/components/ProgresoHex';
 import { RanurasPalabra } from '@/features/juegos/colmena/components/RanurasPalabra';
+import { usePanalFuera } from '@/features/juegos/colmena/hooks/usePanalFuera';
 import { useRondaColmena } from '@/features/juegos/colmena/hooks/useRondaColmena';
 import { RelojRonda } from '@/features/juegos/pares/components/RelojRonda';
 import { color, font, space } from '@/theme';
@@ -24,6 +25,7 @@ import { color, font, space } from '@/theme';
 export function ColmenaScreen() {
   const p = useRondaColmena();
   const { nav, carga, round, nv, tablero } = p;
+  const panalFuera = usePanalFuera(p.resuelta, tablero.aterrizaMs);
 
   if (carga.estado === 'error') {
     return (
@@ -163,26 +165,28 @@ export function ColmenaScreen() {
           style={{ width: tablero.disposicion.ancho, minHeight: tablero.disposicion.alto }}
           onLayout={(e) => tablero.medirPanal(e.nativeEvent.layout.x, e.nativeEvent.layout.y)}
         >
-          <View style={styles.panalCapa}>
-            <Panal
-              key={p.idx}
-              letras={round.letras}
-              disposicion={tablero.disposicion}
-              colocadas={tablero.colocadas}
-              rechazo={tablero.rechazo}
-              resuelta={p.resuelta}
-              saliendo={p.saliendo}
-              onTocar={p.alTocarFicha}
-            />
-          </View>
-          {p.resuelta && p.analisis ? (
+          {panalFuera ? null : (
+            <View style={styles.panalCapa}>
+              <Panal
+                key={p.idx}
+                letras={round.letras}
+                disposicion={tablero.disposicion}
+                colocadas={tablero.colocadas}
+                rechazo={tablero.rechazo}
+                resuelta={p.resuelta}
+                saliendo={p.saliendo}
+                onTocar={p.alTocarFicha}
+              />
+            </View>
+          )}
+          {p.resuelta && panalFuera && p.analisis ? (
             <FraseResuelta
               key={p.idx}
               entry={round.entry}
               palabras={p.analisis.palabras}
               voz={p.voz}
               seAcabo={p.seAcabo}
-              retraso={tablero.aterrizaMs}
+              retraso={0}
               saliendo={p.saliendo}
               alto={tablero.disposicion.alto}
             />

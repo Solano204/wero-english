@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { Image, type ImageStyle } from 'expo-image';
-import {
-  StyleSheet,
-  type ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { CACHE_IMAGEN, hayArchivo, imageSource } from '@/services/media';
 import { color, radius, aparecer } from '@/theme';
@@ -25,8 +23,6 @@ export function hayImagen(path: string | null): boolean {
   return hayArchivo(path);
 }
 
-const AnimatedImage = Animated.createAnimatedComponent(Image);
-
 /**
  * Imagen de escena.
  *
@@ -47,24 +43,26 @@ export function SceneImage({ path, size = 200, round = true, style, ancha }: Pro
   } as const;
 
   return (
-    <AnimatedImage
+    // La animación de entrada va en una vista y no en la imagen: el Image de expo-image
+    // envuelto con createAnimatedComponent lleva sus callbacks (onError) al hilo de UI y
+    // revienta con "Tried to synchronously call a Remote Function".
+    <Animated.View
       entering={aparecer()}
-      source={source}
-      style={[
-        styles.image,
-        box as ImageStyle,
-        (ancha ? { alignSelf: 'stretch' } : { alignSelf: 'center' }) as ImageStyle,
-        style as ImageStyle,
-      ]}
-      onError={() => setFailed(true)}
-      contentFit="cover"
-      cachePolicy={CACHE_IMAGEN}
-      recyclingKey={path}
-      accessible={false}
-    />
+      style={[styles.image, box, ancha ? { alignSelf: 'stretch' } : { alignSelf: 'center' }, style]}
+    >
+      <Image
+        source={source}
+        style={StyleSheet.absoluteFill}
+        onError={() => setFailed(true)}
+        contentFit="cover"
+        cachePolicy={CACHE_IMAGEN}
+        recyclingKey={path}
+        accessible={false}
+      />
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  image: { backgroundColor: color.surfaceAlt },
+  image: { backgroundColor: color.surfaceAlt, overflow: 'hidden' },
 });

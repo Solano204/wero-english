@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, useEffectEvent } from 'react';
+import React, { memo, useEffect, useRef, useState, useEffectEvent } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -60,6 +60,12 @@ interface Props {
   entrada?: Entrada;
   /** Cambia cuando el deslizamiento no tenía a dónde ir: la pieza cabecea y se sacude. */
   rechazo: number;
+  /**
+   * Cambia cuando el tablero queda quieto (terminó el reparto o una jugada): la pieza se planta en su celda,
+   * entera y visible, sin animación. Si una actualización de la animación se perdió (una pieza nueva que se
+   * quedó arriba, fuera del recorte, o una que no bajó), aquí se corrige y no queda un hueco en el tablero.
+   */
+  asiento: number;
   onTocar: (celda: number) => void;
 }
 
@@ -88,6 +94,7 @@ export const Pieza = memo(function Pieza({
   mov,
   entrada,
   rechazo,
+  asiento,
   onTocar,
 }: Props) {
   const reducido = useMovimientoReducido();
@@ -183,6 +190,28 @@ export const Pieza = memo(function Pieza({
     ));
     opacidad.set(withDelay(motionDulces.pulso, withTiming(0, { duration: motionDulces.estallido, easing: motionEasing.salir })));
   }, [explota, reducido, escala, opacidad]);
+
+  // El tablero quedó quieto: la pieza se planta donde debe estar. `modify()` fuerza la actualización aunque el
+  // valor ya sea el mismo (si no, Reanimated la omite y la vista seguiría con lo que se perdió). Al montar no:
+  // una pieza nueva de la cascada tiene que caer, no aparecer ya plantada.
+  const asientoMontaje = useRef(asiento);
+  const plantar = useEffectEvent(() => {
+    if (explota) return;
+    px.set(x);
+    px.modify();
+    py.set(y);
+    py.modify();
+    opacidad.set(1);
+    opacidad.modify();
+    escala.set(1);
+    escala.modify();
+    giro.set(0);
+    giro.modify();
+  });
+  useEffect(() => {
+    if (asiento === asientoMontaje.current) return;
+    plantar();
+  }, [asiento]);
 
   // La pieza elegida se levanta un poco.
   useEffect(() => {

@@ -1,10 +1,9 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
 import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/shared/ui';
 import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { AudioButton } from '@/shared/ui/AudioButton';
-import { aparecer, color, font, radius, space } from '@/theme';
+import { color, font, radius, space } from '@/theme';
 import { useContracciones } from '@/features/sonidos/hooks/useContracciones';
 
 /**
@@ -71,16 +70,26 @@ export function ContractionsScreen() {
           <ProveedorEsqueleto etiqueta="Cargando las reducciones" style={styles.list}>
             {Array.from({ length: 5 }, (_, i) => (
               <Card key={i} style={styles.item}>
-                <Hueso width="60%" height={16} />
-                <Hueso width={40} height={12} />
-                <Hueso width="50%" height={16} />
+                <View style={styles.itemHead}>
+                  <View style={styles.itemText}>
+                    <Hueso width="60%" height={20} />
+                    <Hueso width={40} height={12} />
+                    <Hueso width="50%" height={16} />
+                  </View>
+                  <Hueso width={36} height={36} radius={radius.pill} />
+                </View>
+                <View style={styles.practice}>
+                  <Hueso width={88} height={36} radius={radius.pill} />
+                  <Hueso width={72} height={36} radius={radius.pill} />
+                </View>
               </Card>
             ))}
           </ProveedorEsqueleto>
         ) : null
       ) : (
         <>
-          <Animated.View entering={carga.huboEsqueleto ? aparecer() : undefined} style={styles.list}>
+          {/* Sin fundido de entrada: arrancaba en opacidad 0 y, si no corría, la lista cargada no se veía. */}
+          <View style={styles.list}>
             {entries.map((e) => (
               <Card key={e.id} style={styles.item}>
                 <View style={styles.itemHead}>
@@ -107,7 +116,7 @@ export function ContractionsScreen() {
                 ) : null}
               </Card>
             ))}
-          </Animated.View>
+          </View>
 
           <Button
             label="Probar con Cázala"
