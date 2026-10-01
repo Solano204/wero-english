@@ -18,6 +18,9 @@ import { ALTO_TRAMO } from './EncabezadoTramo';
 /** La primera vez por sesión el scroll al nivel actual es animado; las siguientes, directo. */
 let yaSeAnimo = false;
 
+/** Lo más que la lista se queda invisible esperando posicionarse en el nivel actual. */
+const TOPE_POSICIONAR_MS = 1000;
+
 /** Que ítems cuentan como «a la vista» para saber si el nivel actual se alejó. */
 export const CONFIGURACION_VISTA = { itemVisiblePercentThreshold: 40 } as const;
 
@@ -103,6 +106,14 @@ export function useScrollNivel({ medidas, indiceActual, hayDatos }: Opciones) {
     // Un cuadro después de mandar el scroll: sin esto se vería un destello de la lista arriba.
     requestAnimationFrame(() => setPosicionada(true));
   }, [hayDatos, viewport, indiceActual, medidas, reducido, irA]);
+
+  // Red de seguridad: si la lista nunca llega a medirse o a posicionarse (alto 0, un scroll que
+  // no responde), se muestra igual donde esté. Mejor la lista arriba que una pantalla vacía.
+  useEffect(() => {
+    if (!hayDatos || posicionada) return;
+    const t = setTimeout(() => setPosicionada(true), TOPE_POSICIONAR_MS);
+    return () => clearTimeout(t);
+  }, [hayDatos, posicionada]);
 
   // Estable: FlatList no admite cambiar este callback en caliente.
   const alVisibles = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {

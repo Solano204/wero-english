@@ -36,7 +36,7 @@ import {
   type EstadoNivel,
   type ItemLista,
 } from '@/domain/niveles';
-import { useCarga } from '@/hooks/useCarga';
+import { DEMORA_ESQUELETO_MS, useCarga } from '@/hooks/useCarga';
 import { useAuthStore } from '@/store';
 import { loadContent } from '@/store/content';
 import { MuroDesbloqueo } from '@/components/unlock';
@@ -235,6 +235,16 @@ export function NivelesScreen() {
   }, [posicionada, recompensaHallada, contadoId]);
   const cuenta = recompensaHallada.ganadas > 0 && contadoId !== recompensaHallada.id ? total - recompensaHallada.ganadas : total;
 
+  // Si la lista tarda en quedar en su lugar, el esqueleto se queda encima mientras tanto: nunca
+  // una pantalla vacía. Una espera corta no lo pinta (no parpadea).
+  const [esperaLarga, setEsperaLarga] = useState(false);
+  useEffect(() => {
+    if (!carga.datos || posicionada) return;
+    const t = setTimeout(() => setEsperaLarga(true), DEMORA_ESQUELETO_MS);
+    return () => clearTimeout(t);
+  }, [carga.datos, posicionada]);
+  const esqueletoEncima = !posicionada && (carga.huboEsqueleto || esperaLarga);
+
   // La entrada: los renglones que se montan mientras entra la pantalla aparecen escalonados, y las
   // estrellas del tramo actual se encienden en cascada. Pasado ese momento, lo que aparece al hacer
   // scroll no se anima.
@@ -321,36 +331,47 @@ export function NivelesScreen() {
         onBack={() => nav.goBack()}
       />
 
-      <Carga carga={carga} esqueleto={<EsqueletoNiveles lado={lado} />}>
+      <Carga carga={carga} style={styles.lista} esqueleto={<EsqueletoNiveles lado={lado} />}>
         {() => (
-          // Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba.
-          <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
-            <Animated.FlatList
-              ref={listaRef}
-              data={items}
-              renderItem={renderItem}
-              keyExtractor={claveItem}
-              getItemLayout={getItemLayout}
-              extraData={extraData}
-              stickyHeaderIndices={pegados}
-              onScroll={alScroll}
-              scrollEventThrottle={16}
-              onViewableItemsChanged={alVisibles}
-              viewabilityConfig={CONFIGURACION_VISTA}
-              initialNumToRender={12}
-              maxToRenderPerBatch={8}
-              windowSize={7}
-              showsVerticalScrollIndicator={false}
-              ListFooterComponent={
-                <Text style={styles.pie}>
-                  Terminar un nivel abre el siguiente, saques una estrella o tres.
-                  {ANUNCIOS_ACTIVOS
-                    ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
-                    : ''}
-                  {' '}Rejugar nunca te baja lo que ya tenías.
-                </Text>
-              }
-            />
+          <View style={styles.lista}>
+            {/* Hasta que la lista se posiciona en el nivel actual no se ve: sin esto se vería un destello arriba. */}
+            <View style={[styles.lista, { opacity: posicionada ? 1 : 0 }]} onLayout={alMedir}>
+              <Animated.FlatList
+                ref={listaRef}
+                data={items}
+                renderItem={renderItem}
+                keyExtractor={claveItem}
+                getItemLayout={getItemLayout}
+                extraData={extraData}
+                stickyHeaderIndices={pegados}
+                onScroll={alScroll}
+                scrollEventThrottle={16}
+                onViewableItemsChanged={alVisibles}
+                viewabilityConfig={CONFIGURACION_VISTA}
+                initialNumToRender={12}
+                maxToRenderPerBatch={8}
+                windowSize={7}
+                showsVerticalScrollIndicator={false}
+                ListFooterComponent={
+                  <Text style={styles.pie}>
+                    Terminar un nivel abre el siguiente, saques una estrella o tres.
+                    {ANUNCIOS_ACTIVOS
+                      ? ' El que sigue del último también se abre con «Ver anuncio y abrir».'
+                      : ''}
+                    {' '}Rejugar nunca te baja lo que ya tenías.
+                  </Text>
+                }
+              />
+            </View>
+            {esqueletoEncima ? (
+              <Animated.View
+                exiting={reducido ? undefined : desaparecer()}
+                style={[StyleSheet.absoluteFill, styles.esqueletoEncima]}
+                pointerEvents="none"
+              >
+                <EsqueletoNiveles lado={lado} />
+              </Animated.View>
+            ) : null}
           </View>
         )}
       </Carga>
@@ -411,6 +432,7 @@ const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
 
 const styles = StyleSheet.create({
   lista: { flex: 1 },
+  esqueletoEncima: { backgroundColor: color.bg },
   // Pegado abajo, sobre la lista y encima del footer (el footer queda fuera de este contenedor).
   flotante: { position: 'absolute', left: 0, right: 0, bottom: space.md, alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
   aviso: {
