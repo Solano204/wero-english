@@ -93,11 +93,28 @@ export function imageSource(relPath: string | null): ImageSourcePropType | null 
   }
 }
 
+/**
+ * Archivos que ya se encontraron en disco. Preguntar `exists` es una llamada nativa síncrona, y los botones de
+ * audio lo hacían en cada render (una lista de frases son decenas). Solo se guardan los que sí están: lo que
+ * falta se sigue revisando, y descargar o borrar un pack limpia todo (`invalidate`).
+ */
+const enDisco = new Set<string>();
+
+/** ¿Está este medio descargado? Con caché de los que sí están. */
+export function existeEnDisco(relPath: string): boolean {
+  if (enDisco.has(relPath)) return true;
+  const existe = fileFor(relPath).exists;
+  if (existe) enDisco.add(relPath);
+  return existe;
+}
+
 /** Limpia la caché. Se llama tras descargar o borrar un pack. */
 export function invalidate(): void {
   cache.clear();
+  enDisco.clear();
 }
 
 export function invalidateOne(relPath: string): void {
   cache.delete(relPath);
+  enDisco.delete(relPath);
 }

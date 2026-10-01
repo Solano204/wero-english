@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Card, EmptyState, ErrorCarga, Header, Screen, Presionable } from '@/components/base';
@@ -10,11 +9,28 @@ import { getEntriesByIds } from '@/db/queries';
 import { useCarga } from '@/hooks/useCarga';
 import { useCortarAudioAlSalir } from '@/hooks/useCortarAudioAlSalir';
 import { loadContent } from '@/store/content';
-import { aparecer, color, font, radius, space } from '@/theme';
+import { color, font, radius, space } from '@/theme';
 import type { Entry } from '@/types';
 import type { RootStackParams } from '@/navigation/routes';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
+
+/**
+ * Las entradas de todos los grupos, de una sola consulta y guardadas para toda la sesión: son 75 frases fijas del
+ * catálogo. Cambiar de pestaña o volver a la pantalla ya no consulta la base ni espera nada.
+ */
+let porGrupoCache: Map<string, Entry[]> | null = null;
+
+async function entradasPorGrupo(grupos: readonly { id: string; entradas: number[] }[]): Promise<Map<string, Entry[]>> {
+  if (porGrupoCache) return porGrupoCache;
+  const todas = await getEntriesByIds([...new Set(grupos.flatMap((g) => g.entradas))]);
+  const porId = new Map(todas.map((e) => [e.id, e]));
+  const mapa = new Map(
+    grupos.map((g) => [g.id, g.entradas.map((id) => porId.get(id)).filter((e): e is Entry => Boolean(e))])
+  );
+  porGrupoCache = mapa;
+  return mapa;
+}
 
 /**
  * P-19, "cómo suena de verdad".
@@ -23,6 +39,8 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
  * las 75 entradas del volumen 11 agrupadas en cinco categorías. Lo único
  * nuevo es el ejercicio Cázala, que está en su propia pantalla.
  */
+const SIN_ENTRADAS: Entry[] = [];
+
 export function ContractionsScreen() {
   const nav = useNavigation<Nav>();
   const content = useMemo(loadContent, []);
@@ -35,15 +53,9 @@ export function ContractionsScreen() {
   );
 
   const [activo, setActivo] = useState<string>(grupos[0]?.id ?? '');
-  const carga = useCarga(
-    async (): Promise<Entry[]> => {
-      const g = grupos.find((x) => x.id === activo);
-      return g ? getEntriesByIds(g.entradas) : [];
-    },
-    [activo, grupos]
-  );
-  const entries = carga.datos ?? [];
-  // El giro de carga sale de inmediato, sin el retraso del esqueleto: es lo que ya se veía.
+  // Una sola carga para todos los grupos: la pestaña solo elige cuál se muestra.
+  const carga = useCarga(() => entradasPorGrupo(grupos), [grupos]);
+  const entries = carga.datos?.get(activo) ?? SIN_ENTRADAS;
   const cargando = carga.estado === 'cargando';
 
   if (grupos.length === 0) {
@@ -100,16 +112,26 @@ export function ContractionsScreen() {
           <ProveedorEsqueleto etiqueta="Cargando las reducciones" style={styles.list}>
             {Array.from({ length: 5 }, (_, i) => (
               <Card key={i} style={styles.item}>
-                <Hueso width="60%" height={16} />
-                <Hueso width={40} height={12} />
-                <Hueso width="50%" height={16} />
+                <View style={styles.itemHead}>
+                  <View style={styles.itemText}>
+                    <Hueso width="60%" height={20} />
+                    <Hueso width={40} height={12} />
+                    <Hueso width="50%" height={16} />
+                  </View>
+                  <Hueso width={36} height={36} radius={radius.pill} />
+                </View>
+                <View style={styles.practice}>
+                  <Hueso width={88} height={36} radius={radius.pill} />
+                  <Hueso width={72} height={36} radius={radius.pill} />
+                </View>
               </Card>
             ))}
           </ProveedorEsqueleto>
         ) : null
       ) : (
         <>
-          <Animated.View entering={carga.huboEsqueleto ? aparecer() : undefined} style={styles.list}>
+          {/* Sin fundido de entrada: arrancaba en opacidad 0 y, si no corría, la lista cargada no se veía. */}
+          <View style={styles.list}>
             {entries.map((e) => (
               <Card key={e.id} style={styles.item}>
                 <View style={styles.itemHead}>
@@ -136,7 +158,7 @@ export function ContractionsScreen() {
                 ) : null}
               </Card>
             ))}
-          </Animated.View>
+          </View>
 
           <Button
             label="Probar con Cázala"

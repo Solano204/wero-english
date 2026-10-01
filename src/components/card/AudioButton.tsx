@@ -24,7 +24,7 @@ export function hayAudio(path: string | null): boolean {
   if (!path) return false;
   if (isBundled(path)) return true;
   try {
-    return media.fileFor(path).exists;
+    return media.existeEnDisco(path);
   } catch {
     return false;
   }
