@@ -449,4 +449,158 @@ prueba('la dispersión de los trozos es la misma cada vez y no gasta Math.random
   assert.equal(T.TROZOS_RETRASO_MS, 60);
 });
 
+
+// ---------------------------------------------------------------------------------------------------------------
+// El modelo como única fuente de verdad: decidirIntercambio (logic/intercambio.ts) con el dominio real.
+// Se transpilan juntos match3, match3Pasos e intercambio, con sus imports «@/domain/…» apuntando a la copia.
+const os = await import('node:os');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'check-dulces-'));
+const modulos = {
+  match3: 'src/domain/match3.ts',
+  match3Pasos: 'src/domain/match3Pasos.ts',
+  intercambio: 'src/features/juegos/dulces/logic/intercambio.ts',
+};
+for (const [nombre, rel] of Object.entries(modulos)) {
+  let js = ts.transpileModule(fs.readFileSync(path.join(ROOT, rel), 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  js = js
+    .replace(/from '(?:@\/domain\/|\.\/)match3'/g, "from './match3.mjs'")
+    .replace(/from '(?:@\/domain\/|\.\/)match3Pasos'/g, "from './match3Pasos.mjs'");
+  fs.writeFileSync(path.join(tmp, `${nombre}.mjs`), js);
+}
+const M = await import(path.join(tmp, 'match3.mjs'));
+const MP = await import(path.join(tmp, 'match3Pasos.mjs'));
+const I = await import(path.join(tmp, 'intercambio.mjs'));
+fs.rmSync(tmp, { recursive: true, force: true });
+
+/** Azar con semilla: la misma simulación cada vez. */
+const azarConSemilla = (s) => () => ((s = (s * 1103515245 + 12345) % 2147483648) / 2147483648);
+/** Un tablero a mano: una cadena por fila, un dígito por color. */
+const tab = (...filas) => ({ cols: filas[0].length, rows: filas.length, cells: filas.join('').split('').map(Number) });
+const formaLinea = (b, a, c) => {
+  const copia = M.clone(b);
+  M.swap(copia, a, c);
+  return M.findMatches(copia).length > 0;
+};
+
+prueba('simulación de 1,000 movimientos al azar: rechazos no cambian nada, jugadas siempre arman línea, tablero siempre lleno, vista = modelo', () => {
+  const rand = azarConSemilla(20261001);
+  let board = M.createBoard(8, 9, 5, rand);
+  let jugadas = 1000;
+  // La vista: un id por pieza, con el mismo reparto que TableroDulces (idsTrasPaso / idsTrasRebaraje).
+  let siguiente = 0;
+  const nuevoId = () => siguiente++;
+  let ids = board.cells.map(() => nuevoId());
+  let colorDe = new Map(ids.map((id, i) => [id, board.cells[i]]));
+  let validos = 0;
+  let rechazos = 0;
+  for (let n = 0; n < 1000; n++) {
+    const a = Math.floor(rand() * board.cells.length);
+    // La mitad de las veces una vecina; la otra mitad cualquier celda (no vecinas incluidas).
+    const vecinas = [a - 1, a + 1, a - board.cols, a + board.cols].filter((c) => c >= 0 && c < board.cells.length && M.sonVecinas(board, a, c));
+    const c = rand() < 0.5 && vecinas.length ? vecinas[Math.floor(rand() * vecinas.length)] : Math.floor(rand() * board.cells.length);
+    if (c === a) continue;
+    const antes = [...board.cells];
+    const d = I.decidirIntercambio(board, a, c, 5, rand);
+    assert.deepEqual(board.cells, antes, 'decidirIntercambio nunca toca el tablero que recibe');
+    if (d.tipo === 'rechazo') {
+      rechazos++;
+      assert.ok(!M.sonVecinas(board, a, c) || !formaLinea(board, a, c), `movimiento ${n}: se rechazó uno válido`);
+      continue; // no cambia nada ni gasta jugada
+    }
+    validos++;
+    jugadas--;
+    assert.ok(M.sonVecinas(board, a, c), `movimiento ${n}: se aceptó con una pieza que no es vecina`);
+    assert.ok(formaLinea(board, a, c), `movimiento ${n}: se aceptó un intercambio que no arma línea`);
+    assert.ok(d.res.pasos.length >= 1, 'una jugada válida produce al menos una línea');
+    assert.ok(I.tableroLleno(d.tablero, 5), `movimiento ${n}: el tablero quedó con huecos`);
+    assert.ok(M.hayMovimiento(d.tablero), `movimiento ${n}: el tablero quedó sin movimientos (faltó rebarajar)`);
+    // La vista sigue a la jugada: intercambio, cada paso y el rebarajado, como TableroDulces.
+    [ids[a], ids[c]] = [ids[c], ids[a]];
+    for (const p of d.res.pasos) {
+      const nuevos = [];
+      ids = MP.idsTrasPaso(ids, p, () => {
+        const id = nuevoId();
+        nuevos.push(id);
+        return id;
+      });
+      p.nuevas.forEach((nv, k) => colorDe.set(nuevos[k], nv.color));
+    }
+    if (d.rebarajado) {
+      const cel = ids.map((id) => colorDe.get(id));
+      const r = MP.idsTrasRebaraje(cel, ids, d.rebarajado, nuevoId);
+      for (const i of r.nuevas) colorDe.set(r.ids[i], d.rebarajado[i]);
+      ids = r.ids;
+    }
+    assert.equal(new Set(ids).size, ids.length, `movimiento ${n}: dos celdas con la misma pieza`);
+    assert.ok(!ids.includes(MP.SIN_ID), `movimiento ${n}: una celda sin pieza en la vista`);
+    assert.deepEqual(ids.map((id) => colorDe.get(id)), d.tablero.cells, `movimiento ${n}: la vista no coincide con el modelo`);
+    board = d.tablero;
+  }
+  assert.ok(validos > 50 && rechazos > 50, `se probaron ambos: ${validos} válidos, ${rechazos} rechazados`);
+  assert.equal(jugadas, 1000 - validos, 'solo los válidos gastan jugada');
+});
+
+prueba('casos fijos: horizontal, vertical, L y T arman línea y se aceptan', () => {
+  // Horizontal: mover el 0 de (1,2) arriba completa 0 0 _ en la fila 0.
+  const h = tab('0013', '2301', '3123');
+  assert.equal(I.decidirIntercambio(h, 2, 6, 4).tipo, 'jugada', 'horizontal');
+  // Vertical: el 0 de (2,1) a la izquierda completa la columna 0.
+  const v = tab('0123', '0231', '2012');
+  assert.equal(I.decidirIntercambio(v, 8, 9, 4).tipo, 'jugada', 'vertical');
+  // L: el 0 de (2,3) a la izquierda completa columna 2 (0,0,0) y fila 2 (0,0,0).
+  const l = tab('1202', '3101', '0010', '2313');
+  const dl = I.decidirIntercambio(l, 11, 10, 4);
+  assert.equal(dl.tipo, 'jugada', 'L');
+  assert.equal(dl.res.pasos[0].quitar.length >= 3, true);
+  // T: el 0 de (3,1) sube a (2,1) y completa fila 2 (0,0,0) y columna 1 (0,0,0).
+  const t = tab('1013', '2032', '0303', '1023');
+  const dt = I.decidirIntercambio(t, 9, 13, 4);
+  assert.equal(dt.tipo, 'jugada', 'T');
+});
+
+prueba('casos fijos: un intercambio que no arma línea y uno con pieza no vecina se rechazan sin tocar nada', () => {
+  const b = tab('0123', '1230', '2301', '3012');
+  const copia = [...b.cells];
+  assert.deepEqual(I.decidirIntercambio(b, 0, 1, 4), { tipo: 'rechazo', motivo: 'sin-linea' });
+  assert.deepEqual(I.decidirIntercambio(b, 0, 5, 4), { tipo: 'rechazo', motivo: 'no-vecinas' }, 'diagonal');
+  assert.deepEqual(I.decidirIntercambio(b, 0, 2, 4), { tipo: 'rechazo', motivo: 'no-vecinas' }, 'a distancia');
+  assert.deepEqual(I.decidirIntercambio(b, 3, 4, 4), { tipo: 'rechazo', motivo: 'no-vecinas' }, 'fin de fila con inicio de la siguiente');
+  assert.deepEqual(b.cells, copia);
+});
+
+prueba('caso fijo: cascada de tres pasos', () => {
+  // Al quitar la fila de 0 de abajo, bajan dos filas de 1 y 2 que arman línea, y luego otra.
+  const b = tab('3132', '2223', '1113', '0300', '3212');
+  const azarFijo = () => 0.999; // las nuevas son todas del color 3: no arman nada en la columna de la izquierda
+  const d = I.decidirIntercambio(b, 13, 14, 4, azarFijo);
+  assert.equal(d.tipo, 'jugada');
+  assert.ok(d.res.pasos.length >= 3, `cascada: ${d.res.pasos.length} pasos`);
+  assert.ok(I.tableroLleno(d.tablero, 4));
+});
+
+prueba('caso fijo: si al terminar no queda ningún movimiento, se rebaraja y queda jugable', () => {
+  // Con un solo movimiento posible y nuevas piezas que no dejan otro: el resultado debe venir rebarajado y con salida.
+  const rand = azarConSemilla(7);
+  let rebarajados = 0;
+  for (let k = 0; k < 400; k++) {
+    const b = M.createBoard(4, 4, 4, rand);
+    for (let i = 0; i < b.cells.length; i++) {
+      for (const c of [i + 1, i + 4]) {
+        if (c >= b.cells.length || !M.sonVecinas(b, i, c)) continue;
+        const d = I.decidirIntercambio(b, i, c, 4, rand);
+        if (d.tipo !== 'jugada') continue;
+        assert.ok(M.hayMovimiento(d.tablero), 'siempre queda al menos un movimiento');
+        assert.equal(M.findMatches(d.tablero).length, 0, 'en reposo no hay líneas sin quitar');
+        if (d.rebarajado) {
+          rebarajados++;
+          assert.deepEqual(d.rebarajado, d.tablero.cells);
+        }
+      }
+    }
+  }
+  assert.ok(rebarajados > 0, 'el caso de rebarajar sí se ejercitó');
+});
+
 console.log(`\ncheck:dulces ${total} pruebas ok`);

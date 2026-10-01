@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { EmptyState, ErrorCarga, Header, Screen } from '@/shared/ui';
 import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { TableroDulces } from '@/features/juegos/dulces/components/TableroDulces';
+import { CapaModelo } from '@/features/juegos/dulces/components/CapaModelo';
 import { Estallidos } from '@/features/juegos/dulces/components/Estallidos';
 import { FraseVoladora } from '@/features/juegos/dulces/components/FraseVoladora';
 import { HojaPregunta } from '@/features/juegos/dulces/components/HojaPregunta';
@@ -29,6 +30,8 @@ import { color, radius, space } from '@/theme';
 export function DulcesScreen() {
   const { animando, avanzando, capaAlto, carga, deslizar, destinoTitulo, elegidaOpcion, huboLinea, jugadas, jugadasTotal, loading, medidas, nav, nivel, objetivos, pregunta, reaccion, responder, respondiendo, seguirAhora, setCapaAlto, setContenidoAlto, setDestinoTitulo, setVistaAlto, setVuelo, tablero, tableroRef, terminar, tocar, vuelo } = usePartidaDulces();
   const { capaRef, estallidosRef, registrarBarra, registrarFrase, tableroCajaRef } = medidas;
+  // Capa de depuración (pulsación larga sobre «jugadas»): el modelo encima del tablero, y la marca de la versión.
+  const [depurar, setDepurar] = useState(false);
 
   if (carga.estado === 'error') {
     return (
@@ -131,12 +134,21 @@ export function DulcesScreen() {
               onTocar={tocar}
               onDeslizar={deslizar}
             />
+            {depurar ? (
+              <CapaModelo
+                celdas={tablero.board.cells}
+                cols={tablero.COLS}
+                rows={tablero.ROWS}
+                lado={tablero.LADO}
+                hueco={space.xs}
+              />
+            ) : null}
           </View>
 
           <NotaInicial visible={!huboLinea} texto="Junta tres del mismo color para llenar su barra" />
         </ScrollView>
 
-        <PieDulces jugadas={jugadas} total={jugadasTotal} onDejar={terminar} />
+        <PieDulces jugadas={jugadas} total={jugadasTotal} onDejar={terminar} onDepurar={() => setDepurar((d) => !d)} />
 
         <HojaPregunta
           pregunta={pregunta}
