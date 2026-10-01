@@ -8,6 +8,8 @@ import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { ChipCascada } from './ChipCascada';
 import { Pieza, type Movimiento } from './Pieza';
 import { vistaInicial, type Jugada, type PiezaVista, type TableroDulcesRef } from '@/features/juegos/dulces/logic/vistaTablero';
+import { ANIMACION_DULCES } from '@/config/dulces';
+import { registrarFalla } from '@/services/fallas';
 
 export type { Jugada, TableroDulcesRef } from '@/features/juegos/dulces/logic/vistaTablero';
 import {
@@ -263,6 +265,16 @@ export function TableroDulces({
         celdasRef.current = [...despues];
       };
 
+      // Sin animación (ANIMACION_DULCES = false): el tablero se dibuja directo del modelo y las metas suben de una
+      // vez. Lo que se ve es exactamente lo que dice el dominio, sin pasos intermedios.
+      if (!ANIMACION_DULCES) {
+        for (const [k, p] of j.pasos.entries()) j.onLlegan?.(p, k);
+        reiniciar(j.final, columnas, datos.current.rows, false);
+        setAsiento((n) => n + 1);
+        j.onFin();
+        return;
+      }
+
       void (async () => {
         // 1. Las dos piezas se deslizan una a la otra. Si no armó nada se quedan así y se asientan.
         const sinLinea = j.pasos.length === 0;
@@ -313,8 +325,17 @@ export function TableroDulces({
         const ps = piezasRef.current;
         const piezaPorCelda =
           ps.length === ids.length && ps.every((v) => !v.explota && ids[v.fila * columnas + v.col] === v.id);
-        if (!piezaPorCelda || !celdasRef.current.every((v, i) => v === j.final[i])) {
-          if (__DEV__) console.warn('[dulces] el tablero animado no coincide con el del dominio: se corrige');
+        const mismosColores = celdasRef.current.length === j.final.length && celdasRef.current.every((v, i) => v === j.final[i]);
+        if (!piezaPorCelda || !mismosColores) {
+          // Invariante roto: la vista se separó del modelo. Se anota (queda en el reporte de fallas, también en
+          // release) con lo que no cuadraba, y la vista se rehace desde el modelo.
+          void registrarFalla(
+            new Error(
+              `[dulces] vista ≠ modelo al terminar la jugada: piezas ${ps.length}/${ids.length}, ` +
+                `una por celda ${piezaPorCelda ? 'sí' : 'no'}, colores ${mismosColores ? 'iguales' : 'distintos'}`
+            ),
+            'juego:dulces'
+          );
           reiniciar(j.final, columnas, datos.current.rows, false);
         }
         setAsiento((n) => n + 1);

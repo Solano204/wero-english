@@ -4,14 +4,15 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { Jugada, TableroDulcesRef } from '@/features/juegos/dulces/components/TableroDulces';
 import type { DestinoTitulo, PreguntaDulces } from '@/features/juegos/dulces/components/HojaPregunta';
+import { decidirIntercambio } from '@/features/juegos/dulces/logic/intercambio';
 import { RESPALDO_DULCES, ladoPara } from '@/features/juegos/dulces/logic/medidas';
 import { PARTIDA_INICIAL, fasePartida, mejorColor, opcionesPara, partidaDulces } from '@/features/juegos/dulces/logic/partida';
 import { useMedidasDulces } from './useMedidasDulces';
 import { useRespuestaDulces } from './useRespuestaDulces';
 import { useVozMatch } from './useVozMatch';
 import { useNivel } from '@/features/juegos/comun/useNivel';
-import { clone, createBoard, hayMovimiento, intercambioValido, rebarajar, sonVecinas, swap, type Board } from '@/domain/match3';
-import { resolverPorPasos, type Paso } from '@/domain/match3Pasos';
+import { createBoard, sonVecinas, type Board } from '@/domain/match3';
+import type { Paso } from '@/domain/match3Pasos';
 import { shuffle } from '@/domain/arreglos';
 import { getRandomEntries } from '@/data/repos/frases';
 import { useAuthStore } from '@/estado/useAuthStore';
@@ -257,23 +258,23 @@ export function usePartidaDulces() {
     if (!board) return;
     setElegida(null);
 
-    if (!intercambioValido(board, a, c)) {
+    // Toda la jugada se decide aquí, con el tablero actual del modelo y de una vez (cascada y rebarajado
+    // incluidos). La vista solo la dibuja: si una animación se corta, el modelo ya quedó bien.
+    const decision = decidirIntercambio(board, a, c, COLORES);
+    if (decision.tipo === 'rechazo') {
+      // No arma línea (o no son vecinas): el modelo no cambia y la jugada no se cobra.
       haptics.failure();
       void audio.playFail();
       tableroRef.current?.rechazar(a, c);
       return;
     }
 
-    const nuevo = clone(board);
-    swap(nuevo, a, c);
+    const { res, rebarajado } = decision;
     setHuboLinea(true);
     setJugadas((j) => j - 1);
-
-    const res = resolverPorPasos(nuevo, COLORES);
-
     haptics.success();
     void audio.playSuccess();
-    setBoard(nuevo);
+    setBoard(decision.tablero);
 
     // Se reparte lo quitado entre las frases de cada color.
     const sig = objetivos.map((o) => ({ ...o, llevas: o.llevas + (res.porColor[o.color] ?? 0) }));
@@ -292,21 +293,13 @@ export function usePartidaDulces() {
       if (objetivo) reproducirVozMatch(objetivo.entry);
     }
 
-    let rebarajado: number[] | null = null;
-    if (!hayMovimiento(nuevo)) {
-      const otro = clone(nuevo);
-      rebarajar(otro, COLORES);
-      setBoard(otro);
-      rebarajado = otro.cells;
-    }
-
     animar(
       {
         a,
         c,
         pasos: res.pasos,
         rebarajado,
-        final: rebarajado ?? nuevo.cells,
+        final: decision.tablero.cells,
         onEstallido: alEstallar,
         onLlegan: sumarAMetas,
       },
