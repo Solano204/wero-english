@@ -96,7 +96,6 @@ export function RootNavigator() {
         <Stack.Screen name="Colmena" getComponent={() => require('@/features/juegos/colmena/screens/ColmenaScreen').ColmenaScreen} />
         <Stack.Screen name="Pares" getComponent={() => require('@/features/juegos/pares/screens/ParesScreen').ParesScreen} />
         <Stack.Screen name="Caida" getComponent={() => require('@/features/juegos/caida/screens/CaidaScreen').CaidaScreen} />
-        <Stack.Screen name="Dulces" getComponent={() => require('@/features/juegos/dulces/screens/DulcesScreen').DulcesScreen} />
         <Stack.Screen
           name="GameEnd"
           getComponent={() => require('@/features/juegos/fin/screens/GameEndScreen').GameEndScreen}

@@ -31,11 +31,10 @@ const DURACION_AVISO_MS = 5000;
 /** La entrada escalonada cuenta desde unos renglones arriba del nivel actual (lo que cabe en pantalla). */
 const FILAS_ANTES_DEL_ACTUAL = 4;
 
-export const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida' | 'Dulces'> = {
+export const RUTA: Record<string, 'Colmena' | 'Pares' | 'Caida'> = {
   colmena: 'Colmena',
   pares: 'Pares',
   caida: 'Caida',
-  dulces: 'Dulces',
 };
 
 /**

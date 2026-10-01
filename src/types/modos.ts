@@ -5,7 +5,6 @@ export type ModoId =
   | 'colmena'
   | 'pares'
   | 'caida'
-  | 'dulces'
   | 'cazala'
   | 'pares_minimos'
   | 'oido'

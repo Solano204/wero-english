@@ -69,14 +69,6 @@ export const MODOS: Record<ModoId, Modo> = {
     grupo: 'juegos',
     ir: (nav) => nav.navigate('Niveles', { juego: 'caida' }),
   },
-  dulces: {
-    titulo: 'Dulces',
-    cuerpo: 'Tres en línea con frases al azar · 200 niveles',
-    corta: 'Tres en línea con frases',
-    arte: 'dulces',
-    grupo: 'juegos',
-    ir: (nav) => nav.navigate('Niveles', { juego: 'dulces' }),
-  },
   cazala: {
     titulo: 'Cázala',
     cuerpo: 'Oye una frase rápida y di qué reducciones traía',

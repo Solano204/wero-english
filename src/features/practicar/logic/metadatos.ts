@@ -25,7 +25,6 @@ export function metaDe(id: ModoId, f: FuentesMeta): Meta | null {
     case 'colmena':
     case 'pares':
     case 'caida':
-    case 'dulces':
     case 'cazala': {
       const n = f.niveles[id];
       if (n) return n.jugados > 0 ? { tipo: 'nivel', nivel: n.siguiente, estrellas: n.estrellas } : { tipo: 'nivel', nivel: 1, estrellas: 0 };

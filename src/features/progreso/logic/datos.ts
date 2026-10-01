@@ -156,7 +156,7 @@ export function textoMundo(f: ProgresoMundo): string {
 
 /* ── Por juego ───────────────────────────────────────────────────────── */
 
-export const JUEGOS_PROGRESO = ['colmena', 'pares', 'caida', 'dulces', 'cazala'] as const;
+export const JUEGOS_PROGRESO = ['colmena', 'pares', 'caida', 'cazala'] as const;
 export type JuegoProgreso = (typeof JUEGOS_PROGRESO)[number];
 
 export type ResumenJuego =

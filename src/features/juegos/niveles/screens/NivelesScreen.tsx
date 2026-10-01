@@ -27,7 +27,6 @@ const TITULOS: Record<string, string> = {
   colmena: 'Colmena',
   pares: 'Pares',
   caida: 'Caída',
-  dulces: 'Dulces',
   cazala: 'Cázala',
   pares_minimos: 'Pares mínimos',
 };

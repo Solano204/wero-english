@@ -9,7 +9,6 @@ export const ICONO_MODO: Record<ModoId, IconName> = {
   colmena: 'hexagon',
   pares: 'link',
   caida: 'arrow-down',
-  dulces: 'cube',
   cazala: 'target',
   pares_minimos: 'microphone',
   oido: 'headphones',

@@ -59,7 +59,7 @@ assert.deepEqual(elegirDestacados(uso({ caida: [5, 1], colmena: [2, 1] }), 'stud
 // El de HOY nunca se repite, aunque sea el más usado.
 assert.deepEqual(elegirDestacados(uso({ caida: [9, 1] }), 'caida'), ['study', 'gramatica', 'colmena']);
 
-assert.equal(new Set(ORDEN).size, 17, 'ORDEN debe tener los 17 destinos sin repetir');
+assert.equal(new Set(ORDEN).size, 16, 'ORDEN debe tener los 16 destinos sin repetir');
 assert.equal(NUM_DESTACADOS, 3);
 // Consola de HOY: la onda, el anillo de meta y el marcador.
 assert.equal(energiaOnda(0), ENERGIA_MIN, '0 pendientes: onda casi plana');
@@ -205,7 +205,7 @@ const rec = { cazala: { partidas: 3, mejor: 12 } };
 assert.deepEqual(P.resumenJuego('pares', niv, rec), { tipo: 'nivel', nivel: 23, estrellas: 36, fraccion: 23 / 200 });
 assert.deepEqual(P.resumenJuego('colmena', niv, rec), { tipo: 'sinJugar' }, 'abierto con anuncio pero sin jugar');
 assert.deepEqual(P.resumenJuego('caida', niv, rec), { tipo: 'sinJugar' });
-assert.equal(P.resumenJuego('dulces', niv, rec).nivel, 200, 'el nivel no pasa de 200');
+assert.equal(P.resumenJuego('caida', { ...niv, caida: niv.dulces }, rec).nivel, 200, 'el nivel no pasa de 200');
 assert.deepEqual(P.resumenJuego('cazala', niv, rec), { tipo: 'partidas', partidas: 3, mejor: 12 }, 'Cázala no tiene niveles: su dato real');
 assert.deepEqual(P.resumenJuego('cazala', niv, {}), { tipo: 'sinJugar' });
 assert.equal(P.textoJuego(P.resumenJuego('pares', niv, rec)), 'Nivel 23 de 200');

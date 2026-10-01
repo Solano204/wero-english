@@ -6,7 +6,7 @@ export type { ModoId };
 
 /** El orden que tenía Practicar. Desempata los destacados y elige el modo de un usuario nuevo. */
 export const ORDEN: readonly ModoId[] = [
-  'study', 'gramatica', 'colmena', 'pares', 'caida', 'dulces', 'cazala',
+  'study', 'gramatica', 'colmena', 'pares', 'caida', 'cazala',
   'pares_minimos', 'oido', 'sonidos', 'suena', 'phrasal', 'azar', 'lecturas',
   'errores', 'atoran', 'mazo',
 ];
