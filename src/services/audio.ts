@@ -14,6 +14,8 @@ import * as music from './music';
 let player: AudioPlayer | null = null;
 let ready = false;
 let currentPath: string | null = null;
+/** De dónde se creó `player`: para rehacerlo igual si deja de responder. */
+let fuenteActual: Parameters<typeof createAudioPlayer>[0] | null = null;
 
 /**
  * Token de reproducción vigente. Cada play()/playSlow() de frase saca
@@ -467,10 +469,8 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
         // (como hacía antes) depende de bajar el archivo desde el packager y
         // fallaba en silencio: el player se creaba con la URL del bundler en
         // vez de un archivo local, y no sonaba nada.
-        player = createAudioPlayer(
-          resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri },
-          { updateInterval: INTERVALO_ESTADO_MS }
-        );
+        fuenteActual = resolved.kind === 'bundled' ? resolved.module : { uri: resolved.uri };
+        player = createAudioPlayer(fuenteActual, { updateInterval: INTERVALO_ESTADO_MS });
         vigilar(player);
         currentPath = relPath;
       }
@@ -487,6 +487,7 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
 
       player.play();
       marcar(player, { arrancando: true });
+      vigilarArranque(player, miId, rate, 0);
       resultado = true;
       avisarReproduccion(relPath, rate);
       // Ducking: la música se agacha mientras suena esta voz y se
@@ -507,6 +508,59 @@ function reproducir(relPath: string | null, rate: number): Promise<boolean> {
   // Y quien llamó a play()/playSlow()/playAndWait() recibe respuesta
   // aunque la cola traiga pasos anteriores atorados.
   return conTope(colaFrase.then(() => resultado), TOPE_ABSOLUTO_MS, false);
+}
+
+/**
+ * Un player que recibió play() y no arranca nunca (perdió el foco de audio, quedó en error tras ir a segundo plano, un
+ * seek nativo que no volvió) se seguía reutilizando para el mismo audio: desde ahí nada sonaba hasta reiniciar la app.
+ * Si a ARRANQUE_TIMEOUT_MS sigue sin sonar y nadie más tomó el player, se tira y se rehace desde la misma fuente, en la
+ * misma posición, una sola vez. No cambia `reproduccionId`: para quien escucha es la misma reproducción.
+ */
+function vigilarArranque(p: AudioPlayer, miId: number, rate: number, desde: number): void {
+  setTimeout(() => {
+    const e = estados.get(p);
+    if (miId !== reproduccionId || player !== p || suena(p) || !e?.arrancando) return;
+    colaFrase = colaFrase.then(() =>
+      conTope(
+        (async () => {
+          // Otra vez dentro de la cola: mientras esperaba turno pudo arrancar o cambiar todo.
+          if (miId !== reproduccionId || player !== p || suena(p) || !fuenteActual) return;
+          console.warn('[audio] el player no arrancó: se rehace');
+          try {
+            p.pause();
+          } catch {
+            /* sin consecuencia */
+          }
+          soltar(p);
+          try {
+            p.remove();
+          } catch {
+            /* sin consecuencia */
+          }
+          const nuevo = createAudioPlayer(fuenteActual, { updateInterval: INTERVALO_ESTADO_MS });
+          player = nuevo;
+          vigilar(nuevo);
+          try {
+            nuevo.setPlaybackRate(rate, 'high');
+          } catch {
+            /* suena a velocidad normal */
+          }
+          if (desde > 0) {
+            try {
+              await conTope(nuevo.seekTo(desde), TOPE_NATIVO_MS, undefined);
+            } catch {
+              /* desde el principio */
+            }
+          }
+          if (miId !== reproduccionId || player !== nuevo) return;
+          nuevo.play();
+          marcar(nuevo, { arrancando: true });
+        })().catch((err) => console.warn('[audio] no se pudo rehacer el player', err)),
+        TOPE_ABSOLUTO_MS,
+        undefined
+      )
+    );
+  }, ARRANQUE_TIMEOUT_MS);
 }
 
 /** Reproduce siempre a velocidad normal (1.0). */
@@ -857,12 +911,15 @@ export function pauseFrase(): void {
  */
 export function resumeFrase(): boolean {
   if (!player) return false;
+  const e = estados.get(player);
+  const desde = e ? posicionDe(e) : 0;
   try {
     player.play();
   } catch {
     return false;
   }
   marcar(player, { arrancando: true });
+  vigilarArranque(player, reproduccionId, e?.rate ?? 1, desde);
   void music.duck(true);
   void esperarFinReanudado(reproduccionId).then(() => music.duck(false));
   return true;
@@ -892,7 +949,8 @@ async function esperarFinReanudado(miId: number): Promise<void> {
 export async function saltarFrase(seg: number): Promise<boolean> {
   if (!player) return false;
   try {
-    await player.seekTo(Math.max(0, seg));
+    // Con tope: un seek nativo que no vuelve dejaba colgado el toque en la oración.
+    await conTope(player.seekTo(Math.max(0, seg)), TOPE_NATIVO_MS, undefined);
     return true;
   } catch {
     return false;
@@ -993,6 +1051,7 @@ export function releaseAudio(): void {
   ultimoPlayerPorClave.clear();
   player = null;
   currentPath = null;
+  fuenteActual = null;
   media.invalidate();
 }
 
