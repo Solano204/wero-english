@@ -10,8 +10,9 @@ import { useMedidasDulces } from './useMedidasDulces';
 import { useRespuestaDulces } from './useRespuestaDulces';
 import { useVozMatch } from './useVozMatch';
 import { useNivel } from '@/features/juegos/comun/useNivel';
-import { clone, createBoard, hayMovimiento, intercambioValido, rebarajar, sonVecinas, swap, type Board } from '@/domain/match3';
-import { resolverPorPasos, type Paso } from '@/domain/match3Pasos';
+import { createBoard, sonVecinas } from '@/domain/match3';
+import type { Paso } from '@/domain/match3Pasos';
+import { TABLERO_VACIO, tableroReducer, type EventoTablero } from '@/domain/match3Partida';
 import { shuffle } from '@/domain/arreglos';
 import { getRandomEntries } from '@/data/repos/frases';
 import { useAuthStore } from '@/estado/useAuthStore';
@@ -31,6 +32,9 @@ type Nav = NativeStackNavigationProp<RootStackParams>;
 type Ruta = RouteProp<RootStackParams, 'Dulces'>;
 
 const ANCHO = Dimensions.get('window').width;
+
+/** El azar de una jugada viaja en la acción (no se saca dentro del reducer): así el reducer es puro. */
+const nuevaSemilla = () => Math.floor(Math.random() * 2 ** 32);
 
 /** Tope del vuelo de la frase hasta el título de la pregunta (unos 320 ms): si no llega a medirse, se suelta igual. */
 const VUELO_MAXIMO_MS = 1200;
@@ -64,7 +68,9 @@ export function usePartidaDulces() {
   const ANCHO_TABLERO = COLS * PASO_CELDA - space.xs;
   const ALTO_TABLERO = ROWS * PASO_CELDA - space.xs;
 
-  const [board, setBoard] = useState<Board | null>(null);
+  // El tablero (colores, ids, jugadas) es el MODELO: vive en un reducer puro y toda decisión sale de su estado actual.
+  const [tab, despacharTab] = useReducer(tableroReducer, TABLERO_VACIO);
+  const board = tab.cargado ? tab.board : null;
   const [pool, setPool] = useState<Entry[]>([]);
   const [objetivos, setObjetivos] = useState<DulceObjetivo[]>([]);
   const objetivosRef = useRef(objetivos);
@@ -74,7 +80,7 @@ export function usePartidaDulces() {
   const [elegida, setElegida] = useState<number | null>(null);
   // Cubitos al acertar.
   const reaccion = useReaccion();
-  const [jugadas, setJugadas] = useState<number>(JUGADAS_DEF);
+  const jugadas = tab.cargado ? tab.jugadas : JUGADAS_DEF;
   const [resueltas, setResueltas] = useState(0);
   // jugando, animando, pregunta o respondiendo: nunca dos a la vez.
   const [partida, despachar] = useReducer(partidaDulces, PARTIDA_INICIAL);
@@ -180,8 +186,10 @@ export function usePartidaDulces() {
         }))
       );
       siguienteFrase.current = nv.frases;
-      setJugadas(nv.jugadas);
-      setBoard(createBoard(nv.cols, nv.rows, nv.colores));
+      // Un tablero nuevo corta cualquier jugada que se estuviera dibujando: no debe quedar el bloqueo de la anterior.
+      animandoRef.current = false;
+      despachar({ tipo: 'finAnimacion' });
+      despacharTab({ tipo: 'armar', board: createBoard(nv.cols, nv.rows, nv.colores), colores: nv.colores, jugadas: nv.jugadas });
       setLlave((l) => l + 1);
       setHuboLinea(false);
       empezoEn.current = Date.now();
@@ -216,15 +224,18 @@ export function usePartidaDulces() {
     despachar({ tipo: 'abrirPregunta', pregunta: nueva });
   };
 
-  /** Le pide al tablero que anime la jugada y no acepta toques hasta que termine. */
-  const animar = (jugada: Omit<Jugada, 'onFin'>, alTerminar?: () => void) => {
+  /** Le pide al tablero que dibuje la jugada que ya resolvió el modelo y no acepta toques hasta que termine. */
+  const animar = (jugada: Omit<Jugada, 'onFin' | 'onEstallido' | 'onLlegan'>, alTerminar?: () => void) => {
     animandoRef.current = true;
     despachar({ tipo: 'animar' });
     medirPosiciones();
     tableroRef.current?.jugar({
       ...jugada,
+      onEstallido: alEstallar,
+      onLlegan: sumarAMetas,
       onFin: () => {
         animandoRef.current = false;
+        despacharTab({ tipo: 'terminar' });
         despachar({ tipo: 'finAnimacion' });
         alTerminar?.();
       },
@@ -244,39 +255,25 @@ export function usePartidaDulces() {
 
   /*
    * Tres en línea clásico: solo se intercambian dos piezas vecinas, y solo si el cambio arma al menos una línea.
-   * Un cambio que no arma nada no se hace: las dos piezas se sacuden y la jugada NO se cobra (cobrar por un
-   * movimiento imposible es la forma más rápida de que alguien cierre el juego). Antes cualquier par se podía
-   * cambiar aunque no armara nada, y el tablero parecía no tener reglas.
-   *
-   * La lógica se decide aquí y de golpe (mismo azar, mismo orden); lo que
-   * cambia es que el tablero la ANIMA paso a paso y las metas se llenan
-   * cuando llegan los trozos. La pregunta, si esta jugada llenó una barra,
-   * sale cuando termina la animación.
+   * Eso lo decide el REDUCER del tablero (domain/match3Partida.ts) con su estado actual, no esta pantalla: un
+   * cambio que no arma nada deja el modelo igual, no cobra jugada y la vista sacude las dos piezas (rechazo);
+   * uno que sí arma queda resuelto de golpe (cascada, ids y rebarajado) y la vista solo lo dibuja. Aquí solo
+   * se manda la acción y, cuando el modelo contesta (`tab.evento`), se reacciona una vez: sonido, metas, voz y
+   * la pregunta, que sale al terminar la animación si la jugada llenó una barra.
    */
   const intercambiar = (a: number, c: number) => {
-    if (!board) return;
     setElegida(null);
+    despacharTab({ tipo: 'intercambiar', a, c, semilla: nuevaSemilla() });
+  };
 
-    if (!intercambioValido(board, a, c)) {
-      haptics.failure();
-      void audio.playFail();
-      tableroRef.current?.rechazar(a, c);
-      return;
-    }
-
-    const nuevo = clone(board);
-    swap(nuevo, a, c);
+  const alJugada = (ev: Extract<EventoTablero, { tipo: 'jugada' }>) => {
+    const { jugada } = ev;
     setHuboLinea(true);
-    setJugadas((j) => j - 1);
-
-    const res = resolverPorPasos(nuevo, COLORES);
-
     haptics.success();
     void audio.playSuccess();
-    setBoard(nuevo);
 
     // Se reparte lo quitado entre las frases de cada color.
-    const sig = objetivos.map((o) => ({ ...o, llevas: o.llevas + (res.porColor[o.color] ?? 0) }));
+    const sig = objetivosRef.current.map((o) => ({ ...o, llevas: o.llevas + (jugada.porColor[o.color] ?? 0) }));
     const llena = sig.find((o) => o.llevas >= o.meta);
     let pendiente: PreguntaDulces | null = null;
     if (llena) {
@@ -285,36 +282,35 @@ export function usePartidaDulces() {
       pendiente = { objetivo: llena, opciones: opcionesPara(llena, pool) };
     } else {
       // El color con más piezas quitadas en esta jugada (una cascada
-      // cuenta como una sola jugada, resolve() ya la resolvió
+      // cuenta como una sola jugada, el modelo ya la resolvió
       // entera). En empate, el que esté más cerca de llenar su barra.
-      const colorGanador = mejorColor(res.porColor, sig);
+      const colorGanador = mejorColor(jugada.porColor, sig);
       const objetivo = sig.find((o) => o.color === colorGanador);
       if (objetivo) reproducirVozMatch(objetivo.entry);
     }
 
-    let rebarajado: number[] | null = null;
-    if (!hayMovimiento(nuevo)) {
-      const otro = clone(nuevo);
-      rebarajar(otro, COLORES);
-      setBoard(otro);
-      rebarajado = otro.cells;
-    }
-
-    animar(
-      {
-        a,
-        c,
-        pasos: res.pasos,
-        rebarajado,
-        final: rebarajado ?? nuevo.cells,
-        onEstallido: alEstallar,
-        onLlegan: sumarAMetas,
-      },
-      () => {
-        if (pendiente) abrirPregunta(pendiente);
-      }
-    );
+    animar(jugada, () => {
+      if (pendiente) abrirPregunta(pendiente);
+    });
   };
+
+  // El modelo contestó (jugada o rechazo): se reacciona una sola vez por evento, aunque el efecto corra de más.
+  const eventoAtendido = useRef(0);
+  const alEvento = useEffectEvent((ev: EventoTablero) => {
+    if (ev.tipo === 'jugada') {
+      alJugada(ev);
+      return;
+    }
+    haptics.failure();
+    void audio.playFail();
+    tableroRef.current?.rechazar(ev.a, ev.c);
+  });
+  useEffect(() => {
+    const ev = tab.evento;
+    if (!ev || ev.n === eventoAtendido.current) return;
+    eventoAtendido.current = ev.n;
+    alEvento(ev);
+  }, [tab.evento]);
 
   const tocar = (i: number) => {
     if (!board || pregunta || jugadas <= 0 || animandoRef.current) return;
@@ -358,12 +354,12 @@ export function usePartidaDulces() {
   useEffect(() => efectoPregunta(), [pregunta]);
 
   useEffect(() => {
-    if (jugadas <= 0 && !pregunta && !animando) {
+    if (tab.cargado && jugadas <= 0 && !pregunta && !animando && !tab.ocupado) {
       const t = setTimeout(terminar, 900);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [jugadas, pregunta, animando, terminar]);
+  }, [tab.cargado, tab.ocupado, jugadas, pregunta, animando, terminar]);
 
   return {
     nav,
@@ -372,7 +368,7 @@ export function usePartidaDulces() {
     fase: fasePartida(partida, loading, jugadas),
     nivel,
     jugadasTotal: nv?.jugadas ?? JUGADAS_DEF,
-    tablero: { board, COLS, ROWS, LADO, ANCHO_TABLERO, ALTO_TABLERO, llave, elegida, puedeScroll },
+    tablero: { board, ids: tab.ids, COLS, ROWS, LADO, ANCHO_TABLERO, ALTO_TABLERO, llave, elegida, puedeScroll },
     objetivos,
     jugadas,
     huboLinea,

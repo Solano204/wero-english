@@ -2,12 +2,28 @@ import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, us
 import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
-import { idsTrasPaso, idsTrasRebaraje, type Paso } from '@/domain/match3Pasos';
+import type { Paso } from '@/domain/match3Pasos';
+import { ANIMACION_DULCES, DEPURACION_DULCES } from '@/config/dulces';
+import { registrarFalla } from '@/services/fallas';
 import { motionDuration, motionDulces } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { CapaDepuracion } from './CapaDepuracion';
 import { ChipCascada } from './ChipCascada';
-import { Pieza, type Movimiento } from './Pieza';
-import { vistaInicial, type Jugada, type PiezaVista, type TableroDulcesRef } from '@/features/juegos/dulces/logic/vistaTablero';
+import { Pieza } from './Pieza';
+import {
+  invariantesVista,
+  piezasMarcarExplota,
+  piezasTrasIntercambio,
+  piezasTrasPaso,
+  piezasTrasRebaraje,
+  vistaDesdeModelo,
+  vistaInicial,
+  volcarModelo,
+  volcarVista,
+  type Jugada,
+  type PiezaVista,
+  type TableroDulcesRef,
+} from '@/features/juegos/dulces/logic/vistaTablero';
 
 export type { Jugada, TableroDulcesRef } from '@/features/juegos/dulces/logic/vistaTablero';
 import {
@@ -27,10 +43,21 @@ function invalidar(vigencia: { current: number }): void {
   vigencia.current++;
 }
 
+/** El rastro de depuración va por console.error: es el único console que sobrevive a un APK de release (adb logcat). */
+const trazar = (texto: string) => console.error(texto);
+
+/** Los registros y la capa de depuración: siempre en `__DEV__` y, en un APK de prueba, con `DEPURACION_DULCES`. */
+const DEPURANDO = __DEV__ || DEPURACION_DULCES;
+
+/** Cuánto se espera, además de lo calculado, antes de dar una jugada por terminada a la fuerza. */
+const VIGILANTE_BASE_MS = 2500;
+const VIGILANTE_POR_PASO_MS = 1800;
+
 interface Props {
   ref?: Ref<TableroDulcesRef>;
-  /** El tablero de partida: solo se lee al montar y cada vez que cambia `llave`. */
+  /** El modelo: colores e ids por celda. Se lee al montar y cada vez que cambia `llave`. */
   celdas: number[];
+  ids: number[];
   cols: number;
   rows: number;
   lado: number;
@@ -47,16 +74,18 @@ interface Props {
 }
 
 /**
- * El tablero de Dulces. Las piezas tienen un id estable y se mueven con valores compartidos (`Pieza`): aquí solo
- * se decide qué pasa en cada momento de una jugada, con la misma resolución que produce el dominio pero
- * paso a paso (`resolverPorPasos`): intercambio → las que forman línea pulsan y estallan → las de arriba caen y
- * entran las nuevas → si formaron otra línea, el paso siguiente. `setState` solo al empezar cada etapa, nunca por
- * cuadro. El deslizamiento del dedo (Gesture Handler) intercambia con la vecina hacia donde va; tocar y tocar lo
- * resuelve la pantalla como siempre.
+ * El tablero de Dulces: SOLO DIBUJA el modelo. Cada pieza tiene el id que le dio el dominio y su lugar sale de
+ * los ids del modelo (`piezasTrasPaso`…); las animaciones solo van de la posición anterior a la nueva y no
+ * deciden nada: el modelo ya tiene el resultado final antes de que empiece la jugada. Al terminar cada paso, y
+ * al final con un vigilante por si una animación se pierde, la vista se reconcilia con el modelo: una pieza por
+ * celda, del color y con el id que dice el modelo, cero huecos. `ANIMACION_DULCES` en `false` dibuja cada paso
+ * de inmediato. El deslizamiento del dedo (Gesture Handler) intercambia con la vecina hacia donde va; tocar y
+ * tocar lo resuelve la pantalla como siempre.
  */
 export function TableroDulces({
   ref,
   celdas,
+  ids,
   cols,
   rows,
   lado,
@@ -77,12 +106,9 @@ export function TableroDulces({
   const ancho = cols * paso - hueco;
   const alto = rows * paso - hueco;
 
-  const siguienteId = useRef(0);
-  const nuevoId = useCallback(() => siguienteId.current++, []);
-  const [piezas, setPiezas] = useState<PiezaVista[]>(() => vistaInicial(celdas, cols, rows, () => siguienteId.current++, true));
-  // Qué pieza hay en cada celda y de qué color, por índice: lo que ve el jugador en este momento de la animación.
-  const idsRef = useRef<number[]>(piezas.map((p) => p.id));
-  const celdasRef = useRef<number[]>([...celdas]);
+  const [piezas, setPiezas] = useState<PiezaVista[]>(() => vistaInicial(celdas, ids, cols, rows, true));
+  // Lo que ve el jugador, al día en el mismo instante en que se decide (el estado de React llega un render después).
+  const vistaRef = useRef(piezas);
   const nonce = useRef(0);
   const rechazoRef = useRef(0);
   const jugadaToken = useRef(0);
@@ -91,8 +117,7 @@ export function TableroDulces({
   const [chip, setChip] = useState<{ id: number; texto: string } | null>(null);
   // Sube cada vez que el tablero queda quieto: todas las piezas se plantan en su celda (`Pieza`, `asiento`).
   const [asiento, setAsiento] = useState(0);
-  const piezasRef = useRef(piezas);
-  piezasRef.current = piezas;
+  const [jugando, setJugando] = useState(false);
   const chipId = useRef(0);
 
   // Lo último que trae la pantalla, para que ni el gesto ni la jugada en curso usen valores viejos.
@@ -110,31 +135,46 @@ export function TableroDulces({
     };
   }, []);
 
-  const reiniciar = useCallback(
-    (nuevas: readonly number[], columnas: number, filas: number, conEntrada: boolean) => {
-      const vista = vistaInicial(nuevas, columnas, filas, nuevoId, conEntrada);
-      idsRef.current = vista.map((p) => p.id);
-      celdasRef.current = [...nuevas];
-      setPiezas(vista);
-      setChip(null);
+  const poner = useCallback((siguiente: PiezaVista[]) => {
+    vistaRef.current = siguiente;
+    setPiezas(siguiente);
+  }, []);
+  const cambiar = useCallback((f: (ps: PiezaVista[]) => PiezaVista[]) => poner(f(vistaRef.current)), [poner]);
+
+  /** La vista contra el modelo: si algo no coincide (hueco, pieza de más, color o id distinto) se rehace desde el modelo. */
+  const reconciliar = useCallback(
+    (modelo: readonly number[], idsModelo: readonly number[], cuando: string) => {
+      const { cols: columnas, rows: filas } = datos.current;
+      const fallas = invariantesVista(vistaRef.current, modelo, idsModelo, columnas, filas);
+      if (DEPURANDO) {
+        const linea = `[dulces] ${cuando}: modelo=${volcarModelo(modelo, columnas)} vista=${volcarVista(vistaRef.current, columnas, filas)}`;
+        if (fallas.length === 0) trazar(linea);
+        else {
+          trazar(`${linea} FALLAS: ${fallas.join(' | ')}`);
+          void registrarFalla(new Error(`${linea} ${fallas.join(' | ')}`), 'dulces:invariante');
+        }
+      }
+      if (fallas.length > 0) poner(vistaDesdeModelo(modelo, idsModelo, columnas));
     },
-    [nuevoId]
+    [poner]
   );
 
-  // Otra partida: piezas nuevas (ids nuevos, así ninguna hereda la posición de la de antes).
+  // Otra partida: piezas nuevas (el modelo reparte ids nuevos, así ninguna hereda la posición de la de antes).
   const llaveAnterior = useRef(llave);
   useEffect(() => {
     if (llaveAnterior.current === llave) return;
     llaveAnterior.current = llave;
     jugadaToken.current++;
-    reiniciar(celdas, cols, rows, true);
-  }, [llave, celdas, cols, rows, reiniciar]);
+    poner(vistaInicial(celdas, ids, cols, rows, true));
+    setChip(null);
+    setJugando(false);
+  }, [llave, celdas, ids, cols, rows, poner]);
 
   // Mientras cae el reparto no se aceptan toques: el tablero está en el aire.
   const [entrando, setEntrando] = useState(true);
   useEffect(() => {
     setEntrando(true);
-    const espera = reducido ? motionDuration.rapido : retrasoDeColumna(cols - 1) + duracionCaida(rows) + REBOTE_MS;
+    const espera = reducido || !ANIMACION_DULCES ? motionDuration.rapido : retrasoDeColumna(cols - 1) + duracionCaida(rows) + REBOTE_MS;
     const t = setTimeout(() => {
       setEntrando(false);
       setAsiento((n) => n + 1);
@@ -159,189 +199,152 @@ export function TableroDulces({
       const token = ++jugadaToken.current;
       const vive = () => montado.current && jugadaToken.current === token;
       const { cols: columnas, reducido: sinMovimiento } = datos.current;
+      const animada = ANIMACION_DULCES;
       const ms = (t: number) => (sinMovimiento ? motionDuration.rapido : t);
-      const filaDe = (i: number) => Math.floor(i / columnas);
-      const colDe = (i: number) => i % columnas;
+      const llegaron = new Set<number>();
       let ultimaLlegada = 0;
+      let terminada = false;
+      let vigilante: ReturnType<typeof setTimeout> | undefined;
 
       const mostrarChip = (texto: string) => {
         const id = ++chipId.current;
         setChip({ id, texto });
       };
-
-      const intercambiar = (a: number, c: number, asienta: boolean) => {
-        const ida = idsRef.current[a];
-        const idc = idsRef.current[c];
-        if (ida === undefined || idc === undefined) return;
-        idsRef.current[a] = idc;
-        idsRef.current[c] = ida;
-        const cel = celdasRef.current;
-        [cel[a], cel[c]] = [cel[c] as number, cel[a] as number];
-        const n = ++nonce.current;
-        const mov: Movimiento = { tipo: 'intercambio', filas: 0, asienta, nonce: n };
-        setPiezas((ps) =>
-          ps.map((p) => {
-            if (p.id === ida) return { ...p, fila: filaDe(c), col: colDe(c), mov };
-            if (p.id === idc) return { ...p, fila: filaDe(a), col: colDe(a), mov };
-            return p;
-          })
-        );
+      const llegan = (p: Paso, k: number) => {
+        if (llegaron.has(k)) return;
+        llegaron.add(k);
+        j.onLlegan?.(p, k);
       };
 
-      const marcarExplota = (p: Paso) => {
-        const quitar = new Set(p.quitar.map((i) => idsRef.current[i]));
-        setPiezas((ps) => ps.map((v) => (quitar.has(v.id) ? { ...v, explota: true } : v)));
+      /** Una sola vez: lo que no llegó llega, la vista se reconcilia con el modelo y se avisa que terminó. */
+      const terminar = (cuando: string) => {
+        if (terminada) return;
+        terminada = true;
+        if (vigilante) {
+          clearTimeout(vigilante);
+          timers.current.delete(vigilante);
+        }
+        j.pasos.forEach((p, k) => llegan(p, k));
+        reconciliar(j.final, j.idsFinal, cuando);
+        jugadaToken.current++;
+        setJugando(false);
+        setAsiento((n) => n + 1);
+        j.onFin();
       };
 
-      const aplicarPaso = (p: Paso) => {
-        const antes = idsRef.current;
-        const quitar = new Set(p.quitar.map((i) => antes[i]));
-        const n = ++nonce.current;
-        const bajan = new Map(
-          p.caidas.map((c) => [antes[c.desde] as number, { celda: c.hasta, filas: (c.hasta - c.desde) / columnas }])
-        );
-        const creados: number[] = [];
-        idsRef.current = idsTrasPaso(antes, p, () => {
-          const id = siguienteId.current++;
-          creados.push(id);
-          return id;
-        });
-        celdasRef.current = [...p.tablero];
-        setPiezas((ps) => {
-          const quedan = ps
-            .filter((v) => !quitar.has(v.id))
-            .map((v) => {
-              const baja = bajan.get(v.id);
-              if (!baja) return v;
-              const mov: Movimiento = { tipo: 'caida', filas: baja.filas, asienta: false, nonce: n };
-              return { ...v, fila: filaDe(baja.celda), col: colDe(baja.celda), mov };
-            });
-          const nuevas: PiezaVista[] = p.nuevas.map((nv, k) => ({
-            id: creados[k] as number,
-            color: nv.color,
-            fila: filaDe(nv.indice),
-            col: colDe(nv.indice),
-            explota: false,
-            mov: null,
-            entrada: { desde: nv.desde, retraso: retrasoDeColumna(colDe(nv.indice)) },
-            rechazo: 0,
-          }));
-          return [...quedan, ...nuevas];
-        });
-      };
-
-      const aplicarRebaraje = (despues: readonly number[]) => {
-        const antes = celdasRef.current;
-        const ids = idsRef.current;
-        const vieja = new Map<number, number>();
-        ids.forEach((id, i) => vieja.set(id, i));
-        const r = idsTrasRebaraje(antes, ids, despues, nuevoId);
-        const n = ++nonce.current;
-        const sobran = new Set(r.sobran);
-        setPiezas((ps) => {
-          const porId = new Map(ps.filter((p) => !sobran.has(p.id)).map((p) => [p.id, p]));
-          return r.ids.map((id, i) => {
-            const existente = porId.get(id);
-            if (existente) {
-              if (vieja.get(id) === i) return existente;
-              const mov: Movimiento = { tipo: 'rebaraja', filas: 0, asienta: false, nonce: n };
-              return { ...existente, fila: filaDe(i), col: colDe(i), mov };
-            }
-            return {
-              id,
-              color: despues[i] as number,
-              fila: filaDe(i),
-              col: colDe(i),
-              explota: false,
-              mov: null,
-              entrada: { desde: filaDe(i), retraso: 0 },
-              rechazo: 0,
-            };
-          });
-        });
-        idsRef.current = r.ids;
-        celdasRef.current = [...despues];
-      };
+      // Respaldo: si una animación se corta, la jugada termina igual y el tablero queda como el modelo.
+      const tope = VIGILANTE_BASE_MS + j.pasos.length * VIGILANTE_POR_PASO_MS + (j.rebarajado ? VIGILANTE_BASE_MS : 0);
+      vigilante = setTimeout(() => {
+        if (vive()) terminar('vigilante');
+      }, tope);
+      timers.current.add(vigilante);
 
       void (async () => {
-        // 1. Las dos piezas se deslizan una a la otra. Si no armó nada se quedan así y se asientan.
-        const sinLinea = j.pasos.length === 0;
-        intercambiar(j.a, j.c, sinLinea);
-        await dormir(ms(motionDuration.base) + (sinLinea && !sinMovimiento ? motionDuration.rapido : 0));
-        if (!vive()) return;
-
-        // 2. Cada paso: estallan, y mientras sus trozos vuelan a las barras, caen las de arriba.
-        for (const [k, p] of j.pasos.entries()) {
-          if (k >= 1) mostrarChip(`Cascada ×${k + 1}`);
-          marcarExplota(p);
-          j.onEstallido?.(p, k);
-          if (sinMovimiento) {
-            j.onLlegan?.(p, k);
-          } else {
-            const llegada = motionDulces.pulso + TROZOS_RETRASO_MS + motionDulces.vuelo;
-            ultimaLlegada = Math.max(ultimaLlegada, Date.now() + llegada);
-            const t = setTimeout(() => {
-              timers.current.delete(t);
-              if (vive()) j.onLlegan?.(p, k);
-            }, llegada);
-            timers.current.add(t);
-          }
-          await dormir(ms(motionDulces.pulso + motionDulces.estallido));
-          if (!vive()) return;
-          aplicarPaso(p);
-          await dormir(sinMovimiento ? motionDuration.rapido : esperaDeCaida(p, columnas));
+        setJugando(true);
+        // 1. Las dos piezas se deslizan una a la otra.
+        if (animada) {
+          cambiar((ps) => piezasTrasIntercambio(ps, j.a, j.c, j.idsAntes, columnas, ++nonce.current, false));
+          await dormir(ms(motionDuration.base));
           if (!vive()) return;
         }
 
+        // 2. Cada paso: estallan, y mientras sus trozos vuelan a las barras, caen las de arriba.
+        let idsPrevios = j.idsIntercambio;
+        for (const [k, p] of j.pasos.entries()) {
+          const idsPaso = j.idsPasos[k] as number[];
+          if (k >= 1) mostrarChip(`Cascada ×${k + 1}`);
+          j.onEstallido?.(p, k);
+          if (animada) {
+            const quitados = p.quitar.map((i) => idsPrevios[i] as number);
+            cambiar((ps) => piezasMarcarExplota(ps, quitados));
+            if (sinMovimiento) {
+              llegan(p, k);
+            } else {
+              const llegada = motionDulces.pulso + TROZOS_RETRASO_MS + motionDulces.vuelo;
+              ultimaLlegada = Math.max(ultimaLlegada, Date.now() + llegada);
+              const t = setTimeout(() => {
+                timers.current.delete(t);
+                if (vive()) llegan(p, k);
+              }, llegada);
+              timers.current.add(t);
+            }
+            await dormir(ms(motionDulces.pulso + motionDulces.estallido));
+            if (!vive()) return;
+            cambiar((ps) => piezasTrasPaso(ps, p, idsPaso, columnas, ++nonce.current));
+            await dormir(sinMovimiento ? motionDuration.rapido : esperaDeCaida(p, columnas));
+            if (!vive()) return;
+          } else {
+            llegan(p, k);
+            poner(vistaDesdeModelo(p.tablero, idsPaso, columnas));
+            setAsiento((n) => n + 1);
+            await dormir(motionDuration.rapido);
+            if (!vive()) return;
+          }
+          idsPrevios = idsPaso;
+          reconciliar(p.tablero, idsPaso, `paso ${k + 1}`);
+          setAsiento((n) => n + 1);
+        }
+
         // 3. Sin movimientos posibles: se avisa y las piezas giran a su nuevo lugar.
-        if (j.rebarajado) {
+        if (j.rebarajado && j.idsRebaraje) {
+          const { rebarajado, idsRebaraje } = j;
           mostrarChip('Rebarajando el tablero');
-          await dormir(ms(motionDuration.base));
-          if (!vive()) return;
-          aplicarRebaraje(j.rebarajado);
-          await dormir(ms(motionDuration.lento));
-          if (!vive()) return;
+          if (animada) {
+            await dormir(ms(motionDuration.base));
+            if (!vive()) return;
+            cambiar((ps) => piezasTrasRebaraje(ps, rebarajado, idsRebaraje, columnas, ++nonce.current));
+            await dormir(ms(motionDuration.lento));
+            if (!vive()) return;
+          } else {
+            poner(vistaDesdeModelo(rebarajado, idsRebaraje, columnas));
+          }
+          reconciliar(rebarajado, idsRebaraje, 'rebarajado');
         }
 
         // Los trozos del último paso tienen que llegar antes de dar por terminada la jugada.
         const falta = ultimaLlegada - Date.now();
         if (falta > 0) await dormir(falta);
         if (!vive()) return;
-
-        // Una pieza por celda, la que dicen los ids, y del color del dominio. Si no, se corrige.
-        const ids = idsRef.current;
-        const ps = piezasRef.current;
-        const piezaPorCelda =
-          ps.length === ids.length && ps.every((v) => !v.explota && ids[v.fila * columnas + v.col] === v.id);
-        if (!piezaPorCelda || !celdasRef.current.every((v, i) => v === j.final[i])) {
-          if (__DEV__) console.warn('[dulces] el tablero animado no coincide con el del dominio: se corrige');
-          reiniciar(j.final, columnas, datos.current.rows, false);
-        }
-        setAsiento((n) => n + 1);
-        j.onFin();
+        terminar('fin de la jugada');
       })();
     },
-    [dormir, nuevoId, reiniciar]
+    [cambiar, dormir, poner, reconciliar]
   );
 
-  // Un intercambio que no arma línea: las dos piezas cabecean y se sacuden, sin moverse de su celda.
-  const rechazar = useCallback((a: number, c: number) => {
-    const ids = new Set([idsRef.current[a], idsRef.current[c]]);
-    const n = ++rechazoRef.current;
-    setPiezas((ps) => ps.map((p) => (ids.has(p.id) ? { ...p, rechazo: n } : p)));
-  }, []);
+  // Un intercambio que no arma línea: las dos piezas «van» hacia la otra, cabecean y regresan, sin moverse de su celda.
+  const rechazar = useCallback(
+    (a: number, c: number) => {
+      const { cols: columnas } = datos.current;
+      const n = ++rechazoRef.current;
+      const hacia = (de: number, a2: number) => ({
+        dx: Math.sign((a2 % columnas) - (de % columnas)),
+        dy: Math.sign(Math.floor(a2 / columnas) - Math.floor(de / columnas)),
+      });
+      cambiar((ps) =>
+        ps.map((p) => {
+          const celda = p.fila * columnas + p.col;
+          if (celda === a) return { ...p, rechazo: n, ida: hacia(a, c) };
+          if (celda === c) return { ...p, rechazo: n, ida: hacia(c, a) };
+          return p;
+        })
+      );
+    },
+    [cambiar]
+  );
 
   useImperativeHandle(ref, () => ({ jugar, rechazar }), [jugar, rechazar]);
 
   const alTocar = useCallback((celda: number) => datos.current.onTocar(celda), []);
   const alDeslizar = useCallback((origen: number, destino: number) => datos.current.onDeslizar(origen, destino), []);
   // El deslizamiento no tenía a dónde ir (el borde del tablero): la pieza cabecea y se sacude.
-  const alBorde = useCallback((origen: number) => {
-    const id = idsRef.current[origen];
-    if (id === undefined) return;
-    const n = ++rechazoRef.current;
-    setPiezas((ps) => ps.map((p) => (p.id === id ? { ...p, rechazo: n } : p)));
-  }, []);
+  const alBorde = useCallback(
+    (origen: number, dx: number, dy: number) => {
+      const { cols: columnas } = datos.current;
+      const n = ++rechazoRef.current;
+      cambiar((ps) => ps.map((p) => (p.fila * columnas + p.col === origen ? { ...p, rechazo: n, ida: { dx, dy } } : p)));
+    },
+    [cambiar]
+  );
 
   const origen = useSharedValue(-1);
   const hecho = useSharedValue(0);
@@ -362,7 +365,7 @@ export function TableroDulces({
         const destino = vecinaHacia(origen.get(), e.translationX, e.translationY, cols, rows, soloHorizontal);
         if (!destino) return;
         if (destino.celda >= 0) runOnJS(alDeslizar)(origen.get(), destino.celda);
-        else runOnJS(alBorde)(origen.get());
+        else runOnJS(alBorde)(origen.get(), destino.dx, destino.dy);
       })
       .onFinalize(() => {
         origen.set(-1);
@@ -379,6 +382,7 @@ export function TableroDulces({
           {enOrden.map((p) => (
             <Pieza
               key={p.id}
+              id={p.id}
               color={p.color}
               celda={p.fila * cols + p.col}
               fila={p.fila}
@@ -390,6 +394,7 @@ export function TableroDulces({
               mov={p.mov}
               entrada={p.entrada}
               rechazo={p.rechazo}
+              ida={p.ida}
               asiento={asiento}
               onTocar={alTocar}
             />
@@ -400,6 +405,9 @@ export function TableroDulces({
               texto={chip.texto}
               onFin={() => setChip((actual) => (actual?.id === chip.id ? null : actual))}
             />
+          ) : null}
+          {DEPURANDO ? (
+            <CapaDepuracion celdas={celdas} ids={ids} piezas={piezas} cols={cols} rows={rows} paso={paso} lado={lado} enReposo={!jugando && !entrando} />
           ) : null}
         </View>
       </GestureDetector>

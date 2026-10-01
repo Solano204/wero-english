@@ -120,6 +120,7 @@ export function DulcesScreen() {
             <TableroDulces
               ref={tableroRef}
               celdas={tablero.board.cells}
+              ids={tablero.ids}
               cols={tablero.COLS}
               rows={tablero.ROWS}
               lado={tablero.LADO}

@@ -8,12 +8,15 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { ANIMACION_DULCES, DEPURACION_DULCES } from '@/config/dulces';
+import { registrarFalla } from '@/services/fallas';
 import { Presionable } from '@/shared/ui/Presionable';
 import { color, motionDuration, motionDulces, motionEasing, motionSpring, radius } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { CaraPieza } from './SimboloPieza';
 import { etiquetaPieza } from '@/features/juegos/dulces/logic/piezas';
 import { REBOTE_DP, duracionCaida } from '@/features/juegos/dulces/logic/tablero';
+import type { Ida } from '@/features/juegos/dulces/logic/vistaTablero';
 
 /** El área táctil mínima: una pieza más chica que esto se amplía con `hitSlop` hasta llegar. */
 const AREA_MINIMA = 48;
@@ -25,6 +28,11 @@ const PULSO = 1.14;
 const ENCOGIDA = 0.2;
 /** Cuánto se hunde al asentarse un intercambio que no armó nada. */
 const ASIENTO = 0.94;
+/** Cuánto «va» hacia su vecina una pieza rechazada (fracción de una celda) antes de regresar. */
+const IDA_RECHAZO = 0.35;
+/** Cuánto puede alejarse (dp) una pieza de su celda en reposo antes de contarlo como desfase (solo depuración). */
+const TOLERANCIA_DP = 0.75;
+const DEPURANDO = __DEV__ || DEPURACION_DULCES;
 
 /** Por qué una pieza cambió de celda: decide cómo se mueve hasta ella. */
 export interface Movimiento {
@@ -44,6 +52,8 @@ export interface Entrada {
 }
 
 interface Props {
+  /** El id que le dio el dominio: es la key y sirve para los registros de depuración. */
+  id: number;
   color: number;
   /** La celda actual de la pieza (fila * columnas + columna). */
   celda: number;
@@ -60,6 +70,8 @@ interface Props {
   entrada?: Entrada;
   /** Cambia cuando el deslizamiento no tenía a dónde ir: la pieza cabecea y se sacude. */
   rechazo: number;
+  /** Hacia dónde «va» al ser rechazada (la vecina con la que se quiso intercambiar); sin vecina, solo se sacude. */
+  ida?: Ida;
   /**
    * Cambia cuando el tablero queda quieto (terminó el reparto o una jugada): la pieza se planta en su celda,
    * entera y visible, sin animación. Si una actualización de la animación se perdió (una pieza nueva que se
@@ -83,6 +95,7 @@ interface Props {
  * mide menos de 48 dp (8 columnas en un teléfono angosto) el área táctil se completa con `hitSlop`.
  */
 export const Pieza = memo(function Pieza({
+  id,
   color: c,
   celda,
   fila,
@@ -94,6 +107,7 @@ export const Pieza = memo(function Pieza({
   mov,
   entrada,
   rechazo,
+  ida,
   asiento,
   onTocar,
 }: Props) {
@@ -101,7 +115,7 @@ export const Pieza = memo(function Pieza({
   const x = col * paso;
   const y = fila * paso;
   const px = useSharedValue(x);
-  const py = useSharedValue(entrada ? entrada.desde * paso : y);
+  const py = useSharedValue(entrada && ANIMACION_DULCES ? entrada.desde * paso : y);
   const escala = useSharedValue(1);
   const realce = useSharedValue(1);
   const opacidad = useSharedValue(entrada && reducido ? 0 : 1);
@@ -123,7 +137,7 @@ export const Pieza = memo(function Pieza({
   // Al montar: la que entra por arriba cae a su celda con el escalón de su columna.
   const alMontar = useEffectEvent(() => {
     if (!entrada) return;
-    if (reducido) {
+    if (reducido || !ANIMACION_DULCES) {
       py.set(y);
       opacidad.set(withTiming(1, { duration: motionDuration.rapido, easing: motionEasing.entrar }));
       return;
@@ -142,7 +156,7 @@ export const Pieza = memo(function Pieza({
   // Cada vez que cambia de celda: el intercambio, la caída o el rebarajado.
   const efectoMov = useEffectEvent(() => {
     if (!mov) return;
-    if (reducido) {
+    if (reducido || !ANIMACION_DULCES) {
       px.set(x);
       py.set(y);
       opacidad.set(withSequence(
@@ -195,8 +209,22 @@ export const Pieza = memo(function Pieza({
   // valor ya sea el mismo (si no, Reanimated la omite y la vista seguiría con lo que se perdió). Al montar no:
   // una pieza nueva de la cascada tiene que caer, no aparecer ya plantada.
   const asientoMontaje = useRef(asiento);
+  // Solo depuración: antes de plantarla, ¿la pieza estaba donde debía? Si no, la animación la dejó fuera de su celda.
+  const avisarDesfase = useEffectEvent(() => {
+    try {
+      const dx = px.get() - x;
+      const dy = py.get() - y;
+      if (Math.abs(dx) <= TOLERANCIA_DP && Math.abs(dy) <= TOLERANCIA_DP) return;
+      const aviso = `[dulces] la pieza ${id} (celda ${fila},${col}) estaba fuera de su lugar: dx=${dx.toFixed(1)} dy=${dy.toFixed(1)}`;
+      console.error(aviso);
+      void registrarFalla(new Error(aviso), "dulces:desfase");
+    } catch {
+      // Leer un valor compartido desde JS puede fallar fuera de depuración: aquí no importa.
+    }
+  });
   const plantar = useEffectEvent(() => {
     if (explota) return;
+    if (DEPURANDO) avisarDesfase();
     px.set(x);
     px.modify();
     py.set(y);
@@ -232,6 +260,16 @@ export const Pieza = memo(function Pieza({
     const t = setTimeout(() => setSacude(false), motionDuration.base);
     return () => clearTimeout(t);
   }, [rechazo, reducido, escala]);
+
+  // Un intercambio rechazado: la pieza «va» hacia su vecina y regresa (la sacudida de arriba la acompaña).
+  const efectoIda = useEffectEvent(() => {
+    if (!rechazo || reducido || !ida || (ida.dx === 0 && ida.dy === 0)) return;
+    const d = paso * IDA_RECHAZO;
+    const cfg = (easing: typeof motionEasing.salir) => ({ duration: motionDuration.rapido, easing });
+    px.set(withSequence(withTiming(x + ida.dx * d, cfg(motionEasing.salir)), withTiming(x, cfg(motionEasing.entrar))));
+    py.set(withSequence(withTiming(y + ida.dy * d, cfg(motionEasing.salir)), withTiming(y, cfg(motionEasing.entrar))));
+  });
+  useEffect(() => efectoIda(), [rechazo]);
 
   const lugar = useAnimatedStyle(() => ({
     opacity: opacidad.get(),

@@ -71,8 +71,7 @@ const ARRANQUE = [
 /** 9 · Archivos que pueden pasar de 400 líneas. */
 const LARGOS = {
   'src/features/cuenta/legal/textos.ts': 'generado por scripts/legal.mjs desde docs/legal/',
-  'src/features/juegos/dulces/hooks/usePartidaDulces.ts': 'la máquina de la partida (406); partirla toca la lógica de turnos',
-  'src/features/juegos/dulces/components/TableroDulces.tsx': 'el tablero fuera del React Compiler con sus memos a mano (404)',
+  'src/features/juegos/dulces/components/TableroDulces.tsx': 'el tablero fuera del React Compiler con sus memos a mano (433)',
 };
 const MAX_LINEAS = 400;
 
