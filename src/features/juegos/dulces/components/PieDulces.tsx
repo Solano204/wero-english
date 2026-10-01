@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { Button } from '@/shared/ui/Button';
 import { Marcador } from '@/shared/ui/fx/Marcador';
@@ -16,6 +16,8 @@ const LATE = 1.8;
 interface Props {
   /** Las jugadas que quedan. */
   jugadas: number;
+  /** Pulsación larga sobre la cuenta: enciende o apaga la capa de depuración del tablero. */
+  onDepurar?: () => void;
   /** Con las que empezó el nivel: la barra se vacía de este total a cero. */
   total: number;
   onDejar: () => void;
@@ -27,7 +29,7 @@ interface Props {
  * cada vez que se gasta una: es el aviso de que se acaban, no un castigo, así que nunca hay rojo ni ámbar.
  * Con «reducir movimiento» la barra se actualiza directo y no late.
  */
-export function PieDulces({ jugadas, total, onDejar }: Props) {
+export function PieDulces({ jugadas, total, onDejar, onDepurar }: Props) {
   const reducido = useMovimientoReducido();
   const pct = total > 0 ? Math.min(1, Math.max(0, jugadas / total)) : 0;
   const avance = useSharedValue(pct);
@@ -57,6 +59,8 @@ export function PieDulces({ jugadas, total, onDejar }: Props) {
 
   return (
     <View style={styles.pie}>
+      {/* Sin animación al tocar: la cuenta se ve igual; solo la pulsación larga hace algo (depuración). */}
+      <Pressable accessible={false} onLongPress={onDepurar} delayLongPress={800}>
       <View
         style={styles.cuenta}
         accessible
@@ -74,6 +78,7 @@ export function PieDulces({ jugadas, total, onDejar }: Props) {
           <Animated.View style={[styles.relleno, { backgroundColor: enUltimas ? color.accent : color.textMuted }, relleno]} />
         </View>
       </View>
+      </Pressable>
       <Button label="Dejarlo aquí" variant="ghost" onPress={onDejar} full />
     </View>
   );
