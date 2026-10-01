@@ -11,5 +11,10 @@ fs.writeFileSync(path.join(root, RUTA_RESUMEN), textoResumen(root), 'utf8');
 console.log(`${RUTA_RESUMEN} generado`);
 fs.writeFileSync(path.join(root, RUTA_CAZALA), textoCazala(root), 'utf8');
 console.log(`${RUTA_CAZALA} generado`);
-const n = await construirDb(root);
-console.log(`${RUTA_DB} generado (${n} entradas, ${(fs.statSync(path.join(root, RUTA_DB)).size / 1024).toFixed(0)} KB)`);
+const { entradas, reusada } = await construirDb(root);
+const kb = (fs.statSync(path.join(root, RUTA_DB)).size / 1024).toFixed(0);
+console.log(
+  reusada
+    ? `${RUTA_DB} al día (${entradas} entradas, ${kb} KB): catalogo.json no cambió, se usa la de Git (Node ${process.versions.node} no tiene node:sqlite)`
+    : `${RUTA_DB} generado (${entradas} entradas, ${kb} KB)`,
+);

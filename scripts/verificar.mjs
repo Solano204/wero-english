@@ -8,13 +8,13 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 
-// Varias herramientas (dependency-cruiser en check:capas, node:sqlite en check:data y build:derivados) piden Node 22.13+.
-const [mayor, menor] = process.versions.node.split('.').map(Number);
-if (mayor < 22 || (mayor === 22 && menor < 13)) {
+// React Native 0.86 pide Node 20.19.4 o más nuevo. Con Node 22.13+ además se puede rearmar catalogo.db (node:sqlite);
+// con Node 20 se usa la de Git mientras catalogo.json no cambie.
+const [mayor, menor, parche] = process.versions.node.split('.').map(Number);
+if (mayor < 20 || (mayor === 20 && (menor < 19 || (menor === 19 && parche < 4)))) {
   console.error(
-    `verificar: necesitas Node 22.13 o más nuevo; tienes ${process.version}.\n` +
-      '  Windows: instala Node 22 LTS de https://nodejs.org (o con nvm-windows: nvm install 22 && nvm use 22).\n' +
-      '  La versión va en .nvmrc y en "engines" de package.json.',
+    `verificar: necesitas Node 20.19.4 o más nuevo (recomendado 22 LTS); tienes ${process.version}.\n` +
+      '  Windows: instala Node 22 LTS de https://nodejs.org (o con nvm-windows: nvm install 22 && nvm use 22).',
   );
   process.exit(1);
 }

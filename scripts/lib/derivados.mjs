@@ -13,6 +13,29 @@ import path from 'node:path';
 export const RUTA_RESUMEN = 'src/data/resumenContenido.ts';
 export const RUTA_CAZALA = 'assets/data/cazala_entradas.json';
 export const RUTA_DB = 'assets/data/catalogo.db';
+/**
+ * Lo que dice catalogo.db de sí mismo, en JSON al lado. Lo escribe construirDb junto con la base: con Node 20 (sin
+ * node:sqlite) check:data y build:derivados lo leen para saber si la base de Git sigue al día con catalogo.json.
+ */
+export const RUTA_META_DB = 'assets/data/catalogo.db.json';
+
+async function sqlite() {
+  try {
+    return (await import('node:sqlite')).DatabaseSync;
+  } catch {
+    return null;
+  }
+}
+
+function leerMetaJson(root) {
+  const f = path.join(root, RUTA_META_DB);
+  if (!fs.existsSync(f) || !fs.existsSync(path.join(root, RUTA_DB))) return null;
+  try {
+    return JSON.parse(fs.readFileSync(f, 'utf8'));
+  } catch {
+    return null;
+  }
+}
 
 const leer = (root, nombre) => {
   try {
@@ -109,13 +132,14 @@ export function textoCazala(root = process.cwd()) {
 
 /** Arma catalogo.db (necesita node:sqlite, Node 22.13 o más nuevo). */
 export async function construirDb(root = process.cwd()) {
-  let DatabaseSync;
-  try {
-    ({ DatabaseSync } = await import('node:sqlite'));
-  } catch {
+  const DatabaseSync = await sqlite();
+  if (!DatabaseSync) {
+    // Node 20: no se puede armar la base, pero si catalogo.json no cambió, la de Git ya es la correcta.
+    const meta = leerMetaJson(root);
+    if (meta && meta.sha256 === hashCatalogo(root)) return { entradas: meta.entradas, reusada: true };
     throw new Error(
-      `catalogo.db necesita Node 22.13 o más nuevo (tienes ${process.version}). Instala Node 22 LTS (ver .nvmrc) y vuelve a correr npm run build:derivados. ` +
-        'Mientras tanto la copia de assets/data/catalogo.db que viene en Git sirve si no cambiaste catalogo.json.',
+      `catalogo.json cambió y rearmar catalogo.db necesita Node 22.13 o más nuevo (tienes ${process.version}). ` +
+        'Instala Node 22 LTS y vuelve a correr npm run build:derivados.',
     );
   }
   const destino = path.join(root, RUTA_DB);
@@ -133,15 +157,19 @@ export async function construirDb(root = process.cwd()) {
   db.exec('COMMIT;');
   db.exec('VACUUM;');
   db.close();
-  return catalogo.entries.length;
+  const resumen = { sha256: hashCatalogo(root), huella: huellaCatalogo(catalogo), entradas: catalogo.entries.length };
+  fs.writeFileSync(path.join(root, RUTA_META_DB), JSON.stringify(resumen, null, 2) + '\n', 'utf8');
+  return { entradas: catalogo.entries.length, reusada: false };
 }
 
 /** Lo que dice catalogo.db de sí mismo (para check:data), o null si no existe o no se puede abrir. */
 export async function metaDb(root = process.cwd()) {
   const f = path.join(root, RUTA_DB);
   if (!fs.existsSync(f)) return null;
+  const DatabaseSync = await sqlite();
+  // Sin node:sqlite (Node 20) se confía en el resumen que se escribió junto con la base.
+  if (!DatabaseSync) return leerMetaJson(root);
   try {
-    const { DatabaseSync } = await import('node:sqlite');
     const db = new DatabaseSync(f, { readOnly: true });
     const meta = Object.fromEntries(db.prepare('SELECT clave, valor FROM meta;').all().map((r) => [r.clave, r.valor]));
     const n = db.prepare('SELECT COUNT(*) AS n FROM entrada;').get().n;

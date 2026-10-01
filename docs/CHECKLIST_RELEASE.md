@@ -2,10 +2,11 @@
 
 En orden. Si un paso falla, no se sigue: se arregla y se vuelve a empezar desde ese paso.
 
-## 0. Node 22
+## 0. Node
 
-`node -v` tiene que decir **v22.13 o más nuevo** (`.nvmrc`). Con Node 20 fallan `check:capas` (dependency-cruiser) y
-`build:derivados`/`check:data` (usan `node:sqlite`); `npm run verificar` lo revisa antes de empezar.
+`node -v`: **v20.19.4 o más nuevo** (lo que pide React Native 0.86); recomendado **22 LTS** (`.nvmrc`). Con Node 20
+todo corre; lo único que necesita Node 22.13+ es **rearmar** `assets/data/catalogo.db` (usa `node:sqlite`) cuando
+cambia `catalogo.json`. Si no cambió, `build:derivados` usa la de Git (lo sabe por `catalogo.db.json`).
 En Windows: instalador de Node 22 LTS de nodejs.org, o `nvm install 22 && nvm use 22` con nvm-windows.
 
 ## 1. Verificar (obligatorio)
