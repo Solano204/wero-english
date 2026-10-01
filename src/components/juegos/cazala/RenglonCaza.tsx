@@ -13,7 +13,6 @@ import { Presionable } from '@/components/base/Presionable';
 import { BordePunteado } from '@/components/fx';
 import {
   color,
-  escalon,
   font,
   layout,
   motionCaza,
@@ -22,8 +21,6 @@ import {
   motionPulso,
   radius,
   space,
-  tarjetaEntra,
-  tarjetaSale,
 } from '@/theme';
 import { useMovimientoReducido } from '@/utils';
 import { Reticulo } from './Reticulo';
@@ -61,7 +58,6 @@ const etiquetaA11y = (label: string, estado: EstadoRenglon): string => {
 
 interface Props {
   label: string;
-  indice: number;
   estado: EstadoRenglon;
   /** Ya hay tres marcadas: este renglón no lo está y baja de opacidad (sigue tocable). */
   bajada: boolean;
@@ -78,7 +74,7 @@ interface Props {
  * y, en las correctas, late una vez cuando el karaoke de la frase llega a ella. Con «reducir movimiento» no hay
  * retículo, pulsos ni sacudida: solo el borde, el fondo y el ícono.
  */
-export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, caceria }: Props) {
+export function RenglonCaza({ label, estado, bajada, compacta, onPress, caceria }: Props) {
   const reducido = useMovimientoReducido();
   const [tam, setTam] = useState({ ancho: 0, alto: 0 });
   const marcada = estado === 'marcada' || estado === 'cazada' || estado === 'noIba';
@@ -127,10 +123,9 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
   const { fondo, borde } = APARIENCIA[estado];
 
   return (
-    <Animated.View
-      entering={tarjetaEntra().delay(escalon(indice))}
-      exiting={tarjetaSale().delay(escalon(indice))}
-    >
+    // Sin animación de entrada ni de salida: el renglón arrancaba en opacidad 0 y, si su keyframe no llegaba a
+    // correr (seis a la vez, escalonados), se quedaba invisible ocupando su lugar y no se podía elegir.
+    <View>
       <Presionable
         onPress={onPress}
         disabled={!interactivo}
@@ -168,7 +163,7 @@ export function RenglonCaza({ label, indice, estado, bajada, compacta, onPress, 
           </View>
         </Animated.View>
       </Presionable>
-    </Animated.View>
+    </View>
   );
 }
 
