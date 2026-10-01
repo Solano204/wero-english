@@ -312,13 +312,11 @@ export const useSessionStore = create<SessionState>((set, get) => {
     // dispara en el mismo tick que esta llamada, así que el sonido tiene
     // que salir aquí también, no después del viaje a SQLite de abajo,
     // o la tarjeta se ve festejando un instante antes de oírse.
-    if (correct) {
-      haptics.success();
-      void audio.playSuccess();
-    } else {
-      haptics.failure();
-      void audio.playFail();
-    }
+    // Tras el efecto, la frase en inglés y luego en español, aciertes o no: oírla completa en los dos idiomas
+    // es parte del repaso. «Siguiente» y «Saltar» la cortan (audio.stop() cambia el token de reproducción).
+    if (correct) haptics.success();
+    else haptics.failure();
+    void audio.playRoundResultBilingue(correct, card.entry.audio_en, card.entry.audio_es);
 
     await upsertCardState(usuarioId, res.state);
 
