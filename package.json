@@ -51,6 +51,7 @@
     "check:orden": "node scripts/check-orden.mjs",
     "check:voz": "node scripts/check-voz.mjs",
     "check:perf": "node scripts/check-perf.mjs",
+    "check:worklets": "node scripts/check-worklets.mjs",
     "presupuesto": "node scripts/presupuesto.mjs",
     "verificar": "node scripts/verificar.mjs"
   },

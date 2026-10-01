@@ -10,7 +10,7 @@ import { useMedidasDulces } from './useMedidasDulces';
 import { useRespuestaDulces } from './useRespuestaDulces';
 import { useVozMatch } from './useVozMatch';
 import { useNivel } from '@/features/juegos/comun/useNivel';
-import { clone, createBoard, findMatches, hayMovimiento, rebarajar, swap, type Board } from '@/domain/match3';
+import { clone, createBoard, hayMovimiento, intercambioValido, rebarajar, sonVecinas, swap, type Board } from '@/domain/match3';
 import { resolverPorPasos, type Paso } from '@/domain/match3Pasos';
 import { shuffle } from '@/domain/arreglos';
 import { getRandomEntries } from '@/data/repos/frases';
@@ -243,18 +243,10 @@ export function usePartidaDulces() {
   };
 
   /*
-   * Intercambio libre, y libre de verdad.
-   *
-   * Antes la ficha solo se movía si el movimiento armaba línea, y
-   * solo entre vecinas. Eso convertía el juego en un buscaminas: la
-   * app ya sabía la respuesta y solo te dejaba acertar.
-   *
-   * Ahora se puede cambiar CUALQUIER par de fichas, vecinas o no, y
-   * el cambio se queda aunque no arme nada. Lo que hace que siga
-   * siendo un juego y no un lienzo es el presupuesto de jugadas:
-   * cada intercambio cuesta una, armes o no. Así el jugador decide
-   * si explora o si va al grano, que es justo la decisión
-   * interesante.
+   * Tres en línea clásico: solo se intercambian dos piezas vecinas, y solo si el cambio arma al menos una línea.
+   * Un cambio que no arma nada no se hace: las dos piezas se sacuden y la jugada NO se cobra (cobrar por un
+   * movimiento imposible es la forma más rápida de que alguien cierre el juego). Antes cualquier par se podía
+   * cambiar aunque no armara nada, y el tablero parecía no tener reglas.
    *
    * La lógica se decide aquí y de golpe (mismo azar, mismo orden); lo que
    * cambia es que el tablero la ANIMA paso a paso y las metas se llenan
@@ -263,23 +255,19 @@ export function usePartidaDulces() {
    */
   const intercambiar = (a: number, c: number) => {
     if (!board) return;
-    const nuevo = clone(board);
-    swap(nuevo, a, c);
-
-    const arma = findMatches(nuevo).length > 0;
-    if (arma) setHuboLinea(true);
     setElegida(null);
-    setJugadas((j) => j - 1);
 
-    if (!arma) {
-      // El cambio se queda. Un golpecito seco: no pasó nada malo,
-      // simplemente no armó.
-      haptics.tapLight();
-      void audio.playTap();
-      setBoard(nuevo);
-      animar({ a, c, pasos: [], rebarajado: null, final: nuevo.cells });
+    if (!intercambioValido(board, a, c)) {
+      haptics.failure();
+      void audio.playFail();
+      tableroRef.current?.rechazar(a, c);
       return;
     }
+
+    const nuevo = clone(board);
+    swap(nuevo, a, c);
+    setHuboLinea(true);
+    setJugadas((j) => j - 1);
 
     const res = resolverPorPasos(nuevo, COLORES);
 
@@ -339,6 +327,13 @@ export function usePartidaDulces() {
     }
     if (elegida === i) {
       setElegida(null);
+      return;
+    }
+    // Tocar una que no es vecina cambia la elección: solo se intercambian vecinas.
+    if (!sonVecinas(board, elegida, i)) {
+      haptics.tapLight();
+      void audio.playTap();
+      setElegida(i);
       return;
     }
     intercambiar(elegida, i);
