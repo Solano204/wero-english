@@ -449,4 +449,261 @@ prueba('la dispersión de los trozos es la misma cada vez y no gasta Math.random
   assert.equal(T.TROZOS_RETRASO_MS, 60);
 });
 
+
+// ── el modelo como única fuente de verdad: el reducer de domain/match3Partida.ts ─────────────────────
+const MP = await importar('src/domain/match3Partida.ts');
+const VT = await importar('src/features/juegos/dulces/logic/vistaTablero.ts');
+
+const tableroDe = (filas) => ({ cols: filas[0].length, rows: filas.length, cells: filas.flat() });
+const armar = (filas, colores = 4, jugadas = 20) =>
+  MP.tableroReducer(MP.TABLERO_VACIO, { tipo: 'armar', board: tableroDe(filas), colores, jugadas });
+const intercambiar = (s, a, c, sem = 1) => MP.tableroReducer(s, { tipo: 'intercambiar', a, c, semilla: sem });
+const idx = (cols, f, c) => f * cols + c;
+
+const FH = [
+  [1, 2, 1, 2, 1],
+  [2, 1, 2, 1, 2],
+  [3, 0, 3, 0, 0],
+  [1, 2, 1, 2, 1],
+  [2, 1, 2, 1, 2],
+];
+const trasponer = (m) => m[0].map((_, c) => m.map((fila) => fila[c]));
+const FL = [
+  [1, 2, 1, 2, 1],
+  [0, 1, 2, 1, 2],
+  [3, 0, 0, 3, 1],
+  [0, 2, 1, 2, 3],
+  [0, 3, 2, 1, 2],
+];
+const FT = [
+  [1, 2, 1, 2, 1],
+  [2, 0, 2, 1, 2],
+  [0, 3, 0, 3, 1],
+  [1, 0, 2, 1, 3],
+  [2, 0, 1, 2, 1],
+];
+const sinLineas = (filas) => assert.equal(M3.findMatches(tableroDe(filas)).length, 0, 'el tablero de la prueba no trae líneas hechas');
+const primeraLinea = (s) => [...s.evento.jugada.pasos[0].quitar].sort((x, y) => x - y);
+
+prueba('un intercambio que forma una línea horizontal la quita y gasta una jugada', () => {
+  sinLineas(FH);
+  const s = intercambiar(armar(FH), idx(5, 2, 1), idx(5, 2, 2));
+  assert.equal(s.evento.tipo, 'jugada');
+  assert.deepEqual(primeraLinea(s), [12, 13, 14]);
+  assert.equal(s.jugadas, 19);
+  assert.ok(s.ocupado, 'queda ocupado hasta que la vista termine');
+});
+
+prueba('un intercambio que forma una línea vertical', () => {
+  const V = trasponer(FH);
+  sinLineas(V);
+  const s = intercambiar(armar(V), idx(5, 1, 2), idx(5, 2, 2));
+  assert.equal(s.evento.tipo, 'jugada');
+  assert.deepEqual(primeraLinea(s), [12, 17, 22]);
+});
+
+prueba('un intercambio que forma una L quita las cinco piezas de una vez', () => {
+  sinLineas(FL);
+  const s = intercambiar(armar(FL), idx(5, 1, 0), idx(5, 2, 0));
+  assert.equal(s.evento.tipo, 'jugada');
+  assert.deepEqual(primeraLinea(s), [10, 11, 12, 15, 20]);
+});
+
+prueba('un intercambio que forma una T quita las cinco piezas de una vez', () => {
+  sinLineas(FT);
+  const s = intercambiar(armar(FT), idx(5, 1, 1), idx(5, 2, 1));
+  assert.equal(s.evento.tipo, 'jugada');
+  assert.deepEqual(primeraLinea(s), [10, 11, 12, 16, 21]);
+});
+
+prueba('un intercambio que no forma línea NO cambia el modelo ni gasta jugada', () => {
+  const antes = armar(FH);
+  const s = intercambiar(antes, 0, 1);
+  assert.equal(s.evento.tipo, 'rechazo');
+  assert.equal(s.evento.motivo, 'sin-linea');
+  assert.deepEqual(s.board.cells, antes.board.cells);
+  assert.deepEqual(s.ids, antes.ids);
+  assert.equal(s.jugadas, antes.jugadas);
+  assert.equal(s.ocupado, false);
+});
+
+prueba('solo se intercambia con una vecina directa: ni diagonal, ni a distancia, ni de una orilla a la siguiente fila', () => {
+  const antes = armar(FH);
+  for (const [a, c] of [[0, 6], [0, 2], [0, 10], [4, 5], [12, 12], [3, 9]]) {
+    const s = intercambiar(antes, a, c);
+    assert.equal(s.evento?.tipo, 'rechazo', `${a}-${c}`);
+    assert.equal(s.evento.motivo, 'no-vecinas', `${a}-${c}`);
+    assert.deepEqual(s.board.cells, antes.board.cells);
+    assert.equal(s.jugadas, antes.jugadas);
+  }
+  for (const [a, c] of [[-1, 0], [0, 25], [0.5, 1]]) assert.equal(intercambiar(antes, a, c).evento.motivo, 'fuera', `${a}-${c}`);
+});
+
+prueba('con una jugada dibujándose, sin jugadas o sin tablero no se acepta nada', () => {
+  const ocupado = intercambiar(armar(FH), idx(5, 2, 1), idx(5, 2, 2));
+  assert.equal(intercambiar(ocupado, idx(5, 2, 1), idx(5, 2, 2)), ocupado, 'ocupado: ni se mira');
+  const libre = MP.tableroReducer(ocupado, { tipo: 'terminar' });
+  assert.equal(libre.ocupado, false);
+  assert.equal(MP.tableroReducer(libre, { tipo: 'terminar' }), libre, 'terminar de más no hace nada');
+  assert.equal(intercambiar(armar(FH, 4, 0), idx(5, 2, 1), idx(5, 2, 2)).evento, null, 'sin jugadas');
+  assert.equal(intercambiar(MP.TABLERO_VACIO, 0, 1), MP.TABLERO_VACIO, 'sin tablero');
+});
+
+prueba('el reducer es puro: la misma acción sobre el mismo estado da lo mismo y no toca el estado de antes', () => {
+  const antes = armar(FH);
+  const copia = JSON.stringify(antes);
+  const x = intercambiar(antes, idx(5, 2, 1), idx(5, 2, 2), 77);
+  const y = intercambiar(antes, idx(5, 2, 1), idx(5, 2, 2), 77);
+  assert.equal(JSON.stringify(x), JSON.stringify(y));
+  assert.equal(JSON.stringify(antes), copia, 'el estado de antes no se mutó');
+});
+
+/** Todos los intercambios de vecinas que arman línea en un tablero. */
+function movimientosValidos(board) {
+  const lista = [];
+  for (let f = 0; f < board.rows; f++) {
+    for (let c = 0; c < board.cols; c++) {
+      const i = f * board.cols + c;
+      if (c + 1 < board.cols && M3.intercambioValido(board, i, i + 1)) lista.push([i, i + 1]);
+      if (f + 1 < board.rows && M3.intercambioValido(board, i, i + board.cols)) lista.push([i, i + board.cols]);
+    }
+  }
+  return lista;
+}
+
+/** Lo que la vista dibuja en reposo, reproduciendo una jugada con las funciones puras de vistaTablero. */
+function dibujar(ps, antes, j, cols, rows, registro) {
+  let ids = antes.ids;
+  let nonce = 0;
+  ps = VT.piezasTrasIntercambio(ps, j.a, j.c, ids, cols, ++nonce, false);
+  ids = j.idsIntercambio;
+  j.pasos.forEach((p, k) => {
+    ps = VT.piezasMarcarExplota(ps, p.quitar.map((i) => ids[i]));
+    ps = VT.piezasTrasPaso(ps, p, j.idsPasos[k], cols, ++nonce);
+    ids = j.idsPasos[k];
+    registro(`paso ${k + 1}`, VT.invariantesVista(ps, p.tablero, ids, cols, rows));
+  });
+  if (j.rebarajado) {
+    ps = VT.piezasTrasRebaraje(ps, j.rebarajado, j.idsRebaraje, cols, ++nonce);
+    registro('rebarajado', VT.invariantesVista(ps, j.rebarajado, j.idsRebaraje, cols, rows));
+  }
+  return ps;
+}
+
+prueba('simulación: 1000 movimientos al azar (válidos e inválidos) con el reducer, sin interfaz', () => {
+  const azar = semilla(2026);
+  let s = MP.tableroReducer(MP.TABLERO_VACIO, { tipo: 'armar', board: M3.createBoard(7, 8, 5, azar), colores: 5, jugadas: 22 });
+  let ps = VT.vistaDesdeModelo(s.board.cells, s.ids, 7);
+  const colorDeId = new Map(s.ids.map((id, i) => [id, s.board.cells[i]]));
+  const cuenta = { validos: 0, rechazados: 0, cascadas3: 0, rebarajes: 0 };
+
+  for (let n = 0; n < 1000; n++) {
+    if (s.jugadas <= 0) {
+      s = MP.tableroReducer(s, { tipo: 'armar', board: M3.createBoard(7, 8, 5, azar), colores: 5, jugadas: 22 });
+      ps = VT.vistaDesdeModelo(s.board.cells, s.ids, 7);
+      colorDeId.clear();
+      s.ids.forEach((id, i) => colorDeId.set(id, s.board.cells[i]));
+    }
+    const total = s.board.cells.length;
+    const tipo = azar();
+    let a;
+    let c;
+    if (tipo < 0.4) {
+      const lista = movimientosValidos(s.board);
+      [a, c] = lista.length ? lista[Math.floor(azar() * lista.length)] : [0, 1];
+    } else if (tipo < 0.8) {
+      a = Math.floor(azar() * total);
+      c = azar() < 0.5 ? a + 1 : a + s.board.cols;
+    } else {
+      a = Math.floor(azar() * total);
+      c = Math.floor(azar() * total);
+    }
+    const antes = s;
+    s = MP.tableroReducer(s, { tipo: 'intercambiar', a, c, semilla: Math.floor(azar() * 2 ** 32) });
+
+    if (s.evento !== antes.evento && s.evento?.tipo === 'jugada') {
+      const j = s.evento.jugada;
+      cuenta.validos++;
+      assert.ok(j.pasos.length >= 1, `movimiento ${n}: una jugada válida siempre arma al menos una línea`);
+      assert.equal(s.jugadas, antes.jugadas - 1, `movimiento ${n}: se cobra una jugada`);
+      if (j.pasos.length >= 3) cuenta.cascadas3++;
+      if (j.rebarajado) cuenta.rebarajes++;
+      ps = dibujar(ps, antes, j, 7, 8, (cuando, fallas) =>
+        assert.deepEqual(fallas, [], `movimiento ${n}, ${cuando}: la vista no coincide con el modelo`)
+      );
+      s = MP.tableroReducer(s, { tipo: 'terminar' });
+    } else {
+      if (s.evento?.tipo === 'rechazo' && s.evento !== antes.evento) cuenta.rechazados++;
+      assert.deepEqual(s.board.cells, antes.board.cells, `movimiento ${n}: un rechazo no cambia el tablero`);
+      assert.deepEqual(s.ids, antes.ids, `movimiento ${n}: un rechazo no cambia los ids`);
+      assert.equal(s.jugadas, antes.jugadas, `movimiento ${n}: un rechazo no gasta jugada`);
+    }
+
+    // En reposo: tablero lleno, sin líneas hechas, con al menos un movimiento posible, ids únicos y colores estables.
+    assert.ok(s.board.cells.every((v) => v >= 0 && v < 5), `movimiento ${n}: el tablero está lleno`);
+    assert.equal(M3.findMatches(s.board).length, 0, `movimiento ${n}: no quedan líneas hechas`);
+    assert.ok(M3.hayMovimiento(s.board), `movimiento ${n}: queda algún movimiento`);
+    assert.equal(new Set(s.ids).size, total, `movimiento ${n}: ids únicos`);
+    s.ids.forEach((id, i) => {
+      const antesColor = colorDeId.get(id);
+      if (antesColor !== undefined) assert.equal(antesColor, s.board.cells[i], `movimiento ${n}: la pieza ${id} cambió de color`);
+      colorDeId.set(id, s.board.cells[i]);
+    });
+    assert.deepEqual(VT.invariantesVista(ps, s.board.cells, s.ids, 7, 8), [], `movimiento ${n}: vista en reposo`);
+  }
+  assert.ok(cuenta.validos > 300 && cuenta.rechazados > 100, JSON.stringify(cuenta));
+  console.log(`      (1000 movimientos: ${cuenta.validos} válidos, ${cuenta.rechazados} rechazados, ${cuenta.cascadas3} con cascada x3 o más, ${cuenta.rebarajes} con rebarajado; vista = modelo en cada paso)`);
+});
+
+prueba('hay cascadas de tres pasos o más, y la vista las sigue sin huecos', () => {
+  const azar = semilla(5);
+  let visto = 0;
+  for (let t = 0; t < 400 && visto < 5; t++) {
+    const s0 = MP.tableroReducer(MP.TABLERO_VACIO, { tipo: 'armar', board: M3.createBoard(7, 8, 5, azar), colores: 5, jugadas: 9 });
+    for (const [a, c] of movimientosValidos(s0.board)) {
+      const s = intercambiar(s0, a, c, t * 31 + a);
+      if (s.evento.jugada.pasos.length < 3) continue;
+      visto++;
+      const ps = dibujar(VT.vistaDesdeModelo(s0.board.cells, s0.ids, 7), s0, s.evento.jugada, 7, 8, (cuando, f) => assert.deepEqual(f, [], cuando));
+      assert.deepEqual(VT.invariantesVista(ps, s.board.cells, s.ids, 7, 8), []);
+      break;
+    }
+  }
+  assert.ok(visto >= 5, `solo ${visto} cascadas de tres pasos o más`);
+});
+
+prueba('rebarajar sin movimientos: el tablero que queda tiene movimiento, ninguna línea y las mismas piezas (mismos ids)', () => {
+  const azar = semilla(11);
+  let visto = 0;
+  for (let t = 0; t < 4000 && visto < 3; t++) {
+    const s0 = MP.tableroReducer(MP.TABLERO_VACIO, { tipo: 'armar', board: M3.createBoard(4, 4, 6, azar), colores: 6, jugadas: 9 });
+    for (const [a, c] of movimientosValidos(s0.board)) {
+      const s = intercambiar(s0, a, c, t + a);
+      const j = s.evento.jugada;
+      if (!j.rebarajado) continue;
+      visto++;
+      assert.equal(M3.findMatches(s.board).length, 0);
+      assert.ok(M3.hayMovimiento(s.board));
+      assert.deepEqual(s.board.cells, j.rebarajado);
+      assert.equal(new Set(s.ids).size, 16);
+      const ps = dibujar(VT.vistaDesdeModelo(s0.board.cells, s0.ids, 4), s0, j, 4, 4, (cuando, f) => assert.deepEqual(f, [], cuando));
+      assert.deepEqual(VT.invariantesVista(ps, s.board.cells, s.ids, 4, 4), []);
+      break;
+    }
+  }
+  assert.ok(visto >= 3, `solo ${visto} rebarajados en la búsqueda`);
+});
+
+prueba('invariantesVista detecta los huecos, las piezas de más y los colores o ids que no coinciden', () => {
+  const celdas = [0, 1, 1, 0];
+  const ids = [10, 11, 12, 13];
+  const bien = VT.vistaDesdeModelo(celdas, ids, 2);
+  assert.deepEqual(VT.invariantesVista(bien, celdas, ids, 2, 2), []);
+  assert.ok(VT.invariantesVista(bien.slice(1), celdas, ids, 2, 2).some((f) => f.includes('hueco')), 'hueco');
+  assert.ok(VT.invariantesVista([...bien, { ...bien[0], id: 99 }], celdas, ids, 2, 2).some((f) => f.includes('piezas visibles')), 'de más');
+  assert.ok(VT.invariantesVista(bien.map((p, i) => (i === 0 ? { ...p, color: 1 } : p)), celdas, ids, 2, 2).some((f) => f.includes('color')), 'color');
+  assert.ok(VT.invariantesVista(bien.map((p, i) => (i === 0 ? { ...p, id: 50 } : p)), celdas, ids, 2, 2).some((f) => f.includes('pieza 50')), 'id');
+  assert.ok(VT.invariantesVista(bien, [0, -1, 1, 0], ids, 2, 2).some((f) => f.includes('vacías')), 'modelo con celdas vacías');
+});
+
 console.log(`\ncheck:dulces ${total} pruebas ok`);
