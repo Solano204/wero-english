@@ -26,6 +26,8 @@ export interface Jugada {
 export interface TableroDulcesRef {
   /** Anima una jugada: el intercambio, cada paso de la cascada y, si hizo falta, el rebarajado. */
   jugar: (jugada: Jugada) => void;
+  /** El intercambio no arma línea: las dos piezas se sacuden y se quedan en su lugar. */
+  rechazar: (a: number, c: number) => void;
 }
 
 export interface PiezaVista {

@@ -324,7 +324,14 @@ export function TableroDulces({
     [dormir, nuevoId, reiniciar]
   );
 
-  useImperativeHandle(ref, () => ({ jugar }), [jugar]);
+  // Un intercambio que no arma línea: las dos piezas cabecean y se sacuden, sin moverse de su celda.
+  const rechazar = useCallback((a: number, c: number) => {
+    const ids = new Set([idsRef.current[a], idsRef.current[c]]);
+    const n = ++rechazoRef.current;
+    setPiezas((ps) => ps.map((p) => (ids.has(p.id) ? { ...p, rechazo: n } : p)));
+  }, []);
+
+  useImperativeHandle(ref, () => ({ jugar, rechazar }), [jugar, rechazar]);
 
   const alTocar = useCallback((celda: number) => datos.current.onTocar(celda), []);
   const alDeslizar = useCallback((origen: number, destino: number) => datos.current.onDeslizar(origen, destino), []);
