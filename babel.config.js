@@ -4,7 +4,27 @@ module.exports = function (api) {
   // api.env() ya registra el entorno en la caché de Babel.
   const produccion = api.env('production');
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      [
+        'babel-preset-expo',
+        {
+          'react-compiler': {
+            // El React Compiler «saca» a nivel de módulo (`function _temp…`) las funciones que no usan nada del
+            // componente. Si esa función era el callback de una animación anidada dentro de un worklet, deja de
+            // ser worklet y Reanimated la llama en el hilo de UI: «[Worklets] Tried to synchronously call a Remote
+            // Function» (el crash al entrar a Estudio por HOY y al volver de segundo plano). Sin outlining las
+            // funciones se quedan donde están y el plugin de worklets las convierte. check:worklets lo vigila.
+            //
+            // `environment` reemplaza entero al que arma babel-preset-expo (lo esparce después), así que se repite
+            // su única opción: reiniciar la caché al editar un archivo, solo en desarrollo.
+            environment: {
+              enableFunctionOutlining: false,
+              enableResetCacheOnSourceFileChanges: !produccion,
+            },
+          },
+        },
+      ],
+    ],
     plugins: [
       [
         'module-resolver',
