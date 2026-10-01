@@ -181,6 +181,15 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
   const [sacude, setSacude] = useState(false);
   // La capa del destello ámbar solo se monta si esta ficha llega a equivocarse: 26 SVG menos en reposo.
   const [conAviso, setConAviso] = useState(false);
+  // La ficha ya llegó a su ranura: se quita del panal. Lo decide React y no la animación, así una ficha usada
+  // nunca se queda en el panal aunque Reanimated pierda una actualización (en su lugar queda su contorno).
+  const [fuera, setFuera] = useState(false);
+  useEffect(() => {
+    if (!vuelo) return undefined;
+    const llega = reducido ? motionDuration.rapido : vuelo.retraso + DURACION_VUELO + motionDuration.rapido / 2;
+    const t = setTimeout(() => setFuera(true), llega);
+    return () => clearTimeout(t);
+  }, [vuelo, reducido]);
 
   // Al armarse el panal: cada ficha crece y se aclara con el escalón de su distancia al centro.
   useEffect(() => {
@@ -267,7 +276,6 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
     const p = avance.value;
     return {
       opacity: opacidad.value * (1 - caida.value),
-      zIndex: p > 0 ? 10 : 0,
       transform: [
         { translateX: vx.value * p },
         { translateY: vy.value * p - ARCO * Math.sin(Math.PI * p) + (reducido ? 0 : caida.value * motionColmena.caeDp) },
@@ -289,11 +297,14 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
 
   const paleta = vuelo?.tipo === 'ayuda' ? CARA_AYUDA : CARA;
   const enPanal = vuelo === null;
+  if (fuera) return null;
   return (
     <Animated.View
       pointerEvents={enPanal ? 'auto' : 'none'}
       importantForAccessibility={enPanal ? 'auto' : 'no-hide-descendants'}
-      style={[styles.abs, { left: x, top: y, width: ancho, height: alto }, lugar]}
+      // La que vuela pasa por encima de las demás. En el estilo de React y no en el animado: un zIndex animado
+      // va por el camino lento de Reanimated y un render de React lo pisaba junto con el resto del estilo.
+      style={[styles.abs, { left: x, top: y, width: ancho, height: alto, zIndex: enPanal ? 0 : 10 }, lugar]}
     >
       <Animated.View style={[styles.abs, styles.llena, cara]}>
         <Svg width={ancho} height={alto}>

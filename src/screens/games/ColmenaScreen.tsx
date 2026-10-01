@@ -55,6 +55,9 @@ const PANAL = { toqueMin: layout.tapMin, hueco: 5 };
 /** La pista enciende su ficha en `senal` este rato antes de que salga sola. */
 const PISTA_BRILLO_MS = motionDuration.base;
 
+/** Lo más que espera el último señuelo en caer (el `CAE_TOPE_MS` de Panal). */
+const CAE_TOPE_MS = 150;
+
 /** Cuánto se bloquea "Siguiente" tras tocarlo, para no procesar dos toques. */
 const AVANZAR_DEBOUNCE_MS = 400;
 
@@ -185,6 +188,19 @@ export function ColmenaScreen() {
   }, [colocadas]);
 
   const aterrizaMs = useMemo(() => retrasos.reduce((m, r) => Math.max(m, r ?? 0), 0), [retrasos]);
+
+  // Con la ronda resuelta, el panal se va (llega la última ficha y caen los señuelos) y recién entonces la frase
+  // toma su lugar. Nunca los dos a la vez: la frase encima de las fichas no se leía.
+  const [panalFuera, setPanalFuera] = useState(false);
+  useEffect(() => {
+    if (!resuelta) {
+      setPanalFuera(false);
+      return undefined;
+    }
+    const espera = aterrizaMs + (reducido ? motionDuration.rapido : motionColmena.cae + CAE_TOPE_MS);
+    const t = setTimeout(() => setPanalFuera(true), espera);
+    return () => clearTimeout(t);
+  }, [resuelta, aterrizaMs, reducido]);
 
   // El lector de pantalla oye la frase completa cuando se resuelve la ronda.
   useEffect(() => {
@@ -656,26 +672,28 @@ export function ColmenaScreen() {
             origenPanal.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y };
           }}
         >
-          <View style={styles.panalCapa}>
-            <Panal
-              key={idx}
-              letras={round.letras}
-              disposicion={disposicion}
-              colocadas={colocadas}
-              rechazo={rechazo}
-              resuelta={resuelta}
-              saliendo={saliendo}
-              onTocar={alTocarFicha}
-            />
-          </View>
-          {resuelta && analisis ? (
+          {panalFuera ? null : (
+            <View style={styles.panalCapa}>
+              <Panal
+                key={idx}
+                letras={round.letras}
+                disposicion={disposicion}
+                colocadas={colocadas}
+                rechazo={rechazo}
+                resuelta={resuelta}
+                saliendo={saliendo}
+                onTocar={alTocarFicha}
+              />
+            </View>
+          )}
+          {resuelta && panalFuera && analisis ? (
             <FraseResuelta
               key={idx}
               entry={round.entry}
               palabras={analisis.palabras}
               voz={voz}
               seAcabo={seAcabo}
-              retraso={aterrizaMs}
+              retraso={0}
               saliendo={saliendo}
               alto={disposicion.alto}
             />
