@@ -1,6 +1,11 @@
 /**
- * Revisa que todo import con alias @/ resuelva a un archivo real,
- * y que no haya ciclos entre módulos.
+ * Revisa los imports de src/:
+ *  1. todo import con alias @/ (o relativo) resuelve a un archivo real;
+ *  2. no hay ciclos entre módulos;
+ *  3. los íconos entran solo por shared/ui/Icon.tsx;
+ *  4. las reglas de capas de docs/ARQUITECTURA.md (qué puede importar a qué);
+ *  5. una feature no importa archivos internos de otra;
+ *  6. domain es puro: ni React, ni React Native, ni Expo, ni otro paquete.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +27,8 @@ function resolve(spec, from) {
   let base;
   if (spec.startsWith('@/')) base = path.join(SRC, spec.slice(2));
   else if (spec.startsWith('@data/')) base = path.join(ROOT, 'assets/data', spec.slice(6));
+  else if (spec.startsWith('@assets/')) base = path.join(ROOT, 'assets', spec.slice(8));
+  else if (spec.startsWith('@modules/')) base = path.join(ROOT, 'modules', spec.slice(9));
   else if (spec.startsWith('.')) base = path.resolve(path.dirname(from), spec);
   else return null; // paquete de node_modules
 
@@ -31,12 +38,44 @@ function resolve(spec, from) {
   return false;
 }
 
-const files = [...walk(SRC), path.join(ROOT, 'App.tsx')];
+/** La capa de un archivo de src/: la primera carpeta (app, features, estado, shared, data, services, domain…). */
+const capaDe = (f) => path.relative(SRC, f).split(path.sep)[0];
+
+/**
+ * Qué puede importar cada capa (además de sí misma). `theme`, `config` y `types` los puede importar
+ * cualquiera; `assets` es el mapa de medios (solo lo leen services y data).
+ */
+const PERMITIDO = {
+  app: ['features', 'estado', 'shared', 'data', 'services', 'domain', 'theme', 'config', 'types', 'assets'],
+  features: ['estado', 'shared', 'data', 'services', 'domain', 'theme', 'config', 'types'],
+  estado: ['data', 'services', 'domain', 'theme', 'config', 'types'],
+  shared: ['services', 'domain', 'theme', 'config', 'types'],
+  services: ['data', 'domain', 'theme', 'config', 'types', 'assets'],
+  data: ['domain', 'config', 'types'],
+  domain: ['types'],
+  theme: ['types'],
+  config: ['types'],
+  types: [],
+  assets: [],
+};
+
+/** La feature de un archivo: `features/juegos` cuenta como una sola (sus juegos comparten juegos/comun). */
+const featureDe = (f) => {
+  const partes = path.relative(SRC, f).split(path.sep);
+  return partes[0] === 'features' ? partes[1] : null;
+};
+
+/** Paquetes que sí puede usar domain (ninguno de React, React Native ni Expo). */
+const DOMAIN_PAQUETES = new Set([]);
+
+const files = walk(SRC);
 const graph = new Map();
 const broken = [];
-// Regla: los íconos entran solo por components/base/Icon.tsx.
-const PUERTA_ICONOS = path.join(SRC, 'components', 'base', 'Icon.tsx');
+const PUERTA_ICONOS = path.join(SRC, 'shared', 'ui', 'Icon.tsx');
 const iconosSueltos = [];
+const capas = [];
+const entreFeatures = [];
+const domainImpuro = [];
 
 for (const f of files) {
   const src = fs.readFileSync(f, 'utf8');
@@ -45,24 +84,43 @@ for (const f of files) {
   let m;
   while ((m = re.exec(src))) {
     const spec = m[1];
-    if (spec.startsWith('phosphor-react-native') && f !== PUERTA_ICONOS) {
-      iconosSueltos.push(`${path.relative(ROOT, f)} -> ${spec}`);
-    }
+    const rel = path.relative(ROOT, f);
+    if (spec.startsWith('phosphor-react-native') && f !== PUERTA_ICONOS) iconosSueltos.push(`${rel} -> ${spec}`);
     const target = resolve(spec, f);
-    // `import type` se borra al compilar: se revisa que resuelva, pero no cuenta para los ciclos.
+    // `import type` se borra al compilar: se revisa que resuelva y las capas, pero no cuenta para los ciclos.
     const inicio = src.lastIndexOf('\n', m.index) + 1;
     const soloTipos = /^\s*(?:import|export)\s+type\b/.test(src.slice(inicio, m.index));
-    if (target === false) broken.push(`${path.relative(ROOT, f)} -> ${spec}`);
-    else if (target && !soloTipos) deps.push(target);
+    if (target === false) {
+      broken.push(`${rel} -> ${spec}`);
+      continue;
+    }
+    if (target === null) {
+      if (capaDe(f) === 'domain' && !soloTipos && !DOMAIN_PAQUETES.has(spec)) domainImpuro.push(`${rel} -> ${spec}`);
+      continue;
+    }
+    if (target.startsWith(SRC + path.sep)) {
+      const de = capaDe(f);
+      const a = capaDe(target);
+      if (de !== a && !(PERMITIDO[de] ?? []).includes(a)) capas.push(`${rel} -> ${spec}  (${de} no puede importar ${a})`);
+      const fd = featureDe(f);
+      const fa = featureDe(target);
+      if (fd && fa && fd !== fa) entreFeatures.push(`${rel} -> ${spec}  (${fd} → ${fa})`);
+    }
+    if (!soloTipos) deps.push(target);
   }
   graph.set(f, deps);
 }
 
+const lista = (titulo, xs) => {
+  console.log(`${titulo}: ${xs.length}`);
+  for (const x of xs.slice(0, 40)) console.log(`  ${x}`);
+};
 console.log(`archivos analizados: ${files.length}`);
-console.log(`imports rotos: ${broken.length}`);
-for (const b of broken) console.log(`  ${b}`);
-console.log(`phosphor-react-native fuera de Icon.tsx: ${iconosSueltos.length}`);
-for (const i of iconosSueltos) console.log(`  ${i}`);
+lista('imports rotos', broken);
+lista('phosphor-react-native fuera de Icon.tsx', iconosSueltos);
+lista('imports que rompen las capas', capas);
+lista('imports entre features', entreFeatures);
+lista('paquetes en domain', domainImpuro);
 
 // Detección de ciclos con DFS
 const WHITE = 0, GRAY = 1, BLACK = 2;
@@ -90,4 +148,5 @@ for (const f of files) if (state.get(f) === WHITE) dfs(f, []);
 console.log(`ciclos: ${cycles.length}`);
 for (const c of cycles.slice(0, 10)) console.log('  ' + c.join(' -> '));
 
-process.exit(broken.length === 0 && cycles.length === 0 && iconosSueltos.length === 0 ? 0 : 1);
+const problemas = broken.length + cycles.length + iconosSueltos.length + capas.length + entreFeatures.length + domainImpuro.length;
+process.exit(problemas === 0 ? 0 : 1);

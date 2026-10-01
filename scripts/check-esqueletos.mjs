@@ -3,7 +3,7 @@
  *
  * Una pantalla "carga datos" si:
  *   1. usa useCarga(), o
- *   2. lee de la base por su cuenta: importa de '@/db/...' una función de
+ *   2. lee de la base por su cuenta: importa de '@/data/...' una función de
  *      lectura (get*, leer*, cargar*, buscar*, listar*, obtener*, contar*) y
  *      la llama dentro de un efecto o con await/then.
  *
@@ -15,22 +15,15 @@
  * bajo el splash) se declara en SIN_PANTALLA_DE_CARGA con la razón, en vez de
  * que el script mienta.
  *
+ * Cada pantalla se lee junto con lo que es suyo (sus hooks y su logic, ver lib/pantallas.mjs): la carga
+ * puede vivir en el hook de la feature.
+ *
  * Análisis estático de texto, igual que check-imports.mjs: no ejecuta nada.
  */
-import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla, pantallas } from './lib/pantallas.mjs';
 
 const ROOT = process.cwd();
-const SRC = path.join(ROOT, 'src', 'screens');
-
-function walk(dir, out = []) {
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) walk(p, out);
-    else if (/\.tsx$/.test(e.name)) out.push(p);
-  }
-  return out;
-}
 
 const MARCAS_ESQUELETO = [
   '<Carga', // el componente base ya trae esqueleto y fundido cruzado
@@ -42,14 +35,14 @@ const MARCAS_ESQUELETO = [
 
 /** Leen de la base sin que nadie las vea esperar. Cada una con su razón. */
 const SIN_PANTALLA_DE_CARGA = new Map([
-  ['src/screens/entry/BootScreen.tsx', 'corre bajo el splash: App.tsx no lo esconde hasta que el arranque termina'],
+  ['src/app/arranque/BootScreen.tsx', 'corre bajo el splash: src/app/App.tsx no lo esconde hasta que el arranque termina'],
 ]);
 
 const LECTURA = /^(get|leer|cargar|buscar|listar|obtener|contar)[A-Z]/;
 
 function leeDeLaBase(src) {
   const nombres = [];
-  const re = /import\s*\{([^}]*)\}\s*from\s*['"]@\/db\/[^'"]+['"]/g;
+  const re = /import\s*\{([^}]*)\}\s*from\s*['"]@\/(?:db|data)\/[^'"]+['"]/g;
   let m;
   while ((m = re.exec(src))) {
     for (const parte of m[1].split(',')) {
@@ -63,14 +56,14 @@ function leeDeLaBase(src) {
   return nombres.filter((n) => new RegExp(`\\b${n}\\s*\\(`).test(src));
 }
 
-const archivos = walk(SRC);
+const archivos = pantallas(ROOT);
 const faltantes = [];
 let conCarga = 0;
 let porSuCuenta = 0;
 
 for (const f of archivos) {
   const rel = path.relative(ROOT, f).split(path.sep).join('/');
-  const src = fs.readFileSync(f, 'utf8');
+  const src = fuenteDePantalla(f, ROOT);
   const usaCarga = /\buseCarga\s*\(/.test(src);
   const lecturas = leeDeLaBase(src);
   if (!usaCarga && lecturas.length === 0) continue; // no carga datos: no aplica

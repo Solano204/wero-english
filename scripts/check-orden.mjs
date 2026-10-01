@@ -1,6 +1,6 @@
 /**
  * Prueba que cada usuario recibe sus frases NUEVAS en un orden propio: al azar, distinto al de
- * cualquier otro y estable para él. Corre la consulta real (src/db/cola.ts, consultaNuevas) sobre
+ * cualquier otro y estable para él. Corre la consulta real (src/data/repos/cola.ts, consultaNuevas) sobre
  * SQLite (sql.js) con el catálogo real (assets/data/catalogo.json) y 5 usuarios con semillas al
  * azar, como las que da expo-crypto en el teléfono.
  *
@@ -47,12 +47,12 @@ function cargar(archivo) {
   return url;
 }
 const importar = (rel) => import(cargar(path.join(ROOT, rel)));
-const sql = await importar('src/db/cola.ts');
+const sql = await importar('src/data/repos/cola.ts');
 const plan = await importar('src/domain/cola.ts');
 
 // ── base con el catálogo real ────────────────────────────────────────────
 const SQL = await initSqlJs();
-const esquema = fs.readFileSync(path.join(ROOT, 'src/db/schema.ts'), 'utf8');
+const esquema = fs.readFileSync(path.join(ROOT, 'src/data/esquema.ts'), 'utf8');
 const tarjeta = esquema.match(/CREATE TABLE IF NOT EXISTS tarjeta \([\s\S]*?\n    \);/)[0];
 const catalogo = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/data/catalogo.json'), 'utf8'));
 const entradas = catalogo.entries ?? catalogo;

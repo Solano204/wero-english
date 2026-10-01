@@ -572,9 +572,10 @@ function generaPaquete(id, gen) {
       archivos[`success_h${escalon}_v${v + 1}.wav`] = gen.success(RAICES[id], escalon, v);
     }
   }
-  for (let v = 0; v < 3; v++) archivos[`fail_${v + 1}.wav`] = gen.fail(v);
+  // fail y match no cambian con la variante: un solo archivo (paquetesSfx lo usa en los tres huecos).
+  archivos['fail_1.wav'] = gen.fail(0);
   for (let v = 0; v < 3; v++) archivos[`tap_${v + 1}.wav`] = gen.tap(v);
-  for (let v = 0; v < 3; v++) archivos[`match_${v + 1}.wav`] = gen.match(v);
+  archivos['match_1.wav'] = gen.match(0);
   archivos['combo.wav'] = gen.combo();
   archivos['caida_pieza.wav'] = gen.caidaPieza();
   archivos['pista.wav'] = gen.pista();

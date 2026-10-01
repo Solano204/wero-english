@@ -1,4 +1,4 @@
-import { shuffle } from '@/utils/array';
+import { shuffle } from '@/domain/arreglos';
 import type { ColmenaRound, Entry } from '@/types';
 
 /**

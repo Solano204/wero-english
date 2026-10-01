@@ -1,4 +1,4 @@
-import type { ContentFilter } from '@/db/cola';
+import type { ContentFilter } from '@/types';
 import type { Nivel } from '@/types';
 
 /**

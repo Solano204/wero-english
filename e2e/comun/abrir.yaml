@@ -1,0 +1,17 @@
+# Abre un modo de Practicar: GRUPO es el grupo plegable («Juegos», «Oír y hablar», «Leer y repasar») y MODO su título.
+appId: app.wero.mobile
+---
+- scrollUntilVisible:
+    element: ${GRUPO}
+    direction: DOWN
+- runFlow:
+    when:
+      notVisible: ${MODO}
+    commands:
+      - tapOn: ${GRUPO}
+- scrollUntilVisible:
+    element: ${MODO}
+    direction: DOWN
+- tapOn: ${MODO}
+- waitForAnimationToEnd:
+    timeout: 5000

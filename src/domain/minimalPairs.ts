@@ -1,5 +1,5 @@
-import { shuffle } from '@/utils/array';
-import { levenshtein, normalizeAnswer } from '@/utils/text';
+import { shuffle } from '@/domain/arreglos';
+import { levenshtein, normalizeAnswer } from '@/domain/texto';
 import type { AlternativaVoz, Fonema, HablaVeredicto, ParMinimoRound } from '@/types';
 
 /**

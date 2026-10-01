@@ -1,0 +1,35 @@
+# Una ronda de humo de un juego (JUEGO = su título en Practicar): entra al nivel que toca, toca el tablero unos
+# segundos (la ronda avanza o se acaba por tiempo) y regresa. Lo que se revisa es que no se congele ni se cierre.
+appId: app.wero.mobile
+---
+- runFlow:
+    file: abrir.yaml
+    env:
+      GRUPO: "Juegos"
+      MODO: ${JUEGO}
+- extendedWaitUntil:
+    visible: "Jugar nivel.*"
+    timeout: 15000
+- tapOn: "Jugar nivel.*"
+- waitForAnimationToEnd:
+    timeout: 5000
+- repeat:
+    times: 12
+    commands:
+      - tapOn:
+          point: "30%,55%"
+      - tapOn:
+          point: "70%,65%"
+      - runFlow:
+          when:
+            visible:
+              id: "opcion-0"
+          commands:
+            - tapOn:
+                id: "opcion-0"
+      - runFlow:
+          when:
+            visible: "Siguiente"
+          commands:
+            - tapOn: "Siguiente"
+- runFlow: volver.yaml

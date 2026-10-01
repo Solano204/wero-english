@@ -5,20 +5,10 @@
  *
  * Análisis estático de texto, igual que check-imports.mjs: no ejecuta nada.
  */
-import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla, pantallas } from './lib/pantallas.mjs';
 
 const ROOT = process.cwd();
-const SCREENS = path.join(ROOT, 'src', 'screens');
-
-function walk(dir, out = []) {
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) walk(p, out);
-    else if (/\.tsx?$/.test(e.name)) out.push(p);
-  }
-  return out;
-}
 
 // Pantallas donde reproducir sonido está intencionalmente fuera de este
 // corte (ninguna hoy: se deja el arreglo por si hace falta una excepción
@@ -31,9 +21,10 @@ const USA_HOOK = /\buseCortarAudioAlSalir\s*\(/;
 const sinCorte = [];
 let pantallasConAudio = 0;
 
-for (const f of walk(SCREENS)) {
+// Cada pantalla con lo que es suyo (sus hooks y su logic): el corte puede vivir en el hook de la partida.
+for (const f of pantallas(ROOT)) {
   const rel = path.relative(ROOT, f);
-  const src = fs.readFileSync(f, 'utf8');
+  const src = fuenteDePantalla(f, ROOT);
   const reproduce = REPRODUCE.some((re) => re.test(src));
   if (!reproduce) continue;
   pantallasConAudio++;

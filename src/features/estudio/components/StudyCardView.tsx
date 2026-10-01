@@ -1,0 +1,383 @@
+import React, { useEffect, useRef, useState, useEffectEvent } from 'react';
+import { Keyboard, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { BloqueVoz } from './BloqueVoz';
+import { FraseHueco } from './FraseHueco';
+import { MarcoImagen } from '@/shared/ui/MarcoImagen';
+import { PrecargaImagen } from '@/shared/ui/PrecargaImagen';
+import { OptionButton, type OptionState } from '@/shared/ui/OptionButton';
+import { PalabraVoladora } from './PalabraVoladora';
+import { TileBuilder } from './TileBuilder';
+import { ZonaEscribir } from './ZonaEscribir';
+import { RiskBadge } from '@/shared/ui';
+import { answerMode, imagenRevelaSignificado, instructionFor, promptFor } from '@/domain/exercise';
+import { isCloseEnough } from '@/domain/texto';
+import { color, font, layout, motionDuration, space, aparecer, desaparecer, tarjetaEntra, tarjetaSale, type WorldId } from '@/theme';
+import type { RellenoHueco } from './FraseHueco';
+import { useMusicaPantalla } from '@/estado/useMusicaPantalla';
+import * as audio from '@/services/audio';
+import type { StudyCard } from '@/types';
+import { useEfectoResultado } from '@/shared/hooks/useEfectoResultado';
+import { useDesfaseVentana, type Rect } from '@/shared/ui/fx/useDesfaseVentana';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+
+/**
+ * La tarjeta que se va sale hacia la izquierda con un fundido (`base`) y la nueva
+ * entra desde la derecha (`lento`): una sola dirección, como pasar la página.
+ * Con movimiento reducido no se desliza nada: la nueva aparece con un fundido y
+ * la anterior se desvanece.
+ */
+const tarjetaEntraAnim = tarjetaEntra();
+const tarjetaSaleAnim = tarjetaSale();
+const tarjetaAparece = aparecer();
+const tarjetaSeVa = desaparecer(motionDuration.rapido);
+
+/**
+ * Por debajo de esta altura de ventana (un teléfono de 640 dp) todo se aprieta:
+ * huecos de 8 y opciones de 52. Por encima se queda holgado.
+ */
+const ALTURA_COMPACTA = 700;
+/** Tope del marco de imagen: no más del 22 % de la pantalla, para que las 4 opciones sigan cabiendo. */
+const TOPE_ALTO_IMAGEN = 0.22;
+
+interface Props {
+  card: StudyCard;
+  locked: boolean;
+  chosen: string | null;
+  autoAudio: boolean;
+  onAnswer: (correct: boolean, elapsedMs: number, usedHint: boolean) => void;
+  onChoose: (value: string) => void;
+  /** Desde dónde (ventana, px) salen los cubitos si aciertas tocando una opción. */
+  onOrigenAcierto?: (punto: { x: number; y: number }) => void;
+  /** La imagen de la tarjeta que probablemente sigue: se decodifica por adelantado, sin verse. */
+  siguienteImagen?: string | null;
+}
+
+/**
+ * La tarjeta de estudio. Renderiza los seis tipos de ejercicio.
+ *
+ * El cronómetro empieza cuando la tarjeta aparece y se lee al responder:
+ * de ahí sale la calificación 4 contra 3 en SM-2. Se guarda en un ref
+ * porque un state provocaría un render por segundo sin necesidad.
+ */
+export function StudyCardView({
+  card,
+  locked,
+  chosen,
+  autoAudio,
+  onAnswer,
+  onChoose,
+  onOrigenAcierto,
+  siguienteImagen = null,
+}: Props) {
+  const startedAt = useRef(Date.now());
+  const ventana = useWindowDimensions();
+  const compacto = ventana.height < ALTURA_COMPACTA;
+  // 16:9 al ancho del contenido, sin pasar del 22 % de la pantalla: si el tope manda,
+  // se angosta (centrada) en vez de recortar la proporción.
+  const anchoContenido = ventana.width - layout.screenPad * 2;
+  const altoImagen = Math.min(anchoContenido * (9 / 16), ventana.height * TOPE_ALTO_IMAGEN);
+  const anchoImagen = altoImagen * (16 / 9);
+  const [typed, setTyped] = useState('');
+  // Bloquea el paso mientras suena el audio. En Escuchar y Dictado el
+  // audio ES el ejercicio: dejar avanzar a media reproducción es dejar
+  // responder sin haber oído la pregunta.
+  const [sonando, setSonando] = useState(false);
+  const [usedHint, setUsedHint] = useState(false);
+
+  const prompt = promptFor(card);
+  const modo = answerMode(card.kind);
+  const isTyping = modo === 'type';
+
+  // Con opciones cada `OptionButton` hace su efecto; al armar o escribir la
+  // respuesta, la pieza es todo el bloque.
+  const { estilo: estiloBloque, disparar } = useEfectoResultado();
+  // Igual que la calificación: las opciones por igualdad; las fichas y el texto
+  // escrito con la tolerancia de `isCloseEnough` (un typo aceptado es un acierto).
+  const acierto =
+    chosen !== null && (modo === 'choice' ? chosen === card.answer : isCloseEnough(chosen, card.answer));
+
+  // Completar: la palabra tocada vuela de su opción al hueco. El vuelo es decoración; el
+  // hueco se llena al llegar, o al calificar si no hubo vuelo (movimiento reducido o sin medir).
+  const reducido = useMovimientoReducido();
+  const esCompletar = card.kind === 'completar';
+  const huecoRef = useRef<View>(null);
+  const { alAcomodar: acomodarCapa, desfase, ref: capaRef } = useDesfaseVentana();
+  const [vuelo, setVuelo] = useState<{ palabra: string; de: Rect; a: Rect } | null>(null);
+  const [aterrizo, setAterrizo] = useState(false);
+  const anchoHueco = Math.min(220, Math.max(72, ...card.options.map((o) => o.length * font.size.xxl * 0.55)));
+  const relleno: RellenoHueco | null =
+    esCompletar && aterrizo && chosen !== null ? { palabra: chosen, estado: acierto ? 'ok' : 'mal' } : null;
+  useEffect(() => {
+    if (!esCompletar || !locked || aterrizo) return;
+    if (!reducido && vuelo) return;
+    const t = setTimeout(() => setAterrizo(true), reducido ? 0 : motionDuration.lento);
+    return () => clearTimeout(t);
+  }, [esCompletar, locked, aterrizo, reducido, vuelo]);
+  const efectoLocked = useEffectEvent(() => {
+    // El teclado de Dictado y Escribir se va al calificar: la hoja del veredicto sube en su lugar.
+    if (locked) Keyboard.dismiss();
+    if (!locked || modo === 'choice') return;
+    disparar(acierto ? 'acierto' : 'fallo');
+    // Solo al bloquearse la tarjeta.
+  });
+  useEffect(() => efectoLocked(), [locked]);
+
+  // Id estable de la tarjeta. `card` es un objeto nuevo en cada
+  // respuesta (el store lo reconstruye), así que depender de él directo
+  // repetiría el audio al mostrar el feedback sin que la tarjeta haya
+  // cambiado de verdad.
+  const cardId = `${card.entry.id}:${card.kind}`;
+
+  const efectoCardId = useEffectEvent(() => {
+    // `typed` y `usedHint` ya arrancan vacíos: la tarjeta se vuelve a montar con cada una (key en StudyScreen).
+    startedAt.current = Date.now();
+
+    // En Escuchar y en Dictado el audio suena solo: el ejercicio es el
+    // audio, y obligar a un toque extra antes de empezar solo estorba.
+    const debeSonar =
+      card.kind === 'escuchar' ||
+      card.kind === 'dictado' ||
+      (autoAudio && Boolean(card.entry.audio_en) && card.kind === 'reconocer');
+
+    if (!debeSonar) return;
+
+    // Retraso corto y cancelable: si la tarjeta cambia antes de que se
+    // cumpla (otro salto rápido), el cleanup lo cancela y nunca llega a
+    // sonar. Sin esto, cada salto disparaba su propio audio.play() sin
+    // esperar a ver si el usuario ya iba de salida a la siguiente.
+    const t = setTimeout(() => {
+      void audio.play(card.entry.audio_en);
+    }, 150);
+
+    return () => clearTimeout(t);
+  });
+  useEffect(() => efectoCardId(), [cardId, autoAudio]);
+
+  // Escuchar y Dictado son ejercicios de oído puro: hasta la música de
+  // fondo suave estorba. Cada tarjeta es un montaje nuevo (StudyScreen le
+  // da key por card.kind), así que esto alcanza sin más lógica: se
+  // pausa al entrar a una de oído y se retoma sola al salir.
+  useMusicaPantalla(
+    card.kind === 'escuchar' || card.kind === 'dictado' ? 'silencio' : 'app'
+  );
+
+  const handleChoice = (value: string) => {
+    if (locked) return;
+    onChoose(value);
+    onAnswer(value === card.answer, Date.now() - startedAt.current, usedHint);
+  };
+
+  const handleSubmit = () => {
+    if (locked || typed.trim().length === 0) return;
+    onChoose(typed);
+    onAnswer(
+      isCloseEnough(typed, card.answer),
+      Date.now() - startedAt.current,
+      usedHint
+    );
+  };
+
+  /**
+   * Construir se califica con la misma tolerancia que Escribir. No hay
+   * razón para ser más estricto aquí: el usuario ya demostró que sabe
+   * el orden de las palabras, y marcarle mal un apóstrofo de una ficha
+   * que la app misma le dio sería un error de la app, no suyo.
+   */
+  const handleTiles = (armado: string) => {
+    if (locked) return;
+    onChoose(armado);
+    onAnswer(
+      isCloseEnough(armado, card.answer),
+      Date.now() - startedAt.current,
+      usedHint
+    );
+  };
+
+  /** La opción tocada dice dónde está: si es la correcta, de ahí salen los cubitos. */
+  const alMedirOpcion = (opt: string, r: Rect) => {
+    if (opt === card.answer) onOrigenAcierto?.({ x: r.x + r.width / 2, y: r.y + r.height / 2 });
+    if (esCompletar && !reducido) {
+      huecoRef.current?.measureInWindow((x, y, width, height) =>
+        setVuelo((v) => v ?? { palabra: opt, de: r, a: { x, y, width, height } })
+      );
+    }
+  };
+
+  const stateFor = (option: string): OptionState => {
+    if (!locked) return chosen === option ? 'chosen' : 'idle';
+    if (option === card.answer) return 'correct';
+    if (option === chosen) return 'wrong';
+    return 'dimmed';
+  };
+
+  return (
+    /*
+     * Estructura fija, pensada para el pulgar: la instrucción y la frase
+     * arriba (tercio superior) y lo que se toca abajo (mitad inferior).
+     *
+     * Nada scrollea si cabe. Antes toda la tarjeta era un scroll, y la
+     * cuarta opción quedaba fuera de pantalla en un teléfono chico. Ahora
+     * el bloque de la frase no encoge y solo la zona de abajo se acorta y
+     * scrollea si de verdad no cabe (con la acción principal fija fuera
+     * del scroll), así que las opciones siempre están donde el dedo llega.
+     */
+    <Animated.View
+      entering={reducido ? tarjetaAparece : tarjetaEntraAnim}
+      exiting={reducido ? tarjetaSeVa : tarjetaSaleAnim}
+      style={[styles.wrap, compacto && styles.wrapCompacto]}
+    >
+      <View style={styles.top}>
+        <Text style={styles.instruction} accessibilityRole="header">
+          {instructionFor(card.kind)}
+        </Text>
+        <RiskBadge vulgaridad={card.entry.vulgaridad} />
+      </View>
+
+      <View style={[styles.stage, compacto && styles.stageCompacto]}>
+        <MarcoImagen
+          path={card.entry.imagen}
+          tinte={color.world[card.entry.mundo as WorldId]}
+          mundo={card.entry.mundo}
+          ancho={anchoImagen}
+          alto={altoImagen}
+          desenfocada={!locked && imagenRevelaSignificado(card.kind)}
+          style={styles.marco}
+        />
+        {/* Dentro del marco la imagen mide 1 dp menos por lado (su borde): la precarga usa ese tamaño. */}
+        <PrecargaImagen path={siguienteImagen} ancho={anchoImagen - 2} alto={altoImagen - 2} />
+
+        {card.kind === 'escuchar' || card.kind === 'dictado' ? (
+          <BloqueVoz entry={card.entry} variante="oido" dictado={card.kind === 'dictado'} compacto={compacto} />
+        ) : card.kind === 'construir' ? (
+          <BloqueVoz entry={card.entry} variante="pista" pista={prompt} compacto={compacto} />
+        ) : card.kind === 'completar' ? (
+          <FraseHueco texto={prompt} relleno={relleno} huecoRef={huecoRef} anchoHueco={anchoHueco} />
+        ) : card.kind === 'escribir' ? (
+          <Text style={styles.spanishPrompt}>{prompt}</Text>
+        ) : (
+          <View style={[styles.reveal, compacto && styles.revealCompacto]}>
+            <BloqueVoz entry={card.entry} variante="frase" compacto={compacto} />
+          </View>
+        )}
+      </View>
+
+      {modo === 'tiles' ? (
+        <Animated.View style={[styles.zona, estiloBloque]}>
+          <TileBuilder
+            key={`tiles-${card.entry.id}-${card.state.repeticiones}`}
+            tiles={card.options}
+            locked={locked}
+            respuesta={card.answer}
+            compacto={compacto}
+            onSubmit={handleTiles}
+          />
+        </Animated.View>
+      ) : isTyping ? (
+        <ZonaEscribir
+          typed={typed}
+          setTyped={setTyped}
+          locked={locked}
+          acierto={acierto}
+          dictado={card.kind === 'dictado'}
+          usedHint={usedHint}
+          estiloBloque={estiloBloque}
+          onPista={() => {
+            setUsedHint(true);
+            setTyped(firstWords(card.answer));
+          }}
+          onRevisar={handleSubmit}
+        />
+      ) : (
+        <ScrollView
+          style={styles.zona}
+          contentContainerStyle={[styles.options, compacto && styles.optionsCompacto]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          overScrollMode="never"
+        >
+          {card.options.map((opt, i) => (
+            <OptionButton
+              key={`${card.entry.id}-${opt}`}
+              label={opt}
+              index={i}
+              state={stateFor(opt)}
+              disabled={locked}
+              compacta={compacto}
+              alMedir={(r) => alMedirOpcion(opt, r)}
+              vaciada={esCompletar && chosen === opt && vuelo !== null}
+              onPress={() => handleChoice(opt)}
+            />
+          ))}
+        </ScrollView>
+      )}
+
+      {esCompletar ? (
+        <View ref={capaRef} collapsable={false} onLayout={acomodarCapa} pointerEvents="none" style={StyleSheet.absoluteFill}>
+          {vuelo && !aterrizo ? (
+            <PalabraVoladora
+              palabra={vuelo.palabra}
+              de={vuelo.de}
+              a={vuelo.a}
+              desfase={desfase}
+              alTerminar={() => setAterrizo(true)}
+            />
+          ) : null}
+        </View>
+      ) : null}
+    </Animated.View>
+  );
+}
+
+/** Da las dos primeras palabras como pista, no la respuesta entera. */
+function firstWords(answer: string): string {
+  const parts = answer.split(' ');
+  return parts.slice(0, Math.min(2, parts.length - 1)).join(' ');
+}
+
+const styles = StyleSheet.create({
+  wrap: { flex: 1, gap: space.md },
+  wrapCompacto: { gap: space.sm },
+  // La instrucción nunca cede: ni encoge ni la tapa la frase cuando esta es alta (imagen, IPA y tres líneas).
+  top: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 26,
+    flexShrink: 0,
+    zIndex: 1,
+    gap: space.sm,
+  },
+  // `flexShrink`: con una frase vulgar la insignia comparte la fila y la instrucción empujaba fuera a la insignia.
+  instruction: {
+    flexShrink: 1,
+    fontSize: font.size.xs,
+    color: color.textFaint,
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    fontFamily: font.family.bodyStrong,
+  },
+  // La frase se ancla arriba y no encoge: si algo tiene que ceder, es la zona de abajo.
+  stage: {
+    flexGrow: 1,
+    flexShrink: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: space.lg,
+  },
+  stageCompacto: { paddingTop: space.xs },
+  marco: { marginBottom: space.md },
+  // Lo que se toca: no crece, y si no cabe es lo único que se acorta (y scrollea).
+  zona: { flexGrow: 0, flexShrink: 1, minHeight: 120 },
+  spanishPrompt: {
+    fontSize: font.size.xl,
+    color: color.text,
+    textAlign: 'center',
+    lineHeight: font.size.xl * 1.35,
+    fontFamily: font.family.body,
+  },
+  reveal: { alignItems: 'center', gap: space.md },
+  revealCompacto: { gap: space.sm },
+  options: { gap: space.md },
+  optionsCompacto: { gap: space.sm },
+});

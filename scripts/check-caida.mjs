@@ -17,7 +17,7 @@ const cargar = async (rel) => {
   const js = ts.transpileModule(fuente, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
-const M = await cargar('src/components/juegos/caida/medidas.ts');
+const M = await cargar('src/features/juegos/caida/logic/medidas.ts');
 const { distanciaCaida, avance, resplandor, largoEstela, chevronsPara, CHEVRONS, ESTELA_MIN, ESTELA_MAX, ALTO_FICHA, ALTO_PISO, MARGEN_ARRIBA, MARGEN_PISO, CAIDA_MINIMA, AVISO_EN, RESPLANDOR_DESDE } = M;
 
 let total = 0;

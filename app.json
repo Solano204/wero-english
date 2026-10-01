@@ -41,7 +41,69 @@
       ]
     },
     "plugins": [
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "ios": {
+            "fonts": [
+              "./assets/fonts/BricolageGrotesque-Bold.ttf",
+              "./assets/fonts/BricolageGrotesque-SemiBold.ttf",
+              "./assets/fonts/InstrumentSans-Regular.ttf",
+              "./assets/fonts/InstrumentSans-SemiBold.ttf",
+              "./assets/fonts/CharisSIL-Regular.ttf"
+            ]
+          },
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "BricolageGrotesque-Bold",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/BricolageGrotesque-Bold.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "BricolageGrotesque-SemiBold",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/BricolageGrotesque-SemiBold.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "InstrumentSans-Regular",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/InstrumentSans-Regular.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "InstrumentSans-SemiBold",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/InstrumentSans-SemiBold.ttf",
+                    "weight": 400
+                  }
+                ]
+              },
+              {
+                "fontFamily": "CharisSIL",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/CharisSIL-Regular.ttf",
+                    "weight": 400
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
       [
         "expo-notifications",
         {
@@ -71,7 +133,8 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": false
+      "typedRoutes": false,
+      "reactCompiler": true
     }
   }
 }

@@ -12,6 +12,8 @@
     "paths": {
       "@/*": ["src/*"],
       "@data/*": ["assets/data/*"],
+      "@assets/*": ["assets/*"],
+      "@modules/*": ["modules/*"],
       "phosphor-react-native/src/icons/*": ["node_modules/phosphor-react-native/lib/typescript/icons/*"]
     }
   },

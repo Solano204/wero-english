@@ -12,10 +12,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 import ts from 'typescript';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const leer = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+// Una pantalla se lee con lo que es suyo (su hook y su logic): la lógica de las pantallas delgadas vive ahí.
+const leer = (rel) =>
+  /\/screens\/\w+Screen\.tsx$/.test(rel) ? fuenteDePantalla(path.join(ROOT, rel), ROOT) : fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const existe = (rel) => fs.existsSync(path.join(ROOT, rel));
 const cargar = async (rel) => {
   const js = ts.transpileModule(leer(rel), {
@@ -103,11 +106,11 @@ await prueba('reinsertar no duplica, no se sale de la lista y quitar varias segu
 /* ---------- Mi mazo: lo que no se toca y lo que se puede revisar sin teléfono ---------- */
 
 await prueba('lo que no se toca: `toggleFavorite`, el orden de `getFavorites` y SM-2 quedan como estaban', () => {
-  const q = leer('src/db/queries.ts');
+  const q = leer('src/data/repos/tarjetas.ts') + leer('src/data/repos/frases.ts');
   assert.match(q, /DO UPDATE SET favorito = 1 - favorito;/, 'toggleFavorite sigue alternando');
   assert.match(q, /WHERE \$\{f\.sql\} AND t\.favorito = 1\s*ORDER BY t\.ultimo_repaso DESC NULLS LAST, e\.id ASC;/, 'el orden de siempre: aún no se guarda la fecha en que se guardó');
-  assert.ok(!/guardada_en|fecha_guardado/.test(leer('src/db/schema.ts')), 'no se agregó ninguna columna');
-  const mazoScreen = sinComentarios(leer('src/screens/utility/DeckScreen.tsx'));
+  assert.ok(!/guardada_en|fecha_guardado/.test(leer('src/data/esquema.ts')), 'no se agregó ninguna columna');
+  const mazoScreen = sinComentarios(leer('src/features/mazo/screens/DeckScreen.tsx'));
   assert.ok(!/upsertCardState|useSessionStore|calificar|Repasar/.test(mazoScreen), 'Mi mazo no toca SM-2 ni ofrece «Repasar»');
 });
 
@@ -115,7 +118,7 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
   const motion = leer('src/theme/motion.ts');
   assert.match(motion, /export const motionAviso = \{ duracion: 5000 \} as const;/);
   assert.match(motion, /export const reacomodarResorte = \(\) =>\s*LinearTransition\.springify\(\)\s*\.damping\(motionSpring\.rebote\.damping\)/, 'las de abajo suben con el resorte de rebote');
-  const pantalla = sinComentarios(leer('src/screens/utility/DeckScreen.tsx'));
+  const pantalla = sinComentarios(leer('src/features/mazo/screens/DeckScreen.tsx'));
   assert.match(pantalla, /setTimeout\(\(\) => setAviso\(null\), motionAviso\.duracion\)/);
   assert.match(pantalla, /texto=\{aviso\.tipo === 'quitada' \? 'Quitada de tu mazo'/);
   assert.match(pantalla, /onDeshacer=\{aviso\.tipo === 'quitada' \? deshacer : undefined\}/);
@@ -124,10 +127,10 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
   assert.match(pantalla, /itemLayoutAnimation=\{reducido \? undefined : REACOMODO\}/, 'sin resorte con reducir movimiento');
   assert.match(pantalla, /keyExtractor=\{claveEntrada\}/);
   assert.match(pantalla, /<Marcador\b/);
-  assert.match(pantalla, /useFocusEffect\(/);
+  assert.match(pantalla, /useFocusEffect\(|useCortarAudioAlSalir\(/);
   assert.match(pantalla, /actionLabel="Ir a Frases sueltas"/);
   assert.match(pantalla, /body="Toca la estrella en cualquier frase para guardarla aquí\."/, 'el texto vacío ya dice cómo guardar');
-  const aviso = sinComentarios(leer('src/components/mazo/AvisoDeshacer.tsx'));
+  const aviso = sinComentarios(leer('src/features/mazo/components/AvisoDeshacer.tsx'));
   assert.match(aviso, /label="Deshacer"/);
   assert.match(aviso, /accessibilityLiveRegion="polite"/);
   assert.match(aviso, /\{onDeshacer && !reducido \? \(/, 'sin la barra con reducir movimiento');
@@ -135,10 +138,10 @@ await prueba('el aviso dura 5 s, «Deshacer» regresa la frase y un fallo de la 
 });
 
 await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Español, chevron, botón al mantener presionado y deslizar sin rojo', () => {
-  const t = sinComentarios(leer('src/components/mazo/TarjetaGuardada.tsx'));
+  const t = sinComentarios(leer('src/features/mazo/components/TarjetaGuardada.tsx'));
   assert.match(t, /export const TarjetaGuardada = memo\(/);
   assert.ok(t.includes("label: 'Quitar de mi mazo'"), 'acción «Quitar de mi mazo»');
-  const hook = sinComentarios(leer('src/components/card/useAudioFrase.ts'));
+  const hook = sinComentarios(leer('src/shared/hooks/useAudioFrase.ts'));
   for (const etiqueta of ['Escuchar en inglés', 'Escuchar en español']) assert.ok(hook.includes(`label: '${etiqueta}'`), etiqueta);
   assert.match(hook, /etiqueta: 'Inglés'/);
   assert.match(hook, /etiqueta: 'Español'/);
@@ -149,10 +152,10 @@ await prueba('la tarjeta: acciones del lector, karaoke en h3, Inglés · Españo
   assert.match(t, /onLongPress=\{alMantener\}/, 'mantener presionado muestra el botón');
   assert.match(t, /<Button variant="ghost" icon="star" label="Quitar de mi mazo"/);
   assert.match(t, /<DeslizarQuitar onQuitar=\{quitar\}>/);
-  const d = sinComentarios(leer('src/components/mazo/DeslizarQuitar.tsx'));
+  const d = sinComentarios(leer('src/features/mazo/components/DeslizarQuitar.tsx'));
   assert.match(d, /\.activeOffsetX\(\[-QUITAR\.activa, QUITAR\.activa\]\)/);
   assert.match(d, /\.failOffsetY\(\[-QUITAR\.falla, QUITAR\.falla\]\)/, 'cede ante el scroll de la lista');
-  assert.match(d, /decidirQuitar\(tx\.value, e\.velocityX\)/);
+  assert.match(d, /decidirQuitar\(tx\.get\(\), e\.velocityX\)/);
   assert.match(d, /if \(reducido\) return <>\{children\}<\/>;/, 'con reducir movimiento no hay deslizamiento');
   assert.match(d, /name="star"/, 'la estrella en contorno');
   assert.match(d, /color\.wrongSoft/);
@@ -198,33 +201,33 @@ await prueba('las más atoradas van arriba y más grandes; a igual número, por 
 });
 
 await prueba('qué cuenta como atorada no cambió (fallos >= 3 y no dominada) y la pantalla no toca SM-2', () => {
-  const q = leer('src/db/queries.ts');
+  const q = leer('src/data/repos/frases.ts');
   assert.match(q, /WHERE t\.fallos >= \? AND t\.dominada = 0\s*ORDER BY t\.fallos DESC LIMIT \?;/);
-  assert.match(sinComentarios(leer('src/screens/utility/StuckScreen.tsx')), /getStuckEntries\(user\.id, 3, 30\)/, 'el mismo umbral de siempre');
-  const pantalla = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  assert.match(sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx')), /getStuckEntries\(user\.id, 3, 30\)/, 'el mismo umbral de siempre');
+  const pantalla = sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx'));
   assert.ok(!/upsertCardState|useSessionStore|calificar/.test(pantalla), 'Se me atoran no toca SM-2');
   assert.ok(!/<Button\b[^>]*variant="primary"|Corregir/.test(pantalla), 'sin botón principal: «Corregir N errores» lleva a esta misma pantalla');
-  const hoy = leer('src/screens/extras/practicar/hoy.ts');
+  const hoy = leer('src/features/practicar/logic/hoy.ts');
   assert.match(hoy, /if \(atoradas > 0\) return \{ modo: 'atoran', motivo: 'atoradas' \};/, 'hoy.ts manda a esta pantalla');
-  assert.match(leer('src/screens/extras/practicar/modos.ts'), /ir: \(nav\) => nav\.navigate\('Stuck'\),/);
-  assert.match(leer('src/screens/extras/practicar/consola.ts'), /return `Corregir \$\{conteo\(atoradas, 'error', 'errores'\)\}`;/, 'el verbo de Hoy es el de siempre');
+  assert.match(leer('src/shared/navegacion/modos.ts'), /ir: \(nav\) => nav\.navigate\('Stuck'\),/);
+  assert.match(leer('src/domain/consolaHoy.ts'), /return `Corregir \$\{conteo\(atoradas, 'error', 'errores'\)\}`;/, 'el verbo de Hoy es el de siempre');
 });
 
 await prueba('la lista y la tarjeta: FlatList estable, memo, nota arriba, audio con texto, medidor que anuncia y vacío en correct', () => {
-  const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  const p = sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx'));
   assert.match(p, /keyExtractor=\{claveAtorada\}/);
   assert.match(p, /Sin cronómetro ni calificación\. Léelas, escúchalas y ya\./, 'la nota se queda');
   assert.match(p, /ordenarAtoradas\(carga\.datos\?\.atoradas \?\? \[\]\)/);
   assert.match(p, /iconColor=\{color\.correct\}/, 'el vacío lleva el check en correct');
   assert.match(p, /body="Cuando falles la misma frase tres veces, aparecerá aquí para que la repases con calma\."/, 'el texto vacío de siempre');
-  assert.match(p, /useFocusEffect\(/);
-  const t = sinComentarios(leer('src/components/atoradas/TarjetaAtorada.tsx'));
+  assert.match(p, /useFocusEffect\(|useCortarAudioAlSalir\(/);
+  const t = sinComentarios(leer('src/features/atoradas/components/TarjetaAtorada.tsx'));
   assert.match(t, /export const TarjetaAtorada = memo\(/);
   assert.match(t, /<GrupoAudio controles=\{controles\}/, 'el grupo Inglés · Español en lugar de los dos plays');
   assert.match(t, /<MedidorAtasco fallos=\{fallos\} tamano=\{tamano\} \/>/, 'el medidor va dentro de la misma tarjeta');
   assert.match(t, /\$\{etiquetaFallos\(fallos\)\}/, 'el lector oye los fallos');
   assert.match(t, /tamano=\{tamano === 'grande' \? 'md' : 'h3'\}/, 'las más atoradas, más grandes');
-  const m = sinComentarios(leer('src/components/atoradas/MedidorAtasco.tsx'));
+  const m = sinComentarios(leer('src/features/atoradas/components/MedidorAtasco.tsx'));
   assert.match(m, /accessibilityLabel=\{etiquetaFallos\(fallos\)\}/, 'anuncia «4 fallos»');
   assert.match(m, /encendido: \{ backgroundColor: color\.wrong \}/);
   assert.ok(!/riskStrong|tone="strong"/.test(m + t + p));
@@ -236,7 +239,7 @@ await prueba('lo guardado en ajustes se normaliza: lo que no sirve se descarta y
   assert.deepEqual(A.normalizarVistas(undefined), []);
   assert.deepEqual(A.normalizarVistas('x'), []);
   assert.deepEqual(A.normalizarVistas([{ id: 4, fallos: 3 }, null, 7, { id: 'a', fallos: 2 }, { id: 4, fallos: 9 }, { id: 5, fallos: -1 }, { id: 0, fallos: 3 }, { id: 6, fallos: 2.5 }, { id: 8, fallos: 5 }]), [{ id: 4, fallos: 3 }, { id: 8, fallos: 5 }]);
-  assert.match(leer('src/db/settings.ts'), /atoradasVistas: \[\],/, 'sin visita previa no hay nada que comparar');
+  assert.match(leer('src/data/repos/ajustes.ts'), /atoradasVistas: \[\],/, 'sin visita previa no hay nada que comparar');
   assert.deepEqual(A.vistasDe([{ entry: { id: 3 }, fallos: 4 }]), [{ id: 3, fallos: 4 }]);
   assert.equal(A.mismasVistas([{ id: 1, fallos: 3 }, { id: 2, fallos: 4 }], [{ id: 2, fallos: 4 }, { id: 1, fallos: 3 }]), true, 'sin importar el orden');
   assert.equal(A.mismasVistas([{ id: 1, fallos: 3 }], [{ id: 1, fallos: 4 }]), false, 'un fallo más ya es un cambio');
@@ -286,17 +289,17 @@ await prueba('desatorar dura poco y una sola vez: una tarjeta ≤ 2.5 s, tres es
   assert.equal(A.duracionDesatorar(9, t), A.duracionDesatorar(5, t), 'el tope de puntos es cinco');
   for (let p = 0; p <= 5; p++) assert.ok(A.duracionDesatorar(p, t) <= 2500, `${p} puntos`);
   assert.ok(2 * 600 + A.duracionDesatorar(5, t) <= 4000, 'las tres escalonadas');
-  const d = sinComentarios(leer('src/components/atoradas/Desatorar.tsx'));
+  const d = sinComentarios(leer('src/features/atoradas/components/Desatorar.tsx'));
   assert.ok(!/withRepeat|skia|Shader/i.test(d), 'una sola vez, sin bucles ni shaders');
-  assert.match(d, /if \(reducido\) \{\s*entra\.value = 1;\s*apagado\.value = encendidos;/, 'con reducir movimiento los puntos ya están apagados');
-  assert.match(d, /etiqueta\.value = withTiming\(1, \{ duration: motionDuration\.base/, 'la etiqueta aparece con fade');
+  assert.match(d, /if \(reducido\) \{\s*entra\.set\(1\);\s*apagado\.set\(encendidos\);/, 'con reducir movimiento los puntos ya están apagados');
+  assert.match(d, /etiqueta\.set\(withTiming\(1, \{ duration: motionDuration\.base/, 'la etiqueta aparece con fade');
   assert.match(d, /setTimeout\(terminar, t\.mantenerReducido\)/);
   assert.match(d, /Ya no se te atora/);
-  assert.match(d, /height: altoMedido\.value \* \(1 - sale\.value\)/, 'al irse el hueco se cierra: la lista no salta');
+  assert.match(d, /height: altoMedido\.get\(\) \* \(1 - sale\.get\(\)\)/, 'al irse el hueco se cierra: la lista no salta');
   assert.match(d, /color: color\.correct|backgroundColor: color\.correct/, 'el destello y la etiqueta en correct');
   assert.match(d, /accessibilityLabel=\{`\$\{entry\.phrase\}\. Ya no se te atora`\}/);
   assert.ok(!/riskStrong|tone="strong"/.test(d));
-  const p = sinComentarios(leer('src/screens/utility/StuckScreen.tsx'));
+  const p = sinComentarios(leer('src/features/atoradas/screens/StuckScreen.tsx'));
   assert.match(p, /guardarAjuste\(user\.id, 'atoradasVistas', actuales\)/, 'guarda la lista de esta visita');
   assert.match(p, /normalizarVistas\(useSettingsStore\.getState\(\)\.atoradasVistas\)/, 'compara con la última visita');
   assert.match(p, /getCardStates\(user\.id, candidatas\.map/, 'le pregunta a la base si de verdad se destrabó');

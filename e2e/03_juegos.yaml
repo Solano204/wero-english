@@ -1,0 +1,37 @@
+# Una ronda de cada juego.
+appId: app.wero.mobile
+---
+- launchApp
+- runFlow: comun/entrar.yaml
+- runFlow:
+    file: comun/jugar.yaml
+    env:
+      JUEGO: "Colmena"
+- runFlow:
+    file: comun/jugar.yaml
+    env:
+      JUEGO: "Pares"
+- runFlow:
+    file: comun/jugar.yaml
+    env:
+      JUEGO: "Caída"
+- runFlow:
+    file: comun/jugar.yaml
+    env:
+      JUEGO: "Dulces"
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Juegos"
+      MODO: "Cázala"
+- repeat:
+    times: 6
+    commands:
+      - tapOn:
+          point: "50%,50%"
+      - runFlow:
+          when:
+            visible: "Siguiente"
+          commands:
+            - tapOn: "Siguiente"
+- runFlow: comun/volver.yaml

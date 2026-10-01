@@ -1,7 +1,11 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import type { ImageSourcePropType } from 'react-native';
-import { bundledModule } from '@/assets/bundled';
+import { bundledModule, isBundled } from '@/assets/bundled';
+import { Lru } from '@/domain/lru';
+
+// Lo empaquetado se pregunta aquí: features y shared no importan el mapa generado directo.
+export { BUNDLED_COUNT, isBundled } from '@/assets/bundled';
 
 /**
  * Resuelve una ruta relativa del JSON ("aud/18.mp3", "img/err/err_001.webp")
@@ -25,8 +29,14 @@ type Resolved =
   | { kind: 'file'; uri: string }
   | null;
 
+/**
+ * Tope de las dos cachés de rutas de abajo: más que las rutas que una sesión larga toca (una pantalla usa decenas), menos
+ * que todo el catálogo (~8k medios), para que no crezcan sin fin.
+ */
+const TOPE_CACHE_RUTAS = 1500;
+
 /** Caché de resolución. Evita un stat al disco por cada toque. */
-const cache = new Map<string, Resolved>();
+const cache = new Lru<string, Resolved>(TOPE_CACHE_RUTAS);
 
 export function fileFor(relPath: string): File {
   return new File(MEDIA_DIR, relPath);
@@ -75,6 +85,14 @@ export async function uriFor(relPath: string | null): Promise<string | null> {
 }
 
 /**
+ * Caché de `expo-image` para los medios de la app. Son archivos locales (del APK o descargados): en Android la política
+ * por defecto (`disk`) se salta la caché de memoria y vuelve a decodificar la imagen cada vez que se monta, y además
+ * escribe una copia en la caché de disco. Con `memory` la imagen decodificada se reutiliza al volver a una pantalla o
+ * al reciclar una fila, y no se duplica en disco.
+ */
+export const CACHE_IMAGEN = 'memory' as const;
+
+/**
  * Fuente para <Image>. Es síncrona a propósito: un componente de imagen
  * no puede esperar a una promesa sin parpadear.
  *
@@ -93,28 +111,34 @@ export function imageSource(relPath: string | null): ImageSourcePropType | null 
   }
 }
 
-/**
- * Archivos que ya se encontraron en disco. Preguntar `exists` es una llamada nativa síncrona, y los botones de
- * audio lo hacían en cada render (una lista de frases son decenas). Solo se guardan los que sí están: lo que
- * falta se sigue revisando, y descargar o borrar un pack limpia todo (`invalidate`).
- */
-const enDisco = new Set<string>();
+/** Caché de «¿existe este archivo?»: `File.exists` es síncrono y las imágenes lo preguntaban en cada render. */
+const existe = new Lru<string, boolean>(TOPE_CACHE_RUTAS);
 
-/** ¿Está este medio descargado? Con caché de los que sí están. */
-export function existeEnDisco(relPath: string): boolean {
-  if (enDisco.has(relPath)) return true;
-  const existe = fileFor(relPath).exists;
-  if (existe) enDisco.add(relPath);
-  return existe;
+/** ¿Hay archivo en esta ruta (empaquetado o ya descargado)? Se pregunta al disco una vez por ruta. */
+export function hayArchivo(relPath: string | null): boolean {
+  if (!relPath) return false;
+  const hit = existe.get(relPath);
+  if (hit !== undefined) return hit;
+  let out = false;
+  if (isBundled(relPath)) out = true;
+  else {
+    try {
+      out = fileFor(relPath).exists;
+    } catch {
+      out = false;
+    }
+  }
+  existe.set(relPath, out);
+  return out;
 }
 
 /** Limpia la caché. Se llama tras descargar o borrar un pack. */
 export function invalidate(): void {
   cache.clear();
-  enDisco.clear();
+  existe.clear();
 }
 
 export function invalidateOne(relPath: string): void {
   cache.delete(relPath);
-  enDisco.delete(relPath);
+  existe.delete(relPath);
 }

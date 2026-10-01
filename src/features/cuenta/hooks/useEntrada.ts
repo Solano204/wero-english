@@ -1,0 +1,78 @@
+import { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParams } from '@/types/rutas';
+import { useConsentimiento } from '@/shared/ui/HojaConsentimiento';
+import { useAuthStore } from '@/estado/useAuthStore';
+import { conFinalAsync } from '@/shared/utils/conFinal';
+import { useShallow } from 'zustand/react/shallow';
+
+type Vista = 'inicio' | 'usuario';
+
+type Accion = 'google' | 'sin' | 'usuario' | 'vincular' | 'nueva' | null;
+
+/**
+ * La entrada: Google, usuario y contraseña, entrar sin cuenta y vincular el avance.
+ */
+export function useEntrada() {
+  const nav = useNavigation<NativeStackNavigationProp<RootStackParams>>();
+  const [vista, setVista] = useState<Vista>('inicio');
+  const [accion, setAccion] = useState<Accion>(null);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const {
+    signIn,
+    continuarSinCuenta,
+    entrarConGoogle,
+    resolverVinculo,
+    cancelarVinculo,
+    vinculoPendiente,
+    aviso: avisoEntrada,
+    limpiarAviso,
+    busy,
+    error,
+    clearError,
+  } = useAuthStore(
+    useShallow((st) => ({
+      signIn: st.signIn,
+      continuarSinCuenta: st.continuarSinCuenta,
+      entrarConGoogle: st.entrarConGoogle,
+      resolverVinculo: st.resolverVinculo,
+      cancelarVinculo: st.cancelarVinculo,
+      vinculoPendiente: st.vinculoPendiente,
+      aviso: st.aviso,
+      limpiarAviso: st.limpiarAviso,
+      busy: st.busy,
+      error: st.error,
+      clearError: st.clearError,
+    }))
+  );
+
+  useEffect(() => {
+    clearError();
+  }, [vista, clearError]);
+
+  // Cada botón muestra su propia carga: el resto solo se bloquea.
+  const correr = async (quien: Accion, fn: () => Promise<unknown>) => {
+    limpiarAviso();
+    setAccion(quien);
+    await conFinalAsync(async () => {
+      await fn();
+    }, () => {
+      setAccion(null);
+    });
+  };
+
+  const { pedir: pedirConsentimiento, hoja } = useConsentimiento();
+
+  // Primero la hoja que dice qué se toma de Google; «Ahora no» deja la entrada como estaba.
+  const conGoogle = async () => {
+    if (!(await pedirConsentimiento('google'))) return;
+    await correr('google', entrarConGoogle);
+  };
+  const sinCuenta = () => correr('sin', continuarSinCuenta);
+  const conUsuario = () => correr('usuario', () => signIn(username, password));
+
+  return { nav, vista, setVista, accion, username, setUsername, password, setPassword, resolverVinculo, cancelarVinculo, vinculoPendiente, avisoEntrada, busy, error, correr, hoja, conGoogle, sinCuenta, conUsuario };
+}

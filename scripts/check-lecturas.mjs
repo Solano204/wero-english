@@ -14,10 +14,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 import ts from 'typescript';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const leer = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+// Una pantalla se lee con lo que es suyo (su hook y su logic): la lógica de las pantallas delgadas vive ahí.
+const leer = (rel) =>
+  /\/screens\/\w+Screen\.tsx$/.test(rel) ? fuenteDePantalla(path.join(ROOT, rel), ROOT) : fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const cargar = async (rel) => {
   const js = ts.transpileModule(leer(rel), {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -196,60 +199,60 @@ prueba('destacada: la abierta con más frases dominadas va primero; con empate g
 });
 
 prueba('la lista: sin números de 0 a 100 a la vista, «Niños» con ícono neutro y la entrada separada de Presionable', () => {
-  const tarjeta = leer('src/components/lectura/TarjetaLectura.tsx');
+  const tarjeta = leer('src/features/lecturas/components/TarjetaLectura.tsx');
   assert.match(tarjeta, /Te sabes \$\{fila\.dominadas\} de \$\{conteo\(fila\.total, 'frase'\)\}/);
   assert.match(tarjeta, /<Badge label="Niños" icono="smile" small \/>/);
   assert.match(tarjeta, /<LevelBadge nivel=\{nivelDificultad\(fila\.dificultad\)\} \/>/);
   assert.ok(!/Dificultad \{/.test(tarjeta), 'el número de dificultad no va a la vista');
   assert.match(tarjeta, /Dificultad \$\{fila\.dificultad\} de 100/, 'sí va en el accessibilityLabel');
   assert.match(tarjeta, /<Animated\.View entering=\{reducido \? undefined : aparecerSubiendo\(retraso\)\}>\s*<Presionable/);
-  assert.match(leer('src/screens/extras/LecturasScreen.tsx'), /destacarLectura\(filas\)/);
+  assert.match(leer('src/features/lecturas/screens/LecturasScreen.tsx'), /destacarLectura\(filas\)/);
 });
 
 /* ---------- el lector ---------- */
 
 prueba('lector: la leyenda va arriba y se guarda en ajustes, y las frases dicen «ya la viste» o «nueva» sin depender del color', () => {
-  const pantalla = leer('src/screens/extras/LecturaScreen.tsx');
+  const pantalla = leer('src/features/lecturas/screens/LecturaScreen.tsx');
   const iLeyenda = pantalla.indexOf('<LeyendaFrases');
   assert.ok(iLeyenda > 0 && iLeyenda < pantalla.indexOf('<TextoAcompanado'), 'la leyenda va antes del texto');
   assert.ok(!/Toca cualquiera para abrir su ficha/.test(pantalla), 'ya no hay leyenda al final');
-  assert.match(leer('src/db/settings.ts'), /leyendaLecturaVista: false/);
-  const oracion = leer('src/components/lectura/Oracion.tsx');
+  assert.match(leer('src/data/repos/ajustes.ts'), /leyendaLecturaVista: false/);
+  const oracion = leer('src/features/lecturas/components/Oracion.tsx');
   assert.match(oracion, /nueva, abre su ficha/);
   assert.match(oracion, /ya la viste/);
   assert.match(oracion, /textDecorationStyle: 'dotted'/);
   assert.ok(!/riskWarn|wrong/.test(oracion), 'el ámbar (color del fallo) ya no marca las frases nuevas');
   assert.match(oracion, /export const Oracion = memo\(/);
-  assert.match(leer('src/components/lectura/TextoAcompanado.tsx'), /export const TextoAcompanado = memo\(/);
+  assert.match(leer('src/features/lecturas/components/TextoAcompanado.tsx'), /export const TextoAcompanado = memo\(/);
 });
 
 prueba('reproductor: fijo abajo, sin «0:00 / 0:00» antes de conocer la duración, y el botón de seguir aparece con el pie', () => {
-  const pie = leer('src/components/lectura/PieReproductor.tsx');
+  const pie = leer('src/features/lecturas/components/PieReproductor.tsx');
   assert.match(pie, /progreso\.dur > 0 \? mmss\(progreso\.dur\) : '—:—'/);
   assert.match(pie, /variant="ghost"/, 'Detener es ghost');
-  assert.match(leer('src/screens/extras/LecturaScreen.tsx'), /footer=\{capitulo\?\.audio \? pie : undefined\}/);
-  const pantalla = leer('src/screens/extras/LecturaScreen.tsx');
+  assert.match(leer('src/features/lecturas/screens/LecturaScreen.tsx'), /footer=\{capitulo\?\.audio \? pie : undefined\}/);
+  const pantalla = leer('src/features/lecturas/screens/LecturaScreen.tsx');
   assert.match(pantalla, /ultimo \? 'Ver las preguntas' : `Capítulo \$\{cap \+ 2\}`/);
   assert.ok(!fs.existsSync(path.join(ROOT, 'src/components/card/ReproductorCapitulo.tsx')), 'el reproductor de arriba se retiró');
-  const hook = leer('src/components/lectura/useReproductorCapitulo.ts');
+  const hook = leer('src/features/lecturas/hooks/useReproductorCapitulo.ts');
   for (const llamada of ['audio.play(path)', 'audio.pauseFrase()', 'audio.resumeFrase()', 'audio.stop()', 'audio.generacionActual()']) {
     assert.ok(hook.includes(llamada), `el reproductor sigue usando ${llamada}`);
   }
 });
 
 prueba('lectura acompañada: sigue al audio en el tercio de arriba, se suelta con el dedo, ofrece volver y con reducir movimiento salta', () => {
-  const p = leer('src/screens/extras/LecturaScreen.tsx');
+  const p = leer('src/features/lecturas/screens/LecturaScreen.tsx');
   const linea = Number(p.match(/const LINEA_LECTURA = ([\d.]+);/)?.[1]);
   assert.ok(linea > 0 && linea <= 1 / 3, `la oración queda a ${linea} del alto visible: debe estar en el tercio de arriba`);
   assert.match(p, /soltarScroll=\{siguiendo\}/, 'el dedo suelta el seguimiento');
   assert.match(p, /label="Volver a donde va el audio"/);
-  assert.match(p, /if \(reducido\) \{\s*animandoScroll\.value = 0;\s*scrollTo\(scrollRef, 0, objetivo, false\);/, 'con reducir movimiento el scroll salta');
+  assert.match(p, /if \(reducido\) \{\s*animandoScroll\.set\(0\);\s*scrollTo\(scrollRef, 0, objetivo, false\);/, 'con reducir movimiento el scroll salta');
   assert.match(p, /<Animated\.View\s+entering=\{reducido \? undefined : aparecer\(\)\}\s+exiting=\{reducido \? undefined : desaparecer\(motionDuration\.rapido\)\}\s+style=\{styles\.volver\}\s*>\s*<Button/, 'el botón entra en su propio Animated.View');
-  const texto = leer('src/components/lectura/TextoAcompanado.tsx');
+  const texto = leer('src/features/lecturas/components/TextoAcompanado.tsx');
   assert.match(texto, /useAnimatedReaction\(/);
-  assert.match(texto, /if \(reducido \|\| pulso\.value > 0/, 'con reducir movimiento no hay pulso');
+  assert.match(texto, /if \(reducido \|\| pulso\.get\(\) > 0/, 'con reducir movimiento no hay pulso');
   assert.match(texto, /duration: motionDuration\.rapido/, 'el pulso dura 150 ms (rapido)');
-  const hook = leer('src/components/lectura/useReproductorCapitulo.ts');
+  const hook = leer('src/features/lecturas/hooks/useReproductorCapitulo.ts');
   assert.match(hook, /AppState\.addEventListener/, 'pausa al irse a segundo plano');
 });
 
@@ -258,7 +261,7 @@ prueba('preguntas: tres por historia, una a la vez, marcadas como en Estudio, si
     assert.equal(l.preguntas.length, 3, `${l.id}: son tres preguntas (los tres puntos de arriba)`);
     for (const p of l.preguntas) assert.ok(p.correcta >= 0 && p.correcta < p.opciones.length && p.porque.length > 0, `${l.id}: pregunta mal formada`);
   }
-  const una = leer('src/components/lectura/PreguntaUnaAUna.tsx');
+  const una = leer('src/features/lecturas/components/PreguntaUnaAUna.tsx');
   assert.match(una, /export const TOTAL_PREGUNTAS = 3;/);
   assert.match(una, /<PuntosRepeticion\s+ronda=\{\(indice \+ 1\) as 1 \| 2 \| 3\}/, 'los tres puntos de avance son los de Estudio');
   assert.match(una, /No se guarda calificación\./, 'la nota se queda');
@@ -266,17 +269,17 @@ prueba('preguntas: tres por historia, una a la vez, marcadas como en Estudio, si
   assert.match(una, /if \(k === correcta\) return 'correct';\s*return k === respuesta \? 'wrong' : 'dimmed';/);
   assert.match(una, /entering=\{reducido \? undefined : aparecer\(\)\}\s+accessibilityLiveRegion="polite"/, 'la explicación entra con fade y se anuncia');
   assert.ok(!/puntaje|score|confeti|confetti/i.test(sinComentarios(una)), 'nada de puntaje ni confeti');
-  const puntos = leer('src/components/fx/PuntosRepeticion.tsx');
+  const puntos = leer('src/shared/ui/fx/PuntosRepeticion.tsx');
   assert.match(puntos, /accessibilityLabel=\{etiqueta \?\? `Repetición \$\{ronda\} de \$\{REPETICIONES\}`\}/, 'Estudio conserva su etiqueta');
 
-  const cierre = leer('src/components/lectura/CierreLectura.tsx');
+  const cierre = leer('src/features/lecturas/components/CierreLectura.tsx');
   assert.match(cierre, /Terminaste la historia/);
   assert.match(cierre, /if \(!todas \|\| reducido\) return;/, 'sin las tres respuestas o con reducir movimiento no hay destello');
   assert.equal((cierre.match(/withTiming\(/g) ?? []).length, 1, 'un solo destello, sin bucles');
   assert.ok(!/withRepeat|confeti|confetti|puntaje|score/i.test(sinComentarios(cierre)));
   assert.ok(!/\bexiting=|\blayout=/.test(cierre) && !/style=\{\[styles\.destello, estiloDestello\]\}[^>]*entering/.test(cierre), 'el destello lleva transform: no comparte nodo con entering');
 
-  const p = leer('src/screens/extras/LecturaScreen.tsx');
+  const p = leer('src/features/lecturas/screens/LecturaScreen.tsx');
   assert.match(p, /<Button label="Salir sin contestar" variant="ghost"/, '«Salir sin contestar» es ghost');
   assert.match(p, /pregunta \+ 1 >= total \? 'Terminar' : 'Siguiente'/);
   assert.match(p, /todas=\{Object\.keys\(respuestas\)\.length === total\}/);
@@ -319,7 +322,7 @@ prueba('marcas de oración y salto de audio: el índice es un objeto válido, ha
     assert.equal(m.n, texto.length, `${ruta}: las marcas son de otro texto`);
   }
   assert.match(leer('src/services/marcas.ts'), /export function marcasOracionesDe/);
-  assert.match(leer('src/services/audio.ts'), /export async function saltarFrase\(seg: number\)/);
+  assert.match(leer('src/services/audio/reproductor.ts'), /export async function saltarFrase\(seg: number\)/);
   const polly = leer('scripts/polly.mjs');
   assert.match(polly, /--marcas-oraciones/);
   assert.match(polly, /SpeechMarkTypes: \["sentence"\]/);

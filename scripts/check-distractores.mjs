@@ -14,10 +14,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 import ts from 'typescript';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const leer = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+// Una pantalla se lee con lo que es suyo (su hook y su logic): la lógica de las pantallas delgadas vive ahí.
+const leer = (rel) =>
+  /\/screens\/\w+Screen\.tsx$/.test(rel) ? fuenteDePantalla(path.join(ROOT, rel), ROOT) : fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const cargar = async (rel, sustituir = (s) => s) => {
   const js = ts.transpileModule(sustituir(leer(rel)), {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -25,9 +28,9 @@ const cargar = async (rel, sustituir = (s) => s) => {
   return import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 };
 
-globalThis.__texto = await cargar('src/utils/text.ts');
+globalThis.__texto = await cargar('src/domain/texto.ts');
 const D = await cargar('src/domain/distractores.ts', (s) =>
-  s.replace(/import \{ levenshtein, mismoTexto \} from '@\/utils\/text';/, 'const { levenshtein, mismoTexto } = globalThis.__texto;')
+  s.replace(/import \{ levenshtein, mismoTexto \} from '@\/domain\/texto';/, 'const { levenshtein, mismoTexto } = globalThis.__texto;')
 );
 
 let total = 0;
@@ -316,7 +319,7 @@ prueba('d) cada tipo de ejercicio tiene su instrucción y la tarjeta la muestra 
   for (const k of tipos) {
     assert.match(funcion, new RegExp(`case '${k}':\\s*return '[^']+';`), `falta la instrucción de ${k}`);
   }
-  const tarjeta = leer('src/components/card/StudyCardView.tsx');
+  const tarjeta = leer('src/features/estudio/components/StudyCardView.tsx');
   const arriba = tarjeta.indexOf('<View style={styles.top}>');
   const instruccion = tarjeta.indexOf('{instructionFor(card.kind)}');
   const escena = tarjeta.indexOf('<View style={[styles.stage');

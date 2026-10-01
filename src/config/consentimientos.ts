@@ -1,4 +1,4 @@
-import type { TipoConsentimiento } from '@/services/consentimiento';
+import type { TipoConsentimiento } from '@/types/consentimiento';
 
 /** Lo que dice cada hoja de consentimiento. Tiene que decir exactamente lo que hace la app: si el código cambia, esto cambia. */
 export interface TextoConsentimiento {
@@ -23,7 +23,7 @@ export const CONSENTIMIENTOS: Record<TipoConsentimiento, TextoConsentimiento> = 
     titulo: '¿Usar el micrófono?',
     toma: ['Tu voz, solo mientras dices la palabra'],
     paraQue: 'Para saber qué palabra entendió el teléfono y compararla con la que se pidió.',
-    // Verificado en src/services/speech.ts (reconoceEnDispositivo) y en expo-speech-recognition: en Android 13+
+    // Verificado en src/services/voz.ts (reconoceEnDispositivo) y en expo-speech-recognition: en Android 13+
     // con en-US instalado se usa el reconocedor del dispositivo; si no, el del sistema, que puede usar la nube.
     donde:
       'Si tu teléfono puede reconocer inglés sin conexión, tu voz se procesa en el teléfono y no sale de él. Si no, la procesa el servicio de voz de tu teléfono (normalmente el de Google), que puede mandarla a sus servidores para entenderla. Wero no graba ni guarda el audio: solo recibe el texto de lo que se entendió.',

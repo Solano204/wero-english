@@ -8,7 +8,6 @@ export {
   resplandorSol,
   resplandorPiso,
   pieza,
-  color,
   gradiente,
   iconoRedondo,
   iconoVisual,
@@ -29,9 +28,8 @@ export {
   medidor,
   inclinacion,
   marcaGoogle,
-  tema,
 } from './tokens';
-export type { WorldId } from './tokens';
+export { color, tema, type WorldId } from './paleta';
 export {
   motionDuration,
   motionEasing,
@@ -73,5 +71,4 @@ export {
   reacomodar,
 } from './motion';
 export { text } from './typography';
-export { fuentes } from './fuentes';
 export { PORTADA_MUNDO, PORTADA_JUEGO } from './portadas';

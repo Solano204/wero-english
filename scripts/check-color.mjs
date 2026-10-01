@@ -3,8 +3,8 @@
  *
  *   npm run check:color
  *
- * Busca hex (#rgb, #rgba, #rrggbb, #rrggbbaa) y rgb( / rgba( en src/ y App.tsx,
- * sin contar comentarios. Todo color sale de src/theme/tokens.ts.
+ * Busca hex (#rgb, #rgba, #rrggbb, #rrggbbaa) y rgb( / rgba( en src/,
+ * sin contar comentarios. Todo color sale de src/theme/paleta.ts (y los derivados de src/theme/tokens.ts).
  * Sale con código 1 y lista archivo:línea si encuentra alguno.
  */
 import fs from 'node:fs';
@@ -26,12 +26,12 @@ const esColor = (l) => COLOR.test(l) || COLOR_SKSL.test(l);
  */
 const EXPLICITO = new Set([
   // Define el tono `strong` y RiskBadge («Solo con amigos»).
-  'src/components/base/Badge.tsx',
+  'src/shared/ui/Badge.tsx',
   // El paso explícito de la escala de registro.
-  'src/components/detalle/EscalaRegistro.tsx',
+  'src/features/detalle/components/EscalaRegistro.tsx',
   // El aviso «Fuerte» de una frase con vulgaridad 2.
-  'src/components/mazo/CartaFrase.tsx',
-  'src/components/phrasal/DetalleForma.tsx',
+  'src/features/frases-sueltas/components/CartaFrase.tsx',
+  'src/features/phrasal/components/DetalleForma.tsx',
 ]);
 const ROJO = /\briskStrong(?:Soft)?\b|['"]strong['"]/;
 const rojoFueraDeLugar = (rel, src) => (EXPLICITO.has(rel) ? [] : sinComentarios(src).split('\n').flatMap((l, i) => (ROJO.test(l) ? [i + 1] : [])));
@@ -51,7 +51,7 @@ const difTono = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
 
 /** COLOR-2: `senal` sale solo de tokens de `color` y sus pasos son del mismo tono. Devuelve los errores. */
 function revisaSenal() {
-  const tokens = fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8');
+  const tokens = (fs.readFileSync(path.join(TEMA, 'paleta.ts'), 'utf8') + '\n' + fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8'));
   const decl = tokens.match(/export const senal[^=]*=\s*\[([^\]]+)\]/);
   if (!decl) return ['senal no está definido en src/theme/tokens.ts'];
   const pasos = decl[1].split(',').map((p) => p.trim()).filter(Boolean);
@@ -117,7 +117,7 @@ const FONDOS = ['bg', 'bgFin', 'bgAlto', 'surface', 'surfaceAlt', 'surfaceHigh',
  *  - Los pares que sostienen la pantalla pasan AA: texto 4.5:1; el bloque del botón contra el fondo 3:1.
  */
 function revisaPaleta() {
-  const hex = hexDeColor(fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8'));
+  const hex = hexDeColor((fs.readFileSync(path.join(TEMA, 'paleta.ts'), 'utf8') + '\n' + fs.readFileSync(path.join(TEMA, 'tokens.ts'), 'utf8')));
   const errores = [];
   for (const [k, v] of Object.entries(hex)) {
     if (SEMANTICOS.test(k) || saturacion(v) < 0.2) continue;
@@ -203,8 +203,8 @@ function autoprueba() {
     ['src/screens/x.tsx', '// color.riskStrong', 0],
     ['src/screens/x.tsx', '/* tone="strong" */ const a = 1;', 0],
     ['src/screens/x.tsx', 'fontFamily: font.family.bodyStrong,', 0],
-    ['src/components/detalle/EscalaRegistro.tsx', 'const c = color.riskStrong;', 0],
-    ['src/components/base/Badge.tsx', "tone={v === 2 ? 'strong' : 'warn'}", 0],
+    ['src/features/detalle/components/EscalaRegistro.tsx', 'const c = color.riskStrong;', 0],
+    ['src/shared/ui/Badge.tsx', "tone={v === 2 ? 'strong' : 'warn'}", 0],
   ];
   for (const [rel, src, esperado] of rojo) {
     const real = rojoFueraDeLugar(rel, src).length;
@@ -229,7 +229,7 @@ function archivos(dir, out = []) {
 if (process.argv.includes('--test')) {
   autoprueba();
 } else {
-  const lista = archivos(path.join(ROOT, 'src')).concat(path.join(ROOT, 'App.tsx'));
+  const lista = archivos(path.join(ROOT, 'src'));
   const hallazgos = [];
   const rojos = [];
   for (const f of lista) {

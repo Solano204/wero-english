@@ -12,10 +12,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 import ts from 'typescript';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const leer = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+// Una pantalla se lee con lo que es suyo (su hook y su logic): la lógica de las pantallas delgadas vive ahí.
+const leer = (rel) =>
+  /\/screens\/\w+Screen\.tsx$/.test(rel) ? fuenteDePantalla(path.join(ROOT, rel), ROOT) : fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const existe = (rel) => fs.existsSync(path.join(ROOT, rel));
 const cargar = async (rel) => {
   const js = ts.transpileModule(leer(rel), {
@@ -87,7 +90,7 @@ await prueba('ordenar no modifica la lista de entrada y el ajuste guardado se no
   assert.equal(E.normalizarOrden('graves'), 'graves');
   for (const raro of [undefined, null, 3, 'otro', '']) assert.equal(E.normalizarOrden(raro), 'graves', String(raro));
   assert.deepEqual(E.ORDENES_ERRORES.map((o) => o.label), ['Más graves primero', 'En orden']);
-  assert.match(leer('src/db/settings.ts'), /ordenErrores: 'graves',/, 'el orden de siempre es el que arranca');
+  assert.match(leer('src/data/repos/ajustes.ts'), /ordenErrores: 'graves',/, 'el orden de siempre es el que arranca');
 });
 
 /* ---------- encabezado, gravedad, anuncio y compartir ---------- */
@@ -126,7 +129,7 @@ await prueba('el detalle se anuncia en orden y sin doble punto; el texto de comp
 });
 
 await prueba('la secuencia del detalle: los tres pasos caben en 1.6 s en los 194 pares y el glitch termina cuando arranca «Lo correcto»', async () => {
-  const D = await cargar('src/utils/diff.ts');
+  const D = await cargar('src/domain/diffFrase.ts');
   const motion = leer('src/theme/motion.ts');
   const num = (patron, nombre) => {
     const m = motion.match(patron);
@@ -178,17 +181,17 @@ await prueba('la secuencia del detalle: los tres pasos caben en 1.6 s en los 194
 /* ---------- lo que se puede revisar sin teléfono ---------- */
 
 await prueba('la lista y el detalle no usan rojo ni el badge de gravedad: la gravedad es un medidor con texto, en ámbar', () => {
-  for (const rel of ['src/screens/extras/ErrorsScreen.tsx', 'src/screens/extras/ErrorDetailScreen.tsx']) {
+  for (const rel of ['src/features/errores/screens/ErrorsScreen.tsx', 'src/features/errores/screens/ErrorDetailScreen.tsx']) {
     const codigo = sinComentarios(leer(rel));
     assert.ok(!/riskStrong|tone="strong"/.test(codigo), `${rel}: sin rojo`);
     assert.ok(!/label="Cambia el significado"/.test(codigo), `${rel}: la gravedad no es un badge suelto`);
   }
-  const detalle = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
+  const detalle = sinComentarios(leer('src/features/errores/screens/ErrorDetailScreen.tsx'));
   assert.doesNotMatch(detalle, /errImg: \{[^}]*alignSelf/, 'la imagen no se centra encogida: `ancha` la estira');
 });
 
 await prueba('la lista: encabezado con marcador, chips con cuenta y orden guardado en ajustes', () => {
-  const p = sinComentarios(leer('src/screens/extras/ErrorsScreen.tsx'));
+  const p = sinComentarios(leer('src/features/errores/screens/ErrorsScreen.tsx'));
   assert.match(p, /<Marcador\b/, 'el número rueda con el Marcador');
   assert.match(p, /encabezadoErrores\(/);
   assert.match(p, /conteoPorCategoria\(/);
@@ -198,20 +201,20 @@ await prueba('la lista: encabezado con marcador, chips con cuenta y orden guarda
   assert.match(p, /<TarjetaError\b/);
   assert.match(p, /keyExtractor=\{claveError\}/);
   assert.match(p, /removeClippedSubviews/);
-  assert.ok(existe('src/components/errores/TarjetaError.tsx') && existe('src/components/errores/MedidorGravedad.tsx'));
-  const tarjeta = sinComentarios(leer('src/components/errores/TarjetaError.tsx'));
+  assert.ok(existe('src/features/errores/components/TarjetaError.tsx') && existe('src/features/errores/components/MedidorGravedad.tsx'));
+  const tarjeta = sinComentarios(leer('src/features/errores/components/TarjetaError.tsx'));
   assert.match(tarjeta, /<MedidorGravedad\b/);
   assert.match(tarjeta, /color\.wrong/, 'la ✕ y lo dicho van en ámbar');
   assert.match(tarjeta, /color\.correct/, 'la ✓ va en verde');
   assert.match(tarjeta, /Para contar/);
   assert.match(tarjeta, /export const TarjetaError = memo\(/);
-  const medidor = sinComentarios(leer('src/components/errores/MedidorGravedad.tsx'));
+  const medidor = sinComentarios(leer('src/features/errores/components/MedidorGravedad.tsx'));
   assert.match(medidor, /anuncioGravedad\(/);
   assert.match(medidor, /etiquetaGravedad\(/);
 });
 
 await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la corrección de Gramática y reducir movimiento sin nada de eso', () => {
-  const sec = sinComentarios(leer('src/components/errores/SecuenciaMalentendido.tsx'));
+  const sec = sinComentarios(leer('src/features/errores/components/SecuenciaMalentendido.tsx'));
   assert.match(sec, /<CableTrazo\b/, 'el cable es el de Pares');
   assert.match(sec, /desvio=\{desvio\}/, 'el cable vibra');
   assert.match(sec, /useCorreccion\(e\.lo_que_dices, e\.lo_correcto\)/, 'el diff es el de Gramática');
@@ -222,10 +225,10 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
   assert.match(sec, /accessibilityLabel=\{anuncioDeError\(e\)\}/, 'el lector oye el malentendido completo, en orden');
   assert.match(sec, /Ver otra vez/);
   assert.match(sec, /\{reducido \? null : \(\s*<View style=\{styles\.otraVez\}>/, 'sin animación no hay «Ver otra vez»');
-  const reducido = sec.slice(sec.indexOf('if (reducido) {'), sec.indexOf('v1.value = 0;'));
+  const reducido = sec.slice(sec.indexOf('if (reducido) {'), sec.indexOf('v1.set(0);'));
   assert.ok(/setFinal\(true\)/.test(reducido) && !/soltarCable|jugarCorreccion|setGlitch|programar/.test(reducido), 'con reducir movimiento: los tres pasos con fundido, sin cable, glitch ni morph');
   assert.ok(!/riskStrong|tone="strong"/.test(sec));
-  const rota = sinComentarios(leer('src/components/errores/SenalRota.tsx'));
+  const rota = sinComentarios(leer('src/features/errores/components/SenalRota.tsx'));
   assert.ok(!/skia|Shader|RuntimeEffect|withRepeat/i.test(rota), 'sin shaders ni bucles: dura una sola vez');
   assert.equal((rota.match(/withTiming\(/g) ?? []).length, 1);
   assert.match(rota, /duration: motionMalentendido\.glitch/);
@@ -234,18 +237,18 @@ await prueba('el héroe: cable de Pares, glitch solo con transform y opacity, la
     for (const k of claves) assert.ok(['opacity', 'transform', 'color', 'translateX'].includes(k), `el glitch solo mueve transform y opacity (color en la base), no ${k}`);
   }
   assert.match(rota, /if \(reducido\) return <Text/, 'con reducir movimiento es solo el texto');
-  const trazo = leer('src/components/fx/CableTrazo.tsx');
+  const trazo = leer('src/shared/ui/fx/CableTrazo.tsx');
   assert.match(trazo, /desvio\?: SharedValue<number>;/);
-  assert.match(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx')), /<CableTrazo\b/, 'Pares usa el mismo dibujo');
-  assert.ok(!/Canvas/.test(sinComentarios(leer('src/components/juegos/pares/CableSenal.tsx'))));
-  const gram = sinComentarios(leer('src/components/gramatica/ErrorQueSeCorrige.tsx'));
+  assert.match(sinComentarios(leer('src/features/juegos/pares/components/CableSenal.tsx')), /<CableTrazo\b/, 'Pares usa el mismo dibujo');
+  assert.ok(!/Canvas/.test(sinComentarios(leer('src/features/juegos/pares/components/CableSenal.tsx'))));
+  const gram = sinComentarios(leer('src/features/gramatica/components/ErrorQueSeCorrige.tsx'));
   assert.match(gram, /useCorreccion\(mal, bien\)/, 'Gramática usa el mismo núcleo');
   assert.ok(!/function Tacha|function FraseTransformada/.test(gram));
-  assert.match(sinComentarios(leer('src/components/gramatica/CorreccionFrase.tsx')), /export function useCorreccion\(/);
-  const detalle = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
+  assert.match(sinComentarios(leer('src/shared/ui/CorreccionFrase.tsx')), /export function useCorreccion\(/);
+  const detalle = sinComentarios(leer('src/features/errores/screens/ErrorDetailScreen.tsx'));
   assert.match(detalle, /<SecuenciaMalentendido key=\{err\.id\} error=\{err\} \/>/);
-  assert.match(detalle, /useFocusEffect\(/);
-  assert.match(detalle, /audio\.stop\(\)/, 'salir corta la voz');
+  assert.match(detalle, /useFocusEffect\(|useCortarAudioAlSalir\(/);
+  assert.match(detalle, /audio\.stop\(\)|useCortarAudioAlSalir\(/, 'salir corta la voz');
 });
 
 await prueba('el detalle: el duelo solo sale con audio de contraste (los 22 de pronunciación), «Por qué pasa» con NotaInfo y Compartir solo si se puede contar', () => {
@@ -254,7 +257,7 @@ await prueba('el detalle: el duelo solo sale con audio de contraste (los 22 de p
   assert.ok(conContraste.every((e) => e.categoria === 'pronunciacion' && e.audio_contraste && e.audio), 'todos son de pronunciación y traen texto y audio');
   assert.equal(errores.filter((e) => e.categoria === 'pronunciacion').length, 22, 'y todos los de pronunciación lo traen');
   assert.equal(errores.filter((e) => e.compartible).length, 112);
-  const d = sinComentarios(leer('src/screens/extras/ErrorDetailScreen.tsx'));
+  const d = sinComentarios(leer('src/features/errores/screens/ErrorDetailScreen.tsx'));
   assert.match(d, /<DueloContraste error=\{err\} \/>/);
   assert.match(d, /<NotaInfo>\s*<Text style=\{styles\.whyBody\}>\{err\.por_que\}<\/Text>\s*<\/NotaInfo>/, '«Por qué pasa» lleva el ícono info y el filo accent de NotaInfo');
   assert.match(d, /<MedidorGravedad gravedad=\{err\.gravedad\} disposicion="fila" animado/);
@@ -264,7 +267,7 @@ await prueba('el detalle: el duelo solo sale con audio de contraste (los 22 de p
   assert.match(d, /Share\.share\(\{ message: textoParaCompartir\(err\) \}\)/, 'abre el menú del sistema con el texto armado');
   assert.match(d, /setFalloCompartir\(true\)/, 'si el menú no abre se avisa: no se traga el error');
   assert.ok(!/GenerarImagen|captureRef|ViewShot/.test(d), 'sin imagen generada por ahora');
-  const duelo = sinComentarios(leer('src/components/errores/DueloContraste.tsx'));
+  const duelo = sinComentarios(leer('src/features/errores/components/DueloContraste.tsx'));
   assert.match(duelo, /if \(!e\.audio_contraste_archivo\) return null;/);
   assert.match(duelo, /titulo="Así suena mal"/);
   assert.match(duelo, /titulo="Así suena bien"/);

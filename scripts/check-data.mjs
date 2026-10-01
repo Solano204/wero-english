@@ -4,6 +4,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { RUTA_CAZALA, RUTA_RESUMEN, hashCatalogo, huellaCatalogo, metaDb, textoCazala, textoResumen } from './lib/derivados.mjs';
 
 const DIR = path.join(process.cwd(), 'assets/data');
 
@@ -79,6 +80,33 @@ if (cat?.entries?.length && packs?.packs?.length) {
     console.log(
       `AVISO: los packs suman ${suma} y el catálogo tiene ${cat.entries.length}`
     );
+  }
+}
+
+// Lo que la app lee al abrir sin cargar los JSON grandes tiene que coincidir con ellos.
+{
+  const ruta = path.join(process.cwd(), RUTA_RESUMEN);
+  const actual = fs.existsSync(ruta) ? fs.readFileSync(ruta, 'utf8') : '';
+  if (actual !== textoResumen()) {
+    console.log(`ERROR: ${RUTA_RESUMEN} no coincide con assets/data. Corre:  npm run build:derivados`);
+    process.exitCode = 1;
+  } else {
+    console.log(`ok: ${RUTA_RESUMEN} coincide con assets/data`);
+  }
+  const cazala = path.join(process.cwd(), RUTA_CAZALA);
+  if ((fs.existsSync(cazala) ? fs.readFileSync(cazala, 'utf8') : '') !== textoCazala()) {
+    console.log(`ERROR: ${RUTA_CAZALA} no coincide con catalogo.json y contracciones.json. Corre:  npm run build:derivados`);
+    process.exitCode = 1;
+  } else {
+    console.log(`ok: ${RUTA_CAZALA} coincide con el catálogo`);
+  }
+  const cat = read('catalogo.json');
+  const meta = await metaDb();
+  if (!meta || meta.sha256 !== hashCatalogo() || (cat && meta.huella !== huellaCatalogo(cat)) || (cat && meta.entradas !== cat.entries.length)) {
+    console.log('ERROR: assets/data/catalogo.db no está o no coincide con catalogo.json. Corre:  npm run build:derivados');
+    process.exitCode = 1;
+  } else {
+    console.log(`ok: assets/data/catalogo.db coincide con catalogo.json (${meta.entradas} entradas)`);
   }
 }
 

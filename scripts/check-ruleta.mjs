@@ -13,10 +13,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 import ts from 'typescript';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const leer = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+// Una pantalla se lee con lo que es suyo (su hook y su logic): la lógica de las pantallas delgadas vive ahí.
+const leer = (rel) =>
+  /\/screens\/\w+Screen\.tsx$/.test(rel) ? fuenteDePantalla(path.join(ROOT, rel), ROOT) : fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const cargar = async (rel) => {
   const js = ts.transpileModule(leer(rel), {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -185,9 +188,9 @@ prueba('un toque lleva a la partícula tocada: la de arriba, la de abajo o la mi
 /* ---------- lo que las pantallas dibujan ---------- */
 
 prueba('la ruta PhrasalVerbo existe y la lista ya no reacomoda tarjetas (era el bug de las tarjetas encimadas)', () => {
-  assert.match(leer('src/navigation/routes.ts'), /PhrasalVerbo:\s*\{\s*verbo: string/);
-  assert.match(leer('src/navigation/RootNavigator.tsx'), /name="PhrasalVerbo"/);
-  const lista = leer('src/screens/extras/PhrasalScreen.tsx');
+  assert.match(leer('src/types/rutas.ts'), /PhrasalVerbo:\s*\{\s*verbo: string/);
+  assert.match(leer('src/app/navegacion/RootNavigator.tsx'), /name="PhrasalVerbo"/);
+  const lista = leer('src/features/phrasal/screens/PhrasalScreen.tsx');
   assert.match(lista, /<FlatList/);
   assert.match(lista, /Busca un verbo o una partícula/);
   assert.ok(!/reacomodar|layout=\{/.test(lista), 'la lista no debe tener layout transitions');
@@ -195,7 +198,7 @@ prueba('la ruta PhrasalVerbo existe y la lista ya no reacomoda tarjetas (era el 
 });
 
 prueba('la ruleta es un control ajustable, solo renderiza las partículas cercanas y se asienta con háptico', () => {
-  const r = leer('src/components/phrasal/RuletaParticulas.tsx');
+  const r = leer('src/features/phrasal/components/RuletaParticulas.tsx');
   assert.match(r, /accessibilityRole="adjustable"/);
   assert.match(r, /name: 'increment'/);
   assert.match(r, /name: 'decrement'/);
@@ -206,16 +209,16 @@ prueba('la ruleta es un control ajustable, solo renderiza las partículas cercan
 });
 
 prueba('la página del verbo: «N de M», chips como control principal con reducir movimiento y deslizar de lado', () => {
-  const p = leer('src/screens/extras/PhrasalVerboScreen.tsx');
+  const p = leer('src/features/phrasal/screens/PhrasalVerboScreen.tsx');
   assert.match(p, /`\$\{cambio\.indice \+ 1\} de \$\{n\}`/);
   assert.match(p, /const conRuleta = n > 1 && !reducido/);
   assert.match(p, /n > 1 && reducido \? chips : null/);
   assert.match(p, /activeOffsetX\(\[-20, 20\]\)/);
-  const d = leer('src/components/phrasal/DetalleForma.tsx');
+  const d = leer('src/features/phrasal/components/DetalleForma.tsx');
   assert.match(d, /label="Fuerte"/);
   assert.match(d, /label="Cuidado"/);
   assert.match(d, /Separable:/);
-  const c = leer('src/components/phrasal/ChipsFormas.tsx');
+  const c = leer('src/features/phrasal/components/ChipsFormas.tsx');
   assert.match(c, /minHeight: layout\.tapMin/);
   assert.match(c, /accessibilityRole="radiogroup"/);
 });

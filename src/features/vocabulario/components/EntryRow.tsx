@@ -1,0 +1,161 @@
+import React, { memo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { Icon, RiskBadge, Presionable } from '@/shared/ui';
+import { color, font, radius, space, aparecerSubiendo, escalon, motionEscalon } from '@/theme';
+import type { Entry } from '@/types';
+
+interface Props {
+  entry: Entry;
+  onPress: (entry: Entry) => void;
+  dominada?: boolean;
+  showAudio?: boolean;
+  /** Segundo botón para escuchar la frase en español, junto al de inglés.
+   *  Apagado por defecto: en una lista de 100+ renglones (Explorar, un
+   *  pack) un segundo botón por fila es puro ruido. */
+  showSpanishAudio?: boolean;
+  /** Posición en la lista, para la entrada escalonada. Sin ella, entra sin demora. Solo los primeros
+   *  `motionEscalon.max` renglones se animan: los que la lista monta al hacer scroll aparecen quietos
+   *  (una animación de layout por renglón, a media lista, traba el scroll en gama media). */
+  index?: number;
+  /** 'compacta': renglón de una línea para listas largas. 'mazo': tarjeta
+   *  con el texto a ancho completo y los audios etiquetados debajo; en
+   *  esa variante el botón en español siempre va (ignora showSpanishAudio). */
+  variant?: 'compacta' | 'mazo';
+}
+
+/** Cuerpo de la variante 'mazo': texto arriba, acciones abajo. */
+function ContenidoMazo({
+  entry,
+  dominada,
+  showAudio,
+}: Pick<Props, 'entry' | 'dominada' | 'showAudio'>) {
+  return (
+    <>
+      <View style={styles.bodyMazo}>
+        <View style={styles.head}>
+          <Text style={styles.phrase} numberOfLines={2}>
+            {entry.phrase}
+          </Text>
+          {dominada ? <Icon name="check" size="md" color={color.correct} /> : null}
+        </View>
+        <Text style={styles.spanish} numberOfLines={2}>
+          {entry.spanish_main}
+        </Text>
+        {entry.vulgaridad > 0 ? (
+          <View style={styles.badges}>
+            <RiskBadge vulgaridad={entry.vulgaridad} />
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.separador} />
+
+      <View style={styles.acciones}>
+        {showAudio && entry.audio_en ? (
+          <AudioButton path={entry.audio_en} size="sm" label="Inglés" />
+        ) : null}
+        {entry.audio_es ? (
+          <AudioButton path={entry.audio_es} size="sm" label="Español" />
+        ) : null}
+        <View style={styles.ver}>
+          <Text style={styles.verTexto}>Ver</Text>
+          <Icon name="chevron-right" size="sm" color={color.textMuted} />
+        </View>
+      </View>
+    </>
+  );
+}
+
+/**
+ * Renglón de una lista de frases.
+ *
+ * Va memoizado porque las listas de packs llegan a 120 renglones y sin
+ * memo cualquier cambio de estado del padre los repinta todos.
+ */
+export const EntryRow = memo(function EntryRow({
+  entry,
+  onPress,
+  dominada,
+  showAudio = true,
+  showSpanishAudio = false,
+  index = 0,
+  variant = 'compacta',
+}: Props) {
+  const esMazo = variant === 'mazo';
+  return (
+    // La entrada va en un `Animated.View` aparte: `Presionable` anima su propio transform (la escala) y una
+    // animación de layout en ese mismo nodo lo pisaría.
+    <Animated.View entering={index < motionEscalon.max ? aparecerSubiendo(escalon(index)) : undefined}>
+    <Presionable
+      onPress={() => onPress(entry)}
+      accessibilityRole="button"
+      accessibilityLabel={`${entry.phrase}. ${entry.spanish_main}`}
+      style={[styles.row, esMazo && styles.rowMazo]}
+    >
+      {esMazo ? (
+        <ContenidoMazo entry={entry} dominada={dominada} showAudio={showAudio} />
+      ) : (
+        <>
+          <View style={styles.body}>
+            <View style={styles.head}>
+              <Text style={styles.phrase} numberOfLines={2}>
+                {entry.phrase}
+              </Text>
+              {dominada ? <Icon name="check" size="md" color={color.correct} /> : null}
+            </View>
+            <Text style={styles.spanish} numberOfLines={2}>
+              {entry.spanish_main}
+            </Text>
+            {entry.vulgaridad > 0 ? (
+              <View style={styles.badges}>
+                <RiskBadge vulgaridad={entry.vulgaridad} />
+              </View>
+            ) : null}
+          </View>
+
+          {showAudio && entry.audio_en ? (
+            <AudioButton path={entry.audio_en} size="sm" />
+          ) : null}
+          {showSpanishAudio && entry.audio_es ? (
+            <AudioButton path={entry.audio_es} size="sm" />
+          ) : null}
+        </>
+      )}
+    </Presionable>
+    </Animated.View>
+  );
+});
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingVertical: space.md,
+    paddingHorizontal: space.md,
+    backgroundColor: color.surface,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.border,
+  },
+  // Pisa el flexDirection, el alineado y el gap de `row`: en columna, con
+  // alignItems 'center' el texto se encogería a su contenido.
+  rowMazo: { flexDirection: 'column', alignItems: 'stretch', gap: space.sm },
+  body: { flex: 1, gap: space.xs },
+  bodyMazo: { gap: space.xs },
+  separador: { height: StyleSheet.hairlineWidth, backgroundColor: color.border },
+  acciones: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  ver: { flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: space.sm },
+  verTexto: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
+  head: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  phrase: {
+    flex: 1,
+    fontSize: font.size.md,
+    fontFamily: font.family.bodyStrong,
+    color: color.text,
+  },
+  spanish: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
+  badges: { flexDirection: 'row', gap: space.xs, marginTop: space.xs },
+});

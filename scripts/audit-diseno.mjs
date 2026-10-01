@@ -3,7 +3,7 @@
  *
  *   npm run audit:diseno
  *
- * Es análisis estático de src/ y App.tsx: no ejecuta la app ni arregla nada.
+ * Es análisis estático de src/: no ejecuta la app ni arregla nada.
  * Al final imprime cuántos hallazgos hay por regla y los compara con la
  * corrida anterior, para ver el efecto de cada arreglo.
  *
@@ -13,6 +13,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fuenteDePantalla } from './lib/pantallas.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SALIDA = path.join(ROOT, 'DESIGN-AUDIT.md');
@@ -35,13 +36,13 @@ const CONTENIDO = /(phrase|spanish|frase|traduc|titulo|title|nombre|palabra|ganc
  * `primary`, pero nunca conviven en pantalla (vistas o estados excluyentes).
  */
 const ACC1_NO_CONVIVEN = {
-  'src/screens/extras/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
-  'src/components/juegos/cazala/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
-  'src/screens/games/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
-  'src/screens/utility/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
-  'src/screens/entry/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
-  'src/components/estudio/FinDelDia.tsx': '`quedan ? Seguir repasando : sinNuevas ? Frases sueltas : Aprender frases nuevas`: un solo `primary` a la vez; Jugar es `secondary` y Volver `ghost`',
-  'src/screens/entry/AuthScreen.tsx': 'tres vistas excluyentes (vincular tu avance, usuario y contraseña, inicio), cada una con un solo `primary`; en el inicio la acción principal es «Continuar con Google» (`BotonGoogle`, con la marca de Google) y lo demás es `secondary`/`ghost`',
+  'src/features/lecturas/screens/LecturaScreen.tsx': 'la vista de preguntas y la de lectura son excluyentes (`enPreguntas`)',
+  'src/features/juegos/cazala/components/PieCaza.tsx': '`revisada ? Siguiente : Revisar`: el pie muestra uno u otro, nunca los dos',
+  'src/features/juegos/fin/screens/GameEndScreen.tsx': '`nivel ? Nivel siguiente (primary) + Recoger (secondary) : Recoger (primary)`: nunca hay dos',
+  'src/features/ajustes/screens/DownloadsScreen.tsx': 'lista de 16 packs con la misma acción "descargar": ninguna es la principal y 16 `primary` romperían "una sola acción sólida"; se queda `secondary`',
+  'src/features/cuenta/screens/OnboardingScreen.tsx': 'un paso a la vez (`paso === N`); en el último, "Permitir y empezar" y "Entrar a la app" son excluyentes',
+  'src/features/estudio/components/FinDelDia.tsx': '`quedan ? Seguir repasando : sinNuevas ? Frases sueltas : Aprender frases nuevas`: un solo `primary` a la vez; Jugar es `secondary` y Volver `ghost`',
+  'src/features/cuenta/screens/AuthScreen.tsx': 'tres vistas excluyentes (vincular tu avance, usuario y contraseña, inicio), cada una con un solo `primary`; en el inicio la acción principal es «Continuar con Google» (`BotonGoogle`, con la marca de Google) y lo demás es `secondary`/`ghost`',
 };
 
 /**
@@ -49,7 +50,7 @@ const ACC1_NO_CONVIVEN = {
  * sigue sus lineamientos de marca: Roboto Medium, la fuente del sistema en Android.
  */
 const TIPO1_EXCEPCIONES = {
-  'src/components/entrada/BotonGoogle.tsx': 'los lineamientos de marca de «Sign in with Google» piden Roboto Medium',
+  'src/features/cuenta/components/BotonGoogle.tsx': 'los lineamientos de marca de «Sign in with Google» piden Roboto Medium',
 };
 /** ACC-1 reales: la acción principal no es sólida, o hay varios sólidos a la vez. */
 const ACC1_REALES = [
@@ -57,39 +58,40 @@ const ACC1_REALES = [
 
 /** TIPO-2: textos de 12–13 px con nombre de cuerpo que se quedan así, revisados a mano. */
 const TIPO2_SE_QUEDAN = {
-  'src/components/base/Ads.tsx:fullNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/entry/AuthScreen.tsx:legalTexto': 'nota al pie o leyenda: «Al continuar aceptas los Términos y el Aviso de privacidad», una línea bajo los botones',
-  'src/components/entrada/BotonGoogle.tsx:texto': 'la etiqueta del botón «Continuar con Google» va en 14 como piden los lineamientos de marca de Google',
-  'src/screens/entry/OnboardingScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/entry/OnboardingScreen.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/screens/extras/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/games/ColmenaScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/components/juegos/caida/FinCaida.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/games/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/games/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/components/juegos/dulces/PieDulces.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/extras/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
-  'src/screens/extras/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/screens/utility/SettingsScreen.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/screens/games/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
-  'src/components/list/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
-  'src/components/fx/Espectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
-  'src/components/fx/Espectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
-  'src/components/fx/Espectrograma.tsx:listaTexto': 'texto alternativo de la gráfica: una línea por día, información secundaria',
-  'src/components/gramatica/BloqueGramatica.tsx:resumen': 'una línea de lo que reúne el bloque, como `FilaModo.corta` de Practicar: apoya al título, no es lo que se estudia',
-  'src/components/gramatica/RenglonTema.tsx:gancho': 'una o dos líneas que apoyan al título del renglón, como `FilaModo.corta` de Practicar; el gancho del tema se lee en 16 px en su pantalla',
+  'src/shared/ui/Ads.tsx:fullNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/cuenta/screens/AuthScreen.tsx:legalTexto': 'nota al pie o leyenda: «Al continuar aceptas los Términos y el Aviso de privacidad», una línea bajo los botones',
+  'src/features/cuenta/components/BotonGoogle.tsx:texto': 'la etiqueta del botón «Continuar con Google» va en 14 como piden los lineamientos de marca de Google',
+  'src/features/cuenta/components/Presentacion.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/cuenta/components/Pregunta.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/cuenta/components/PasoCuantas.tsx:chipTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/practicar/screens/PracticeScreen.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/colmena/components/PieColmena.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/caida/components/FinCaida.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/fin/screens/GameEndScreen.tsx:estrellasNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/fin/screens/GameEndScreen.tsx:repasoNota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/juegos/dulces/components/PieDulces.tsx:nota': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/lecturas/screens/LecturaScreen.tsx:leyendaTexto': 'nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia',
+  'src/features/lecturas/screens/LecturasScreen.tsx:difTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/ajustes/components/ControlesAjustes.tsx:horaTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/juegos/pares/screens/ParesScreen.tsx:saltarTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/features/vocabulario/components/EntryRow.tsx:verTexto': 'etiqueta de un botón de texto: lo que se toca es el contenedor',
+  'src/features/progreso/components/GraficaEspectrograma.tsx:etiquetaTexto': 'etiqueta flotante de una línea con el dato del día que se toca: metadato, no lo que se estudia',
+  'src/features/progreso/components/GraficaEspectrograma.tsx:hoyTexto': 'etiqueta de una línea (metadato o chip)',
+  'src/features/progreso/components/GraficaEspectrograma.tsx:listaTexto': 'texto alternativo de la gráfica: una línea por día, información secundaria',
+  'src/features/gramatica/components/BloqueGramatica.tsx:resumen': 'una línea de lo que reúne el bloque, como `FilaModo.corta` de Practicar: apoya al título, no es lo que se estudia',
+  'src/features/gramatica/components/RenglonTema.tsx:gancho': 'una o dos líneas que apoyan al título del renglón, como `FilaModo.corta` de Practicar; el gancho del tema se lee en 16 px en su pantalla',
 };
 
 /** TIPO-4: estilos de 28 px o más que no son títulos, revisados a mano. */
 const TIPO4_NO_ES_TITULO = {
-  'src/components/base/Card.tsx:portadaVacia': 'inicial suelta de una portada pendiente (`textSobrePortada`), no un título',
-  'src/components/card/SceneImage.tsx:inicial': 'inicial suelta de una imagen pendiente (`textSobrePortada`), no un título',
+  'src/shared/ui/Card.tsx:portadaVacia': 'inicial suelta de una portada pendiente (`textSobrePortada`), no un título',
+  'src/shared/ui/SceneImage.tsx:inicial': 'inicial suelta de una imagen pendiente (`textSobrePortada`), no un título',
 };
 
 /** Colecciones grandes pintadas con `.map` dentro de un ScrollView, sin virtualizar. Revisado a mano. */
 const LISTAS_SIN_VIRTUALIZAR = [
-  { archivo: 'src/screens/extras/ErrorsScreen.tsx', patron: /lista\.map\(/, motivo: 'hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render' },
-  { archivo: 'src/screens/extras/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
+  { archivo: 'src/features/errores/screens/ErrorsScreen.tsx', patron: /lista\.map\(/, motivo: 'hasta 194 `Card` a la vez con el filtro "todos"; el arreglo se filtra y se ordena en cada render' },
+  { archivo: 'src/features/sonidos/screens/PronunciationScreen.tsx', patron: /fonemas\.map\(\(f\)/, motivo: 'hasta 53 tarjetas de fonema (con imagen y botones de audio) a la vez' },
 ];
 
 /** COLOR-1: usos de un color de mundo como relleno que sí se aceptan, con su motivo. */
@@ -101,8 +103,8 @@ const PASOS_ESCALA = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 
 /** MOT-1: curvas lineales válidas. Son relojes de la ronda, no animación de interfaz. */
 const MOT1_EXCEPCIONES = [
-  { archivo: 'src/components/base/RoundTimer.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda' },
-  { archivo: 'src/screens/games/CaidaScreen.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
+  { archivo: 'src/shared/ui/RoundTimer.tsx', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la barra baja a ritmo constante durante los segundos que dura la ronda' },
+  { archivo: 'src/features/juegos/caida/hooks/usePartidaCaida.ts', patron: /Easing\.linear/, motivo: 'reloj de la ronda: la ficha cae a velocidad constante y su duración es la de la ronda' },
 ];
 
 // ── utilidades ───────────────────────────────────────────────────────────
@@ -245,7 +247,7 @@ function auditaEstatica(archivos) {
       if (/fontFamily/.test(l) && !/font\.family\./.test(l) && !TIPO1_EXCEPCIONES[r]) H.fuente.push({ r, linea: i + 1, txt: l.trim() });
       if (/<LinearGradient/.test(l)) H.gradiente.push({ r, linea: i + 1 });
     });
-    if (!enTema && !r.startsWith('src/components/base/Button')) {
+    if (!enTema && !r.startsWith('src/shared/ui/Button')) {
       const tags = leeTags(src, 'Button');
       if (tags.length) H.botones.push({ r, tags: tags.map((t) => ({ linea: t.linea, variant: limpia((t.texto.match(/variant=(\{[^}]*\}|"[^"]*")/) || [])[1]) || 'primary (por defecto)', label: limpia((t.texto.match(/label=(\{[^}]*\}|"[^"]*")/) || [])[1]).slice(0, 44) })) });
     }
@@ -298,7 +300,7 @@ function evaluaEstilo(e, r, enTema, H) {
   const alto = get('minHeight') || get('height');
   // El `icon` de la barra de pestañas (28 dp) es solo el dibujo: lo que se toca
   // es la pestaña entera, de 68 dp de alto. No es un objetivo táctil chico.
-  const esIconoDePestana = r === 'src/navigation/TabNavigator.tsx' && e.nombre === 'icon';
+  const esIconoDePestana = r === 'src/app/navegacion/TabNavigator.tsx' && e.nombre === 'icon';
   if (alto && INTERACTIVO.test(e.nombre) && !enTema && !esIconoDePestana) {
     const v = num(alto.v);
     if (v !== null && v > 4 && v < 48) H.tactil.push({ r, linea: alto.linea, txt: `${e.nombre}: ${alto.k} ${alto.v} = ${v} dp` });
@@ -316,7 +318,30 @@ function tokensTactiles(tokens, audioBtn) {
 }
 
 // ── auditoría de comportamiento ──────────────────────────────────────────
-const esPantalla = (r) => /^src\/screens\/.*Screen\.tsx$/.test(r);
+const esPantalla = (r) => /^src\/(.+\/)?screens\/.*Screen\.tsx$/.test(r) || r === 'src/app/arranque/BootScreen.tsx';
+/** Nombre corto de una pantalla o archivo para las tablas del informe. */
+const corto = (r) => r.replace(/^src\/(screens|features)\//, '');
+/** Los efectos de la señal: `shared/ui/fx/` y los que viven con la única pantalla que los usa. */
+const FX_EN_FEATURES = new Set([
+  'src/features/practicar/components/BotonSenal.tsx',
+  'src/features/practicar/components/FondoAurora.tsx',
+  'src/features/practicar/components/MedidorVU.tsx',
+  'src/features/practicar/components/OndaSenal.tsx',
+  'src/features/practicar/components/PortadaJuego.tsx',
+  'src/features/practicar/components/TarjetaTilt.tsx',
+  'src/features/progreso/components/Espectrograma.tsx',
+  'src/features/progreso/components/MedidorSenal.tsx',
+  'src/features/progreso/components/GraficaEspectrograma.tsx',
+  'src/features/progreso/components/ArcoSenal.tsx',
+  'src/features/oido/components/AnilloRadio.tsx',
+  'src/features/oido/hooks/useBolsillo.ts',
+  'src/features/estudio/components/HojaVeredicto.tsx',
+  'src/features/estudio/components/ChipMarcador.tsx',
+  'src/app/navegacion/PildoraLiquida.tsx',
+  'src/app/navegacion/TransicionHoy.tsx',
+  'src/shared/hooks/useVisibilidad.ts',
+]);
+const esFx = (r) => r.startsWith('src/components/fx/') || r.startsWith('src/shared/ui/fx/') || FX_EN_FEATURES.has(r);
 
 function primeraLinea(lines, re) {
   const i = lines.findIndex((l) => !esComentario(l) && re.test(l));
@@ -327,15 +352,20 @@ function primeraLinea(lines, re) {
 function auditaEstados(archivos) {
   const RE = {
     carga: /\b(setLoading|setCargando|isLoading|loading|cargando|Repartiendo|Cargando)\b|<ActivityIndicator|\buseCarga\(|<Carga\b/,
-    vacio: /<EmptyState|\.length === 0|\.length == 0|!\w+\.length\b/,
+    // `ENTRADAS_CATALOGO === 0`: un conteo generado al compilar (resumenContenido.ts) que hace lo mismo que `.length === 0`.
+    vacio: /<EmptyState|\.length === 0|\.length == 0|!\w+\.length\b|\b[A-Z][A-Z_]+ === 0\b/,
     error: /\.catch\(|\bcatch\s*[({]|setError|useState<[^>]*rror|<Carga\b|<ErrorCarga|estado === 'error'/,
   };
   const filas = [];
-  for (const { r, lines, src } of archivos.filter((a) => esPantalla(a.r))) {
+  for (const { r, lines } of archivos.filter((a) => esPantalla(a.r))) {
+    // La pantalla con lo que es suyo (sus hooks y su logic): la carga suele vivir en el hook de la feature.
+    // Las líneas pasadas del final de la pantalla son de sus hooks.
+    const src = fuenteDePantalla(path.join(ROOT, r), ROOT, 1);
     // Carga datos = importa de la base y llama a alguna función de lectura.
     // Las pantallas que solo escriben (applyGameGrade…) no entran.
-    if (!/from '@\/db\//.test(src) || !/\b(get|count|resumen|list|fetch)[A-Z]\w*\(/.test(src)) continue;
-    const ev = Object.fromEntries(Object.entries(RE).map(([k, re]) => [k, primeraLinea(lines, re)]));
+    if (!/from '@\/(db|data)\//.test(src) || !/\b(get|count|resumen|list|fetch)[A-Z]\w*\(/.test(src)) continue;
+    const todas = src.split('\n').slice(1);
+    const ev = Object.fromEntries(Object.entries(RE).map(([k, re]) => [k, primeraLinea(lines, re) ?? primeraLinea(todas, re)]));
     filas.push({ r, ...ev });
   }
   return filas;
@@ -389,7 +419,7 @@ function auditaMovimiento(archivos) {
   const sinFeedback = [];
   const TOCABLE = /<(Pressable|AnimatedPressable|TouchableOpacity|TouchableHighlight|TouchableWithoutFeedback)\b|createAnimatedComponent\(Pressable\)/;
   for (const { r, lines } of archivos) {
-    if (r === 'src/components/base/Presionable.tsx') continue;
+    if (r === 'src/shared/ui/Presionable.tsx') continue;
     lines.forEach((l, i) => {
       if (!esComentario(l) && TOCABLE.test(l)) sinFeedback.push({ r, linea: i + 1, txt: 'tocable que no usa `Presionable`' });
     });
@@ -403,34 +433,47 @@ function auditaMovimiento(archivos) {
  */
 /** Estudio 5.0: las piezas de la tarjeta y la pantalla que animan (el resto de `card/` es anterior a la señal). */
 const ESTUDIO_SENAL = new Set([
-  'src/screens/study/StudyScreen.tsx',
-  'src/components/card/StudyCardView.tsx',
-  'src/components/card/OptionButton.tsx',
-  'src/components/card/TileBuilder.tsx',
-  'src/components/card/FraseHueco.tsx',
-  'src/components/card/PalabraVoladora.tsx',
-  'src/components/card/DiffFrase.tsx',
-  'src/components/card/BloqueVoz.tsx',
+  'src/features/estudio/screens/StudyScreen.tsx',
+  'src/features/estudio/components/StudyCardView.tsx',
+  'src/features/estudio/components/TileBuilder.tsx',
+  'src/features/estudio/components/FraseHueco.tsx',
+  'src/features/estudio/components/PalabraVoladora.tsx',
+  'src/features/estudio/components/DiffFrase.tsx',
+  'src/features/estudio/components/BloqueVoz.tsx',
+  'src/features/estudio/screens/StudyScreen.tsx',
+  'src/features/estudio/components/StudyCardView.tsx',
+  'src/shared/ui/OptionButton.tsx',
+  'src/features/estudio/components/TileBuilder.tsx',
+  'src/features/estudio/components/FraseHueco.tsx',
+  'src/features/estudio/components/PalabraVoladora.tsx',
+  'src/features/estudio/components/DiffFrase.tsx',
+  'src/features/estudio/components/BloqueVoz.tsx',
 ]);
 const ALCANCE_SENAL = (r) =>
+  esFx(r) || r === 'src/shared/ui/BarraFina.tsx' || r === 'src/shared/ui/BotonGuardar.tsx' || r === 'src/shared/ui/CorreccionFrase.tsx' ||
+  r === 'src/domain/resumenNiveles.ts' || r === 'src/data/local/celebracion.ts' ||
+  /^src\/features\/(progreso|detalle|oido|gramatica|phrasal|lecturas|frases-sueltas|errores|atoradas|practicar)\//.test(r) ||
+  /^src\/features\/juegos\/(niveles|pares|caida|dulces|colmena|cazala)\//.test(r) ||
+  r.startsWith('src/features/sonidos/components/') || r === 'src/features/sonidos/screens/PronunciationScreen.tsx' ||
+  r.startsWith('src/features/mazo/components/') || r === 'src/features/mazo/screens/DeckScreen.tsx' ||
   r.startsWith('src/components/fx/') || r.startsWith('src/components/progreso/') || ESTUDIO_SENAL.has(r) ||
-  r.startsWith('src/components/detalle/') || r === 'src/screens/discover/DetailScreen.tsx' ||
-  r.startsWith('src/components/niveles/') || r === 'src/screens/games/NivelesScreen.tsx' ||
-  r.startsWith('src/components/juegos/pares/') || r === 'src/screens/games/ParesScreen.tsx' ||
-  r.startsWith('src/components/juegos/caida/') || r === 'src/screens/games/CaidaScreen.tsx' ||
-  r.startsWith('src/components/juegos/dulces/') || r === 'src/screens/games/DulcesScreen.tsx' ||
-  r.startsWith('src/components/juegos/colmena/') || r === 'src/screens/games/ColmenaScreen.tsx' ||
-  r.startsWith('src/components/juegos/cazala/') || r === 'src/screens/games/CazalaScreen.tsx' ||
-  r === 'src/screens/extras/EarModeScreen.tsx' ||
-  r.startsWith('src/components/sonidos/') || r === 'src/screens/extras/PronunciationScreen.tsx' ||
-  r.startsWith('src/components/gramatica/') || r === 'src/screens/extras/GramaticaScreen.tsx' || r === 'src/screens/extras/GramaticaTemaScreen.tsx' ||
-  r.startsWith('src/components/phrasal/') || r === 'src/screens/extras/PhrasalScreen.tsx' || r === 'src/screens/extras/PhrasalVerboScreen.tsx' ||
-  r.startsWith('src/components/lectura/') || r === 'src/screens/extras/LecturasScreen.tsx' || r === 'src/screens/extras/LecturaScreen.tsx' ||
-  r.startsWith('src/components/mazo/') || r === 'src/screens/extras/AzarScreen.tsx' ||
-  r.startsWith('src/components/errores/') || r === 'src/screens/extras/ErrorsScreen.tsx' || r === 'src/screens/extras/ErrorDetailScreen.tsx' ||
-  r.startsWith('src/components/atoradas/') || r === 'src/screens/utility/DeckScreen.tsx' || r === 'src/screens/utility/StuckScreen.tsx' ||
-  r.startsWith('src/screens/extras/practicar/') || r === 'src/screens/extras/PracticeScreen.tsx' ||
-  r === 'src/screens/utility/ProgressScreen.tsx' || r === 'src/navigation/TabNavigator.tsx';
+  r.startsWith('src/components/detalle/') || r === 'src/features/detalle/screens/DetailScreen.tsx' ||
+  r.startsWith('src/components/niveles/') || r === 'src/features/juegos/niveles/screens/NivelesScreen.tsx' ||
+  r.startsWith('src/components/juegos/pares/') || r === 'src/features/juegos/pares/screens/ParesScreen.tsx' ||
+  r.startsWith('src/components/juegos/caida/') || r === 'src/features/juegos/caida/screens/CaidaScreen.tsx' ||
+  r.startsWith('src/components/juegos/dulces/') || r === 'src/features/juegos/dulces/screens/DulcesScreen.tsx' ||
+  r.startsWith('src/components/juegos/colmena/') || r === 'src/features/juegos/colmena/screens/ColmenaScreen.tsx' ||
+  r.startsWith('src/components/juegos/cazala/') || r === 'src/features/juegos/cazala/screens/CazalaScreen.tsx' ||
+  r === 'src/features/oido/screens/EarModeScreen.tsx' ||
+  r.startsWith('src/components/sonidos/') || r === 'src/features/sonidos/screens/PronunciationScreen.tsx' ||
+  r.startsWith('src/components/gramatica/') || r === 'src/features/gramatica/screens/GramaticaScreen.tsx' || r === 'src/features/gramatica/screens/GramaticaTemaScreen.tsx' ||
+  r.startsWith('src/components/phrasal/') || r === 'src/features/phrasal/screens/PhrasalScreen.tsx' || r === 'src/features/phrasal/screens/PhrasalVerboScreen.tsx' ||
+  r.startsWith('src/components/lectura/') || r === 'src/features/lecturas/screens/LecturasScreen.tsx' || r === 'src/features/lecturas/screens/LecturaScreen.tsx' ||
+  r.startsWith('src/components/mazo/') || r === 'src/features/frases-sueltas/screens/AzarScreen.tsx' ||
+  r.startsWith('src/components/errores/') || r === 'src/features/errores/screens/ErrorsScreen.tsx' || r === 'src/features/errores/screens/ErrorDetailScreen.tsx' ||
+  r.startsWith('src/components/atoradas/') || r === 'src/features/mazo/screens/DeckScreen.tsx' || r === 'src/features/atoradas/screens/StuckScreen.tsx' ||
+  r.startsWith('src/screens/extras/practicar/') || r === 'src/features/practicar/screens/PracticeScreen.tsx' ||
+  r === 'src/features/progreso/screens/ProgressScreen.tsx' || r === 'src/app/navegacion/TabNavigator.tsx';
 const BUCLE = /\b(useFrameCallback|withRepeat|useReloj)\(/;
 const ANIMA = /\b(withTiming|withSpring|withRepeat|withSequence|withDelay|useFrameCallback)\(|entering=/;
 /** MOT-3: componentes que son el momento héroe animado de su pantalla. */
@@ -438,7 +481,7 @@ const MOMENTOS_HEROE = ['ConsolaHoy', 'MedidorSenal'];
 /** MOT-3: los canvases de Skia en bucle que vive cada pantalla (máximo 3 a la vez). */
 const LOOPS_POR_PANTALLA = {
   Practicar: ['FondoAurora.tsx', 'OndaSenal.tsx', 'PortadaJuego.tsx'],
-  Progreso: ['MedidorSenal.tsx'],
+  Progreso: ['ArcoSenal.tsx'],
   // El héroe de Estudio (OndaVoz) no es un bucle: lo mueve la posición del audio y solo mientras suena.
   Estudio: [],
   // Detalle: el héroe es la frase con su onda (mismo OndaVoz, movida por el audio); ningún bucle.
@@ -476,9 +519,12 @@ const LOOPS_POR_PANTALLA = {
 };
 const MAX_CANVAS_EN_BUCLE = 3;
 const MOT5_EXCEPCIONES = [
-  { archivo: 'src/components/fx/TransicionHoy.tsx', motivo: 'solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento' },
-  { archivo: 'src/screens/extras/practicar/Destacados.tsx', motivo: '`entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)' },
-  { archivo: 'src/screens/extras/practicar/EncabezadoPracticar.tsx', motivo: 'anima con el scroll (lo mueve el dedo, no es un bucle) y con `entering`, que salta al valor final con reducir movimiento' },
+  { archivo: 'src/features/frases-sueltas/components/CartaEnMazo.tsx', motivo: 'recibe `reducido` (useMovimientoReducido) de MazoCartas: con reducir movimiento no hay abanico de entrada' },
+  { archivo: 'src/features/juegos/caida/hooks/useMarcadorCaida.ts', motivo: 'recibe `reducido` (useMovimientoReducido) de usePartidaCaida: con reducir movimiento el marcador no pulsa' },
+  { archivo: 'src/features/juegos/caida/hooks/useChoqueCaida.ts', motivo: 'recibe `reducido` (useMovimientoReducido) de usePartidaCaida: con reducir movimiento no hay aplaste ni destello, solo cambian los colores' },
+  { archivo: 'src/app/navegacion/TransicionHoy.tsx', motivo: 'solo se monta si `ConsolaHoy` la pide, y `ConsolaHoy` no la pide con reducir movimiento' },
+  { archivo: 'src/features/practicar/components/Destacados.tsx', motivo: '`entering` de Reanimated: salta al valor final con reducir movimiento (`ReduceMotion.System`)' },
+  { archivo: 'src/features/practicar/components/EncabezadoPracticar.tsx', motivo: 'anima con el scroll (lo mueve el dedo, no es un bucle) y con `entering`, que salta al valor final con reducir movimiento' },
 ];
 
 /** MOT-3 (un solo momento héroe; máximo 3 canvases en bucle), MOT-4 (bucles con `useSenalActiva`), MOT-5 (reducir movimiento) e IA-3 (luz de escena). */
@@ -488,20 +534,22 @@ function auditaSenal(archivos) {
     const enAlcance = ALCANCE_SENAL(r);
     const codigo = lines.map((l) => (esComentario(l) ? '' : l));
     const texto = codigo.join('\n');
-    if (r.startsWith('src/screens/') || r.startsWith('src/components/progreso/')) {
+    if (esPantalla(r) || r.startsWith('src/screens/') || r.startsWith('src/components/progreso/') || r.startsWith('src/features/progreso/components/')) {
       const n = MOMENTOS_HEROE.reduce((t, c) => t + (texto.match(new RegExp(`<${c}\\b`, 'g')) || []).length, 0);
       if (n > 1) S.mot3.push({ r, linea: primeraLinea(codigo, new RegExp(`<(${MOMENTOS_HEROE.join('|')})\\b`)) ?? 1, txt: `${n} momentos héroe en una pantalla` });
     }
-    if (r.startsWith('src/components/fx/') && /shadowColor/.test(texto)) {
+    if (esFx(r) && /shadowColor/.test(texto)) {
       S.luz.push({ r, linea: primeraLinea(codigo, /shadowColor/) ?? 1, txt: 'sombra de color en un efecto: la señal es luz de escena, no sombra' });
     }
     if (!enAlcance) continue;
     const bucle = BUCLE.test(texto);
     if (bucle && /<Canvas\b/.test(texto)) S.canvasEnBucle.push(r);
-    if (bucle && r !== 'src/components/fx/useSenalActiva.ts' && !/\buseSenalActiva\b/.test(texto)) {
+    if (bucle && r !== 'src/shared/ui/fx/useSenalActiva.ts' && !/\buseSenalActiva\b/.test(texto)) {
       S.mot4.push({ r, linea: primeraLinea(codigo, BUCLE) ?? 1, txt: 'bucle que no consulta `useSenalActiva` (foco, segundo plano, reducir movimiento)' });
     }
-    if (ANIMA.test(texto) && !/\b(useMovimientoReducido|useSenalActiva)\b/.test(texto)) {
+    // Una pantalla puede recibir `reducido` de su hook: se mira la pantalla junto con sus hooks.
+    const consulta = esPantalla(r) ? fuenteDePantalla(path.join(ROOT, r), ROOT, 1) : texto;
+    if (ANIMA.test(texto) && !/\b(useMovimientoReducido|useSenalActiva)\b/.test(consulta)) {
       const item = { r, linea: primeraLinea(codigo, ANIMA) ?? 1 };
       const ex = MOT5_EXCEPCIONES.find((e) => e.archivo === r);
       if (ex) S.mot5Exentos.push({ ...item, txt: ex.motivo });
@@ -517,7 +565,7 @@ function auditaSenal(archivos) {
   }
   for (const [pantalla, archivos] of Object.entries(LOOPS_POR_PANTALLA)) {
     if (archivos.length > MAX_CANVAS_EN_BUCLE) {
-      S.mot3.push({ r: 'src/components/fx/', linea: 1, txt: `${pantalla}: ${archivos.length} canvases de Skia en bucle (máximo ${MAX_CANVAS_EN_BUCLE} a la vez)` });
+      S.mot3.push({ r: 'src/shared/ui/fx/', linea: 1, txt: `${pantalla}: ${archivos.length} canvases de Skia en bucle (máximo ${MAX_CANVAS_EN_BUCLE} a la vez)` });
     }
   }
   return S;
@@ -749,7 +797,30 @@ function analizaTicks(r, src, out) {
   }
 }
 
-/** d) Audio: rutas de los JSON que no están en bundled.ts, y botones que las usan. */
+/** Las familias de `font.family` (tokens.ts) que el plugin de expo-font de app.json no incrusta en Android: caerían a Roboto. */
+function familiasSinIncrustar(tokens) {
+  const bloque = tokens.match(/family:\s*\{([^}]*)\}/)?.[1] ?? '';
+  const familias = [...bloque.matchAll(/:\s*'([^']+)'/g)].map((m) => m[1]);
+  let incrustadas = [];
+  try {
+    const plugins = JSON.parse(fs.readFileSync(path.join(ROOT, 'app.json'), 'utf8')).expo?.plugins ?? [];
+    const fuente = plugins.find((p) => Array.isArray(p) && p[0] === 'expo-font')?.[1];
+    incrustadas = (fuente?.android?.fonts ?? []).map((f) => (typeof f === 'string' ? path.basename(f).replace(/\.[^.]+$/, '') : f.fontFamily));
+  } catch {
+    /* sin app.json legible: todas cuentan como faltantes */
+  }
+  return familias.filter((f) => !incrustadas.includes(f));
+}
+
+/** El mapa de medios empaquetados completo: bundled.ts y sus módulos por paquete (src/assets/medios/). */
+function leerMapaMedios() {
+  const dir = path.join(ROOT, 'src/assets/medios');
+  const partes = fs.existsSync(dir) ? fs.readdirSync(dir).filter((n) => n.endsWith('.ts')).map((n) => fs.readFileSync(path.join(dir, n), 'utf8')) : [];
+  const base = path.join(ROOT, 'src/assets/bundled.ts');
+  return [fs.existsSync(base) ? fs.readFileSync(base, 'utf8') : '', ...partes].join('\n');
+}
+
+/** d) Audio: rutas de los JSON que no están en el mapa de medios (bundled.ts y medios/), y botones que las usan. */
 function auditaAudio(archivos, bundledSrc) {
   const bundled = new Set([...bundledSrc.matchAll(/^\s*'([^']+)':\s*(?:require|\d+,)/gm)].map((m) => m[1]));
   const refs = new Set();
@@ -781,9 +852,9 @@ function auditaAudio(archivos, bundledSrc) {
 
 /** ACC-3: opciones visibles en Practicar con los grupos plegados = 1 acción de HOY + destacados + grupos. */
 function opcionesPracticar(leer) {
-  const modos = leer('src/screens/extras/practicar/modos.ts');
+  const modos = leer('src/shared/navegacion/modos.ts');
   const grupos = modos.slice(modos.indexOf('GRUPOS = ['), modos.indexOf('] as const')).split("id: '").length - 1;
-  const hoy = leer('src/screens/extras/practicar/hoy.ts');
+  const hoy = leer('src/features/practicar/logic/hoy.ts');
   const destacados = Number(hoy.slice(hoy.indexOf('NUM_DESTACADOS = ') + 17).split(';')[0]);
   const destinos = modos.split("    titulo: '").length - 1;
   return { total: 1 + destacados + grupos, destacados, grupos, destinos };
@@ -811,7 +882,7 @@ function leePrevio() {
 
 function tablaEstados(filas) {
   const celda = (l) => (l ? `✓ \`:${l}\`` : '✗');
-  const cuerpo = filas.map((f) => `| \`${f.r.replace('src/screens/', '')}\` | ${celda(f.carga)} | ${celda(f.vacio)} | ${celda(f.error)} |`).join('\n');
+  const cuerpo = filas.map((f) => `| \`${corto(f.r)}\` | ${celda(f.carga)} | ${celda(f.vacio)} | ${celda(f.error)} |`).join('\n');
   return `| pantalla (archivo) | carga | vacío | error |\n|---|---|---|---|\n${cuerpo}`;
 }
 
@@ -873,7 +944,7 @@ ${c.C.fallos.map((f) => `- \`${f.t}\` sobre \`${f.s}\`: ${f.v.toFixed(2)}`).join
 
 ## TIPOGRAFÍA
 
-**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), cargadas en \`App.tsx\` con \`useFonts\` (\`src/theme/fuentes.ts\`): Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
+**TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de \`font.family\` (\`tokens.ts\`), incrustadas en el APK por el plugin de \`expo-font\` en \`app.json\`: Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un \`fontFamily\` que no salga de \`font.family\`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de \`font.family\`:
 ${L(c.H.fuente)}
 
 **TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo \`font.size.md\` vale **16** (\`tokens.ts\`) y \`text.body\` y \`text.bodyMuted\` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (${c.H.cuerpoMd.length + c.H.cuerpoSm.length}):
@@ -950,7 +1021,7 @@ const SECCION_COMPORTAMIENTO = (c) => {
 
 ## a) Estados: carga, vacío y error
 
-Pantallas de \`src/screens/\` que leen de la base (\`@/db/\`). Cada celda apunta a la primera línea que evidencia el estado; ✗ es que no se detectó ninguno. La detección busca nombres de estado (\`loading\`, \`cargando\`, \`useCarga\`, \`<Carga>\`, \`ErrorCarga\`, \`EmptyState\`, \`.length === 0\`, \`.catch\`, \`setError\`), así que un estado con otro nombre saldría ✗ y hay que confirmarlo.
+Pantallas (\`*/screens/*Screen.tsx\`) que leen de la base (\`@/data/\`). Cada celda apunta a la primera línea que evidencia el estado; ✗ es que no se detectó ninguno. La detección busca nombres de estado (\`loading\`, \`cargando\`, \`useCarga\`, \`<Carga>\`, \`ErrorCarga\`, \`EmptyState\`, \`.length === 0\`, \`.catch\`, \`setError\`), así que un estado con otro nombre saldría ✗ y hay que confirmarlo.
 
 ${tablaEstados(c.E)}
 
@@ -980,7 +1051,7 @@ ${L(c.R.intervalos)}
 **Solo informativo (no cuenta):** claves por índice en listas estáticas, que solo importan si la lista se reordena o se filtra:
 ${L(c.R.claves)}
 
-Pantallas con más de 8 \`useState\` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): ${c.R.estado.map((x) => `\`${x.r.replace('src/screens/', '')}\` ${x.txt.split(' ')[0]}`).join(', ') || 'ninguna'}.
+Pantallas con más de 8 \`useState\` (cualquier cambio repinta la pantalla; no es un bug por sí solo, pero es donde mirar si hay tirones): ${c.R.estado.map((x) => `\`${corto(x.r)}\` ${x.txt.split(' ')[0]}`).join(', ') || 'ninguna'}.
 
 ## d) Audio
 
@@ -1006,7 +1077,7 @@ ${L(c.M.exentos)}
 **MOT-2 · Todo tocable pasa por \`Presionable\`** (escala 0.97 en \`rapido\`; con Reduce Motion baja la opacidad). Cuenta \`Pressable\`, \`AnimatedPressable\` y \`Touchable*\` sueltos:
 ${L(c.M.sinFeedback)}
 
-**MOT-3 · Un solo momento héroe animado por pantalla** (en Practicar es HOY, \`ConsolaHoy\`) **y como máximo 3 canvases de Skia en bucle a la vez.** Archivos con canvas en bucle (${c.S.canvasEnBucle.length}): ${c.S.canvasEnBucle.map((r) => '\`' + r.replace('src/components/fx/', '') + '\`').join(', ') || 'ninguno'}. Hallazgos:
+**MOT-3 · Un solo momento héroe animado por pantalla** (en Practicar es HOY, \`ConsolaHoy\`) **y como máximo 3 canvases de Skia en bucle a la vez.** Archivos con canvas en bucle (${c.S.canvasEnBucle.length}): ${c.S.canvasEnBucle.map((r) => '\`' + r.split('/').pop() + '\`').join(', ') || 'ninguno'}. Hallazgos:
 ${L(c.S.mot3)}
 
 **MOT-4 · Todo bucle se pausa fuera de pantalla, sin foco o en segundo plano.** Los efectos de la señal consultan \`useSenalActiva\` (foco + AppState + reducir movimiento) y \`useReloj\` se detiene con \`visible\`. Bucles que no lo hacen:
@@ -1032,12 +1103,12 @@ ${L(c.LT)}
 };
 
 function main() {
-  const archivos = walk(path.join(ROOT, 'src')).concat([path.join(ROOT, 'App.tsx')]).map((f) => {
+  const archivos = walk(path.join(ROOT, 'src')).map((f) => {
     const src = fs.readFileSync(f, 'utf8');
     return { r: rel(f), src, lines: src.split('\n') };
   });
   const leer = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
-  const tokens = leer('src/theme/tokens.ts');
+  const tokens = leer('src/theme/paleta.ts') + '\n' + leer('src/theme/tokens.ts');
   const H = auditaEstatica(archivos);
   const S = auditaSenal(archivos);
   const coloreadas = (tokens.match(/shadowColor:\s*'#[0-9A-Fa-f]{6}'/g) || []).filter((s) => !/#000000/i.test(s)).length;
@@ -1045,11 +1116,11 @@ function main() {
     H, C: contrastes(tokens), E: auditaEstados(archivos), T: auditaTextoCortado(archivos), R: auditaRendimiento(archivos), M: auditaMovimiento(archivos), S,
     LT: auditaLayoutTransform(archivos),
     FT: auditaFilaTexto(archivos),
-    A: auditaAudio(archivos, leer('src/assets/bundled.ts')), acc1: auditaAcc1(H, archivos),
+    A: auditaAudio(archivos, leerMapaMedios()), acc1: auditaAcc1(H, archivos),
     modos: opcionesPracticar(leer),
-    tokensBajos: tokensTactiles(tokens, leer('src/components/card/AudioButton.tsx')),
+    tokensBajos: tokensTactiles(tokens, leer('src/shared/ui/AudioButton.tsx')),
     K: auditaColorMarca(archivos), escalas: auditaEscalas(tokens),
-    tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + (/ipa:\s*'CharisSIL'/.test(tokens) && !archivos.some((a) => /useFonts\(/.test(a.src)) ? 1 : 0) + H.fuente.length,
+    tipo1: (/fontFamily/.test(leer('src/theme/typography.ts')) ? 0 : 1) + familiasSinIncrustar(tokens).length + H.fuente.length,
     sombras: coloreadas + H.sombra.length + H.propio.length + S.luz.length,
   };
   const previo = leePrevio();
@@ -1059,7 +1130,7 @@ function main() {
   const encabezado = `# Auditoría de diseño
 
 Qué reglas de \`DESIGN.md\` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con \`npm run audit:diseno\` (análisis estático de ${archivos.length} archivos de \`src/\` y \`App.tsx\`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con \`npm run audit:diseno\` (análisis estático de ${archivos.length} archivos de \`src/\`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 ${plan}
 

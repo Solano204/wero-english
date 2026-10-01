@@ -1,0 +1,18 @@
+# Abrir una Lectura, escucharla unos segundos y salir (el audio se corta al salir).
+appId: app.wero.mobile
+---
+- launchApp
+- runFlow: comun/entrar.yaml
+- runFlow:
+    file: comun/abrir.yaml
+    env:
+      GRUPO: "Leer y repasar"
+      MODO: "Lecturas"
+- tapOn: "Wero y el taco perdido"
+- extendedWaitUntil:
+    visible: "Escuchar el capítulo"
+    timeout: 15000
+- tapOn: "Escuchar el capítulo"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: comun/volver.yaml

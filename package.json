@@ -1,6 +1,9 @@
 {
   "name": "wero",
   "version": "1.2.0",
+  "engines": {
+    "node": ">=20.19.4"
+  },
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -8,16 +11,16 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "build:assets": "node scripts/build-asset-map.mjs",
+    "build:derivados": "node --no-warnings scripts/build-derivados.mjs",
     "fonemas:importar": "node scripts/importar-fonemas.mjs",
     "audit:diseno": "node scripts/audit-diseno.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "test": "jest",
+    "lint": "eslint src",
     "verify": "node scripts/verify.mjs",
-    "check:data": "node scripts/check-data.mjs",
+    "check:data": "node --no-warnings scripts/check-data.mjs",
     "check:media": "node scripts/check-media.mjs",
     "check:imports": "node scripts/check-imports.mjs",
+    "check:capas": "depcruise src --config .dependency-cruiser.cjs",
     "check:anuncios": "node scripts/check-anuncios.mjs",
     "check:measure": "node scripts/check-measure.mjs",
     "check:audio": "node scripts/check-audio.mjs",
@@ -46,7 +49,10 @@
     "legal:generar": "node scripts/legal.mjs",
     "check:legal": "node scripts/legal.mjs --check",
     "check:orden": "node scripts/check-orden.mjs",
-    "check:voz": "node scripts/check-voz.mjs"
+    "check:voz": "node scripts/check-voz.mjs",
+    "check:perf": "node scripts/check-perf.mjs",
+    "presupuesto": "node scripts/presupuesto.mjs",
+    "verificar": "node scripts/verificar.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -58,6 +64,7 @@
     "expo-asset": "~57.0.16",
     "expo-audio": "~57.0.5",
     "expo-blur": "~57.0.3",
+    "expo-clipboard": "~57.0.2",
     "expo-constants": "~57.0.17",
     "expo-crypto": "~57.0.3",
     "expo-file-system": "~57.0.6",
@@ -89,8 +96,21 @@
     "@google/genai": "^2.22.0",
     "@types/react": "~19.2.0",
     "babel-plugin-module-resolver": "^5.0.3",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "~57.0.10",
+    "dependency-cruiser": "^17.4.3",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-compiler": "^19.1.0-rc.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "expo-atlas": "^0.4.0",
     "sql.js": "^1.14.2",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "overrides": {
+    "eslint-plugin-react-hooks": {
+      "zod-validation-error": "^4.0.2"
+    }
   }
 }

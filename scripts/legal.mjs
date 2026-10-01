@@ -2,7 +2,7 @@
  * Los textos legales tienen una sola fuente: docs/PRIVACIDAD.md, docs/TERMINOS.md y
  * docs/ELIMINAR_CUENTA.md. Este script genera a partir de ellos:
  *
- *   - src/legal/textos.ts: lo que se lee dentro de la app, empaquetado (funciona sin internet);
+ *   - src/features/cuenta/legal/textos.ts: lo que se lee dentro de la app, empaquetado (funciona sin internet);
  *   - docs/web/*.html: las páginas para publicar (GitHub Pages o Netlify; ver docs/web/LEEME.md).
  *
  *   npm run legal:generar   escribe los dos
@@ -22,7 +22,7 @@ const DOCS = [
   { id: 'terminos', md: 'docs/TERMINOS.md', html: 'terminos.html' },
   { id: 'eliminar', md: 'docs/ELIMINAR_CUENTA.md', html: 'eliminar-cuenta.html' },
 ];
-const SALIDA_TS = 'src/legal/textos.ts';
+const SALIDA_TS = 'src/features/cuenta/legal/textos.ts';
 const SALIDA_WEB = 'docs/web';
 
 function partesDe(linea) {
@@ -80,7 +80,7 @@ export function parsear(md, archivo) {
 
 function generarTs(textos) {
   return `/* Generado por scripts/legal.mjs a partir de docs/*.md. No se edita a mano: npm run legal:generar */
-import type { DocLegal, TextoLegal } from './tipos';
+import type { DocLegal, TextoLegal } from '@/types/legal';
 
 export const TEXTOS: Record<DocLegal, TextoLegal> = ${JSON.stringify(textos, null, 2)};
 `;

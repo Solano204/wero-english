@@ -1,5 +1,5 @@
-import { addDays, startOfDay } from '@/utils/date';
-import { conteo } from '@/utils/text';
+import { addDays, startOfDay } from '@/domain/fechas';
+import { conteo } from '@/domain/texto';
 import type { CardState, Grade } from '@/types';
 
 /**

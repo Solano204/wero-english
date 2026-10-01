@@ -1,0 +1,235 @@
+import React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { conteo } from '@/domain/texto';
+import { Button, EmptyState, ErrorCarga, Header, Screen } from '@/shared/ui';
+import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
+import { Trozos } from '@/shared/ui/feedback/Trozos';
+import { CableSenal } from '@/features/juegos/pares/components/CableSenal';
+import { FichaPar } from '@/features/juegos/pares/components/FichaPar';
+import { FichasJugadas } from '@/features/juegos/pares/components/FichasJugadas';
+import { RelojRonda } from '@/features/juegos/pares/components/RelojRonda';
+import { SegmentosPares } from '@/features/juegos/pares/components/SegmentosPares';
+import { Sello } from '@/features/juegos/pares/components/Sello';
+import { TarjetaFusion } from '@/features/juegos/pares/components/TarjetaFusion';
+import { usePartidaPares } from '@/features/juegos/pares/hooks/usePartidaPares';
+import { color, escalon, font, radius, space } from '@/theme';
+
+/**
+ * P-25, Pares.
+ *
+ * La mecánica que la competencia usa con una lista fija de palabras
+ * sueltas. Aquí el tablero se arma con las tarjetas que le tocan hoy al
+ * usuario, así que juntar dos fichas mueve su cola de repaso de verdad.
+ *
+ * Quedarse sin jugadas no acaba la partida. El tablero se queda como
+ * está, se muestra lo que faltaba y se pasa al resumen. No hay derrota.
+ *
+ * La partida vive en usePartidaPares (y su fase con nombre en logic/partida.ts). Aquí solo se pinta.
+ */
+export function ParesScreen() {
+  const { alAterrizar, alTerminarUnion, cancelarArrastre, carga, cerrando, elegida, enPausa, fallando, fallo, fusion, jugadas, libres, loading, medidas, nav, nivel, nv, reaccion, resueltas, saltando, saltarPausa, tablero, terminar, tocar, tocarIndice, union, vuelo } = usePartidaPares();
+  const { alMedirCapa, alMedirZona, alScrollear, capa, capaRef, geo, medirSegmentos, repartido, segmentosRef, zona } = medidas;
+
+  if (carga.estado === 'error') {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Pares" />
+        <ErrorCarga onReintentar={carga.reintentar} />
+      </Screen>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Screen transicionCarga={carga.demora ? 'esqueleto' : undefined}>
+        <Header onBack={() => nav.goBack()} title="Pares" />
+        {carga.demora ? (
+          <ProveedorEsqueleto etiqueta="Repartiendo fichas" style={styles.esqueletoRaiz}>
+            <Hueso width="60%" height={4} radius={radius.pill} style={styles.esqueletoCentrado} />
+            <View style={styles.esqueletoColumnas}>
+              {[0, 1].map((col) => (
+                <View key={col} style={styles.esqueletoColumna}>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <Hueso key={i} height={64} radius={radius.md} />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ProveedorEsqueleto>
+        ) : null}
+      </Screen>
+    );
+  }
+
+  if (!tablero || tablero.totalPares < 3) {
+    return (
+      <Screen>
+        <Header onBack={() => nav.goBack()} title="Pares" />
+        <EmptyState
+          icon="warning"
+          title="No se pudo armar el tablero"
+          body="No hay frases cortas suficientes con los filtros que traes puestos."
+          actionLabel="Volver"
+          onAction={() => nav.goBack()}
+        />
+      </Screen>
+    );
+  }
+
+  const restantes = Math.max(0, tablero.jugadas - jugadas);
+
+  return (
+    <Screen padded={false} style={styles.sinHueco} transicionCarga={carga.huboEsqueleto ? 'contenido' : undefined}>
+      <View ref={capaRef} style={styles.capa} onLayout={alMedirCapa}>
+        <Trozos disparo={reaccion.trozos} tinte={color.world.dia_a_dia} x="50%" y="50%" />
+        <View style={styles.top}>
+          <Header
+            onBack={() => nav.goBack()}
+            title={nivel ? `Nivel ${nivel}` : undefined}
+            right={
+              <View ref={segmentosRef} collapsable={false} onLayout={medirSegmentos}>
+                <SegmentosPares total={tablero.totalPares} resueltos={resueltas.length - (fusion ? 1 : 0)} cierre={cerrando} />
+              </View>
+            }
+          />
+          {nv ? (
+            <View style={styles.reloj}>
+              <RelojRonda
+                segundos={nv.segundosTablero}
+                llave={nivel ?? 0}
+                // Al resolver el tablero el reloj se congela: seguir
+                // contando mientras corre la animación de salida haría
+                // perder partidas ya ganadas. También se congela mientras
+                // se oye la voz de un par recién acertado. Y no arranca hasta
+                // que cae la última ficha: la duración del nivel no cambia.
+                pausado={!repartido || enPausa || resueltas.length >= (tablero?.totalPares ?? 0)}
+                onFin={terminar}
+              />
+            </View>
+          ) : null}
+        </View>
+
+        <Text style={styles.instruccion}>Junta cada frase con lo que significa</Text>
+
+        <View style={styles.zona} onLayout={alMedirZona} pointerEvents={enPausa ? 'none' : 'auto'}>
+          {zona.ancho > 0 ? (
+            <ScrollView
+              scrollEnabled={geo.desborda}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.zonaContenido}
+              onScroll={alScrollear}
+              scrollEventThrottle={16}
+            >
+              <CableSenal
+                ancho={zona.ancho}
+                alto={geo.altoContenido}
+                rectas={geo.rectas}
+                ancla={elegida ? tablero.fichas.findIndex((f) => f.id === elegida.id) : -1}
+                libres={libres}
+                bloqueado={!repartido || enPausa || fallando.length > 0 || union !== null || fusion !== null}
+                arrastrable={!geo.desborda}
+                union={union}
+                fallo={fallo}
+                onIniciar={tocarIndice}
+                onSoltar={tocarIndice}
+                onCancelar={cancelarArrastre}
+                onUnionLista={alTerminarUnion}
+              >
+                {tablero.fichas.map((f, i) => {
+                  const recta = geo.rectas[i];
+                  if (!recta) return null;
+                  const uniendo = union !== null && (union.a === i || union.b === i);
+                  if (resueltas.includes(f.entryId) && !uniendo) return <Sello key={f.id} recta={recta} saliendo={cerrando} retraso={escalon(i)} />;
+                  return (
+                    <FichaPar
+                      key={f.id}
+                      ficha={f}
+                      recta={recta}
+                      elevada={uniendo || elegida?.id === f.id}
+                      falla={fallando.includes(f.id)}
+                      // La segunda ficha de la jugada es la que se sacude.
+                      sacude={fallando[1] === f.id}
+                      onPress={() => tocar(f)}
+                      entra={escalon(i)}
+                    />
+                  );
+                })}
+              </CableSenal>
+            </ScrollView>
+          ) : null}
+        </View>
+
+        {fusion && vuelo?.fichaA && vuelo.fichaB && capa.ancho > 0 ? (
+          <TarjetaFusion
+            fichas={[vuelo.fichaA, vuelo.fichaB]}
+            rectas={vuelo.rectaA && vuelo.rectaB ? [vuelo.rectaA, vuelo.rectaB] : null}
+            capa={capa}
+            destino={vuelo.destino}
+            entry={fusion.entry}
+            iniciar={union === null}
+            saliendo={!enPausa}
+            onAterrizo={alAterrizar}
+          />
+        ) : null}
+
+        <View style={styles.pie}>
+          <View style={styles.jugadasFila}>
+            {restantes > 0 ? <FichasJugadas total={tablero.jugadas} restantes={restantes} /> : null}
+            <Text style={[styles.jugadas, restantes > 0 && styles.jugadasAlLado]}>
+              {restantes > 0
+                ? `Te quedan ${conteo(restantes, 'jugada')}`
+                : 'Se acabaron las jugadas, pero el tablero se queda'}
+            </Text>
+          </View>
+          {enPausa ? (
+            // «Saltar» ocupa el lugar del botón de salida, en la zona del pulgar y por encima del velo de la tarjeta.
+            <Button label="Saltar" variant="ghost" icon="chevron-right" iconAlFinal onPress={saltarPausa} disabled={saltando} full />
+          ) : (
+            <Button
+              label={restantes > 0 ? 'Dejarlo aquí' : 'Ver cómo me fue'}
+              variant={restantes > 0 ? 'ghost' : 'primary'}
+              onPress={terminar}
+              full
+            />
+          )}
+        </View>
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  // `Screen` suma un colchón abajo cuando no hay footer: aquí el contenido llega hasta el borde seguro.
+  sinHueco: { paddingBottom: 0 },
+  capa: { flex: 1 },
+  top: { paddingHorizontal: space.lg, paddingTop: space.sm },
+  reloj: { marginTop: space.sm, marginBottom: space.md },
+  instruccion: {
+    fontFamily: font.family.body,
+    fontSize: font.size.sm,
+    color: color.textMuted,
+    paddingHorizontal: space.lg,
+    marginBottom: space.md,
+  },
+  zona: { flex: 1, marginHorizontal: space.lg },
+  zonaContenido: { flexGrow: 1, justifyContent: 'center' },
+  pie: {
+    paddingHorizontal: space.lg,
+    paddingBottom: space.lg,
+    paddingTop: space.md,
+    gap: space.sm,
+  },
+  jugadasFila: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
+  jugadas: {
+    fontFamily: font.family.body,
+    fontSize: font.size.xs,
+    color: color.textMuted,
+    textAlign: 'center',
+    flex: 1,
+  },
+  jugadasAlLado: { textAlign: 'right' },
+  esqueletoRaiz: { flex: 1, paddingHorizontal: space.lg, paddingTop: space.lg, gap: space.xl },
+  esqueletoCentrado: { alignSelf: 'center' },
+  esqueletoColumnas: { flexDirection: 'row', gap: space.md },
+  esqueletoColumna: { flex: 1, gap: space.sm },
+});

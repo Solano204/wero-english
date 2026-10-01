@@ -1,0 +1,6 @@
+{
+  "_nota": "Presupuestos de tamaño (docs/RENDIMIENTO.md, «Presupuestos y candados»): lo logrado al cerrar la serie + 10 %. Se revisan con npm run presupuesto. aabBytes queda en null hasta medir el AAB release en tu máquina; entonces se pone el tamaño + 10 %.",
+  "hermesBytes": 8017722,
+  "assetsBytes": 2892492,
+  "aabBytes": null
+}

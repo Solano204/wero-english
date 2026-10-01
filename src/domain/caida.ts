@@ -1,4 +1,4 @@
-import { pickRandom, shuffle } from '@/utils/array';
+import { pickRandom, shuffle } from '@/domain/arreglos';
 import type { CaidaRound, Entry } from '@/types';
 
 /**
