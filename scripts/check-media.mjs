@@ -75,6 +75,17 @@ if (!ids.length) {
   for (const c of con?.cazala ?? []) {
     want(c.audio, `cázala ${c.id}`);
     want(c.audio_lento, `cázala ${c.id}`);
+    want(c.audio_es, `cázala ${c.id}`);
+  }
+
+  const lec = read('lecturas.json');
+  for (const l of lec?.lecturas ?? []) {
+    for (const c of l.capitulos ?? []) want(c.audio, `lectura ${l.id}`);
+  }
+
+  const portadas = path.join(ROOT, 'src/theme/portadas.ts');
+  if (fs.existsSync(portadas)) {
+    for (const m of fs.readFileSync(portadas, 'utf8').matchAll(/'(img\/[^']+)'/g)) want(m[1], 'portadas.ts');
   }
 
   const sit = read('situaciones.json');
@@ -86,6 +97,7 @@ if (!ids.length) {
     for (const e of t.ejemplos ?? []) {
       want(e.audio, `gramática ${t.id}`);
       want(e.audio_es, `gramática ${t.id}`);
+      want(e.audio_lento, `gramática ${t.id}`);
     }
     want(t.error_tipico?.audio_bien, `gramática ${t.id}`);
   }
