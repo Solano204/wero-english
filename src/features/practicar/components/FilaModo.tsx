@@ -100,6 +100,7 @@ export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice 
               source={fuente}
               style={StyleSheet.absoluteFill}
               contentFit="cover"
+              contentPosition="right"
               cachePolicy={CACHE_IMAGEN}
               recyclingKey={imagen}
               onError={() => setImagenFallo(true)}
