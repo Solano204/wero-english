@@ -5,7 +5,7 @@ import { ErrorCarga, Screen } from '@/shared/ui';
 import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { SectionTitle } from '@/shared/ui/SectionTitle';
 import { FondoAurora } from '@/features/practicar/components/FondoAurora';
-import { radius, space, tarjeta } from '@/theme';
+import { PORTADA_JUEGO, radius, space, tarjeta } from '@/theme';
 import { conteo } from '@/domain/texto';
 import { dayKey } from '@/domain/fechas';
 import { ConsolaHoy } from '@/features/practicar/components/ConsolaHoy';
@@ -145,6 +145,7 @@ export function PracticeScreen() {
                       titulo={MODOS[id].titulo}
                       corta={MODOS[id].corta}
                       icono={ICONO_MODO[id]}
+                      imagen={PORTADA_JUEGO[MODOS[id].arte]}
                       meta={metaDe(id, fuentesMeta)}
                       primera={i === 0}
                       indice={i}

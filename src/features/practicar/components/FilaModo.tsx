@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -12,6 +13,7 @@ import Animated, {
 import { Icon, Presionable, type IconName } from '@/shared/ui';
 import { color, escalon, font, layout, motionDuration, motionEasing, radius, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { CACHE_IMAGEN, imageSource } from '@/services/media';
 import type { Avance } from './GrupoPlegable';
 import { MetaModo } from './MetaModo';
 import { textoMeta, type Meta } from '@/features/practicar/logic/metadatos';
@@ -37,6 +39,8 @@ interface Props {
   /** Posición en el grupo y avance de su despliegue: entra con `escalon(indice)` desde 8 dp más abajo. */
   indice?: number;
   avance?: Avance;
+  /** Ruta de la portada (PORTADA_JUEGO). Sin ella, o si falla al cargar, el renglón queda como siempre. */
+  imagen?: string | null;
 }
 
 /**
@@ -45,8 +49,10 @@ interface Props {
  * (`Presionable`), un barrido de luz `accentSoft` de izquierda a derecha y el
  * chevron avanza 4 dp y regresa. Alto mínimo 56.
  */
-export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice = 0, avance }: Props) {
+export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice = 0, avance, imagen }: Props) {
   const reducido = useMovimientoReducido();
+  const [imagenFallo, setImagenFallo] = React.useState(false);
+  const fuente = imagen && !imagenFallo ? imageSource(imagen) : null;
   const retraso = escalon(indice);
   const ancho = useSharedValue(0);
   const barrido = useSharedValue(0);
@@ -88,6 +94,19 @@ export function FilaModo({ titulo, corta, icono, meta, primera, onPress, indice 
         accessibilityLabel={dato ? `${titulo}. ${corta}. ${dato}` : `${titulo}. ${corta}`}
         style={styles.fila}
       >
+        {fuente ? (
+          <>
+            <Image
+              source={fuente}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              cachePolicy={CACHE_IMAGEN}
+              recyclingKey={imagen}
+              onError={() => setImagenFallo(true)}
+            />
+            <View style={styles.velo} pointerEvents="none" />
+          </>
+        ) : null}
         <Animated.View style={[styles.barrido, estiloBarrido]} pointerEvents="none">
           <LinearGradient
             colors={['transparent', color.accentSoft, 'transparent']}
@@ -128,6 +147,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     overflow: 'hidden',
   },
+  velo: { ...StyleSheet.absoluteFill, backgroundColor: color.veloPortada },
   barrido: { position: 'absolute', top: 0, bottom: 0, left: 0, width: `${ANCHO_BARRIDO * 100}%` },
   separador: { position: 'absolute', top: 0, left: SANGRIA, right: 0, height: 1, backgroundColor: color.border },
   ficha: {
