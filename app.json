@@ -20,16 +20,13 @@
       "supportsTablet": false,
       "bundleIdentifier": "app.wero.mobile",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ],
         "NSMicrophoneUsageDescription": "Wero usa el micrófono para oír la palabra que dices y decirte cuál entendió. Wero no graba ni guarda el audio.",
         "NSSpeechRecognitionUsageDescription": "El servicio de voz del teléfono entiende la palabra que dijiste para compararla con la que se pidió; puede procesarla en sus servidores. Wero no guarda el audio."
       }
     },
     "android": {
       "package": "app.wero.mobile",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#07080B"
       },
@@ -38,6 +35,10 @@
         "SCHEDULE_EXACT_ALARM",
         "VIBRATE",
         "RECORD_AUDIO"
+      ],
+      "blockedPermissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ]
     },
     "plugins": [
@@ -120,7 +121,7 @@
           ]
         }
       ],
-      "expo-audio",
+      ["expo-audio", { "enableBackgroundPlayback": false }],
       "./plugins/withFirmaRelease.js",
       "expo-splash-screen",
       "expo-sqlite",
