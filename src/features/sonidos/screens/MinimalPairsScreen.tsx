@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Button, Card, EmptyState, Header, ProgressBar, Screen } from '@/shared/ui';
 import { AudioButton } from '@/shared/ui/AudioButton';
@@ -80,7 +80,8 @@ export function MinimalPairsScreen() {
         <ProgressBar value={idx} total={rounds.length} />
       </View>
 
-      <View style={styles.body}>
+      {/* El cuerpo hace scroll si no cabe; el pie (micrófono y botones) queda fijo y nunca se encima. */}
+      <ScrollView style={styles.cuerpo} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <Text style={styles.instruccion}>Di esta palabra</Text>
         <Text style={styles.palabra}>{round.objetivo}</Text>
         <Text style={styles.significado}>{round.objetivoEs}</Text>
@@ -125,7 +126,7 @@ export function MinimalPairsScreen() {
             ) : null}
           </Animated.View>
         ) : null}
-      </View>
+      </ScrollView>
 
       <View style={styles.pie}>
         <View style={styles.medidor}>
@@ -146,10 +147,9 @@ export function MinimalPairsScreen() {
         />
         {veredicto ? (
           <Button
+            label={idx + 1 >= rounds.length ? 'Terminar' : 'Siguiente'}
             icon={idx + 1 >= rounds.length ? 'check' : 'arrow-right'}
-            accessibilityLabel={
-              idx + 1 >= rounds.length ? 'Terminar' : 'Siguiente'
-            }
+            iconAlFinal
             variant="secondary"
             onPress={siguiente}
             full
@@ -169,12 +169,13 @@ export function MinimalPairsScreen() {
 const styles = StyleSheet.create({
   top: { paddingHorizontal: space.lg, paddingTop: space.sm },
   contador: { fontFamily: font.family.body, fontSize: font.size.xs, color: color.textFaint },
+  cuerpo: { flex: 1 },
   body: {
-    flex: 1,
     paddingHorizontal: space.lg,
     alignItems: 'center',
-    gap: space.md,
+    gap: space.lg,
     paddingTop: space.lg,
+    paddingBottom: space.lg,
   },
   instruccion: {
     fontSize: font.size.xs,
@@ -203,15 +204,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   confusa: { color: color.riskWarn, fontFamily: font.family.bodyStrong },
-  resultado: { alignSelf: 'stretch', gap: space.sm },
-  resultadoCard: { gap: 4 },
+  resultado: { alignSelf: 'stretch', gap: space.md },
+  resultadoCard: { gap: space.xs },
   resultadoTitulo: {
     fontSize: font.size.md,
     fontFamily: font.family.bodyStrong,
   },
   resultadoCuerpo: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
   oyo: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
-  medidor: { alignItems: 'center', gap: space.xs },
+  // El círculo vive en su caja de tamaño fijo (la del máximo con la voz): crecer no mueve nada.
+  medidor: { alignItems: 'center', gap: space.xs, marginBottom: space.xs },
   sinVoz: {
     minHeight: font.size.sm * 1.5 * 2,
     fontFamily: font.family.body,
@@ -228,8 +230,9 @@ const styles = StyleSheet.create({
   },
   pie: {
     paddingHorizontal: space.lg,
+    paddingTop: space.lg,
     paddingBottom: space.lg,
-    gap: space.sm,
+    gap: space.md,
   },
   privacidad: {
     fontFamily: font.family.body,
