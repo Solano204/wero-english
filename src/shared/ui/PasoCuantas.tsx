@@ -1,9 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
-import { Button, Card, Presionable } from '@/shared/ui';
+import { Button } from './Button';
+import { Card } from './Card';
+import { Presionable } from './Presionable';
 import { NOTIF_MAX_POR_DIA } from '@/config/notificaciones';
-import { aparecer, color, font, layout, radius, space } from '@/theme';
+import { VENTANAS_AVISO } from '@/domain/perfilInicial';
+import { color, font, layout, radius, space } from '@/theme';
 
 /**
  * El paso de las notificaciones.
@@ -21,6 +23,7 @@ export function PasoCuantas({
   hasta,
   onVentana,
   onSiguiente,
+  textoBoton = 'Siguiente',
 }: {
   valor: number;
   onChange: (n: number) => void;
@@ -28,41 +31,34 @@ export function PasoCuantas({
   hasta: string;
   onVentana: (desde: string, hasta: string) => void;
   onSiguiente: () => void;
+  textoBoton?: string;
 }) {
   const opciones = [0, 2, 4, 6, 8, 12].filter((n) => n <= NOTIF_MAX_POR_DIA);
-  const ventanas: { label: string; desde: string; hasta: string }[] = [
-    { label: 'Todo el día', desde: '09:00', hasta: '21:00' },
-    { label: 'Solo en la mañana', desde: '08:00', hasta: '13:00' },
-    { label: 'Solo en la tarde', desde: '15:00', hasta: '21:00' },
-  ];
 
   return (
-    <Animated.View entering={aparecer()} style={styles.paso}>
-      <Text style={styles.titulo}>Recibe frases todo el día</Text>
-      <Text style={styles.bajada}>
-        Cada aviso es una sola frase
+    <View style={styles.paso}>
+      <Text style={styles.titulo} accessibilityRole="header">
+        Recibe frases todo el día
       </Text>
+      <Text style={styles.bajada}>Cada aviso es una sola frase</Text>
 
       <Card style={styles.previa}>
         <Text style={styles.previaApp}>Wero · ahora</Text>
-        <Text style={styles.previaTexto}>
-          ¿Sabes qué significa Out of pocket?
-        </Text>
+        <Text style={styles.previaTexto}>¿Sabes qué significa Out of pocket?</Text>
       </Card>
 
       <Text style={styles.etiqueta}>Cuántas al día</Text>
-      <View style={styles.chips}>
+      <View style={styles.chips} accessibilityRole="radiogroup">
         {opciones.map((n) => (
           <Presionable
             key={n}
             onPress={() => onChange(n)}
-            accessibilityRole="button"
-            accessibilityLabel={`${n} al día`}
+            accessibilityRole="radio"
+            accessibilityLabel={n === 0 ? 'Ninguna al día' : `${n} al día`}
+            accessibilityState={{ selected: valor === n, checked: valor === n }}
             style={[styles.chip, valor === n && styles.chipOn]}
           >
-            <Text style={[styles.chipTexto, valor === n && styles.chipTextoOn]}>
-              {n === 0 ? 'ninguna' : n}
-            </Text>
+            <Text style={[styles.chipTexto, valor === n && styles.chipTextoOn]}>{n === 0 ? 'ninguna' : n}</Text>
           </Presionable>
         ))}
       </View>
@@ -70,22 +66,19 @@ export function PasoCuantas({
       {valor > 0 ? (
         <>
           <Text style={styles.etiqueta}>A qué horas</Text>
-          <View style={styles.chips}>
-            {ventanas.map((v) => {
+          <View style={styles.chips} accessibilityRole="radiogroup">
+            {VENTANAS_AVISO.map((v) => {
               const activa = v.desde === desde && v.hasta === hasta;
               return (
                 <Presionable
                   key={v.label}
                   onPress={() => onVentana(v.desde, v.hasta)}
-                  accessibilityRole="button"
+                  accessibilityRole="radio"
                   accessibilityLabel={v.label}
+                  accessibilityState={{ selected: activa, checked: activa }}
                   style={[styles.chip, activa && styles.chipOn]}
                 >
-                  <Text
-                    style={[styles.chipTexto, activa && styles.chipTextoOn]}
-                  >
-                    {v.label}
-                  </Text>
+                  <Text style={[styles.chipTexto, activa && styles.chipTextoOn]}>{v.label}</Text>
                 </Presionable>
               );
             })}
@@ -93,8 +86,8 @@ export function PasoCuantas({
         </>
       ) : null}
 
-      <Button label="Siguiente" onPress={onSiguiente} full />
-    </Animated.View>
+      <Button label={textoBoton} onPress={onSiguiente} full />
+    </View>
   );
 }
 

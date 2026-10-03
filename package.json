@@ -37,6 +37,7 @@
     "check:estudio": "node scripts/check-estudio.mjs",
     "check:niveles": "node scripts/check-niveles.mjs",
     "check:pares": "node scripts/check-pares.mjs",
+    "check:perfil": "node scripts/check-perfil.mjs",
     "check:caida": "node scripts/check-caida.mjs",
     "check:dulces": "node scripts/check-dulces.mjs",
     "check:colmena": "node scripts/check-colmena.mjs",

@@ -1,150 +1,147 @@
-import React from 'react';
-import { conteo } from '@/domain/texto';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, Card, ProgressBar, Screen, Presionable } from '@/shared/ui';
-import { color, font, space } from '@/theme';
+import React, { useEffect, useEffectEvent } from 'react';
+import { AccessibilityInfo, Alert, BackHandler, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, SlideInLeft, SlideInRight } from 'react-native-reanimated';
+import { Icon, Presionable, Screen } from '@/shared/ui';
+import { color, font, layout, motionDuration, motionEasing, space } from '@/theme';
+import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
+import { textoProgreso } from '@/domain/perfilInicial';
 import { usePrimerosPasos } from '@/features/cuenta/hooks/usePrimerosPasos';
-import { PasoCuantas } from '@/features/cuenta/components/PasoCuantas';
-import { Pregunta } from '@/features/cuenta/components/Pregunta';
+import { PasoCuantas } from '@/shared/ui/PasoCuantas';
+import { PreguntaPerfil } from '@/shared/ui/PreguntaPerfil';
 import { PRESENTACION, Presentacion } from '@/features/cuenta/components/Presentacion';
-import { sinEsperar } from '@/services/fallas';
+import { ProgresoPerfil } from '@/features/cuenta/components/ProgresoPerfil';
+import { ResumenPerfil } from '@/features/cuenta/components/ResumenPerfil';
+
+/** Lo que dura el deslizamiento de una pregunta a otra (ms). */
+const DESLIZA_MS = 220;
 
 /**
  * P-01, la entrada.
  *
- * Cinco preguntas, una por pantalla, tres opciones cada una y un
- * "Saltar" siempre visible. La forma está copiada de la competencia
- * porque ahí la tienen bien: una decisión a la vez se contesta, una
- * pantalla con cinco campos se abandona.
+ * Presentación, dos preguntas (una por pantalla) y «Revisa tus respuestas». Se puede regresar a cualquier
+ * pregunta, cambiar la respuesta y seguir: las demás se conservan, y si cierra la app a la mitad continúa donde
+ * iba. Un «Saltar» siempre visible.
  *
- * Lo que no se copió: el paso de notificaciones de ellos junta el
- * permiso del sistema con el guardado de ajustes en un solo botón, y si
- * el usuario niega el permiso los ajustes quedan guardados y nada
- * funciona, en silencio. Aquí se detecta el rechazo y se dice en la
- * misma pantalla.
+ * Lo que no se copió de la competencia: su paso de notificaciones junta el permiso del sistema con el guardado de
+ * ajustes en un solo botón, y si el usuario niega el permiso los ajustes quedan guardados y nada funciona, en
+ * silencio. Aquí se detecta el rechazo y se dice en el resumen.
  *
- * Ninguna respuesta es obligatoria y ninguna se manda a ningún lado:
- * todo se guarda en la tabla ajuste del teléfono.
+ * Ninguna respuesta es obligatoria y ninguna se manda a ningún lado: todo se guarda en la tabla ajuste del teléfono,
+ * y las respuestas no deciden qué frases te tocan.
  */
 export function OnboardingScreen() {
-  const { user, settings, paso, permisoNegado, notifEstado, avanzar, slide, setSlide, terminar, saltarTodo, hoja, pedirNotificaciones, total } = usePrimerosPasos();
+  const p = usePrimerosPasos();
+  const reducido = useMovimientoReducido();
+  const { paso, slide, setSlide } = p;
+
+  const confirmarSalida = () =>
+    Alert.alert('¿Salir de Wero?', 'Lo que contestaste queda guardado: al volver sigues donde ibas.', [
+      { text: 'Quedarme', style: 'cancel' },
+      { text: 'Salir', onPress: () => BackHandler.exitApp() },
+    ]);
+
+  // El botón atrás del sistema y el gesto de atrás: una pregunta (o slide) hacia atrás; en la primera, preguntan.
+  const alAtrasSistema = useEffectEvent(() => {
+    if (paso === 'intro') {
+      if (slide > 0) setSlide(slide - 1);
+      else confirmarSalida();
+    } else if (paso === 'p1') confirmarSalida();
+    else p.atras();
+    return true;
+  });
+  useEffect(() => {
+    const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => alAtrasSistema());
+    return () => suscripcion.remove();
+  }, []);
+
+  const anunciar = useEffectEvent(() => {
+    if (paso !== 'intro') AccessibilityInfo.announceForAccessibility(textoProgreso(paso));
+  });
+  useEffect(() => {
+    anunciar();
+  }, [paso]);
+
+  const entrada = reducido
+    ? FadeIn.duration(motionDuration.rapido)
+    : (p.direccion === 'adelante' ? SlideInRight : SlideInLeft).duration(DESLIZA_MS).easing(motionEasing.entrar);
 
   return (
     <Screen scroll>
-      <View style={styles.head}>
-        <View style={styles.barra}>
-          <ProgressBar value={paso} total={total} />
-        </View>
-        {paso > 0 ? (
+      {paso !== 'intro' ? (
+        <View style={styles.head}>
+          {paso !== 'p1' ? (
+            <Presionable
+              onPress={p.atras}
+              accessibilityRole="button"
+              accessibilityLabel="Atrás"
+              style={styles.atras}
+            >
+              <Icon name="back" size="lg" color={color.text} />
+            </Presionable>
+          ) : (
+            <View style={styles.atras} />
+          )}
+          <ProgresoPerfil paso={paso} alcanzado={p.alcanzado} onIr={p.irA} />
           <Presionable
-            onPress={saltarTodo}
+            onPress={p.saltarTodo}
             hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel="Saltar la configuración"
           >
             <Text style={styles.saltar}>Saltar</Text>
           </Presionable>
-        ) : null}
-      </View>
-
-      {paso === 0 ? (
-        <Presentacion
-          slide={slide}
-          onSiguiente={() => {
-            if (slide + 1 < PRESENTACION.length) setSlide((v) => v + 1);
-            else avanzar();
-          }}
-        />
-      ) : null}
-
-      {paso === 1 ? (
-        <Pregunta
-          titulo="¿Te enseñamos las groserías?"
-          bajada="El catálogo trae lenguaje fuerte marcado. Tú decides si aparece."
-          opciones={[
-            { label: 'Sí, para eso vine', valor: false },
-            { label: 'No, déjalo limpio', valor: true },
-          ]}
-          onPick={(v) => {
-            if (user) sinEsperar(settings.set(user.id, 'modoLimpio', Boolean(v)), 'ajustes:bienvenida');
-            avanzar();
-          }}
-          nota="Aunque salgan, cada frase trae su aviso de dónde no decirla."
-        />
-      ) : null}
-
-      {paso === 2 ? (
-        <PasoCuantas
-          valor={settings.notifPorDia}
-          onChange={(n) => {
-            if (user) sinEsperar(settings.set(user.id, 'notifPorDia', n), 'ajustes:bienvenida');
-          }}
-          desde={settings.notifDesde}
-          hasta={settings.notifHasta}
-          onVentana={(d, h) => {
-            if (!user) return;
-            sinEsperar(settings.set(user.id, 'notifDesde', d), 'ajustes:bienvenida');
-            sinEsperar(settings.set(user.id, 'notifHasta', h), 'ajustes:bienvenida');
-          }}
-          onSiguiente={avanzar}
-        />
-      ) : null}
-
-      {paso === 3 ? (
-        <View style={styles.paso}>
-          <Text style={styles.titulo}>Ya está</Text>
-          <Text style={styles.bajada}>
-            {settings.notifPorDia > 0
-              ? `Te van a llegar ${conteo(settings.notifPorDia, 'frase')} al día entre las ${settings.notifDesde} y las ${settings.notifHasta}.`
-              : 'No te vamos a mandar nada. Puedes prenderlo después en Ajustes.'}
-          </Text>
-
-          {!notifEstado.ok ? (
-            <Card style={styles.aviso}>
-              <Text style={styles.avisoTitulo}>Aquí todavía no llegan</Text>
-              <Text style={styles.avisoTexto}>
-                {notifEstado.razon} Tus ajustes se guardan de una vez, así que
-                cuando eso pase ya quedan puestos.
-              </Text>
-            </Card>
-          ) : permisoNegado ? (
-            <Card style={styles.aviso}>
-              <Text style={styles.avisoTitulo}>El permiso quedó apagado</Text>
-              <Text style={styles.avisoTexto}>
-                Sin permiso no llega ninguna frase. Se prende desde los ajustes
-                del teléfono, en la sección de notificaciones de Wero. La app
-                funciona igual sin eso.
-              </Text>
-            </Card>
-          ) : null}
-
-          <View style={styles.acciones}>
-            {settings.notifPorDia > 0 && !permisoNegado && notifEstado.ok ? (
-              <Button
-                label="Permitir y empezar"
-                onPress={pedirNotificaciones}
-                full
-                size="lg"
-              />
-            ) : null}
-            <Button
-              label={
-                notifEstado.ok && !permisoNegado
-                  ? 'Empezar sin avisos'
-                  : 'Entrar a la app'
-              }
-              variant={
-                settings.notifPorDia > 0 && !permisoNegado && notifEstado.ok
-                  ? 'ghost'
-                  : 'primary'
-              }
-              onPress={terminar}
-              full
-            />
-          </View>
         </View>
       ) : null}
-      {hoja}
+
+      <Animated.View key={paso} entering={entrada}>
+        {paso === 'intro' ? (
+          <Presentacion
+            slide={slide}
+            onSiguiente={() => {
+              if (slide + 1 < PRESENTACION.length) setSlide((v) => v + 1);
+              else p.empezar();
+            }}
+          />
+        ) : null}
+
+        {paso === 'p1' ? (
+          <PreguntaPerfil
+            titulo="¿Te enseñamos las groserías?"
+            bajada="El catálogo trae lenguaje fuerte marcado. Tú decides si aparece."
+            opciones={[
+              { label: 'Sí, para eso vine', valor: false },
+              { label: 'No, déjalo limpio', valor: true },
+            ]}
+            valor={p.respuestas.limpio}
+            onElegir={p.elegirLimpio}
+            onSiguiente={p.siguiente}
+            nota="Aunque salgan, cada frase trae su aviso de dónde no decirla."
+          />
+        ) : null}
+
+        {paso === 'p2' ? (
+          <PasoCuantas
+            valor={p.respuestas.porDia}
+            onChange={p.cambiarPorDia}
+            desde={p.respuestas.desde}
+            hasta={p.respuestas.hasta}
+            onVentana={p.cambiarVentana}
+            onSiguiente={p.siguiente}
+          />
+        ) : null}
+
+        {paso === 'resumen' ? (
+          <ResumenPerfil
+            respuestas={p.respuestas}
+            notifEstado={p.notifEstado}
+            permisoNegado={p.permisoNegado}
+            onCambiar={p.cambiarDesdeResumen}
+            onListo={p.respuestas.porDia > 0 && p.notifEstado.ok && !p.permisoNegado ? p.pedirNotificaciones : p.terminar}
+            onSinAvisos={p.terminar}
+          />
+        ) : null}
+      </Animated.View>
+      {p.hoja}
     </Screen>
   );
 }
@@ -154,24 +151,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    marginBottom: space.xl,
+    marginBottom: space.lg,
   },
-  barra: { flex: 1 },
+  atras: { width: layout.tapMin, height: layout.tapMin, alignItems: 'center', justifyContent: 'center' },
   saltar: { color: color.textMuted, fontFamily: font.family.body, fontSize: font.size.sm },
-  paso: { gap: space.md },
-  titulo: {
-    fontSize: font.size.xxl,
-    letterSpacing: font.size.xxl * -0.015,
-    fontFamily: font.family.display,
-    color: color.text,
-  },
-  bajada: { fontFamily: font.family.body, fontSize: font.size.md, color: color.textMuted },
-  aviso: { gap: 4 },
-  avisoTitulo: {
-    fontSize: font.size.md,
-    fontFamily: font.family.bodyStrong,
-    color: color.riskWarn,
-  },
-  avisoTexto: { fontFamily: font.family.body, fontSize: font.size.md, lineHeight: font.size.md * 1.5, color: color.textMuted },
-  acciones: { gap: space.sm, marginTop: space.lg },
 });

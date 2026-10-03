@@ -55,6 +55,7 @@ export type RootStackParams = {
 
   Downloads: undefined;
   Settings: undefined;
+  MiPerfil: undefined;
   /** Un texto legal empaquetado; también existe fuera de la sesión (entrada y onboarding). */
   LegalDoc: { doc: DocLegal };
   /** Confirmación de «Borrar cuenta y datos» (`cuenta`) o «Borrar todos mis datos» (`datos`). */

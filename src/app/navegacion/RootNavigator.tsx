@@ -117,6 +117,7 @@ export function RootNavigator() {
       <Stack.Screen name="ErrorDetail" getComponent={() => require('@/features/errores/screens/ErrorDetailScreen').ErrorDetailScreen} />
       <Stack.Screen name="Downloads" getComponent={() => require('@/features/ajustes/screens/DownloadsScreen').DownloadsScreen} />
       <Stack.Screen name="Settings" getComponent={() => require('@/features/ajustes/screens/SettingsScreen').SettingsScreen} />
+      <Stack.Screen name="MiPerfil" getComponent={() => require('@/features/ajustes/screens/PerfilScreen').PerfilScreen} />
       <Stack.Screen name="LegalDoc" getComponent={() => require('@/features/cuenta/screens/LegalDocScreen').LegalDocScreen} />
       <Stack.Screen name="Borrar" getComponent={() => require('@/features/cuenta/screens/BorrarScreen').BorrarScreen} />
       <Stack.Screen name="Stuck" getComponent={() => require('@/features/atoradas/screens/StuckScreen').StuckScreen} />

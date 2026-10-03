@@ -8,6 +8,7 @@ import { color, font, space } from '@/theme';
 import type { Nivel } from '@/types';
 import { useAjustes } from '@/features/ajustes/hooks/useAjustes';
 import { todoIncluido } from '@/features/ajustes/hooks/useDescargas';
+import { resumenRespuestas } from '@/domain/perfilInicial';
 import { Toggle } from '@/features/ajustes/components/ControlesAjustes';
 import { Identidad } from '@/features/ajustes/components/Identidad';
 import { SeccionRecordatorios } from '@/features/ajustes/components/SeccionRecordatorios';
@@ -71,6 +72,17 @@ export function SettingsScreen() {
             full
           />
         ) : null}
+      </Card>
+
+      <SectionTitle title="Mi perfil" />
+      <Card style={styles.card}>
+        {resumenRespuestas({ limpio: s.modoLimpio, porDia: s.notifPorDia, desde: s.notifDesde, hasta: s.notifHasta }).map((r) => (
+          <View key={r.paso} style={styles.perfilFila}>
+            <Text style={styles.hint}>{r.pregunta}</Text>
+            <Text style={styles.perfilRespuesta}>{r.respuesta}</Text>
+          </View>
+        ))}
+        <Button label="Cambiar mis respuestas" variant="secondary" onPress={() => nav.navigate('MiPerfil')} full />
       </Card>
 
       {todoIncluido() ? null : (
@@ -195,6 +207,8 @@ const styles = StyleSheet.create({
   card: { gap: space.lg },
   label: { fontFamily: font.family.body, fontSize: font.size.md, color: color.text },
   hint: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted, marginTop: space.xs },
+  perfilFila: { gap: space.xs },
+  perfilRespuesta: { fontFamily: font.family.bodyStrong, fontSize: font.size.md, color: color.text },
   levels: { flexDirection: 'row', gap: space.sm },
   level: { flex: 1 },
   levelOn: { flex: 1, backgroundColor: color.accentSoft, borderColor: color.accent },

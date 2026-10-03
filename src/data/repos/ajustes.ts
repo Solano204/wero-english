@@ -1,6 +1,7 @@
 import { getDb } from '@/data/cliente';
 import type { AtoradaVista } from '@/domain/atoradas';
 import type { OrdenErrores } from '@/domain/errores';
+import type { BorradorPerfil } from '@/domain/perfilInicial';
 import type { Nivel } from '@/types';
 
 /** Ajustes por usuario. Se guardan como texto y se parsean al leer. */
@@ -38,6 +39,8 @@ export interface Settings {
   micHabilitado: boolean;
   /** Onboarding contestado. Si es false se muestra al entrar. */
   onboardingHecho: boolean;
+  /** Las respuestas del onboarding mientras contesta: si cierra la app a la mitad, continúa donde iba. */
+  onboardingBorrador: BorradorPerfil | null;
 
   /** Grupos de Practicar que el usuario dejó desplegados (ids de `GRUPOS`). */
   practicarGruposAbiertos: string[];
@@ -75,6 +78,7 @@ export const DEFAULT_SETTINGS: Settings = {
   mostrarSeguidas: true,
   micHabilitado: false,
   onboardingHecho: false,
+  onboardingBorrador: null,
   practicarGruposAbiertos: [],
   leyendaLecturaVista: false,
   ordenErrores: 'graves',
@@ -123,6 +127,21 @@ export async function saveSetting<K extends keyof Settings>(
      ON CONFLICT(usuario_id, clave) DO UPDATE SET valor = excluded.valor;`,
     [usuarioId, clave, JSON.stringify(valor)]
   );
+}
+
+/** Varios ajustes en una sola transacción: o se guardan todos o ninguno. */
+export async function saveSettingsBatch(usuarioId: number, parcial: Partial<Settings>): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    for (const [clave, valor] of Object.entries(parcial)) {
+      if (valor === undefined) continue;
+      await db.runAsync(
+        `INSERT INTO ajuste (usuario_id, clave, valor) VALUES (?,?,?)
+         ON CONFLICT(usuario_id, clave) DO UPDATE SET valor = excluded.valor;`,
+        [usuarioId, clave, JSON.stringify(valor)]
+      );
+    }
+  });
 }
 
 /**

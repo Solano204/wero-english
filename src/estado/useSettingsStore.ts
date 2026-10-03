@@ -3,6 +3,7 @@ import {
   DEFAULT_SETTINGS,
   loadSettings,
   saveSetting,
+  saveSettingsBatch,
   type Settings,
 } from '@/data/repos/ajustes';
 import * as audio from '@/services/audio';
@@ -18,6 +19,8 @@ interface SettingsState extends Settings {
     key: K,
     value: Settings[K]
   ) => Promise<void>;
+  /** Varios ajustes de una vez, guardados en una sola transacción. */
+  setVarios: (usuarioId: number, parcial: Partial<Settings>) => Promise<void>;
   /**
    * El filtro que consumen todas las consultas de contenido. Es una función nueva cada vez que cambian el Modo
    * Limpio o los niveles (y solo entonces): las cargas que dependen de `filter` se rehacen al cambiarlos.
@@ -51,6 +54,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     if (key === 'volumenMusica') music.setVolumen(Number(value) / 100);
     if (key === 'musica') music.setActiva(Boolean(value));
     await saveSetting(usuarioId, key, value);
+  },
+
+  setVarios: async (usuarioId, parcial) => {
+    set(parcial as Partial<SettingsState>);
+    if ('modoLimpio' in parcial) set({ filter: filtroDe(get().modoLimpio, get().niveles) });
+    await saveSettingsBatch(usuarioId, parcial);
   },
 
   filter: filtroDe(DEFAULT_SETTINGS.modoLimpio, DEFAULT_SETTINGS.niveles),

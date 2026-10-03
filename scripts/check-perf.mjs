@@ -36,6 +36,8 @@ const MAP_EN_SCROLL = {
   'src/features/juegos/cazala/screens/CazalaScreen.tsx': [1, 'palabras de una frase (≤ 12)'],
   'src/features/ajustes/screens/DiagnosticsScreen.tsx': [1, 'un renglón por archivo de contenido (11)'],
   'src/features/ajustes/screens/DownloadsScreen.tsx': [1, 'packs descargables (≤ 20)'],
+  'src/features/ajustes/screens/PerfilScreen.tsx': [1, 'las respuestas del perfil (2)'],
+  'src/features/ajustes/screens/SettingsScreen.tsx': [1, 'las respuestas del perfil (2)'],
   'src/features/ajustes/screens/ProbarVozScreen.tsx': [3, 'solo __DEV__: pruebas de voz'],
   'src/features/ajustes/screens/SfxSamplerScreen.tsx': [2, 'solo __DEV__: 4 paquetes y sus efectos'],
   'src/features/cuenta/screens/BorrarScreen.tsx': [1, 'lo que se borra (≤ 6 renglones)'],
