@@ -34,7 +34,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | COLOR-3 | colores de marca (acento, primario, neutro) sin escala 50–900 | 0 |
 | COLOR-4 | pares texto/superficie bajo AA | 0 |
 | TIPO-1 | familias: fuente del sistema, `CharisSIL` sin cargar, `monospace` | 0 |
-| TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 1 |
+| TIPO-2 | cuerpo < 16 px (estilos de cuerpo en 15, 13 o 12, salvo los descartados a mano) | 2 |
 | TIPO-2b | line-height del cuerpo fuera de 1.4–1.6 | 0 |
 | TIPO-4 | títulos ≥ 28 px sin letterSpacing negativo | 0 |
 | ESP-1 | espaciado fuera de 4/8 | 0 |
@@ -116,16 +116,16 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 **TIPO-1 · Máximo 2 familias; prohibidas Inter, Roboto, Arial y Space Grotesk como default.** Familias de `font.family` (`tokens.ts`), incrustadas en el APK por el plugin de `expo-font` en `app.json`: Bricolage Grotesque (títulos), Instrument Sans (cuerpo) y Charis SIL (IPA). Un `fontFamily` que no salga de `font.family`, o un texto sin familia, cae a la fuente del sistema (en Android, **Roboto**). Ocurrencias fuera de `font.family`:
 - (ninguno)
 
-**TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo `font.size.md` vale **16** (`tokens.ts`) y `text.body` y `text.bodyMuted` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (1):
+**TIPO-2 · Cuerpo de 16 px mínimo.** El token de cuerpo `font.size.md` vale **16** (`tokens.ts`) y `text.body` y `text.bodyMuted` lo usan. Estilos de cuerpo o descripción por debajo de 16 px (2):
+- `src/features/cuenta/screens/AuthScreen.tsx:279` — notaSm: fontSize sm = 13
 - `src/features/juegos/dulces/components/CapaDepuracion.tsx:51` — texto: fontSize xs = 12
 
-Se quedan en 12–13 px, revisados a mano (18):
+Se quedan en 12–13 px, revisados a mano (17):
 - `src/features/ajustes/components/ControlesAjustes.tsx:128` — horaTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
-- `src/features/cuenta/components/BotonGoogle.tsx:87` — texto: fontSize 14 = 14 — la etiqueta del botón «Continuar con Google» va en 14 como piden los lineamientos de marca de Google
 - `src/features/cuenta/components/PasoCuantas.tsx:131` — chipTexto: fontSize sm = 13 — etiqueta de una línea (metadato o chip)
 - `src/features/cuenta/components/Pregunta.tsx:69` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
 - `src/features/cuenta/components/Presentacion.tsx:88` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
-- `src/features/cuenta/screens/AuthScreen.tsx:217` — legalTexto: fontSize sm = 13 — nota al pie o leyenda: «Al continuar aceptas los Términos y el Aviso de privacidad», una línea bajo los botones
+- `src/features/cuenta/screens/AuthScreen.tsx:296` — legalTexto: fontSize xs = 12 — nota al pie o leyenda: «Al continuar aceptas los Términos y el Aviso de privacidad», una línea bajo los botones
 - `src/features/gramatica/components/BloqueGramatica.tsx:134` — resumen: fontSize sm = 13 — una línea de lo que reúne el bloque, como `FilaModo.corta` de Practicar: apoya al título, no es lo que se estudia
 - `src/features/gramatica/components/RenglonTema.tsx:143` — gancho: fontSize sm = 13 — una o dos líneas que apoyan al título del renglón, como `FilaModo.corta` de Practicar; el gancho del tema se lee en 16 px en su pantalla
 - `src/features/juegos/caida/components/FinCaida.tsx:192` — nota: fontSize xs = 12 — nota al pie o leyenda: información secundaria de una o dos líneas, no lo que se estudia
@@ -375,4 +375,4 @@ Archivos que pintan `<AudioButton>`: `features/vocabulario/components/EntryRow.t
 - Los bucles anteriores a la v5.0 (`Skeleton` mientras carga) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (`src/components/fx/`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":1,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"TXT-2":0,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":0,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":2,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"TXT-2":0,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":0,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->

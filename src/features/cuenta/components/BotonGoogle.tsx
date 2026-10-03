@@ -3,7 +3,10 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Presionable } from '@/shared/ui/Presionable';
 import * as haptics from '@/services/haptics';
-import { layout, marcaGoogle, radius, space } from '@/theme';
+import { color, font, marcaGoogle, radius, space } from '@/theme';
+
+/** Alto del botón de la entrada. */
+export const ALTO_BOTON_ENTRADA = 56;
 
 /** La «G» oficial, 20 dp: sus cuatro colores y su forma no se tocan (lineamientos de marca de Google). */
 function LogoG() {
@@ -37,10 +40,10 @@ interface Props {
 }
 
 /**
- * «Continuar con Google» con los lineamientos de marca de Google (variante oscura): fondo
- * #131314, borde #8E918F, la «G» oficial a la izquierda y el texto en Roboto Medium. El texto
- * es uno de los permitidos por Google y no se cambia. Mientras carga, la «G» cede su lugar a un
- * indicador y el botón no responde. Alto de 48 (el área táctil de la app; Google pide 40 o más).
+ * «Continuar con Google» de la entrada «Tu cuenta»: píldora de 56 con el fondo de la app, borde de
+ * 1 px, la «G» oficial a la izquierda (sus cuatro colores y su forma, sin alterar) y el texto en
+ * la tipografía de la app. El texto es uno de los permitidos por Google y no se cambia. Mientras
+ * carga, la «G» cede su lugar a un indicador y el botón no responde.
  */
 export function BotonGoogle({ onPress, cargando = false, disabled = false }: Props) {
   const bloqueado = disabled || cargando;
@@ -58,7 +61,7 @@ export function BotonGoogle({ onPress, cargando = false, disabled = false }: Pro
       style={[styles.boton, disabled && !cargando && styles.apagado]}
     >
       <View style={styles.logo}>
-        {cargando ? <ActivityIndicator size="small" color={marcaGoogle.texto} /> : <LogoG />}
+        {cargando ? <ActivityIndicator size="small" color={color.text} /> : <LogoG />}
       </View>
       <Text style={styles.texto} numberOfLines={1}>
         Continuar con Google
@@ -69,23 +72,22 @@ export function BotonGoogle({ onPress, cargando = false, disabled = false }: Pro
 
 const styles = StyleSheet.create({
   boton: {
-    minHeight: layout.tapMin,
+    height: ALTO_BOTON_ENTRADA,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: space.md,
-    paddingHorizontal: space.md,
+    paddingHorizontal: space.lg,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: marcaGoogle.borde,
-    backgroundColor: marcaGoogle.fondo,
+    borderColor: color.borderStrong,
+    backgroundColor: color.bg,
   },
   apagado: { opacity: 0.5 },
   logo: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
   texto: {
-    fontFamily: marcaGoogle.fuente,
-    fontSize: 14,
-    lineHeight: 20,
-    color: marcaGoogle.texto,
+    fontFamily: font.family.bodyStrong,
+    fontSize: font.size.md,
+    color: color.text,
   },
 });

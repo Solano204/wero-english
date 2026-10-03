@@ -19,6 +19,8 @@ import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMe
 import { InfoIcon } from 'phosphor-react-native/src/icons/Info';
 import { LightbulbIcon } from 'phosphor-react-native/src/icons/Lightbulb';
 import { LockSimpleIcon } from 'phosphor-react-native/src/icons/LockSimple';
+import { ListChecksIcon } from 'phosphor-react-native/src/icons/ListChecks';
+import { DeviceMobileIcon } from 'phosphor-react-native/src/icons/DeviceMobile';
 import { SmileyIcon } from 'phosphor-react-native/src/icons/Smiley';
 import { MicrophoneSlashIcon } from 'phosphor-react-native/src/icons/MicrophoneSlash';
 import { PauseIcon } from 'phosphor-react-native/src/icons/Pause';
@@ -142,6 +144,8 @@ const ICONOS = {
   // La señal que se rompe de Errores que te delatan: lo que entienden no es lo que dijiste.
   'signal-broken': { Componente: CellSignalSlashIcon },
   share: { Componente: ShareNetworkIcon },
+  list: { Componente: ListChecksIcon },
+  phone: { Componente: DeviceMobileIcon },
   // La entrada a Ajustes (cuenta, recordatorios, contenido), en el encabezado de Progreso.
   settings: { Componente: GearSixIcon },
 } satisfies Record<string, Definicion>;
