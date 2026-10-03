@@ -11,6 +11,7 @@ export {
   gradiente,
   iconoRedondo,
   iconoVisual,
+  seccion,
   space,
   radius,
   font,

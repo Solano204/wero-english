@@ -98,7 +98,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipograf√≠a, jerarqu√
 - `src/shared/ui/fx/CableTrazo.tsx:80`
 - `src/shared/ui/fx/OndaVoz.tsx:124`
 - `src/shared/ui/Hoja.tsx:103`
-- `src/shared/ui/MarcoImagen.tsx:149`
+- `src/shared/ui/MarcoImagen.tsx:177`
 - `src/shared/ui/MuroDesbloqueo.tsx:74`
 - `src/shared/ui/OptionButton.tsx:136`
 - `src/shared/ui/Screen.tsx:159`

@@ -5,7 +5,7 @@ import { MarcoImagen } from '@/shared/ui/MarcoImagen';
 import { DueloContraste } from '@/features/errores/components/DueloContraste';
 import { MedidorGravedad } from '@/features/errores/components/MedidorGravedad';
 import { SecuenciaMalentendido } from '@/features/errores/components/SecuenciaMalentendido';
-import { color, font, motionMalentendido, space } from '@/theme';
+import { color, font, motionMalentendido, seccion, space } from '@/theme';
 import { useDetalleError } from '@/features/errores/hooks/useDetalleError';
 
 /**
@@ -69,7 +69,7 @@ export function ErrorDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  imagen: { marginBottom: space.lg },
+  imagen: { marginTop: space.md, marginBottom: seccion.entre },
   why: { marginTop: space.xl, gap: space.sm },
   whyHead: {
     fontSize: font.size.xs,

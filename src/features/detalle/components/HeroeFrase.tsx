@@ -6,7 +6,7 @@ import { OndaVoz } from '@/shared/ui/fx/OndaVoz';
 import { useVozEnVivo } from '@/shared/ui/fx/useVozEnVivo';
 import { analizar } from '@/domain/marcas';
 import { marcasDe } from '@/services/marcas';
-import { color, font, space } from '@/theme';
+import { color, font, seccion, space } from '@/theme';
 import type { Entry } from '@/types';
 import { NotaPlegable } from './NotaPlegable';
 
@@ -65,7 +65,7 @@ export function HeroeFrase({ entry }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', gap: space.md },
+  wrap: { alignItems: 'center', gap: seccion.entre },
   ipa: {
     fontFamily: font.family.ipa,
     fontSize: font.size.md,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   botones: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm },
-  traduccion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.sm },
+  traduccion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
   spanish: {
     flexShrink: 1,
     fontFamily: font.family.body,

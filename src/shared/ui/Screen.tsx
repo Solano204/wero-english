@@ -135,11 +135,11 @@ export function Screen({
    */
   const altoPestanas = useContext(BottomTabBarHeightContext) ?? 0;
   const { bottom: insetAbajo } = useSafeAreaInsets();
-  // Con footer no hace falta este colchón: el footer ya reserva su
-  // propio espacio fijo abajo, y sumarlo aquí solo le roba altura al
-  // contenido de en medio sin ganar nada.
+  // Con footer no hace falta el colchón de las pestañas: el footer ya reserva su propio espacio fijo
+  // abajo (no flota sobre el scroll), y sumarlo aquí solo le roba altura al contenido de en medio. Sí
+  // queda un respiro: sin él, la última tarjeta termina pegada al borde del footer y parece tapada.
   const huecoAbajo = footer
-    ? 0
+    ? space.lg
     : altoPestanas > 0
       ? altoPestanas + (ANUNCIOS_ACTIVOS ? layout.adBar : 0) + insetAbajo + space.xl
       : space.xxxl;

@@ -129,6 +129,17 @@ export const space = {
   xxxl: 48,
 } as const;
 
+/**
+ * Separaciones verticales de una pantalla de lectura (Detalle): una sola medida entre bloques, para que el aire
+ * sea el mismo en toda la app. Los títulos de sección llevan `entre` arriba y `tituloAbajo` abajo; la escala de
+ * Registro, `escalaAbajo` antes de lo que sigue.
+ */
+export const seccion = {
+  entre: space.lg,
+  tituloAbajo: space.sm,
+  escalaAbajo: space.md,
+} as const;
+
 export const radius = {
   sm: 14,
   md: 20,

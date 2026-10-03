@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useEffectEvent } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { Asset } from 'expo-asset';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -19,6 +20,10 @@ import { blur, color, motionDuration, radius } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 
 const RAZON = 16 / 9;
+/** Cuánto puede alejarse una imagen de 16:9 (en proporción) para seguir llenando el marco sin recortarla de más. */
+const TOLERANCIA_RAZON = 0.02;
+/** Desenfoque del fondo con que se rellena el marco cuando la imagen no es 16:9. */
+const BLUR_FONDO = 30;
 const FADE_MS = motionDuration.base;
 const REVELA_MS = 320;
 /** Al entrar en Detalle, la imagen se aleja un poco: de 1.06 a 1. */
@@ -64,12 +69,19 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
   const reducido = useMovimientoReducido();
   const [cargada, setCargada] = useState(false);
   const [fallo, setFallo] = useState(false);
+  // La proporción real de la imagen, si ya se cargó (las empaquetadas la traen de antemano).
+  const [razonCargada, setRazonCargada] = useState<number | null>(null);
   const opacidadCarga = useSharedValue(0);
   const revelo = useSharedValue(desenfocada && !reducido ? 0 : 1);
   const zoom = useSharedValue(zoomEntrada && !reducido ? ZOOM_INICIAL : 1);
 
   const source = imageSource(path);
   const conImagen = Boolean(source) && !fallo && hayImagen(path);
+  const medidas = typeof source === 'number' ? Asset.fromModule(source) : null;
+  const razon = razonCargada ?? (medidas?.width && medidas.height ? medidas.width / medidas.height : null);
+  // Una imagen 16:9 llena el marco (si hay que recortar, desde arriba: nunca se cortan cabezas). Cualquier otra
+  // proporción se muestra completa sobre su propio fondo desenfocado.
+  const llena = razon === null || Math.abs(razon - RAZON) / RAZON <= TOLERANCIA_RAZON;
 
   // Cambió la frase (o su imagen): se olvida el fallo/carga anterior en el mismo render (sin un cuadro con el
   // estado viejo) y la opacidad vuelve a cero para fundir otra vez.
@@ -78,6 +90,7 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
     setPathPrevio(path);
     setCargada(false);
     setFallo(false);
+    setRazonCargada(null);
   }
   useEffect(() => {
     opacidadCarga.set(0);
@@ -119,12 +132,27 @@ export function MarcoImagen({ path, tinte, mundo, ancho, alto, desenfocada = fal
         // createAnimatedComponent lleva onLoad/onError al hilo de UI y revienta con
         // "Tried to synchronously call a Remote Function".
         <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, imagenAnim]}>
+          {llena ? null : (
+            <>
+              <Image
+                source={source ?? undefined}
+                contentFit="cover"
+                blurRadius={BLUR_FONDO}
+                cachePolicy={CACHE_IMAGEN}
+                recyclingKey={`${path}:fondo`}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.velo} />
+            </>
+          )}
           <Image
             source={source ?? undefined}
-            contentFit="cover"
+            contentFit={llena ? 'cover' : 'contain'}
+            contentPosition={llena ? 'top' : 'center'}
             cachePolicy={CACHE_IMAGEN}
             recyclingKey={path}
-            onLoad={() => {
+            onLoad={(e) => {
+              if (e.source.width && e.source.height) setRazonCargada(e.source.width / e.source.height);
               setCargada(true);
               opacidadCarga.set(reducido ? 1 : withTiming(1, { duration: FADE_MS }));
             }}
@@ -175,6 +203,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: color.surfaceAlt,
   },
+  velo: { ...StyleSheet.absoluteFill, backgroundColor: color.veloPortada },
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   puntoWrap: { position: 'absolute', left: 10, bottom: 10 },
 });

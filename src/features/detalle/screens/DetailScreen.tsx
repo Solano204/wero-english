@@ -10,7 +10,7 @@ import { CuandoNoDecirla } from '@/features/detalle/components/CuandoNoDecirla';
 import { EscalaRegistro } from '@/features/detalle/components/EscalaRegistro';
 import { FilaDondeVive } from '@/features/detalle/components/FilaDondeVive';
 import { HeroeFrase } from '@/features/detalle/components/HeroeFrase';
-import { color, font, layout, motionDuration, motionEntrada, radius, space, type WorldId } from '@/theme';
+import { color, font, layout, motionDuration, motionEntrada, radius, seccion, space, type WorldId } from '@/theme';
 import { mismoTexto } from '@/domain/texto';
 import { useDetalleFrase } from '@/features/detalle/hooks/useDetalleFrase';
 
@@ -77,7 +77,8 @@ export function DetailScreen() {
         // Guardar es la acción principal y vive en la zona del pulgar, no arriba.
         footer={<BotonGuardar guardada={fav} pulso={pulso} onPress={alternar} />}
       >
-        <View style={{ height: top + layout.tapMin + space.sm }} />
+        {/* El encabezado flota: este hueco lo cubre entero (su margen + el botón de 48), y luego va `space.md` más. */}
+        <View style={{ height: top + space.xs + layout.tapMin }} />
 
         <View style={styles.marcoZona}>
           <MarcoImagen
@@ -178,12 +179,12 @@ const styles = StyleSheet.create({
   },
   raiz: { flex: 1 },
   marcoZona: { paddingHorizontal: layout.screenPad, paddingTop: space.md },
-  cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: space.lg },
-  fila: { marginTop: space.xl },
-  registro: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
+  cuerpo: { paddingHorizontal: layout.screenPad, paddingTop: seccion.entre },
+  fila: { marginTop: seccion.entre },
+  registro: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, marginBottom: seccion.escalaAbajo },
   chips: { alignItems: 'flex-end', gap: space.xs },
-  warn: { marginTop: space.lg },
-  block: { marginTop: space.lg, gap: space.xs },
+  warn: { marginTop: seccion.entre },
+  block: { marginTop: seccion.entre, gap: seccion.tituloAbajo },
   blockTitle: {
     fontSize: font.size.xs,
     color: color.textFaint,
