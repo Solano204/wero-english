@@ -7,8 +7,15 @@ import { avisoBloqueo, tituloTramo, type Tramo } from '@/domain/niveles';
 import { color, font, layout, space, text } from '@/theme';
 import { conteo, miles } from '@/domain/texto';
 
+/**
+ * Aire entre el encabezado y la primera fila: el anillo y la onda de la celda actual (hasta 0.3 de su lado
+ * fuera de ella, unos 17 dp) no llegan a tocar el texto del tramo. Es parte del encabezado, que es opaco:
+ * al pegarse arriba tapa también esta franja.
+ */
+export const ESPACIO_TRAS_TRAMO = space.xl;
+
 /** Alto fijo del encabezado: la lista calcula sus posiciones con él (`getItemLayout`). */
-export const ALTO_TRAMO = 72;
+export const ALTO_TRAMO = 72 + ESPACIO_TRAS_TRAMO;
 
 interface Props {
   tramo: Tramo;
@@ -101,6 +108,7 @@ const styles = StyleSheet.create({
     height: ALTO_TRAMO,
     backgroundColor: color.bg,
     paddingHorizontal: layout.screenPad,
+    paddingBottom: ESPACIO_TRAS_TRAMO,
     justifyContent: 'center',
     gap: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,

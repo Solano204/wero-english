@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Hueso, ProveedorEsqueleto } from '@/shared/ui/esqueleto';
 import { COLUMNAS } from '@/domain/niveles';
 import { color, layout, radius, space } from '@/theme';
-import { ALTO_TRAMO } from './EncabezadoTramo';
+import { ALTO_TRAMO, ESPACIO_TRAS_TRAMO } from './EncabezadoTramo';
 import { HUECO_CELDAS } from './FilaNiveles';
 
 /** Renglones que se ven del tramo abierto antes de que empiece el siguiente. */
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
   tramo: {
     height: ALTO_TRAMO,
     paddingHorizontal: layout.screenPad,
+    paddingBottom: ESPACIO_TRAS_TRAMO,
     justifyContent: 'center',
     gap: space.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,

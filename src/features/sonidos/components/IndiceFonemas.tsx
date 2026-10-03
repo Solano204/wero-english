@@ -60,7 +60,7 @@ interface Props {
  */
 export function IndiceFonemas({ fonemas, onAbrir, onAtras }: Props) {
   const { width } = useWindowDimensions();
-  const ancho = Math.floor((width - layout.screenPad * 2 - space.sm * (COLUMNAS - 1)) / COLUMNAS);
+  const ancho = Math.floor((width - layout.screenPad * 2 - space.md * (COLUMNAS - 1)) / COLUMNAS);
   const indexados = fonemas.map((f, i) => ({ f, i }));
 
   return (
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   titulo: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   tituloTexto: { fontFamily: font.family.heading, fontSize: font.size.lg, color: color.text },
   cuenta: { fontFamily: font.family.body, fontSize: font.size.sm, color: color.textMuted },
-  rejilla: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  rejilla: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   chip: {
     height: ALTO_CHIP,
     alignItems: 'center',

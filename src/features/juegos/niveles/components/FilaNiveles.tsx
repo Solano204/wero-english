@@ -2,13 +2,13 @@ import React, { memo } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import type { EstadoNivel, NivelVista } from '@/domain/niveles';
-import { aparecerSubiendo, layout, motionDuration } from '@/theme';
+import { aparecerSubiendo, layout, motionDuration, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import { CeldaNivel } from './CeldaNivel';
 import type { Logro } from '@/features/juegos/niveles/hooks/useRecompensaNiveles';
 
-/** Hueco entre celdas, en los dos sentidos (escala 4/8). */
-export const HUECO_CELDAS = 8;
+/** Hueco entre celdas, en los dos sentidos: se ve que son cuadros separados. Si no caben, se achica la celda, nunca el hueco. */
+export const HUECO_CELDAS = space.md;
 
 interface Props {
   niveles: NivelVista[];
