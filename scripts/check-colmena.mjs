@@ -19,7 +19,7 @@ const cargar = async (rel, sustituir = (s) => s) => {
 };
 const G = await cargar('src/features/juegos/colmena/logic/geometria.ts');
 const { formaPalabras } = await cargar('src/domain/texto.ts');
-const { normaliza } = await cargar('src/domain/colmena.ts', (s) => s.replace(/import \{ shuffle \} from '@\/domain\/arreglos';/, 'const shuffle = (a) => a;'));
+const { normaliza, aplicarPista, invariantesPanal } = await cargar('src/domain/colmena.ts', (s) => s.replace(/import \{ shuffle \} from '@\/domain\/arreglos';/, 'const shuffle = (a) => a;'));
 const { distribuirRanuras, disposicionPanal, ordenDesdeCentro, fichasParaCompletar, retrasoVuelo, etiquetaRanura, puntosHexagono } = G;
 
 let total = 0;
@@ -243,6 +243,82 @@ prueba('retrasoVuelo: 40 ms entre fichas y nunca más de 400 ms en total', () =>
   assert.equal(retrasoVuelo(3, 8), 120);
   for (let n = 1; n <= 26; n++) assert.ok(retrasoVuelo(n - 1, n) <= 400, `n=${n}`);
   assert.equal(retrasoVuelo(4, 20), 80);
+});
+
+// ── la pista: una letra, una ficha, nada más ────────────────────────────────────────────────────────────────────
+
+/** Una ronda de juguete: el objetivo, sus fichas (la ficha 6 es un señuelo) y nada armado todavía. */
+const ronda = (objetivo, letras) => ({ objetivo, letras, armado: '', usadas: [] });
+const FRASE = ronda('keepeasy', [...'keepeasyz']); // tres «e» y dos «e» repetidas más: ids 1, 2, 4 son «e»
+
+prueba('pista como primera acción: una ranura llena, una sola ficha usada, el resto del panal intacto', () => {
+  const e = FRASE;
+  const p = aplicarPista(e);
+  assert.equal(p.letra, 'k');
+  assert.equal(p.ranura, 0);
+  assert.equal(p.ficha, 0);
+  assert.equal(p.armado, 'k');
+  assert.deepEqual(p.usadas, [0]);
+  assert.equal(p.completa, false);
+  assert.equal(e.letras.length - p.usadas.length, 8); // visibles = total − usadas
+  assert.deepEqual(e.usadas, []); // no muta el estado que recibe
+});
+
+prueba('pista después de letras puestas a mano: sigue por la siguiente ranura y respeta lo usado', () => {
+  // A mano: «k» (ficha 0) y «e» (ficha 2, no la 1): la pista pone la «e» de la ranura 2 con la ficha libre que sigue.
+  const e = { ...FRASE, armado: 'ke', usadas: [0, 2] };
+  const p = aplicarPista(e);
+  assert.equal(p.letra, 'e');
+  assert.equal(p.ranura, 2);
+  assert.equal(p.ficha, 1); // la primera «e» libre por id
+  assert.deepEqual(p.usadas, [0, 2, 1]);
+  assert.equal(p.armado, 'kee');
+});
+
+prueba('letras repetidas (varias «e»): solo UNA ficha más queda usada, las otras «e» siguen libres', () => {
+  let e = { ...FRASE, armado: 'ke', usadas: [0, 1] };
+  const p = aplicarPista(e);
+  assert.equal(p.ficha, 2);
+  assert.equal(p.usadas.length, e.usadas.length + 1);
+  assert.equal(new Set(p.usadas).size, p.usadas.length);
+  // Las «e» que no se usaron (id 4) siguen sin estar usadas.
+  assert.ok(!p.usadas.includes(4));
+});
+
+prueba('varias pistas seguidas: cada una pone una letra, nunca la misma ficha dos veces, y el estado se mantiene sano', () => {
+  let e = FRASE;
+  const puestas = [];
+  for (let k = 0; k < 5; k++) {
+    const p = aplicarPista(e);
+    assert.ok(p, `pista ${k + 1}`);
+    assert.equal(p.usadas.length, k + 1);
+    assert.ok(!e.usadas.includes(p.ficha), 'la ficha estaba libre');
+    puestas.push(p.letra);
+    e = { ...e, armado: p.armado, usadas: p.usadas };
+    assert.deepEqual(invariantesPanal(e), []);
+  }
+  assert.equal(puestas.join(''), 'keepe');
+});
+
+prueba('una pista que completa la frase lo dice (la ronda termina como si la completaras tú)', () => {
+  const e = ronda('hey', [...'yhe']);
+  const p1 = aplicarPista(e);
+  const p2 = aplicarPista({ ...e, armado: p1.armado, usadas: p1.usadas });
+  const p3 = aplicarPista({ ...e, armado: p2.armado, usadas: p2.usadas });
+  assert.deepEqual([p1.completa, p2.completa, p3.completa], [false, false, true]);
+  assert.equal(p3.armado, 'hey');
+  assert.equal(aplicarPista({ ...e, armado: 'hey', usadas: [1, 2, 0] }), null); // ya no hay ranura vacía
+});
+
+prueba('sin ficha libre con esa letra, la pista no inventa nada', () => {
+  assert.equal(aplicarPista({ objetivo: 'ab', letras: ['b', 'c'], armado: '', usadas: [] }), null);
+});
+
+prueba('invariantes: fichas usadas = letras colocadas, sin repetidas y cada ranura con su letra', () => {
+  assert.deepEqual(invariantesPanal({ ...FRASE, armado: 'ke', usadas: [0, 1] }), []);
+  assert.ok(invariantesPanal({ ...FRASE, armado: 'ke', usadas: [0, 0] }).length > 0); // la misma ficha dos veces
+  assert.ok(invariantesPanal({ ...FRASE, armado: 'ke', usadas: [0] }).length > 0); // usadas ≠ colocadas
+  assert.ok(invariantesPanal({ ...FRASE, armado: 'kx', usadas: [0, 1] }).length > 0); // la ranura no dice lo que su ficha
 });
 
 console.log(`\ncheck:colmena ${total} pruebas ok`);

@@ -77,7 +77,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipograf√≠a, jerarqu√
 - `src/features/juegos/caida/components/PistaCaida.tsx:62`
 - `src/features/juegos/cazala/components/PieCaza.tsx:44`
 - `src/features/juegos/cazala/components/ResultadoCaza.tsx:96`
-- `src/features/juegos/colmena/components/Hexagono.tsx:313`
+- `src/features/juegos/colmena/components/Hexagono.tsx:327`
 - `src/features/juegos/dulces/components/SimboloPieza.tsx:56`
 - `src/features/juegos/niveles/components/CeldaNivel.tsx:130`
 - `src/features/lecturas/components/TarjetaLectura.tsx:91`

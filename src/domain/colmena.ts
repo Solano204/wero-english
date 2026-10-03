@@ -95,6 +95,57 @@ export function pistaPara(objetivo: string, armado: string): string | null {
   return objetivo[armado.length] ?? null;
 }
 
+/** Lo de una ronda de Colmena que le importa a la pista: lo demás es dibujo. */
+export interface EstadoPanal {
+  objetivo: string;
+  /** Las letras de las fichas del panal, por id (su índice). */
+  letras: readonly string[];
+  armado: string;
+  /** Los ids de las fichas ya usadas, en el orden en que se pusieron. */
+  usadas: readonly number[];
+}
+
+export interface PistaAplicada {
+  /** El id de la única ficha que se usa. */
+  ficha: number;
+  /** La ranura que se llena. */
+  ranura: number;
+  letra: string;
+  armado: string;
+  usadas: number[];
+  /** Esa letra completa la frase: la ronda termina como cuando la completa quien juega. */
+  completa: boolean;
+}
+
+/**
+ * Una pista: la letra correcta para la siguiente ranura vacía, tomada de UNA sola ficha libre del panal (la
+ * primera que la tenga, elegida por id y no por letra: con dos «e» solo queda usada una). Devuelve el estado
+ * nuevo y no toca nada más; sin ranura vacía o sin una ficha libre con esa letra, null.
+ */
+export function aplicarPista(e: EstadoPanal): PistaAplicada | null {
+  const letra = pistaPara(e.objetivo, e.armado);
+  if (letra === null) return null;
+  const tomadas = new Set(e.usadas);
+  const ficha = e.letras.findIndex((l, i) => l === letra && !tomadas.has(i));
+  if (ficha < 0) return null;
+  const armado = e.armado + letra;
+  return { ficha, ranura: e.armado.length, letra, armado, usadas: [...e.usadas, ficha], completa: estaCompleta(e.objetivo, armado) };
+}
+
+/** Lo que tiene que cumplirse en una ronda que sigue en juego; devuelve lo que no (vacío si todo está bien). */
+export function invariantesPanal(e: EstadoPanal): string[] {
+  const fallas: string[] = [];
+  if (new Set(e.usadas).size !== e.usadas.length) fallas.push('una ficha está usada dos veces');
+  if (e.usadas.length !== e.armado.length) {
+    fallas.push(`fichas usadas (${e.usadas.length}) distinto de letras colocadas (${e.armado.length})`);
+  }
+  e.usadas.forEach((f, k) => {
+    if (f < 0 || f >= e.letras.length) fallas.push(`la ficha ${f} no existe`);
+    else if (e.letras[f] !== e.armado[k]) fallas.push(`la ranura ${k} dice «${e.armado[k]}» y su ficha ${f} es «${e.letras[f]}»`);
+  });
+  return fallas;
+}
+
 /** ¿Lo armado hasta ahora sigue siendo un prefijo válido? */
 export function vaBien(objetivo: string, armado: string): boolean {
   return objetivo.startsWith(armado);

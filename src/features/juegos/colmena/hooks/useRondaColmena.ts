@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RONDA_INICIAL, faseColmena, rondaColmena } from '@/features/juegos/colmena/logic/ronda';
 import { useTableroColmena } from './useTableroColmena';
 import { useVozRonda } from './useVozRonda';
-import { buildRounds, estaCompleta, pistaPara, vaBien } from '@/domain/colmena';
+import { aplicarPista, buildRounds, estaCompleta, invariantesPanal, vaBien } from '@/domain/colmena';
 import { useNivel } from '@/features/juegos/comun/useNivel';
 import { applyGameGrade } from '@/data/repos/juegos';
 import { getRandomSpellable } from '@/data/repos/frases';
@@ -34,6 +34,9 @@ const PISTA_BRILLO_MS = motionDuration.base;
 
 /** Cuánto se bloquea "Siguiente" tras tocarlo, para no procesar dos toques. */
 const AVANZAR_DEBOUNCE_MS = 400;
+
+/** Cuánto se bloquea «Pista» tras tocarla: lo que tarda el estado nuevo en llegar a la siguiente pista. */
+const PISTA_DEBOUNCE_MS = 300;
 
 /**
  * Toda la partida de Colmena: rondas, letras, pistas, escuchas, el reloj y el paso a la ronda que sigue.
@@ -66,6 +69,7 @@ export function useRondaColmena() {
       audio.stop();
       if (avanzandoTimer.current) clearTimeout(avanzandoTimer.current);
       if (salidaTimer.current) clearTimeout(salidaTimer.current);
+      if (pistaTimer.current) clearTimeout(pistaTimer.current);
     };
   }, []);
 
@@ -94,6 +98,10 @@ export function useRondaColmena() {
   const [avanzando, setAvanzando] = useState(false);
   const candadoAvanzar = useRef(false);
   const avanzandoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lo mismo para «Pista»: dos toques sobre el mismo estado viejo ponían la misma ficha dos veces y gastaban
+  // dos pistas por una letra.
+  const candadoPista = useRef(false);
+  const pistaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Qué ronda ya se resolvió. El reloj avisa desde el hilo de UI y puede
   // llegar en el mismo instante que la última letra o «No me sale», con
   // un `resuelta` todavía viejo: esta ref corta la segunda resolución.
@@ -195,23 +203,39 @@ export function useRondaColmena() {
   }, [tocarLetra]);
   const alTocarFicha = (ficha: number) => tocarRef.current(ficha);
 
+  /**
+   * Una pista pone exactamente UNA letra: la de la siguiente ranura vacía, de UNA sola ficha libre (elegida por
+   * id, en `aplicarPista`). Solo esa ficha queda usada; las demás siguen en el panal. Si esa letra completa la
+   * frase, `tocarLetra` termina la ronda igual que cuando la completa quien juega.
+   */
   const usarPista = () => {
-    if (!round || resuelta || pistas <= 0) return;
+    if (!round || resuelta || pistas <= 0 || candadoPista.current) return;
 
-    const letra = pistaPara(round.objetivo, armado);
-    if (!letra) return;
+    const pista = aplicarPista({ objetivo: round.objetivo, letras: round.letras, armado, usadas });
+    if (!pista) return;
 
-    // La pista pone la letra que sigue, nunca resuelve la palabra: si
-    // terminara el ejercicio, no sería un empujón sino la respuesta.
-    const i = round.letras.findIndex(
-      (l, k) => l === letra && !usadas.includes(k)
-    );
-    if (i >= 0) {
-      setPistas((n) => n - 1);
+    candadoPista.current = true;
+    conFinal(() => {
+      setPistas((n) => Math.max(0, n - 1));
       void audio.playPista();
-      tocarLetra(i, true);
-    }
+      tocarLetra(pista.ficha, true);
+    }, () => {
+      // Se suelta siempre, pase lo que pase arriba, y un instante después: así el toque siguiente ya ve el estado nuevo.
+      if (pistaTimer.current) clearTimeout(pistaTimer.current);
+      pistaTimer.current = setTimeout(() => {
+        candadoPista.current = false;
+      }, PISTA_DEBOUNCE_MS);
+    });
   };
+
+  // Solo en desarrollo: con la ronda en juego, las fichas usadas son las letras colocadas, sin repetidas.
+  useEffect(() => {
+    if (!__DEV__ || !round || resuelta) return;
+    const fallas = invariantesPanal({ objetivo: round.objetivo, letras: round.letras, armado, usadas });
+    if (fallas.length > 0) {
+      if (__DEV__) console.warn('[colmena] invariantes rotas:', fallas.join('; '));
+    }
+  }, [round, resuelta, armado, usadas]);
 
   /**
    * Escuchar la palabra completa en inglés. Independiente de las pistas

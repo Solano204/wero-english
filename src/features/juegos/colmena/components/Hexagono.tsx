@@ -27,6 +27,8 @@ const ENTRA_DESDE = 0.5;
 const FILO = 1.5;
 /** Desde qué punto del vuelo (0 a 1) el hexágono se funde con la ranura. */
 const FUNDE_DESDE = 0.45;
+/** Margen, pasada la entrada, antes de encender a la fuerza una ficha que la animación dejó apagada. */
+const SOBRA_ENTRADA_MS = 150;
 
 /** Una ficha que vuela a su ranura: por un toque, por una pista o porque la ayuda completó la frase. */
 export interface Vuelo {
@@ -142,6 +144,18 @@ export const Hexagono = memo(function Hexagono({ indice, letra, x, y, ancho, alt
     // Solo cuenta la entrada del montaje.
   });
   useEffect(() => alMontar(), []);
+
+  // Red de seguridad de la entrada. Si Reanimated pierde la actualización que enciende esta ficha, se queda en
+  // opacidad 0 y el panal se ve vacío (solo los contornos). Pasado el tiempo de la entrada, una ficha que sigue en
+  // el panal (ni voló a una ranura ni cayó por la ronda resuelta) se enciende sin importar lo que dijo la animación.
+  const redDeSeguridad = useEffectEvent(() => {
+    const t = setTimeout(() => {
+      if (!vuelo && !cae) opacidad.set(1);
+    }, (reducido ? 0 : entrada) + motionDuration.base + SOBRA_ENTRADA_MS);
+    return () => clearTimeout(t);
+    // Solo cuenta la entrada del montaje.
+  });
+  useEffect(() => redDeSeguridad(), []);
 
   // Un señuelo, con la ronda ya resuelta: cae y se desvanece. Las fichas que se usaron ya se fueron volando.
   useEffect(() => {
