@@ -1,7 +1,7 @@
 # Auditoría de diseño
 
 Qué reglas de `DESIGN.md` incumple hoy el código y cómo se comporta en pantallas, texto, rendimiento y audio. **No se corrigió nada.**
-Se regenera con `npm run audit:diseno` (análisis estático de 582 archivos de `src/`). Las reglas que dependen de juicio visual van en "Revisión manual".
+Se regenera con `npm run audit:diseno` (análisis estático de 589 archivos de `src/`). Las reglas que dependen de juicio visual van en "Revisión manual".
 
 <!-- PLAN:start -->
 ## Top 10
@@ -52,7 +52,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 | RND-1 | listas sin `keyExtractor` estable, con ítem sin `memo` o con separador inline | 0 |
 | RND-2 | hooks con dependencias que cambian en cada render | 0 |
 | RND-3 | estado por intervalo, cuadro o scroll que repinta toda la pantalla | 0 |
-| AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 1 |
+| AUD-1 | audios de los JSON que no están en el bundle o están vacíos | 0 |
 | MOT-1 | duraciones, curvas y springs fuera de `motion.ts` (salvo los relojes revisados) | 0 |
 | MOT-2 | tocables sin el feedback al presionar (`Presionable`) | 0 |
 | MOT-3 | más de un momento héroe animado por pantalla, o más de 3 canvases de Skia en bucle | 0 |
@@ -85,7 +85,7 @@ Orden: primero lo que se nota en los primeros 10 segundos (tipografía, jerarqu�
 - `src/features/practicar/components/BotonSenal.tsx:87`
 - `src/features/practicar/components/ConsolaHoy.tsx:102`
 - `src/features/practicar/components/Destacados.tsx:74`
-- `src/features/practicar/components/FilaModo.tsx:92`
+- `src/features/practicar/components/FilaModo.tsx:112`
 - `src/features/practicar/components/MedidorVU.tsx:99`
 - `src/features/practicar/components/OndaSenal.tsx:55`
 - `src/features/practicar/components/PortadaJuego.tsx:93`
@@ -317,11 +317,10 @@ Pantallas con más de 8 `useState` (cualquier cambio repinta la pantalla; no es 
 
 ## d) Audio
 
-Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pinta **apagado** (opacidad 0.4, deshabilitado) si la ruta no está empaquetada ni descargada (`hayAudio`, `AudioButton.tsx`). Rutas de audio que los JSON de `assets/data/` piden y **no están en `bundled.ts`** (1 de 6344):
+Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pinta **apagado** (opacidad 0.4, deshabilitado) si la ruta no está empaquetada ni descargada (`hayAudio`, `AudioButton.tsx`). Rutas de audio que los JSON de `assets/data/` piden y **no están en `bundled.ts`** (0 de 6344):
 
 | grupo | pedidas | sin empaquetar |
 |---|---|---|
-| `aud/phrasal` | 1242 | 1 (ej. `aud/phrasal/5_ejemplo_en_lento.mp3`) |
 | `aud` | 3048 | 0 |
 | `aud/rules` | 300 | 0 |
 | `aud/caza` | 60 | 0 |
@@ -330,6 +329,7 @@ Los botones de audio no desaparecen cuando falta el archivo: `AudioButton` se pi
 | `aud/reg` | 75 | 0 |
 | `aud/gram` | 800 | 0 |
 | `aud/lec` | 29 | 0 |
+| `aud/phrasal` | 1242 | 0 |
 
 **Audios vacíos** (empaquetados, pero de menos de 1000 bytes: `isBundled` dice que existen, así que su botón se pinta **activo** y falla en silencio):
 - (ninguno)
@@ -375,4 +375,4 @@ Archivos que pintan `<AudioButton>`: `features/vocabulario/components/EntryRow.t
 - Los bucles anteriores a la v5.0 (`Skeleton` mientras carga) quedan fuera de MOT-4 y MOT-5: MOT-3 a MOT-5 se miden sobre la señal (`src/components/fx/`, Practicar y la barra de pestañas).
 - Los conteos salen de análisis estático: resuelve expresiones con los tokens `space` y `font.size`, no valores calculados en ejecución.
 
-<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":1,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"TXT-2":0,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":1,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->
+<!-- conteos: {"COLOR-1":0,"COLOR-3":0,"COLOR-4":0,"TIPO-1":0,"TIPO-2":1,"TIPO-2b":0,"TIPO-4":0,"ESP-1":0,"ACC-1":0,"ACC-3":7,"MOV-1":0,"IA-1":0,"IA-1b":0,"IA-3":0,"EST-carga":0,"EST-vacio":5,"EST-error":0,"TXT-1":1,"TXT-2":0,"RND-1":0,"RND-2":0,"RND-3":0,"AUD-1":0,"MOT-1":0,"MOT-2":0,"MOT-3":0,"MOT-4":0,"MOT-5":0,"MOT-6":0} -->

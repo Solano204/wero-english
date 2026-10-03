@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { cancelAnimation, runOnJS, runOnUI, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { BordePunteado } from '@/shared/ui/fx/BordePunteado';
-import { MAZO, amortiguar, decidirGesto, giroDeArrastre, giroDeSalida, indicesVisibles } from '@/domain/mazo';
+import { PrecargaImagen } from '@/shared/ui/PrecargaImagen';
+import { MAZO, alturaImagen, amortiguar, decidirGesto, giroDeArrastre, giroDeSalida, indicesVisibles } from '@/domain/mazo';
 import { aparecerRapido, color, font, motionEasing, motionMazo, motionSpring, space } from '@/theme';
 import { useMovimientoReducido } from '@/shared/hooks/useMovimientoReducido';
 import type { Entry } from '@/types';
@@ -203,9 +204,11 @@ export const MazoCartas = forwardRef<ManejadorMazo, Props>(function MazoCartas(
 
   // La de arriba se dibuja al final: en React Native lo que va después queda encima.
   const pila = listo ? indicesVisibles(actual, entradas.length).reverse() : [];
+  const sigueFueraDelMazo = listo ? entradas[actual + MAZO.cartas]?.imagen ?? null : null;
   return (
     <GestureDetector gesture={gesto}>
       <View style={styles.zona} onLayout={alMedir}>
+        <PrecargaImagen path={sigueFueraDelMazo} ancho={ancho} alto={alturaImagen(ancho)} />
         {pila.map((n) => {
           const entry = entradas[n];
           if (!entry) return null;

@@ -156,6 +156,23 @@ console.log(`faltan                 : ${faltan.length}`);
 console.log(`sobran en assets/      : ${sobran.length}`);
 console.log(`peso de lo que hay     : ${(bytes / 1048576).toFixed(1)} MB`);
 
+// imageSource()/audioSource() solo devuelven un módulo si la ruta está en el mapa generado por build:assets.
+const dirMedios = path.join(ROOT, 'src/assets/medios');
+const empaquetadas = new Set();
+if (fs.existsSync(dirMedios)) {
+  for (const f of fs.readdirSync(dirMedios).filter((n) => n.endsWith('.ts'))) {
+    for (const m of fs.readFileSync(path.join(dirMedios, f), 'utf8').matchAll(/^\s*'((?:img|aud)\/[^']+)':/gm)) empaquetadas.add(m[1]);
+  }
+}
+const sinEmpaquetar = [...esperado.keys()].filter((r) => /^(img|aud)\//.test(r) && !empaquetadas.has(r));
+console.log(`en el mapa empaquetado : ${esperado.size - sinEmpaquetar.length} de ${esperado.size}`);
+if (sinEmpaquetar.length) {
+  console.log(`\nNO EMPAQUETADAS (imageSource/audioSource no las encuentran; corre npm run build:assets):`);
+  for (const r of sinEmpaquetar.slice(0, 10)) console.log(`    ${r}`);
+  if (sinEmpaquetar.length > 10) console.log(`    … y ${sinEmpaquetar.length - 10} más`);
+  process.exitCode = 1;
+}
+
 if (chicos.length) {
   console.log(`\nAVISO: ${chicos.length} archivos pesan menos de 3 KB.`);
   console.log('  Suele ser un fallo silencioso de la API que los generó.');

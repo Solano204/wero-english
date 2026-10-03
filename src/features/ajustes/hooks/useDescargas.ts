@@ -10,6 +10,11 @@ import type { RootStackParams } from '@/types/rutas';
 
 type Nav = NativeStackNavigationProp<RootStackParams>;
 
+/** Todos los packs vienen dentro del APK: no queda nada por descargar. */
+export function todoIncluido(): boolean {
+  return loadContent().packs.packs.every((p) => p.empaquetado);
+}
+
 /**
  * Descargas: los paquetes de medios y su estado.
  */

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Badge, Button, Header, NotaInfo, Screen } from '@/shared/ui';
+import { MarcoImagen } from '@/shared/ui/MarcoImagen';
 import { DueloContraste } from '@/features/errores/components/DueloContraste';
 import { MedidorGravedad } from '@/features/errores/components/MedidorGravedad';
 import { SecuenciaMalentendido } from '@/features/errores/components/SecuenciaMalentendido';
@@ -26,6 +27,8 @@ export function ErrorDetailScreen() {
   return (
     <Screen scroll>
       <Header onBack={() => nav.goBack()} />
+
+      <MarcoImagen path={err.imagen} style={styles.imagen} />
 
       <SecuenciaMalentendido key={err.id} error={err} />
 
@@ -66,6 +69,7 @@ export function ErrorDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  imagen: { marginBottom: space.lg },
   why: { marginTop: space.xl, gap: space.sm },
   whyHead: {
     fontSize: font.size.xs,

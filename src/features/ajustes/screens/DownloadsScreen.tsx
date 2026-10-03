@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Header, ProgressBar, Screen } from '@/shared/ui';
 import { ANUNCIOS_ACTIVOS } from '@/config/monetizacion';
 import { color, font, space } from '@/theme';
-import { useDescargas } from '@/features/ajustes/hooks/useDescargas';
+import { todoIncluido, useDescargas } from '@/features/ajustes/hooks/useDescargas';
 
 /**
  * P-15, administrar descargas.
@@ -14,6 +14,7 @@ import { useDescargas } from '@/features/ajustes/hooks/useDescargas';
  */
 export function DownloadsScreen() {
   const { nav, progress, errors, cancelar, hoja, descargar, packs } = useDescargas();
+  const incluido = todoIncluido();
 
   return (
     <Screen scroll>
@@ -24,8 +25,9 @@ export function DownloadsScreen() {
       />
 
       <Text style={styles.intro}>
-        Todos los packs son gratis. Lo único que decides aquí es cuáles
-        guardas en el teléfono para usarlos sin internet.
+        {incluido
+          ? 'Todo el audio y todas las imágenes ya vienen incluidos en la app. No hay nada que descargar: funciona sin internet.'
+          : 'Todos los packs son gratis. Lo único que decides aquí es cuáles guardas en el teléfono para usarlos sin internet.'}
       </Text>
 
       <View style={styles.list}>

@@ -153,7 +153,7 @@
       "descripcion": "La rutina, el taller y los papeles",
       "orden": 2,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_conversacion_casual_viaje",
         "v02_rutina_comida_convivencia",
@@ -186,7 +186,7 @@
       "descripcion": "Hilar ideas sin traducir palabra por palabra",
       "orden": 3,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v02_seguir_a_alguien_sospecha",
         "v05_cierre_excusas_sesgo",
@@ -214,7 +214,7 @@
       "descripcion": "Lo que se dice en streams, comentarios y letras",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_brainrot_memes_jerga",
         "v01_misterio_hype_ejecucion",
@@ -240,7 +240,7 @@
       "descripcion": "Territorio, lealtad y cómo se habla entre carnales",
       "orden": 2,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_aave_habla_calle",
         "v03_barrio_caos_filosofia",
@@ -268,7 +268,7 @@
       "descripcion": "Cuando la cosa se pone fea",
       "orden": 3,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v02_familia_droga_secretos",
         "v04_desaparecido_cautiverio",
@@ -297,7 +297,7 @@
       "descripcion": "Presumir lo que tienes y sobrevivir a lo que debes",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_hellcat_deuda_cultura",
         "v01_pelea_dinero_sospecha",
@@ -327,7 +327,7 @@
       "descripcion": "Corporativo, reclutadores y política interna",
       "orden": 2,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_corporate_america",
         "v01_reclutadores_staffing",
@@ -355,7 +355,7 @@
       "descripcion": "Montar algo propio y aguantar la carrera",
       "orden": 3,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_carrera_esfuerzo",
         "v03_trabajo_duro_imagen",
@@ -374,7 +374,7 @@
       "vulgaridad_2": 5,
       "archivos_audio": 89,
       "archivos_imagen": 89,
-      "peso_mb": 7.0,
+      "peso_mb": 7,
       "url": "https://media.wero.app/v1/dinero_emprender/"
     },
     {
@@ -384,7 +384,7 @@
       "descripcion": "Noviazgo, matrimonio y quién manda en la casa",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v03_casa_decisiones_autoridad",
         "v03_encuentro_centro",
@@ -404,7 +404,7 @@
       "vulgaridad_2": 1,
       "archivos_audio": 89,
       "archivos_imagen": 89,
-      "peso_mb": 7.0,
+      "peso_mb": 7,
       "url": "https://media.wero.app/v1/gente_pareja/"
     },
     {
@@ -414,7 +414,7 @@
       "descripcion": "Cómo te sientes y cuándo truena todo",
       "orden": 2,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v03_autoestima_actitud_cierre",
         "v05_salud_contagio_riesgo",
@@ -442,7 +442,7 @@
       "descripcion": "Armar un argumento y defenderlo",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_exito_riesgo_colapso",
         "v04_dialogo_crudo_humor_negro",
@@ -471,7 +471,7 @@
       "descripcion": "Estudiar y quién quieres llegar a ser",
       "orden": 2,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_caracter_valores",
         "v04_tareas_resaca_aguantar",
@@ -500,7 +500,7 @@
       "descripcion": "Entrenar, medir y desplegar sin romper nada",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v06_datos_entrenamiento",
         "v06_fundamentos_ia_sesgo",
@@ -527,7 +527,7 @@
       "descripcion": "Infraestructura, versiones y trabajo en equipo",
       "orden": 2,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v07_infraestructura",
         "v08_desastre_clasico_git",
@@ -546,7 +546,7 @@
       "vulgaridad_2": 1,
       "archivos_audio": 103,
       "archivos_imagen": 103,
-      "peso_mb": 8.0,
+      "peso_mb": 8,
       "url": "https://media.wero.app/v1/tech_servidores/"
     },
     {
@@ -556,7 +556,7 @@
       "descripcion": "Detención, fianza, testigos y accidentes",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v01_poder_abogados_prensa",
         "v02_nervios_tribunal",
@@ -586,7 +586,7 @@
       "descripcion": "Las reducciones que te impiden entender al oír",
       "orden": 1,
       "gratis": true,
-      "empaquetado": false,
+      "empaquetado": true,
       "pack_ids_origen": [
         "v11_contracciones_que_no_se",
         "v11_flap_t_clave_que_casi",

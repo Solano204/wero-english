@@ -7,6 +7,7 @@ import { setSimularCargaLenta } from '@/shared/hooks/useCarga';
 import { color, font, space } from '@/theme';
 import type { Nivel } from '@/types';
 import { useAjustes } from '@/features/ajustes/hooks/useAjustes';
+import { todoIncluido } from '@/features/ajustes/hooks/useDescargas';
 import { Toggle } from '@/features/ajustes/components/ControlesAjustes';
 import { Identidad } from '@/features/ajustes/components/Identidad';
 import { SeccionRecordatorios } from '@/features/ajustes/components/SeccionRecordatorios';
@@ -72,21 +73,25 @@ export function SettingsScreen() {
         ) : null}
       </Card>
 
-      <SectionTitle title="Descargas" />
-      <Card style={styles.card}>
-        <Toggle
-          label="Solo con wifi"
-          hint="No usar datos móviles para bajar audio e imágenes"
-          value={s.soloWifi}
-          onChange={(v) => void cambiar('soloWifi', v as never)}
-        />
-        <Button
-          label="Administrar packs"
-          variant="secondary"
-          onPress={() => nav.navigate('Downloads')}
-          full
-        />
-      </Card>
+      {todoIncluido() ? null : (
+        <>
+          <SectionTitle title="Descargas" />
+          <Card style={styles.card}>
+            <Toggle
+              label="Solo con wifi"
+              hint="No usar datos móviles para bajar audio e imágenes"
+              value={s.soloWifi}
+              onChange={(v) => void cambiar('soloWifi', v as never)}
+            />
+            <Button
+              label="Administrar packs"
+              variant="secondary"
+              onPress={() => nav.navigate('Downloads')}
+              full
+            />
+          </Card>
+        </>
+      )}
 
       <SectionTitle title="Cuenta" />
       <Card style={styles.card}>
